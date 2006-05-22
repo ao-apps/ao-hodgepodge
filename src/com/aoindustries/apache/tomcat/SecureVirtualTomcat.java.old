@@ -1,0 +1,153 @@
+package com.aoindustries.apache.tomcat;
+
+/*
+ * Copyright 2000-2005 by AO Industries, Inc.,
+ * 2200 Dogwood Ct N, Mobile, Alabama, 36693, U.S.A.
+ * All rights reserved.
+ */
+import com.aoindustries.io.unix.*;
+import com.aoindustries.profiler.*;
+import com.aoindustries.util.*;
+import java.io.*;
+import java.util.*;
+import org.apache.tomcat.startup.Tomcat;
+
+/**
+ * @version  1.0
+ *
+ * @author  AO Industries, Inc.
+ */
+final public class SecureVirtualTomcat extends Thread {
+
+    private final String site;
+    private final ThreadGroup threadGroup;
+    private final String action;
+
+    private SecureVirtualTomcat(String site, ThreadGroup threadGroup, String action) {
+	super(threadGroup, "Tomcat Startup");
+        Profiler.startProfile(Profiler.FAST, SecureVirtualTomcat.class, "<init>(String,ThreadGroup,String)", null);
+        try {
+            this.site = site;
+            this.threadGroup = threadGroup;
+            this.action = action;
+
+            start();
+        } finally {
+            Profiler.endProfile(Profiler.FAST);
+        }
+    }
+
+    public static void main(String[] args) {
+        Profiler.startProfile(Profiler.UNKNOWN, SecureVirtualTomcat.class, "main(String[])", null);
+        try {
+            int len = args.length;
+            String action;
+            if (len >= 2 && ((action = args[0]).equals("start") || action.equals("stop"))) {
+                String smtpHost;
+                try {
+                    Process P=Runtime.getRuntime().exec(new String[] {"/bin/hostname"});
+                    BufferedReader in=new BufferedReader(new InputStreamReader(P.getInputStream()));
+                    try {
+                        smtpHost=in.readLine();
+                    } finally {
+                        in.close();
+                    }
+                } catch(IOException err) {
+                    smtpHost="localhost";
+                }
+
+                // Set the SMTP server
+                System.setProperty("mail.smtp.host", smtpHost);
+
+                try {
+                    // Calculate the number of sites
+                    int siteCount = len - 1;
+
+                    // Build the list of site names
+                    String[] sites = new String[siteCount];
+                    System.arraycopy(args, 1, sites, 0, siteCount);
+
+                    // Get the group ID for each site
+                    UnixFile[] files = new UnixFile[siteCount];
+                    for (int c = 0; c < siteCount; c++)
+                        files[c] = new UnixFile(VirtualTomcat.WWW_DIRECTORY + '/' + sites[c]);
+                    //UnixFile.reload(files);
+                    //UnixFile.closeStatProcess();
+                    int[] siteGroups = new int[siteCount];
+                    for (int c = 0; c < siteCount; c++)
+                        siteGroups[c] = files[c].getGID();
+
+                    // Find the top most thread group
+                    ThreadGroup TG = Thread.currentThread().getThreadGroup();
+                    {
+                        ThreadGroup temp;
+                        while ((temp = TG.getParent()) != null)
+                            TG = temp;
+                    }
+                    TG = new ThreadGroup(TG, "SecureVirtualTomcat");
+
+                    // Build the thread groups that will be used
+                    ThreadGroup[] threadGroups = new ThreadGroup[siteCount];
+                    for (int c = 0; c < siteCount; c++)
+                        threadGroups[c] = new ThreadGroup(TG, sites[c]);
+
+                    // Redirect the standard out and standard err
+                    VirtualTomcatOutputStream errorStream = new VirtualTomcatOutputStream(System.err, sites, threadGroups);
+                    PrintStream out = new PrintStream(errorStream);
+                    System.setOut(out);
+                    System.setErr(out);
+
+                    // Create and install the security manager
+                    System.setSecurityManager(new VirtualTomcatSecurityManager(sites, siteGroups, threadGroups, errorStream));
+
+                    // Start or stop each virtual tomcat
+                    for (int c = 0; c < siteCount; c++) {
+                        try {
+                            new SecureVirtualTomcat(sites[c], threadGroups[c], action);
+                            Thread.currentThread().sleep("start".equals(action) ? 1000 : 200);
+                        } catch (InterruptedException err) {
+                            ErrorPrinter.printStackTraces(err);
+                        }
+                    }
+                } catch (IOException err) {
+                    ErrorPrinter.printStackTraces(err);
+                }
+            } else {
+                System.err.println("usage: " + SecureVirtualTomcat.class.getName() + " {start|stop} sitename [sitename] [...]");
+                System.exit(1);
+            }
+        } finally {
+            Profiler.endProfile(Profiler.UNKNOWN);
+        }
+    }
+
+    public void run() {
+        Profiler.startProfile(Profiler.UNKNOWN, SecureVirtualTomcat.class, "run()", null);
+        try {
+            String[] params;
+            if(action.equals("start")) {
+                String[] SA={
+                    "-f",
+                    VirtualTomcat.WWW_DIRECTORY+'/'+site+"/conf/server.xml"
+                };
+                params=SA;
+            } else {
+                String[] SA={
+                    "-f",
+                    VirtualTomcat.WWW_DIRECTORY+'/'+site+"/conf/server.xml",
+                    "-stop"
+                };
+                params=SA;
+            }
+            try {
+                Tomcat.main(params);
+            } catch(ThreadDeath TD) {
+                throw TD;
+            } catch(Throwable T) {
+                ErrorPrinter.printStackTraces(T);
+            }
+        } finally {
+            Profiler.endProfile(Profiler.UNKNOWN);
+        }
+    }
+}

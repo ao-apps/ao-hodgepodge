@@ -1,0 +1,306 @@
+package com.aoindustries.apache.tomcat;
+
+/*
+ * Copyright 2000-2005 by AO Industries, Inc.,
+ * 2200 Dogwood Ct N, Mobile, Alabama, 36693, U.S.A.
+ * All rights reserved.
+ */
+import com.aoindustries.profiler.*;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+/**
+ * @version  1.0
+ *
+ * @author  AO Industries, Inc.
+ */
+public final class VirtualTomcatClassLoader extends ClassLoader {
+
+    public static final boolean DEBUG=false;
+
+    private final String site;
+
+    /**
+     * All classes in any package listed here will be loaded in the
+     * separate ClassLoader.
+     */
+    private static final String[] isolatedPackages = {
+    };
+
+    /**
+     * Any class listed here will be loaded in the separate ClassLoader.
+     */
+    private static final String[] isolatedClasses = {
+    };
+
+    /**
+     * Any class in any package listed here will be loaded with the
+     * system ClassLoader.
+     */
+    private static final String[] sharedPackages = {
+        "Acme",
+        "com.aoindustries.apache.tomcat",
+        "com.aoindustries.awt",
+        "com.aoindustries.io",
+        "com.aoindustries.jboss",
+        "com.aoindustries.mail",
+        "com.aoindustries.net",
+        "com.aoindustries.sql",
+        "com.aoindustries.util",
+        "com.codestudio",
+        "com.ibm.bsf",
+        "com.ibm.cf",
+        "com.ibm.cs",
+        "com.oreilly.servlet",
+        "com.oroinc.text.regex",
+        "COM.rsa",
+        "com.sun.activation",
+        "com.sun.corba",
+        "com.sun.image",
+        "com.sun.java",
+        "com.sun.javadoc",
+        "com.sun.jdi",
+        "com.sun.jimi.core",
+        "com.sun.jndi",
+        "com.sun.mail",
+        "com.sun.media",
+        "com.sun.naming",
+        "com.sun.net.ssl",
+        "com.sun.org",
+        "com.sun.rmi",
+        "com.sun.rsajca",
+        "com.sun.rsasign",
+        "com.sun.security",
+        "com.sun.tools",
+        "com.sun.xml",
+        "com.workingdogs.village",
+        "FESI",
+        "freemarker.template",
+        "gnu.regexp",
+        "helma.xmlrpc",
+        "interbase.interclient",
+        "java.applet",
+        "java.awt",
+        "java.beans",
+        "javachart",
+        "java.io",
+        "java.lang",
+        "java.math",
+        "java.net",
+        "java.rmi",
+        "java.security",
+        "java.sql",
+        "java.text",
+        "java.util",
+        "javax.accessibility",
+        "javax.activation",
+        "javax.mail",
+        "javax.naming",
+        "javax.net",
+        "javax.rmi",
+        "javax.security",
+        "javax.servlet",
+        "javax.sound",
+        "javax.sql",
+        "javax.swing",
+        "javax.xml.parsers",
+        "netscape.javascript",
+        "org.apache.cocoon",
+        "org.apache.ecs",
+        "org.apache.fop",
+        "org.apache.html.dom",
+        "org.apache.java",
+        "org.apache.jetspeed",
+        "org.apache.jserv",
+        "org.apache.jyve",
+        "org.apache.oro",
+        "org.apache.regexp",
+        "org.apache.servlet.ssi",
+        "org.apache.slide",
+        "org.apache.soap",
+        "org.apache.spfc",
+        "org.apache.stylebook",
+        "org.apache.tools.ant",
+        "org.apache.tools.mail",
+        "org.apache.tools.tar",
+        "org.apache.turbine",
+        "org.apache.wml",
+        "org.apache.xalan",
+        "org.apache.xang",
+        "org.apache.xerces",
+        "org.apache.xml",
+        "org.exolab",
+        "org.gjt.mm.mysql",
+        "org.omg",
+        "org.openxml",
+        "org.postgresql",
+        "org.w3c.dom",
+        "org.webmacro",
+        "org.xml.sax",
+        "sun.applet",
+        "sun.audio",
+        "sun.awt",
+        "sun.beans",
+        "sun.dc",
+        "sun.io",
+        "sun.java2d",
+        "sun.jdbc",
+        "sun.misc",
+        "sun.net",
+        "sun.plugin",
+        "sun.rmi",
+        "sun.security",
+        "sun.tools",
+        "sunw.io",
+        "sunw.util",
+        "testsuite"
+    };
+
+    /**
+     * Any class listed here will be loaded with the system ClassLoader.
+     */
+    private static final String[] sharedClasses = {
+        "org.apache.tools.DOMWriter"
+    };
+
+    // This instance is reused for speed
+    private final ByteArrayOutputStream bytesOut=new ByteArrayOutputStream();
+
+    protected VirtualTomcatClassLoader(String site) {
+	super();
+        Profiler.startProfile(Profiler.INSTANTANEOUS, VirtualTomcatClassLoader.class, "<init>(String)", null);
+        try {
+            this.site=site;
+        } finally {
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
+        }
+    }
+
+    protected URL findResource(String name) {
+        Profiler.startProfile(Profiler.IO, VirtualTomcatClassLoader.class, "findResource(String)", null);
+        try {
+            if(DEBUG) System.err.println(hashCode()+": findResource(\""+name+"\");");
+            return getSystemResource(name);
+        } finally {
+            Profiler.endProfile(Profiler.IO);
+        }
+    }
+
+    protected Enumeration findResources(String name) throws IOException {
+        Profiler.startProfile(Profiler.IO, VirtualTomcatClassLoader.class, "findResources(String)", null);
+        try {
+            if(DEBUG) System.err.println(hashCode()+": findResources(\""+name+"\");");
+            return getSystemResources(name);
+        } finally {
+            Profiler.endProfile(Profiler.IO);
+        }
+    }
+
+    protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        Profiler.startProfile(Profiler.IO, VirtualTomcatClassLoader.class, "loadClass(String,boolean)", null);
+        try {
+	    synchronized(this) {
+		if(DEBUG) System.err.println(hashCode()+": loadClass(\""+name+"\", "+resolve+");");
+		// First, check if the class has already been loaded
+		Class c = findLoadedClass(name);
+		if (c == null) {
+		    // Check sequentially for convenience, add speed later
+		    int nameLen = name.length();
+
+		    // Determine to use isolation or not
+		    boolean resolved = false;
+
+		    // Isolation is used by default
+		    boolean useIsolation = true;
+
+		    // Check isolatedPackages
+		    int len = isolatedPackages.length;
+		    for (int d = 0; d < len; d++) {
+			String s = isolatedPackages[d];
+			int sLen = s.length();
+			if (nameLen > (sLen + 1)) {
+			    boolean matched = true;
+			    for (int e = 0; e < sLen; e++) {
+				if (s.charAt(e) != name.charAt(e)) {
+				    matched = false;
+				    break;
+				}
+			    }
+			    if (matched && name.charAt(sLen) != '.') matched = false;
+			    if (matched) resolved = true;
+			}
+		    }
+
+		    // Check isolatedClasses
+		    if (!resolved) {
+			len = isolatedClasses.length;
+			for (int d = 0; d < len; d++) {
+			    if (name.equals(isolatedClasses[d])) resolved = true;
+			}
+		    }
+		    
+		    // Check sharedPackages
+		    if (!resolved) {
+			len = sharedPackages.length;
+			for (int d = 0; d < len; d++) {
+			    String s = sharedPackages[d];
+			    int sLen = s.length();
+			    if (nameLen > (sLen + 1)) {
+				boolean matched = true;
+				for (int e = 0; e < sLen; e++) {
+				    if (s.charAt(e) != name.charAt(e)) {
+					matched = false;
+					break;
+				    }
+				}
+				if (matched && name.charAt(sLen) != '.') matched = false;
+				if (matched) {
+				    useIsolation = false;
+				    resolved = true;
+				}
+			    }
+			}
+		    }
+
+		    // Check sharedClasses
+		    if (!resolved) {
+			len = sharedClasses.length;
+			for (int d = 0; d < len; d++) {
+			    if (name.equals(sharedClasses[d])) {
+				useIsolation = false;
+				resolved = true;
+			    }
+			}
+		    }
+
+		    if (useIsolation) {
+			try {
+			    String resourceName = name.replace('.', '/') + ".class";
+			    InputStream in = getSystemResourceAsStream(resourceName);
+                            try {
+                                if (in == null) throw new ClassNotFoundException("Class not found using getSystemResourceAsStream: " + resourceName);
+                                bytesOut.reset();
+                                int ch;
+                                while ((ch = in.read()) != -1) bytesOut.write(ch);
+                            } finally {
+                                in.close();
+                            }
+
+			    byte[] bytes = bytesOut.toByteArray();
+			    c = defineClass(name, bytes, 0, bytes.length);
+			} catch (IOException err) {
+			    throw new ClassNotFoundException(err.toString());
+			}
+		    } else c = findSystemClass(name);
+		}
+		if (resolve) {
+		    resolveClass(c);
+		}
+		return c;
+	    }
+        } finally {
+            Profiler.endProfile(Profiler.IO);
+        }
+    }
+}
