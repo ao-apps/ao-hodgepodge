@@ -1214,7 +1214,7 @@ public class UnixFile {
     }
 
     /**
-     * Securely creates a temporary file.  In order to be secure, through, the directory
+     * Securely creates a temporary file.  In order to be secure, though, the directory
      * needs to be secure, or at least have the sticky bit set.
      *
      * This method will follow symbolic links in the path but not final links.
@@ -1773,4 +1773,15 @@ public class UnixFile {
 
     private static native void utime0(byte[] filename, long atime, long mtime) throws IOException;
     
+    public int hashCode() {
+        return filename.hashCode();
+    }
+    
+    public boolean equals(Object O) {
+        return
+            O!=null
+            && (O instanceof UnixFile)
+            && ((UnixFile)O).filename.equals(filename)
+        ;
+    }
 }
