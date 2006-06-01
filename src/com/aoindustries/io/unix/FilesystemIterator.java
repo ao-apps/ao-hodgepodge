@@ -5,11 +5,13 @@ package com.aoindustries.io.unix;
  * 2200 Dogwood Ct N, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
-import com.aoindustries.util.*;
-import com.aoindustries.util.sort.*;
-import java.io.*;
-import java.util.*;
+import com.aoindustries.profiler.Profiler;
+import com.aoindustries.util.sort.AutoSort;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.EmptyStackException;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * Iterates through all of the files in a filesystem.
@@ -20,12 +22,14 @@ import java.util.*;
  */
 public class FilesystemIterator {
 
-    private final List<String> skipList;
+    private static final String[] emptyStringArray = new String[0];
+
+    private final Map<String,FilesystemIteratorRule> rules;
     
-    public FilesystemIterator(List<String> skipList) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FilesystemIterator.class, "<init>(List<String>)", null);
+    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules) {
+        Profiler.startProfile(Profiler.INSTANTANEOUS, FilesystemIterator.class, "<init>(Map<String,FilesystemIteratorRule>)", null);
         try {
-            this.skipList=skipList;
+            this.rules=rules;
             currentDirectories=null;
             currentLists=null;
             currentIndexes=null;
@@ -98,9 +102,9 @@ public class FilesystemIterator {
                             ) {
                                 // Push on stacks for next level
                                 currentDirectories.push(filename);
-                                String[] list=unixFile.list();
-                                if(list==null) list=new String[0];
-                                AutoSort.sortStatic(list);
+                                String[] list=isNoRecurse(filename) ? emptyStringArray : unixFile.list();
+                                if(list==null) list = emptyStringArray;
+                                else AutoSort.sortStatic(list);
                                 currentLists.push(list);
                                 currentIndexes.push(Integer.valueOf(0));
                             }
@@ -132,10 +136,27 @@ public class FilesystemIterator {
         }
     }
     
-    public boolean isSkip(String filename) {
+    public boolean isNoRecurse(String filename) throws IOException {
+        Profiler.startProfile(Profiler.FAST, FilesystemIterator.class, "isNoRecurse(String)", null);
+        try {
+            FilesystemIteratorRule rule = rules.get(filename);
+            if(rule!=null) {
+                return rule.isNoRecurse(filename);
+            }
+            return false;
+        } finally {
+            Profiler.endProfile(Profiler.FAST);
+        }
+    }
+
+    public boolean isSkip(String filename) throws IOException {
         Profiler.startProfile(Profiler.FAST, FilesystemIterator.class, "isSkip(String)", null);
         try {
-            return skipList.contains(filename);
+            FilesystemIteratorRule rule = rules.get(filename);
+            if(rule!=null) {
+                return rule.isSkip(filename);
+            }
+            return false;
         } finally {
             Profiler.endProfile(Profiler.FAST);
         }

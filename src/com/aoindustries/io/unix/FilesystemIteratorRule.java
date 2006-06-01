@@ -1,0 +1,58 @@
+package com.aoindustries.io.unix;
+
+/*
+ * Copyright 2006 by AO Industries, Inc.,
+ * 2200 Dogwood Ct N, Mobile, Alabama, 36693, U.S.A.
+ * All rights reserved.
+ */
+import com.aoindustries.profiler.Profiler;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Stack;
+
+/**
+ * Controls the behavior of a <code>FilesystemIterator</code>.
+ *
+ * @version  1.0
+ *
+ * @author  AO Industries, Inc.
+ */
+abstract public class FilesystemIteratorRule {
+
+    abstract public boolean isNoRecurse(String filename) throws IOException;
+
+    abstract public boolean isSkip(String filename) throws IOException;
+    
+    public static final FilesystemIteratorRule OK = new FilesystemIteratorRule() {
+
+        public boolean isNoRecurse(String filename) {
+            return false;
+        }
+
+        public boolean isSkip(String filename) {
+            return false;
+        }
+    };
+
+    public static final FilesystemIteratorRule NO_RECURSE = new FilesystemIteratorRule() {
+
+        public boolean isNoRecurse(String filename) {
+            return true;
+        }
+
+        public boolean isSkip(String filename) {
+            return false;
+        }
+    };
+
+    public static final FilesystemIteratorRule SKIP = new FilesystemIteratorRule() {
+
+        public boolean isNoRecurse(String filename) {
+            return true;
+        }
+
+        public boolean isSkip(String filename) {
+            return true;
+        }
+    };
+}
