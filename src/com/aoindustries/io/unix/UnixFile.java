@@ -1226,6 +1226,9 @@ public class UnixFile {
             checkWrite(filename);
             loadLibrary();
             return new UnixFile(mktemp0(filename)).setMode(0600);
+        } catch(IOException err) {
+            System.err.println("UnixFile.mktemp: IOException: template="+template);
+            throw err;
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
