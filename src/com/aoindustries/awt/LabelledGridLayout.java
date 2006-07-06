@@ -2,7 +2,7 @@ package com.aoindustries.awt;
 
 /*
  * Copyright 2000-2003 by AO Industries, Inc.,
- * 2200 Dogwood Ct N, Mobile, Alabama, 36693, U.S.A.
+ * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
 import java.awt.*;

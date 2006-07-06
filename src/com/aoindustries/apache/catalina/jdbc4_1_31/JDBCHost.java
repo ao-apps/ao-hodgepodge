@@ -7,7 +7,7 @@ package com.aoindustries.apache.catalina.jdbc4_1_31;
  * in their Tomcat distribution.
  *
  * By AO Industries, Inc.,
- * 2200 Dogwood Ct N, Mobile, Alabama, 36693, U.S.A.
+ * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
 import org.apache.catalina.core.StandardHost;

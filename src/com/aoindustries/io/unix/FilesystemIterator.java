@@ -2,7 +2,7 @@ package com.aoindustries.io.unix;
 
 /*
  * Copyright 2003-2006 by AO Industries, Inc.,
- * 2200 Dogwood Ct N, Mobile, Alabama, 36693, U.S.A.
+ * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
 import com.aoindustries.profiler.Profiler;
@@ -151,19 +151,19 @@ public class FilesystemIterator {
                     } else {
                         // Get the current filename
                         String filename;
-                        if(currentDirectory.equals("/")) filename="/"+currentList[currentIndex++];
-                        else filename=currentDirectory+'/'+currentList[currentIndex++];
+                        if(currentDirectory.equals("/")) filename="/"+currentList[currentIndex];
+                        else filename=currentDirectory+'/'+currentList[currentIndex];
 
                         // Get the converted filename
                         String convertedFilename;
                         if(convertPathsToASCII) {
-                            if(currentDirectory.equals("/")) convertedFilename="/"+currentConvertedList[currentIndex++];
-                            else convertedFilename=currentDirectory+'/'+currentConvertedList[currentIndex++];
+                            if(currentDirectory.equals("/")) convertedFilename="/"+currentConvertedList[currentIndex];
+                            else convertedFilename=currentDirectory+'/'+currentConvertedList[currentIndex];
                         } else convertedFilename=null;
 
-                        // Set to the next file
+                        // Increment index to point to the next file
                         currentIndexes.pop();
-                        currentIndexes.push(Integer.valueOf(currentIndex));
+                        currentIndexes.push(Integer.valueOf(currentIndex+1));
 
                         try {
                             // Recurse for directories
@@ -180,9 +180,7 @@ public class FilesystemIterator {
                                 if(list==null) list = emptyStringArray;
                                 else AutoSort.sortStatic(list);
                                 currentLists.push(list);
-                                if(convertPathsToASCII) {
-                                    currentConvertedLists.push(convertNonASCII(list));
-                                }
+                                if(convertPathsToASCII) currentConvertedLists.push(convertNonASCII(list));
                                 currentIndexes.push(Integer.valueOf(0));
                             }
                             // Return if not a skip file
