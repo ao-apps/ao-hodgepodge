@@ -628,6 +628,8 @@ public class UnixFile {
                     }
                 }
                 file.delete();
+            } catch(FileNotFoundException err) {
+                // OK if it was deleted while we're trying to delete it
             } catch(IOException err) {
                 System.err.println("Error recursively delete: "+file.filename);
                 throw err;

@@ -15,8 +15,10 @@ import java.io.*;
  */
 public interface BitRateProvider {
 
+    int UNLIMITED_BANDWIDTH = -1;
+
     /**
-     * Gets the bit rate in bits per second, <code>-1</code> indicates unlimited bandwidth.
+     * Gets the bit rate in bits per second, <code>UNLIMITED_BANDWIDTH</code> indicates unlimited bandwidth.
      */
     int getBitRate() throws IOException;
  

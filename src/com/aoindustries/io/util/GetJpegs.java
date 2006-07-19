@@ -15,8 +15,8 @@ import java.io.*;
  */
 public class GetJpegs {
 
-    public static final int BLOCK_SIZE=512;
-    public static final int BLOCK_COUNT=20480;
+    public static final int BLOCK_SIZE=10; // TODO: Make 512
+    public static final int BLOCK_COUNT=1000000; // TODO: Make 20480
 
     public static void main(String[] args) {
         if(args.length!=2) {
@@ -30,7 +30,7 @@ public class GetJpegs {
                     byte[] buff=new byte[BLOCK_SIZE];
                     int pos=0;
                     long fileLength=in.length();
-                    for(int startPos=0;startPos<fileLength;startPos+=BLOCK_SIZE) {
+                    for(int startPos=0;startPos<fileLength;startPos+=1) { // TODO: Make BLOCK_SIZE, not 1
                         in.seek(startPos);
                         in.readFully(buff, 0, BLOCK_SIZE);
                         if(
@@ -42,7 +42,7 @@ public class GetJpegs {
                             && buff[8]==0x69
                             && buff[9]==0x66
                         ) {
-                            String filename=destinationDirectory+"/recovered_"+(startPos/512)+".jpg";
+                            String filename=destinationDirectory+"/recovered_"+startPos+".jpg"; // TODO: Make startPos/512
                             System.out.println("Found file at "+startPos+", saving to "+filename);
                             FileOutputStream out=new FileOutputStream(filename);
                             try {

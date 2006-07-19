@@ -403,6 +403,33 @@ public class SQLUtility {
     }
 
     /**
+     * Converts a number of millis into decimal representation.
+     */
+    public static String getMilliDecimal(long millis) {
+        Profiler.startProfile(Profiler.FAST, SQLUtility.class, "getMilliDecimal(long)", null);
+        try {
+            StringBuilder SB=new StringBuilder(10);
+            if(millis<0) {
+                SB.append('-');
+                millis=-millis;
+            }
+            SB
+                .append(millis/1000)
+                .append('.')
+            ;
+            millis%=1000;
+            if(millis<10) SB.append("00");
+            else if(millis<100) SB.append('0');
+            return SB
+                .append(millis)
+                .toString()
+            ;
+        } finally {
+            Profiler.endProfile(Profiler.FAST);
+        }
+    }
+
+    /**
      * Gets the number of millis represented by a <code>String</code> containing a decimal(8,3) type.
      */
     public static int getMillis(String decimal) {
