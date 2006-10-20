@@ -19,28 +19,52 @@ extern "C" {
 #define com_aoindustries_io_unix_UnixFile_PERMISSION_MASK 4095LL
 #undef com_aoindustries_io_unix_UnixFile_OTHER_EXECUTE
 #define com_aoindustries_io_unix_UnixFile_OTHER_EXECUTE 1LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_OTHER_EXECUTE
+#define com_aoindustries_io_unix_UnixFile_NOT_OTHER_EXECUTE -2LL
 #undef com_aoindustries_io_unix_UnixFile_OTHER_WRITE
 #define com_aoindustries_io_unix_UnixFile_OTHER_WRITE 2LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_OTHER_WRITE
+#define com_aoindustries_io_unix_UnixFile_NOT_OTHER_WRITE -3LL
 #undef com_aoindustries_io_unix_UnixFile_OTHER_READ
 #define com_aoindustries_io_unix_UnixFile_OTHER_READ 4LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_OTHER_READ
+#define com_aoindustries_io_unix_UnixFile_NOT_OTHER_READ -5LL
 #undef com_aoindustries_io_unix_UnixFile_GROUP_EXECUTE
 #define com_aoindustries_io_unix_UnixFile_GROUP_EXECUTE 8LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_GROUP_EXECUTE
+#define com_aoindustries_io_unix_UnixFile_NOT_GROUP_EXECUTE -9LL
 #undef com_aoindustries_io_unix_UnixFile_GROUP_WRITE
 #define com_aoindustries_io_unix_UnixFile_GROUP_WRITE 16LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_GROUP_WRITE
+#define com_aoindustries_io_unix_UnixFile_NOT_GROUP_WRITE -17LL
 #undef com_aoindustries_io_unix_UnixFile_GROUP_READ
 #define com_aoindustries_io_unix_UnixFile_GROUP_READ 32LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_GROUP_READ
+#define com_aoindustries_io_unix_UnixFile_NOT_GROUP_READ -33LL
 #undef com_aoindustries_io_unix_UnixFile_USER_EXECUTE
 #define com_aoindustries_io_unix_UnixFile_USER_EXECUTE 64LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_USER_EXECUTE
+#define com_aoindustries_io_unix_UnixFile_NOT_USER_EXECUTE -65LL
 #undef com_aoindustries_io_unix_UnixFile_USER_WRITE
 #define com_aoindustries_io_unix_UnixFile_USER_WRITE 128LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_USER_WRITE
+#define com_aoindustries_io_unix_UnixFile_NOT_USER_WRITE -129LL
 #undef com_aoindustries_io_unix_UnixFile_USER_READ
 #define com_aoindustries_io_unix_UnixFile_USER_READ 256LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_USER_READ
+#define com_aoindustries_io_unix_UnixFile_NOT_USER_READ -257LL
 #undef com_aoindustries_io_unix_UnixFile_SAVE_TEXT_IMAGE
 #define com_aoindustries_io_unix_UnixFile_SAVE_TEXT_IMAGE 512LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_SAVE_TEXT_IMAGE
+#define com_aoindustries_io_unix_UnixFile_NOT_SAVE_TEXT_IMAGE -513LL
 #undef com_aoindustries_io_unix_UnixFile_SET_GID
 #define com_aoindustries_io_unix_UnixFile_SET_GID 1024LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_SET_GID
+#define com_aoindustries_io_unix_UnixFile_NOT_SET_GID -1025LL
 #undef com_aoindustries_io_unix_UnixFile_SET_UID
 #define com_aoindustries_io_unix_UnixFile_SET_UID 2048LL
+#undef com_aoindustries_io_unix_UnixFile_NOT_SET_UID
+#define com_aoindustries_io_unix_UnixFile_NOT_SET_UID -2049LL
 #undef com_aoindustries_io_unix_UnixFile_TYPE_MASK
 #define com_aoindustries_io_unix_UnixFile_TYPE_MASK 61440LL
 #undef com_aoindustries_io_unix_UnixFile_IS_FIFO
@@ -57,16 +81,21 @@ extern "C" {
 #define com_aoindustries_io_unix_UnixFile_IS_SYM_LINK 40960LL
 #undef com_aoindustries_io_unix_UnixFile_IS_SOCKET
 #define com_aoindustries_io_unix_UnixFile_IS_SOCKET 49152LL
-/* Inaccessible static: loaded */
-/* Inaccessible static: random */
-/* Inaccessible static: class_00024com_00024aoindustries_00024io_00024unix_00024UnixFile */
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
  * Method:    chown0
- * Signature: ([BII)V
+ * Signature: (Ljava/lang/String;II)V
  */
 JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_chown0
-  (JNIEnv *, jclass, jbyteArray, jint, jint);
+  (JNIEnv *, jclass, jstring, jint, jint);
+
+/*
+ * Class:     com_aoindustries_io_unix_UnixFile
+ * Method:    getStat0
+ * Signature: (Ljava/lang/String;Lcom/aoindustries/io/unix/Stat;)V
+ */
+JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_getStat0
+  (JNIEnv *, jobject, jstring, jobject);
 
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
@@ -78,94 +107,6 @@ JNIEXPORT jstring JNICALL Java_com_aoindustries_io_unix_UnixFile_crypt0
 
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getAccessTime0
- * Signature: ([B)J
- */
-JNIEXPORT jlong JNICALL Java_com_aoindustries_io_unix_UnixFile_getAccessTime0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getBlockCount0
- * Signature: ([B)J
- */
-JNIEXPORT jlong JNICALL Java_com_aoindustries_io_unix_UnixFile_getBlockCount0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getBlockSize0
- * Signature: ([B)I
- */
-JNIEXPORT jint JNICALL Java_com_aoindustries_io_unix_UnixFile_getBlockSize0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getChangeTime0
- * Signature: ([B)J
- */
-JNIEXPORT jlong JNICALL Java_com_aoindustries_io_unix_UnixFile_getChangeTime0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getDevice0
- * Signature: ([B)J
- */
-JNIEXPORT jlong JNICALL Java_com_aoindustries_io_unix_UnixFile_getDevice0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getDeviceIdentifier0
- * Signature: ([B)J
- */
-JNIEXPORT jlong JNICALL Java_com_aoindustries_io_unix_UnixFile_getDeviceIdentifier0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getGID0
- * Signature: ([B)I
- */
-JNIEXPORT jint JNICALL Java_com_aoindustries_io_unix_UnixFile_getGID0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getInode0
- * Signature: ([B)J
- */
-JNIEXPORT jlong JNICALL Java_com_aoindustries_io_unix_UnixFile_getInode0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getLinkCount0
- * Signature: ([B)I
- */
-JNIEXPORT jint JNICALL Java_com_aoindustries_io_unix_UnixFile_getLinkCount0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getMode0
- * Signature: ([B)J
- */
-JNIEXPORT jlong JNICALL Java_com_aoindustries_io_unix_UnixFile_getMode0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getModifyTime0
- * Signature: ([B)J
- */
-JNIEXPORT jlong JNICALL Java_com_aoindustries_io_unix_UnixFile_getModifyTime0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
  * Method:    mktemp0
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
@@ -174,67 +115,59 @@ JNIEXPORT jstring JNICALL Java_com_aoindustries_io_unix_UnixFile_mktemp0
 
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
- * Method:    getUID0
- * Signature: ([B)I
- */
-JNIEXPORT jint JNICALL Java_com_aoindustries_io_unix_UnixFile_getUID0
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     com_aoindustries_io_unix_UnixFile
  * Method:    mknod0
- * Signature: ([BJJ)V
+ * Signature: (Ljava/lang/String;JJ)V
  */
 JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_mknod0
-  (JNIEnv *, jclass, jbyteArray, jlong, jlong);
+  (JNIEnv *, jclass, jstring, jlong, jlong);
 
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
  * Method:    mkfifo0
- * Signature: ([BJ)V
+ * Signature: (Ljava/lang/String;J)V
  */
 JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_mkfifo0
-  (JNIEnv *, jclass, jbyteArray, jlong);
+  (JNIEnv *, jclass, jstring, jlong);
 
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
  * Method:    setMode0
- * Signature: ([BJ)V
+ * Signature: (Ljava/lang/String;J)V
  */
 JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_setMode0
-  (JNIEnv *, jclass, jbyteArray, jlong);
+  (JNIEnv *, jclass, jstring, jlong);
 
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
  * Method:    symLink0
- * Signature: ([B[B)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_symLink0
-  (JNIEnv *, jclass, jbyteArray, jbyteArray);
+  (JNIEnv *, jclass, jstring, jstring);
 
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
  * Method:    link0
- * Signature: ([B[B)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_link0
-  (JNIEnv *, jclass, jbyteArray, jbyteArray);
+  (JNIEnv *, jclass, jstring, jstring);
 
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
  * Method:    readLink0
- * Signature: ([B)[B
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jbyteArray JNICALL Java_com_aoindustries_io_unix_UnixFile_readLink0
-  (JNIEnv *, jclass, jbyteArray);
+JNIEXPORT jstring JNICALL Java_com_aoindustries_io_unix_UnixFile_readLink0
+  (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     com_aoindustries_io_unix_UnixFile
  * Method:    utime0
- * Signature: ([BJJ)V
+ * Signature: (Ljava/lang/String;JJ)V
  */
 JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_utime0
-  (JNIEnv *, jclass, jbyteArray, jlong, jlong);
+  (JNIEnv *, jclass, jstring, jlong, jlong);
 
 #ifdef __cplusplus
 }

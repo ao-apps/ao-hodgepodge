@@ -161,21 +161,16 @@ public class UnixFile {
      */
     public static final long IS_SOCKET = 0140000;
 
-    /**
-     * The filename.
-     */
-    protected final String filename;
-
-    private File file;
-
-    private static boolean loaded=false;
+    volatile private static boolean loaded=false;
     public static void loadLibrary() {
         Profiler.startProfile(Profiler.FAST, UnixFile.class, "loadLibrary()", null);
         try {
-            synchronized(UnixFile.class) {
-                if(!loaded) {
-                    System.loadLibrary("aocode");
-                    loaded=true;
+            if(!loaded) {
+                synchronized(UnixFile.class) {
+                    if(!loaded) {
+                        System.loadLibrary("aocode");
+                        loaded=true;
+                    }
                 }
             }
         } finally {
@@ -183,10 +178,32 @@ public class UnixFile {
         }
     }
 
+    /**
+     * The filename.
+     */
+    protected final String filename;
+    
+    volatile private File file;
+
+    /**
+     * Strictly requires the parent to be a directory if it exists.
+     *
+     * @deprecated  Please call #UnixFile(UnixFile,String,boolean) to explicitly control whether strict parent checking is performed
+     */
     public UnixFile(UnixFile parent, String filename) throws IOException {
+        this(parent, filename, true);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "<init>(UnixFile,String)", null);
+        Profiler.endProfile(Profiler.INSTANTANEOUS);
+    }
+
+    /**
+     * When strictly checking, a parent must be a directory if it exists.
+     */
+    public UnixFile(UnixFile parent, String filename, boolean strict) throws IOException {
         Profiler.startProfile(Profiler.FAST, UnixFile.class, "<init>(UnixFile,String)", null);
         try {
-            if (parent.exists() && !parent.isDirectory()) throw new IOException("parent is not a directory: " + parent.filename);
+            if(parent==null) throw new NullPointerException("parent is null");
+            if(strict && parent.exists() && !parent.isDirectory()) throw new IOException("parent is not a directory: " + parent.filename);
             if(parent.filename.equals("/")) this.filename=parent.filename+filename;
             else this.filename = parent.filename + '/' + filename;
         } finally {
@@ -287,30 +304,6 @@ public class UnixFile {
     }
 
     /**
-     * Converts a Java string to a C string.
-     */
-    public static byte[] toBytes(String filename) throws UnsupportedEncodingException {
-        Profiler.startProfile(Profiler.FAST, UnixFile.class, "toBytes(String)", null);
-        try {
-            return filename.getBytes("ISO-8859-1");
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
-    }
-
-    /**
-     * Converts a C string to a Java string.
-     */
-    public static String toString(byte[] filename) throws UnsupportedEncodingException {
-        Profiler.startProfile(Profiler.FAST, UnixFile.class, "toString(byte[])", null);
-        try {
-            return new String(filename, 0, filename.length, "ISO-8859-1");
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
-    }
-
-    /**
      * Changes both the owner and group for a file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
@@ -320,14 +313,62 @@ public class UnixFile {
         try {
             checkWrite();
             loadLibrary();
-            chown0(toBytes(filename), uid, gid);
+            chown0(filename, uid, gid);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
 
-    private static native void chown0(byte[] filename, int uid, int gid) throws IOException;
+    private static native void chown0(String filename, int uid, int gid) throws IOException;
+
+    /**
+     * Stats the file.  Please consider calling getStat(Stat) to avoid memory allocation.
+     *
+     * This method will follow symbolic links in the path but not a final symbolic link.
+     */
+    public Stat getStat() throws IOException {
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getStat()", null);
+        try {
+            return getStat(null);
+        } finally {
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
+        }
+    }
+
+    /**
+     * Stats the file into the provided Stat buffer.  If no buffer is provided, a new one will be created.
+     *
+     * This method will follow symbolic links in the path but not a final symbolic link.
+     */
+    public Stat getStat(Stat stat) throws IOException {
+        Profiler.startProfile(Profiler.IO, UnixFile.class, "getStat(Stat)", null);
+        try {
+            checkRead();
+            loadLibrary();
+            if(stat==null) stat=new Stat();
+            getStat0(filename, stat);
+            return stat;
+        } finally {
+            Profiler.endProfile(Profiler.IO);
+        }
+    }
+
+    // Combine to one native method
+    /*private static native long getDevice0(String filename) throws IOException;
+    private static native long getInode0(String filename) throws IOException;
+    private static native long getMode0(String filename) throws IOException;
+    private static native int getLinkCount0(String filename) throws IOException;
+    private static native int getUID0(String filename) throws IOException;
+    private static native int getGID0(String filename) throws IOException;
+    private static native long getDeviceIdentifier0(String filename) throws IOException;
+    private static native int getBlockSize0(String filename) throws IOException;
+    private static native long getBlockCount0(String filename) throws IOException;
+    private static native long getAccessTime0(String filename) throws IOException;
+    private static native long getModifyTime0(String filename) throws IOException;
+    private static native long getChangeTime0(String filename) throws IOException;
+    */
+    private native void getStat0(String filename, Stat stat) throws IOException;
 
     /**
      * Compares this contents of this file to the contents of another file.
@@ -337,10 +378,12 @@ public class UnixFile {
     public boolean contentEquals(UnixFile otherUF) throws IOException {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "contentEquals(UnixFile)", null);
         try {
-            if(!isRegularFile()) throw new IOException("Not a regular file: "+filename);
-            if(!otherUF.isRegularFile()) throw new IOException("Not a regular file: "+otherUF.filename);
-            long size=getSize();
-            if(size!=otherUF.getSize()) return false;
+            Stat stat = getStat();
+            if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
+            Stat otherStat = otherUF.getStat();
+            if(!otherStat.isRegularFile()) throw new IOException("Not a regular file: "+otherUF.filename);
+            long size=stat.getSize();
+            if(size!=otherStat.getSize()) return false;
             int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
             if(buffSize<64) buffSize=64;
             InputStream in1=new BufferedInputStream(new FileInputStream(getFile()), buffSize);
@@ -373,8 +416,9 @@ public class UnixFile {
     public boolean contentEquals(byte[] otherFile) throws IOException {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "contentEquals(byte[])", null);
         try {
-            if(!isRegularFile()) throw new IOException("Not a regular file: "+filename);
-            long size=getSize();
+            Stat stat = getStat();
+            if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
+            long size=stat.getSize();
             if(size!=otherFile.length) return false;
             int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
             if(buffSize<64) buffSize=64;
@@ -402,10 +446,12 @@ public class UnixFile {
     public boolean secureContentEquals(UnixFile otherUF) throws IOException {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "contentEquals(UnixFile)", null);
         try {
-            if(!isRegularFile()) throw new IOException("Not a regular file: "+filename);
-            if(!otherUF.isRegularFile()) throw new IOException("Not a regular file: "+otherUF.filename);
-            long size=getSize();
-            if(size!=otherUF.getSize()) return false;
+            Stat stat = getStat();
+            if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
+            Stat otherStat = otherUF.getStat();
+            if(!otherStat.isRegularFile()) throw new IOException("Not a regular file: "+otherUF.filename);
+            long size=stat.getSize();
+            if(size!=otherStat.getSize()) return false;
             int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
             if(buffSize<64) buffSize=64;
             InputStream in1=new BufferedInputStream(getSecureInputStream(), buffSize);
@@ -438,8 +484,9 @@ public class UnixFile {
     public boolean secureContentEquals(byte[] otherFile) throws IOException {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "contentEquals(byte[])", null);
         try {
-            if(!isRegularFile()) throw new IOException("Not a regular file: "+filename);
-            long size=getSize();
+            Stat stat = getStat();
+            if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
+            long size=stat.getSize();
             if(size!=otherFile.length) return false;
             int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
             if(buffSize<64) buffSize=64;
@@ -459,19 +506,23 @@ public class UnixFile {
         }
     }
 
-    private static Random random;
+    volatile private static Random random;
     private static Random getRandom() {
         Profiler.startProfile(Profiler.FAST, UnixFile.class, "getRandom()", null);
         try {
-            synchronized(UnixFile.class) {
-                String algorithm="SHA1PRNG";
-                try {
-                    if(random==null) random=SecureRandom.getInstance(algorithm);
-                    return random;
-                } catch(NoSuchAlgorithmException err) {
-                    throw new WrappedException(err, new Object[] {"algorithm="+algorithm});
+            if(random==null) {
+                synchronized(UnixFile.class) {
+                    if(random==null) {
+                        String algorithm="SHA1PRNG";
+                        try {
+                            random=SecureRandom.getInstance(algorithm);
+                        } catch(NoSuchAlgorithmException err) {
+                            throw new WrappedException(err, new Object[] {"algorithm="+algorithm});
+                        }
+                    }
                 }
             }
+            return random;
         } finally {
             Profiler.endProfile(Profiler.FAST);
         }
@@ -488,24 +539,26 @@ public class UnixFile {
         try {
             checkRead();
             otherUF.checkWrite();
-            long mode=getStatMode();
-            boolean oExists=otherUF.exists();
+            Stat stat = getStat();
+            long mode=stat.getRawMode();
+            Stat otherStat = otherUF.getStat();
+            boolean oExists=otherStat.exists();
             if(!overwrite && oExists) throw new IOException("File already exists: "+otherUF);
             if(isBlockDevice(mode) || isCharacterDevice(mode)) {
                 if(oExists) otherUF.delete();
-                otherUF.mknod(mode, getDeviceIdentifier()).chown(getUID(), getGID());
+                otherUF.mknod(mode, stat.getDeviceIdentifier()).chown(stat.getUID(), stat.getGID());
             } else if(isDirectory(mode)) {
                 if(!oExists) otherUF.mkdir();
-                otherUF.setMode(mode).chown(getUID(), getGID());
+                otherUF.setMode(mode).chown(stat.getUID(), stat.getGID());
             } else if(isFIFO(mode)) {
                 if(oExists) otherUF.delete();
-                otherUF.mkfifo(mode).chown(getUID(), getGID());
+                otherUF.mkfifo(mode).chown(stat.getUID(), stat.getGID());
             } else if(isRegularFile(mode)) {
                 InputStream in=new FileInputStream(getFile());
                 try {
                     OutputStream out=new FileOutputStream(otherUF.getFile());
                     try {
-                        otherUF.setMode(mode).chown(getUID(), getGID());
+                        otherUF.setMode(mode).chown(stat.getUID(), stat.getGID());
                         byte[] buff=BufferManager.getBytes();
                         try {
                             int ret;
@@ -520,12 +573,19 @@ public class UnixFile {
                     in.close();
                 }
             } else if(isSocket(mode)) throw new IOException("Unable to copy socket: "+filename);
-            else if(isSymLink(mode)) otherUF.symLink(readLink()).chown(getUID(), getGID());
-            else throw new RuntimeException("Unknown mode type: "+Long.toOctalString(mode));
+            else if(isSymLink(mode)) {
+                // This takes the byte[] from readLink directory to symLink to avoid conversions from byte[]->String->byte[]
+                otherUF.symLink(readLink()).chown(stat.getUID(), stat.getGID());
+            } else throw new RuntimeException("Unknown mode type: "+Long.toOctalString(mode));
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
+
+    /**
+     * crypt is not thread safe due to static data in the return value
+     */
+    private static final Object cryptLock = new Object();
 
     /**
      * Hashes a password using the MD5 crypt algorithm and the internal random source.
@@ -533,7 +593,10 @@ public class UnixFile {
     public static String crypt(String password) {
         Profiler.startProfile(Profiler.FAST, UnixFile.class, "crypt(String)", null);
         try {
-            return crypt(password, getRandom());
+            // crypt is not thread safe due to static data in the return value
+            synchronized(cryptLock) {
+                return crypt(password, getRandom());
+            }
         } finally {
             Profiler.endProfile(Profiler.FAST);
         }
@@ -619,12 +682,14 @@ public class UnixFile {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "deleteRecursive(UnixFile)", null);
         try {
             try {
-                if(!file.isSymLink()) {
-                    // Race condition between isSymLink and list()
+                Stat stat = file.getStat();
+                // This next line matches directories specifically to avoid listing and recursing into symlink references
+                if(stat.isDirectory()) {
+                    // TODO: Race condition between getStat and list(), how can we avoid this from pure Java???
                     String[] list = file.list();
                     if (list != null) {
                         int len = list.length;
-                        for (int c = 0; c < len; c++) deleteRecursive(new UnixFile(file, list[c]));
+                        for (int c = 0; c < len; c++) deleteRecursive(new UnixFile(file, list[c], false));
                     }
                 }
                 file.delete();
@@ -663,12 +728,14 @@ public class UnixFile {
             }
         }
         // Set any necessary permissions from root to file's immediate parent while looking for symbolic links
+        Stat parentStat = new Stat();
         while(!parents.isEmpty()) {
             UnixFile parent=parents.pop();
-            long statMode=parent.getStatMode();
+            parent.getStat(parentStat);
+            long statMode = parentStat.getRawMode();
             if(isSymLink(statMode)) throw new IOException("Symbolic link found in path: "+parent.getFilename());
-            int uid=parent.getUID();
-            int gid=parent.getGID();
+            int uid=parentStat.getUID();
+            int gid=parentStat.getGID();
             if(
                 uid>=MINIMUM_USER_UID
                 || gid>=MINIMUM_USER_GID
@@ -727,11 +794,13 @@ public class UnixFile {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "secureDeleteRecursive(UnixFile)", null);
         try {
             try {
-                long mode=file.getStatMode();
+                Stat stat = file.getStat();
+                long mode=stat.getRawMode();
                 // Race condition does not exist because the parents have been secured already
                 if(!isSymLink(mode) && isDirectory(mode)) {
                     // Secure the current directory before the recursive calls
-                    file.chown(ROOT_UID, ROOT_GID).setMode(0700);
+                    if(stat.getUID()!=ROOT_UID || stat.getGID()!=ROOT_GID) file.chown(ROOT_UID, ROOT_GID);
+                    if(stat.getMode()!=0700) file.setMode(0700);
                     String[] list = file.list();
                     if (list != null) {
                         int len = list.length;
@@ -753,136 +822,125 @@ public class UnixFile {
      * is still considered to exist.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).exists()
      */
     final public boolean exists() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "exists()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "exists()", null);
         try {
-            try {
-                getStatMode();
-                return true;
-            } catch(FileNotFoundException err) {
-                return false;
-            }
+            return getStat().exists();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
     /**
-     * Gets the last access to for this file.
+     * Gets the last access to this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getAccessTime()
      */
     final public long getAccessTime() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getAccessTime()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getAccessTime()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getAccessTime0(toBytes(filename))*1000;
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getAccessTime();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native long getAccessTime0(byte[] filename) throws IOException;
 
     /**
      * Gets the block count for this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(State).getBlockCount()
      */
     final public long getBlockCount() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getBlockCount()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getBlockCount()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getBlockCount0(toBytes(filename)); 
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getBlockCount();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native long getBlockCount0(byte[] filename) throws IOException;
 
     /**
      * Gets the block size for this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getBlockSize()
      */
     final public int getBlockSize() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getBlockSize()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getBlockSize()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getBlockSize0(toBytes(filename));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getBlockSize();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native int getBlockSize0(byte[] filename) throws IOException;
 
     /**
-     * Gets the change time this file.
+     * Gets the change time of this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getChangeTime()
      */
     final public long getChangeTime() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getChangeTime()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getChangeTime()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getChangeTime0(toBytes(filename))*1000;
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getChangeTime();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native long getChangeTime0(byte[] filename) throws IOException;
 
     /**
      * Gets the device for this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getDevice()
      */
     final public long getDevice() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getDevice()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getDevice()", null);
         try {
-            checkRead();
-            loadLibrary();
-            try {
-                return getDevice0(toBytes(filename));
-            } catch(RuntimeException err) {
-                if("Value too large for defined data type".equals(err.getMessage())) {
-                    IOException ioErr=new IOException("Unable to get device: Value too large for defined data type");
-                    ioErr.initCause(err);
-                    throw ioErr;
-                } else throw err;
-            }
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getDevice();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native long getDevice0(byte[] filename) throws IOException;
 
     /**
      * Gets the device identifier for this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getDeviceIdentifier()
      */
     final public long getDeviceIdentifier() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getDeviceIdentifier()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getDeviceIdentifier()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getDeviceIdentifier0(toBytes(filename));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getDeviceIdentifier();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native long getDeviceIdentifier0(byte[] filename) throws IOException;
 
     /**
      * Gets the extension from the filename.
@@ -946,69 +1004,71 @@ public class UnixFile {
      * Gets the group ID for this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getGID()
      */
     final public int getGID() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getGID()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getGID()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getGID0(toBytes(filename));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getGID();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native int getGID0(byte[] filename) throws IOException;
 
     /**
      * Gets the inode for this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getInode()
      */
     final public long getInode() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getInode()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getInode()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getInode0(toBytes(filename));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getInode();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native long getInode0(byte[] filename) throws IOException;
 
     /**
      * Gets the link count for this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getNumberLinks()
      */
     final public int getLinkCount() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getLinkCount()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getLinkCount()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getLinkCount0(toBytes(filename));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getNumberLinks();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native int getLinkCount0(byte[] filename) throws IOException;
 
     /**
      * Gets the permission bits of the mode of this file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getMode()
      */
     final public long getMode() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getMode()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getMode()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getMode0(toBytes(filename)) & PERMISSION_MASK;
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getMode();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
@@ -1049,11 +1109,15 @@ public class UnixFile {
      * Gets a String representation of the mode of this file similar to the output of the Unix ls command.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getModeString()
      */
     final public String getModeString() throws IOException {
         Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getModeString()", null);
         try {
-            return getModeString(getStatMode());
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getModeString();
         } finally {
             Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
@@ -1071,7 +1135,7 @@ public class UnixFile {
                 secureParents(parentsChanged);
 
                 // Make sure the file does not exist
-                if(!isRegularFile()) throw new IOException("Not a regular file: "+filename);
+                if(!getStat().isRegularFile()) throw new IOException("Not a regular file: "+filename);
 
                 // Create the new file with the correct owner and permissions
                 return new FileInputStream(getFile());
@@ -1095,10 +1159,11 @@ public class UnixFile {
                 secureParents(parentsChanged);
 
                 // Make sure the file does not exist
+                Stat stat = getStat();
                 if(overwrite) {
-                    if(exists() && !isRegularFile()) throw new IOException("Not a regular file: "+filename);
+                    if(stat.exists() && !stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
                 } else {
-                    if(exists()) throw new IOException("File already exists: "+filename);
+                    if(stat.exists()) throw new IOException("File already exists: "+filename);
                 }
 
                 // Create the new file with the correct owner and permissions
@@ -1125,7 +1190,7 @@ public class UnixFile {
                 secureParents(parentsChanged);
 
                 // Make sure the file does not exist
-                if(!isRegularFile()) throw new IOException("Not a regular file: "+filename);
+                if(!getStat().isRegularFile()) throw new IOException("Not a regular file: "+filename);
 
                 // Create the new file with the correct owner and permissions
                 return new RandomAccessFile(getFile(), mode);
@@ -1154,62 +1219,51 @@ public class UnixFile {
      * file type.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getRawMode()
      */
     final public long getStatMode() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getStatMode()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getStatMode()", null);
         try {
-            checkRead();
-            loadLibrary();
-            try {
-                return getMode0(toBytes(filename));
-            } catch(IllegalArgumentException err) {
-                IOException ioErr=new IOException("Unable to getMode0: "+filename);
-                ioErr.initCause(err);
-                throw ioErr;
-            } catch(RuntimeException err) {
-                String message=err.getMessage();
-                if("Value too large for defined data type".equals(message)) {
-                    IOException ioErr=new IOException("Unable to getMode0: "+filename);
-                    ioErr.initCause(err);
-                    throw ioErr;
-                } else throw err;
-            }
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getRawMode();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
-
-    private static native long getMode0(byte[] filename) throws IOException;
 
     /**
      * Gets the modification time of the file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getModifyTime()
      */
     final public long getModifyTime() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "getModifyTime()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getModifyTime()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getModifyTime0(toBytes(filename))*1000;
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getModifyTime();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
-    private static native long getModifyTime0(byte[] filename) throws IOException;
-
     /**
-     * Gets the length of the file or <code>-1</code> if unknown.
+     * Gets the size of the file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
      *
-     * @see File#length()
+     * @deprecated  Please use getStat(Stat).getSize()
      */
     final public long getSize() throws IOException {
         Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "getSize()", null);
         try {
-            return getFile().length();
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getSize();
         } finally {
             Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
@@ -1227,7 +1281,7 @@ public class UnixFile {
             String filename=template+"XXXXXX";
             checkWrite(filename);
             loadLibrary();
-            return new UnixFile(mktemp0(filename)).setMode(0600);
+            return new UnixFile(mktemp0(filename));
         } catch(IOException err) {
             System.err.println("UnixFile.mktemp: IOException: template="+template);
             throw err;
@@ -1242,29 +1296,29 @@ public class UnixFile {
      * Gets the user ID of the file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).getUID()
      */
     public final int getUID() throws IOException {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "getUID()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return getUID0(toBytes(filename));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.getUID();
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
 
-    private static native int getUID0(byte[] filename) throws IOException;
-
     /**
      * Determines if a specific mode represents a block device.
      */
     public static boolean isBlockDevice(long mode) {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "isBlockDevice(long)", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "isBlockDevice(long)", null);
         try {
             return (mode & TYPE_MASK) == IS_BLOCK_DEVICE;
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
@@ -1272,15 +1326,17 @@ public class UnixFile {
      * Determines if this file represents a block device.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).isBlockDevice()
      */
     final public boolean isBlockDevice() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "isBlockDevice()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "isBlockDevice()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return isBlockDevice(getMode0(toBytes(filename)));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.isBlockDevice();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
@@ -1300,15 +1356,17 @@ public class UnixFile {
      * Determines if this file represents a character device.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).isCharacterDevice()
      */
     final public boolean isCharacterDevice() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "isCharacterDevice()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "isCharacterDevice()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return isCharacterDevice(getMode0(toBytes(filename)));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.isCharacterDevice();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
@@ -1328,15 +1386,17 @@ public class UnixFile {
      * Determines if this file represents a directory.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).isDirectory()
      */
     final public boolean isDirectory() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "isDirectory()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "isDirectory()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return isDirectory(getMode0(toBytes(filename)));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.isDirectory();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
@@ -1356,15 +1416,17 @@ public class UnixFile {
      * Determines if this file represents a FIFO.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).isFIFO()
      */
     final public boolean isFIFO() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "isFIFO()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "isFIFO()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return isFIFO(getMode0(toBytes(filename)));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.isFIFO();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
@@ -1387,15 +1449,17 @@ public class UnixFile {
      * Determines if this file represents a regular file.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).isRegularFile()
      */
     final public boolean isRegularFile() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "isRegularFile()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "isRegularFile()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return isRegularFile(getMode0(toBytes(filename)));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.isRegularFile();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
@@ -1427,15 +1491,17 @@ public class UnixFile {
      * Determines if this file represents a socket.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).isSocket()
      */
     final public boolean isSocket() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "isSocket()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "isSocket()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return isSocket(getMode0(toBytes(filename)));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.isSocket();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
@@ -1455,22 +1521,24 @@ public class UnixFile {
      * Determines if this file represents a sybolic link.
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
+     *
+     * @deprecated  Please use getStat(Stat).isSymLink()
      */
     final public boolean isSymLink() throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "isSymLink()", null);
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "isSymLink()", null);
         try {
-            checkRead();
-            loadLibrary();
-            return isSymLink(getMode0(toBytes(filename)));
+            Stat stat = getStat();
+            if(!stat.exists()) throw new FileNotFoundException(filename);
+            return stat.isSymLink();
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
     /**
      * Lists the contents of the directory.
      *
-     * This method will follow symbolic links in the path but not a final symbolic link.
+     * This method will follow symbolic links in the path, including a final symbolic link.
      *
      * @see java.io.File#list
      */
@@ -1508,9 +1576,10 @@ public class UnixFile {
         Profiler.startProfile(Profiler.FAST, UnixFile.class, "mkdir(boolean,long)", null);
         try {
             if(makeParents) {
+                Stat stat = new Stat();
                 UnixFile dir=getParent();
                 Stack<UnixFile> neededParents=new Stack<UnixFile>();
-                while(!dir.isRootDirectory() && !dir.exists()) {
+                while(!dir.isRootDirectory() && !dir.getStat(stat).exists()) {
                     neededParents.push(dir);
                     dir=dir.getParent();
                 }
@@ -1535,9 +1604,10 @@ public class UnixFile {
         Profiler.startProfile(Profiler.FAST, UnixFile.class, "mkdir(boolean,long,int,int)", null);
         try {
             if(makeParents) {
+                Stat stat = new Stat();
                 UnixFile dir=getParent();
                 Stack<UnixFile> neededParents=new Stack<UnixFile>();
-                while(!dir.isRootDirectory() && !dir.exists()) {
+                while(!dir.isRootDirectory() && !dir.getStat(stat).exists()) {
                     neededParents.push(dir);
                     dir=dir.getParent();
                 }
@@ -1562,14 +1632,14 @@ public class UnixFile {
         try {
             checkWrite();
             loadLibrary();
-            mknod0(toBytes(filename), mode, device);
+            mknod0(filename, mode, device);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
 
-    private static native void mknod0(byte[] filename, long mode, long device) throws IOException;
+    private static native void mknod0(String filename, long mode, long device) throws IOException;
 
     /**
      * Creates a FIFO.
@@ -1581,26 +1651,29 @@ public class UnixFile {
         try {
             checkWrite();
             loadLibrary();
-            mkfifo0(toBytes(filename), mode&PERMISSION_MASK);
+            mkfifo0(filename, mode&PERMISSION_MASK);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
 
-    private static native void mkfifo0(byte[] filename, long mode) throws IOException;
+    private static native void mkfifo0(String filename, long mode) throws IOException;
 
     /**
      * Sets the access time for this file.
      *
      * This method will follow symbolic links in the path.
+     *
+     * @deprecated  This method internally performs an extra stat.  Please try to use utime(long,long) directly to avoid this extra stat.
      */
     final public UnixFile setAccessTime(long atime) throws IOException {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "setAccessTime(long)", null);
         try {
             checkWrite();
-            loadLibrary();
-            utime0(toBytes(filename), atime/1000, getModifyTime0(toBytes(filename)));
+            // getStat does loadLibrary already: loadLibrary();
+            long mtime = getStat().getModifyTime();
+            utime0(filename, atime/1000, mtime/1000);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
@@ -1611,13 +1684,16 @@ public class UnixFile {
      * Sets the group ID for this file.
      *
      * This method will follow symbolic links in the path.
+     *
+     * @deprecated  This method internally performs an extra stat.  Please try to use chown(int,int) directly to avoid this extra stat.
      */
     final public UnixFile setGID(int gid) throws IOException {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "setGID(int)", null);
         try {
             checkWrite();
-            loadLibrary();
-            chown0(toBytes(filename), getUID(), gid);
+            // getStat does loadLibrary already: loadLibrary();
+            int uid = getStat().getUID();
+            chown0(filename, uid, gid);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
@@ -1634,27 +1710,29 @@ public class UnixFile {
         try {
             checkWrite();
             loadLibrary();
-            setMode0(toBytes(filename), mode & PERMISSION_MASK);
+            setMode0(filename, mode & PERMISSION_MASK);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
 
-    private static native void setMode0(byte[] filename, long mode) throws IOException;
+    private static native void setMode0(String filename, long mode) throws IOException;
 
     /**
      * Sets the modification time for this file.
      *
      * This method will follow symbolic links in the path.
+     *
+     * @deprecated  This method internally performs an extra stat.  Please try to use utime(long,long) directly to avoid this extra stat.
      */
     final public UnixFile setModifyTime(long mtime) throws IOException {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "setModifyTime(long)", null);
         try {
             checkWrite();
-            loadLibrary();
-            byte[] bytes=toBytes(filename);
-            utime0(bytes, getAccessTime0(bytes), mtime/1000);
+            // getStat does loadLibrary already: loadLibrary();
+            long atime = getStat().getAccessTime();
+            utime0(filename, atime/1000, mtime/1000);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
@@ -1665,13 +1743,16 @@ public class UnixFile {
      * Sets the user ID for this file.
      *
      * This method will follow symbolic links in the path.
+     *
+     * @deprecated  This method internally performs an extra stat.  Please try to use chown(int,int) directly to avoid this extra stat.
      */
     final public UnixFile setUID(int uid) throws IOException {
         Profiler.startProfile(Profiler.IO, UnixFile.class, "setUID(int)", null);
         try {
             checkWrite();
-            loadLibrary();
-            chown0(toBytes(filename), uid, getGID());
+            // getStat does loadLibrary already: loadLibrary();
+            int gid = getStat().getGID();
+            chown0(filename, uid, gid);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
@@ -1688,14 +1769,23 @@ public class UnixFile {
         try {
             checkWrite();
             loadLibrary();
-            symLink0(toBytes(filename), toBytes(destination));
+            symLink0(filename, destination);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
 
-    final static native private void symLink0(byte[] filename, byte[] destination) throws IOException;
+    final static native private void symLink0(String filename, String destination) throws IOException;
+
+    /**
+     * Creates a hard link.
+     *
+     * This method will follow symbolic links in the path.
+     */
+    final public UnixFile link(UnixFile destination) throws IOException {
+        return link(destination.getFilename());
+    }
 
     /**
      * Creates a hard link.
@@ -1707,14 +1797,14 @@ public class UnixFile {
         try {
             checkWrite();
             loadLibrary();
-            link0(toBytes(filename), toBytes(destination));
+            link0(filename, destination);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
 
-    final static native private void link0(byte[] filename, byte[] destination) throws IOException;
+    final static native private void link0(String filename, String destination) throws IOException;
 
     /**
      * Reads a symbolic link.
@@ -1726,13 +1816,13 @@ public class UnixFile {
         try {
             checkRead();
             loadLibrary();
-            return toString(readLink0(toBytes(filename)));
+            return readLink0(filename);
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
     
-    final static native private byte[] readLink0(byte[] filename) throws IOException;
+    final static native private String readLink0(String filename) throws IOException;
 
     /**
      * Renames this file, possibly overwriting any previous file.
@@ -1769,24 +1859,34 @@ public class UnixFile {
         try {
             checkWrite();
             loadLibrary();
-            utime0(toBytes(filename), atime/1000, mtime/1000);
+            utime0(filename, atime/1000, mtime/1000);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
         }
     }
 
-    private static native void utime0(byte[] filename, long atime, long mtime) throws IOException;
+    private static native void utime0(String filename, long atime, long mtime) throws IOException;
     
     public int hashCode() {
-        return filename.hashCode();
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "hashCode()", null);
+        try {
+            return filename.hashCode();
+        } finally {
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
+        }
     }
     
     public boolean equals(Object O) {
-        return
-            O!=null
-            && (O instanceof UnixFile)
-            && ((UnixFile)O).filename.equals(filename)
-        ;
+        Profiler.startProfile(Profiler.INSTANTANEOUS, UnixFile.class, "equals(Object)", null);
+        try {
+            return
+                O!=null
+                && (O instanceof UnixFile)
+                && ((UnixFile) O).filename.equals(filename)
+            ;
+        } finally {
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
+        }
     }
 }

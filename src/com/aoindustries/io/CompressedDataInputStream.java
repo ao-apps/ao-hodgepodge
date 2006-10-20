@@ -38,34 +38,49 @@ public class CompressedDataInputStream extends DataInputStream {
      * 22 bit  - 01SXXXXX XXXXXXXX XXXXXXXX
      * 31 bit  - 1SXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX
      * </pre>
+     *
+     * @exception  EOFException if the end of file is reached
      */
     public int readCompressedInt() throws IOException {
         Profiler.startProfile(Profiler.IO, CompressedDataInputStream.class, "readCompressedInt()", null);
         try {
             int b1=in.read();
+            if(b1==-1) throw new EOFException();
             if((b1&0x80)!=0) {
                 // 31 bit
+                int b2=in.read();
+                if(b2==-1) throw new EOFException();
+                int b3=in.read();
+                if(b3==-1) throw new EOFException();
+                int b4=in.read();
+                if(b4==-1) throw new EOFException();
                 return
                     ((b1&0x40)==0 ? 0 : 0xc0000000)
                     | ((b1&0x3f)<<24)
-                    | (in.read()<<16)
-                    | (in.read()<<8)
-                    | in.read()
+                    | (b2<<16)
+                    | (b3<<8)
+                    | b4
                 ;
             } else if((b1&0x40)!=0) {
                 // 22 bit
+                int b2=in.read();
+                if(b2==-1) throw new EOFException();
+                int b3=in.read();
+                if(b3==-1) throw new EOFException();
                 return
                     ((b1&0x20)==0 ? 0 : 0xffe00000)
                     | ((b1&0x1f)<<16)
-                    | (in.read()<<8)
-                    | in.read()
+                    | (b2<<8)
+                    | b3
                 ;
             } else if((b1&0x20)!=0) {
                 // 13 bit
+                int b2=in.read();
+                if(b2==-1) throw new EOFException();
                 return
                     ((b1&0x10)==0 ? 0 : 0xfffff000)
                     | ((b1&0x0f)<<8)
-                    | in.read()
+                    | b2
                 ;
             } else {
                 // 5 bit
@@ -82,11 +97,15 @@ public class CompressedDataInputStream extends DataInputStream {
     private final String[] lastStrings=new String[64];
     private final int[] lastCommonLengths=new int[64];
 
+    /**
+     * @exception  EOFException if the end of file is reached
+     */
     public String readCompressedUTF() throws IOException {
         Profiler.startProfile(Profiler.IO, CompressedDataInputStream.class, "readCompressedUTF()", null);
         try {
             synchronized(this) {
                 int b1=in.read();
+                if(b1==-1) throw new EOFException();
                 int slot=b1&0x3f;
 
                 // Is there a difference to the common

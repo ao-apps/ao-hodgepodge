@@ -7,8 +7,10 @@ package com.aoindustries.io.unix;
  */
 import com.aoindustries.profiler.Profiler;
 import com.aoindustries.util.sort.AutoSort;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.HashSet;
 import java.util.Map;
@@ -28,15 +30,27 @@ public class FilesystemIterator {
 
     private final Map<String,FilesystemIteratorRule> rules;
     private final boolean convertPathsToASCII;
+    private final String startPath;
 
     /**
-     * Constructs an iterator without any filename conversions.
+     * Constructs an iterator without any filename conversions and starting at "/".
      *
-     * @see  #FilesystemIterator(Map,boolean)
+     * @see  #FilesystemIterator(Map,boolean,String)
      */
     public FilesystemIterator(Map<String,FilesystemIteratorRule> rules) {
-        this(rules, false);
+        this(rules, false, "/");
         Profiler.startProfile(Profiler.INSTANTANEOUS, FilesystemIterator.class, "<init>(Map<String,FilesystemIteratorRule>)", null);
+        Profiler.endProfile(Profiler.INSTANTANEOUS);
+    }
+
+    /**
+     * Constructs a filesystem iterator with the provided rules and conversion, starting at "/"
+     *
+     * @see  #FilesystemIterator(Map,boolean,String)
+     */
+    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, boolean convertPathsToASCII) {
+        this(rules, convertPathsToASCII, "/");
+        Profiler.startProfile(Profiler.INSTANTANEOUS, FilesystemIterator.class, "<init>(Map<String,FilesystemIteratorRule>,boolean)", null);
         Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
@@ -48,22 +62,25 @@ public class FilesystemIterator {
      *                              should two or more files end up with the same path after conversion, the second one will be appended with
      *                              a sequence number, such as .2, .3, .4, ...
      */
-    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, boolean convertPathsToASCII) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FilesystemIterator.class, "<init>(Map<String,FilesystemIteratorRule>,boolean)", null);
+    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, boolean convertPathsToASCII, String startPath) {
+        Profiler.startProfile(Profiler.INSTANTANEOUS, FilesystemIterator.class, "<init>(Map<String,FilesystemIteratorRule>,boolean,String)", null);
         try {
             this.rules=rules;
             currentDirectories=null;
+            currentConvertedDirectories=null;
             currentLists=null;
             currentConvertedLists=null;
             currentIndexes=null;
             filesDone=false;
             this.convertPathsToASCII = convertPathsToASCII;
+            this.startPath = startPath;
         } finally {
             Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
     }
 
     private Stack<String> currentDirectories;
+    private Stack<String> currentConvertedDirectories;
     private Stack<String[]> currentLists;
     private Stack<String[]> currentConvertedLists;
     private Stack<Integer> currentIndexes;
@@ -114,19 +131,40 @@ public class FilesystemIterator {
 
                     // Initialize the stacks, if needed
                     if(currentDirectories==null) {
-                        (currentDirectories=new Stack<String>()).push("");
-                        (currentLists=new Stack<String[]>()).push(new String[] {""});
-                        if(convertPathsToASCII) (currentConvertedLists=new Stack<String[]>()).push(new String[] {""});
+                        if(startPath.equals("/")) {
+                            // Starting at root will include the starting directory itself
+                            (currentDirectories=new Stack<String>()).push("");
+                            (currentLists=new Stack<String[]>()).push(new String[] {""});
+                            if(convertPathsToASCII) {
+                                (currentConvertedDirectories=new Stack<String>()).push("");
+                                (currentConvertedLists=new Stack<String[]>()).push(new String[] {""});
+                            }
+                        } else {
+                            // Starting at non root will include the starting directory itself
+                            File startPathFile = new File(startPath);
+                            String parent = startPathFile.getParent();
+                            String name = startPathFile.getName();
+                            (currentDirectories=new Stack<String>()).push(parent);
+                            (currentLists=new Stack<String[]>()).push(new String[] {name});
+                            if(convertPathsToASCII) {
+                                (currentConvertedDirectories=new Stack<String>()).push(parent);
+                                (currentConvertedLists=new Stack<String[]>()).push(new String[] {name});
+                            }
+                        }
                         (currentIndexes=new Stack<Integer>()).push(Integer.valueOf(0));
                     }
                     String currentDirectory=null;
+                    String currentConvertedDirectory=null;
                     String[] currentList=null;
                     String[] currentConvertedList=null;
                     int currentIndex=-1;
                     try {
                         currentDirectory=currentDirectories.peek();
                         currentList=currentLists.peek();
-                        if(convertPathsToASCII) currentConvertedList=currentConvertedLists.peek();
+                        if(convertPathsToASCII) {
+                            currentConvertedDirectory=currentConvertedDirectories.peek();
+                            currentConvertedList=currentConvertedLists.peek();
+                        }
                         currentIndex=currentIndexes.peek().intValue();
 
                         // Undo the stack as far as needed
@@ -136,6 +174,8 @@ public class FilesystemIterator {
                             currentLists.pop();
                             currentList=currentLists.peek();
                             if(convertPathsToASCII) {
+                                currentConvertedDirectories.pop();
+                                currentConvertedDirectory=currentConvertedDirectories.peek();
                                 currentConvertedLists.pop();
                                 currentConvertedList=currentConvertedLists.peek();
                             }
@@ -144,6 +184,7 @@ public class FilesystemIterator {
                         }
                     } catch(EmptyStackException err) {
                         currentDirectory=null;
+                        currentConvertedDirectory=null;
                     }
                     if(currentDirectory==null) {
                         filesDone=true;
@@ -157,8 +198,8 @@ public class FilesystemIterator {
                         // Get the converted filename
                         String convertedFilename;
                         if(convertPathsToASCII) {
-                            if(currentDirectory.equals("/")) convertedFilename="/"+currentConvertedList[currentIndex];
-                            else convertedFilename=currentDirectory+'/'+currentConvertedList[currentIndex];
+                            if(currentConvertedDirectory.equals("/")) convertedFilename="/"+currentConvertedList[currentIndex];
+                            else convertedFilename=currentConvertedDirectory+'/'+currentConvertedList[currentIndex];
                         } else convertedFilename=null;
 
                         // Increment index to point to the next file
@@ -168,7 +209,8 @@ public class FilesystemIterator {
                         try {
                             // Recurse for directories
                             UnixFile unixFile=new UnixFile(filename);
-                            long statMode=unixFile.getStatMode();
+                            Stat stat = unixFile.getStat();
+                            long statMode=stat.getRawMode();
                             if(
                                 !UnixFile.isSymLink(statMode)
                                 && UnixFile.isDirectory(statMode)
@@ -176,6 +218,7 @@ public class FilesystemIterator {
                             ) {
                                 // Push on stacks for next level
                                 currentDirectories.push(filename);
+                                if(convertPathsToASCII) currentConvertedDirectories.push(convertedFilename);
                                 String[] list=isNoRecurse(filename) ? emptyStringArray : unixFile.list();
                                 if(list==null) list = emptyStringArray;
                                 else AutoSort.sortStatic(list);
@@ -313,4 +356,20 @@ public class FilesystemIterator {
             Profiler.endProfile(Profiler.UNKNOWN);
         }
     }
+
+    /*
+    public static void main(String[] args) {
+        try {
+            String path;
+            if(args.length==0) path="/";
+            else path=args[0];
+            Map<String,FilesystemIteratorRule> rules = Collections.emptyMap();
+            FilesystemIterator iter =  new FilesystemIterator(rules, false, path);
+            UnixFile uf;
+            while((uf=iter.getNextUnixFile())!=null) System.out.println(uf.getFilename());
+        } catch(IOException err) {
+            err.printStackTrace();
+        }
+    }
+     */
 }

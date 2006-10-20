@@ -14,8 +14,6 @@ static const char* RUNTIME_EXCEPTION="java/lang/RuntimeException";
 static const char* SECURITY_EXCEPTION="java/lang/SecurityException";
 
 extern const char* getErrorType(const int err);
-extern char* getCharsForByteArray(JNIEnv* env, jbyteArray bytes);
-extern jbyteArray getByteArrayForChars(JNIEnv* env, char* chars);
 #ifdef __cplusplus
 }
 #endif

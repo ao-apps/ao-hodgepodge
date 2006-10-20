@@ -21,6 +21,9 @@ public class FilesystemIteratorResult {
     UnixFile unixFile;
     String convertedFilename;
     
+    public FilesystemIteratorResult() {
+    }
+
     FilesystemIteratorResult(UnixFile unixFile, String convertedFilename) {
         this.unixFile = unixFile;
         this.convertedFilename = convertedFilename;

@@ -32,7 +32,7 @@ public class FileExistsRule extends FilesystemIteratorRule {
     public FilesystemIteratorRule getEffectiveRule(String filename) throws IOException {
         for(int c=0;c<fullPaths.length;c++) {
             UnixFile uf = new UnixFile(fullPaths[c]);
-            if(uf.exists()) return existsRule;
+            if(uf.getStat().exists()) return existsRule;
         }
         return notExistsRule;
     }

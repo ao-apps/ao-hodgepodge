@@ -51,7 +51,7 @@ public class LogFollower extends InputStream {
         if(randomAccess==null) {
             randomAccess=new RandomAccessFile(path, "r");
             filePos=randomAccess.length();
-            currentInode=unixFile.getInode();
+            currentInode=unixFile.getStat().getInode();
         }
     }
 
@@ -92,8 +92,9 @@ public class LogFollower extends InputStream {
             } else filePos=ral;
 
             // Reopen if the inode has changed
-            if(unixFile.exists()) {
-                long newInode=unixFile.getInode();
+            Stat stat = unixFile.getStat();
+            if(stat.exists()) {
+                long newInode=stat.getInode();
                 if(newInode!=currentInode) {
                     randomAccess.close();
                     randomAccess=new RandomAccessFile(path, "r");
@@ -135,8 +136,9 @@ public class LogFollower extends InputStream {
             } else filePos=ral;
 
             // Reopen if the inode has changed
-            if(unixFile.exists()) {
-                long newInode=unixFile.getInode();
+            Stat stat = unixFile.getStat();
+            if(stat.exists()) {
+                long newInode=stat.getInode();
                 if(newInode!=currentInode) {
                     randomAccess.close();
                     randomAccess=new RandomAccessFile(path, "r");
@@ -182,8 +184,9 @@ public class LogFollower extends InputStream {
             } else filePos=ral;
 
             // Reopen if the inode has changed
-            if(unixFile.exists()) {
-                long newInode=unixFile.getInode();
+            Stat stat = unixFile.getStat();
+            if(stat.exists()) {
+                long newInode=stat.getInode();
                 if(newInode!=currentInode) {
                     randomAccess.close();
                     randomAccess=new RandomAccessFile(path, "r");

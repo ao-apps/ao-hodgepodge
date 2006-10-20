@@ -76,7 +76,7 @@ public class LinuxFile extends UnixFile {
         Profiler.startProfile(Profiler.FAST, LinuxFile.class, "getAttributes()", null);
         try {
             //reloadIfNeeded();
-            if(!exists()) throw new FileNotFoundException();
+            if(!getStat().exists()) throw new FileNotFoundException();
             return attributes;
         } finally {
             Profiler.endProfile(Profiler.FAST);

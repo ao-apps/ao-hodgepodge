@@ -23,6 +23,9 @@ abstract public class FilesystemIteratorRule {
 
     abstract public boolean isSkip(String filename) throws IOException;
     
+    /**
+     * A rule that will recurse and not be skipped.
+     */
     public static final FilesystemIteratorRule OK = new FilesystemIteratorRule() {
 
         public boolean isNoRecurse(String filename) {
@@ -34,6 +37,9 @@ abstract public class FilesystemIteratorRule {
         }
     };
 
+    /**
+     * A rule that will not recurse but is not skipped.
+     */
     public static final FilesystemIteratorRule NO_RECURSE = new FilesystemIteratorRule() {
 
         public boolean isNoRecurse(String filename) {
@@ -45,6 +51,9 @@ abstract public class FilesystemIteratorRule {
         }
     };
 
+    /**
+     * A rule that will be skipped (and therefore not recursed).
+     */
     public static final FilesystemIteratorRule SKIP = new FilesystemIteratorRule() {
 
         public boolean isNoRecurse(String filename) {
