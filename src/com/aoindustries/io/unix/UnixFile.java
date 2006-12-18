@@ -1673,7 +1673,7 @@ public class UnixFile {
             checkWrite();
             // getStat does loadLibrary already: loadLibrary();
             long mtime = getStat().getModifyTime();
-            utime0(filename, atime/1000, mtime/1000);
+            utime0(filename, atime, mtime);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
@@ -1732,7 +1732,7 @@ public class UnixFile {
             checkWrite();
             // getStat does loadLibrary already: loadLibrary();
             long atime = getStat().getAccessTime();
-            utime0(filename, atime/1000, mtime/1000);
+            utime0(filename, atime, mtime);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);
@@ -1859,7 +1859,7 @@ public class UnixFile {
         try {
             checkWrite();
             loadLibrary();
-            utime0(filename, atime/1000, mtime/1000);
+            utime0(filename, atime, mtime);
             return this;
         } finally {
             Profiler.endProfile(Profiler.IO);

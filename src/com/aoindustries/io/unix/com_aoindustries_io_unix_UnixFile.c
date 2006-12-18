@@ -69,10 +69,10 @@ JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_getStat0(JNIEnv* e
                 size             = (jlong)buff->st_size;
                 blockSize        = (jint)buff->st_blksize;
                 blockCount       = (jlong)buff->st_blocks;
-                accessTime       = (jlong)((buff->st_atime)*1000);
-                modifyTime       = (jlong)((buff->st_mtime)*1000);
-                changeTime       = (jlong)((buff->st_ctime)*1000);
-            } else if(errno==ENOENT) {
+                accessTime       = ((jlong)(buff->st_atime))*1000;
+                modifyTime       = ((jlong)(buff->st_mtime))*1000;
+                changeTime       = ((jlong)(buff->st_ctime))*1000;
+            } else if(errno==ENOENT || errno==ENOTDIR) {
                 exists           = JNI_FALSE;
                 device           = 0;
                 inode            = 0;
@@ -301,8 +301,8 @@ JNIEXPORT void JNICALL Java_com_aoindustries_io_unix_UnixFile_utime0(JNIEnv* env
     if(times!=NULL) {
         const char* filename=getString8859_1Chars(env, jfilename);
         if(filename!=NULL) {
-            times->actime=atime;
-            times->modtime=mtime;
+            times->actime=atime/1000;
+            times->modtime=mtime/1000;
             if(utime(filename, times)!=0) newExcCls=(*env)->FindClass(env, getErrorType(errno));
             releaseString8859_1Chars(filename);
         }
