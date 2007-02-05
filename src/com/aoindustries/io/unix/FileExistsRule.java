@@ -3,7 +3,7 @@ package com.aoindustries.io.unix;
 import java.io.IOException;
 
 /*
- * Copyright 2006 by AO Industries, Inc.,
+ * Copyright 2006-2007 by AO Industries, Inc.,
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
