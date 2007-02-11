@@ -5,7 +5,6 @@ package com.aoindustries.io;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import com.aoindustries.util.*;
 import java.io.*;
 
@@ -20,9 +19,175 @@ import java.io.*;
  */
 final public class ChainWriter {
 
-    private final PrintWriter out;
-
     private static final char[] hexChars={'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+    /**
+     * Escapes for use in a HTML attribute and writes to the provided <code>Writer</code>.
+     *
+     * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
+     */
+    public static void writeHtmlAttribute(String S, Writer out) throws IOException {
+        if (S != null) {
+            int len = S.length();
+            int toPrint = 0;
+            for (int c = 0; c < len; c++) {
+                char ch = S.charAt(c);
+                switch(ch) {
+                    case '<':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.write("&#60;");
+                        break;
+                    case '&':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.write("&#38;");
+                        break;
+                    case '"':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.write("&#34;");
+                        break;
+                    case '\'':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.write("&#39;");
+                        break;
+                    default:
+                        toPrint++;
+                }
+            }
+            if(toPrint>0) {
+                out.write(S, len-toPrint, toPrint);
+            }
+        }
+    }
+
+    /**
+     * Escapes for use in a HTML document and writes to the provided <code>Writer</code>.
+     *
+     * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
+     */
+    public static void writeHtml(String S, Writer out) throws IOException {
+        writeHtml(S, true, true, out);
+    }
+
+    /**
+     * Escapes for use in a HTML document and writes to the provided <code>Writer</code>.
+     *
+     * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
+     * @param make_br  will write &lt;BR&gt; tags for every newline character
+     * @param make_br  will write &amp;nbsp; for a space when another space follows
+     */
+    public static void writeHtml(String S, boolean make_br, boolean make_nbsp, Writer out) throws IOException {
+        if (S != null) {
+            int len = S.length();
+            int toPrint = 0;
+            for (int c = 0; c < len; c++) {
+                char ch = S.charAt(c);
+                switch(ch) {
+                    case ' ':
+                        if(make_nbsp && c<(len-1) && S.charAt(c+1)==' ') {
+                            if(toPrint>0) {
+                                out.write(S, c-toPrint, c);
+                                toPrint=0;
+                            }
+                            out.write("&nbsp;");
+                        } else {
+                            toPrint++;
+                        }
+                        break;
+                    case '<':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.write("&#60;");
+                        break;
+                    case '&':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.write("&#38;");
+                        break;
+                    case '"':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.write("&#34;");
+                        break;
+                    case '\'':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.write("&#39;");
+                        break;
+                    case '\r':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        // skip '\r'
+                        break;
+                    case '\n':
+                        if(make_br) {
+                            if(toPrint>0) {
+                                out.write(S, c-toPrint, c);
+                                toPrint=0;
+                            }
+                            out.write("<BR>\n");
+                        } else {
+                            toPrint++;
+                        }
+                        break;
+                    default:
+                        toPrint++;
+                }
+            }
+            if(toPrint>0) {
+                out.write(S, len-toPrint, toPrint);
+            }
+        }
+    }
+
+    /**
+     * Prints a color in HTML format #xxxxxx, where xxxxxx is the hex code.
+     */
+    public static void writeHtmlColor(int color, Writer out) throws IOException {
+        out.write('#');
+        out.write(hexChars[(color>>>20)&15]);
+        out.write(hexChars[(color>>>16)&15]);
+        out.write(hexChars[(color>>>12)&15]);
+        out.write(hexChars[(color>>>8)&15]);
+        out.write(hexChars[(color>>>4)&15]);
+        out.write(hexChars[color&15]);
+    }
+
+    /**
+     * Prints a JavaScript script that will preload the image at the provided URL.
+     */
+    public static void writeHtmlImagePreloadJavaScript(String url, Writer out) throws IOException {
+        out.write("<SCRIPT language='JavaScript1.2'><!--\n"
+                + "  var img=new Image();\n"
+                + "  img.src='");
+        writeHtmlAttribute(url, out);
+        out.write("';\n"
+                + "  // --></SCRIPT>");
+    }
+
+    private final PrintWriter out;
+    private boolean error = false;
 
     /**
      * Create a new PrintWriter, without automatic line flushing, from an
@@ -34,8 +199,6 @@ final public class ChainWriter {
      */
     public ChainWriter(OutputStream out) {
 	this(new PrintWriter(out));
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ChainWriter.class, "<init>(OutputStream)", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     /**
@@ -50,17 +213,10 @@ final public class ChainWriter {
      */
     public ChainWriter(OutputStream out, boolean autoFlush) {
 	this(new PrintWriter(out, autoFlush));
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ChainWriter.class, "<init>(OutputStream,boolean)", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     public ChainWriter(PrintWriter out) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ChainWriter.class, "<init>(PrintWriter)", null);
-        try {
-            this.out=out;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.out=out;
     }
 
     /**
@@ -70,8 +226,6 @@ final public class ChainWriter {
      */
     public ChainWriter(Writer out) {
 	this(new PrintWriter(out));
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ChainWriter.class, "<init>(Writer)", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     /**
@@ -83,8 +237,6 @@ final public class ChainWriter {
      */
     public ChainWriter(Writer out, boolean autoFlush) {
 	this(new PrintWriter(out, autoFlush));
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ChainWriter.class, "<init>(Writer,boolean)", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     /**
@@ -96,77 +248,47 @@ final public class ChainWriter {
      * underlying output stream or during a format conversion.
      */
     public boolean checkError() {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "checkError()", null);
-        try {
-            return out.checkError();
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        return error || out.checkError();
     }
 
     /** Close the stream. */
     public ChainWriter close() {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "close()", null);
-        try {
-            out.close();
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.close();
+        return this;
     }
 
     /** Flush the stream. */
     public ChainWriter flush() {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "flush()", null);
-        try {
-            out.flush();
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.flush();
+        return this;
     }
 
     private static char getHex(int value) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ChainWriter.class, "getHex(int)", null);
-        try {
-            return hexChars[value & 15];
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return hexChars[value & 15];
     }
 
     public PrintWriter getPrintWriter() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ChainWriter.class, "getPrintWriter()", null);
-        try {
-            return out;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return out;
     }
 
     /**
      * Prints a <code>byte[]</code> to a <code>ChainWriter</code>.
      */
-    public ChainWriter print(byte[] bytes) throws IOException {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(byte[])", null);
+    public ChainWriter print(byte[] bytes) {
+        int len=bytes.length;
+        int pos=0;
+        char[] buffer=BufferManager.getChars();
         try {
-            int len=bytes.length;
-            int pos=0;
-            char[] buffer=BufferManager.getChars();
-            try {
-                while(pos<len) {
-                    int blockSize=len-pos;
-                    if(blockSize>BufferManager.BUFFER_SIZE) blockSize=BufferManager.BUFFER_SIZE;
-                    for(int c=0;c<blockSize;c++) buffer[c]=(char)bytes[pos++];
-                    out.write(buffer, 0, blockSize);
-                }
-            } finally {
-                BufferManager.release(buffer);
+            while(pos<len) {
+                int blockSize=len-pos;
+                if(blockSize>BufferManager.BUFFER_SIZE) blockSize=BufferManager.BUFFER_SIZE;
+                for(int c=0;c<blockSize;c++) buffer[c]=(char)bytes[pos++];
+                out.write(buffer, 0, blockSize);
             }
-            return this;
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            BufferManager.release(buffer);
         }
+        return this;
     }
 
     /**
@@ -180,13 +302,8 @@ final public class ChainWriter {
      * @throws  NullPointerException  If <code>s</code> is <code>null</code>
      */
     public ChainWriter print(char s[]) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(char[])", null);
-        try {
-            out.print(s);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.print(s);
+        return this;
     }
 
     /**
@@ -198,13 +315,8 @@ final public class ChainWriter {
      * @param      c   The <code>char</code> to be printed
      */
     public ChainWriter print(char c) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(char)", null);
-        try {
-            out.print(c);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.print(c);
+        return this;
     }
 
     /**
@@ -217,13 +329,8 @@ final public class ChainWriter {
      * @param      d   The <code>double</code> to be printed
      */
     public ChainWriter print(double d) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(double)", null);
-        try {
-            out.print(d);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.print(d);
+        return this;
     }
 
     /**
@@ -237,13 +344,8 @@ final public class ChainWriter {
      * @see        java.lang.Float#toString(float)
      */
     public ChainWriter print(float f) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(float)", null);
-        try {
-            out.print(f);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.print(f);
+        return this;
     }
 
     /**
@@ -257,13 +359,8 @@ final public class ChainWriter {
      * @see        java.lang.Integer#toString(int)
      */
     public ChainWriter print(int i) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(int)", null);
-        try {
-            out.print(i);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.print(i);
+        return this;
     }
 
     /**
@@ -276,13 +373,8 @@ final public class ChainWriter {
      * @param      l   The <code>long</code> to be printed
      */
     public ChainWriter print(long l) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(long)", null);
-        try {
-            out.print(l);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.print(l);
+        return this;
     }
 
     /**
@@ -296,13 +388,8 @@ final public class ChainWriter {
      * @see        java.lang.Object#toString()
      */
     public ChainWriter print(Object obj) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(Object)", null);
-        try {
-            out.print(obj);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.print(obj);
+        return this;
     }
 
     /**
@@ -315,13 +402,8 @@ final public class ChainWriter {
      * @param      s   The <code>String</code> to be printed
      */
     public ChainWriter print(String s) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(String)", null);
-        try {
-            out.print(s);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.print(s);
+        return this;
     }
 
     /* Methods that do not terminate lines */
@@ -336,13 +418,8 @@ final public class ChainWriter {
      * @param      b   The <code>boolean</code> to be printed
      */
     public ChainWriter print(boolean b) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "print(boolean)", null);
-        try {
-            out.print(b);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.print(b);
+        return this;
     }
 
     /**
@@ -351,29 +428,24 @@ final public class ChainWriter {
      * Writes to the internal <code>PrintWriter</code>.
      */
     public ChainWriter printDateJS(long date) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printDateJS(long)", null);
-        try {
-            if(date==-1) out.print("&nbsp;");
-            else {
-                out.print("<SCRIPT language='JavaScript1.3'><!--\n"
-                          +"  var date=new Date(");
-                out.print(date);
-                out.print(");\n"
-                        + "  document.write(date.getFullYear());\n"
-                        + "  document.write('-');\n"
-                        + "  var month=date.getMonth()+1;\n"
-                        + "  if(month<10) document.write('0');\n"
-                        + "  document.write(month);\n"
-                        + "  document.write('-');\n"
-                        + "  var day=date.getDate();\n"
-                        + "  if(day<10) document.write('0');\n"
-                        + "  document.write(day);\n"
-                        + "// --></SCRIPT>");
-            }
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        if(date==-1) out.print("&nbsp;");
+        else {
+            out.print("<SCRIPT language='JavaScript1.3'><!--\n"
+                      +"  var date=new Date(");
+            out.print(date);
+            out.print(");\n"
+                    + "  document.write(date.getFullYear());\n"
+                    + "  document.write('-');\n"
+                    + "  var month=date.getMonth()+1;\n"
+                    + "  if(month<10) document.write('0');\n"
+                    + "  document.write(month);\n"
+                    + "  document.write('-');\n"
+                    + "  var day=date.getDate();\n"
+                    + "  if(day<10) document.write('0');\n"
+                    + "  document.write(day);\n"
+                    + "// --></SCRIPT>");
         }
+        return this;
     }
 
     /**
@@ -382,41 +454,60 @@ final public class ChainWriter {
      * Writes to the internal <code>PrintWriter</code>.
      */
     public ChainWriter printDateTimeJS(long date) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printDateTimeJS(long)", null);
-        try {
-            if(date==-1) out.print("&nbsp;");
-            else {
-                out.print("<SCRIPT language='JavaScript1.1'><!--\n"
-                        + "  var date=new Date(");
-                out.print(date);
-                out.print(");\n"
-                        + "  document.write(date.getFullYear());\n"
-                        + "  document.write('-');\n"
-                        + "  var month=date.getMonth()+1;\n"
-                        + "  if(month<10) document.write('0');\n"
-                        + "  document.write(month);\n"
-                        + "  document.write('-');\n"
-                        + "  var day=date.getDate();\n"
-                        + "  if(day<10) document.write('0');\n"
-                        + "  document.write(day);\n"
-                        + "  document.write(' ');\n"
-                        + "  var hour=date.getHours();\n"
-                        + "  if(hour<10) document.write('0');\n"
-                        + "  document.write(hour);\n"
-                        + "  document.write(':');\n"
-                        + "  var minute=date.getMinutes();\n"
-                        + "  if(minute<10) document.write('0');\n"
-                        + "  document.write(minute);\n"
-                        + "  document.write(':');\n"
-                        + "  var second=date.getSeconds();\n"
-                        + "  if(second<10) document.write('0');\n"
-                        + "  document.write(second);\n"
-                        + "// --></SCRIPT>");
-            }
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        if(date==-1) out.print("&nbsp;");
+        else {
+            out.print("<SCRIPT language='JavaScript1.1'><!--\n"
+                    + "  var date=new Date(");
+            out.print(date);
+            out.print(");\n"
+                    + "  document.write(date.getFullYear());\n"
+                    + "  document.write('-');\n"
+                    + "  var month=date.getMonth()+1;\n"
+                    + "  if(month<10) document.write('0');\n"
+                    + "  document.write(month);\n"
+                    + "  document.write('-');\n"
+                    + "  var day=date.getDate();\n"
+                    + "  if(day<10) document.write('0');\n"
+                    + "  document.write(day);\n"
+                    + "  document.write(' ');\n"
+                    + "  var hour=date.getHours();\n"
+                    + "  if(hour<10) document.write('0');\n"
+                    + "  document.write(hour);\n"
+                    + "  document.write(':');\n"
+                    + "  var minute=date.getMinutes();\n"
+                    + "  if(minute<10) document.write('0');\n"
+                    + "  document.write(minute);\n"
+                    + "  document.write(':');\n"
+                    + "  var second=date.getSeconds();\n"
+                    + "  if(second<10) document.write('0');\n"
+                    + "  document.write(second);\n"
+                    + "// --></SCRIPT>");
         }
+        return this;
+    }
+
+    /**
+     * @deprecated  Please use writeHtml instead.
+     */
+    public ChainWriter printEH(String S) {
+        try {
+            writeHtml(S, true, true, out);
+        } catch(IOException err) {
+            error = true;
+        }
+        return this;
+    }
+    
+    /**
+     * @deprecated  Please use writeHtml instead.
+     */
+    public ChainWriter printEH(String S, boolean make_br, boolean make_nbsp) {
+        try {
+            writeHtml(S, make_br, make_nbsp, out);
+        } catch(IOException err) {
+            error = true;
+        }
+        return this;
     }
 
     /**
@@ -424,13 +515,13 @@ final public class ChainWriter {
      *
      * @param S the string to be escaped.
      */
-    public ChainWriter printEH(String S) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printEH(String)", null);
+    public ChainWriter writeHtml(String S) {
         try {
-            return printEH(S, true, true);
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            writeHtml(S, true, true, out);
+        } catch(IOException err) {
+            error = true;
         }
+        return this;
     }
     
     /**
@@ -439,56 +530,41 @@ final public class ChainWriter {
      * @param S the string to be escaped.
      * @param make_br  will write &lt;BR&gt; tags for every newline character
      */
-    public ChainWriter printEH(String S, boolean make_br, boolean make_nbsp) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printEH(String,boolean,boolean)", null);
+    public ChainWriter writeHtml(String S, boolean make_br, boolean make_nbsp) {
         try {
-            if (S != null) {
-                int len = S.length();
-                for (int c = 0; c < len; c++) {
-                    char ch = S.charAt(c);
-                    if(ch==' ') {
-                        if(make_nbsp && c<(len-1) && S.charAt(c+1)==' ') out.print("&nbsp;");
-                        else out.print(' ');
-                    } else if (ch == '<') out.print("&#60;");
-                    else if (ch == '&') out.print("&#38;");
-                    else if (ch == '"') out.print("&#34;");
-                    else if (ch == '\'') out.print("&#39;");
-                    else if (ch == '\r'); // skip '\r'
-                    else if (ch == '\n') {
-                        if(make_br) out.print("<BR>");
-                        out.print('\n');
-                    } else out.print(ch);
-                }
-            }
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            writeHtml(S, make_br, make_nbsp, out);
+        } catch(IOException err) {
+            error = true;
         }
+        return this;
     }
 
     /**
-     * Escapes HTML for displaying in browsers and writes to the internal <code>PrintWriter</code>.
+     * @deprecated  Please use writeHtmlAttribute instead.
      *
      * @param S the string to be escaped.
      */
     public ChainWriter printEI(String S) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printEI(String)", null);
         try {
-            if (S != null) {
-                int len = S.length();
-                for (int c = 0; c < len; c++) {
-                    char ch = S.charAt(c);
-                    if (ch == '<') out.print("&#60;");
-                    else if (ch == '&') out.print("&#38;");
-                    else if (ch == '"') out.print("&#34;");
-                    else if (ch == '\'') out.print("&#39;");
-                    else out.print(ch);
-                }
-            }
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            writeHtmlAttribute(S, out);
+        } catch(IOException err) {
+            error = true;
         }
+        return this;
+    }
+
+    /**
+     * Escapes for use in a HTML attribute and writes to the internal <code>PrintWriter</code>.
+     *
+     * @param S the string to be escaped.
+     */
+    public ChainWriter writeHtmlAttribute(String S) {
+        try {
+            writeHtmlAttribute(S, out);
+        } catch(IOException err) {
+            error = true;
+        }
+        return this;
     }
 
     /**
@@ -498,48 +574,38 @@ final public class ChainWriter {
      * @param S the string to be escaped.
      */
     public ChainWriter printEJ(String S) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printEJ(String)", null);
-        try {
-            if (S != null) {
-                int len = S.length();
-                for (int c = 0; c < len; c++) {
-                    char ch = S.charAt(c);
-                    if (ch == '"') out.print("\\\"");
-                    else if (ch == '\'') out.print("\\'");
-                    else if (ch == '\n') out.print("\\n");
-                    else if (ch == '\t') out.print("\\t");
-                    else out.print(ch);
-                }
+        if (S != null) {
+            int len = S.length();
+            for (int c = 0; c < len; c++) {
+                char ch = S.charAt(c);
+                if (ch == '"') out.print("\\\"");
+                else if (ch == '\'') out.print("\\'");
+                else if (ch == '\n') out.print("\\n");
+                else if (ch == '\t') out.print("\\t");
+                else out.print(ch);
             }
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
         }
+        return this;
     }
 
     /**
      * Prints a value that may be placed in a URL.
      */
     public ChainWriter printEU(String value) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printEU(String)", null);
-        try {
-            int len = value.length();
-            for (int c = 0; c < len; c++) {
-                char ch = value.charAt(c);
-                if (ch == ' ') out.print('+');
+        int len = value.length();
+        for (int c = 0; c < len; c++) {
+            char ch = value.charAt(c);
+            if (ch == ' ') out.print('+');
+            else {
+                if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) out.print(ch);
                 else {
-                    if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) out.print(ch);
-                    else {
-                        out.print('%');
-                        out.print(getHex(ch >>> 4));
-                        out.print(getHex(ch));
-                    }
+                    out.print('%');
+                    out.print(getHex(ch >>> 4));
+                    out.print(getHex(ch));
                 }
             }
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
         }
+        return this;
     }
 
     /**
@@ -548,24 +614,19 @@ final public class ChainWriter {
      * @param S the string to be escaped
      */
     public ChainWriter printXmlAttribute(String S) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printXmlAttribute(String)", null);
-        try {
-            if (S != null) {
-                int len = S.length();
-                for (int c = 0; c < len; c++) {
-                    char ch = S.charAt(c);
-                    if(ch=='"') out.print("&quot;");
-                    else if(ch=='\'') out.print("&apos;");
-                    else if(ch=='&') out.print("&amp;");
-                    else if(ch=='<') out.print("&lt;");
-                    else if(ch=='>') out.print("&gt;");
-                    else out.print(ch);
-                }
+        if (S != null) {
+            int len = S.length();
+            for (int c = 0; c < len; c++) {
+                char ch = S.charAt(c);
+                if(ch=='"') out.print("&quot;");
+                else if(ch=='\'') out.print("&apos;");
+                else if(ch=='&') out.print("&amp;");
+                else if(ch=='<') out.print("&lt;");
+                else if(ch=='>') out.print("&gt;");
+                else out.print(ch);
             }
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
         }
+        return this;
     }
 
     /**
@@ -574,43 +635,44 @@ final public class ChainWriter {
      * @param S the string to be escaped
      */
     public ChainWriter printXmlBody(String S) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printXmlBody(String)", null);
-        try {
-            if (S != null) {
-                int len = S.length();
-                for (int c = 0; c < len; c++) {
-                    char ch = S.charAt(c);
-                    if(ch=='"') out.print("\\\"");
-                    else if(ch=='\'') out.print("&apos;");
-                    else if(ch=='&') out.print("&amp;");
-                    else if(ch=='<') out.print("&lt;");
-                    else if(ch=='>') out.print("&gt;");
-                    else if(ch=='\\') out.print("\\\\");
-                    else out.print(ch);
-                }
+        if (S != null) {
+            int len = S.length();
+            for (int c = 0; c < len; c++) {
+                char ch = S.charAt(c);
+                if(ch=='"') out.print("\\\"");
+                else if(ch=='\'') out.print("&apos;");
+                else if(ch=='&') out.print("&amp;");
+                else if(ch=='<') out.print("&lt;");
+                else if(ch=='>') out.print("&gt;");
+                else if(ch=='\\') out.print("\\\\");
+                else out.print(ch);
             }
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
         }
+        return this;
+    }
+
+    /**
+     * @deprecated  Please use writeHtmlImagePreloadJavaScript instead.
+     */
+    public ChainWriter printImagePreloadJS(String url) {
+        try {
+            writeHtmlImagePreloadJavaScript(url, out);
+        } catch(IOException err) {
+            error = true;
+        }
+        return this;
     }
 
     /**
      * Prints a JavaScript script that will preload the image at the provided URL.
      */
-    public ChainWriter printImagePreloadJS(String url) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printImagePreloadJS(String)", null);
+    public ChainWriter writeHtmlImagePreloadJavaScript(String url) {
         try {
-            out.print("<SCRIPT language='JavaScript1.2'><!--\n"
-                    + "  var img=new Image();\n"
-                    + "  img.src='");
-            printEI(url);
-            out.print("';\n"
-                    + "  // --></SCRIPT>");
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            writeHtmlImagePreloadJavaScript(url, out);
+        } catch(IOException err) {
+            error = true;
         }
+        return this;
     }
 
     /**
@@ -620,13 +682,8 @@ final public class ChainWriter {
      * character (<code>'\n'</code>).
      */
     public ChainWriter println() {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println()", null);
-        try {
-            out.println();
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println();
+        return this;
     }
 
     /**
@@ -635,13 +692,8 @@ final public class ChainWriter {
      * <code>{@link #println()}</code>.
      */
     public ChainWriter println(char x[]) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println(char[])", null);
-        try {
-            out.println(x);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println(x);
+        return this;
     }
 
     /**
@@ -650,13 +702,8 @@ final public class ChainWriter {
      * #println()}</code>.
      */
     public ChainWriter println(char x) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println(char)", null);
-        try {
-            out.println(x);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println(x);
+        return this;
     }
 
     /**
@@ -665,13 +712,8 @@ final public class ChainWriter {
      * #print(double)}</code> and then <code>{@link #println()}</code>.
      */
     public ChainWriter println(double x) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println(double)", null);
-        try {
-            out.println(x);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println(x);
+        return this;
     }
 
     /**
@@ -680,13 +722,8 @@ final public class ChainWriter {
      * <code>{@link #println()}</code>.
      */
     public ChainWriter println(float x) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println(float)", null);
-        try {
-            out.println(x);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println(x);
+        return this;
     }
 
     /**
@@ -695,13 +732,8 @@ final public class ChainWriter {
      * #println()}</code>.
      */
     public ChainWriter println(int x) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println(int)", null);
-        try {
-            out.println(x);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println(x);
+        return this;
     }
 
     /**
@@ -710,13 +742,8 @@ final public class ChainWriter {
      * <code>{@link #println()}</code>.
      */
     public ChainWriter println(long x) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println(long)", null);
-        try {
-            out.println(x);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println(x);
+        return this;
     }
 
     /**
@@ -725,13 +752,8 @@ final public class ChainWriter {
      * <code>{@link #println()}</code>.
      */
     public ChainWriter println(Object x) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println(Object)", null);
-        try {
-            out.println(x);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println(x);
+        return this;
     }
 
     /**
@@ -740,13 +762,8 @@ final public class ChainWriter {
      * <code>{@link #println()}</code>.
      */
     public ChainWriter println(String x) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println(String)", null);
-        try {
-            out.println(x);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println(x);
+        return this;
     }
 
     /**
@@ -755,13 +772,8 @@ final public class ChainWriter {
      * <code>{@link #println()}</code>.
      */
     public ChainWriter println(boolean x) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "println(boolean)", null);
-        try {
-            out.println(x);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.println(x);
+        return this;
     }
 
     /**
@@ -770,31 +782,26 @@ final public class ChainWriter {
      * Writes to the internal <code>PrintWriter</code>.
      */
     public ChainWriter printTimeJS(long date) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printTimeJS(long)", null);
-        try {
-            if(date==-1) out.print("&nbsp;");
-            else {
-                out.print("<SCRIPT language='JavaScript1.3'><!--\n"
-                        + "  var date=new Date(");
-                out.print(date);
-                out.print(");\n"
-                        + "  var hour=date.getHours();\n"
-                        + "  if(hour<10) document.write('0');\n"
-                        + "  document.write(hour);\n"
-                        + "  document.write(':');\n"
-                        + "  var minute=date.getMinutes();\n"
-                        + "  if(minute<10) document.write('0');\n"
-                        + "  document.write(minute);\n"
-                        + "  document.write(':');\n"
-                        + "  var second=date.getSeconds();\n"
-                        + "  if(second<10) document.write('0');\n"
-                        + "  document.write(second);\n"
-                        + "// --></SCRIPT>");
-            }
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        if(date==-1) out.print("&nbsp;");
+        else {
+            out.print("<SCRIPT language='JavaScript1.3'><!--\n"
+                    + "  var date=new Date(");
+            out.print(date);
+            out.print(");\n"
+                    + "  var hour=date.getHours();\n"
+                    + "  if(hour<10) document.write('0');\n"
+                    + "  document.write(hour);\n"
+                    + "  document.write(':');\n"
+                    + "  var minute=date.getMinutes();\n"
+                    + "  if(minute<10) document.write('0');\n"
+                    + "  document.write(minute);\n"
+                    + "  document.write(':');\n"
+                    + "  var second=date.getSeconds();\n"
+                    + "  if(second<10) document.write('0');\n"
+                    + "  document.write(second);\n"
+                    + "// --></SCRIPT>");
         }
+        return this;
     }
 
     /**
@@ -802,24 +809,14 @@ final public class ChainWriter {
      * Writer class because it must suppress I/O exceptions.
      */
     public ChainWriter write(char buf[]) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "write(char[])", null);
-        try {
-            out.write(buf);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.write(buf);
+        return this;
     }
 
     /** Write a portion of an array of characters. */
     public ChainWriter write(char buf[], int off, int len) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "write(char[],int,int)", null);
-        try {
-            out.write(buf, off, len);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.write(buf, off, len);
+        return this;
     }
 
     /*
@@ -829,13 +826,8 @@ final public class ChainWriter {
 
     /** Write a single character. */
     public ChainWriter write(int c) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "write(int)", null);
-        try {
-            out.write(c);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.write(c);
+        return this;
     }
 
     /**
@@ -843,42 +835,37 @@ final public class ChainWriter {
      * because it must suppress I/O exceptions.
      */
     public ChainWriter write(String s) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "write(String)", null);
-        try {
-            out.write(s);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.write(s);
+        return this;
     }
 
     /** Write a portion of a string. */
     public ChainWriter write(String s, int off, int len) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "write(String,int,int)", null);
-        try {
-            out.write(s, off, len);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.write(s, off, len);
+        return this;
     }
     
     /**
-     * Prints a color in HTML format #xxxxxx, where xxxxxx is the hex code.
+     * @deprecated  Please use writeHtmlColor instead.
      */
     public ChainWriter printHTMLColor(int color) {
-        Profiler.startProfile(Profiler.IO, ChainWriter.class, "printHTMLColor(int)", null);
         try {
-            out.write('#');
-            out.write(hexChars[(color>>>20)&15]);
-            out.write(hexChars[(color>>>16)&15]);
-            out.write(hexChars[(color>>>12)&15]);
-            out.write(hexChars[(color>>>8)&15]);
-            out.write(hexChars[(color>>>4)&15]);
-            out.write(hexChars[color&15]);
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            writeHtmlColor(color, out);
+        } catch(IOException err) {
+            error = true;
         }
+        return this;
+    }
+
+    /**
+     * Prints a color in HTML format #xxxxxx, where xxxxxx is the hex code.
+     */
+    public ChainWriter writeHtmlColor(int color) {
+        try {
+            writeHtmlColor(color, out);
+        } catch(IOException err) {
+            error = true;
+        }
+        return this;
     }
 }
