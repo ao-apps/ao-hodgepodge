@@ -35,28 +35,28 @@ final public class ChainWriter {
                 switch(ch) {
                     case '<':
                         if(toPrint>0) {
-                            out.write(S, c-toPrint, c);
+                            out.write(S, c-toPrint, toPrint);
                             toPrint=0;
                         }
                         out.write("&#60;");
                         break;
                     case '&':
                         if(toPrint>0) {
-                            out.write(S, c-toPrint, c);
+                            out.write(S, c-toPrint, toPrint);
                             toPrint=0;
                         }
                         out.write("&#38;");
                         break;
                     case '"':
                         if(toPrint>0) {
-                            out.write(S, c-toPrint, c);
+                            out.write(S, c-toPrint, toPrint);
                             toPrint=0;
                         }
                         out.write("&#34;");
                         break;
                     case '\'':
                         if(toPrint>0) {
-                            out.write(S, c-toPrint, c);
+                            out.write(S, c-toPrint, toPrint);
                             toPrint=0;
                         }
                         out.write("&#39;");
@@ -85,78 +85,83 @@ final public class ChainWriter {
      *
      * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
      * @param make_br  will write &lt;BR&gt; tags for every newline character
-     * @param make_br  will write &amp;nbsp; for a space when another space follows
+     * @param make_nbsp  will write &amp;nbsp; for a space when another space follows
      */
     public static void writeHtml(String S, boolean make_br, boolean make_nbsp, Writer out) throws IOException {
         if (S != null) {
-            int len = S.length();
-            int toPrint = 0;
-            for (int c = 0; c < len; c++) {
-                char ch = S.charAt(c);
-                switch(ch) {
-                    case ' ':
-                        if(make_nbsp && c<(len-1) && S.charAt(c+1)==' ') {
+            try {
+                int len = S.length();
+                int toPrint = 0;
+                for (int c = 0; c < len; c++) {
+                    char ch = S.charAt(c);
+                    switch(ch) {
+                        case ' ':
+                            if(make_nbsp && c<(len-1) && S.charAt(c+1)==' ') {
+                                if(toPrint>0) {
+                                    out.write(S, c-toPrint, toPrint);
+                                    toPrint=0;
+                                }
+                                out.write("&nbsp;");
+                            } else {
+                                toPrint++;
+                            }
+                            break;
+                        case '<':
                             if(toPrint>0) {
-                                out.write(S, c-toPrint, c);
+                                out.write(S, c-toPrint, toPrint);
                                 toPrint=0;
                             }
-                            out.write("&nbsp;");
-                        } else {
-                            toPrint++;
-                        }
-                        break;
-                    case '<':
-                        if(toPrint>0) {
-                            out.write(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.write("&#60;");
-                        break;
-                    case '&':
-                        if(toPrint>0) {
-                            out.write(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.write("&#38;");
-                        break;
-                    case '"':
-                        if(toPrint>0) {
-                            out.write(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.write("&#34;");
-                        break;
-                    case '\'':
-                        if(toPrint>0) {
-                            out.write(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.write("&#39;");
-                        break;
-                    case '\r':
-                        if(toPrint>0) {
-                            out.write(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        // skip '\r'
-                        break;
-                    case '\n':
-                        if(make_br) {
+                            out.write("&#60;");
+                            break;
+                        case '&':
                             if(toPrint>0) {
-                                out.write(S, c-toPrint, c);
+                                out.write(S, c-toPrint, toPrint);
                                 toPrint=0;
                             }
-                            out.write("<BR>\n");
-                        } else {
+                            out.write("&#38;");
+                            break;
+                        case '"':
+                            if(toPrint>0) {
+                                out.write(S, c-toPrint, toPrint);
+                                toPrint=0;
+                            }
+                            out.write("&#34;");
+                            break;
+                        case '\'':
+                            if(toPrint>0) {
+                                out.write(S, c-toPrint, toPrint);
+                                toPrint=0;
+                            }
+                            out.write("&#39;");
+                            break;
+                        case '\r':
+                            if(toPrint>0) {
+                                out.write(S, c-toPrint, toPrint);
+                                toPrint=0;
+                            }
+                            // skip '\r'
+                            break;
+                        case '\n':
+                            if(make_br) {
+                                if(toPrint>0) {
+                                    out.write(S, c-toPrint, toPrint);
+                                    toPrint=0;
+                                }
+                                out.write("<BR>\n");
+                            } else {
+                                toPrint++;
+                            }
+                            break;
+                        default:
                             toPrint++;
-                        }
-                        break;
-                    default:
-                        toPrint++;
+                    }
                 }
-            }
-            if(toPrint>0) {
-                out.write(S, len-toPrint, toPrint);
+                if(toPrint>0) {
+                    out.write(S, len-toPrint, toPrint);
+                }
+            } catch(StringIndexOutOfBoundsException err) {
+                System.err.println("ERROR: ChainWriter: writeHtml: S=\""+S+"\"");
+                throw err;
             }
         }
     }
