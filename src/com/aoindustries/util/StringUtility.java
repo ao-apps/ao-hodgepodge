@@ -1011,6 +1011,9 @@ public final class StringUtility {
         }
     }
 
+    /**
+     * Splits a String into lines on any '\n' characters.  Also removes any ending '\r' characters if present
+     */
     public static List<String> splitLines(String S) {
         Profiler.startProfile(Profiler.FAST, StringUtility.class, "splitLines(String)", null);
         try {
@@ -1018,10 +1021,16 @@ public final class StringUtility {
             int start=0;
             int pos;
             while((pos=S.indexOf('\n', start))!=-1) {
-                V.add(S.substring(start, pos));
+                String line = S.substring(start, pos);
+                if(line.endsWith("\r")) line=line.substring(0, line.length()-1);
+                V.add(line);
                 start=pos+1;
             }
-            if(start<S.length()) V.add(S.substring(start));
+            if(start<S.length()) {
+                String line = S.substring(start);
+                if(line.endsWith("\r")) line=line.substring(0, line.length()-1);
+                V.add(line);
+            }
             return V;
         } finally {
             Profiler.endProfile(Profiler.FAST);
