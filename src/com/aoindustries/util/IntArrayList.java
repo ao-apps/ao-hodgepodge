@@ -284,6 +284,7 @@ public class IntArrayList extends AbstractList<Integer>
      * @throws ArrayStoreException if the runtime type of a is not a supertype
      *         of the runtime type of every element in this list.
      */
+    @SuppressWarnings({"unchecked"})
     public <T> T[] toArray(T[] a) {
         if (a.length < size)
             a = (T[])java.lang.reflect.Array.

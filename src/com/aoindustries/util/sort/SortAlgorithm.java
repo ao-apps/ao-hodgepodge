@@ -39,6 +39,7 @@ abstract public class SortAlgorithm {
 
     public abstract <T> void sort(T[] array, Comparator<T> comparator, SortStatistics stats);
 
+    @SuppressWarnings({"unchecked"})
     protected static <T> int compare(List<T> list, int i, int j, Comparator<T> comparator, SortStatistics stats) {
         Profiler.startProfile(Profiler.FAST, SortAlgorithm.class, "compare(List<T>,int,int,Comparator<T>,SortStatistics)", null);
         try {
@@ -54,8 +55,10 @@ abstract public class SortAlgorithm {
                 if(O2==null) return 1;
                 else {
                     if(comparator!=null) return comparator.compare(O1, O2);
-                    else if(O1 instanceof Comparable) return ((Comparable)O1).compareTo(O2);
-                    else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
+                    else if(O1 instanceof Comparable) {
+                        Comparable<T> comp1 = (Comparable)O1;
+                        return comp1.compareTo(O2);
+                    } else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
                 }
             }
         } finally {
@@ -63,6 +66,7 @@ abstract public class SortAlgorithm {
         }
     }
 
+    @SuppressWarnings({"unchecked"})
     protected static <T> int compare(T[] array, int i, int j, Comparator<T> comparator, SortStatistics stats) {
         Profiler.startProfile(Profiler.FAST, SortAlgorithm.class, "compare(T[],int,int,Comparator<T>,SortStatistics)", null);
         try {
@@ -78,8 +82,10 @@ abstract public class SortAlgorithm {
                 if(O2==null) return 1;
                 else {
                     if(comparator!=null) return comparator.compare(O1, O2);
-                    else if(O1 instanceof Comparable) return ((Comparable)O1).compareTo(O2);
-                    else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
+                    else if(O1 instanceof Comparable) {
+                        Comparable<T> comp1 = (Comparable)O1;
+                        return comp1.compareTo(O2);
+                    } else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
                 }
             }
         } finally {
@@ -87,6 +93,7 @@ abstract public class SortAlgorithm {
         }
     }
 
+    @SuppressWarnings({"unchecked"})
     protected static <T> int compare(T O1, T O2, Comparator<T> comparator, SortStatistics stats) {
         Profiler.startProfile(Profiler.FAST, SortAlgorithm.class, "compare(T,T,Comparator<T>,SortStatistics)", null);
         try {
@@ -99,8 +106,10 @@ abstract public class SortAlgorithm {
                 if(O2==null) return 1;
                 else {
                     if(comparator!=null) return comparator.compare(O1, O2);
-                    else if(O1 instanceof Comparable) return ((Comparable)O1).compareTo(O2);
-                    else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
+                    else if(O1 instanceof Comparable) {
+                        Comparable<T> comp1 = (Comparable)O1;
+                        return comp1.compareTo(O2);
+                    } else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
                 }
             }
         } finally {

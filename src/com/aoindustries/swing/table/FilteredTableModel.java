@@ -18,10 +18,10 @@ import javax.swing.table.*;
 /**
  * @author  AO Industries, Inc.
  */
-public class FilteredTableModel extends AbstractTableModel implements AncestorListener, TableListener {
+public class FilteredTableModel<T extends Row> extends AbstractTableModel implements AncestorListener, TableListener {
 
     private final ErrorHandler errorHandler;
-    private final Table table;
+    private final Table<T> table;
     private final String[] columnHeaders;
     private final Type[] columnTypes;
     private final MethodCall[] getValueMethods;
@@ -31,11 +31,11 @@ public class FilteredTableModel extends AbstractTableModel implements AncestorLi
     private final String[] filters;
     private final DataFilter[] dataFilters;
     
-    private List filteredCache;
+    private List<T> filteredCache;
 
     public FilteredTableModel(
         ErrorHandler errorHandler,
-        Table table,
+        Table<T> table,
         String[] columnHeaders,
         Type[] columnTypes,
         MethodCall[] getValueMethods,
@@ -59,7 +59,7 @@ public class FilteredTableModel extends AbstractTableModel implements AncestorLi
         dataFilters=new DataFilter[cols];
     }
 
-    public synchronized List<Row> getFilteredRows() throws IOException, SQLException {
+    public synchronized List<T> getFilteredRows() throws IOException, SQLException {
         boolean isFiltered=false;
         for(int c=0;c<filters.length;c++) {
             if(filters[c]!=null) {
@@ -67,7 +67,7 @@ public class FilteredTableModel extends AbstractTableModel implements AncestorLi
                 break;
             }
         }
-        List<Row> objs=table.getRows();
+        List<T> objs=table.getRows();
         if(!isFiltered) return objs;
         
         if(filteredCache!=null) return filteredCache;
@@ -76,10 +76,10 @@ public class FilteredTableModel extends AbstractTableModel implements AncestorLi
             dataFilters[c]=DataFilter.getDataFilter(columnTypes[c].getTypeClass(), filters[c]);
         }
 
-        List<Row> matches=new ArrayList<Row>();
+        List<T> matches=new ArrayList<T>();
         int len=objs.size();
         for(int c=0;c<len;c++) {
-            Row row=(Row)objs.get(c);
+            T row=objs.get(c);
             boolean isMatch=true;
             for(int d=0;d<dataFilters.length;d++) {
                 DataFilter filter=dataFilters[d];

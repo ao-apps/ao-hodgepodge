@@ -5,14 +5,19 @@ package com.aoindustries.swing.table;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.reflect.*;
-import com.aoindustries.table.*;
-import com.aoindustries.util.*;
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
+import com.aoindustries.reflect.MethodCall;
+import com.aoindustries.table.Row;
+import com.aoindustries.table.Table;
+import com.aoindustries.table.Type;
+import com.aoindustries.util.ErrorHandler;
+import java.awt.Dimension;
+import javax.swing.JScrollBar;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.BevelBorder;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * TODO: Make the columns automatically big enough for the table contents whenever date reloaded, growing but not shrinking.
@@ -20,18 +25,18 @@ import javax.swing.table.*;
  *
  * @author  AO Industries, Inc.
  */
-public class FilteredJTable extends JTable {
+public class FilteredJTable<T extends Row> extends JTable {
 
     public FilteredJTable(
         ErrorHandler errorHandler,
-        Table table,
+        Table<T> table,
         String[] columnHeaders,
         Type[] columnTypes,
         MethodCall[] getValueMethods,
         MethodCall[] setValueMethods,
         Table[] invalidateTables
     ) {
-        FilteredTableModel tableModel=new FilteredTableModel(
+        FilteredTableModel tableModel=new FilteredTableModel<T>(
             errorHandler,
             table,
             columnHeaders,
@@ -57,7 +62,7 @@ public class FilteredJTable extends JTable {
 
     public FilteredJTable(
         ErrorHandler errorHandler,
-        Table table,
+        Table<T> table,
         String[] columnHeaders,
         Type[] columnTypes,
         MethodCall[] getValueMethods,

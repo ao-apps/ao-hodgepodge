@@ -206,17 +206,18 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
                     }
                     if(changed) modCount++;
                     return changed;
-                } else if(C instanceof List) {
+                } else {
                     // Do block allocate then write
                     boolean changed=false;
-                    List<T> otherList=(List)C;
-                    int otherSize=otherList.size();
+                    int otherSize=C.size();
                     if(otherSize>0) {
                         frf.addRecords(index, otherSize);
-                        for(int c=0;c<otherSize;c++) {
+                        Iterator<? extends T> records = C.iterator();
+                        int count=0;
+                        while(records.hasNext()) {
                             // Write to buffer
                             outBuffer.reset();
-                            T O=otherList.get(c);
+                            T O=records.next();
                             if(O==null) dataOutBuffer.writeBoolean(false);
                             else {
                                 dataOutBuffer.writeBoolean(true);
@@ -226,16 +227,15 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
                             if(recordSize>frf.getRecordLength()) throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
 
                             // Write to disk
-                            frf.seekToExistingRecord(index+c);
+                            frf.seekToExistingRecord(index+count);
                             outBuffer.writeTo(frf);
+                            count++;
                         }
+                        if(count!=otherSize) throw new IOException("count!=otherSize");
                         changed=true;
                     }
                     if(changed) modCount++;
                     return changed;
-                } else {
-                    // Default to single adds
-                    return super.addAll(index, C);
                 }
             } catch(IOException err) {
                 throw new WrappedException(err, new Object[] {"frf="+frf, "index="+index});

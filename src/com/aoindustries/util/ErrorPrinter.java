@@ -156,7 +156,7 @@ public class ErrorPrinter {
             }
             // Uses reflection avoid binding to JspException directly.
             try {
-                Class clazz=T.getClass();
+                Class<?> clazz=T.getClass();
                 if(isSubclass(clazz, "javax.servlet.jsp.JspException")) {
                     Method method=clazz.getMethod("getRootCause", new Class[0]);
                     Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);
@@ -176,7 +176,7 @@ public class ErrorPrinter {
             }
             // Uses reflection avoid binding to ServletException directly.
             try {
-                Class clazz=T.getClass();
+                Class<?> clazz=T.getClass();
                 if(isSubclass(clazz, "javax.servlet.ServletException")) {
                     Method method=clazz.getMethod("getRootCause", new Class[0]);
                     Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);
@@ -350,7 +350,7 @@ public class ErrorPrinter {
             }
             // Uses reflection avoid binding to JspException directly.
             try {
-                Class clazz=T.getClass();
+                Class<?> clazz=T.getClass();
                 if(isSubclass(clazz, "javax.servlet.jsp.JspException")) {
                     Method method=clazz.getMethod("getRootCause", new Class[0]);
                     Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);
@@ -370,7 +370,7 @@ public class ErrorPrinter {
             }
             // Uses reflection avoid binding to ServletException directly.
             try {
-                Class clazz=T.getClass();
+                Class<?> clazz=T.getClass();
                 if(isSubclass(clazz, "javax.servlet.ServletException")) {
                     Method method=clazz.getMethod("getRootCause", new Class[0]);
                     Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);

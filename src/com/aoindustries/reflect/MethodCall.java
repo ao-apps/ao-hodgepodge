@@ -30,7 +30,7 @@ public class MethodCall {
         this.parameterValues=new Object[0];
     }
 
-    public MethodCall(Class clazz, String name) {
+    public MethodCall(Class<?> clazz, String name) {
         try {
             this.parameterTypes=new Class[0];
             this.method=clazz.getMethod(name, parameterTypes);
@@ -64,7 +64,7 @@ public class MethodCall {
      * Calls the method, obtaining the parameter types from the parameter values.  Any
      * <code>null</code> parameter value will result in a <code>NullPointerException</code>.
      */
-    public MethodCall(Class clazz, String name, Object[] parameterValues) {
+    public MethodCall(Class<?> clazz, String name, Object[] parameterValues) {
         try {
             this.parameterValues=parameterValues;
             int paramCount=parameterValues.length;
@@ -110,7 +110,7 @@ public class MethodCall {
      *
      * @see  #invokeOn(Object,Object[])
      */
-    public MethodCall(Class clazz, String name, Class[] parameterTypes) {
+    public MethodCall(Class<?> clazz, String name, Class[] parameterTypes) {
         try {
             this.method=clazz.getMethod(name, parameterTypes);
             this.parameterTypes=parameterTypes;
