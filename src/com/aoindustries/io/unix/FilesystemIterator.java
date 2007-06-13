@@ -283,13 +283,17 @@ public class FilesystemIterator {
             String longestPrefix = null;
             for(Map.Entry<String,FilesystemIteratorRule> entry : prefixRules.entrySet()) {
                 String prefix = entry.getKey();
-                if((longestPrefix==null || prefix.length()>longestPrefix.length()) && filename.startsWith(prefix)) {
+                if(
+                    (longestPrefix==null || prefix.length()>longestPrefix.length())
+                    && filename.startsWith(prefix)
+                ) {
+                    System.err.println("DEBUG: FilesystemIterator: getBestRule: filename="+filename+", prefix="+prefix+", longestPrefix="+longestPrefix);
                     longestPrefix = prefix;
                     rule = entry.getValue();
                 }
             }
         }
-        return null;
+        return rule;
     }
 
     public boolean isNoRecurse(String filename) throws IOException {
