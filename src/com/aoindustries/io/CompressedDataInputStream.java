@@ -131,4 +131,8 @@ public class CompressedDataInputStream extends DataInputStream {
             Profiler.endProfile(Profiler.IO);
         }
     }
+
+    public String readNullUTF() throws IOException {
+        return readBoolean() ? readUTF() : null;
+    }
 }

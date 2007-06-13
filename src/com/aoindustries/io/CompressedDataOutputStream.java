@@ -140,4 +140,9 @@ public class CompressedDataOutputStream extends DataOutputStream {
             Profiler.endProfile(Profiler.IO);
         }
     }
+    
+    public void writeNullUTF(String str) throws IOException {
+        writeBoolean(str!=null);
+        if(str!=null) writeUTF(str);
+    }
 }
