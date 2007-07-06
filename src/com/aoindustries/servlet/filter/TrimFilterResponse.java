@@ -6,8 +6,11 @@ package com.aoindustries.servlet.filter;
  * All rights reserved.
  */
 
+import com.aoindustries.util.WrappedException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Locale;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -174,5 +177,33 @@ public class TrimFilterResponse implements HttpServletResponse {
     
     public void addCookie(Cookie cookie) {
         wrapped.addCookie(cookie);
+    }
+
+    public void setCharacterEncoding(String string) {
+        try {
+            // Call through reflection just in case we are in an older servlet environment
+            Method setCharacterEncodingMethod = wrapped.getClass().getMethod("setCharacterEncoding", String.class);
+            setCharacterEncodingMethod.invoke(wrapped, string);
+        } catch(NoSuchMethodException err) {
+            throw new WrappedException(err);
+        } catch(IllegalAccessException err) {
+            throw new WrappedException(err);
+        } catch(InvocationTargetException err) {
+            throw new WrappedException(err);
+        }
+    }
+
+    public String getContentType() {
+        try {
+            // Call through reflection just in case we are in an older servlet environment
+            Method getContentTypeMethod = wrapped.getClass().getMethod("getContentType");
+            return (String)getContentTypeMethod.invoke(wrapped);
+        } catch(NoSuchMethodException err) {
+            throw new WrappedException(err);
+        } catch(IllegalAccessException err) {
+            throw new WrappedException(err);
+        } catch(InvocationTargetException err) {
+            throw new WrappedException(err);
+        }
     }
 }
