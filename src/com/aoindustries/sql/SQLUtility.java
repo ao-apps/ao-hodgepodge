@@ -451,7 +451,9 @@ public class SQLUtility {
             int len = decimal.length();
             int whole = Integer.parseInt(decimal.substring(0, len - 4));
             int millis = Integer.parseInt(decimal.substring(len - 3));
-            return (isNegative?-1:1)*(whole * 1000 + millis);
+            long result = (isNegative?-1L:1L)*(whole * 1000L + millis);
+            if(result<Integer.MIN_VALUE || result>Integer.MAX_VALUE) throw new NumberFormatException("Out of range during conversion");
+            return (int)result;
         } finally {
             Profiler.endProfile(Profiler.FAST);
         }
@@ -481,7 +483,9 @@ public class SQLUtility {
             int len = decimal.length();
             int dollars = Integer.parseInt(decimal.substring(0, len - 3));
             int pennies = Integer.parseInt(decimal.substring(len - 2));
-            return (isNegative?-1:1)*(dollars * 100 + pennies);
+            long result = (isNegative?-1l:1l)*(dollars * 100l + pennies);
+            if(result<Integer.MIN_VALUE || result>Integer.MAX_VALUE) throw new NumberFormatException("Out of range during conversion");
+            return (int)result;
         } finally {
             Profiler.endProfile(Profiler.FAST);
         }
