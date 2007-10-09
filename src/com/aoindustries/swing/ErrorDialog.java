@@ -21,12 +21,12 @@ public class ErrorDialog extends DefaultJDialog implements ActionListener {
 
     private EnterJButton closeButton;
 
-    public ErrorDialog(JFrame parent, Throwable T) {
-        this(parent, T, null);
+    public ErrorDialog(Component parent, String title, Throwable T) {
+        this(parent, title, T, null);
     }
 
-    public ErrorDialog(JFrame parent, Throwable T, Object[] extraInfo) {
-        super(parent, "Error", true, 400, 300);
+    public ErrorDialog(Component parent, String title, Throwable T, Object[] extraInfo) {
+        super((parent instanceof JFrame) ? (JFrame)parent : new JFrame(), title, true, 400, 300);
 
         Container contentPane=getContentPane();
         contentPane.setLayout(new MultiBorderLayout());
