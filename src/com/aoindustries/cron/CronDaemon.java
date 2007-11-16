@@ -103,11 +103,12 @@ public final class CronDaemon extends Thread {
             int dayOfMonth=cal.get(Calendar.DAY_OF_MONTH);
             int month=cal.get(Calendar.MONTH)+1;
             int dayOfWeek=cal.get(Calendar.DAY_OF_WEEK);
+            int year = cal.get(Calendar.YEAR);
             for(int c=0;c<cronJobs.size();c++) {
                 CronJob job=cronJobs.get(c);
                 ErrorHandler jobErrorHandler=errorHandlers.get(c);
                 try {
-                    if(job.isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek)) {
+                    if(job.isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek, year)) {
                         int scheduleMode=job.getCronJobScheduleMode();
                         boolean run;
                         if(scheduleMode==CronJob.CRON_JOB_SCHEDULE_SKIP) {
@@ -124,7 +125,7 @@ public final class CronDaemon extends Thread {
                             run=true;
                         } else throw new RuntimeException("Unknown value from CronJob.getCronJobScheduleMode: "+scheduleMode);
                         if(run) {
-                            CronDaemonThread thread=new CronDaemonThread(job, jobErrorHandler, minute, hour, dayOfMonth, month, dayOfWeek);
+                            CronDaemonThread thread=new CronDaemonThread(job, jobErrorHandler, minute, hour, dayOfMonth, month, dayOfWeek, year);
                             thread.setDaemon(false);
                             thread.setPriority(job.getCronJobThreadPriority());
                             runningJobs.add(thread);

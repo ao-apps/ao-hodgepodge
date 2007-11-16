@@ -35,7 +35,7 @@ public interface CronJob {
      * @param month 1-12
      * @param dayOfWeek 1-7, <code>Calendar.SUNDAY</code> through <code>Calendar.SATURDAY</code>
      */
-    boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek);
+    boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year);
     
     /**
      * Gets the job scheduling mode.
@@ -53,7 +53,7 @@ public interface CronJob {
     /**
      * Performs the scheduled task.
      */
-    void runCronJob(int minute, int hour, int dayOfMonth, int month, int dayOfWeek);
+    void runCronJob(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year);
     
     /**
      * Gets the Thread priority for this job.  Previously defaulted to <code>Thread.NORM_PRIORITY-2</code>

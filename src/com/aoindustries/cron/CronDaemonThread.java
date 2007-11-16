@@ -24,8 +24,9 @@ final public class CronDaemonThread extends Thread {
     final int dayOfMonth;
     final int month;
     final int dayOfWeek;
-
-    CronDaemonThread(CronJob cronJob, ErrorHandler errorHandler, int minute, int hour, int dayOfMonth, int month, int dayOfWeek) {
+    final int year;
+    
+    CronDaemonThread(CronJob cronJob, ErrorHandler errorHandler, int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
         super(cronJob.getCronJobName());
         Profiler.startProfile(Profiler.INSTANTANEOUS, CronDaemonThread.class, "<init>(CronJob)", null);
         try {
@@ -36,6 +37,7 @@ final public class CronDaemonThread extends Thread {
             this.dayOfMonth=dayOfMonth;
             this.month=month;
             this.dayOfWeek=dayOfWeek;
+            this.year = year;
         } finally {
             Profiler.endProfile(Profiler.INSTANTANEOUS);
         }
@@ -49,7 +51,7 @@ final public class CronDaemonThread extends Thread {
         try {
             try {
                 try {
-                    cronJob.runCronJob(minute, hour, dayOfMonth, month, dayOfWeek);
+                    cronJob.runCronJob(minute, hour, dayOfMonth, month, dayOfWeek, year);
                 } catch(ThreadDeath TD) {
                     throw TD;
                 } catch(Throwable T) {
