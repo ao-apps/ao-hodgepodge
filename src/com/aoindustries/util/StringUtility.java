@@ -506,29 +506,24 @@ public final class StringUtility {
      * Converts one hex digit to an integer
      */
     public static int getHex(char ch) throws IllegalArgumentException {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, StringUtility.class, "getHex()", null);
-        try {
-            switch(ch) {
-                case '0': return 0x00;
-                case '1': return 0x01;
-                case '2': return 0x02;
-                case '3': return 0x03;
-                case '4': return 0x04;
-                case '5': return 0x05;
-                case '6': return 0x06;
-                case '7': return 0x07;
-                case '8': return 0x08;
-                case '9': return 0x09;
-                case 'a': case 'A': return 0x0a;
-                case 'b': case 'B': return 0x0b;
-                case 'c': case 'C': return 0x0c;
-                case 'd': case 'D': return 0x0d;
-                case 'e': case 'E': return 0x0e;
-                case 'f': case 'F': return 0x0f;
-                default: throw new IllegalArgumentException("Invalid hex character: "+ch);
-            }
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
+        switch(ch) {
+            case '0': return 0x00;
+            case '1': return 0x01;
+            case '2': return 0x02;
+            case '3': return 0x03;
+            case '4': return 0x04;
+            case '5': return 0x05;
+            case '6': return 0x06;
+            case '7': return 0x07;
+            case '8': return 0x08;
+            case '9': return 0x09;
+            case 'a': case 'A': return 0x0a;
+            case 'b': case 'B': return 0x0b;
+            case 'c': case 'C': return 0x0c;
+            case 'd': case 'D': return 0x0d;
+            case 'e': case 'E': return 0x0e;
+            case 'f': case 'F': return 0x0f;
+            default: throw new IllegalArgumentException("Invalid hex character: "+ch);
         }
     }
 

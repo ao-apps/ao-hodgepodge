@@ -1,6 +1,8 @@
 package com.aoindustries.md5;
+
+import com.aoindustries.util.StringUtility;
 /*
- * $Header: /home/orion/common/aoprod/cvsroot/aocode-public/module/src/com/aoindustries/md5/MD5.java,v 1.1 2006/05/22 00:51:15 orion Exp $
+ * $Header: /home/orion/common/aoprod/cvsroot/aocode-public/module/src/com/aoindustries/md5/MD5.java,v 1.2 2008/01/06 16:47:45 orion Exp $
  *
  * MD5 in Java JDK Beta-2
  * written Santeri Paavolainen, Helsinki Finland 1996
@@ -34,6 +36,9 @@ package com.aoindustries.md5;
  *
  *
  * $Log: MD5.java,v $
+ * Revision 1.2  2008/01/06 16:47:45  orion
+ * Working on CentOS 5 distribution checks, added prelinked binary/library verification support.
+ *
  * Revision 1.1  2006/05/22 00:51:15  orion
  * Current production version
  *
@@ -131,7 +136,7 @@ class MD5State {
 /**
  * Implementation of RSA's MD5 hash generator
  *
- * @version	$Revision: 1.1 $
+ * @version	$Revision: 1.2 $
  * @author	Santeri Paavolainen <sjpaavol@cc.helsinki.fi>
  */
 
@@ -558,6 +563,32 @@ public class MD5 {
     ;
   }
 
+  private static long getHexValue(char ch) throws IllegalArgumentException {
+      return StringUtility.getHex(ch);
+  }
+
+  public static long getMD5Hi(String md5) throws IllegalArgumentException {
+    if(md5.length()!=32) throw new IllegalArgumentException("MD5 sum is not 32 characters long, length is "+md5.length());
+    return
+        (getHexValue(md5.charAt(0))<<60)
+        | (getHexValue(md5.charAt(1))<<56)
+        | (getHexValue(md5.charAt(2))<<52)
+        | (getHexValue(md5.charAt(3))<<48)
+        | (getHexValue(md5.charAt(4))<<44)
+        | (getHexValue(md5.charAt(5))<<40)
+        | (getHexValue(md5.charAt(6))<<36)
+        | (getHexValue(md5.charAt(7))<<32)
+        | (getHexValue(md5.charAt(8))<<28)
+        | (getHexValue(md5.charAt(9))<<24)
+        | (getHexValue(md5.charAt(10))<<20)
+        | (getHexValue(md5.charAt(11))<<16)
+        | (getHexValue(md5.charAt(12))<<12)
+        | (getHexValue(md5.charAt(13))<<8)
+        | (getHexValue(md5.charAt(14))<<4)
+        | getHexValue(md5.charAt(15))
+    ;
+  }
+
   public static long getMD5Lo(byte[] md5) {
     return
         (((long)(md5[8]&255))<<56)
@@ -568,6 +599,28 @@ public class MD5 {
         | (((long)(md5[13]&255))<<16)
         | (((long)(md5[14]&255))<<8)
         | ((long)(md5[15]&255))
+    ;
+  }
+
+  public static long getMD5Lo(String md5) throws IllegalArgumentException {
+    if(md5.length()!=32) throw new IllegalArgumentException("MD5 sum is not 32 characters long, length is "+md5.length());
+    return
+        (getHexValue(md5.charAt(16))<<60)
+        | (getHexValue(md5.charAt(17))<<56)
+        | (getHexValue(md5.charAt(18))<<52)
+        | (getHexValue(md5.charAt(19))<<48)
+        | (getHexValue(md5.charAt(20))<<44)
+        | (getHexValue(md5.charAt(21))<<40)
+        | (getHexValue(md5.charAt(22))<<36)
+        | (getHexValue(md5.charAt(23))<<32)
+        | (getHexValue(md5.charAt(24))<<28)
+        | (getHexValue(md5.charAt(25))<<24)
+        | (getHexValue(md5.charAt(26))<<20)
+        | (getHexValue(md5.charAt(27))<<16)
+        | (getHexValue(md5.charAt(28))<<12)
+        | (getHexValue(md5.charAt(29))<<8)
+        | (getHexValue(md5.charAt(30))<<4)
+        | getHexValue(md5.charAt(31))
     ;
   }
 }
