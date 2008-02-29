@@ -5,7 +5,8 @@ package com.aoindustries.sql;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Wraps a <code>SQLException</code> to include its source SQL statement.

@@ -6,6 +6,7 @@ package com.aoindustries.sql;
  * All rights reserved.
  */
 import com.aoindustries.util.IntList;
+import com.aoindustries.util.LongList;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -51,6 +52,21 @@ public interface DatabaseAccess {
     boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException;
     
     /**
+     * Read-only query the database with a <code>byte[]</code> return type.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    byte[] executeByteArrayQuery(String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Query the database with a <code>byte[]</code> return type.
+     */
+    byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
      * Read-only query the database with a <code>java.sql.Date</code> return type.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
@@ -66,7 +82,7 @@ public interface DatabaseAccess {
     Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException;
 
     /**
-     * Read-only query the database with a <code>IntList</code> return type.
+     * Read-only query the database with an <code>IntList</code> return type.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
@@ -76,12 +92,12 @@ public interface DatabaseAccess {
     IntList executeIntListQuery(String sql, Object ... params) throws IOException, SQLException;
 
     /**
-     * Query the database with a <code>IntList</code> return type.
+     * Query the database with an <code>IntList</code> return type.
      */
     IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException;
 
     /**
-     * Read-only query the database with a <code>int</code> return type.
+     * Read-only query the database with an <code>int</code> return type.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
@@ -91,9 +107,24 @@ public interface DatabaseAccess {
     int executeIntQuery(String sql, Object ... params) throws IOException, SQLException;
 
     /**
-     * Query the database with a <code>int</code> return type.
+     * Query the database with an <code>int</code> return type.
      */
     int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Read-only query the database with a <code>LongList</code> return type.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    LongList executeLongListQuery(String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Query the database with a <code>LongList</code> return type.
+     */
+    LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException;
 
     /**
      * Read-only query the database with a <code>long</code> return type.

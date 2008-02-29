@@ -6,9 +6,9 @@ package com.aoindustries.sql;
  * All rights reserved.
  */
 import com.aoindustries.io.AOPool;
-import com.aoindustries.profiler.Profiler;
 import com.aoindustries.util.ErrorHandler;
 import com.aoindustries.util.IntList;
+import com.aoindustries.util.LongList;
 import com.aoindustries.util.StandardErrorHandler;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -27,6 +27,8 @@ import java.util.List;
  * @author  AO Industries, Inc.
  */
 public class Database extends AbstractDatabaseAccess {
+
+    private static final boolean DEBUG_TIMING = false;
 
     /**
      * Only one connection pool is made to the database.
@@ -90,440 +92,448 @@ public class Database extends AbstractDatabaseAccess {
     }
 
     public AOConnectionPool getConnectionPool() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, Database.class, "getConnectionPool()", null);
-        try {
-            return pool;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return pool;
     }
 
     public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeBigDecimalQuery(int,boolean,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    BigDecimal value=conn.executeBigDecimalQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                BigDecimal value=conn.executeBigDecimalQuery(isolationLevel, readOnly, rowRequired, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeBooleanQuery(int,boolean,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    boolean value=conn.executeBooleanQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                boolean value=conn.executeBooleanQuery(isolationLevel, readOnly, rowRequired, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
+    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            DatabaseConnection conn=createDatabaseConnection();
+            try {
+                byte[] value=conn.executeByteArrayQuery(isolationLevel, readOnly, rowRequired, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
+            } catch(IOException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } catch(SQLException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } finally {
+                conn.releaseConnection();
+            }
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeDateQuery(int,boolean,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    Date value=conn.executeDateQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                Date value=conn.executeDateQuery(isolationLevel, readOnly, rowRequired, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeIntListQuery(int,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    IntList value=conn.executeIntListQuery(isolationLevel, readOnly, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                IntList value=conn.executeIntListQuery(isolationLevel, readOnly, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeIntQuery(int,boolean,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    int value=conn.executeIntQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                int value=conn.executeIntQuery(isolationLevel, readOnly, rowRequired, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
+    public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            DatabaseConnection conn=createDatabaseConnection();
+            try {
+                LongList value=conn.executeLongListQuery(isolationLevel, readOnly, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
+            } catch(IOException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } catch(SQLException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } finally {
+                conn.releaseConnection();
+            }
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeLongQuery(int,boolean,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    long value=conn.executeLongQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                long value=conn.executeLongQuery(isolationLevel, readOnly, rowRequired, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeObjectQuery(int,boolean,boolean,Class<T>,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, clazz, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, clazz, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeObjectListQuery(int,boolean,Class<T>,String,...)", null);
         try {
+            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+            DatabaseConnection conn=createDatabaseConnection();
+            if(DEBUG_TIMING) {
+                long endTime = System.currentTimeMillis();
+                System.err.println("DEBUG: Database: executeObjectListQuery: createDatabaseConnection in "+(endTime-startTime)+" ms");
+            }
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, clazz, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, clazz, sql, params);
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: Database: executeObjectListQuery: executeObjectListQuery in "+(endTime-startTime)+" ms");
                 }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                if(!readOnly) {
+                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                    conn.commit();
+                    if(DEBUG_TIMING) {
+                        long endTime = System.currentTimeMillis();
+                        System.err.println("DEBUG: Database: executeObjectListQuery: commit in "+(endTime-startTime)+" ms");
+                    }
+                }
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                conn.releaseConnection();
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: Database: executeObjectListQuery: releaseConnection in "+(endTime-startTime)+" ms");
+                }
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeShortQuery(int,boolean,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    short value=conn.executeShortQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                short value=conn.executeShortQuery(isolationLevel, readOnly, rowRequired, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeStringQuery(int,boolean,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    String value=conn.executeStringQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                String value=conn.executeStringQuery(isolationLevel, readOnly, rowRequired, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeStringListQuery(int,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    List<String> value=conn.executeStringListQuery(isolationLevel, readOnly, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                List<String> value=conn.executeStringListQuery(isolationLevel, readOnly, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeTimestampQuery(int,boolean,boolean,String,...)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    Timestamp value=conn.executeTimestampQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                    if(!readOnly) conn.commit();
-                    return value;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                Timestamp value=conn.executeTimestampQuery(isolationLevel, readOnly, rowRequired, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 
     public int executeUpdate(String sql, Object ... params) throws IOException, SQLException {
-        Profiler.startProfile(Profiler.IO, Database.class, "executeUpdate(String,params)", null);
         try {
+            DatabaseConnection conn=createDatabaseConnection();
             try {
-                DatabaseConnection conn=createDatabaseConnection();
-                try {
-                    int updateCount = conn.executeUpdate(sql, params);
-                    conn.commit();
-                    return updateCount;
-                } catch(IOException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } catch(SQLException err) {
-                    conn.rollbackAndClose();
-                    throw err;
-                } finally {
-                    conn.releaseConnection();
-                }
-            } catch(RuntimeException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
-                throw err;
+                int updateCount = conn.executeUpdate(sql, params);
+                conn.commit();
+                return updateCount;
             } catch(IOException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
             } catch(SQLException err) {
-                getConnectionPool().getErrorHandler().reportError(err, null);
+                conn.rollbackAndClose();
                 throw err;
+            } finally {
+                conn.releaseConnection();
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
         }
     }
 }

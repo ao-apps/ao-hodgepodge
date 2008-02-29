@@ -6,6 +6,7 @@ package com.aoindustries.sql;
  * All rights reserved.
  */
 import com.aoindustries.util.IntList;
+import com.aoindustries.util.LongList;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -29,6 +30,10 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeBooleanQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
     
+    public byte[] executeByteArrayQuery(String sql, Object ... params) throws IOException, SQLException {
+        return executeByteArrayQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
+    }
+
     public Date executeDateQuery(String sql, Object ... params) throws IOException, SQLException {
         return executeDateQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
@@ -39,6 +44,10 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
 
     public int executeIntQuery(String sql, Object ... params) throws IOException, SQLException {
         return executeIntQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
+    }
+
+    public LongList executeLongListQuery(String sql, Object ... params) throws IOException, SQLException {
+        return executeLongListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }
 
     public long executeLongQuery(String sql, Object ... params) throws IOException, SQLException {

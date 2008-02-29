@@ -6,7 +6,6 @@ package com.aoindustries.sql;
  * All rights reserved.
  */
 import com.aoindustries.io.*;
-import com.aoindustries.profiler.*;
 import com.aoindustries.util.*;
 import java.io.*;
 import java.sql.*;
@@ -20,6 +19,8 @@ import java.sql.*;
  */
 final public class AOConnectionPool extends AOPool {
 
+    private static final boolean DEBUG_TIMING = false;
+
     private String driver;
     private String url;
     private String user;
@@ -32,8 +33,6 @@ final public class AOConnectionPool extends AOPool {
      */
     public AOConnectionPool(String driver, String url, String user, String password, int numConnections) {
         this(driver, url, user, password, numConnections, DEFAULT_MAX_CONNECTION_AGE, new StandardErrorHandler());
-        Profiler.startProfile(Profiler.INSTANTANEOUS, AOConnectionPool.class, "<init>(String,String,String,String,int)", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     /**
@@ -43,280 +42,255 @@ final public class AOConnectionPool extends AOPool {
      */
     public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge) {
         this(driver, url, user, password, numConnections, maxConnectionAge, new StandardErrorHandler());
-        Profiler.startProfile(Profiler.INSTANTANEOUS, AOConnectionPool.class, "<init>(String,String,String,String,int,long)", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge, ErrorHandler errorHandler) {
 	super(AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, errorHandler);
-        Profiler.startProfile(Profiler.INSTANTANEOUS, AOConnectionPool.class, "<init>(String,String,String,String,int,long,ErrorHandler)", null);
-        try {
-            this.driver = driver;
-            this.url = url;
-            this.user = user;
-            this.password = password;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.driver = driver;
+        this.url = url;
+        this.user = user;
+        this.password = password;
     }
 
     public void close() throws SQLException {
-        Profiler.startProfile(Profiler.IO, AOConnectionPool.class, "close()", null);
         try {
-            try {
-                closeImp();
-            } catch(Exception err) {
-                if(err instanceof SQLException) throw (SQLException)err;
-                SQLException sqlErr=new SQLException();
-                sqlErr.initCause(err);
-                throw sqlErr;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            closeImp();
+        } catch(Exception err) {
+            if(err instanceof SQLException) throw (SQLException)err;
+            SQLException sqlErr=new SQLException();
+            sqlErr.initCause(err);
+            throw sqlErr;
         }
     }
 
     protected void close(Object O) throws SQLException {
-        Profiler.startProfile(Profiler.IO, AOConnectionPool.class, "close(Object)", null);
-        try {
-            ((Connection)O).close();
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        ((Connection)O).close();
     }
 
     /**
      * Gets a read/write connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
      */
     public Connection getConnection() throws SQLException {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, AOConnectionPool.class, "getConnection()", null);
-        try {
-            return getConnection(Connection.TRANSACTION_READ_COMMITTED, false, 1);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return getConnection(Connection.TRANSACTION_READ_COMMITTED, false, 1);
     }
 
     /**
      * Gets a connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
      */
     public Connection getConnection(boolean readOnly) throws SQLException {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, AOConnectionPool.class, "getConnection(boolean)", null);
-        try {
-            return getConnection(Connection.TRANSACTION_READ_COMMITTED, readOnly, 1);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return getConnection(Connection.TRANSACTION_READ_COMMITTED, readOnly, 1);
     }
 
     /**
      * Gets a connection to the database with a maximum connections of 1.
      */
     public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, AOConnectionPool.class, "getConnection(int,boolean)", null);
-        try {
-	    return getConnection(isolationLevel, readOnly, 1);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return getConnection(isolationLevel, readOnly, 1);
     }
 
     public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
-        Profiler.startProfile(Profiler.IO, AOConnectionPool.class, "getConnection(int,boolean,int)", null);
+        Connection conn=null;
         try {
-            Connection conn=null;
-            try {
-                while(conn==null) {
-                    conn=(Connection)getConnectionImp(maxConnections);
-                    try {
-                        if(conn.isReadOnly()!=readOnly) {
-                            conn.setReadOnly(readOnly);
-                        }
-                    } catch(SQLException err) {
-                        String message=err.getMessage();
-                        // TODO: InterBase has a problem with setReadOnly(true), this is a workaround
-                        if(message!=null && message.indexOf("[interclient] Invalid operation when transaction is in progress.")!=-1) {
-                            conn.close();
-                            releaseConnectionImp(conn);
-                            conn=null;
-                        } else throw err;
-                    }
+            while(conn==null) {
+                long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+                conn=(Connection)getConnectionImp(maxConnections);
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: AOConnectionPool: getConnection: getConnectionImp in "+(endTime-startTime)+" ms");
                 }
-                if(conn.getTransactionIsolation()!=isolationLevel) conn.setTransactionIsolation(isolationLevel);
-                return conn;
-            } catch(SQLException err) {
-                if(conn!=null) {
-                    try {
-                        releaseConnectionImp(conn);
-                    } catch(Exception err2) {
-                        // Will throw original error instead
-                    }
-                }
-                throw err;
-            } catch(Exception err) {
-                if(conn!=null) {
-                    try {
-                        releaseConnectionImp(conn);
-                    } catch(Exception err2) {
-                        // Will throw original error instead
-                    }
-                }
-                SQLException sqlErr=new SQLException();
-                sqlErr.initCause(err);
-                throw sqlErr;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
-    }
-
-    protected Object getConnectionObject() throws SQLException {
-        Profiler.startProfile(Profiler.FAST, AOConnectionPool.class, "getConnectionObject()", null);
-        try {
-            try {
-                Class.forName(driver).newInstance();
-                return DriverManager.getConnection(url, user, password);
-            } catch(SQLException err) {
-                errorHandler.reportError(
-                    err, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
-                );
-                throw err;
-            } catch (ClassNotFoundException err) {
-                SQLException sqlErr=new SQLException();
-                sqlErr.initCause(err);
-                errorHandler.reportError(
-                    sqlErr, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
-                );
-                throw sqlErr;
-            } catch (InstantiationException err) {
-                SQLException sqlErr=new SQLException();
-                sqlErr.initCause(err);
-                errorHandler.reportError(
-                    sqlErr, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
-                );
-                throw sqlErr;
-            } catch (IllegalAccessException err) {
-                SQLException sqlErr=new SQLException();
-                sqlErr.initCause(err);
-                errorHandler.reportError(
-                    sqlErr, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
-                );
-                throw sqlErr;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
-    }
-
-    protected boolean isClosed(Object O) throws SQLException {
-        Profiler.startProfile(Profiler.FAST, AOConnectionPool.class, "isClosed(Object)", null);
-        try {
-            return ((Connection)O).isClosed();
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
-    }
-
-    protected void printConnectionStats(ChainWriter out) {
-        Profiler.startProfile(Profiler.IO, AOConnectionPool.class, "printConnectionStats(ChainWriter)", null);
-        try {
-            out.print("  <TR><TH colspan=2><FONT size=+1>JDBC Driver</FONT></TH></TR>\n"
-                    + "  <TR><TD>Driver:</TD><TD>").print(driver).print("</TD></TR>\n"
-                    + "  <TR><TD>URL:</TD><TD>").print(url).print("</TD></TR>\n"
-                    + "  <TR><TD>User:</TD><TD>").print(user).print("</TD></TR>\n"
-                    + "  <TR><TD>Password:</TD><TD>");
-            int len=password.length();
-            for(int c=0;c<len;c++) out.print('*');
-            out.print("</TD></TR>\n");
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
-    }
-
-    public void printStatisticsHTML(ChainWriter out) throws SQLException {
-        Profiler.startProfile(Profiler.IO, AOConnectionPool.class, "printStatisticsHTML(ChainWriter)", null);
-        try {
-            try {
-                printStatisticsHTMLImp(out);
-            } catch(Exception err) {
-                if(err instanceof SQLException) throw (SQLException)err;
-                SQLException sqlErr=new SQLException();
-                sqlErr.initCause(err);
-                throw sqlErr;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
-    }
-
-    public void releaseConnection(Connection connection) throws SQLException {
-        Profiler.startProfile(Profiler.IO, AOConnectionPool.class, "releaseConnection(Connection)", null);
-        try {
-            try {
-                releaseConnectionImp((Object)connection);
-            } catch(Exception err) {
-                if(err instanceof SQLException) throw (SQLException)err;
-                SQLException sqlErr=new SQLException();
-                sqlErr.initCause(err);
-                throw sqlErr;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
-    }
-
-    protected void resetConnection(Object O) throws SQLException {
-        Profiler.startProfile(Profiler.IO, AOConnectionPool.class, "resetConnection(Object)", null);
-        try {
-            Connection connection=(Connection)O;
-
-            // Dump all warnings to System.err and clear warnings
-            SQLWarning warning=connection.getWarnings();
-            if(warning!=null) errorHandler.reportWarning(warning, null);
-            connection.clearWarnings();
-
-            // Autocommit will always be turned on, regardless what a previous transaction might have done
-            if(connection.getAutoCommit()==false) {
-                connection.setAutoCommit(true);
-            }
-
-            // Restore to default transaction level
-            if(connection.getTransactionIsolation()!=Connection.TRANSACTION_READ_COMMITTED) connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-
-            // Restore the connection to a read-only state
-            if(!connection.isReadOnly()) {
                 try {
-                    connection.setReadOnly(true);
+                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                    boolean isReadOnly = conn.isReadOnly();
+                    if(DEBUG_TIMING) {
+                        long endTime = System.currentTimeMillis();
+                        System.err.println("DEBUG: AOConnectionPool: getConnection: isReadOnly in "+(endTime-startTime)+" ms");
+                    }
+                    if(isReadOnly!=readOnly) {
+                        if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                        conn.setReadOnly(readOnly);
+                        if(DEBUG_TIMING) {
+                            long endTime = System.currentTimeMillis();
+                            System.err.println("DEBUG: AOConnectionPool: getConnection: setReadOnly("+readOnly+") in "+(endTime-startTime)+" ms");
+                        }
+                    }
                 } catch(SQLException err) {
                     String message=err.getMessage();
                     // TODO: InterBase has a problem with setReadOnly(true), this is a workaround
                     if(message!=null && message.indexOf("[interclient] Invalid operation when transaction is in progress.")!=-1) {
-                        connection.close();
+                        conn.close();
+                        releaseConnectionImp(conn);
+                        conn=null;
                     } else throw err;
                 }
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+            int currentIsolationLevel = conn.getTransactionIsolation();
+            if(DEBUG_TIMING) {
+                long endTime = System.currentTimeMillis();
+                System.err.println("DEBUG: AOConnectionPool: getConnection: getTransactionIsolation in "+(endTime-startTime)+" ms");
+            }
+            if(currentIsolationLevel!=isolationLevel) {
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                conn.setTransactionIsolation(isolationLevel);
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: AOConnectionPool: getConnection: setTransactionIsolation("+isolationLevel+") in "+(endTime-startTime)+" ms");
+                }
+            }
+            return conn;
+        } catch(SQLException err) {
+            if(conn!=null) {
+                try {
+                    releaseConnectionImp(conn);
+                } catch(Exception err2) {
+                    // Will throw original error instead
+                }
+            }
+            throw err;
+        } catch(Exception err) {
+            if(conn!=null) {
+                try {
+                    releaseConnectionImp(conn);
+                } catch(Exception err2) {
+                    // Will throw original error instead
+                }
+            }
+            SQLException sqlErr=new SQLException();
+            sqlErr.initCause(err);
+            throw sqlErr;
+        }
+    }
+
+    protected Object getConnectionObject() throws SQLException {
+        try {
+            Class.forName(driver).newInstance();
+            Connection conn = DriverManager.getConnection(url, user, password);
+            if(conn.getClass().getName().startsWith("org.postgresql.")) {
+                // getTransactionIsolation causes a round-trip to the database, this wrapper caches the value and avoids unnecessary sets
+                // to eliminate unnecessary round-trips and improve performance over high-latency links.
+                conn = new PostgresqlConnectionWrapper(conn);
+            }
+            return conn;
+        } catch(SQLException err) {
+            errorHandler.reportError(
+                err, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
+            );
+            throw err;
+        } catch (ClassNotFoundException err) {
+            SQLException sqlErr=new SQLException();
+            sqlErr.initCause(err);
+            errorHandler.reportError(
+                sqlErr, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
+            );
+            throw sqlErr;
+        } catch (InstantiationException err) {
+            SQLException sqlErr=new SQLException();
+            sqlErr.initCause(err);
+            errorHandler.reportError(
+                sqlErr, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
+            );
+            throw sqlErr;
+        } catch (IllegalAccessException err) {
+            SQLException sqlErr=new SQLException();
+            sqlErr.initCause(err);
+            errorHandler.reportError(
+                sqlErr, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
+            );
+            throw sqlErr;
+        }
+    }
+
+    protected boolean isClosed(Object O) throws SQLException {
+        return ((Connection)O).isClosed();
+    }
+
+    protected void printConnectionStats(ChainWriter out) {
+        out.print("  <TR><TH colspan=2><FONT size=+1>JDBC Driver</FONT></TH></TR>\n"
+                + "  <TR><TD>Driver:</TD><TD>").print(driver).print("</TD></TR>\n"
+                + "  <TR><TD>URL:</TD><TD>").print(url).print("</TD></TR>\n"
+                + "  <TR><TD>User:</TD><TD>").print(user).print("</TD></TR>\n"
+                + "  <TR><TD>Password:</TD><TD>");
+        int len=password.length();
+        for(int c=0;c<len;c++) out.print('*');
+        out.print("</TD></TR>\n");
+    }
+
+    public void printStatisticsHTML(ChainWriter out) throws SQLException {
+        try {
+            printStatisticsHTMLImp(out);
+        } catch(Exception err) {
+            if(err instanceof SQLException) throw (SQLException)err;
+            SQLException sqlErr=new SQLException();
+            sqlErr.initCause(err);
+            throw sqlErr;
+        }
+    }
+
+    public void releaseConnection(Connection connection) throws SQLException {
+        try {
+            releaseConnectionImp((Object)connection);
+        } catch(Exception err) {
+            if(err instanceof SQLException) throw (SQLException)err;
+            SQLException sqlErr=new SQLException();
+            sqlErr.initCause(err);
+            throw sqlErr;
+        }
+    }
+
+    protected void resetConnection(Object O) throws SQLException {
+        Connection connection=(Connection)O;
+
+        // Dump all warnings to System.err and clear warnings
+        SQLWarning warning=connection.getWarnings();
+        if(warning!=null) errorHandler.reportWarning(warning, null);
+        connection.clearWarnings();
+
+        // Autocommit will always be turned on, regardless what a previous transaction might have done
+        if(connection.getAutoCommit()==false) {
+            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+            connection.setAutoCommit(true);
+            if(DEBUG_TIMING) {
+                long endTime = System.currentTimeMillis();
+                System.err.println("DEBUG: AOConnectionPool: resetConnection: setAutoCommit(true) in "+(endTime-startTime)+" ms");
+            }
+        }
+
+        // Restore to default transaction level
+        if(connection.getTransactionIsolation()!=Connection.TRANSACTION_READ_COMMITTED) {
+            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+            connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            if(DEBUG_TIMING) {
+                long endTime = System.currentTimeMillis();
+                System.err.println("DEBUG: AOConnectionPool: resetConnection: setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED) in "+(endTime-startTime)+" ms");
+            }
+        }
+
+        // Restore the connection to a read-only state
+        if(!connection.isReadOnly()) {
+            try {
+                long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+                connection.setReadOnly(true);
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: AOConnectionPool: resetConnection: setReadOnly(true) in "+(endTime-startTime)+" ms");
+                }
+            } catch(SQLException err) {
+                String message=err.getMessage();
+                // TODO: InterBase has a problem with setReadOnly(true), this is a workaround
+                if(message!=null && message.indexOf("[interclient] Invalid operation when transaction is in progress.")!=-1) {
+                    connection.close();
+                } else throw err;
+            }
         }
     }
 
     protected void throwException(String message, Throwable allocateStackTrace) throws IOException {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, AOConnectionPool.class, "throwException(String,Throwable)", null);
-        try {
-            IOException err=new IOException(message);
-            err.initCause(allocateStackTrace);
-            throw err;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        IOException err=new IOException(message);
+        err.initCause(allocateStackTrace);
+        throw err;
     }
 
     public String toString() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, AOConnectionPool.class, "toString()", null);
-        try {
-            return AOConnectionPool.class.getName()+"?url=" + url+"&user="+user;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return AOConnectionPool.class.getName()+"?url=" + url+"&user="+user;
     }
 }
