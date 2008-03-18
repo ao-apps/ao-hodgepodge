@@ -1469,4 +1469,53 @@ public final class StringUtility {
         if(S==null) return null;
         return S.intern();
     }
+    
+    /**
+     * Finds the next of a substring like regular String.indexOf, but stops at a certain maximum index.
+     * Like substring, will look up to the character one before toIndex.
+     */
+    public static int indexOf(String source, String target, int fromIndex, int toIndex) {
+        if(fromIndex>toIndex) throw new IllegalArgumentException("fromIndex>toIndex: fromIndex="+fromIndex+", toIndex="+toIndex);
+
+        int sourceCount = source.length();
+
+        // This line makes it different than regular String indexOf method.
+        if(toIndex<sourceCount) sourceCount = toIndex;
+
+        int targetCount = target.length();
+
+        if (fromIndex >= sourceCount) {
+            return (targetCount == 0 ? sourceCount : -1);
+	}
+    	if (fromIndex < 0) {
+    	    fromIndex = 0;
+    	}
+	if (targetCount == 0) {
+	    return fromIndex;
+	}
+
+        char first  = target.charAt(0);
+        int max = sourceCount - targetCount;
+
+        for (int i = fromIndex; i <= max; i++) {
+            /* Look for first character. */
+            if (source.charAt(i) != first) {
+                while (++i <= max && source.charAt(i) != first);
+            }
+
+            /* Found first character, now look at the rest of v2 */
+            if (i <= max) {
+                int j = i + 1;
+                int end = j + targetCount - 1;
+                for (int k = 1; j < end && source.charAt(j) ==
+                         target.charAt(k); j++, k++);
+
+                if (j == end) {
+                    /* Found whole string. */
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
 }
