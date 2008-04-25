@@ -11,6 +11,8 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.AccessControlException;
+import java.security.Permission;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
@@ -43,7 +45,11 @@ public class ErrorPrinter {
             out.println();
             out.println("    Time ");
             out.print("        ");
-            out.println(new java.util.Date(System.currentTimeMillis()).toString());
+            try {
+                out.println(new java.util.Date(System.currentTimeMillis()).toString());
+            } catch(Exception err) {
+                out.println("Unable to display date: "+err.toString());
+            }
 
             // Extra info
             if(extraInfo!=null && extraInfo.length>0) {
@@ -118,6 +124,29 @@ public class ErrorPrinter {
                     for(int d=0;d<(indent+8);d++) out.print(' ');
                     out.println(wrappedInfo[c]);
                 }
+            }
+        } else if(T instanceof AccessControlException) {
+            try {
+                AccessControlException ace = (AccessControlException)T;
+                Permission permission = ace.getPermission();
+                for(int c=0;c<(indent+4);c++) out.print(' ');
+                out.print("Permission........: ");
+                out.println(permission);
+                if(permission!=null) {
+                    for(int c=0;c<(indent+4);c++) out.print(' ');
+                    out.print("Permission Class..: ");
+                    out.println(permission.getClass().getName());
+
+                    for(int c=0;c<(indent+4);c++) out.print(' ');
+                    out.print("Permission Name...: ");
+                    out.println(permission.getName());
+
+                    for(int c=0;c<(indent+4);c++) out.print(' ');
+                    out.print("Permission Actions: ");
+                    out.println(permission.getActions());
+                }
+            } catch(SecurityException err) {
+                out.print("Permission........: Unable to get permission details: "+err.toString());
             }
         }
         for(int c=0;c<(indent+4);c++) out.print(' ');
@@ -217,7 +246,11 @@ public class ErrorPrinter {
             out.println();
             out.println("    Time ");
             out.print("        ");
-            out.println(new java.util.Date(System.currentTimeMillis()).toString());
+            try {
+                out.println(new java.util.Date(System.currentTimeMillis()).toString());
+            } catch(Exception err) {
+                out.println("Unable to display date: "+err.toString());
+            }
 
             // Extra info
             if(extraInfo!=null && extraInfo.length>0) {
@@ -292,6 +325,29 @@ public class ErrorPrinter {
                     for(int d=0;d<(indent+8);d++) out.print(' ');
                     out.println(wrappedInfo[c]);
                 }
+            }
+        } else if(T instanceof AccessControlException) {
+            try {
+                AccessControlException ace = (AccessControlException)T;
+                Permission permission = ace.getPermission();
+                for(int c=0;c<(indent+4);c++) out.print(' ');
+                out.print("Permission........: ");
+                out.println(permission);
+                if(permission!=null) {
+                    for(int c=0;c<(indent+4);c++) out.print(' ');
+                    out.print("Permission Class..: ");
+                    out.println(permission.getClass().getName());
+
+                    for(int c=0;c<(indent+4);c++) out.print(' ');
+                    out.print("Permission Name...: ");
+                    out.println(permission.getName());
+
+                    for(int c=0;c<(indent+4);c++) out.print(' ');
+                    out.print("Permission Actions: ");
+                    out.println(permission.getActions());
+                }
+            } catch(SecurityException err) {
+                out.print("Permission........: Unable to get permission details: "+err.toString());
             }
         }
         for(int c=0;c<(indent+4);c++) out.print(' ');
