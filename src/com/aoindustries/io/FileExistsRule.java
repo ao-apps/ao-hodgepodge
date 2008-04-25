@@ -1,12 +1,12 @@
-package com.aoindustries.io.unix;
-
-import java.io.IOException;
+package com.aoindustries.io;
 
 /*
  * Copyright 2006-2007 by AO Industries, Inc.,
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Conditionally uses one of two rules based on the existence of a file on the current server.
@@ -31,17 +31,13 @@ public class FileExistsRule extends FilesystemIteratorRule {
 
     public FilesystemIteratorRule getEffectiveRule(String filename) throws IOException {
         for(int c=0;c<fullPaths.length;c++) {
-            UnixFile uf = new UnixFile(fullPaths[c]);
-            if(uf.getStat().exists()) return existsRule;
+            File file = new File(fullPaths[c]);
+            if(file.exists()) return existsRule;
         }
         return notExistsRule;
     }
 
-    public boolean isNoRecurse(String filename) throws IOException {
-        return getEffectiveRule(filename).isNoRecurse(filename);
-    }
-
-    public boolean isSkip(String filename) throws IOException {
-        return getEffectiveRule(filename).isSkip(filename);
+    public boolean isIncluded(String filename) throws IOException {
+        return getEffectiveRule(filename).isIncluded(filename);
     }
 }
