@@ -33,12 +33,28 @@ final public class ChainWriter {
             for (int c = 0; c < len; c++) {
                 char ch = S.charAt(c);
                 switch(ch) {
+                    case '\r':
+                        break;
+                    case '\n':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, toPrint);
+                            toPrint=0;
+                        }
+                        out.write(' ');
+                        break;
                     case '<':
                         if(toPrint>0) {
                             out.write(S, c-toPrint, toPrint);
                             toPrint=0;
                         }
                         out.write("&#60;");
+                        break;
+                    case '>':
+                        if(toPrint>0) {
+                            out.write(S, c-toPrint, toPrint);
+                            toPrint=0;
+                        }
+                        out.write("&#62;");
                         break;
                     case '&':
                         if(toPrint>0) {
