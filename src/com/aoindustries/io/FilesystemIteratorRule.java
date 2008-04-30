@@ -8,7 +8,10 @@ package com.aoindustries.io;
 import java.io.IOException;
 
 /**
- * Controls the behavior of a <code>FilesystemIterator</code>.
+ * Controls the behavior of a <code>FilesystemIterator</code>.  Each rule
+ * has is mapped in via either a filename or a file prefix.  If a rule is provided
+ * with an empty filename for regular rules (not prefix-matched), it will be the
+ * default for all filesystem roots.
  *
  * @version  1.0
  *

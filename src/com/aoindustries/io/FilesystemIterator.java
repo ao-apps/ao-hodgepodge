@@ -121,7 +121,7 @@ public class FilesystemIterator {
                     return null;
                 } else {
                     // Get the current filename
-                    String filename;
+                    final String filename;
                     if(currentDirectory.length()==0) filename=currentList[currentIndex];
                     else if(currentDirectory.endsWith(File.separator)) filename=currentDirectory+currentList[currentIndex];
                     else filename=currentDirectory+File.separatorChar+currentList[currentIndex];
@@ -131,18 +131,15 @@ public class FilesystemIterator {
                     currentIndexes.push(Integer.valueOf(currentIndex+1));
 
                     try {
-                        File file=new File(filename);
-                        if(
-                            file.isDirectory()
-                            && file.getCanonicalPath().equals(filename) // Avoid symbolic links to other directories
-                        ) {
+                        final File file=new File(filename);
+                        if(file.isDirectory()) {
                             // Directories
-                            String filenamePlusSlash;
+                            final String filenamePlusSlash;
                             if(filename.endsWith(File.separator)) filenamePlusSlash = filename;
                             else filenamePlusSlash = filename+File.separatorChar;
 
-                            boolean includeDirectory;
-                            boolean recurse;
+                            final boolean includeDirectory;
+                            final boolean recurse;
                             // If the settings for the directory indicate include
                             if(isIncluded(filename)) {
                                 // Directory is included, optimized recurse follows
@@ -171,18 +168,26 @@ public class FilesystemIterator {
                             }
                             // Push on stacks for next level
                             if(includeDirectory) {
-                                currentDirectories.push(filename);
                                 String[] list;
                                 if(recurse) {
-                                    list = file.list();
-                                    if(list==null) list = emptyStringArray;
-                                    else AutoSort.sortStatic(list);
+                                    // Skip anything that is not canonical, this avoids symbolic link targets
+                                    if(file.getCanonicalPath().equals(filename)) {
+                                        list = file.list();
+                                        if(list==null) list = emptyStringArray;
+                                        else AutoSort.sortStatic(list);
+                                    } else {
+                                        //System.err.println("Skipping non-canonical directory listing: "+filename);
+                                        list = emptyStringArray;
+                                    }
                                 } else {
                                     list = emptyStringArray;
                                 }
-                                currentLists.push(list);
-                                currentIndexes.push(Integer.valueOf(0));
-                                
+                                // No need to push onto the stack if the children are empty?
+                                if(list.length>0) {
+                                    currentDirectories.push(filename);
+                                    currentLists.push(list);
+                                    currentIndexes.push(Integer.valueOf(0));
+                                }
                                 return file;
                             } else {
                                 if(recurse) throw new AssertionError("recurse=true and includeDirectory=false");
@@ -204,7 +209,7 @@ public class FilesystemIterator {
      * @return the number of files in the array, zero (0) indicates iteration has completed
      * @throws java.io.IOException
      */
-    public int getNextFiles(File[] files, int batchSize) throws IOException {
+    public int getNextFiles(final File[] files, final int batchSize) throws IOException {
         int c=0;
         while(c<batchSize) {
             File file=getNextFile();
@@ -216,7 +221,8 @@ public class FilesystemIterator {
 
     /**
      * Gets the filesystem roots.  It will only include the root if it has
-     * at least one backup-enabled rule.
+     * at least one backup-enabled rule.  An empty rule ("") will implicitely
+     * allow all roots.
      */
     protected String[] getFilesystemRoots() throws IOException {
         File[] fileRoots=File.listRoots();
@@ -224,7 +230,11 @@ public class FilesystemIterator {
         for(int c=0;c<fileRoots.length;c++) {
             String root=fileRoots[c].getPath();
             // Only add if this root is used for at least one backup setting
-            if(hasIncludedChild(root)) tempRoots.add(root);
+            FilesystemIteratorRule defaultRule = rules.get("");
+            if(
+                (defaultRule!=null && defaultRule.isIncluded(root))
+                || hasIncludedChild(root)
+            ) tempRoots.add(root);
         }
         return tempRoots.toArray(new String[tempRoots.size()]);
     }
@@ -242,22 +252,60 @@ public class FilesystemIterator {
     }
 
     /**
-     * Gets the rule that best suits the provided filename.
+     * Gets the rule that best suits the provided filename.  The rule is the longer
+     * rule between the regular rules and the prefix rules.
+     * 
+     * The regular rules are scanned first by looking through the filename and then
+     * all parents up to the root for the first match.  These use Map lookups in the
+     * set of rules so this should still perform well when there are many rules.
+     * For example, when searching for the rule for /home/u/username/tmp/, this
+     * will search:
+     * <ol>
+     *   <li>/home/u/username/tmp/</li>
+     *   <li>/home/u/username/tmp</li>
+     *   <li>/home/u/username/</li>
+     *   <li>/home/u/username</li>
+     *   <li>/home/u/</li>
+     *   <li>/home/u</li>
+     *   <li>/home/</li>
+     *   <li>/home</li>
+     *   <li>/</li>
+     *   <li></li>
+     * </ol>
      *
-     * If an exact match in rules is found, that is used.
-     * Next, the longest prefix match in prefixRules is used.
+     * Next, the entire list of prefix rules is searched, with the longest rule
+     * being used if it is a longer match than that found in the regular rules.
      */
-    private FilesystemIteratorRule getBestRule(String filename) {
-        FilesystemIteratorRule rule = rules.get(filename);
-        if(rule==null && prefixRules!=null) {
-            String longestPrefix = null;
-            // Treat a all-child directory prefix (like /proc/) as a prefix rule
-            int lastSlashPos = filename.lastIndexOf(File.separatorChar);
-            if(lastSlashPos!=-1) {
-                String pathPlusSlash = filename.substring(0, lastSlashPos+1);
-                rule = rules.get(pathPlusSlash);
-                if(rule!=null) longestPrefix = pathPlusSlash;
+    private FilesystemIteratorRule getBestRule(final String filename) {
+        String longestPrefix = null;
+        FilesystemIteratorRule rule = null;
+        // First search the path and all of its parents for the first regular rule
+        String path = filename;
+        while(true) {
+            // Check the current path for an exact match
+            //System.out.println("DEBUG: Checking "+path);
+            rule = rules.get(path);
+            if(rule!=null) {
+                longestPrefix = path;
+                break;
             }
+
+            // If done, break the loop
+            int pathLen = path.length();
+            if(pathLen==0) break;
+
+            int lastSlashPos = path.lastIndexOf(File.separatorChar);
+            if(lastSlashPos==-1) {
+                path = "";
+            } else if(lastSlashPos==(pathLen-1)) {
+                // If ends with a slash, remove that slash
+                path = path.substring(0, lastSlashPos);
+            } else {
+                // Otherwise, remove and leave the last slash
+                path = path.substring(0, lastSlashPos+1);
+            }
+        }
+        if(prefixRules!=null) {
             for(Map.Entry<String,FilesystemIteratorRule> entry : prefixRules.entrySet()) {
                 String prefix = entry.getKey();
                 if(
@@ -285,8 +333,10 @@ public class FilesystemIterator {
         // Iterate through all rules, looking for the first one that starts with the current filename+File.separatorChar and has backup enabled
         for(Map.Entry<String,FilesystemIteratorRule> entry : rules.entrySet()) {
             String path = entry.getKey();
-            FilesystemIteratorRule rule = entry.getValue();
-            if(path.startsWith(filenamePlusSlash) && rule.isIncluded(filenamePlusSlash)) return true;
+            if(path.startsWith(filenamePlusSlash)) {
+                FilesystemIteratorRule rule = entry.getValue();
+                if(rule.isIncluded(filenamePlusSlash)) return true;
+            }
         }
         for(Map.Entry<String,FilesystemIteratorRule> entry : prefixRules.entrySet()) {
             String path = entry.getKey();
@@ -346,22 +396,6 @@ public class FilesystemIterator {
         }
         return results;
     }
-
-    /*
-    public static void main(String[] args) {
-        try {
-            String path;
-            if(args.length==0) path="/";
-            else path=args[0];
-            Map<String,FilesystemIteratorRule> rules = Collections.emptyMap();
-            FilesystemIterator iter =  new FilesystemIterator(rules, false, path);
-            UnixFile uf;
-            while((uf=iter.getNextUnixFile())!=null) System.out.println(uf.getFilename());
-        } catch(IOException err) {
-            err.printStackTrace();
-        }
-    }
-     */
 
     static class FilenameIterator implements Iterator<String> {
 
