@@ -21,10 +21,6 @@ abstract public class FilesystemIteratorRule {
 
     /**
      * Gets if this item should be included.
-     * 
-     * @param filename
-     * @return
-     * @throws java.io.IOException
      */
     abstract public boolean isIncluded(String filename) throws IOException;
     

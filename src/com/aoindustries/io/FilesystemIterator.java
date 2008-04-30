@@ -38,7 +38,7 @@ public class FilesystemIterator {
     /**
      * Constructs an iterator without any filename conversions and starting at all roots.
      *
-     * @see  #FilesystemIterator(Map,boolean,String)
+     * @see  #FilesystemIterator(Map,Map,String)
      */
     public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules) {
         this(rules, prefixRules, "");
