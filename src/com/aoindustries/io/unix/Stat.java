@@ -5,7 +5,7 @@ package com.aoindustries.io.unix;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import java.io.*;
+import java.io.FileNotFoundException;
 
 /**
  * One stat call may have all of its output stored in an instance of this class.  This class is not profiled because every method runs in a fast and constant time.
