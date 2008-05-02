@@ -95,7 +95,7 @@ final public class Stat {
     }
     
     private void checkInitted() {
-        if(unixFile==null) throw new RuntimeException("unixFile is null: Stat object not yet used in a call to UnixFile.getStat(Stat)");
+        if(unixFile==null) throw new AssertionError("unixFile is null: Stat object not yet used in a call to UnixFile.getStat(Stat)");
     }
 
     /**
@@ -120,7 +120,7 @@ final public class Stat {
      */
     public long getDevice() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return device;
     }
 
@@ -129,7 +129,7 @@ final public class Stat {
      */
     public long getInode() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return inode;
     }
 
@@ -139,7 +139,7 @@ final public class Stat {
      */
     public long getRawMode() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return mode;
     }
 
@@ -148,7 +148,7 @@ final public class Stat {
      */
     public long getMode() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return mode & UnixFile.PERMISSION_MASK;
     }
 
@@ -157,7 +157,7 @@ final public class Stat {
      */
     public String getModeString() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return UnixFile.getModeString(mode);
     }
 
@@ -166,7 +166,7 @@ final public class Stat {
      */
     public int getNumberLinks() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return numberLinks;
     }
 
@@ -175,7 +175,7 @@ final public class Stat {
      */
     public int getUID() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return uid;
     }
 
@@ -184,7 +184,7 @@ final public class Stat {
      */
     public int getGID() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return gid;
     }
 
@@ -193,7 +193,7 @@ final public class Stat {
      */
     public long getDeviceIdentifier() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return deviceIdentifier;
     }
 
@@ -202,7 +202,7 @@ final public class Stat {
      */
     public long getSize() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return size;
     }
 
@@ -211,7 +211,7 @@ final public class Stat {
      */
     public int getBlockSize() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return blockSize;
     }
 
@@ -220,7 +220,7 @@ final public class Stat {
      */
     public long getBlockCount() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return blockCount;
     }
 
@@ -229,7 +229,7 @@ final public class Stat {
      */
     public long getAccessTime() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return accessTime;
     }
 
@@ -238,7 +238,7 @@ final public class Stat {
      */
     public long getModifyTime() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return modifyTime;
     }
 
@@ -247,7 +247,7 @@ final public class Stat {
      */
     public long getChangeTime() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return changeTime;
     }
     
@@ -256,7 +256,7 @@ final public class Stat {
      */
     public boolean isBlockDevice() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return UnixFile.isBlockDevice(mode);
     }
 
@@ -265,7 +265,7 @@ final public class Stat {
      */
     public boolean isCharacterDevice() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return UnixFile.isCharacterDevice(mode);
     }
 
@@ -274,7 +274,7 @@ final public class Stat {
      */
     public boolean isDirectory() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return UnixFile.isDirectory(mode);
     }
 
@@ -283,7 +283,7 @@ final public class Stat {
      */
     public boolean isFIFO() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return UnixFile.isFIFO(mode);
     }
 
@@ -292,7 +292,7 @@ final public class Stat {
      */
     public boolean isRegularFile() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return UnixFile.isRegularFile(mode);
     }
 
@@ -301,7 +301,7 @@ final public class Stat {
      */
     public boolean isSocket() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return UnixFile.isSocket(mode);
     }
 
@@ -310,7 +310,7 @@ final public class Stat {
      */
     public boolean isSymLink() throws FileNotFoundException {
         checkInitted();
-        if(!exists) throw new FileNotFoundException(unixFile.getFilename());
+        if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return UnixFile.isSymLink(mode);
     }
 }

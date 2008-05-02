@@ -101,7 +101,7 @@ public class LinuxFile extends UnixFile {
                     getattrIn=new BufferedReader(new InputStreamReader(getattrProcess.getInputStream()));
                 }
 
-                getattrOut.println(filename);
+                getattrOut.println(path);
                 getattrOut.flush();
 
                 attributes=Integer.parseInt(getattrIn.readLine());
