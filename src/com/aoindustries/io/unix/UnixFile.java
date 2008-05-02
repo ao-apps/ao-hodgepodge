@@ -184,9 +184,9 @@ public class UnixFile {
     }
 
     /**
-     * The filename.
+     * The path.
      */
-    protected final String filename;
+    protected final String path;
     
     volatile private File file;
 
@@ -195,23 +195,23 @@ public class UnixFile {
      *
      * @deprecated  Please call #UnixFile(UnixFile,String,boolean) to explicitly control whether strict parent checking is performed
      */
-    public UnixFile(UnixFile parent, String filename) throws IOException {
-        this(parent, filename, true);
+    public UnixFile(UnixFile parent, String path) throws IOException {
+        this(parent, path, true);
     }
 
     /**
      * When strictly checking, a parent must be a directory if it exists.
      */
-    public UnixFile(UnixFile parent, String filename, boolean strict) throws IOException {
+    public UnixFile(UnixFile parent, String path, boolean strict) throws IOException {
         if(parent==null) throw new NullPointerException("parent is null");
-        if(strict && parent.exists() && !parent.isDirectory()) throw new IOException("parent is not a directory: " + parent.filename);
-        if(parent.filename.equals("/")) this.filename=parent.filename+filename;
-        else this.filename = parent.filename + '/' + filename;
+        if(strict && parent.exists() && !parent.isDirectory()) throw new IOException("parent is not a directory: " + parent.path);
+        if(parent.path.equals("/")) this.path=parent.path+path;
+        else this.path = parent.path + '/' + path;
     }
 
     public UnixFile(File file) {
         if(file==null) throw new NullPointerException("file is null");
-        this.filename = file.getPath();
+        this.path = file.getPath();
         this.file=file;
     }
 
@@ -219,13 +219,13 @@ public class UnixFile {
         this(parent.getPath(), filename);
     }
 
-    public UnixFile(String filename) {
-        this.filename = filename;
+    public UnixFile(String path) {
+        this.path = path;
     }
 
     public UnixFile(String parent, String filename) {
-        if(parent.equals("/")) this.filename=parent+filename;
-        else this.filename = parent + '/' + filename;
+        if(parent.equals("/")) this.path=parent+filename;
+        else this.path = parent + '/' + filename;
     }
 
     /**
@@ -239,11 +239,11 @@ public class UnixFile {
 
     /**
      * Ensures that the calling thread is allowed to read this
-     * <code>filename</code> in any way.
+     * <code>path</code> in any way.
      */
-    static public void checkRead(String filename) throws IOException {
+    static public void checkRead(String path) throws IOException {
         SecurityManager security=System.getSecurityManager();
-        if(security!=null) security.checkRead(new File(filename).getCanonicalPath());
+        if(security!=null) security.checkRead(new File(path).getCanonicalPath());
     }
 
     /**
@@ -257,11 +257,11 @@ public class UnixFile {
 
     /**
      * Ensures that the calling thread is allowed to write to or modify this
-     * <code>filename</code> in any way.
+     * <code>path</code> in any way.
      */
-    static public void checkWrite(String filename) throws IOException {
+    static public void checkWrite(String path) throws IOException {
         SecurityManager security=System.getSecurityManager();
-        if(security!=null) security.checkWrite(new File(filename).getCanonicalPath());
+        if(security!=null) security.checkWrite(new File(path).getCanonicalPath());
     }
 
     /**
@@ -272,11 +272,11 @@ public class UnixFile {
     final public UnixFile chown(int uid, int gid) throws IOException {
         checkWrite();
         loadLibrary();
-        chown0(filename, uid, gid);
+        chown0(path, uid, gid);
         return this;
     }
 
-    private static native void chown0(String filename, int uid, int gid) throws IOException;
+    private static native void chown0(String path, int uid, int gid) throws IOException;
 
     /**
      * Stats the file.  Please consider calling getStat(Stat) to avoid memory allocation.
@@ -296,25 +296,11 @@ public class UnixFile {
         checkRead();
         loadLibrary();
         if(stat==null) stat=new Stat();
-        getStat0(filename, stat);
+        getStat0(path, stat);
         return stat;
     }
 
-    // Combine to one native method
-    /*private static native long getDevice0(String filename) throws IOException;
-    private static native long getInode0(String filename) throws IOException;
-    private static native long getMode0(String filename) throws IOException;
-    private static native int getLinkCount0(String filename) throws IOException;
-    private static native int getUID0(String filename) throws IOException;
-    private static native int getGID0(String filename) throws IOException;
-    private static native long getDeviceIdentifier0(String filename) throws IOException;
-    private static native int getBlockSize0(String filename) throws IOException;
-    private static native long getBlockCount0(String filename) throws IOException;
-    private static native long getAccessTime0(String filename) throws IOException;
-    private static native long getModifyTime0(String filename) throws IOException;
-    private static native long getChangeTime0(String filename) throws IOException;
-    */
-    private native void getStat0(String filename, Stat stat) throws IOException;
+    private native void getStat0(String path, Stat stat) throws IOException;
 
     /**
      * Compares this contents of this file to the contents of another file.
@@ -323,9 +309,9 @@ public class UnixFile {
      */
     public boolean contentEquals(UnixFile otherUF) throws IOException {
         Stat stat = getStat();
-        if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
+        if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+path);
         Stat otherStat = otherUF.getStat();
-        if(!otherStat.isRegularFile()) throw new IOException("Not a regular file: "+otherUF.filename);
+        if(!otherStat.isRegularFile()) throw new IOException("Not a regular file: "+otherUF.path);
         long size=stat.getSize();
         if(size!=otherStat.getSize()) return false;
         int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
@@ -356,7 +342,7 @@ public class UnixFile {
      */
     public boolean contentEquals(byte[] otherFile) throws IOException {
         Stat stat = getStat();
-        if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
+        if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+path);
         long size=stat.getSize();
         if(size!=otherFile.length) return false;
         int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
@@ -381,9 +367,9 @@ public class UnixFile {
      */
     public boolean secureContentEquals(UnixFile otherUF) throws IOException {
         Stat stat = getStat();
-        if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
+        if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+path);
         Stat otherStat = otherUF.getStat();
-        if(!otherStat.isRegularFile()) throw new IOException("Not a regular file: "+otherUF.filename);
+        if(!otherStat.isRegularFile()) throw new IOException("Not a regular file: "+otherUF.path);
         long size=stat.getSize();
         if(size!=otherStat.getSize()) return false;
         int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
@@ -414,7 +400,7 @@ public class UnixFile {
      */
     public boolean secureContentEquals(byte[] otherFile) throws IOException {
         Stat stat = getStat();
-        if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
+        if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+path);
         long size=stat.getSize();
         if(size!=otherFile.length) return false;
         int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
@@ -490,7 +476,7 @@ public class UnixFile {
             } finally {
                 in.close();
             }
-        } else if(isSocket(mode)) throw new IOException("Unable to copy socket: "+filename);
+        } else if(isSocket(mode)) throw new IOException("Unable to copy socket: "+path);
         else if(isSymLink(mode)) {
             // This takes the byte[] from readLink directory to symLink to avoid conversions from byte[]->String->byte[]
             otherUF.symLink(readLink()).chown(stat.getUID(), stat.getGID());
@@ -548,7 +534,7 @@ public class UnixFile {
      * @see  java.io.File#delete
      */
     final public void delete() throws IOException {
-        if (!getFile().delete()) throw new IOException("Unable to delete file: " + filename);
+        if (!getFile().delete()) throw new IOException("Unable to delete file: " + path);
     }
 
     /**
@@ -582,7 +568,7 @@ public class UnixFile {
         } catch(FileNotFoundException err) {
             // OK if it was deleted while we're trying to delete it
         } catch(IOException err) {
-            System.err.println("Error recursively delete: "+file.filename);
+            System.err.println("Error recursively delete: "+file.path);
             throw err;
         }
     }
@@ -616,7 +602,7 @@ public class UnixFile {
             UnixFile parent=parents.pop();
             parent.getStat(parentStat);
             long statMode = parentStat.getRawMode();
-            if(isSymLink(statMode)) throw new IOException("Symbolic link found in path: "+parent.getFilename());
+            if(isSymLink(statMode)) throw new IOException("Symbolic link found in path: "+parent.path);
             int uid=parentStat.getUID();
             int gid=parentStat.getGID();
             if(
@@ -685,7 +671,7 @@ public class UnixFile {
             }
             file.delete();
         } catch(IOException err) {
-            System.err.println("Error recursively delete: "+file.filename);
+            System.err.println("Error recursively delete: "+file.path);
             throw err;
         }
     }
@@ -711,7 +697,7 @@ public class UnixFile {
      */
     final public long getAccessTime() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getAccessTime();
     }
 
@@ -724,7 +710,7 @@ public class UnixFile {
      */
     final public long getBlockCount() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getBlockCount();
     }
 
@@ -737,7 +723,7 @@ public class UnixFile {
      */
     final public int getBlockSize() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getBlockSize();
     }
 
@@ -750,7 +736,7 @@ public class UnixFile {
      */
     final public long getChangeTime() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getChangeTime();
     }
 
@@ -763,7 +749,7 @@ public class UnixFile {
      */
     final public long getDevice() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getDevice();
     }
 
@@ -776,27 +762,27 @@ public class UnixFile {
      */
     final public long getDeviceIdentifier() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getDeviceIdentifier();
     }
 
     /**
-     * Gets the extension from the filename.
+     * Gets the extension from the path.
      */
-    public static String getExtension(String filename) {
-        int pos=filename.lastIndexOf('.');
+    public static String getExtension(String path) {
+        int pos=path.lastIndexOf('.');
         if(pos<1) return "";
         // If a / follows the ., then no extension
-        int pos2=filename.indexOf('/', pos+1);
+        int pos2=path.indexOf('/', pos+1);
         if(pos2!=-1) return "";
-        return filename.substring(pos+1);
+        return path.substring(pos+1);
     }
     
     /**
      * Gets the extension for this file.
      */
     final public String getExtension() {
-        return getExtension(filename);
+        return getExtension(path);
     }
 
     /**
@@ -804,15 +790,25 @@ public class UnixFile {
      * Not synchronized because multiple instantiation is acceptable.
      */
     final public File getFile() {
-        if (file == null) file = new File(filename);
+        if (file == null) file = new File(path);
         return file;
     }
 
     /**
-     * Gets the filename for this <code>UnixFile</code>.
+     * Gets the path for this <code>UnixFile</code>.
+     * 
+     * @deprecated  the filename is misleading since it represents the entire path, please use <code>getPath()</code> instead.
+     * @see  #getPath()
      */
     final public String getFilename() {
-        return filename;
+        return path;
+    }
+
+    /**
+     * Gets the path for this <code>UnixFile</code>.
+     */
+    final public String getPath() {
+        return path;
     }
 
     /**
@@ -824,7 +820,7 @@ public class UnixFile {
      */
     final public int getGID() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getGID();
     }
 
@@ -837,7 +833,7 @@ public class UnixFile {
      */
     final public long getInode() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getInode();
     }
 
@@ -850,7 +846,7 @@ public class UnixFile {
      */
     final public int getLinkCount() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getNumberLinks();
     }
 
@@ -863,7 +859,7 @@ public class UnixFile {
      */
     final public long getMode() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getMode();
     }
 
@@ -904,7 +900,7 @@ public class UnixFile {
      */
     final public String getModeString() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getModeString();
     }
 
@@ -918,7 +914,7 @@ public class UnixFile {
             secureParents(parentsChanged);
 
             // Make sure the file does not exist
-            if(!getStat().isRegularFile()) throw new IOException("Not a regular file: "+filename);
+            if(!getStat().isRegularFile()) throw new IOException("Not a regular file: "+path);
 
             // Create the new file with the correct owner and permissions
             return new FileInputStream(getFile());
@@ -939,9 +935,9 @@ public class UnixFile {
             // Make sure the file does not exist
             Stat stat = getStat();
             if(overwrite) {
-                if(stat.exists() && !stat.isRegularFile()) throw new IOException("Not a regular file: "+filename);
+                if(stat.exists() && !stat.isRegularFile()) throw new IOException("Not a regular file: "+path);
             } else {
-                if(stat.exists()) throw new IOException("File already exists: "+filename);
+                if(stat.exists()) throw new IOException("File already exists: "+path);
             }
 
             // Create the new file with the correct owner and permissions
@@ -963,7 +959,7 @@ public class UnixFile {
             secureParents(parentsChanged);
 
             // Make sure the file does not exist
-            if(!getStat().isRegularFile()) throw new IOException("Not a regular file: "+filename);
+            if(!getStat().isRegularFile()) throw new IOException("Not a regular file: "+path);
 
             // Create the new file with the correct owner and permissions
             return new RandomAccessFile(getFile(), mode);
@@ -989,7 +985,7 @@ public class UnixFile {
      */
     final public long getStatMode() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getRawMode();
     }
 
@@ -1002,7 +998,7 @@ public class UnixFile {
      */
     final public long getModifyTime() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getModifyTime();
     }
 
@@ -1015,7 +1011,7 @@ public class UnixFile {
      */
     final public long getSize() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getSize();
     }
 
@@ -1027,10 +1023,10 @@ public class UnixFile {
      */
     public static UnixFile mktemp(String template) throws IOException {
         try {
-            String filename=template+"XXXXXX";
-            checkWrite(filename);
+            String path=template+"XXXXXX";
+            checkWrite(path);
             loadLibrary();
-            return new UnixFile(mktemp0(filename));
+            return new UnixFile(mktemp0(path));
         } catch(IOException err) {
             System.err.println("UnixFile.mktemp: IOException: template="+template);
             throw err;
@@ -1048,7 +1044,7 @@ public class UnixFile {
      */
     public final int getUID() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getUID();
     }
 
@@ -1068,7 +1064,7 @@ public class UnixFile {
      */
     final public boolean isBlockDevice() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.isBlockDevice();
     }
 
@@ -1088,7 +1084,7 @@ public class UnixFile {
      */
     final public boolean isCharacterDevice() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.isCharacterDevice();
     }
 
@@ -1108,7 +1104,7 @@ public class UnixFile {
      */
     final public boolean isDirectory() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.isDirectory();
     }
 
@@ -1128,7 +1124,7 @@ public class UnixFile {
      */
     final public boolean isFIFO() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.isFIFO();
     }
 
@@ -1151,7 +1147,7 @@ public class UnixFile {
      */
     final public boolean isRegularFile() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.isRegularFile();
     }
 
@@ -1159,7 +1155,7 @@ public class UnixFile {
      * Determines if this file is the root directory.
      */
     final public boolean isRootDirectory() {
-        return filename.equals("/");
+        return path.equals("/");
     }
 
     /**
@@ -1178,7 +1174,7 @@ public class UnixFile {
      */
     final public boolean isSocket() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.isSocket();
     }
 
@@ -1198,7 +1194,7 @@ public class UnixFile {
      */
     final public boolean isSymLink() throws IOException {
         Stat stat = getStat();
-        if(!stat.exists()) throw new FileNotFoundException(filename);
+        if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.isSymLink();
     }
 
@@ -1219,7 +1215,7 @@ public class UnixFile {
      * This method will follow symbolic links in the path.
      */
     final public UnixFile mkdir() throws IOException {
-        if(!getFile().mkdir()) throw new IOException("Unable to make directory: " + filename);
+        if(!getFile().mkdir()) throw new IOException("Unable to make directory: " + path);
         return this;
     }
     
@@ -1277,11 +1273,11 @@ public class UnixFile {
     final public UnixFile mknod(long mode, long device) throws IOException {
         checkWrite();
         loadLibrary();
-        mknod0(filename, mode, device);
+        mknod0(path, mode, device);
         return this;
     }
 
-    private static native void mknod0(String filename, long mode, long device) throws IOException;
+    private static native void mknod0(String path, long mode, long device) throws IOException;
 
     /**
      * Creates a FIFO.
@@ -1291,11 +1287,11 @@ public class UnixFile {
     final public UnixFile mkfifo(long mode) throws IOException {
         checkWrite();
         loadLibrary();
-        mkfifo0(filename, mode&PERMISSION_MASK);
+        mkfifo0(path, mode&PERMISSION_MASK);
         return this;
     }
 
-    private static native void mkfifo0(String filename, long mode) throws IOException;
+    private static native void mkfifo0(String path, long mode) throws IOException;
 
     /**
      * Sets the access time for this file.
@@ -1308,7 +1304,7 @@ public class UnixFile {
         checkWrite();
         // getStat does loadLibrary already: loadLibrary();
         long mtime = getStat().getModifyTime();
-        utime0(filename, atime, mtime);
+        utime0(path, atime, mtime);
         return this;
     }
 
@@ -1323,7 +1319,7 @@ public class UnixFile {
         checkWrite();
         // getStat does loadLibrary already: loadLibrary();
         int uid = getStat().getUID();
-        chown0(filename, uid, gid);
+        chown0(path, uid, gid);
         return this;
     }
 
@@ -1335,11 +1331,11 @@ public class UnixFile {
     final public UnixFile setMode(long mode) throws IOException {
         checkWrite();
         loadLibrary();
-        setMode0(filename, mode & PERMISSION_MASK);
+        setMode0(path, mode & PERMISSION_MASK);
         return this;
     }
 
-    private static native void setMode0(String filename, long mode) throws IOException;
+    private static native void setMode0(String path, long mode) throws IOException;
 
     /**
      * Sets the modification time for this file.
@@ -1352,7 +1348,7 @@ public class UnixFile {
         checkWrite();
         // getStat does loadLibrary already: loadLibrary();
         long atime = getStat().getAccessTime();
-        utime0(filename, atime, mtime);
+        utime0(path, atime, mtime);
         return this;
     }
 
@@ -1367,7 +1363,7 @@ public class UnixFile {
         checkWrite();
         // getStat does loadLibrary already: loadLibrary();
         int gid = getStat().getGID();
-        chown0(filename, uid, gid);
+        chown0(path, uid, gid);
         return this;
     }
 
@@ -1379,11 +1375,11 @@ public class UnixFile {
     final public UnixFile symLink(String destination) throws IOException {
         checkWrite();
         loadLibrary();
-        symLink0(filename, destination);
+        symLink0(path, destination);
         return this;
     }
 
-    final static native private void symLink0(String filename, String destination) throws IOException;
+    final static native private void symLink0(String path, String destination) throws IOException;
 
     /**
      * Creates a hard link.
@@ -1391,7 +1387,7 @@ public class UnixFile {
      * This method will follow symbolic links in the path.
      */
     final public UnixFile link(UnixFile destination) throws IOException {
-        return link(destination.getFilename());
+        return link(destination.getPath());
     }
 
     /**
@@ -1402,11 +1398,11 @@ public class UnixFile {
     final public UnixFile link(String destination) throws IOException {
         checkWrite();
         loadLibrary();
-        link0(filename, destination);
+        link0(path, destination);
         return this;
     }
 
-    final static native private void link0(String filename, String destination) throws IOException;
+    final static native private void link0(String path, String destination) throws IOException;
 
     /**
      * Reads a symbolic link.
@@ -1416,10 +1412,10 @@ public class UnixFile {
     final public String readLink() throws IOException {
         checkRead();
         loadLibrary();
-        return readLink0(filename);
+        return readLink0(path);
     }
     
-    final static native private String readLink0(String filename) throws IOException;
+    final static native private String readLink0(String path) throws IOException;
 
     /**
      * Renames this file, possibly overwriting any previous file.
@@ -1429,12 +1425,12 @@ public class UnixFile {
      * @see File#renameTo(File)
      */
     final public void renameTo(UnixFile uf) throws IOException {
-        if(!getFile().renameTo(uf.getFile())) throw new IOException("Unable to rename "+filename+" to "+uf.filename);
+        if(!getFile().renameTo(uf.getFile())) throw new IOException("Unable to rename "+path+" to "+uf.path);
     }
 
     @Override
     final public String toString() {
-        return filename;
+        return path;
     }
 
     /**
@@ -1445,15 +1441,15 @@ public class UnixFile {
     final public UnixFile utime(long atime, long mtime) throws IOException {
         checkWrite();
         loadLibrary();
-        utime0(filename, atime, mtime);
+        utime0(path, atime, mtime);
         return this;
     }
 
-    private static native void utime0(String filename, long atime, long mtime) throws IOException;
+    private static native void utime0(String path, long atime, long mtime) throws IOException;
     
     @Override
     public int hashCode() {
-        return filename.hashCode();
+        return path.hashCode();
     }
     
     @Override
@@ -1461,7 +1457,7 @@ public class UnixFile {
         return
             O!=null
             && (O instanceof UnixFile)
-            && ((UnixFile) O).filename.equals(filename)
+            && ((UnixFile) O).path.equals(path)
         ;
     }
 }
