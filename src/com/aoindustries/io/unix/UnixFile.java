@@ -970,11 +970,14 @@ public class UnixFile {
     }
 
     /**
-     * Gets the parent of this file.
+     * Gets the parent of this file or <code>null</code> if it doesn't have a parent.
      * Not synchronized because multiple instantiation is acceptable.
      */
     final public UnixFile getParent() {
-        if(parent==null) parent = isRootDirectory() ? this : new UnixFile(getFile().getParentFile());
+        if(parent==null) {
+            File parentFile = getFile().getParentFile();
+            if(parentFile!=null) parent = new UnixFile(parentFile);
+        }
         return parent;
     }
 
