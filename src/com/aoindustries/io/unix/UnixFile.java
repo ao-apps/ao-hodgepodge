@@ -974,7 +974,7 @@ public class UnixFile {
      * Not synchronized because multiple instantiation is acceptable.
      */
     final public UnixFile getParent() {
-        if(parent==null) parent = new UnixFile(getFile().getParentFile());
+        if(parent==null) parent = isRootDirectory() ? this : new UnixFile(getFile().getParentFile());
         return parent;
     }
 
