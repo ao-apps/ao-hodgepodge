@@ -188,7 +188,8 @@ public class UnixFile {
      */
     protected final String path;
     
-    volatile private File file;
+    private File file;
+    private UnixFile parent;
 
     /**
      * Strictly requires the parent to be a directory if it exists.
@@ -573,7 +574,7 @@ public class UnixFile {
         }
     }
 
-    private static class SecuredDirectory {
+    public static class SecuredDirectory {
         private UnixFile directory;
         private long mode;
         private int uid, gid;
@@ -970,9 +971,11 @@ public class UnixFile {
 
     /**
      * Gets the parent of this file.
+     * Not synchronized because multiple instantiation is acceptable.
      */
     final public UnixFile getParent() {
-        return new UnixFile(getFile().getParentFile());
+        if(parent==null) parent = new UnixFile(getFile().getParentFile());
+        return parent;
     }
 
     /**
