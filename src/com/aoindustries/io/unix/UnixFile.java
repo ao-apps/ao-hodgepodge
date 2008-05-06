@@ -176,7 +176,19 @@ public class UnixFile {
         if(!loaded) {
             synchronized(libraryLock) {
                 if(!loaded) {
-                    System.loadLibrary("aocode");
+                    try {
+                        System.loadLibrary("aocode");
+                    } catch(UnsatisfiedLinkError err) {
+                        // This may happen after a classloader reloads within the running JVM
+                        String message = err.getMessage();
+                        if(
+                            message==null
+                            || !message.startsWith("Native Library ")
+                            || !message.endsWith(" already loaded in another classloader")
+                        ) {
+                            throw err;
+                        }
+                    }
                     loaded=true;
                 }
             }
