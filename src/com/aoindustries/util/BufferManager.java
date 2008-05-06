@@ -45,7 +45,9 @@ final public class BufferManager {
      * Various statistics
      */
     private static long
+        bytesCreates=0,
         bytesUses=0,
+        charsCreates=0,
         charsUses=0
     ;
 
@@ -59,7 +61,10 @@ final public class BufferManager {
         synchronized(bytes) {
             bytesUses++;
             int len = bytes.size();
-            if(len==0) return new byte[BUFFER_SIZE];
+            if(len==0) {
+                bytesCreates++;
+                return new byte[BUFFER_SIZE];
+            }
             return bytes.remove(len-1);
         }
     }
@@ -74,7 +79,10 @@ final public class BufferManager {
         synchronized(chars) {
             charsUses++;
             int len = chars.size();
-            if(len==0) return new char[BUFFER_SIZE];
+            if(len==0) {
+                charsCreates++;
+                return new char[BUFFER_SIZE];
+            }
             return chars.remove(len-1);
         }
     }
@@ -115,9 +123,9 @@ final public class BufferManager {
         return false;
     }
 
-    public static int getByteBufferCount() {
+    public static long getByteBufferCreates() {
         synchronized(bytes) {
-            return bytes.size();
+            return bytesCreates;
         }
     }
 
@@ -127,9 +135,9 @@ final public class BufferManager {
         }
     }
 
-    public static int getCharBufferCount() {
+    public static long getCharBufferCreates() {
         synchronized(chars) {
-            return chars.size();
+            return charsCreates;
         }
     }
 
