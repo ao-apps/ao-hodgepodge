@@ -31,6 +31,7 @@ public class BitRateOutputStream extends FilterOutputStream {
         this.provider=provider;
     }
 
+    @Override
     public void write(int b) throws IOException {
         if(blockStart==-1) blockStart=System.currentTimeMillis();
         out.write(b);
@@ -38,6 +39,7 @@ public class BitRateOutputStream extends FilterOutputStream {
         sleepIfNeeded();
     }
     
+    @Override
     public void write(byte[] b) throws IOException {
         if(blockStart==-1) blockStart=System.currentTimeMillis();
         out.write(b, 0, b.length);
@@ -45,6 +47,7 @@ public class BitRateOutputStream extends FilterOutputStream {
         sleepIfNeeded();
     }
     
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
         if(blockStart==-1) blockStart=System.currentTimeMillis();
         out.write(b, off, len);
@@ -52,12 +55,14 @@ public class BitRateOutputStream extends FilterOutputStream {
         sleepIfNeeded();
     }
 
+    @Override
     public void flush() throws IOException {
         if(blockStart==-1) blockStart=System.currentTimeMillis();
         out.flush();
         sleep();
     }
     
+    @Override
     public void close() throws IOException {
         out.flush();
         out.close();

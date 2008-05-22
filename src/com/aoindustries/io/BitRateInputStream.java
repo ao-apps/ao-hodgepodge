@@ -31,11 +31,13 @@ public class BitRateInputStream extends FilterInputStream {
         this.provider=provider;
     }
 
+    @Override
     public void close() throws IOException {
         in.close();
         sleep();
     }
     
+    @Override
     public int read() throws IOException {
         if(blockStart==-1) blockStart=System.currentTimeMillis();
         int b=in.read();
@@ -44,6 +46,7 @@ public class BitRateInputStream extends FilterInputStream {
         return b;
     }
     
+    @Override
     public int read(byte[] buff) throws IOException {
         if(blockStart==-1) blockStart=System.currentTimeMillis();
         int count=in.read(buff);
@@ -52,6 +55,7 @@ public class BitRateInputStream extends FilterInputStream {
         return count;
     }
     
+    @Override
     public int read(byte[] buff, int off, int len) throws IOException {
         if(blockStart==-1) blockStart=System.currentTimeMillis();
         int count=in.read(buff, off, len);
