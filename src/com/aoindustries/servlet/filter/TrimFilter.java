@@ -37,7 +37,7 @@ public class TrimFilter implements Filter {
 
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain) throws IOException, ServletException {
-        // Makes sure only one trim filter is applier per request
+        // Makes sure only one trim filter is applied per request
         if(
             request.getAttribute(REQUEST_ATTRIBUTE_KEY)==null
             && (response instanceof HttpServletResponse)

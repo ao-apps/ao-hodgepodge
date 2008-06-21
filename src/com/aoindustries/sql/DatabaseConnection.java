@@ -23,7 +23,6 @@ import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -631,6 +630,110 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     long endTime = System.currentTimeMillis();
                     System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: pstmt.close() in "+(endTime-startTime)+" ms");
                 }
+            }
+        } catch(RuntimeException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            Connection conn = getConnection(isolationLevel, readOnly);
+
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            try {
+                setParams(pstmt, params);
+
+                incrementQueryCount();
+
+                ResultSet results=pstmt.executeQuery();
+                try {
+                    if(results.next()) {
+                        T object = objectFactory.createObject(results);
+                        if(results.next()) throw new SQLException("More than one row returned.");
+                        return object;
+                    }
+                    if(rowRequired) throw new SQLException("No row returned.");
+                    return null;
+                } finally {
+                    results.close();
+                }
+            } catch(SQLException err) {
+                throw new WrappedSQLException(err, pstmt);
+            } finally {
+                pstmt.close();
+            }
+        } catch(RuntimeException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            Connection conn = getConnection(isolationLevel, readOnly);
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            try {
+                setParams(pstmt, params);
+
+                incrementQueryCount();
+
+                ResultSet results=pstmt.executeQuery();
+                try {
+                    List<T> list=new ArrayList<T>();
+                    while(results.next()) list.add(objectFactory.createObject(results));
+                    return list;
+                } finally {
+                    results.close();
+                }
+            } catch(SQLException err) {
+                throw new WrappedSQLException(err, pstmt);
+            } finally {
+                pstmt.close();
+            }
+        } catch(RuntimeException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
+    public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            try {
+                setParams(pstmt, params);
+                incrementQueryCount();
+                ResultSet results=pstmt.executeQuery();
+                try {
+                    List<Short> V=new ArrayList<Short>();
+                    while(results.next()) V.add(results.getShort(1));
+                    return V;
+                } finally {
+                    results.close();
+                }
+            } catch(SQLException err) {
+                throw new WrappedSQLException(err, pstmt);
+            } finally {
+                pstmt.close();
             }
         } catch(RuntimeException err) {
             getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);

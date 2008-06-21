@@ -62,6 +62,18 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, clazz, sql, params);
     }
 
+    public <T> T executeObjectQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        return executeObjectQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, objectFactory, sql, params);
+    }
+
+    public <T> List<T> executeObjectListQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, objectFactory, sql, params);
+    }
+
+    public List<Short> executeShortListQuery(String sql, Object ... params) throws IOException, SQLException {
+        return executeShortListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
+    }
+
     public short executeShortQuery(String sql, Object ... params) throws IOException, SQLException {
         return executeShortQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }

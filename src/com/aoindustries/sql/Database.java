@@ -397,6 +397,112 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            DatabaseConnection conn=createDatabaseConnection();
+            try {
+                T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, objectFactory, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
+            } catch(IOException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } catch(SQLException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } finally {
+                conn.releaseConnection();
+            }
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+            DatabaseConnection conn=createDatabaseConnection();
+            if(DEBUG_TIMING) {
+                long endTime = System.currentTimeMillis();
+                System.err.println("DEBUG: Database: executeObjectListQuery: createDatabaseConnection in "+(endTime-startTime)+" ms");
+            }
+            try {
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, objectFactory, sql, params);
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: Database: executeObjectListQuery: executeObjectListQuery in "+(endTime-startTime)+" ms");
+                }
+                if(!readOnly) {
+                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                    conn.commit();
+                    if(DEBUG_TIMING) {
+                        long endTime = System.currentTimeMillis();
+                        System.err.println("DEBUG: Database: executeObjectListQuery: commit in "+(endTime-startTime)+" ms");
+                    }
+                }
+                return value;
+            } catch(IOException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } catch(SQLException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } finally {
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                conn.releaseConnection();
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: Database: executeObjectListQuery: releaseConnection in "+(endTime-startTime)+" ms");
+                }
+            }
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
+    public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            DatabaseConnection conn=createDatabaseConnection();
+            try {
+                List<Short> value=conn.executeShortListQuery(isolationLevel, readOnly, sql, params);
+                if(!readOnly) conn.commit();
+                return value;
+            } catch(IOException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } catch(SQLException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } finally {
+                conn.releaseConnection();
+            }
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
     public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
         try {
             DatabaseConnection conn=createDatabaseConnection();

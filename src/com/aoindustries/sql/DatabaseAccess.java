@@ -172,6 +172,51 @@ public interface DatabaseAccess {
     <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException;
 
     /**
+     * Read-only query the database with a <code>&lt;T&gt;</code> return type, objects are created with the provided factory.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    <T> T executeObjectQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Query the database with a <code>&lt;T&gt;</code> return type, objects are created with the provided factory.
+     */
+    <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Read-only query the database with a <code>List&lt;T&gt;</code> return type, objects are created with the provided factory.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    <T> List<T> executeObjectListQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Query the database with a <code>List&lt;T&gt;</code> return type, objects are created with the provided factory.
+     */
+    <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Read-only query the database with a <code>List<Short></code> return type.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    List<Short> executeShortListQuery(String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Query the database with a <code>List<Short></code> return type.
+     */
+    List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
      * Read-only query the database with a <code>short</code> return type.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
