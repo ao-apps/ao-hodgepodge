@@ -27,9 +27,11 @@ public class TrimFilterWriter extends PrintWriter {
 
     private PrintWriter wrapped;
     boolean inTextArea = false;
+    boolean inPre = false;
     private boolean atLineStart = true;
 
     private int readCharMatchCount = 0;
+    private int preReadCharMatchCount = 0;
     private static final int OUPUT_BUFFER_SIZE=4096;
     private char[] outputBuffer = new char[OUPUT_BUFFER_SIZE];
     private int outputBufferUsed = 0;
@@ -46,7 +48,9 @@ public class TrimFilterWriter extends PrintWriter {
     public void close() {
         wrapped.close();
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         inTextArea = false;
+        inPre = false;
         atLineStart = true;
     }
 
@@ -59,6 +63,12 @@ public class TrimFilterWriter extends PrintWriter {
 
     static final char[] textarea_close = {'<', '/', 't', 'e', 'x', 't', 'a', 'r', 'e', 'a'};
     static final char[] TEXTAREA_CLOSE = {'<', '/', 'T', 'E', 'X', 'T', 'A', 'R', 'E', 'A'};
+
+    static final char[] pre = {'<', 'p', 'r', 'e'};
+    static final char[] PRE = {'<', 'P', 'R', 'E'};
+
+    static final char[] pre_close = {'<', '/', 'p', 'r', 'e'};
+    static final char[] PRE_CLOSE = {'<', '/', 'P', 'R', 'E'};
 
     /**
      * Processes one character and returns true if the character should be outputted.
@@ -78,13 +88,29 @@ public class TrimFilterWriter extends PrintWriter {
                 readCharMatchCount=0;
             }
             return true;
+        } else if(inPre) {
+            if(
+                c==pre_close[preReadCharMatchCount]
+                || c==PRE_CLOSE[preReadCharMatchCount]
+            ) {
+                preReadCharMatchCount++;
+                if(preReadCharMatchCount>=pre_close.length) {
+                    inPre=false;
+                    preReadCharMatchCount=0;
+                }
+            } else {
+                preReadCharMatchCount=0;
+            }
+            return true;
         } else {
             if(c=='\r') {
                 readCharMatchCount = 0;
+                preReadCharMatchCount = 0;
                 // Carriage return only output when no longer at the beginning of the line
                 return !atLineStart;
             } else if(c=='\n') {
                 readCharMatchCount = 0;
+                preReadCharMatchCount = 0;
                 // Newline only output when no longer at the beginning of the line
                 if(!atLineStart) {
                     atLineStart = true;
@@ -94,6 +120,7 @@ public class TrimFilterWriter extends PrintWriter {
                 }
             } else if(c==' ' || c=='\t') {
                 readCharMatchCount = 0;
+                preReadCharMatchCount = 0;
                 // Space and tab only output when no longer at the beginning of the line
                 return !atLineStart;
             } else {
@@ -109,6 +136,18 @@ public class TrimFilterWriter extends PrintWriter {
                     }
                 } else {
                     readCharMatchCount=0;
+                }
+                if(
+                    c==pre[preReadCharMatchCount]
+                    || c==PRE[preReadCharMatchCount]
+                ) {
+                    preReadCharMatchCount++;
+                    if(preReadCharMatchCount>=pre.length) {
+                        inPre=true;
+                        preReadCharMatchCount=0;
+                    }
+                } else {
+                    preReadCharMatchCount=0;
                 }
                 return true;
             }
@@ -166,6 +205,7 @@ public class TrimFilterWriter extends PrintWriter {
     public void print(boolean b) {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(b);
     }
 
@@ -176,24 +216,28 @@ public class TrimFilterWriter extends PrintWriter {
     public void print(int i) {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(i);
     }
 
     public void print(long l) {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(l);
     }
 
     public void print(float f) {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(f);
     }
 
     public void print(double d) {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(d);
     }
 
@@ -204,6 +248,7 @@ public class TrimFilterWriter extends PrintWriter {
     public void println(boolean b) {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(b);
     }
 
@@ -215,24 +260,28 @@ public class TrimFilterWriter extends PrintWriter {
     public void println(int i) {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(i);
     }
 
     public void println(long l) {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(l);
     }
 
     public void println(float f) {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(f);
     }
 
     public void println(double d) {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(d);
     }
     

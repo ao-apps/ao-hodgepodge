@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Filters the output and removes extra white space at the beginning of lines and completely removes blank lines.
  * TEXTAREAs are automatically detected as long as they start with exact "&lt;textarea" and end with exactly "&lt;/textarea" (case insensitive).
+ * PREs are automatically detected as long as they start with exact "&lt;pre" and end with exactly "&lt;/pre" (case insensitive).
  * The reason for the specific tag format is to simplify the implementation
  * for maximum performance.
  *

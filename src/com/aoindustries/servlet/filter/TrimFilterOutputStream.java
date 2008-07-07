@@ -12,6 +12,7 @@ import javax.servlet.ServletOutputStream;
 /**
  * Filters the output and removes extra white space at the beginning of lines and completely removes blank lines.
  * TEXTAREAs are automatically detected as long as they start with exact "&lt;textarea" and end with exactly "&lt;/textarea" (case insensitive).
+ * PREs are automatically detected as long as they start with exact "&lt;pre" and end with exactly "&lt;/pre" (case insensitive).
  * The reason for the specific tag format is to simplify the implementation
  * for maximum performance.  Careful attention has been paid to minimize the internal buffering in this class.  As many write/print operations as possible
  * are passed directly to the wrapped <code>ServletOutputStream</code>.  Please note that these methods are not synchronized, as servlet output is normally written
@@ -27,9 +28,11 @@ public class TrimFilterOutputStream extends ServletOutputStream {
 
     private ServletOutputStream wrapped;
     boolean inTextArea = false;
+    boolean inPre = false;
     private boolean atLineStart = true;
 
     private int readCharMatchCount = 0;
+    private int preReadCharMatchCount = 0;
     private static final int OUPUT_BUFFER_SIZE=4096;
     private byte[] outputBuffer = new byte[OUPUT_BUFFER_SIZE];
     private int outputBufferUsed = 0;
@@ -41,7 +44,9 @@ public class TrimFilterOutputStream extends ServletOutputStream {
     public void close() throws IOException {
         wrapped.close();
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         inTextArea = false;
+        inPre = false;
         atLineStart = true;
     }
     
@@ -67,13 +72,29 @@ public class TrimFilterOutputStream extends ServletOutputStream {
                 readCharMatchCount=0;
             }
             return true;
+        } else if(inPre) {
+            if(
+                c==TrimFilterWriter.pre_close[preReadCharMatchCount]
+                || c==TrimFilterWriter.PRE_CLOSE[preReadCharMatchCount]
+            ) {
+                preReadCharMatchCount++;
+                if(preReadCharMatchCount>=TrimFilterWriter.pre_close.length) {
+                    inPre=false;
+                    preReadCharMatchCount=0;
+                }
+            } else {
+                preReadCharMatchCount=0;
+            }
+            return true;
         } else {
             if(c=='\r') {
                 readCharMatchCount = 0;
+                preReadCharMatchCount = 0;
                 // Carriage return only output when no longer at the beginning of the line
                 return !atLineStart;
             } else if(c=='\n') {
                 readCharMatchCount = 0;
+                preReadCharMatchCount = 0;
                 // Newline only output when no longer at the beginning of the line
                 if(!atLineStart) {
                     atLineStart = true;
@@ -83,6 +104,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
                 }
             } else if(c==' ' || c=='\t') {
                 readCharMatchCount = 0;
+                preReadCharMatchCount = 0;
                 // Space and tab only output when no longer at the beginning of the line
                 return !atLineStart;
             } else {
@@ -98,6 +120,18 @@ public class TrimFilterOutputStream extends ServletOutputStream {
                     }
                 } else {
                     readCharMatchCount=0;
+                }
+                if(
+                    c==TrimFilterWriter.pre[preReadCharMatchCount]
+                    || c==TrimFilterWriter.PRE[preReadCharMatchCount]
+                ) {
+                    preReadCharMatchCount++;
+                    if(preReadCharMatchCount>=TrimFilterWriter.pre.length) {
+                        inPre=true;
+                        preReadCharMatchCount=0;
+                    }
+                } else {
+                    preReadCharMatchCount=0;
                 }
                 return true;
             }
@@ -135,6 +169,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
     public void print(boolean b) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(b);
     }
 
@@ -145,24 +180,28 @@ public class TrimFilterOutputStream extends ServletOutputStream {
     public void print(double d) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(d);
     }
 
     public void print(float f) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(f);
     }
 
     public void print(int i) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(i);
     }
 
     public void print(long l) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.print(l);
     }
 
@@ -195,6 +234,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
     public void println(boolean b) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(b);
     }
 
@@ -206,24 +246,28 @@ public class TrimFilterOutputStream extends ServletOutputStream {
     public void println(double d) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(d);
     }
     
     public void println(float f) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(f);
     }
     
     public void println(int i) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(i);
     }
     
     public void println(long l) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.println(l);
     }
 
