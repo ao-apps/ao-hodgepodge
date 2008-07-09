@@ -78,12 +78,12 @@ final public class Profiler {
     private static Thread[] threads=new Thread[START_SIZE];
     private static int[] stackDepths=new int[START_SIZE];
     private static long[][] startTimes=new long[START_SIZE][];
-    private static MethodProfile[][] methodProfiles=new MethodProfile[START_SIZE][];
+    private static PrivateMethodProfile[][] methodProfiles=new PrivateMethodProfile[START_SIZE][];
 
     /**
      * Caches profile method names.
      */
-    private static final SortedArrayList<MethodProfile> methodProfileCache=new SortedArrayList<MethodProfile>();
+    private static final SortedArrayList<PrivateMethodProfile> methodProfileCache=new SortedArrayList<PrivateMethodProfile>();
 
     private static long methodCount=0;
     private static int concurrency=0;
@@ -96,7 +96,7 @@ final public class Profiler {
                 int stackDepth=--stackDepths[index=getThreadIndex()];
                 if(stackDepth>=0) {
                     // Get the values
-                    MethodProfile profile=methodProfiles[index][stackDepth];
+                    PrivateMethodProfile profile=methodProfiles[index][stackDepth];
 
                     // Debug level mismatches
                     if(profile.level!=level) throw new IllegalArgumentException("Profile level mismatch.  startProfile called with level="+profile.level+" and endProfile called with level="+level);
@@ -168,7 +168,7 @@ final public class Profiler {
             System.arraycopy(startTimes, 0, newTimes, 0, bottom);
             System.arraycopy(startTimes, bottom, newTimes, destIndex, copyLen);
             startTimes=newTimes;
-            MethodProfile[][] newProfiles=new MethodProfile[newLen][];
+            PrivateMethodProfile[][] newProfiles=new PrivateMethodProfile[newLen][];
             System.arraycopy(methodProfiles, 0, newProfiles, 0, bottom);
             System.arraycopy(methodProfiles, bottom, newProfiles, destIndex, copyLen);
             methodProfiles=newProfiles;
@@ -183,7 +183,7 @@ final public class Profiler {
         threads[bottom]=thread;
         stackDepths[bottom]=0;
         startTimes[bottom]=new long[START_SIZE];
-        methodProfiles[bottom]=new MethodProfile[START_SIZE];
+        methodProfiles[bottom]=new PrivateMethodProfile[START_SIZE];
 
         return bottom;
     }
@@ -215,25 +215,29 @@ final public class Profiler {
         }
     }
 
-    public synchronized static MethodProfile[] getMethodProfiles() {
+    /**
+     * Gets a modifable list of a snapshot copies of the current profiler state.  The list is
+     * modifiable to allow direct sorting after retrieval.
+     */
+    public synchronized static List<MethodProfile> getMethodProfiles() {
         int size=methodProfileCache.size();
-        MethodProfile[] mps=new MethodProfile[size];
-        methodProfileCache.toArray(mps);
+        List<MethodProfile> mps = new ArrayList<MethodProfile>(size);
+        for(int c=0;c<size;c++) mps.add(new MethodProfile(methodProfileCache.get(c)));
         return mps;
     }
 
     public synchronized static MethodProfile getMethodProfile(int level, Class clazz, String method, Object param1) {
-        return getMethodProfile0(level, clazz, method, param1);
+        return new MethodProfile(getMethodProfile0(level, clazz, method, param1));
     }
 
-    private static MethodProfile getMethodProfile0(int level, Class clazz, String method, Object param1) {
-        int hash=MethodProfile.hashCode(clazz, method, param1);
+    private static PrivateMethodProfile getMethodProfile0(int level, Class clazz, String method, Object param1) {
+        int hash=PrivateMethodProfile.hashCode(clazz, method, param1);
         int index=methodProfileCache.indexOf(hash);
         if(index>=0) {
             // Look forward until a match is found
             int size=methodProfileCache.size();
             while(index<size) {
-                MethodProfile mp=methodProfileCache.get(index);
+                PrivateMethodProfile mp=methodProfileCache.get(index);
                 if(mp.hashCode()!=hash) break;
                 if(mp.equals(level, clazz, method, param1)) return mp;
             }
@@ -248,9 +252,9 @@ final public class Profiler {
                 if((c=++concurrency)>maxConcurrency) maxConcurrency=c;
                 methodCount++;
 
-                MethodProfile profile=getMethodProfile0(level, clazz, method, param1);
+                PrivateMethodProfile profile=getMethodProfile0(level, clazz, method, param1);
                 if(profile==null) {
-                    methodProfileCache.add(profile=new MethodProfile(level, clazz, method, param1));
+                    methodProfileCache.add(profile=new PrivateMethodProfile(level, clazz, method, param1));
                 }
 
                 profile.useCount++;
@@ -259,7 +263,7 @@ final public class Profiler {
 
                 int stackDepth=stackDepths[index]++;
                 long[] times=startTimes[index];
-                MethodProfile[] profiles=methodProfiles[index];
+                PrivateMethodProfile[] profiles=methodProfiles[index];
                 
                 int arraySize=profiles.length;
                 if(stackDepth>=arraySize) {
@@ -268,7 +272,7 @@ final public class Profiler {
                     long[] newTimes=new long[newLen];
                     System.arraycopy(times, 0, newTimes, 0, stackDepth);
                     startTimes[index]=times=newTimes;
-                    MethodProfile[] newProfiles=new MethodProfile[newLen];
+                    PrivateMethodProfile[] newProfiles=new PrivateMethodProfile[newLen];
                     System.arraycopy(profiles, 0, newProfiles, 0, stackDepth);
                     methodProfiles[index]=profiles=newProfiles;
                 }

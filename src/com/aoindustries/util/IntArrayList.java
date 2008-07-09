@@ -246,7 +246,7 @@ public class IntArrayList extends AbstractList<Integer>
      */
     public Object[] toArray() {
 	Object[] result = new Object[size];
-	System.arraycopy(elementData, 0, result, 0, size);
+        for(int c=0;c<size;c++) result[c] = Integer.valueOf(elementData[c]);
 	return result;
     }
 

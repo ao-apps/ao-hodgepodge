@@ -1,33 +1,44 @@
 package com.aoindustries.profiler;
 
 /*
- * Copyright 2001-2007 by AO Industries, Inc.,
+ * Copyright 2001-2008 by AO Industries, Inc.,
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
 import com.aoindustries.util.StringUtility;
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
 
 /**
+ * Immutable snapshot of <code>PrivateMethodProfile</code> used for reporting.
+ *
  * @author  AO Industries, Inc.
  */
-final public class MethodProfile {
+final public class MethodProfile implements Serializable {
 
-    final int level;
-    private final Class clazz;
+    private static final long serialVersionUID = 1L;
+
+    private final int level;
+    private final String classname;
     private final String method;
-    private final Object param1;
-    long useCount=0;
-    long totalTime=0;
-    long minTime=Long.MAX_VALUE;
-    long maxTime=Long.MIN_VALUE;
+    private final String param1;
+    private final long useCount;
+    private final long totalTime;
+    private final long minTime;
+    private final long maxTime;
 
-    MethodProfile(int level, Class clazz, String method, Object param1) {
-        this.level=level;
-        this.clazz=clazz;
-        this.method=method;
-        this.param1=param1;
+    /**
+     * Creates a clone of the provided object.
+     */
+    MethodProfile(PrivateMethodProfile other) {
+        this.level = other.level;
+        this.classname = other.getProfiledClass().getName();
+        this.method = other.getMethodName();
+        Object oParam1 = other.getParameter1();
+        this.param1 = oParam1==null ? null : oParam1.toString();
+        this.useCount = other.useCount;
+        this.totalTime = other.totalTime;
+        this.minTime = other.minTime;
+        this.maxTime = other.maxTime;
     }
 
     public int getLevel() {
@@ -38,44 +49,40 @@ final public class MethodProfile {
         return Profiler.getProfilerLevelString(level);
     }
 
-    public Class getProfiledClass() {
-        return clazz;
+    public String getProfiledClassName() {
+        return classname;
     }
 
+    @Override
     public boolean equals(Object O) {
         return O!=null && (O instanceof MethodProfile) ? equals((MethodProfile)O):false;
     }
     
     public boolean equals(MethodProfile mp) {
-        return this==mp || equals(mp.level, mp.clazz, mp.method, mp.param1);
+        return this==mp || equals(mp.level, mp.classname, mp.method, mp.param1);
     }
 
-    public boolean equals(int level, Class clazz, String method, Object param1) {
+    public boolean equals(int level, String classname, String method, String param1) {
         return
             this.level==level
-            && this.clazz==clazz
+            && this.classname.equals(classname)
             && this.method.equals(method)
             && this.param1==null?param1==null:this.param1.equals(param1)
         ;
     }
 
-    private int hashCode;
-    private boolean hashCalculated;
+    @Override
     public int hashCode() {
-        if(!hashCalculated) {
-            hashCode=hashCode(clazz, method, param1);
-            hashCalculated=true;
-        }
-        return hashCode;
+        return hashCode(classname, method, param1);
     }
 
-    public static int hashCode(Class clazz, String method, Object param1) {
-        int hash=clazz.hashCode() + method.hashCode();
+    public static int hashCode(String classname, String method, String param1) {
+        int hash=classname.hashCode() + method.hashCode();
         if(param1!=null) hash+=param1.hashCode();
         return hash;
     }
 
-    public Object getParameter1() {
+    public String getParameter1() {
         return param1;
     }
     

@@ -284,7 +284,7 @@ public class LongArrayList extends AbstractList<Long>
      */
     public Object[] toArray() {
 	Object[] result = new Object[size];
-	System.arraycopy(elementData, 0, result, 0, size);
+        for(int c=0;c<size;c++) result[c] = Long.valueOf(elementData[c]);
 	return result;
     }
 
