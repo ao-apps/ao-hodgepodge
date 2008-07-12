@@ -5,7 +5,6 @@ package com.aoindustries.io;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import java.io.*;
 
 /**
@@ -17,30 +16,18 @@ public class BetterByteArrayInputStream extends ByteArrayInputStream {
 
     public BetterByteArrayInputStream(byte[] buf) {
         super(buf);
-        Profiler.startProfile(Profiler.INSTANTANEOUS, BetterByteArrayInputStream.class, "<init>(byte[])", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     public byte[] getInternalByteArray() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, BetterByteArrayInputStream.class, "getInternalByteArray()", null);
-        try {
-            return this.buf;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return this.buf;
     }
 
     public void readFrom(RandomAccessFile raf) throws IOException {
-        Profiler.startProfile(Profiler.IO, BetterByteArrayInputStream.class, "readFrom(RandomAccessFile)", null);
-        try {
-            synchronized(this) {
-                raf.readFully(buf);
-                mark=0;
-                pos=0;
-                count=buf.length;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        synchronized(this) {
+            raf.readFully(buf);
+            mark=0;
+            pos=0;
+            count=buf.length;
         }
     }
 }

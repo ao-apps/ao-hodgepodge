@@ -5,7 +5,6 @@ package com.aoindustries.io.unix.linux;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import com.aoindustries.io.unix.*;
 import com.aoindustries.util.*;
 import java.io.*;
@@ -42,14 +41,9 @@ public class DevRandom extends Random {
      * Opens the <code>FileInputStream</code> that reads from <code>/dev/random</code>.
      */
     public static FileInputStream openDevRandomIn() throws IOException {
-        Profiler.startProfile(Profiler.FAST, DevRandom.class, "openDevRandomIn()", null);
-        try {
-            synchronized(devRandomInLock) {
-                if(devRandomIn==null) devRandomIn=new FileInputStream(devRandomUF.getFile());
-                return devRandomIn;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        synchronized(devRandomInLock) {
+            if(devRandomIn==null) devRandomIn=new FileInputStream(devRandomUF.getFile());
+            return devRandomIn;
         }
     }
     
@@ -57,17 +51,12 @@ public class DevRandom extends Random {
      * Closes the <code>FileInputStream</code> that reads from <code>/dev/random</code>.
      */
     public static void closeDevRandomIn() throws IOException {
-        Profiler.startProfile(Profiler.FAST, DevRandom.class, "closeDevRandomIn()", null);
-        try {
-            synchronized(devRandomInLock) {
-                FileInputStream in=devRandomIn;
-                if(in!=null) {
-                    devRandomIn=null;
-                    in.close();
-                }
+        synchronized(devRandomInLock) {
+            FileInputStream in=devRandomIn;
+            if(in!=null) {
+                devRandomIn=null;
+                in.close();
             }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
         }
     }
 
@@ -85,24 +74,19 @@ public class DevRandom extends Random {
      * Gets the number of random bits currently available in the kernel.
      */
     public static int getEntropyAvail() throws IOException {
-        Profiler.startProfile(Profiler.IO, DevRandom.class, "getEntropyAvail()", null);
+        BufferedReader in=new BufferedReader(new InputStreamReader(new FileInputStream(entropyAvailUF.getFile())));
         try {
-            BufferedReader in=new BufferedReader(new InputStreamReader(new FileInputStream(entropyAvailUF.getFile())));
+            String line=in.readLine();
+            if(line==null) throw new EOFException("EOF when reading from "+ENTROPY_AVAIL_PATH);
             try {
-                String line=in.readLine();
-                if(line==null) throw new EOFException("EOF when reading from "+ENTROPY_AVAIL_PATH);
-                try {
-                    return Integer.parseInt(line.trim());
-                } catch(NumberFormatException err) {
-                    IOException ioErr=new IOException("Unable to parse the output of "+ENTROPY_AVAIL_PATH+": "+line);
-                    ioErr.initCause(err);
-                    throw ioErr;
-                }
-            } finally {
-                in.close();
+                return Integer.parseInt(line.trim());
+            } catch(NumberFormatException err) {
+                IOException ioErr=new IOException("Unable to parse the output of "+ENTROPY_AVAIL_PATH+": "+line);
+                ioErr.initCause(err);
+                throw ioErr;
             }
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            in.close();
         }
     }
 
@@ -120,24 +104,19 @@ public class DevRandom extends Random {
      * Gets the number of bits in the random pool in the kernel.
      */
     public static int getPoolSize() throws IOException {
-        Profiler.startProfile(Profiler.IO, DevRandom.class, "getPoolSize()", null);
+        BufferedReader in=new BufferedReader(new InputStreamReader(new FileInputStream(poolSizeUF.getFile())));
         try {
-            BufferedReader in=new BufferedReader(new InputStreamReader(new FileInputStream(poolSizeUF.getFile())));
+            String line=in.readLine();
+            if(line==null) throw new EOFException("EOF when reading from "+POOL_SIZE_PATH);
             try {
-                String line=in.readLine();
-                if(line==null) throw new EOFException("EOF when reading from "+POOL_SIZE_PATH);
-                try {
-                    return Integer.parseInt(line.trim())*8;
-                } catch(NumberFormatException err) {
-                    IOException ioErr=new IOException("Unable to parse the output of "+POOL_SIZE_PATH+": "+line);
-                    ioErr.initCause(err);
-                    throw ioErr;
-                }
-            } finally {
-                in.close();
+                return Integer.parseInt(line.trim())*8;
+            } catch(NumberFormatException err) {
+                IOException ioErr=new IOException("Unable to parse the output of "+POOL_SIZE_PATH+": "+line);
+                ioErr.initCause(err);
+                throw ioErr;
             }
         } finally {
-            Profiler.endProfile(Profiler.IO);
+            in.close();
         }
     }
 
@@ -150,85 +129,63 @@ public class DevRandom extends Random {
      * Adds random entropy to the kernel.
      */
     public static void addEntropy(byte[] randomData) throws IOException {
-        Profiler.startProfile(Profiler.IO, UnixFile.class, "utime(long,long)", null);
-        try {
-            SecurityManager security=System.getSecurityManager();
-            if(security!=null) security.checkRead(DEV_RANDOM_PATH);
-            UnixFile.loadLibrary();
-            synchronized(addEntropyLock) {
-                addEntropy0(randomData);
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        SecurityManager security=System.getSecurityManager();
+        if(security!=null) security.checkRead(DEV_RANDOM_PATH);
+        UnixFile.loadLibrary();
+        synchronized(addEntropyLock) {
+            addEntropy0(randomData);
         }
     }
 
     private static native void addEntropy0(byte[] randomData) throws IOException;
 
     public DevRandom() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, DevRandom.class, "<init>()", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     /**
      * This class does not use this seed value.
      */
     public void setSeed(long seed) {
-        Profiler.startProfile(Profiler.FAST, DevRandom.class, "setSeed(long)", null);
-        try {
-            super.setSeed(seed);
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        super.setSeed(seed);
     }
 
     protected int next(int bits) {
-        Profiler.startProfile(Profiler.IO, DevRandom.class, "next(int)", null);
         try {
-            try {
-                int result=0;
-                if(bits>=8) {
-                    FileInputStream in=openDevRandomIn();
-                    while(bits>=8) {
-                        int next=in.read();
-                        if(next==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                        result=(result<<8)|next;
-                        bits-=8;
-                    }
+            int result=0;
+            if(bits>=8) {
+                FileInputStream in=openDevRandomIn();
+                while(bits>=8) {
+                    int next=in.read();
+                    if(next==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+                    result=(result<<8)|next;
+                    bits-=8;
                 }
-                while(bits>=1) {
-                    result=(result<<1)|(nextBoolean0()?1:0);
-                    bits--;
-                }
-                return result;
-            } catch(IOException err) {
-                try {
-                    closeDevRandomIn();
-                } catch(IOException err2) {
-                    // Ignore since we already have an exception we are throwing
-                }
-                throw new WrappedException(err);
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            while(bits>=1) {
+                result=(result<<1)|(nextBoolean0()?1:0);
+                bits--;
+            }
+            return result;
+        } catch(IOException err) {
+            try {
+                closeDevRandomIn();
+            } catch(IOException err2) {
+                // Ignore since we already have an exception we are throwing
+            }
+            throw new WrappedException(err);
         }
     }
 
     public boolean nextBoolean() {
-        Profiler.startProfile(Profiler.FAST, DevRandom.class, "nextBoolean()", null);
         try {
+            return nextBoolean0();
+        } catch(IOException err) {
             try {
-                return nextBoolean0();
-            } catch(IOException err) {
-                try {
-                    closeDevRandomIn();
-                } catch(IOException err2) {
-                    // Ignore since we already have an exception we are throwing
-                }
-                throw new WrappedException(err);
+                closeDevRandomIn();
+            } catch(IOException err2) {
+                // Ignore since we already have an exception we are throwing
             }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+            throw new WrappedException(err);
         }
     }
 
@@ -240,152 +197,117 @@ public class DevRandom extends Random {
     private final Object extraBitsLock=new Object();
 
     private boolean nextBoolean0() throws IOException {
-        Profiler.startProfile(Profiler.IO, DevRandom.class, "nextBoolean0()", null);
-        try {
-            synchronized(extraBitsLock) {
-                if(numExtraBits<=0) {
-                    FileInputStream in=openDevRandomIn();
-                    int next=in.read();
-                    if(next==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                    extraBits=next;
-                    numExtraBits=8;
-                }
-                boolean result=(extraBits&1)!=0;
-                extraBits>>>=1;
-                numExtraBits--;
-                return result;
+        synchronized(extraBitsLock) {
+            if(numExtraBits<=0) {
+                FileInputStream in=openDevRandomIn();
+                int next=in.read();
+                if(next==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+                extraBits=next;
+                numExtraBits=8;
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            boolean result=(extraBits&1)!=0;
+            extraBits>>>=1;
+            numExtraBits--;
+            return result;
         }
     }
 
     public void nextBytes(byte[] bytes) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, DevRandom.class, "nextBytes(byte[])", null);
-        try {
-            nextBytesStatic(bytes, 0, bytes.length);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        nextBytesStatic(bytes, 0, bytes.length);
     }
 
     public void nextBytes(byte[] bytes, int off, int len) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, DevRandom.class, "nextBytes(byte[],int,int)", null);
-        try {
-            nextBytesStatic(bytes, off, len);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        nextBytesStatic(bytes, off, len);
     }
 
     public static void nextBytesStatic(byte[] bytes) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, DevRandom.class, "nextBytesStatic(byte[])", null);
-        try {
-            nextBytesStatic(bytes, 0, bytes.length);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        nextBytesStatic(bytes, 0, bytes.length);
     }
 
     public static void nextBytesStatic(byte[] bytes, int off, int len) {
-        Profiler.startProfile(Profiler.IO, DevRandom.class, "nextBytesStatic(byte[],int,int)", null);
         try {
-            try {
-                if(len>0) {
-                    FileInputStream in=openDevRandomIn();
-                    while(len>0) {
-                        int ret=in.read(bytes, off, len);
-                        if(ret==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                        off+=ret;
-                        len-=ret;
-                    }
+            if(len>0) {
+                FileInputStream in=openDevRandomIn();
+                while(len>0) {
+                    int ret=in.read(bytes, off, len);
+                    if(ret==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+                    off+=ret;
+                    len-=ret;
                 }
-            } catch(IOException err) {
-                try {
-                    closeDevRandomIn();
-                } catch(IOException err2) {
-                    // Ignore since we already have an exception we are throwing
-                }
-                throw new WrappedException(err);
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        } catch(IOException err) {
+            try {
+                closeDevRandomIn();
+            } catch(IOException err2) {
+                // Ignore since we already have an exception we are throwing
+            }
+            throw new WrappedException(err);
         }
     }
 
     public int nextInt() {
-        Profiler.startProfile(Profiler.IO, DevRandom.class, "nextInt()", null);
         try {
+            FileInputStream in=openDevRandomIn();
+            int b1=in.read();
+            if(b1==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            int b2=in.read();
+            if(b2==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            int b3=in.read();
+            if(b3==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            int b4=in.read();
+            if(b4==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            return
+                (b1<<24)
+                | (b2<<16)
+                | (b3<<8)
+                | b4
+            ;
+        } catch(IOException err) {
             try {
-                FileInputStream in=openDevRandomIn();
-                int b1=in.read();
-                if(b1==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                int b2=in.read();
-                if(b2==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                int b3=in.read();
-                if(b3==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                int b4=in.read();
-                if(b4==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                return
-                    (b1<<24)
-                    | (b2<<16)
-                    | (b3<<8)
-                    | b4
-                ;
-            } catch(IOException err) {
-                try {
-                    closeDevRandomIn();
-                } catch(IOException err2) {
-                    // Ignore since we already have an exception we are throwing
-                }
-                throw new WrappedException(err);
+                closeDevRandomIn();
+            } catch(IOException err2) {
+                // Ignore since we already have an exception we are throwing
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            throw new WrappedException(err);
         }
     }
 
     public long nextLong() {
-        Profiler.startProfile(Profiler.IO, DevRandom.class, "nextLong()", null);
         try {
+            FileInputStream in=openDevRandomIn();
+            long b1=in.read();
+            if(b1==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            long b2=in.read();
+            if(b2==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            long b3=in.read();
+            if(b3==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            long b4=in.read();
+            if(b4==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            long b5=in.read();
+            if(b5==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            long b6=in.read();
+            if(b6==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            long b7=in.read();
+            if(b7==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            long b8=in.read();
+            if(b8==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
+            return
+                (b1<<56)
+                | (b2<<48)
+                | (b3<<40)
+                | (b4<<32)
+                | (b5<<24)
+                | (b6<<16)
+                | (b7<<8)
+                | b8
+            ;
+        } catch(IOException err) {
             try {
-                FileInputStream in=openDevRandomIn();
-                long b1=in.read();
-                if(b1==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                long b2=in.read();
-                if(b2==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                long b3=in.read();
-                if(b3==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                long b4=in.read();
-                if(b4==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                long b5=in.read();
-                if(b5==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                long b6=in.read();
-                if(b6==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                long b7=in.read();
-                if(b7==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                long b8=in.read();
-                if(b8==-1) throw new EOFException("EOF when reading from "+DEV_RANDOM_PATH);
-                return
-                    (b1<<56)
-                    | (b2<<48)
-                    | (b3<<40)
-                    | (b4<<32)
-                    | (b5<<24)
-                    | (b6<<16)
-                    | (b7<<8)
-                    | b8
-                ;
-            } catch(IOException err) {
-                try {
-                    closeDevRandomIn();
-                } catch(IOException err2) {
-                    // Ignore since we already have an exception we are throwing
-                }
-                throw new WrappedException(err);
+                closeDevRandomIn();
+            } catch(IOException err2) {
+                // Ignore since we already have an exception we are throwing
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            throw new WrappedException(err);
         }
     }
     

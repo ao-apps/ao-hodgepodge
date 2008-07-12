@@ -6,7 +6,6 @@ package com.aoindustries.net;
  * All rights reserved.
  */
 import com.aoindustries.io.BitRateProvider;
-import com.aoindustries.profiler.*;
 import com.aoindustries.util.ErrorPrinter;
 import java.io.*;
 import java.net.InetAddress;

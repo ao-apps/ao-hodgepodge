@@ -5,7 +5,6 @@ package com.aoindustries.io;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import java.io.*;
 
 /**
@@ -34,87 +33,47 @@ public class TerminalWriter extends PrintWriter {
 
     public TerminalWriter(OutputStream out) {
 	super(out);
-        Profiler.startProfile(Profiler.INSTANTANEOUS, TerminalWriter.class, "<init>(OutputStream)", null);
-        try {
-            this.out=out;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.out=out;
     }
 
     public TerminalWriter(OutputStream out, boolean autoFlush) {
 	super(out, autoFlush);
-        Profiler.startProfile(Profiler.INSTANTANEOUS, TerminalWriter.class, "<init>(OutputStream,boolean)", null);
-        try {
-            this.out=out;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.out=out;
     }
 
     public void attributesOff() throws IOException {
-        Profiler.startProfile(Profiler.IO, TerminalWriter.class, "attributesOff()", null);
-        try {
-            if(supported && enabled) {
-                flush();
-                out.write(ATTRIBUTES_OFF);
-                out.flush();
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        if(supported && enabled) {
+            flush();
+            out.write(ATTRIBUTES_OFF);
+            out.flush();
         }
     }
 
     public void boldOn() throws IOException {
-        Profiler.startProfile(Profiler.IO, TerminalWriter.class, "boldOn()", null);
-        try {
-            if(supported && enabled) {
-                flush();
-                out.write(BOLD_ON);
-                out.flush();
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        if(supported && enabled) {
+            flush();
+            out.write(BOLD_ON);
+            out.flush();
         }
     }
 
     public void clearScreen() throws IOException {
-        Profiler.startProfile(Profiler.IO, TerminalWriter.class, "clearScreen()", null);
-        try {
-            if(supported && enabled) {
-                flush();
-                out.write(CLEAR_SCREEN);
-                out.flush();
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        if(supported && enabled) {
+            flush();
+            out.write(CLEAR_SCREEN);
+            out.flush();
         }
     }
 
     public boolean isEnabled() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, TerminalWriter.class, "isEnabled()", null);
-        try {
-            return enabled;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return enabled;
     }
 
     public static boolean isSupported() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, TerminalWriter.class, "isSupported()", null);
-        try {
-            return supported;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return supported;
     }
 
     public void setEnabled(boolean enabled) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, TerminalWriter.class, "setEnabled(boolean)", null);
-        try {
-            this.enabled=enabled;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.enabled=enabled;
     }
 }

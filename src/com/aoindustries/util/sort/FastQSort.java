@@ -30,7 +30,6 @@ package com.aoindustries.util.sort;
  * SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF FITNESS FOR
  * HIGH RISK ACTIVITIES.
  */
-import com.aoindustries.profiler.*;
 import java.util.*;
 
 /**
@@ -54,170 +53,88 @@ import java.util.*;
 public class FastQSort extends SortAlgorithm {
 
     protected FastQSort() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "<init>()", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     public <T> void sort(List<T> list) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sort(List<T>)", null);
-        try {
-            sortStatic(list);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list);
     }
     
     public <T> void sort(T[] array) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sort(T[])", null);
-        try {
-            sortStatic(array);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array);
     }
 
     public <T> void sort(List<T> list, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sort(List<T>,SortStatistics)", null);
-        try {
-            sortStatic(list, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, stats);
     }
 
     public <T> void sort(T[] array, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sort(T[],SortStatistics)", null);
-        try {
-            sortStatic(array, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, stats);
     }
 
     public <T> void sort(List<T> list, Comparator<T> comparator) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sort(List<T>,Comparator<T>)", null);
-        try {
-           sortStatic(list, comparator);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, comparator);
     }
     
     public <T> void sort(T[] array, Comparator<T> comparator) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sort(T[],Comparator<T>)", null);
-        try {
-           sortStatic(array, comparator);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, comparator);
     }
 
     public <T> void sort(List<T> list, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sort(List<T>,Comparator<T>,SortStatistics)", null);
-        try {
-           sortStatic(list, comparator, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, comparator, stats);
     }
 
     public <T> void sort(T[] array, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sort(T[],Comparator<T>,SortStatistics)", null);
-        try {
-           sortStatic(array, comparator, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, comparator, stats);
     }
 
     public static <T> void sortStatic(List<T> list) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sortStatic(List<T>)", null);
-        try {
-            sortStatic(list, null, null);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, null, null);
     }
     
     public static <T> void sortStatic(T[] array) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sortStatic(T[])", null);
-        try {
-            sortStatic(array, null, null);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, null, null);
     }
 
     public static <T> void sortStatic(List<T> list, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sortStatic(List<T>,SortStatistics)", null);
-        try {
-            sortStatic(list, null, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, null, stats);
     }
 
     public static <T> void sortStatic(T[] array, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sortStatic(T[],SortStatistics)", null);
-        try {
-            sortStatic(array, null, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, null, stats);
     }
 
     public static <T> void sortStatic(List<T> list, Comparator<T> comparator) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sortStatic(List<T>,Comparator<T>)", null);
-        try {
-            sortStatic(list, comparator, null);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, comparator, null);
     }
     
     public static <T> void sortStatic(T[] array, Comparator<T> comparator) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FastQSort.class, "sortStatic(T[],Comparator<T>)", null);
-        try {
-            sortStatic(array, comparator, null);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, comparator, null);
     }
 
     public static <T> void sortStatic(List<T> list, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.UNKNOWN, FastQSort.class, "sortStatic(List<T>,Comparator<T>,SortStatistics)", null);
-        try {
-            if(stats!=null) stats.sortStarting();
-            int length=list.size();
-            if(quickSort(list, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
-                insertionSort(list, 0, length-1, comparator, stats);
-            } else {
-                // If quickSort fails, do a more constant-time HeapSort on the remaining data
-                if(stats!=null) stats.sortSwitchingAlgorithms();
-                HeapSort.sortStatic0(list, comparator, stats);
-            }
-            if(stats!=null) stats.sortEnding();
-        } finally {
-            Profiler.endProfile(Profiler.UNKNOWN);
+        if(stats!=null) stats.sortStarting();
+        int length=list.size();
+        if(quickSort(list, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
+            insertionSort(list, 0, length-1, comparator, stats);
+        } else {
+            // If quickSort fails, do a more constant-time HeapSort on the remaining data
+            if(stats!=null) stats.sortSwitchingAlgorithms();
+            HeapSort.sortStatic0(list, comparator, stats);
         }
+        if(stats!=null) stats.sortEnding();
     }
 
     public static <T> void sortStatic(T[] array, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.UNKNOWN, FastQSort.class, "sortStatic(T[],Comparator<T>,SortStatistics)", null);
-        try {
-            if(stats!=null) stats.sortStarting();
-            int length=array.length;
-            if(quickSort(array, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
-                insertionSort(array, 0, length-1, comparator, stats);
-            } else {
-                // If quickSort fails, do a more constant-time HeapSort on the remaining data
-                if(stats!=null) stats.sortSwitchingAlgorithms();
-                HeapSort.sortStatic0(array, comparator, stats);
-            }
-            if(stats!=null) stats.sortEnding();
-        } finally {
-            Profiler.endProfile(Profiler.UNKNOWN);
+        if(stats!=null) stats.sortStarting();
+        int length=array.length;
+        if(quickSort(array, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
+            insertionSort(array, 0, length-1, comparator, stats);
+        } else {
+            // If quickSort fails, do a more constant-time HeapSort on the remaining data
+            if(stats!=null) stats.sortSwitchingAlgorithms();
+            HeapSort.sortStatic0(array, comparator, stats);
         }
+        if(stats!=null) stats.sortEnding();
     }
 
     /**
@@ -238,43 +155,38 @@ public class FastQSort extends SortAlgorithm {
      * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
      */
     private static <T> boolean quickSort(List<T> list, int l, int r, Comparator<T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
-        Profiler.startProfile(Profiler.FAST, FastQSort.class, "quickSort(List<T>,int,int,Comparator<T>,SortStatistics,int,int)", null);
-        try {
-            int M=4;
+        int M=4;
 
-            if((r-l)>M) {
-                int i=(r+l)/2;
+        if((r-l)>M) {
+            int i=(r+l)/2;
 
-                if(compare(list, l, i, comparator, stats)>0) swap(list, l, i, stats);  // Tri-Median Methode!
-                if(compare(list, l, r, comparator, stats)>0) swap(list, l, r, stats);
-                if(compare(list, i, r, comparator, stats)>0) swap(list, i, r, stats);
+            if(compare(list, l, i, comparator, stats)>0) swap(list, l, i, stats);  // Tri-Median Methode!
+            if(compare(list, l, r, comparator, stats)>0) swap(list, l, r, stats);
+            if(compare(list, i, r, comparator, stats)>0) swap(list, i, r, stats);
 
-                int j=r-1;
+            int j=r-1;
+            swap(list, i, j, stats);
+            i=l;
+            T v=get(list, j, stats);
+            for(;;) {
+                while(compare(get(list, ++i, stats), v, comparator, stats)<0);
+                while(compare(get(list, --j, stats), v, comparator, stats)>0);
+                if(j<i) break;
                 swap(list, i, j, stats);
-                i=l;
-                T v=get(list, j, stats);
-                for(;;) {
-                    while(compare(get(list, ++i, stats), v, comparator, stats)<0);
-                    while(compare(get(list, --j, stats), v, comparator, stats)>0);
-                    if(j<i) break;
-                    swap(list, i, j, stats);
-                }
-                swap(list, i, r-1, stats);
-
-                int newRecursion=currentRecursion+1;
-                if(newRecursion>maxRecursion) return false;
-                if(stats!=null) stats.sortRecursing();
-                if(!quickSort(list, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
-                if(stats!=null) stats.sortUnrecursing();
-
-                if(stats!=null) stats.sortRecursing();
-                if(!quickSort(list, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
-                if(stats!=null) stats.sortUnrecursing();
             }
-            return true;
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+            swap(list, i, r-1, stats);
+
+            int newRecursion=currentRecursion+1;
+            if(newRecursion>maxRecursion) return false;
+            if(stats!=null) stats.sortRecursing();
+            if(!quickSort(list, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
+            if(stats!=null) stats.sortUnrecursing();
+
+            if(stats!=null) stats.sortRecursing();
+            if(!quickSort(list, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
+            if(stats!=null) stats.sortUnrecursing();
         }
+        return true;
     } 
 
     /**
@@ -295,84 +207,69 @@ public class FastQSort extends SortAlgorithm {
      * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
      */
     private static <T> boolean quickSort(T[] array, int l, int r, Comparator<T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
-        Profiler.startProfile(Profiler.FAST, FastQSort.class, "quickSort(T[],int,int,Comparator<T>,SortStatistics,int,int)", null);
-        try {
-            int M=4;
+        int M=4;
 
-            if((r-l)>M) {
-                int i=(r+l)/2;
+        if((r-l)>M) {
+            int i=(r+l)/2;
 
-                if(compare(array, l, i, comparator, stats)>0) swap(array, l, i, stats);  // Tri-Median Methode!
-                if(compare(array, l, r, comparator, stats)>0) swap(array, l, r, stats);
-                if(compare(array, i, r, comparator, stats)>0) swap(array, i, r, stats);
+            if(compare(array, l, i, comparator, stats)>0) swap(array, l, i, stats);  // Tri-Median Methode!
+            if(compare(array, l, r, comparator, stats)>0) swap(array, l, r, stats);
+            if(compare(array, i, r, comparator, stats)>0) swap(array, i, r, stats);
 
-                int j=r-1;
+            int j=r-1;
+            swap(array, i, j, stats);
+            i=l;
+            T v=get(array, j, stats);
+            for(;;) {
+                while(compare(get(array, ++i, stats), v, comparator, stats)<0);
+                while(compare(get(array, --j, stats), v, comparator, stats)>0);
+                if(j<i) break;
                 swap(array, i, j, stats);
-                i=l;
-                T v=get(array, j, stats);
-                for(;;) {
-                    while(compare(get(array, ++i, stats), v, comparator, stats)<0);
-                    while(compare(get(array, --j, stats), v, comparator, stats)>0);
-                    if(j<i) break;
-                    swap(array, i, j, stats);
-                }
-                swap(array, i, r-1, stats);
-
-                int newRecursion=currentRecursion+1;
-                if(newRecursion>maxRecursion) return false;
-                if(stats!=null) stats.sortRecursing();
-                if(!quickSort(array, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
-                if(stats!=null) stats.sortUnrecursing();
-
-                if(stats!=null) stats.sortRecursing();
-                if(!quickSort(array, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
-                if(stats!=null) stats.sortUnrecursing();
             }
-            return true;
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+            swap(array, i, r-1, stats);
+
+            int newRecursion=currentRecursion+1;
+            if(newRecursion>maxRecursion) return false;
+            if(stats!=null) stats.sortRecursing();
+            if(!quickSort(array, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
+            if(stats!=null) stats.sortUnrecursing();
+
+            if(stats!=null) stats.sortRecursing();
+            if(!quickSort(array, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
+            if(stats!=null) stats.sortUnrecursing();
         }
+        return true;
     } 
 
     private static <T> void insertionSort(List<T> list, int lo0, int hi0, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.FAST, FastQSort.class, "insertionSort(List<T>,int,int,Comparator<T>,SortStatistics)", null);
-        try {
-            for(int i=lo0+1;i<=hi0;i++) {
-                T v=get(list, i, stats);
-                int j=i;
-                T t;
-                while(
-                    j>lo0
-                    && compare(t=get(list, j-1, stats), v, comparator, stats)>0
-                ) {
-                    set(list, j, t, stats);
-                    j--;
-                }
-                set(list, j, v, stats);
+        for(int i=lo0+1;i<=hi0;i++) {
+            T v=get(list, i, stats);
+            int j=i;
+            T t;
+            while(
+                j>lo0
+                && compare(t=get(list, j-1, stats), v, comparator, stats)>0
+            ) {
+                set(list, j, t, stats);
+                j--;
             }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+            set(list, j, v, stats);
         }
     }
 
     private static <T> void insertionSort(T[] array, int lo0, int hi0, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.FAST, FastQSort.class, "insertionSort(T[],int,int,Comparator<T>,SortStatistics)", null);
-        try {
-            for(int i=lo0+1;i<=hi0;i++) {
-                T v=get(array, i, stats);
-                int j=i;
-                T t;
-                while(
-                    j>lo0
-                    && compare(t=get(array, j-1, stats), v, comparator, stats)>0
-                ) {
-                    set(array, j, t, stats);
-                    j--;
-                }
-                set(array, j, v, stats);
+        for(int i=lo0+1;i<=hi0;i++) {
+            T v=get(array, i, stats);
+            int j=i;
+            T t;
+            while(
+                j>lo0
+                && compare(t=get(array, j-1, stats), v, comparator, stats)>0
+            ) {
+                set(array, j, t, stats);
+                j--;
             }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+            set(array, j, v, stats);
         }
     }
 }

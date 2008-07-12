@@ -5,7 +5,6 @@ package com.aoindustries.io;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import com.aoindustries.util.*;
 import java.io.*;
 
@@ -35,110 +34,63 @@ public class FifoFile {
 
     public FifoFile(String filename, long maxFifoLength) throws IOException {
         this(new File(filename), maxFifoLength);
-        Profiler.startProfile(Profiler.FAST, FifoFile.class, "<init>(String,long)", null);
-        Profiler.endProfile(Profiler.FAST);
     }
     
     public FifoFile(File file, long maxFifoLength) throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFile.class, "<init>(File,long)", null);
-        try {
-            if(maxFifoLength<1) throw new IllegalArgumentException("The FIFO must be at least one byte long");
-            
-            this.maxFifoLength=maxFifoLength;
-            this.fileLength=maxFifoLength+16;
-            this.file=new RandomAccessFile(file, "rw");
-            this.in=new FifoFileInputStream(this);
-            this.out=new FifoFileOutputStream(this);
-            long blockSize=maxFifoLength>>8;
-            this.blockSize=blockSize>=BufferManager.BUFFER_SIZE?BufferManager.BUFFER_SIZE:blockSize<=0?1:(int)blockSize;
-            if(this.file.length()!=fileLength) reset();
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        if(maxFifoLength<1) throw new IllegalArgumentException("The FIFO must be at least one byte long");
+
+        this.maxFifoLength=maxFifoLength;
+        this.fileLength=maxFifoLength+16;
+        this.file=new RandomAccessFile(file, "rw");
+        this.in=new FifoFileInputStream(this);
+        this.out=new FifoFileOutputStream(this);
+        long blockSize=maxFifoLength>>8;
+        this.blockSize=blockSize>=BufferManager.BUFFER_SIZE?BufferManager.BUFFER_SIZE:blockSize<=0?1:(int)blockSize;
+        if(this.file.length()!=fileLength) reset();
     }
 
     public FifoFileInputStream getInputStream() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FifoFile.class, "getInputStream()", null);
-        try {
-            return in;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return in;
     }
     
     public FifoFileOutputStream getOutputStream() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FifoFile.class, "getOutputStream()", null);
-        try {
-            return out;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return out;
     }
 
     public long getMaximumFifoLength() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FifoFile.class, "getMaximumFifoLength()", null);
-        try {
-            return maxFifoLength;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return maxFifoLength;
     }
 
     public long getFileLength() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FifoFile.class, "getFileLength()", null);
-        try {
-            return fileLength;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return fileLength;
     }
 
     public int getBlockSize() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FifoFile.class, "getBlockSize()", null);
-        try {
-            return blockSize;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return blockSize;
     }
 
     /**
      * Resets this <code>FifoFile</code> to contain no contents and start writing at the beginning of the file.
      */
     public void reset() throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFile.class, "reset()", null);
-        try {
-            synchronized(this) {
-                file.setLength(fileLength);
-                // A setLength of 0 triggers a setFirstIndex of 0
-                setLength(0);
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        synchronized(this) {
+            file.setLength(fileLength);
+            // A setLength of 0 triggers a setFirstIndex of 0
+            setLength(0);
         }
     }
 
     public void close() throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFile.class, "close()", null);
-        try {
-            file.close();
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        file.close();
     }
 
     /**
      * Gets the data index of the next value that will be read.
      */
     protected long getFirstIndex() throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFile.class, "getFirstIndex()", null);
-        try {
-            synchronized(this) {
-                file.seek(0);
-                return file.readLong();
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        synchronized(this) {
+            file.seek(0);
+            return file.readLong();
         }
     }
 
@@ -146,14 +98,9 @@ public class FifoFile {
      * Sets the data index of the next value that will be read.
      */
     protected void setFirstIndex(long index) throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFile.class, "setFirstIndex(long)", null);
-        try {
-            synchronized(this) {
-                file.seek(0);
-                file.writeLong(index);
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        synchronized(this) {
+            file.seek(0);
+            file.writeLong(index);
         }
     }
 
@@ -161,14 +108,9 @@ public class FifoFile {
      * Gets the number of bytes currently contained by the FIFO.
      */
     public long getLength() throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFile.class, "getLength()", null);
-        try {
-            synchronized(this) {
-                file.seek(8);
-                return file.readLong();
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        synchronized(this) {
+            file.seek(8);
+            return file.readLong();
         }
     }
 
@@ -176,16 +118,11 @@ public class FifoFile {
      * Sets the number of bytes currently contained by the FIFO.
      */
     protected void setLength(long length) throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFile.class, "setLength(long)", null);
-        try {
-            if(length<0) throw new IllegalArgumentException("Invalid length: "+length);
-            synchronized(this) {
-                file.seek(8);
-                file.writeLong(length);
-                if(length==0) setFirstIndex(0);
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        if(length<0) throw new IllegalArgumentException("Invalid length: "+length);
+        synchronized(this) {
+            file.seek(8);
+            file.writeLong(length);
+            if(length==0) setFirstIndex(0);
         }
     }
 }

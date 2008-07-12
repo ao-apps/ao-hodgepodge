@@ -5,7 +5,6 @@ package com.aoindustries.email;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import java.util.*;
 
 /**
@@ -117,25 +116,20 @@ public class MimeType {
     private MimeType() {}
     
     public static String getMimeType(String filename) {
-        Profiler.startProfile(Profiler.FAST, MimeType.class, "getMimeType(String)", null);
-        try {
-            int pos=filename.lastIndexOf('.');
-            if(pos!=-1) {
-                String extension=filename.substring(pos+1);
-                synchronized(MimeType.class) {
-                    if(hash==null) {
-                        hash=new HashMap<String,String>();
-                        for(int c=0;c<types.length;c+=2) {
-                            if(hash.put(types[c].toLowerCase(), types[c+1])!=null) System.err.println(MimeType.class.getName()+".getMimeType(String): Warning: extension found more than once: "+extension);
-                        }
+        int pos=filename.lastIndexOf('.');
+        if(pos!=-1) {
+            String extension=filename.substring(pos+1);
+            synchronized(MimeType.class) {
+                if(hash==null) {
+                    hash=new HashMap<String,String>();
+                    for(int c=0;c<types.length;c+=2) {
+                        if(hash.put(types[c].toLowerCase(), types[c+1])!=null) System.err.println(MimeType.class.getName()+".getMimeType(String): Warning: extension found more than once: "+extension);
                     }
-                    String type=hash.get(extension.toLowerCase());
-                    if(type!=null) return type;
                 }
+                String type=hash.get(extension.toLowerCase());
+                if(type!=null) return type;
             }
-            return DEFAULT_MIME_TYPE;
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
         }
+        return DEFAULT_MIME_TYPE;
     }
 }

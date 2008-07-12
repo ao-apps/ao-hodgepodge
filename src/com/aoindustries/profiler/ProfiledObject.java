@@ -25,12 +25,7 @@ public class ProfiledObject {
      * Automatically increments the counter for this class on construction.
      */
     public ProfiledObject() {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "<init>()", null);
-        try {
-            incrementCount(getClass());
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        incrementCount(getClass());
     }
 
     /**
@@ -39,13 +34,8 @@ public class ProfiledObject {
      * use could still be high even if the object count is low.
      */
     protected void finalize() throws Throwable {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "finalize()", null);
-        try {
-            decrementCount(getClass());
-            super.finalize();
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        decrementCount(getClass());
+        super.finalize();
     }
     
     /**
@@ -57,27 +47,17 @@ public class ProfiledObject {
      * Increments the counter for the class of the provided object.
      */
     public static void incrementCount(Object O) {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "incrementCount(Object)", null);
-        try {
-            incrementCount(O.getClass());
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        incrementCount(O.getClass());
     }
 
     /**
      * Increments the counter for the provided class.
      */
     public static void incrementCount(Class C) {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "incrementCount(Class)", null);
-        try {
-            synchronized(countsPerClass) {
-                long[] la=countsPerClass.get(C);
-                if(la==null) countsPerClass.put(C, new long[] {1, 0});
-                else la[0]++;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        synchronized(countsPerClass) {
+            long[] la=countsPerClass.get(C);
+            if(la==null) countsPerClass.put(C, new long[] {1, 0});
+            else la[0]++;
         }
     }
 
@@ -85,26 +65,16 @@ public class ProfiledObject {
      * Decrements the counter for the class of the provided object.
      */
     public static void decrementCount(Object O) {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "decrementCount(Object)", null);
-        try {
-            decrementCount(O.getClass());
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        decrementCount(O.getClass());
     }
 
     /**
      * Decrements the counter for the provided class.
      */
     public static void decrementCount(Class C) {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "decrementCount(Class)", null);
-        try {
-            synchronized(countsPerClass) {
-                long[] la=countsPerClass.get(C);
-                if(la!=null) la[1]++;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        synchronized(countsPerClass) {
+            long[] la=countsPerClass.get(C);
+            if(la!=null) la[1]++;
         }
     }
     
@@ -112,51 +82,41 @@ public class ProfiledObject {
      * Gets all of the classes with counts
      */
     public static Class[] getClasses() {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "getClasses()", null);
-        try {
-            List<Class> list=new ArrayList<Class>();
-            synchronized(countsPerClass) {
-                Iterator<Class> I=countsPerClass.keySet().iterator();
-                while(I.hasNext()) list.add(I.next());
-                // Sort by number of instances and then classname
-                Collections.sort(
-                    list,
-                    new Comparator<Class>() {
-                        public int compare(Class C1, Class C2) {
-                            long[] counts1=countsPerClass.get(C1);
-                            long count1=counts1[1]-counts1[0];
-                            long[] counts2=countsPerClass.get(C2);
-                            long count2=counts2[1]-counts2[0];
-                            // Count first
-                            if(count1<count2) return -1;
-                            if(count1>count2) return 1;
-                            // Then classname
-                            return C1.getName().compareTo(C2.getName());
-                        }
+        List<Class> list=new ArrayList<Class>();
+        synchronized(countsPerClass) {
+            Iterator<Class> I=countsPerClass.keySet().iterator();
+            while(I.hasNext()) list.add(I.next());
+            // Sort by number of instances and then classname
+            Collections.sort(
+                list,
+                new Comparator<Class>() {
+                    public int compare(Class C1, Class C2) {
+                        long[] counts1=countsPerClass.get(C1);
+                        long count1=counts1[1]-counts1[0];
+                        long[] counts2=countsPerClass.get(C2);
+                        long count2=counts2[1]-counts2[0];
+                        // Count first
+                        if(count1<count2) return -1;
+                        if(count1>count2) return 1;
+                        // Then classname
+                        return C1.getName().compareTo(C2.getName());
                     }
-                );
-            }
-            Class[] classes=new Class[list.size()];
-            list.toArray(classes);
-            return classes;
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+                }
+            );
         }
+        Class[] classes=new Class[list.size()];
+        list.toArray(classes);
+        return classes;
     }
 
     /**
      * Gets the total constructed count for the provided class.
      */
     public static long getConstructorCount(Class C) {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "getConstructorCount(Class)", null);
-        try {
-            synchronized(countsPerClass) {
-                long[] counts=countsPerClass.get(C);
-                if(counts==null) return 0;
-                return counts[0];
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        synchronized(countsPerClass) {
+            long[] counts=countsPerClass.get(C);
+            if(counts==null) return 0;
+            return counts[0];
         }
     }
 
@@ -164,15 +124,10 @@ public class ProfiledObject {
      * Gets the total finalized count for the provided class.
      */
     public static long getFinalizerCount(Class C) {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "getFinalizerCount(Class)", null);
-        try {
-            synchronized(countsPerClass) {
-                long[] counts=countsPerClass.get(C);
-                if(counts==null) return 0;
-                return counts[1];
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        synchronized(countsPerClass) {
+            long[] counts=countsPerClass.get(C);
+            if(counts==null) return 0;
+            return counts[1];
         }
     }
 
@@ -180,15 +135,10 @@ public class ProfiledObject {
      * Gets the current instance count for the provided class.
      */
     public static long getCurrentCount(Class C) {
-        Profiler.startProfile(Profiler.FAST, ProfiledObject.class, "getCurrentCount(Class)", null);
-        try {
-            synchronized(countsPerClass) {
-                long[] counts=countsPerClass.get(C);
-                if(counts==null) return 0;
-                return counts[0]-counts[1];
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        synchronized(countsPerClass) {
+            long[] counts=countsPerClass.get(C);
+            if(counts==null) return 0;
+            return counts[0]-counts[1];
         }
     }
 }

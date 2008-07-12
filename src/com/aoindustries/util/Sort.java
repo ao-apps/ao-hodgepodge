@@ -5,7 +5,6 @@ package com.aoindustries.util;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import com.aoindustries.util.sort.*;
 import java.util.*;
 
@@ -31,12 +30,7 @@ public final class Sort {
      * @see  com.aoindustries.util.sort.AutoSort#sortStatic(Object[])
      */
     public static void sort(String[] list) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, Sort.class, "sort(String[])", null);
-        try {
-            AutoSort.sortStatic(list);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        AutoSort.sortStatic(list);
     }
 
     /**
@@ -46,12 +40,7 @@ public final class Sort {
      * @see  com.aoindustries.util.sort.AutoSort#sortStatic(List)
      */
     public static void sortInteger(List<?> list) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, Sort.class, "sortInteger(List<?>)", null);
-        try {
-            AutoSort.sortStatic(list);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        AutoSort.sortStatic(list);
     }
 
     /**

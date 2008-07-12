@@ -5,7 +5,6 @@ package com.aoindustries.servlet.http;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import java.util.*;
 import javax.servlet.http.*;
 
@@ -57,52 +56,47 @@ final public class HttpSessionManager {
     private static long lastCleanup=-1;
 
     public static synchronized HttpSession getSession(HttpServletRequest req, HttpServletResponse resp) {
-        Profiler.startProfile(Profiler.FAST, HttpSessionManager.class, "getSession(HttpServletRequest,HttpServletResponse)", null);
-        try {
-            // Cleanup expired sessions once every CLEANUP_INTERVAL
-            long currentTime=System.currentTimeMillis();
-            long timeSince=currentTime-lastCleanup;
-            if(lastCleanup==-1 || timeSince<0 || timeSince>=CLEANUP_INTERVAL) {
-                // A list of keys to remove is created to avoid updating the HashMap while reading its Iterator
-                List<String> removeList=new ArrayList<String>();
+        // Cleanup expired sessions once every CLEANUP_INTERVAL
+        long currentTime=System.currentTimeMillis();
+        long timeSince=currentTime-lastCleanup;
+        if(lastCleanup==-1 || timeSince<0 || timeSince>=CLEANUP_INTERVAL) {
+            // A list of keys to remove is created to avoid updating the HashMap while reading its Iterator
+            List<String> removeList=new ArrayList<String>();
 
-                // Iterate through all sessions
-                Iterator<String> keys=sessions.keySet().iterator();
-                while(keys.hasNext()) {
-                    String key=keys.next();
-                    HttpSession session=sessions.get(key);
-                    // Negative times indicate sessions never expire
-                    int maxInactiveInterval=session.getMaxInactiveInterval();
-                    if(maxInactiveInterval>=0) {
-                        long sessionTimeSince=currentTime-session.getLastAccessedTime();
-                        if(sessionTimeSince<0 || sessionTimeSince>=((long)maxInactiveInterval*1000)) removeList.add(key);
-                    }
-                }
-
-                // Remove all keys that are in the removeList
-                int size=removeList.size();
-                for(int c=0;c<size;c++) sessions.remove(removeList.get(c));
-
-                // Reset interval timer
-                lastCleanup=currentTime;
-            }
-            
-            // Find or create new session
-            String jsessionid=req.getParameter("jsessionid");
-            if(jsessionid!=null && (jsessionid=jsessionid.trim()).length()>0) {
-                HttpSession session=sessions.get(jsessionid);
-                if(session!=null) {
-                    // The use of the JSESSIONID cookie may be specific to the Tomcat
-                    // servlet container.  Code portability is not guaranteed.
-                    resp.addCookie(new Cookie("JSESSIONID", jsessionid));
-                    return session;
+            // Iterate through all sessions
+            Iterator<String> keys=sessions.keySet().iterator();
+            while(keys.hasNext()) {
+                String key=keys.next();
+                HttpSession session=sessions.get(key);
+                // Negative times indicate sessions never expire
+                int maxInactiveInterval=session.getMaxInactiveInterval();
+                if(maxInactiveInterval>=0) {
+                    long sessionTimeSince=currentTime-session.getLastAccessedTime();
+                    if(sessionTimeSince<0 || sessionTimeSince>=((long)maxInactiveInterval*1000)) removeList.add(key);
                 }
             }
-            HttpSession session=req.getSession();
-            sessions.put(session.getId(), session);
-            return session;
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+
+            // Remove all keys that are in the removeList
+            int size=removeList.size();
+            for(int c=0;c<size;c++) sessions.remove(removeList.get(c));
+
+            // Reset interval timer
+            lastCleanup=currentTime;
         }
+
+        // Find or create new session
+        String jsessionid=req.getParameter("jsessionid");
+        if(jsessionid!=null && (jsessionid=jsessionid.trim()).length()>0) {
+            HttpSession session=sessions.get(jsessionid);
+            if(session!=null) {
+                // The use of the JSESSIONID cookie may be specific to the Tomcat
+                // servlet container.  Code portability is not guaranteed.
+                resp.addCookie(new Cookie("JSESSIONID", jsessionid));
+                return session;
+            }
+        }
+        HttpSession session=req.getSession();
+        sessions.put(session.getId(), session);
+        return session;
     }
 }

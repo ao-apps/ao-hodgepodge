@@ -5,7 +5,6 @@ package com.aoindustries.io;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import java.io.*;
 
 /**
@@ -21,25 +20,15 @@ public class FifoFileOutputStream extends OutputStream {
     private long fifoWriteBytes=0;
 
     FifoFileOutputStream(FifoFile file) throws FileNotFoundException {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, FifoFileOutputStream.class, "<init>(FifoFile)", null);
-        try {
-            this.file=file;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.file=file;
     }
 
     /**
      * Gets the number of writes performed on this stream.
      */
     public long getWriteCount() {
-        Profiler.startProfile(Profiler.FAST, FifoFileOutputStream.class, "getWriteCount()", null);
-        try {
-            synchronized(statsLock) {
-                return fifoWriteCount;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        synchronized(statsLock) {
+            return fifoWriteCount;
         }
     }
 
@@ -47,13 +36,8 @@ public class FifoFileOutputStream extends OutputStream {
      * Gets the number of bytes written to this stream.
      */
     public long getWriteBytes() {
-        Profiler.startProfile(Profiler.FAST, FifoFileOutputStream.class, "getWriteBytes()", null);
-        try {
-            synchronized(statsLock) {
-                return fifoWriteBytes;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        synchronized(statsLock) {
+            return fifoWriteBytes;
         }
     }
 
@@ -61,33 +45,65 @@ public class FifoFileOutputStream extends OutputStream {
      * Adds to the stats of this stream.
      */
     protected void addStats(long bytes) {
-        Profiler.startProfile(Profiler.FAST, FifoFileOutputStream.class, "addStats(long)", null);
-        try {
-            synchronized(statsLock) {
-                fifoWriteCount++;
-                fifoWriteBytes+=bytes;
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        synchronized(statsLock) {
+            fifoWriteCount++;
+            fifoWriteBytes+=bytes;
         }
     }
 
     public void write(int b) throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFileOutputStream.class, "write(int)", null);
-        try {
+        // Write to the queue
+        synchronized(file) {
+            while(true) {
+                long len=file.getLength();
+                if(len<file.maxFifoLength) {
+                    long pos=file.getFirstIndex()+len;
+                    while(pos>=file.maxFifoLength) pos-=file.maxFifoLength;
+                    file.file.seek(pos+16);
+                    file.file.write(b);
+                    addStats(1);
+                    file.setLength(len+1);
+                    file.notify();
+                    return;
+                }
+                try {
+                    file.wait();
+                } catch(InterruptedException err) {
+                    InterruptedIOException ioErr=new InterruptedIOException();
+                    ioErr.initCause(err);
+                    throw ioErr;
+                }
+            }
+        }
+    }
+
+    public void write(byte[] b) throws IOException {
+        // Write to the queue
+        write(b, 0, b.length);
+    }
+
+    public void write(byte[] b, int off, int len) throws IOException {
+        // Write blocks until all bytes have been written
+        while(len>0) {
             // Write to the queue
             synchronized(file) {
                 while(true) {
-                    long len=file.getLength();
-                    if(len<file.maxFifoLength) {
-                        long pos=file.getFirstIndex()+len;
+                    long fileLen=file.getLength();
+                    long maxBlockSize=file.maxFifoLength-fileLen;
+                    if(maxBlockSize>0) {
+                        long pos=file.getFirstIndex()+fileLen;
                         while(pos>=file.maxFifoLength) pos-=file.maxFifoLength;
+                        int blockSize=maxBlockSize>len?len:(int)maxBlockSize;
+                        // When at the end of the file, write the remaining bytes
+                        if((pos+blockSize)>file.maxFifoLength) blockSize=(int)(file.maxFifoLength-pos);
                         file.file.seek(pos+16);
-                        file.file.write(b);
-                        addStats(1);
-                        file.setLength(len+1);
+                        file.file.write(b, off, blockSize);
+                        addStats(blockSize);
+                        file.setLength(fileLen+blockSize);
+                        off+=blockSize;
+                        len-=blockSize;
                         file.notify();
-                        return;
+                        break;
                     }
                     try {
                         file.wait();
@@ -98,58 +114,6 @@ public class FifoFileOutputStream extends OutputStream {
                     }
                 }
             }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
-    }
-
-    public void write(byte[] b) throws IOException {
-        Profiler.startProfile(Profiler.FAST, FifoFileOutputStream.class, "write(byte[])", null);
-        try {
-            // Write to the queue
-            write(b, 0, b.length);
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
-    }
-
-    public void write(byte[] b, int off, int len) throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFileOutputStream.class, "write(byte[],int,int)", null);
-        try {
-            // Write blocks until all bytes have been written
-            while(len>0) {
-                // Write to the queue
-                synchronized(file) {
-                    while(true) {
-                        long fileLen=file.getLength();
-                        long maxBlockSize=file.maxFifoLength-fileLen;
-                        if(maxBlockSize>0) {
-                            long pos=file.getFirstIndex()+fileLen;
-                            while(pos>=file.maxFifoLength) pos-=file.maxFifoLength;
-                            int blockSize=maxBlockSize>len?len:(int)maxBlockSize;
-                            // When at the end of the file, write the remaining bytes
-                            if((pos+blockSize)>file.maxFifoLength) blockSize=(int)(file.maxFifoLength-pos);
-                            file.file.seek(pos+16);
-                            file.file.write(b, off, blockSize);
-                            addStats(blockSize);
-                            file.setLength(fileLen+blockSize);
-                            off+=blockSize;
-                            len-=blockSize;
-                            file.notify();
-                            break;
-                        }
-                        try {
-                            file.wait();
-                        } catch(InterruptedException err) {
-                            InterruptedIOException ioErr=new InterruptedIOException();
-                            ioErr.initCause(err);
-                            throw ioErr;
-                        }
-                    }
-                }
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
         }
     }
 
@@ -158,12 +122,7 @@ public class FifoFileOutputStream extends OutputStream {
      * <code>RandomAccessFile.getChannel().force(true)</code>.
      */
     public void flush() throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFileOutputStream.class, "flush()", null);
-        try {
-            file.file.getChannel().force(true);
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        file.file.getChannel().force(true);
     }
 
     /**
@@ -171,13 +130,8 @@ public class FifoFileOutputStream extends OutputStream {
      * queue is full and blocks writes.
      */
     public long available() throws IOException {
-        Profiler.startProfile(Profiler.IO, FifoFileOutputStream.class, "available()", null);
-        try {
-            synchronized(file) {
-                return file.maxFifoLength-file.getLength();
-            }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        synchronized(file) {
+            return file.maxFifoLength-file.getLength();
         }
     }
 
@@ -185,11 +139,6 @@ public class FifoFileOutputStream extends OutputStream {
      * @see  FifoFile#close()
      */
     public void close() throws IOException {
-        Profiler.startProfile(Profiler.FAST, FifoFileOutputStream.class, "close()", null);
-        try {
-            file.close();
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        file.close();
     }
 }

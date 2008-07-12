@@ -5,7 +5,6 @@ package com.aoindustries.email;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import java.io.*;
 
 /**
@@ -22,46 +21,26 @@ public final class Attachment implements Serializable {
     private final byte[] file;
 
     public Attachment(String filename, byte[] file) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, Attachment.class, "<init>(String,byte[])", null);
-        try {
-            this.filename = filename;
-            this.file = file;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.filename = filename;
+        this.file = file;
     }
 
     public byte[] getFile() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, Attachment.class, "getFile()", null);
-        try {
-            return file;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return file;
     }
 
     public String getFilename() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, Attachment.class, "getFilename()", null);
-        try {
-            return filename;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        return filename;
     }
 
     /**
      * Gets the uuencoded version of this file
      */
     public byte[] uuencode() throws IOException {
-        Profiler.startProfile(Profiler.FAST, Attachment.class, "uuencode()", null);
-        try {
-            ByteArrayInputStream in = new ByteArrayInputStream(file);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            UUEncoder uuencode = new UUEncoder(in, out, 640, filename);
-            uuencode.run();
-            return out.toByteArray();
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        ByteArrayInputStream in = new ByteArrayInputStream(file);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        UUEncoder uuencode = new UUEncoder(in, out, 640, filename);
+        uuencode.run();
+        return out.toByteArray();
     }
 }

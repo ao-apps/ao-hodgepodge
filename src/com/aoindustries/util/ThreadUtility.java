@@ -5,7 +5,6 @@ package com.aoindustries.util;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import java.util.*;
 
 /**
@@ -19,23 +18,13 @@ public final class ThreadUtility {
     }
 
     public static int getThreadCount() {
-        Profiler.startProfile(Profiler.FAST, ThreadUtility.class, "getThreadCount()", null);
-        try {
-            return getTopLevelThreadGroup().activeCount();
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        return getTopLevelThreadGroup().activeCount();
     }
 
     public static ThreadGroup getTopLevelThreadGroup() {
-        Profiler.startProfile(Profiler.FAST, ThreadUtility.class, "getTopLevelThreadGroup()", null);
-        try {
-            ThreadGroup TG=Thread.currentThread().getThreadGroup();
-            ThreadGroup parent;
-            while((parent=TG.getParent())!=null) TG=parent;
-            return TG;
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        ThreadGroup TG=Thread.currentThread().getThreadGroup();
+        ThreadGroup parent;
+        while((parent=TG.getParent())!=null) TG=parent;
+        return TG;
     }
 }

@@ -5,7 +5,6 @@ package com.aoindustries.io;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import com.aoindustries.util.*;
 import java.io.*;
 
@@ -32,65 +31,41 @@ final public class WriterOutputStream extends OutputStream {
      * @param  out        A character-output stream
      */
     public WriterOutputStream(Writer out) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, WriterOutputStream.class, "<init>(Writer)", null);
-        try {
-            this.out=out;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.out=out;
     }
 
     public void close() throws IOException {
-        Profiler.startProfile(Profiler.IO, WriterOutputStream.class, "close()", null);
-        try {
-	    synchronized(this) {
-		out.close();
-		if(buff!=null) {
-		    BufferManager.release(buff);
-		    buff=null;
-		}
-	    }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        synchronized(this) {
+            out.close();
+            if(buff!=null) {
+                BufferManager.release(buff);
+                buff=null;
+            }
         }
     }
 
     public void flush() throws IOException {
-        Profiler.startProfile(Profiler.IO, WriterOutputStream.class, "flush()", null);
-        try {
-            out.flush();
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.flush();
     }
 
     public void write(byte b[], int off, int len) throws IOException {
-        Profiler.startProfile(Profiler.IO, WriterOutputStream.class, "write(byte[],int,int)", null);
-        try {
-	    synchronized(this) {
-		if (b == null) throw new NullPointerException();
-		int pos=0;
-		while(pos<len) {
-		    int blockSize=len-pos;
-		    if(blockSize>BufferManager.BUFFER_SIZE) blockSize=BufferManager.BUFFER_SIZE;
-		    for(int cpos=0;cpos<blockSize;cpos++) buff[cpos]=(char)b[off+(pos++)];
-		    out.write(buff, 0, blockSize);
-		}
-	    }
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+        synchronized(this) {
+            if (b == null) throw new NullPointerException();
+            int pos=0;
+            while(pos<len) {
+                int blockSize=len-pos;
+                if(blockSize>BufferManager.BUFFER_SIZE) blockSize=BufferManager.BUFFER_SIZE;
+                for(int cpos=0;cpos<blockSize;cpos++) buff[cpos]=(char)b[off+(pos++)];
+                out.write(buff, 0, blockSize);
+            }
         }
     }
 
     public void write(int b) throws IOException {
-        Profiler.startProfile(Profiler.IO, WriterOutputStream.class, "write(int)", null);
-        try {
-            out.write(b);
-        } finally {
-            Profiler.endProfile(Profiler.IO);
-        }
+        out.write(b);
     }
-    
+
+    @Override
     public void finalize() throws Throwable {
         if(buff!=null) {
             BufferManager.release(buff);

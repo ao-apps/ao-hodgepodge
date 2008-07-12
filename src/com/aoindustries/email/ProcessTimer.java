@@ -6,7 +6,6 @@ package com.aoindustries.email;
  * All rights reserved.
  */
 import com.aoindustries.io.*;
-import com.aoindustries.profiler.*;
 import com.aoindustries.sql.*;
 import com.aoindustries.util.*;
 import com.oreilly.servlet.*;
@@ -44,92 +43,67 @@ public class ProcessTimer implements Runnable {
         long maximumTime,
         long reminderInterval
     ) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ProcessTimer.class, "<init>(Random,String,String,String,String,String,long,long)", null);
-        try {
-            this.random=random;
-            this.smtpServer=smtpServer;
-            this.from=from;
-            this.toList=toList;
-            this.subject=subject;
-            this.processDescription=processDescription;
-            this.startTime=System.currentTimeMillis();
-            this.maximumTime=maximumTime;
-            this.reminderInterval=reminderInterval;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.random=random;
+        this.smtpServer=smtpServer;
+        this.from=from;
+        this.toList=toList;
+        this.subject=subject;
+        this.processDescription=processDescription;
+        this.startTime=System.currentTimeMillis();
+        this.maximumTime=maximumTime;
+        this.reminderInterval=reminderInterval;
     }
     
     public void start() {
-        Profiler.startProfile(Profiler.FAST, ProcessTimer.class, "start()", null);
-        try {
-            synchronized(this) {
-                if(thread==null) {
-                    (thread=new Thread(this)).start();
-                }
+        synchronized(this) {
+            if(thread==null) {
+                (thread=new Thread(this)).start();
             }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
         }
     }
     
     public void stop() {
-        Profiler.startProfile(Profiler.FAST, ProcessTimer.class, "stop()", null);
-        try {
-            synchronized(this) {
-                Thread T=thread;
-                if(T!=null) {
-                    thread=null;
-                    if(isSleeping) T.interrupt();
-                }
+        synchronized(this) {
+            Thread T=thread;
+            if(T!=null) {
+                thread=null;
+                if(isSleeping) T.interrupt();
             }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
         }
     }
     
     public void run() {
-        Profiler.startProfile(Profiler.FAST, ProcessTimer.class, "run()", null);
         try {
-            try {
-                isSleeping=true;
-                Thread.sleep(maximumTime);
-                isSleeping=false;
-                if(thread==Thread.currentThread()) {
-                    sendEmail(false);
-                    while(thread==Thread.currentThread()) {
-                        isSleeping=true;
-                        Thread.sleep(reminderInterval);
-                        isSleeping=false;
-                        if(thread==Thread.currentThread()) {
-                            sendEmail(true);
-                        }
+            isSleeping=true;
+            Thread.sleep(maximumTime);
+            isSleeping=false;
+            if(thread==Thread.currentThread()) {
+                sendEmail(false);
+                while(thread==Thread.currentThread()) {
+                    isSleeping=true;
+                    Thread.sleep(reminderInterval);
+                    isSleeping=false;
+                    if(thread==Thread.currentThread()) {
+                        sendEmail(true);
                     }
                 }
-            } catch(InterruptedException err) {
-                // Normal when the run method is stopping
             }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        } catch(InterruptedException err) {
+            // Normal when the run method is stopping
         }
     }
     
     private void sendEmail(boolean isReminder) {
-        Profiler.startProfile(Profiler.FAST, ProcessTimer.class, "sendEmail(boolean)", null);
-        try {
-            long currentTime=System.currentTimeMillis();
-            StringBuilder SB=new StringBuilder();
-            SB.append("Desc.: ").append(processDescription).append("\n"
-                    + "Start: ").append(SQLUtility.getDateTime(startTime)).append("\n"
-                    + "Maximum Duration: ").append(StringUtility.getTimeLengthString(currentTime-startTime)).append("\n");
-            String message=SB.toString();
-            System.err.println(message);
-            List<String> addys=StringUtility.splitStringCommaSpace(toList);
-            for(int c=0;c<addys.size();c++) {
-                ErrorMailer.reportError(random, message, smtpServer, from, addys.get(c), subject);
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        long currentTime=System.currentTimeMillis();
+        StringBuilder SB=new StringBuilder();
+        SB.append("Desc.: ").append(processDescription).append("\n"
+                + "Start: ").append(SQLUtility.getDateTime(startTime)).append("\n"
+                + "Maximum Duration: ").append(StringUtility.getTimeLengthString(currentTime-startTime)).append("\n");
+        String message=SB.toString();
+        System.err.println(message);
+        List<String> addys=StringUtility.splitStringCommaSpace(toList);
+        for(int c=0;c<addys.size();c++) {
+            ErrorMailer.reportError(random, message, smtpServer, from, addys.get(c), subject);
         }
     }
 }

@@ -5,7 +5,6 @@ package com.aoindustries.cron;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import com.aoindustries.util.*;
 
 /**
@@ -28,43 +27,33 @@ final public class CronDaemonThread extends Thread {
     
     CronDaemonThread(CronJob cronJob, ErrorHandler errorHandler, int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
         super(cronJob.getCronJobName());
-        Profiler.startProfile(Profiler.INSTANTANEOUS, CronDaemonThread.class, "<init>(CronJob)", null);
-        try {
-            this.cronJob=cronJob;
-            this.errorHandler=errorHandler;
-            this.minute=minute;
-            this.hour=hour;
-            this.dayOfMonth=dayOfMonth;
-            this.month=month;
-            this.dayOfWeek=dayOfWeek;
-            this.year = year;
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        this.cronJob=cronJob;
+        this.errorHandler=errorHandler;
+        this.minute=minute;
+        this.hour=hour;
+        this.dayOfMonth=dayOfMonth;
+        this.month=month;
+        this.dayOfWeek=dayOfWeek;
+        this.year = year;
     }
     
     /**
      * For internal API use only.
      */
     public void run() {
-        Profiler.startProfile(Profiler.UNKNOWN, CronDaemonThread.class, "run()", cronJob.getCronJobName());
         try {
             try {
-                try {
-                    cronJob.runCronJob(minute, hour, dayOfMonth, month, dayOfWeek, year);
-                } catch(ThreadDeath TD) {
-                    throw TD;
-                } catch(Throwable T) {
-                    Object[] extraInfo={
-                        "cron_job.name="+cronJob.getCronJobName()
-                    };
-                    errorHandler.reportError(T, extraInfo);
-                }
-            } finally {
-                CronDaemon.threadDone(this);
+                cronJob.runCronJob(minute, hour, dayOfMonth, month, dayOfWeek, year);
+            } catch(ThreadDeath TD) {
+                throw TD;
+            } catch(Throwable T) {
+                Object[] extraInfo={
+                    "cron_job.name="+cronJob.getCronJobName()
+                };
+                errorHandler.reportError(T, extraInfo);
             }
         } finally {
-            Profiler.endProfile(Profiler.UNKNOWN);
+            CronDaemon.threadDone(this);
         }
     }
 }

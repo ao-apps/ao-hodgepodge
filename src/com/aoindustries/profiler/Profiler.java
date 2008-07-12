@@ -48,20 +48,15 @@ final public class Profiler {
     }
 
     public static int parseProfilerLevel(String S) throws IllegalArgumentException {
-        startProfile(FAST, Profiler.class, "getConcurrency()", null);
-        try {
-            if(S==null) return NONE;
-            S=S.trim();
-            if(S.length()==0 || S.equals("0") || S.equalsIgnoreCase("None")) return NONE;
-            else if(S.equals("1") || S.equalsIgnoreCase("Unknown")) return UNKNOWN;
-            else if(S.equals("2") || S.equalsIgnoreCase("Slow")) return SLOW;
-            else if(S.equals("3") || S.equalsIgnoreCase("IO")) return IO;
-            else if(S.equals("4") || S.equalsIgnoreCase("Fast")) return FAST;
-            else if(S.equals("5") || S.equalsIgnoreCase("Instantaneous")) return INSTANTANEOUS;
-            throw new IllegalArgumentException("Unable to parse profiler level: "+S);
-        } finally {
-            endProfile(FAST);
-        }
+        if(S==null) return NONE;
+        S=S.trim();
+        if(S.length()==0 || S.equals("0") || S.equalsIgnoreCase("None")) return NONE;
+        else if(S.equals("1") || S.equalsIgnoreCase("Unknown")) return UNKNOWN;
+        else if(S.equals("2") || S.equalsIgnoreCase("Slow")) return SLOW;
+        else if(S.equals("3") || S.equalsIgnoreCase("IO")) return IO;
+        else if(S.equals("4") || S.equalsIgnoreCase("Fast")) return FAST;
+        else if(S.equals("5") || S.equalsIgnoreCase("Instantaneous")) return INSTANTANEOUS;
+        throw new IllegalArgumentException("Unable to parse profiler level: "+S);
     }
 
     public static void setProfilerLevel(String S) throws IllegalArgumentException {
@@ -189,30 +184,15 @@ final public class Profiler {
     }
 
     public static int getConcurrency() {
-        startProfile(INSTANTANEOUS, Profiler.class, "getConcurrency()", null);
-        try {
-            return concurrency;
-        } finally {
-            endProfile(INSTANTANEOUS);
-        }
+        return concurrency;
     }
 
     public static int getMaxConcurrency() {
-        startProfile(INSTANTANEOUS, Profiler.class, "getMaxConcurrency()", null);
-        try {
-            return maxConcurrency;
-        } finally {
-            endProfile(INSTANTANEOUS);
-        }
+        return maxConcurrency;
     }
 
     public static long getMethodUses() {
-        startProfile(INSTANTANEOUS, Profiler.class, "getMethodUses()", null);
-        try {
-            return methodCount;
-        } finally {
-            endProfile(INSTANTANEOUS);
-        }
+        return methodCount;
     }
 
     /**

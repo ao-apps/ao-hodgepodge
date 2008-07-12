@@ -6,7 +6,6 @@ package com.aoindustries.io.unix.linux;
  * All rights reserved.
  */
 import com.aoindustries.io.unix.*;
-import com.aoindustries.profiler.*;
 import java.io.*;
 
 /**
@@ -68,19 +67,12 @@ public class LinuxFile extends UnixFile {
 
     public LinuxFile(String filename) {
 	super(filename);
-        Profiler.startProfile(Profiler.INSTANTANEOUS, LinuxFile.class, "<init>(String)", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     final public int getAttributes() throws IOException {
-        Profiler.startProfile(Profiler.FAST, LinuxFile.class, "getAttributes()", null);
-        try {
-            //reloadIfNeeded();
-            if(!getStat().exists()) throw new FileNotFoundException();
-            return attributes;
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
-        }
+        //reloadIfNeeded();
+        if(!getStat().exists()) throw new FileNotFoundException();
+        return attributes;
     }
 
     /**
@@ -89,28 +81,23 @@ public class LinuxFile extends UnixFile {
      * the performance of repeated stats by avoiding the creation of another Unix process.
      */
     public LinuxFile reload() throws IOException {
-        Profiler.startProfile(Profiler.IO, LinuxFile.class, "reload()", null);
-        try {
-            // Reload the Linux attributes first
-            synchronized(LinuxFile.class) {
-                if(getattrProcess==null || getattrOut==null || getattrIn==null) {
-                    // Create the getattr process
-                    String[] cmd={"/usr/aoserv/bin/getattrs"};
-                    getattrProcess=Runtime.getRuntime().exec(cmd);
-                    getattrOut=new PrintWriter(getattrProcess.getOutputStream());
-                    getattrIn=new BufferedReader(new InputStreamReader(getattrProcess.getInputStream()));
-                }
-
-                getattrOut.println(path);
-                getattrOut.flush();
-
-                attributes=Integer.parseInt(getattrIn.readLine());
+        // Reload the Linux attributes first
+        synchronized(LinuxFile.class) {
+            if(getattrProcess==null || getattrOut==null || getattrIn==null) {
+                // Create the getattr process
+                String[] cmd={"/usr/aoserv/bin/getattrs"};
+                getattrProcess=Runtime.getRuntime().exec(cmd);
+                getattrOut=new PrintWriter(getattrProcess.getOutputStream());
+                getattrIn=new BufferedReader(new InputStreamReader(getattrProcess.getInputStream()));
             }
 
-            // Then reload the Unix attributes
-            return this;
-        } finally {
-            Profiler.endProfile(Profiler.IO);
+            getattrOut.println(path);
+            getattrOut.flush();
+
+            attributes=Integer.parseInt(getattrIn.readLine());
         }
+
+        // Then reload the Unix attributes
+        return this;
     }
 }

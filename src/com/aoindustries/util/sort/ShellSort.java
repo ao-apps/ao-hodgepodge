@@ -19,7 +19,6 @@ package com.aoindustries.util.sort;
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
  */
 
-import com.aoindustries.profiler.*;
 import java.util.*;
 
 /**
@@ -50,239 +49,157 @@ import java.util.*;
 public class ShellSort extends SortAlgorithm {
 
     protected ShellSort() {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "<init>()", null);
-        Profiler.endProfile(Profiler.INSTANTANEOUS);
     }
 
     public <T> void sort(List<T> list) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sort(List<T>)", null);
-        try {
-            sortStatic(list);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list);
     }
     
     public <T> void sort(T[] array) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sort(T[])", null);
-        try {
-            sortStatic(array);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array);
     }
 
     public <T> void sort(List<T> list, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sort(List<T>,SortStatistics)", null);
-        try {
-            sortStatic(list, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, stats);
     }
 
     public <T> void sort(T[] array, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sort(T[],SortStatistics)", null);
-        try {
-            sortStatic(array, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, stats);
     }
 
     public <T> void sort(List<T> list, Comparator<T> comparator) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sort(List<T>,Comparator<T>)", null);
-        try {
-           sortStatic(list, comparator);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, comparator);
     }
     
     public <T> void sort(T[] array, Comparator<T> comparator) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sort(T[],Comparator<T>)", null);
-        try {
-           sortStatic(array, comparator);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, comparator);
     }
 
     public <T> void sort(List<T> list, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sort(List<T>,Comparator<T>,SortStatistics)", null);
-        try {
-           sortStatic(list, comparator, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, comparator, stats);
     }
 
     public <T> void sort(T[] array, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sort(T[],Comparator<T>,SortStatistics)", null);
-        try {
-           sortStatic(array, comparator, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, comparator, stats);
     }
 
     public static <T> void sortStatic(List<T> list) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sortStatic(List<T>)", null);
-        try {
-            sortStatic(list, null, null);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, null, null);
     }
     
     public static <T> void sortStatic(T[] array) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sortStatic(T[])", null);
-        try {
-            sortStatic(array, null, null);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, null, null);
     }
 
     public static <T> void sortStatic(List<T> list, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sortStatic(List<T>,SortStatistics)", null);
-        try {
-            sortStatic(list, null, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, null, stats);
     }
 
     public static <T> void sortStatic(T[] array, SortStatistics stats) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sortStatic(T[],SortStatistics)", null);
-        try {
-            sortStatic(array, null, stats);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, null, stats);
     }
 
     public static <T> void sortStatic(List<T> list, Comparator<T> comparator) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sortStatic(List<T>,Comparator<T>)", null);
-        try {
-            sortStatic(list, comparator, null);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(list, comparator, null);
     }
     
     public static <T> void sortStatic(T[] array, Comparator<T> comparator) {
-        Profiler.startProfile(Profiler.INSTANTANEOUS, ShellSort.class, "sortStatic(T[],Comparator<T>)", null);
-        try {
-            sortStatic(array, comparator, null);
-        } finally {
-            Profiler.endProfile(Profiler.INSTANTANEOUS);
-        }
+        sortStatic(array, comparator, null);
     }
 
     public static <T> void sortStatic(List<T> list, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.UNKNOWN, ShellSort.class, "sortStatic(List<T>,Comparator<T>,SortStatistics)", null);
-        try {
-            if(stats!=null) stats.sortStarting();
+        if(stats!=null) stats.sortStarting();
 
-            int h=1;
+        int h=1;
 
-            int length=list.size();
-            /* 
-             * find the largest h value possible 
-             */
-            while ((h*3+1) < length) {
-                h=3*h+1;
-            }
-
-            /* 
-             * while h remains larger than 0 
-             */
-            while( h > 0 ) {
-                /* 
-                 * for each set of elements (there are h sets)
-                 */
-                for (int i = h - 1; i < length; i++) {
-                    /* 
-                     * pick the last element in the set
-                     */
-                    T B = get(list, i, stats);
-                    int j = i;
-                    /*
-                     * compare the element at B to the one before it in the set
-                     * if they are out of order continue this loop, moving
-                     * elements "back" to make room for B to be inserted.
-                     */
-                    for( j = i; (j >= h) && compare(get(list, j-h, stats), B, comparator, stats)>0; j -= h) {
-                        set(list, j, get(list, j-h, stats), stats);
-                    }
-                    /*
-                     *  insert B into the correct place
-                     */
-                    set(list, j, B, stats);
-                }
-                /* 
-                 * all sets h-sorted, now decrease set size
-                 */
-                h = h / 3;
-            }
-
-            if(stats!=null) stats.sortEnding();
-        } finally {
-            Profiler.endProfile(Profiler.UNKNOWN);
+        int length=list.size();
+        /* 
+         * find the largest h value possible 
+         */
+        while ((h*3+1) < length) {
+            h=3*h+1;
         }
+
+        /* 
+         * while h remains larger than 0 
+         */
+        while( h > 0 ) {
+            /* 
+             * for each set of elements (there are h sets)
+             */
+            for (int i = h - 1; i < length; i++) {
+                /* 
+                 * pick the last element in the set
+                 */
+                T B = get(list, i, stats);
+                int j = i;
+                /*
+                 * compare the element at B to the one before it in the set
+                 * if they are out of order continue this loop, moving
+                 * elements "back" to make room for B to be inserted.
+                 */
+                for( j = i; (j >= h) && compare(get(list, j-h, stats), B, comparator, stats)>0; j -= h) {
+                    set(list, j, get(list, j-h, stats), stats);
+                }
+                /*
+                 *  insert B into the correct place
+                 */
+                set(list, j, B, stats);
+            }
+            /* 
+             * all sets h-sorted, now decrease set size
+             */
+            h = h / 3;
+        }
+
+        if(stats!=null) stats.sortEnding();
     }
 
     public static <T> void sortStatic(T[] array, Comparator<T> comparator, SortStatistics stats) {
-        Profiler.startProfile(Profiler.UNKNOWN, ShellSort.class, "sortStatic(T[],Comparator<T>,SortStatistics)", null);
-        try {
-            if(stats!=null) stats.sortStarting();
+        if(stats!=null) stats.sortStarting();
 
-            int h=1;
+        int h=1;
 
-            int length=array.length;
-            /* 
-             * find the largest h value possible 
-             */
-            while ((h*3+1) < length) {
-                h=3*h+1;
-            }
-
-            /* 
-             * while h remains larger than 0 
-             */
-            while( h > 0 ) {
-                /* 
-                 * for each set of elements (there are h sets)
-                 */
-                for (int i = h - 1; i < length; i++) {
-                    /* 
-                     * pick the last element in the set
-                     */
-                    T B = get(array, i, stats);
-                    int j = i;
-                    /*
-                     * compare the element at B to the one before it in the set
-                     * if they are out of order continue this loop, moving
-                     * elements "back" to make room for B to be inserted.
-                     */
-                    for( j = i; (j >= h) && compare(get(array, j-h, stats), B, comparator, stats)>0; j -= h) {
-                        set(array, j, get(array, j-h, stats), stats);
-                    }
-                    /*
-                     *  insert B into the correct place
-                     */
-                    set(array, j, B, stats);
-                }
-                /* 
-                 * all sets h-sorted, now decrease set size
-                 */
-                h = h / 3;
-            }
-
-            if(stats!=null) stats.sortEnding();
-        } finally {
-            Profiler.endProfile(Profiler.UNKNOWN);
+        int length=array.length;
+        /* 
+         * find the largest h value possible 
+         */
+        while ((h*3+1) < length) {
+            h=3*h+1;
         }
+
+        /* 
+         * while h remains larger than 0 
+         */
+        while( h > 0 ) {
+            /* 
+             * for each set of elements (there are h sets)
+             */
+            for (int i = h - 1; i < length; i++) {
+                /* 
+                 * pick the last element in the set
+                 */
+                T B = get(array, i, stats);
+                int j = i;
+                /*
+                 * compare the element at B to the one before it in the set
+                 * if they are out of order continue this loop, moving
+                 * elements "back" to make room for B to be inserted.
+                 */
+                for( j = i; (j >= h) && compare(get(array, j-h, stats), B, comparator, stats)>0; j -= h) {
+                    set(array, j, get(array, j-h, stats), stats);
+                }
+                /*
+                 *  insert B into the correct place
+                 */
+                set(array, j, B, stats);
+            }
+            /* 
+             * all sets h-sorted, now decrease set size
+             */
+            h = h / 3;
+        }
+
+        if(stats!=null) stats.sortEnding();
     }
 }

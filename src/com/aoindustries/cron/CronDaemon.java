@@ -5,7 +5,6 @@ package com.aoindustries.cron;
  * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.profiler.*;
 import com.aoindustries.util.*;
 import java.util.*;
 
@@ -55,18 +54,13 @@ public final class CronDaemon extends Thread {
      * Adds a <code>CronJob</code> to the list of jobs.
      */
     synchronized public static void addCronJob(CronJob job, ErrorHandler errorHandler) {
-        Profiler.startProfile(Profiler.FAST, CronDaemon.class, "addCronJob(CronJob,ErrorHandler)", null);
-        try {
-            cronJobs.add(job);
-            errorHandlers.add(errorHandler);
-            if(runningDaemon==null) {
-                runningDaemon=new CronDaemon();
-                runningDaemon.setPriority(Thread.MAX_PRIORITY);
-                runningDaemon.setDaemon(true);
-                runningDaemon.start();
-            }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+        cronJobs.add(job);
+        errorHandlers.add(errorHandler);
+        if(runningDaemon==null) {
+            runningDaemon=new CronDaemon();
+            runningDaemon.setPriority(Thread.MAX_PRIORITY);
+            runningDaemon.setDaemon(true);
+            runningDaemon.start();
         }
     }
 
@@ -95,56 +89,51 @@ public final class CronDaemon extends Thread {
      * Runs the jobs for the current minute, returns the next time to run.
      */
     synchronized private static long runJobs() {
-        Profiler.startProfile(Profiler.FAST, CronDaemon.class, "runJobs()", null);
-        try {
-            Calendar cal=Calendar.getInstance();
-            int minute=cal.get(Calendar.MINUTE);
-            int hour=cal.get(Calendar.HOUR_OF_DAY);
-            int dayOfMonth=cal.get(Calendar.DAY_OF_MONTH);
-            int month=cal.get(Calendar.MONTH)+1;
-            int dayOfWeek=cal.get(Calendar.DAY_OF_WEEK);
-            int year = cal.get(Calendar.YEAR);
-            for(int c=0;c<cronJobs.size();c++) {
-                CronJob job=cronJobs.get(c);
-                ErrorHandler jobErrorHandler=errorHandlers.get(c);
-                try {
-                    if(job.isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek, year)) {
-                        int scheduleMode=job.getCronJobScheduleMode();
-                        boolean run;
-                        if(scheduleMode==CronJob.CRON_JOB_SCHEDULE_SKIP) {
-                            // Skip if already running
-                            boolean found=false;
-                            for(CronDaemonThread runningJob : runningJobs) {
-                                if(runningJob.cronJob==job) {
-                                    found=true;
-                                    break;
-                                }
+        Calendar cal=Calendar.getInstance();
+        int minute=cal.get(Calendar.MINUTE);
+        int hour=cal.get(Calendar.HOUR_OF_DAY);
+        int dayOfMonth=cal.get(Calendar.DAY_OF_MONTH);
+        int month=cal.get(Calendar.MONTH)+1;
+        int dayOfWeek=cal.get(Calendar.DAY_OF_WEEK);
+        int year = cal.get(Calendar.YEAR);
+        for(int c=0;c<cronJobs.size();c++) {
+            CronJob job=cronJobs.get(c);
+            ErrorHandler jobErrorHandler=errorHandlers.get(c);
+            try {
+                if(job.isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek, year)) {
+                    int scheduleMode=job.getCronJobScheduleMode();
+                    boolean run;
+                    if(scheduleMode==CronJob.CRON_JOB_SCHEDULE_SKIP) {
+                        // Skip if already running
+                        boolean found=false;
+                        for(CronDaemonThread runningJob : runningJobs) {
+                            if(runningJob.cronJob==job) {
+                                found=true;
+                                break;
                             }
-                            run=!found;
-                        } else if(scheduleMode==CronJob.CRON_JOB_SCHEDULE_CONCURRENT) {
-                            run=true;
-                        } else throw new RuntimeException("Unknown value from CronJob.getCronJobScheduleMode: "+scheduleMode);
-                        if(run) {
-                            CronDaemonThread thread=new CronDaemonThread(job, jobErrorHandler, minute, hour, dayOfMonth, month, dayOfWeek, year);
-                            thread.setDaemon(false);
-                            thread.setPriority(job.getCronJobThreadPriority());
-                            runningJobs.add(thread);
-                            thread.start();
                         }
+                        run=!found;
+                    } else if(scheduleMode==CronJob.CRON_JOB_SCHEDULE_CONCURRENT) {
+                        run=true;
+                    } else throw new RuntimeException("Unknown value from CronJob.getCronJobScheduleMode: "+scheduleMode);
+                    if(run) {
+                        CronDaemonThread thread=new CronDaemonThread(job, jobErrorHandler, minute, hour, dayOfMonth, month, dayOfWeek, year);
+                        thread.setDaemon(false);
+                        thread.setPriority(job.getCronJobThreadPriority());
+                        runningJobs.add(thread);
+                        thread.start();
                     }
-                } catch(ThreadDeath TD) {
-                    throw TD;
-                } catch(Throwable T) {
-                    Object[] extraInfo=new Object[] {"cron_job.name="+job.getCronJobName()};
-                    jobErrorHandler.reportError(T, extraInfo);
                 }
+            } catch(ThreadDeath TD) {
+                throw TD;
+            } catch(Throwable T) {
+                Object[] extraInfo=new Object[] {"cron_job.name="+job.getCronJobName()};
+                jobErrorHandler.reportError(T, extraInfo);
             }
-            cal.add(Calendar.MINUTE, 1);
-            cal.set(Calendar.MILLISECOND, 0);
-            return cal.getTimeInMillis();
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
         }
+        cal.add(Calendar.MINUTE, 1);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTimeInMillis();
     }
     
     synchronized static void threadDone(CronDaemonThread thread) {
