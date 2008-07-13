@@ -464,7 +464,7 @@ public class LongArrayList extends AbstractList<Long>
      * 		  &lt; 0 || index &gt;= size())</tt>.
      */
     public Long remove(int index) {
-        return Long.valueOf(remove(index));
+        return Long.valueOf(removeLong(index));
     }
 
     /**

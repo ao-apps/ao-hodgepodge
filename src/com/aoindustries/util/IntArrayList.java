@@ -426,7 +426,7 @@ public class IntArrayList extends AbstractList<Integer>
      * 		  &lt; 0 || index &gt;= size())</tt>.
      */
     public Integer remove(int index) {
-        return Integer.valueOf(remove(index));
+        return Integer.valueOf(removeInt(index));
     }
 
     /**
