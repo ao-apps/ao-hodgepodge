@@ -291,6 +291,6 @@ final public class AOConnectionPool extends AOPool {
     }
 
     public String toString() {
-        return AOConnectionPool.class.getName()+"?url=" + url+"&user="+user;
+        return "AOConnectionPool(url=\""+url+"\", user=\""+user+"\")";
     }
 }

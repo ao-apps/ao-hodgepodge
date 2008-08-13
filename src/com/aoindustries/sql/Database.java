@@ -642,4 +642,8 @@ public class Database extends AbstractDatabaseAccess {
             throw err;
         }
     }
+    
+    public String toString() {
+        return "Database("+pool.toString()+")";
+    }
 }
