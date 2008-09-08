@@ -7,7 +7,7 @@ package com.aoindustries.apache.catalina.jdbc4_1_31;
  * to submit this code to Apache for inclusion in their Tomcat distribution.
  *
  * By AO Industries, Inc.,
- * 816 Azalea Rd, Mobile, Alabama, 36693, U.S.A.
+ * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
 import com.aoindustries.io.AOPool;
