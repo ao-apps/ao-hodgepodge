@@ -5,10 +5,13 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * Adds compressed data transfer to DataInputStream.
+ * Adds compressed data transfer to DataInputStream.  This class is not thread safe.
  *
  * @author  AO Industries, Inc.
  */
@@ -35,7 +38,7 @@ public class CompressedDataInputStream extends DataInputStream {
      *
      * @exception  EOFException if the end of file is reached
      */
-    public int readCompressedInt() throws IOException {
+    public static int readCompressedInt(InputStream in) throws IOException {
         int b1=in.read();
         if(b1==-1) throw new EOFException();
         if((b1&0x80)!=0) {
@@ -82,6 +85,23 @@ public class CompressedDataInputStream extends DataInputStream {
             ;
         }
     }
+
+    /**
+     * Reads a compressed integer from the stream.
+     *
+     * The 31 bit pattern is as follows:
+     * <pre>
+     * 5 bit   - 000SXXXX
+     * 13 bit  - 001SXXXX XXXXXXXX
+     * 22 bit  - 01SXXXXX XXXXXXXX XXXXXXXX
+     * 31 bit  - 1SXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX
+     * </pre>
+     *
+     * @exception  EOFException if the end of file is reached
+     */
+    public int readCompressedInt() throws IOException {
+        return readCompressedInt(in);
+    }
     
     private final String[] lastStrings=new String[64];
     private final int[] lastCommonLengths=new int[64];
@@ -90,29 +110,27 @@ public class CompressedDataInputStream extends DataInputStream {
      * @exception  EOFException if the end of file is reached
      */
     public String readCompressedUTF() throws IOException {
-        synchronized(this) {
-            int b1=in.read();
-            if(b1==-1) throw new EOFException();
-            int slot=b1&0x3f;
+        int b1=in.read();
+        if(b1==-1) throw new EOFException();
+        int slot=b1&0x3f;
 
-            // Is there a difference to the common
-            if((b1&0x80)!=0) {
-                int diff=readCompressedInt();
-                if(diff>=0) diff++;
-                lastCommonLengths[slot]+=diff;
-            };
+        // Is there a difference to the common
+        if((b1&0x80)!=0) {
+            int diff=readCompressedInt();
+            if(diff>=0) diff++;
+            lastCommonLengths[slot]+=diff;
+        }
 
-            // Is there a suffix String
-            int common=lastCommonLengths[slot];
-            if((b1&0x40)!=0) {
-                String suffix=readUTF();
-                if(common==0) return lastStrings[slot]=suffix;
-                else return lastStrings[slot]=lastStrings[slot].substring(0, common)+suffix;
-            } else {
-                String last=lastStrings[slot];
-                if(common==last.length()) return last;
-                else return lastStrings[slot]=lastStrings[slot].substring(0, common);
-            }
+        // Is there a suffix String
+        int common=lastCommonLengths[slot];
+        if((b1&0x40)!=0) {
+            String suffix=readUTF();
+            if(common==0) return lastStrings[slot]=suffix;
+            else return lastStrings[slot]=lastStrings[slot].substring(0, common)+suffix;
+        } else {
+            String last=lastStrings[slot];
+            if(common==last.length()) return last;
+            else return lastStrings[slot]=lastStrings[slot].substring(0, common);
         }
     }
 

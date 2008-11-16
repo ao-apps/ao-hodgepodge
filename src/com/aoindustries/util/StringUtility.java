@@ -1147,22 +1147,22 @@ public final class StringUtility {
     }
 
     /**
-     * Gets the approximate size of a file in this format:
+     * Gets the approximate size (where k=1024) of a file in this format:
      *
      * x byte(s)
      * xx bytes
      * xxx bytes
      * x.x k
-     * xx k
+     * xx.x k
      * xxx k
      * x.x M
-     * xx M
+     * xx.x M
      * xxx M
      * x.x G
-     * xx G
+     * xx.x G
      * xxx G
      * x.x T
-     * xx T
+     * xx.x T
      * xxx T
      * xxx... T
      */
@@ -1185,8 +1185,52 @@ public final class StringUtility {
             unitSize=(long)1024*1024*1024*1024;
         }
         long whole=size/unitSize;
-        if(whole<10) {
+        if(whole<100) {
             int fraction=(int)(((size%unitSize)*10)/unitSize);
+            return new StringBuilder().append(whole).append('.').append(fraction).append(unitName).toString();
+        } else return new StringBuilder().append(whole).append(unitName).toString();
+    }
+
+    /**
+     * Gets the approximate bit rate (where k=1000) in this format:
+     *
+     * x
+     * xx
+     * xxx
+     * x.x k
+     * xx.x k
+     * xxx k
+     * x.x M
+     * xx.x M
+     * xxx M
+     * x.x G
+     * xx.x G
+     * xxx G
+     * x.x T
+     * xx.x T
+     * xxx T
+     * xxx... T
+     */
+    public static String getApproximateBitRate(long bit_rate) {
+        if(bit_rate<1000) return Integer.toString((int)bit_rate);
+        String unitName;
+        long unitSize;
+        if(bit_rate<(1000*1000)) {
+            unitName=" k";
+            unitSize=1000;
+        } else if(bit_rate<((long)1000*1000*1000)) {
+            unitName=" M";
+            unitSize=1000*1000;
+        } else if(bit_rate<((long)1000*1000*1000*1000)) {
+            unitName=" G";
+            unitSize=(long)1000*1000*1000;
+        } else {
+            unitName=" T";
+            unitSize=(long)1000*1000*1000*1000;
+        }
+        long whole=bit_rate/unitSize;
+        if(whole<100) {
+            int fraction=(int)(((bit_rate%unitSize)*10)/unitSize);
             return new StringBuilder().append(whole).append('.').append(fraction).append(unitName).toString();
         } else return new StringBuilder().append(whole).append(unitName).toString();
     }

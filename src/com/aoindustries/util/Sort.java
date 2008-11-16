@@ -50,41 +50,36 @@ public final class Sort {
      */
     /*
     public static void sortInteger(List list, List optList) {
-        Profiler.startProfile(Profiler.FAST, Sort.class, "sortInteger(List,List)", null);
-        try {
-            int len=list.size();
-            for(int c=1;c<len;c++) {
-                // Insert the word at the appropriate place in the array
-                Integer I=(Integer)list.get(c);
-                int i=I.intValue();
-                Object O=optList==null?null:optList.get(c);
-                int bottom=0;
-                int range=c;
+        int len=list.size();
+        for(int c=1;c<len;c++) {
+            // Insert the word at the appropriate place in the array
+            Integer I=(Integer)list.get(c);
+            int i=I.intValue();
+            Object O=optList==null?null:optList.get(c);
+            int bottom=0;
+            int range=c;
 
-                while(range>0) {
-                    int half=range>>>1;
-                    int pos=bottom+half;
-                    int compare=((Integer)list.get(pos)).intValue();
-                    if(i>=compare) {
-                        if(half==0) {
-                            if(i>compare) bottom++;
-                            break;
-                        }
-                        bottom=pos;
-                        range-=half;
-                    } else range=half;
-                }
-                if(bottom!=c) {
-                    list.remove(c);
-                    list.add(bottom, I);
-                    if(optList!=null) {
-                        optList.remove(c);
-                        optList.add(bottom, O);
+            while(range>0) {
+                int half=range>>>1;
+                int pos=bottom+half;
+                int compare=((Integer)list.get(pos)).intValue();
+                if(i>=compare) {
+                    if(half==0) {
+                        if(i>compare) bottom++;
+                        break;
                     }
+                    bottom=pos;
+                    range-=half;
+                } else range=half;
+            }
+            if(bottom!=c) {
+                list.remove(c);
+                list.add(bottom, I);
+                if(optList!=null) {
+                    optList.remove(c);
+                    optList.add(bottom, O);
                 }
             }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
         }
     }*/
 
@@ -93,40 +88,35 @@ public final class Sort {
      * be contained in the elements, <code>Object</code> and then <code>Float</code>.
      */
     /*public static void sortObjectFloatDescending(List list) {
-        Profiler.startProfile(Profiler.FAST, Sort.class, "sortObjectFloatDescending(List)", null);
-        try {
-            int len=list.size();
-            for(int c=2;c<len;c+=2) {
-                // Insert the object and float at the appropriate place in the array
-                Float F=(Float)list.get(c+1);
-                float f=F.floatValue();
+        int len=list.size();
+        for(int c=2;c<len;c+=2) {
+            // Insert the object and float at the appropriate place in the array
+            Float F=(Float)list.get(c+1);
+            float f=F.floatValue();
 
-                int bottom=0;
-                int range=c;
+            int bottom=0;
+            int range=c;
 
-                while(range>0) {
-                    int half=(range>>>1)&0xfffffffe;
-                    int pos=bottom+half;
-                    float res=((Float)list.get(pos+1)).floatValue()-f;
-                    if(res>=0) {
-                        if(half==0) {
-                            if(res>0) bottom+=2;
-                            break;
-                        }
-                        bottom=pos;
-                        range-=half;
-                    } else range=half;
-                }
-                if(bottom!=c) {
-                    Object O=list.get(c);
-                    list.remove(c);
-                    list.remove(c);
-                    list.add(bottom, O);
-                    list.add(bottom+1, F);
-                }
+            while(range>0) {
+                int half=(range>>>1)&0xfffffffe;
+                int pos=bottom+half;
+                float res=((Float)list.get(pos+1)).floatValue()-f;
+                if(res>=0) {
+                    if(half==0) {
+                        if(res>0) bottom+=2;
+                        break;
+                    }
+                    bottom=pos;
+                    range-=half;
+                } else range=half;
             }
-        } finally {
-            Profiler.endProfile(Profiler.FAST);
+            if(bottom!=c) {
+                Object O=list.get(c);
+                list.remove(c);
+                list.remove(c);
+                list.add(bottom, O);
+                list.add(bottom+1, F);
+            }
         }
     }*/
 }
