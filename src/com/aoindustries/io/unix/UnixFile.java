@@ -1029,18 +1029,10 @@ public class UnixFile {
      * 
      * @deprecated  Please specify the deleteOnExit flag
      * 
-     * @see  mktemp(String,boolean)
+     * @see  #mktemp(String,boolean)
      */
     public static UnixFile mktemp(String template) throws IOException {
-        try {
-            String path=template+"XXXXXX";
-            checkWrite(path);
-            loadLibrary();
-            return new UnixFile(mktemp0(path));
-        } catch(IOException err) {
-            System.err.println("UnixFile.mktemp: IOException: template="+template);
-            throw err;
-        }
+        return mktemp(template, false);
     }
 
     /**
