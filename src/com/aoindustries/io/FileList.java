@@ -246,8 +246,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
         if(extension==null) extension="tmp";
         try {
             // First try to use Unix file because it creates the files with 600 permissions.
-            File f=UnixFile.mktemp(System.getProperty("java.io.tmpdir")+'/'+prefix+'_'+extension+'.').getFile();
-            f.deleteOnExit();
+            File f=UnixFile.mktemp(System.getProperty("java.io.tmpdir")+'/'+prefix+'_'+extension+'.', true).getFile();
             return f;
         } catch(SecurityException err) {
             // This is OK if now allowed to load libraries

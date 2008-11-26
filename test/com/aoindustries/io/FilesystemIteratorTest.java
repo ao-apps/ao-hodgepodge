@@ -33,7 +33,7 @@ public class FilesystemIteratorTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        tempDir = UnixFile.mktemp("/home/o/orion/tmp/FilesystemIteratorTest.");
+        tempDir = UnixFile.mktemp("/home/o/orion/tmp/FilesystemIteratorTest.", true);
         tempDir.delete();
         tempDir.mkdir(false, 0700);
         UnixFile tmp = new UnixFile(tempDir, "tmp", true).mkdir(false, 0755);

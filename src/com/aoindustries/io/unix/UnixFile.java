@@ -189,7 +189,7 @@ public class UnixFile {
     protected final String path;
     
     private File file;
-    private UnixFile parent;
+    private UnixFile _parent;
 
     /**
      * Strictly requires the parent to be a directory if it exists.
@@ -974,11 +974,11 @@ public class UnixFile {
      * Not synchronized because multiple instantiation is acceptable.
      */
     final public UnixFile getParent() {
-        if(parent==null) {
+        if(_parent==null) {
             File parentFile = getFile().getParentFile();
-            if(parentFile!=null) parent = new UnixFile(parentFile);
+            if(parentFile!=null) _parent = new UnixFile(parentFile);
         }
-        return parent;
+        return _parent;
     }
 
     /**
@@ -1022,10 +1022,14 @@ public class UnixFile {
     }
 
     /**
-     * Securely creates a temporary file.  In order to be secure, though, the directory
+     * Securely creates a temporary file, not deleting on exit.  In order to be secure, though, the directory
      * needs to be secure, or at least have the sticky bit set.
      *
      * This method will follow symbolic links in the path but not final links.
+     * 
+     * @deprecated  Please specify the deleteOnExit flag
+     * 
+     * @see  mktemp(String,boolean)
      */
     public static UnixFile mktemp(String template) throws IOException {
         try {
@@ -1033,6 +1037,26 @@ public class UnixFile {
             checkWrite(path);
             loadLibrary();
             return new UnixFile(mktemp0(path));
+        } catch(IOException err) {
+            System.err.println("UnixFile.mktemp: IOException: template="+template);
+            throw err;
+        }
+    }
+
+    /**
+     * Securely creates a temporary file.  In order to be secure, though, the directory
+     * needs to be secure, or at least have the sticky bit set.
+     *
+     * This method will follow symbolic links in the path but not final links.
+     */
+    public static UnixFile mktemp(String template, boolean deleteOnExit) throws IOException {
+        try {
+            String path=template+"XXXXXX";
+            checkWrite(path);
+            loadLibrary();
+            UnixFile uf = new UnixFile(mktemp0(path));
+            if(deleteOnExit) uf.getFile().deleteOnExit();
+            return uf;
         } catch(IOException err) {
             System.err.println("UnixFile.mktemp: IOException: template="+template);
             throw err;
