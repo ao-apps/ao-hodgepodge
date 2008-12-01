@@ -8,7 +8,7 @@ package com.aoindustries.io.unix;
 import java.io.FileNotFoundException;
 
 /**
- * One stat call may have all of its output stored in an instance of this class.  This class is not profiled because every method runs in a fast and constant time.
+ * One stat call may have all of its output stored in an instance of this class.
  *
  * @see  UnixFile#getStat()
  * @see  UnixFile#getStat(Stat)

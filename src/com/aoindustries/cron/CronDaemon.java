@@ -5,12 +5,19 @@ package com.aoindustries.cron;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.util.*;
-import java.util.*;
+import com.aoindustries.util.ErrorHandler;
+import com.aoindustries.util.StandardErrorHandler;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * Run cron jobs based on their scheduling requirements.  Once per minute
  * it polls each cron job and runs it if it is currently scheduled.
+ *
+ * TODO: Make sure that it will run once per minute, even if delayed more than a minute?
+ * TODO: Use a user-provided ExecutorService, have aoserv-daemon use same executor.
+ *           Also have aoserv-client allow user-provided executor service, use same executor.
  *
  * @see  CronJob
  *
@@ -64,6 +71,7 @@ public final class CronDaemon extends Thread {
         }
     }
 
+    @Override
     public void run() {
         while(true) {
             try {
