@@ -5,8 +5,10 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.util.*;
-import java.io.*;
+import com.aoindustries.util.BufferManager;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * A <code>FifoFile</code> allows code to read and write to an on-disk managed FIFO.
@@ -30,7 +32,7 @@ public class FifoFile {
     final FifoFileOutputStream out;
     final long maxFifoLength;
     final long fileLength;
-    final int blockSize;
+    final int _blockSize;
 
     public FifoFile(String filename, long maxFifoLength) throws IOException {
         this(new File(filename), maxFifoLength);
@@ -45,7 +47,7 @@ public class FifoFile {
         this.in=new FifoFileInputStream(this);
         this.out=new FifoFileOutputStream(this);
         long blockSize=maxFifoLength>>8;
-        this.blockSize=blockSize>=BufferManager.BUFFER_SIZE?BufferManager.BUFFER_SIZE:blockSize<=0?1:(int)blockSize;
+        this._blockSize=blockSize>=BufferManager.BUFFER_SIZE?BufferManager.BUFFER_SIZE:blockSize<=0?1:(int)blockSize;
         if(this.file.length()!=fileLength) reset();
     }
 
@@ -66,7 +68,7 @@ public class FifoFile {
     }
 
     public int getBlockSize() {
-        return blockSize;
+        return _blockSize;
     }
 
     /**
@@ -81,7 +83,9 @@ public class FifoFile {
     }
 
     public void close() throws IOException {
-        file.close();
+        synchronized(this) {
+            file.close();
+        }
     }
 
     /**

@@ -5,7 +5,10 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import java.io.*;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
 
 /**
  * @see FifoFile
@@ -19,7 +22,7 @@ public class FifoFileInputStream extends InputStream {
     private long fifoReadCount=0;
     private long fifoReadBytes=0;
 
-    FifoFileInputStream(FifoFile file) throws FileNotFoundException {
+    FifoFileInputStream(FifoFile file) {
         this.file=file;
     }
 
@@ -86,6 +89,7 @@ public class FifoFileInputStream extends InputStream {
     /**
      * Reads data from the file, blocks until at least one byte is available.
      */
+    @Override
     public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
@@ -93,6 +97,7 @@ public class FifoFileInputStream extends InputStream {
     /**
      * Reads data from the file, blocks until at least one byte is available.
      */
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
         // Read from the queue
         synchronized(file) {
@@ -130,6 +135,7 @@ public class FifoFileInputStream extends InputStream {
     /**
      * Skips data in the queue, blocks until at least one byte is skipped.
      */
+    @Override
     public long skip(long n) throws IOException {
         // Skip in the queue
         synchronized(file) {
@@ -164,6 +170,7 @@ public class FifoFileInputStream extends InputStream {
     /**
      * Determines the number of bytes that may be read without blocking.
      */
+    @Override
     public int available() throws IOException {
         synchronized(file) {
             long len=file.getLength();
@@ -174,6 +181,7 @@ public class FifoFileInputStream extends InputStream {
     /**
      * @see  FifoFile#close()
      */
+    @Override
     public void close() throws IOException {
         file.close();
     }

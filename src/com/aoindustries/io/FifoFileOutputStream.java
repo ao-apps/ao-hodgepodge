@@ -5,7 +5,9 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import java.io.*;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
 
 /**
  * @see FifoFile
@@ -19,7 +21,7 @@ public class FifoFileOutputStream extends OutputStream {
     private long fifoWriteCount=0;
     private long fifoWriteBytes=0;
 
-    FifoFileOutputStream(FifoFile file) throws FileNotFoundException {
+    FifoFileOutputStream(FifoFile file) {
         this.file=file;
     }
 
@@ -77,11 +79,13 @@ public class FifoFileOutputStream extends OutputStream {
         }
     }
 
+    @Override
     public void write(byte[] b) throws IOException {
         // Write to the queue
         write(b, 0, b.length);
     }
 
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
         // Write blocks until all bytes have been written
         while(len>0) {
@@ -121,8 +125,11 @@ public class FifoFileOutputStream extends OutputStream {
      * Flushes all updates to this file to the underlying storage device.  This is performed by
      * <code>RandomAccessFile.getChannel().force(true)</code>.
      */
+    @Override
     public void flush() throws IOException {
-        file.file.getChannel().force(true);
+        synchronized(file) {
+            file.file.getChannel().force(true);
+        }
     }
 
     /**
@@ -138,7 +145,10 @@ public class FifoFileOutputStream extends OutputStream {
     /**
      * @see  FifoFile#close()
      */
+    @Override
     public void close() throws IOException {
-        file.close();
+        synchronized(file) {
+            file.close();
+        }
     }
 }
