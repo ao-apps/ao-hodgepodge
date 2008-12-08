@@ -927,6 +927,9 @@ public class UnixFile {
     /**
      * Securely gets a <code>FileOutputStream</code> to this file, temporarily performing permission
      * changes and ensuring that no symbolic links are anywhere in the path.
+     * 
+     * TODO: Consider the impact of using mktemp instead of secureParents/restoreParents because there
+     *       is the possibility that permissions may not be restored if the JVM is shutdown at that moment.
      */
     final public FileOutputStream getSecureOutputStream(int uid, int gid, long mode, boolean overwrite) throws IOException {
         List<SecuredDirectory> parentsChanged=new ArrayList<SecuredDirectory>();
