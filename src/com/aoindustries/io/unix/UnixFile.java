@@ -798,7 +798,7 @@ public class UnixFile {
     /**
      * Gets the path for this <code>UnixFile</code>.
      * 
-     * @deprecated  the filename is misleading since it represents the entire path, please use <code>getPath()</code> instead.
+     * @deprecated  the use of the word <code>filename</code> is misleading since it represents the entire path, please use <code>getPath()</code> instead.
      * @see  #getPath()
      */
     final public String getFilename() {
