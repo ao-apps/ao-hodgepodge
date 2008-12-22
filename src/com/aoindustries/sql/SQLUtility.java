@@ -24,7 +24,10 @@ public class SQLUtility {
      * Escapes SQL so that it can be used safely in queries.
      *
      * @param S the string to be escaped.
+     *
+     * @deprecated  use PreparedStatement instead
      */
+    @Deprecated
     public static String escapeSQL(String S) {
         int i;
         StringBuilder B = new StringBuilder();
@@ -37,7 +40,10 @@ public class SQLUtility {
      *
      * @param S the string to be escaped.
      * @param B the <code>StringBuilder</code> to append to.
+     *
+     * @deprecated  use PreparedStatement instead
      */
+    @Deprecated
     public static void escapeSQL(String S, StringBuilder B) {
         int i;
         for (i = 0; i < S.length(); i++) {

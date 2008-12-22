@@ -5,8 +5,11 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.util.*;
-import java.io.*;
+import com.aoindustries.util.BufferManager;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 /**
  * A chain writer encapsulates a <code>PrintWriter</code> and returns the <code>ChainWriter</code>
@@ -293,8 +296,12 @@ final public class ChainWriter {
     }
 
     /**
-     * Prints a <code>byte[]</code> to a <code>ChainWriter</code>.
+     * Prints a <code>byte[]</code> to a <code>ChainWriter</code>.  The characters
+     * are assumed to be ASCII.
+     * 
+     * @deprecated  use OutputStreamWriter because this method doesn't do any decoding of the byte[]
      */
+    @Deprecated
     public ChainWriter print(byte[] bytes) {
         int len=bytes.length;
         int pos=0;
