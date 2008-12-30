@@ -70,6 +70,10 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, objectFactory, sql, params);
     }
 
+    public void executeQuery(ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {
+        executeQuery(Connection.TRANSACTION_READ_COMMITTED, true, resultSetHandler, sql, params);
+    }
+
     public List<Short> executeShortListQuery(String sql, Object ... params) throws IOException, SQLException {
         return executeShortListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }

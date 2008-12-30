@@ -202,6 +202,21 @@ public interface DatabaseAccess {
     <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException;
 
     /**
+     * Read-only query the database, calling the <code>ResultSetHandler</code> for each row retrieved.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    void executeQuery(ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Query the database, calling the <code>ResultSetHandler</code> for each row retrieved.
+     */
+    void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
      * Read-only query the database with a <code>List<Short></code> return type.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>

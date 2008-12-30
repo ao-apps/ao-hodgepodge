@@ -61,32 +61,6 @@ public class Database extends AbstractDatabaseAccess {
         this.pool=pool;
     }
 
-    private long updateCount=0;
-    private final Object updateCountLock=new Object();
-    void incrementUpdateCount() {
-        synchronized(updateCountLock) {
-            updateCount++;
-        }
-    }
-    public long getUpdateCount() {
-        synchronized(updateCountLock) {
-            return updateCount;
-        }
-    }
-
-    private long queryCount=0;
-    private final Object queryCountLock=new Object();
-    void incrementQueryCount() {
-        synchronized(queryCountLock) {
-            queryCount++;
-        }
-    }
-    public long getQueryCount() {
-        synchronized(queryCountLock) {
-            return queryCount;
-        }
-    }
-
     public DatabaseConnection createDatabaseConnection() {
         return new DatabaseConnection(this);
     }
@@ -475,6 +449,55 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+            DatabaseConnection conn=createDatabaseConnection();
+            if(DEBUG_TIMING) {
+                long endTime = System.currentTimeMillis();
+                System.err.println("DEBUG: Database: executeQuery: createDatabaseConnection in "+(endTime-startTime)+" ms");
+            }
+            try {
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                conn.executeQuery(isolationLevel, readOnly, resultSetHandler, sql, params);
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: Database: executeQuery: executeQuery in "+(endTime-startTime)+" ms");
+                }
+                if(!readOnly) {
+                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                    conn.commit();
+                    if(DEBUG_TIMING) {
+                        long endTime = System.currentTimeMillis();
+                        System.err.println("DEBUG: Database: executeQuery: commit in "+(endTime-startTime)+" ms");
+                    }
+                }
+            } catch(IOException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } catch(SQLException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } finally {
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                conn.releaseConnection();
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: Database: executeQuery: releaseConnection in "+(endTime-startTime)+" ms");
+                }
+            }
+        } catch(RuntimeException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
     public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
         try {
             DatabaseConnection conn=createDatabaseConnection();
@@ -642,7 +665,8 @@ public class Database extends AbstractDatabaseAccess {
             throw err;
         }
     }
-    
+
+    @Override
     public String toString() {
         return "Database("+pool.toString()+")";
     }

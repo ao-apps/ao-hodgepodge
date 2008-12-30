@@ -42,7 +42,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     private final Database database;
 
-    Connection conn;
+    Connection _conn;
     
     protected DatabaseConnection(Database database) {
        this.database=database;
@@ -57,7 +57,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws IOException, SQLException {
-        Connection c=conn;
+        Connection c=_conn;
         if(c==null) {
             long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
             c=database.getConnectionPool().getConnection(isolationLevel, readOnly, maxConnections);
@@ -73,7 +73,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     System.err.println("DEBUG: DatabaseConnection: getConnection: setAutoCommit(false) in "+(endTime-startTime)+" ms");
                 }
             }
-            conn=c;
+            _conn=c;
         } else if(c.getTransactionIsolation()<isolationLevel) {
             if(!c.getAutoCommit()) {
                 c.commit();
@@ -166,7 +166,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -208,7 +207,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -243,7 +241,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -285,7 +282,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -320,7 +316,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     IntList V=new IntArrayList();
@@ -358,7 +353,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -396,7 +390,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     LongList V=new LongArrayList();
@@ -434,7 +427,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -487,8 +479,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                         long endTime = System.currentTimeMillis();
                         System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: setParams in "+(endTime-startTime)+" ms");
                     }
-
-                    incrementQueryCount();
 
                     if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                     ResultSet results=pstmt.executeQuery();
@@ -582,8 +572,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                         System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: setParams in "+(endTime-startTime)+" ms");
                     }
 
-                    incrementQueryCount();
-
                     if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                     ResultSet results=pstmt.executeQuery();
                     if(DEBUG_TIMING) {
@@ -651,8 +639,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 setParams(pstmt, params);
 
-                incrementQueryCount();
-
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -689,8 +675,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 setParams(pstmt, params);
 
-                incrementQueryCount();
-
                 ResultSet results=pstmt.executeQuery();
                 try {
                     List<T> list=new ArrayList<T>();
@@ -716,12 +700,41 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {
+        try {
+            Connection conn = getConnection(isolationLevel, readOnly);
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            try {
+                setParams(pstmt, params);
+
+                ResultSet results=pstmt.executeQuery();
+                try {
+                    while(results.next()) resultSetHandler.handleResultSet(results);
+                } finally {
+                    results.close();
+                }
+            } catch(SQLException err) {
+                throw new WrappedSQLException(err, pstmt);
+            } finally {
+                pstmt.close();
+            }
+        } catch(RuntimeException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(IOException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        } catch(SQLException err) {
+            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
+            throw err;
+        }
+    }
+
     public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
         try {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     List<Short> V=new ArrayList<Short>();
@@ -759,7 +772,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -801,7 +813,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -836,7 +847,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     List<String> V=new ArrayList<String>();
@@ -874,7 +884,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementQueryCount();
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -909,7 +918,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             PreparedStatement pstmt = getConnection(Connection.TRANSACTION_READ_COMMITTED, false).prepareStatement(sql);
             try {
                 setParams(pstmt, params);
-                incrementUpdateCount();
                 return pstmt.executeUpdate();
             } catch(SQLException err) {
                 throw new WrappedSQLException(err, pstmt);
@@ -929,27 +937,19 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public void commit() throws IOException, SQLException {
-        Connection c=conn;
+        Connection c=_conn;
         if(c!=null) c.commit();
     }
 
-    public void incrementQueryCount() {
-        database.incrementQueryCount();
-    }
-
-    public void incrementUpdateCount() {
-        database.incrementUpdateCount();
-    }
-
     public boolean isClosed() throws IOException, SQLException {
-        Connection c=conn;
+        Connection c=_conn;
         return c==null || c.isClosed();
     }
 
     public void releaseConnection() throws IOException, SQLException {
-        Connection c=conn;
+        Connection c=_conn;
         if(c!=null) {
-            conn=null;
+            _conn=null;
             database.getConnectionPool().releaseConnection(c);
         }
     }
@@ -957,10 +957,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     public boolean rollbackAndClose() {
         boolean rolledBack=false;
         try {
-            if(conn!=null && !conn.isClosed()) {
+            if(_conn!=null && !_conn.isClosed()) {
                 rolledBack=true;
-                conn.rollback();
-                conn.close();
+                _conn.rollback();
+                _conn.close();
             }
         } catch(SQLException err) {
             database.getConnectionPool().getErrorHandler().reportError(err, null);
