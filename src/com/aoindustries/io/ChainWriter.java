@@ -597,22 +597,32 @@ final public class ChainWriter {
 
     /**
      * Escapes the specified <code>String</code> so that it can be put in a JavaScript string.
-     * Writes to the internal <code>PrintWriter</code>.
+     * Writes to the provided <code>Writer</code>.
      *
      * @param S the string to be escaped.
      */
-    public ChainWriter printEJ(String S) {
+    public static void printEJ(String S, Writer out) throws IOException {
         if (S != null) {
             int len = S.length();
             for (int c = 0; c < len; c++) {
                 char ch = S.charAt(c);
-                if (ch == '"') out.print("\\\"");
-                else if (ch == '\'') out.print("\\'");
-                else if (ch == '\n') out.print("\\n");
-                else if (ch == '\t') out.print("\\t");
-                else out.print(ch);
+                if (ch == '"') out.write("\\\"");
+                else if (ch == '\'') out.write("\\'");
+                else if (ch == '\n') out.write("\\n");
+                else if (ch == '\t') out.write("\\t");
+                else out.write(ch);
             }
         }
+    }
+
+    /**
+     * Escapes the specified <code>String</code> so that it can be put in a JavaScript string.
+     * Writes to the internal <code>PrintWriter</code>.
+     *
+     * @param S the string to be escaped.
+     */
+    public ChainWriter printEJ(String S) throws IOException {
+        printEJ(S, out);
         return this;
     }
 
