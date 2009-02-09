@@ -27,21 +27,43 @@ import java.util.Stack;
  *
  * @author  AO Industries, Inc.
  */
-public class FilesystemIterator {
+public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
     private static final String[] emptyStringArray = new String[0];
 
     private final Map<String,FilesystemIteratorRule> rules;
     private final Map<String,FilesystemIteratorRule> prefixRules;
     private final String startPath;
+    private final boolean isPreorder;
+
+    /**
+     * Constructs an iterator without any filename conversions and starting at all roots.
+     * Performs a preorder traversal - directory before directory contents.
+     *
+     * @see  #FilesystemIterator(Map,Map,String,boolean)
+     */
+    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules) {
+        this(rules, prefixRules, "", true);
+    }
 
     /**
      * Constructs an iterator without any filename conversions and starting at all roots.
      *
-     * @see  #FilesystemIterator(Map,Map,String)
+     * @see  #FilesystemIterator(Map,Map,String,boolean)
      */
-    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules) {
-        this(rules, prefixRules, "");
+    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, boolean isPreorder) {
+        this(rules, prefixRules, "", isPreorder);
+    }
+
+    /**
+     * Constructs a filesystem iterator with the provided rules and conversion.
+     * Performs a preorder traversal - directory before directory contents.
+     *
+     * @param  rules  the rules that will be applied during iteration
+     * @param  startPath  if "", all roots will be used, otherwise starts at the provided path
+     */
+    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, String startPath) {
+        this(rules, prefixRules, startPath, true);
     }
 
     /**
@@ -50,7 +72,7 @@ public class FilesystemIterator {
      * @param  rules  the rules that will be applied during iteration
      * @param  startPath  if "", all roots will be used, otherwise starts at the provided path
      */
-    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, String startPath) {
+    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, String startPath, boolean isPreorder) {
         this.rules=rules;
         this.prefixRules=prefixRules;
         currentDirectories=null;
@@ -58,6 +80,7 @@ public class FilesystemIterator {
         currentIndexes=null;
         filesDone=false;
         this.startPath = startPath;
+        this.isPreorder = isPreorder;
     }
 
     private Stack<String> currentDirectories;
@@ -107,11 +130,13 @@ public class FilesystemIterator {
                     // Undo the stack as far as needed
                     while(currentDirectory!=null && currentIndex>=currentList.length) {
                         currentDirectories.pop();
-                        currentDirectory=currentDirectories.peek();
                         currentLists.pop();
-                        currentList=currentLists.peek();
                         currentIndexes.pop();
+                        String oldCurrentDirectory = currentDirectory;
+                        currentDirectory=currentDirectories.peek();
+                        currentList=currentLists.peek();
                         currentIndex=currentIndexes.peek().intValue();
+                        if(!isPreorder) return new File(oldCurrentDirectory); // This is performed last because the EmptyStackException caused by peek indicates end of traversal
                     }
                 } catch(EmptyStackException err) {
                     currentDirectory=null;
@@ -187,8 +212,12 @@ public class FilesystemIterator {
                                     currentDirectories.push(filename);
                                     currentLists.push(list);
                                     currentIndexes.push(Integer.valueOf(0));
+                                    if(isPreorder) return file;
+                                } else {
+                                    // If empty directory both preorder and postorder return directory immediately
+                                    // and bypass using the stack.
+                                    return file;
                                 }
-                                return file;
                             } else {
                                 if(recurse) throw new AssertionError("recurse=true and includeDirectory=false");
                             }
@@ -433,5 +462,23 @@ public class FilesystemIterator {
      */
     public Iterator<String> getFilenameIterator() throws IOException {
         return new FilenameIterator(this);
+    }
+    
+    /**
+     * Gets the start path for this iterator.
+     */
+    public String getStartPath() {
+        return startPath;
+    }
+    
+    /**
+     * Gets the preorder flag for this iterator.
+     */
+    public boolean isPreorder() {
+        return isPreorder;
+    }
+    
+    public int compareTo(FilesystemIterator other) {
+        return startPath.compareTo(other.startPath);
     }
 }
