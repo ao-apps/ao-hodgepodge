@@ -22,10 +22,19 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /**
+ * <p>
  * Our backup directories contain parallel directories with many hard links.
  * The performance of deleting more than one of the directories can be improved
  * by deleting from them in parallel.
- * 
+ * </p>
+ * <p>
+ * Also performs the task with three threads:
+ * <pre>
+ *     Iterate filesystem -> Delete entries -> Verbose Output
+ *     (Calling Thread)      (New Thread)      (New Thread)
+ * </pre>
+ * </p>
+ *     
  * TODO: Verify this is, in fact, true.
  * 
  * This is measured with a copy of the backups from one of our managed servers.
@@ -44,6 +53,8 @@ import java.util.concurrent.BlockingQueue;
  * +-----------+----------+----------+----------+----------+
  * 
  * TODO: Use this from the back-up clean-up code if it is, in fact, faster.
+ * 
+ * TODO: Should it use a provided ExecutorService instead of making own Threads?
  * 
  * TODO: Concurrent deletes would be possible.  Is there any advantage?
  *
@@ -158,6 +169,7 @@ public class ParallelDelete {
                     }
                 }
             };
+            
             verboseThread.start();
         }
         try {
