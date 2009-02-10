@@ -15,9 +15,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -34,25 +32,32 @@ import java.util.concurrent.BlockingQueue;
  *     (Calling Thread)      (New Thread)      (New Thread)
  * </pre>
  * </p>
- *     
- * TODO: Verify this is, in fact, true.
- * 
- * This is measured with a copy of the backups from one of our managed servers.
- *
- *             +---------------------+---------------------+
- *             |         ext3        |      reiserfs       |
- * +-----------+----------+----------+----------+----------+
- * | # Deleted | parallel |  rm -rf  | parallel |  rm -rf  |
- * +-----------+----------+----------+----------+----------+
- * |      1/13 |     TODO |     TODO |     TODO |     TODO |
- * |      2/13 |     TODO |     TODO |     TODO |     TODO |
- * |      3/13 |     TODO |     TODO |     TODO |     TODO |
- * |      4/13 |     TODO |     TODO |     TODO |     TODO |
- * |      8/13 |     TODO |     TODO |     TODO |     TODO |
- * |     13/13 |     TODO |     TODO |     TODO |     TODO |
- * +-----------+----------+----------+----------+----------+
- * 
- * TODO: Use this from the back-up clean-up code if it is, in fact, faster.
+ * <p>
+ * Verifying this is, in fact, true.  This is measured with a copy of the
+ * backups from one of our managed servers.  The system RAM was limited to 128
+ * MB to better simulate backup server hardware.  ext3 benchmarks on Maxtor 250
+ * GB 7200 RPM SATA.  reiserfs benchmarks on WD 80 GB 7200 IDE.
+ * <pre>
+ *                       +---------------------+---------------------+
+ *                       |         ext3        |      reiserfs       |
+ * +-----------+---------+----------+----------+----------+----------+
+ * | # Deleted |         | parallel |  rm -rf  | parallel |  rm -rf  |
+ * +-----------+---------+----------+----------+----------+----------+
+ * |      1/13 |         |     TODO |     TODO |     TODO |     TODO |
+ * |      2/13 |         |     TODO |     TODO |     TODO |     TODO |
+ * |      3/13 |         |     TODO |     TODO |     TODO |     TODO |
+ * |      4/13 |         |     TODO |     TODO |     TODO |     TODO |
+ * |      8/13 |         |     TODO |     TODO |     TODO |     TODO |
+ * +-----------+---------+----------+----------+----------+----------+
+ * |           | User    |    61.99 |     2.61 |    63.29 |     3.00 |
+ * |     13/13 | System  |    89.90 |    48.01 |   180.69 |   113.26 |
+ * |           | Elapsed | 10:38:53 | 10:23.79 |  8:26.71 | 33:13.52 |
+ * |           | % CPU   |      23% |       8% |      48% |       5% |
+ * +-----------+---------+----------+----------+----------+----------+
+ * </pre>
+ * </p>
+ * TODO: Once benchmarks finished for other # Deleted, adjust threshold between
+ *       rm and parallel in FailoverFileReplicationManager
  * 
  * TODO: Should it use a provided ExecutorService instead of making own Threads?
  * 
@@ -65,7 +70,7 @@ public class ParallelDelete {
     /**
      * The size of the delete queue.
      */
-    private static final int DELETE_QUEUE_SIZE = 1000;
+    private static final int DELETE_QUEUE_SIZE = 5000;
 
     /**
      * The size of the verbose output queue.
@@ -82,17 +87,26 @@ public class ParallelDelete {
      */
     public static void main(String[] args) {
         if(args.length==0) {
-            System.err.println("Usage: "+ParallelDelete.class.getName()+" [-v] path {path}");
+            System.err.println("Usage: "+ParallelDelete.class.getName()+" [-n] [-v] [--] path {path}");
+            System.err.println();
+            System.err.println("\t-n\tPerform dry run, do not modify the filesystem");
+            System.err.println("\t-v\tWrite the full path to standard error as each file is removed");
+            System.err.println("\t--\tEnd options, all additional arguments will be interpreted as paths");
+            
             System.exit(1);
         } else {
             List<File> directories = new ArrayList<File>(args.length);
             PrintStream verboseOutput = null;
+            boolean dryRun = false;
+            boolean optionsEnded = false;
             for(String arg : args) {
-                if(arg.equals("-v")) verboseOutput = System.err;
+                if(!optionsEnded && arg.equals("-v")) verboseOutput = System.err;
+                else if(!optionsEnded && arg.equals("-n")) dryRun = true;
+                else if(!optionsEnded && arg.equals("--")) optionsEnded = true;
                 else directories.add(new File(arg));
             }
             try {
-                parallelDelete(directories, verboseOutput);
+                parallelDelete(directories, verboseOutput, dryRun);
             } catch(IOException err) {
                 err.printStackTrace(System.err);
                 System.err.flush();
@@ -109,11 +123,13 @@ public class ParallelDelete {
      * possibly follow a symbolic link and delete outside the intended directory
      * trees.
      */
-    public static void parallelDelete(List<File> directories, final PrintStream verboseOutput) throws IOException {
+    public static void parallelDelete(List<File> directories, final PrintStream verboseOutput, final boolean dryRun) throws IOException {
+        final int numDirectories = directories.size();
+
         // The set of next files is kept in key order so that it can scale with O(n*log(n)) for larger numbers of directories
         // as opposed to O(n^2) for a list.  This is similar to the fix for AWStats logresolvemerge provided by Dan Armstrong
         // a couple of years ago.
-        final Map<String,SortedSet<FilesystemIterator>> nextFiles = new TreeMap<String,SortedSet<FilesystemIterator>>(
+        final Map<String,List<FilesystemIterator>> nextFiles = new TreeMap<String,List<FilesystemIterator>>(
             new Comparator<String>() {
                 public int compare(String S1, String S2) {
                     // Make sure directories are sorted after their directory contents
@@ -132,12 +148,12 @@ public class ParallelDelete {
                 if(!directory.isDirectory()) throw new IOException("Not a directory: "+directory.getPath());
                 String path = directory.getCanonicalPath();
                 Map<String,FilesystemIteratorRule> rules = Collections.singletonMap(path, FilesystemIteratorRule.OK);
-                FilesystemIterator iterator = new FilesystemIterator(rules, prefixRules, path, false);
+                FilesystemIterator iterator = new FilesystemIterator(rules, prefixRules, path, false, true);
                 File nextFile = iterator.getNextFile();
                 if(nextFile!=null) {
                     String relPath = getRelativePath(nextFile, iterator);
-                    SortedSet<FilesystemIterator> list = nextFiles.get(relPath);
-                    if(list==null) nextFiles.put(relPath, list = new TreeSet<FilesystemIterator>());
+                    List<FilesystemIterator> list = nextFiles.get(relPath);
+                    if(list==null) nextFiles.put(relPath, list = new ArrayList<FilesystemIterator>(numDirectories));
                     list.add(iterator);
                 }
             }
@@ -202,7 +218,7 @@ public class ParallelDelete {
                                             }
                                         }
                                     }
-                                    if(!deleteme.delete()) throw new IOException("Unable to delete: "+deleteme.getPath());
+                                    if(!dryRun && !deleteme.delete()) throw new IOException("Unable to delete: "+deleteme.getPath());
                                 } catch(IOException err) {
                                     synchronized(deleteException) {
                                         deleteException[0] = err;
@@ -242,8 +258,8 @@ public class ParallelDelete {
                         File nextFile = iterator.getNextFile();
                         if(nextFile!=null) {
                             String newRelPath = getRelativePath(nextFile, iterator);
-                            SortedSet<FilesystemIterator> list = nextFiles.get(newRelPath);
-                            if(list==null) nextFiles.put(newRelPath, list = new TreeSet<FilesystemIterator>());
+                            List<FilesystemIterator> list = nextFiles.get(newRelPath);
+                            if(list==null) nextFiles.put(newRelPath, list = new ArrayList<FilesystemIterator>(numDirectories));
                             list.add(iterator);
                         }
                     }

@@ -6,11 +6,11 @@ package com.aoindustries.io;
  * All rights reserved.
  */
 import com.aoindustries.util.WrappedException;
-import com.aoindustries.util.sort.AutoSort;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EmptyStackException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,15 +35,17 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
     private final Map<String,FilesystemIteratorRule> prefixRules;
     private final String startPath;
     private final boolean isPreorder;
+    private final boolean isSorted;
 
     /**
      * Constructs an iterator without any filename conversions and starting at all roots.
      * Performs a preorder traversal - directory before directory contents.
+     * The directories are sorted.
      *
      * @see  #FilesystemIterator(Map,Map,String,boolean)
      */
     public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules) {
-        this(rules, prefixRules, "", true);
+        this(rules, prefixRules, "", true, true);
     }
 
     /**
@@ -51,19 +53,20 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
      *
      * @see  #FilesystemIterator(Map,Map,String,boolean)
      */
-    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, boolean isPreorder) {
-        this(rules, prefixRules, "", isPreorder);
+    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, boolean isPreorder, boolean isSorted) {
+        this(rules, prefixRules, "", isPreorder, isSorted);
     }
 
     /**
      * Constructs a filesystem iterator with the provided rules and conversion.
      * Performs a preorder traversal - directory before directory contents.
+     * The directories are sorted.
      *
      * @param  rules  the rules that will be applied during iteration
      * @param  startPath  if "", all roots will be used, otherwise starts at the provided path
      */
     public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, String startPath) {
-        this(rules, prefixRules, startPath, true);
+        this(rules, prefixRules, startPath, true, true);
     }
 
     /**
@@ -72,7 +75,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
      * @param  rules  the rules that will be applied during iteration
      * @param  startPath  if "", all roots will be used, otherwise starts at the provided path
      */
-    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, String startPath, boolean isPreorder) {
+    public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, String startPath, boolean isPreorder, boolean isSorted) {
         this.rules=rules;
         this.prefixRules=prefixRules;
         currentDirectories=null;
@@ -81,6 +84,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
         filesDone=false;
         this.startPath = startPath;
         this.isPreorder = isPreorder;
+        this.isSorted = isSorted;
     }
 
     private Stack<String> currentDirectories;
@@ -199,7 +203,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
                                     if(file.getCanonicalPath().equals(filename)) {
                                         list = file.list();
                                         if(list==null) list = emptyStringArray;
-                                        else AutoSort.sortStatic(list);
+                                        else if(isSorted) Arrays.sort(list);
                                     } else {
                                         //System.err.println("Skipping non-canonical directory listing: "+filename);
                                         list = emptyStringArray;
@@ -477,7 +481,14 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
     public boolean isPreorder() {
         return isPreorder;
     }
-    
+ 
+    /**
+     * Gets the sort flag for this iterator.
+     */
+    public boolean isSorted() {
+        return isSorted;
+    }
+
     public int compareTo(FilesystemIterator other) {
         return startPath.compareTo(other.startPath);
     }
