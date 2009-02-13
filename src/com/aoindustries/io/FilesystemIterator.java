@@ -29,6 +29,18 @@ import java.util.Stack;
  */
 public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
+    /**
+     * The maximum number of times a list will be retried when it results
+     * in duplicate filenames.  This is a workaround from some problems
+     * with a specific server running JDK 1.5.0_12-i686 on reiserfs.
+     */
+    private static final int MAX_LIST_RETRIES = 10;
+    
+    /**
+     * The number of millisecond to delay between list retries.
+     */
+    private static final int LIST_RETRY_DELAY = 100;
+    
     private static final String[] emptyStringArray = new String[0];
 
     private final Map<String,FilesystemIteratorRule> rules;
@@ -42,7 +54,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
      * Performs a preorder traversal - directory before directory contents.
      * The directories are sorted.
      *
-     * @see  #FilesystemIterator(Map,Map,String,boolean)
+     * @see  #FilesystemIterator(Map,Map,String,boolean,boolean)
      */
     public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules) {
         this(rules, prefixRules, "", true, true);
@@ -51,7 +63,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
     /**
      * Constructs an iterator without any filename conversions and starting at all roots.
      *
-     * @see  #FilesystemIterator(Map,Map,String,boolean)
+     * @see  #FilesystemIterator(Map,Map,String,boolean,boolean)
      */
     public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, boolean isPreorder, boolean isSorted) {
         this(rules, prefixRules, "", isPreorder, isSorted);
@@ -62,8 +74,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
      * Performs a preorder traversal - directory before directory contents.
      * The directories are sorted.
      *
-     * @param  rules  the rules that will be applied during iteration
-     * @param  startPath  if "", all roots will be used, otherwise starts at the provided path
+     * @see  #FilesystemIterator(Map,Map,String,boolean,boolean)
      */
     public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, String startPath) {
         this(rules, prefixRules, startPath, true, true);
@@ -197,13 +208,42 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
                             }
                             // Push on stacks for next level
                             if(includeDirectory) {
-                                String[] list;
+                                String[] list = null;
                                 if(recurse) {
                                     // Skip anything that is not canonical, this avoids symbolic link targets
                                     if(file.getCanonicalPath().equals(filename)) {
-                                        list = file.list();
-                                        if(list==null) list = emptyStringArray;
-                                        else if(isSorted) Arrays.sort(list);
+                            ATTEMPT:    for(int attempt=1; attempt<=MAX_LIST_RETRIES; attempt++) {
+                                            list = file.list();
+                                            if(list==null) {
+                                                list = emptyStringArray;
+                                            } else if(isSorted && list.length>0) {
+                                                Arrays.sort(list);
+                                                // TODO: Remove this once ParallelDelete is debugged
+                                                // This happens on JDK1.5.0_12, reiserfs, xen2.mob.aoindustries.com (previously corrupted and repaired reiserfs)
+                                                int listlen = list.length;
+                                                String last = list[0];
+                                                for(int c=1; c<listlen; c++) {
+                                                    String next = list[c];
+                                                    if(last.equals(next)) {
+                                                        if(attempt==MAX_LIST_RETRIES) {
+                                                            throw new IOException("Entry returned twice from list, attempt #"+attempt+": "+new File(file, next).getPath());
+                                                        } else {
+                                                            System.err.println("[WARN] FilesystemIterator - getNextFile() - Entry returned twice from list, will retry list() in 100 milliseconds, attempt #"+attempt+": "+new File(file, next).getPath());
+                                                        }
+                                                        if(LIST_RETRY_DELAY>0) {
+                                                            try {
+                                                                Thread.sleep(LIST_RETRY_DELAY);
+                                                            } catch(InterruptedException err) {
+                                                                // OK
+                                                            }
+                                                        }
+                                                        continue ATTEMPT;
+                                                    }
+                                                    last = next;
+                                                }
+                                            }
+                                            break;
+                                        }
                                     } else {
                                         //System.err.println("Skipping non-canonical directory listing: "+filename);
                                         list = emptyStringArray;
