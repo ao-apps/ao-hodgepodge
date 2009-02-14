@@ -88,7 +88,6 @@ public class ParallelDelete {
     public static void main(String[] args) {
         if(args.length==0) {
             System.err.println("Usage: "+ParallelDelete.class.getName()+" [-n] [-v] [--] path {path}");
-            System.err.println();
             System.err.println("\t-n\tPerform dry run, do not modify the filesystem");
             System.err.println("\t-v\tWrite the full path to standard error as each file is removed");
             System.err.println("\t--\tEnd options, all additional arguments will be interpreted as paths");
