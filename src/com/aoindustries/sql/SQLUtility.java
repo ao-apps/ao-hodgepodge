@@ -8,8 +8,9 @@ package com.aoindustries.sql;
 import com.aoindustries.io.*;
 import com.aoindustries.util.*;
 import java.io.*;
-import java.util.*;
 import java.sql.*;
+import java.util.Calendar;
+import java.util.Collection;
 
 /**
  * SQL utilities.

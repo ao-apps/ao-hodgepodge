@@ -5,6 +5,7 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
+import com.aoindustries.util.Stack;
 import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,11 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.Stack;
 
 /**
  * Iterates through all of the files in a filesystem.
- *
+ * 
  * @version  1.0
  *
  * @author  AO Industries, Inc.
@@ -39,7 +39,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
     /**
      * The number of millisecond to delay between list retries.
      */
-    private static final int LIST_RETRY_DELAY = 100;
+    private static final int LIST_RETRY_DELAY = 10;
     
     private static final String[] emptyStringArray = new String[0];
 
@@ -105,6 +105,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
     /**
      * Gets the next file from the iterator or <code>null</code> if the iterator has completed the iteration of the filesystem.
+     * This method is internally synchronized and is thread-safe.
      */
     public File getNextFile() throws IOException {
         synchronized(this) {
@@ -317,8 +318,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
      */
     protected boolean isFilesystemRoot(String filename) throws IOException {
         String[] roots=getFilesystemRoots();
-        int len=roots.length;
-        for(int c=0;c<roots.length;c++) {
+        for(int c=0, len=roots.length;c<len;c++) {
             if(roots[c].equals(filename)) return true;
         }
         return false;

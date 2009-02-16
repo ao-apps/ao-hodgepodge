@@ -6,6 +6,7 @@ package com.aoindustries.io.unix;
  * All rights reserved.
  */
 import com.aoindustries.io.CompressedDataInputStream;
+import com.aoindustries.util.Stack;
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.FileOutputStream;
@@ -19,7 +20,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 

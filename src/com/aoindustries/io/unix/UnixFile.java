@@ -6,6 +6,7 @@ package com.aoindustries.io.unix;
  * All rights reserved.
  */
 import com.aoindustries.util.BufferManager;
+import com.aoindustries.util.Stack;
 import com.aoindustries.util.WrappedException;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -21,7 +22,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Stack;
 
 /**
  * Access and modify all the Unix specific file attributes.  These updates are made using

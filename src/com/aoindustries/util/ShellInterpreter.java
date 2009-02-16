@@ -9,7 +9,8 @@ import com.aoindustries.io.*;
 import com.aoindustries.sql.*;
 import java.io.*;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <code>AOSH</code> is a Bourne-shell-like command interpreter
