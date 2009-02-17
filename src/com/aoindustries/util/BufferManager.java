@@ -1,28 +1,24 @@
-package com.aoindustries.util;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /*
  * Copyright 2000-2009 by AO Industries, Inc.,
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
+package com.aoindustries.util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <code>BufferManager</code> manages a pool of <code>byte[]</code> and <code>char[]</code>
  * buffers that any <code>Thread</code> may use and then release.  This avoids the allocation
  * of memory for an operation that only needs a temporary buffer.
  *
- * TODO: Reimplement as a single list that is removed from and added to as check out and check-in.
- * Limit size of pool on check-in.
- *
  * @author  AO Industries, Inc.
  */
 final public class BufferManager {
 
     /**
-     * The number of buffers to initially allocate.
+     * The maximum number of buffers to keep for reuse.
      */
     private static final int MAXIMUM_BUFFERS=1024;
 

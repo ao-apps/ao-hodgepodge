@@ -28,9 +28,14 @@ class PackProtocol {
 
     /**
      * The version supported.
+     * 
+     * 1 - Original version
+     * 2 - Added single byte response from unpack when connected over TCP to
+     *     avoid EOFException on socket close
+     * 3 - Added compression option
      */
-    static final int VERSION=1;
-    
+    static final int VERSION=3;
+
     /**
      * These values are used on the main loop.
      */

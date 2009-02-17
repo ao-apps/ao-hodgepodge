@@ -5,7 +5,9 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Adds compressed data transfer to DataOutputStream.  This class is not

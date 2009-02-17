@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.zip.GZIPInputStream;
 
 /**
  * <p>
@@ -60,7 +61,6 @@ public class ParallelUnpack {
             System.err.println("\t-n\tPerform dry run, do not modify the filesystem");
             System.err.println("\t-f\tOverwrite existing files");
             System.err.println("\t-v\tWrite the full path to standard error as each file is unpacked");
-            //System.err.println("\t-z\tDecompress input");
             System.err.println("\t--\tEnd options, any additional argument will be interpreted as a path");
             System.exit(1);
         } else {
@@ -108,6 +108,8 @@ public class ParallelUnpack {
                             InputStream in = socket.getInputStream();
                             try {
                                 parallelUnpack(path, in, verboseOutput, dryRun, force);
+                                out.write(PackProtocol.END);
+                                out.flush();
                             } finally {
                                 in.close();
                             }
@@ -197,6 +199,8 @@ public class ParallelUnpack {
             // Version
             int version = compressedIn.readInt();
             if(version!=PackProtocol.VERSION) throw new IOException("Unsupported pack version "+version+", expecting version "+PackProtocol.VERSION);
+            boolean compress = compressedIn.readBoolean();
+            if(compress) compressedIn = new CompressedDataInputStream(new GZIPInputStream(in, PackProtocol.BUFFER_SIZE));
             // Reused in main loop
             final StringBuilder SB = new StringBuilder();
             final byte[] buffer = new byte[PackProtocol.BUFFER_SIZE];

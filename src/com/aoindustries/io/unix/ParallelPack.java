@@ -9,6 +9,7 @@ import com.aoindustries.io.CompressedDataOutputStream;
 import com.aoindustries.io.FilesystemIterator;
 import com.aoindustries.io.FilesystemIteratorRule;
 import java.io.DataOutput;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * <p>
@@ -72,11 +74,13 @@ public class ParallelPack {
             System.err.println("\t-h\tWill connect to host instead of writing to standard out");
             System.err.println("\t-p\tWill connect to port instead of port "+PackProtocol.DEFAULT_PORT);
             System.err.println("\t-v\tWrite the full path to standard error as each file is packed");
+            System.err.println("\t-z\tCompress the output");
             System.err.println("\t--\tEnd options, all additional arguments will be interpreted as paths");
             System.exit(1);
         } else {
             List<UnixFile> directories = new ArrayList<UnixFile>(args.length);
             PrintStream verboseOutput = null;
+            boolean compress = false;
             String host = null;
             int port = PackProtocol.DEFAULT_PORT;
             boolean optionsEnded = false;
@@ -92,6 +96,7 @@ public class ParallelPack {
                     if(i<args.length) port = Integer.parseInt(args[i]);
                     else throw new IllegalArgumentException("Expecting port after -p");
                 } else if(!optionsEnded && arg.equals("--")) optionsEnded = true;
+                else if(!optionsEnded && arg.equals("-z")) compress = true;
                 else directories.add(new UnixFile(arg));
             }
             try {
@@ -103,7 +108,10 @@ public class ParallelPack {
                         try {
                             InputStream in = socket.getInputStream();
                             try {
-                                parallelPack(directories, out, verboseOutput);
+                                parallelPack(directories, out, verboseOutput, compress);
+                                int resp = in.read();
+                                if(resp==-1) throw new EOFException("End of file while reading completion confirmation");
+                                if(resp!=PackProtocol.END) throw new IOException("Unexpected value while reading completion confirmation");
                             } finally {
                                 in.close();
                             }
@@ -115,7 +123,7 @@ public class ParallelPack {
                     }
                 } else {
                     // System.out
-                    parallelPack(directories, System.out, verboseOutput);
+                    parallelPack(directories, System.out, verboseOutput, compress);
                 }
             } catch(IOException err) {
                 err.printStackTrace(System.err);
@@ -146,7 +154,7 @@ public class ParallelPack {
     /**
      * Packs to the provided output stream.  The stream is flushed but not closed.
      */
-    public static void parallelPack(List<UnixFile> directories, OutputStream out, final PrintStream verboseOutput) throws IOException {
+    public static void parallelPack(List<UnixFile> directories, OutputStream out, final PrintStream verboseOutput, boolean compress) throws IOException {
         // Reused throughout method
         final Stat stat = new Stat();
         final int numDirectories = directories.size();
@@ -228,6 +236,8 @@ public class ParallelPack {
                 for(int c=0, len=PackProtocol.HEADER.length(); c<len; c++) compressedOut.write(PackProtocol.HEADER.charAt(c));
                 // Version
                 compressedOut.writeInt(PackProtocol.VERSION);
+                compressedOut.writeBoolean(compress);
+                if(compress) compressedOut = new CompressedDataOutputStream(new GZIPOutputStream(out, PackProtocol.BUFFER_SIZE));
                 // Reused in main loop
                 final StringBuilder SB = new StringBuilder();
                 final byte[] buffer = new byte[PackProtocol.BUFFER_SIZE];
