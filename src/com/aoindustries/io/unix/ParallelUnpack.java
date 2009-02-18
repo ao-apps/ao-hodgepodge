@@ -212,6 +212,7 @@ public class ParallelUnpack {
                 // Main loop
                 while(true) {
                     byte type = compressedIn.readByte();
+                    if(type==PackProtocol.END) break;
                     String packPath = compressedIn.readCompressedUTF();
                     // Verbose output
                     if(verboseQueue!=null) {
@@ -356,8 +357,6 @@ public class ParallelUnpack {
                             if(stat.exists()) uf.deleteRecursive();
                             uf.mkfifo(mode).chown(uid, gid);
                         }
-                    } else if(type==PackProtocol.END) {
-                        break;
                     } else throw new IOException("Unexpected value for type: "+type);
                 }
             } finally {
