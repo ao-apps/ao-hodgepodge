@@ -152,7 +152,7 @@ public class ParallelPack {
     }
 
     /**
-     * Packs to the provided output stream.  The stream is flushed but not closed.
+     * Packs to the provided output stream.  The stream is flushed and closed.
      */
     public static void parallelPack(List<UnixFile> directories, OutputStream out, final PrintStream verboseOutput, boolean compress) throws IOException {
         // Reused throughout method
@@ -365,6 +365,7 @@ public class ParallelPack {
                 compressedOut.writeByte(PackProtocol.END);
             } finally {
                 compressedOut.flush();
+                compressedOut.close();
             }
             // TODO: If verbose, warn for any hard links that didn't all get packed
         } finally {
