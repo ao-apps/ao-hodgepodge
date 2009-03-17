@@ -5,15 +5,22 @@ package com.aoindustries.io.unix.linux;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.io.unix.*;
-import com.aoindustries.util.*;
-import java.io.*;
-import java.util.*;
+import com.aoindustries.io.unix.UnixFile;
+import com.aoindustries.util.ErrorPrinter;
+import com.aoindustries.util.WrappedException;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Random;
 
 /**
  * This class acts as a direct source of Random data from <code>/dev/random</code> on Linux
  * platforms.  Many of these calls are platform specific and use the included <code>libaocode.so</code>
  * Linux shared library provided as a resource.  The source code is also supplied.
+ * Please note that reading will block if random data is not available.  Use only
+ * where the highest quality random data is required and possible delays are acceptable.
  *
  * @version  1.0
  *
@@ -145,10 +152,12 @@ public class DevRandom extends Random {
     /**
      * This class does not use this seed value.
      */
+    @Override
     public void setSeed(long seed) {
         super.setSeed(seed);
     }
 
+    @Override
     protected int next(int bits) {
         try {
             int result=0;
@@ -176,6 +185,7 @@ public class DevRandom extends Random {
         }
     }
 
+    @Override
     public boolean nextBoolean() {
         try {
             return nextBoolean0();
@@ -212,6 +222,7 @@ public class DevRandom extends Random {
         }
     }
 
+    @Override
     public void nextBytes(byte[] bytes) {
         nextBytesStatic(bytes, 0, bytes.length);
     }
@@ -245,6 +256,7 @@ public class DevRandom extends Random {
         }
     }
 
+    @Override
     public int nextInt() {
         try {
             FileInputStream in=openDevRandomIn();
@@ -272,6 +284,7 @@ public class DevRandom extends Random {
         }
     }
 
+    @Override
     public long nextLong() {
         try {
             FileInputStream in=openDevRandomIn();

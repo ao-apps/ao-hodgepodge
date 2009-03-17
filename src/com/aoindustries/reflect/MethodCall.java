@@ -5,8 +5,9 @@ package com.aoindustries.reflect;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.util.*;
-import java.lang.reflect.*;
+import com.aoindustries.util.WrappedException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Simplifies the invoking of methods by wrapping both the method and the parameters.

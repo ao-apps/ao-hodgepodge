@@ -14,7 +14,6 @@ import com.aoindustries.io.AOPool;
 import com.aoindustries.sql.AOConnectionPool;
 import com.aoindustries.sql.WrappedSQLException;
 import com.aoindustries.util.ErrorHandler;
-import com.aoindustries.util.WrappedException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;

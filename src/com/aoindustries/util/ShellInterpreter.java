@@ -5,10 +5,12 @@ package com.aoindustries.util;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.io.*;
-import com.aoindustries.sql.*;
-import java.io.*;
-import java.sql.*;
+import com.aoindustries.io.TerminalWriter;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,12 +104,11 @@ abstract public class ShellInterpreter implements Runnable {
 	);
     }
 
-    final public void clear(String[] args) {
-        try {
-            out.clearScreen();
-        } catch(IOException err) {
-            throw new WrappedException(err);
-        }
+    /**
+     * Clears the screen.
+     */
+    final public void clear(String[] args) throws IOException {
+        out.clearScreen();
     }
 
     abstract protected String getName();
@@ -174,9 +175,9 @@ abstract public class ShellInterpreter implements Runnable {
      * Processes one command and returns.
      */
     private boolean handleCommandImpl(List<String> arguments) throws IOException, SQLException, Throwable {
-        String[] args=new String[arguments.size()];
-        arguments.toArray(args);
-        return handleCommandImpl(args);
+        String[] myargs=new String[arguments.size()];
+        arguments.toArray(myargs);
+        return handleCommandImpl(myargs);
     }
 
     final protected boolean isAlive() {
@@ -230,9 +231,9 @@ abstract public class ShellInterpreter implements Runnable {
         String num=String.valueOf(jobnum);
         out.print(num);
         out.print("] ");
-        String status=shell.status;
-        out.print(status);
-        int blanks=Math.max(1, 25-num.length()-status.length());
+        String mystatus=shell.status;
+        out.print(mystatus);
+        int blanks=Math.max(1, 25-num.length()-mystatus.length());
         for(int c=0;c<blanks;c++) out.print(' ');
         for(int c=0;c<shell.args.length;c++) {
             if(c>0) out.print(' ');
@@ -250,13 +251,13 @@ abstract public class ShellInterpreter implements Runnable {
             if(args.length>0) handleCommand(args);
             else runImpl();
             status="Done";
-        } catch(IOException err) {
-            this.err.println(getName()+": "+err.getMessage());
-            status="IO Error: "+err.getMessage();
+        } catch(IOException exception) {
+            this.err.println(getName()+": "+exception.getMessage());
+            status="IO Error: "+exception.getMessage();
             this.err.flush();
-        } catch(SQLException err) {
-            this.err.println(getName()+": "+err.getMessage());
-            status="SQL Error: "+err.getMessage();
+        } catch(SQLException exception) {
+            this.err.println(getName()+": "+exception.getMessage());
+            status="SQL Error: "+exception.getMessage();
             this.err.flush();
         } catch(ThreadDeath TD) {
             throw TD;
@@ -393,12 +394,12 @@ abstract public class ShellInterpreter implements Runnable {
             if(status==null || "Running".equals(status)) status="Done";
         }
         // Make the parent of all children the parent of this, and add children to the parents processes
-        ShellInterpreter parent=this.parent;
+        ShellInterpreter myparent=this.parent;
         synchronized(jobs) {
             for(int c=0;c<jobs.size();c++) {
                 ShellInterpreter shell=jobs.get(c);
-                shell.parent=parent;
-                if(parent!=null) parent.jobs.add(shell);
+                shell.parent=myparent;
+                if(myparent!=null) myparent.jobs.add(shell);
             }
             jobs.clear();
         }

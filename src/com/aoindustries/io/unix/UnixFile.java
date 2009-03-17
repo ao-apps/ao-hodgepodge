@@ -7,7 +7,6 @@ package com.aoindustries.io.unix;
  */
 import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.Stack;
-import com.aoindustries.util.WrappedException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -419,21 +418,7 @@ public class UnixFile {
         return true;
     }
 
-    volatile private static Random random;
-    /**
-     * Gets a secure random instance.  Not synchronized because multiple initialization is acceptable.
-     */
-    private static Random getRandom() {
-        if(random==null) {
-            String algorithm="SHA1PRNG";
-            try {
-                random=SecureRandom.getInstance(algorithm);
-            } catch(NoSuchAlgorithmException err) {
-                throw new WrappedException(err, new Object[] {"algorithm="+algorithm});
-            }
-        }
-        return random;
-    }
+    private static final Random random = new SecureRandom();
 
     /**
      * Copies one filesystem object to another.  It supports block devices, directories, fifos, regular files, and symbolic links.  Directories are not
@@ -493,7 +478,7 @@ public class UnixFile {
      * Hashes a password using the MD5 crypt algorithm and the internal random source.
      */
     public static String crypt(String password) {
-        return crypt(password, getRandom());
+        return crypt(password, random);
     }
 
     /**

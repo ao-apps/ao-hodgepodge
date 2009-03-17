@@ -1,6 +1,10 @@
 package com.aoindustries.util;
 
-public class UnixCrypt extends Object {
+/**
+ * @deprecated  This is not secure anymore.
+ */
+@Deprecated
+public class UnixCrypt {
 
   /* (mostly) Standard DES Tables from Tom Truscott */
   private static final byte[] IP = {		/* initial permutation */
@@ -152,7 +156,7 @@ public class UnixCrypt extends Object {
     for (int i=0; i<64; i++) A64TOI[ITOA64[i]] = (byte)i;
 
     // PC1ROT - bit reverse, then PC1, then Rotate, then PC2
-    for (int i=0; i<64; i++) perm[i] = (byte)0;;
+    for (int i=0; i<64; i++) perm[i] = (byte)0;
     for (int i=0; i<64; i++) {
       int k;
       if ((k = (int)PC2[i]) == 0) continue;
@@ -243,6 +247,11 @@ public class UnixCrypt extends Object {
    * You can't call the constructer.
    */
   private UnixCrypt() { }
+
+/**
+ * @deprecated  This is not secure anymore.
+ */
+@Deprecated
 public static String crypt(String plaintext) {
 	return crypt(
 		plaintext,
@@ -254,7 +263,9 @@ public static String crypt(String plaintext) {
    * @param key the key to be encrypted
    * @param setting the salt to be used
    * @return the encrypted String
+   * @deprecated  This is not secure anymore.
    */
+@Deprecated
   public static String crypt(String key, String setting) {
     long constdatablock = 0L;		/* encryption constant */
     byte[] cryptresult = new byte[13];	/* encrypted result */
@@ -420,6 +431,10 @@ public static String crypt(String plaintext) {
 	    ((num >> 2) & 0xfc000000fc00L) | ((num >> 16) & 0xfc000000fcL));
   }
   
+/**
+ * @deprecated  This is not secure anymore.
+ */
+@Deprecated
   public static void main(String[] args) {
       if(args.length==1) {
           System.out.println(crypt(args[0]));
