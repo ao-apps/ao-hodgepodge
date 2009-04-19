@@ -91,8 +91,8 @@ final public class BufferManager {
      */
     public static void release(byte[] buffer) {
         synchronized(bytes) {
-            // Error of already in the buffer list
-            assert !inList(buffer);
+            // Error if already in the buffer list
+            assert !inList(buffer); // Better - to make a set
             if(bytes.size()<MAXIMUM_BUFFERS) bytes.add(buffer);
         }
     }
@@ -109,8 +109,8 @@ final public class BufferManager {
      */
     public static void release(char[] buffer) {
         synchronized(chars) {
-            // Error of already in the buffer list
-            assert !inList(buffer);
+            // Error if already in the buffer list
+            assert !inList(buffer); // Better - to make a set
             if(chars.size()<MAXIMUM_BUFFERS) chars.add(buffer);
         }
     }
