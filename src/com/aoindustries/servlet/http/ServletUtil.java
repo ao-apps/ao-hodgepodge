@@ -20,11 +20,11 @@ public class ServletUtil {
     /**
      * Converts a possibly-relative path to a context-relative absolute path.
      */
-    public static String getAbsolutePath(String servletPath, String path) throws MalformedURLException {
-        if(path.length()>0 && path.charAt(0)!='/') {
+    public static String getAbsolutePath(String servletPath, String relativeUrlPath) throws MalformedURLException {
+        if(relativeUrlPath.length()>0 && relativeUrlPath.charAt(0)!='/') {
             int slashPos = servletPath.lastIndexOf('/');
             if(slashPos==-1) throw new MalformedURLException("No slash found in servlet path: "+servletPath);
-            String newPath = path;
+            String newPath = relativeUrlPath;
             boolean modified;
             do {
                 modified = false;
@@ -34,15 +34,15 @@ public class ServletUtil {
                 }
                 if(newPath.startsWith("../")) {
                     slashPos = servletPath.lastIndexOf('/', slashPos-1);
-                    if(slashPos==-1) throw new MalformedURLException("Too many ../ in path: "+path);
+                    if(slashPos==-1) throw new MalformedURLException("Too many ../ in relativeUrlPath: "+relativeUrlPath);
 
                     newPath = newPath.substring(3);
                     modified = true;
                 }
             } while(modified);
-            path = servletPath.substring(0, slashPos+1) + newPath;
+            relativeUrlPath = servletPath.substring(0, slashPos+1) + newPath;
         }
-        return path;
+        return relativeUrlPath;
     }
 
     /**
@@ -53,17 +53,32 @@ public class ServletUtil {
     }
 
     /**
+     * Gets the URL for the provided absolute path or <code>null</code> if no resource
+     * is mapped to the path.
+     */
+    public static URL getResource(ServletContext servletContext, String path) throws MalformedURLException {
+        return servletContext.getResource(path);
+    }
+
+    /**
      * Gets the URL for the provided possibly-relative path or <code>null</code> if no resource
      * is mapped to the path.
      */
-    public static URL getResource(ServletContext servletContext, HttpServletRequest request, String path) throws MalformedURLException {
-        return servletContext.getResource(getAbsolutePath(request, path));
+    public static URL getResource(ServletContext servletContext, HttpServletRequest request, String relativeUrlPath) throws MalformedURLException {
+        return servletContext.getResource(getAbsolutePath(request, relativeUrlPath));
     }
 
     /**
      * Checks if a resource with the possibly-relative path exists.
      */
-    public static boolean resourceExists(ServletContext servletContext, HttpServletRequest request, String path) throws MalformedURLException {
-        return getResource(servletContext, request, path)!=null;
+    public static boolean resourceExists(ServletContext servletContext, String path) throws MalformedURLException {
+        return getResource(servletContext, path)!=null;
+    }
+
+    /**
+     * Checks if a resource with the possibly-relative path exists.
+     */
+    public static boolean resourceExists(ServletContext servletContext, HttpServletRequest request, String relativeUrlPath) throws MalformedURLException {
+        return getResource(servletContext, request, relativeUrlPath)!=null;
     }
 }
