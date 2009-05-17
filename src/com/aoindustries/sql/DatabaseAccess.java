@@ -10,8 +10,10 @@ import com.aoindustries.util.LongList;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.List;
 
 /**
@@ -20,6 +22,65 @@ import java.util.List;
  * @author  AO Industries, Inc.
  */
 public interface DatabaseAccess {
+
+    /**
+     * These may be used as parameters to represent null values of specific types.
+     *
+     * @see  Types
+     * @see  PreparedStatement#setNull(int, int)
+     */
+    public enum Null {
+        BIT(Types.BIT),
+        TINYINT(Types.TINYINT),
+        SMALLINT(Types.SMALLINT),
+        INTEGER(Types.INTEGER),
+        BIGINT(Types.BIGINT),
+        FLOAT(Types.FLOAT),
+        REAL(Types.REAL),
+        DOUBLE(Types.DOUBLE),
+        NUMERIC(Types.NUMERIC),
+        DECIMAL(Types.DECIMAL),
+        CHAR(Types.CHAR),
+        VARCHAR(Types.VARCHAR),
+        LONGVARCHAR(Types.LONGVARCHAR),
+        DATE(Types.DATE),
+        TIME(Types.TIME),
+        TIMESTAMP(Types.TIMESTAMP),
+        BINARY(Types.BINARY),
+        VARBINARY(Types.VARBINARY),
+        LONGVARBINARY(Types.LONGVARBINARY),
+        NULL(Types.NULL),
+        OTHER(Types.OTHER),
+        JAVA_OBJECT(Types.JAVA_OBJECT),
+        DISTINCT(Types.DISTINCT),
+        STRUCT(Types.STRUCT),
+        ARRAY(Types.ARRAY),
+        BLOB(Types.BLOB),
+        CLOB(Types.CLOB),
+        REF(Types.REF),
+        DATALINK(Types.DATALINK),
+        BOOLEAN(Types.BOOLEAN),
+        ROWID(Types.ROWID),
+        NCHAR(Types.NCHAR),
+        NVARCHAR(Types.NVARCHAR),
+        LONGNVARCHAR(Types.LONGNVARCHAR),
+        NCLOB(Types.NCLOB),
+        SQLXML(Types.SQLXML);
+
+        private final int type;
+
+        private Null(int type) {
+            this.type = type;
+        }
+
+        /**
+         * @see  Types
+         * @see  PreparedStatement#setNull(int, int)
+         */
+        public int getType() {
+            return type;
+        }
+    }
 
     /**
      * Read-only query the database with a <code>BigDecimal</code> return type.

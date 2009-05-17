@@ -134,7 +134,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     protected static void setParam(PreparedStatement pstmt, int pos, Object param) throws SQLException {
-        if(param==null) pstmt.setNull(pos, Types.VARCHAR); // TODO: how should we set the type when all we know is that it is null?
+        if(param==null) pstmt.setNull(pos, Types.VARCHAR);
+        else if(param instanceof Null) pstmt.setNull(pos, ((Null)param).getType());
         else if(param instanceof Array) pstmt.setArray(pos, (Array)param);
         else if(param instanceof BigDecimal) pstmt.setBigDecimal(pos, (BigDecimal)param);
         else if(param instanceof Blob) pstmt.setBlob(pos, (Blob)param);
