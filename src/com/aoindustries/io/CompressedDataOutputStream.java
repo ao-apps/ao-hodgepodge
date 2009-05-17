@@ -127,4 +127,26 @@ public class CompressedDataOutputStream extends DataOutputStream {
         writeBoolean(str!=null);
         if(str!=null) writeUTF(str);
     }
+
+    /**
+     * Writes a string of any length.
+     */
+    public void writeLongUTF(String str) throws IOException {
+        int length = str.length();
+        writeCompressedInt(length);
+        for(int position = 0; position<length; position+=20480) {
+            int blockLength = length - position;
+            if(blockLength>20480) blockLength = 20480;
+            String block = str.substring(position, position+blockLength);
+            writeUTF(block);
+        }
+    }
+
+    /**
+     * Writes a string of any length, supporting <code>null</code>.
+     */
+    public void writeNullLongUTF(String str) throws IOException {
+        writeBoolean(str!=null);
+        if(str!=null) writeLongUTF(str);
+    }
 }

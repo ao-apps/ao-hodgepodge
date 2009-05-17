@@ -137,4 +137,28 @@ public class CompressedDataInputStream extends DataInputStream {
     public String readNullUTF() throws IOException {
         return readBoolean() ? readUTF() : null;
     }
+
+    /**
+     * Reads a string of any length.
+     */
+    public String readLongUTF() throws IOException {
+        int length = readCompressedInt();
+        StringBuilder SB = new StringBuilder(length);
+        for(int position = 0; position<length; position+=20480) {
+            int expectedLen = length - position;
+            if(expectedLen>20480) expectedLen = 20480;
+            String block = readUTF();
+            if(block.length()!=expectedLen) throw new IOException("Block has unexpected length: expected "+expectedLen+", got "+block.length());
+            SB.append(block);
+        }
+        if(SB.length()!=length) throw new IOException("StringBuilder has unexpected length: expected "+length+", got "+SB.length());
+        return SB.toString();
+    }
+
+    /**
+     * Reads a string of any length, supporting <code>null</code>.
+     */
+    public String readNullLongUTF() throws IOException {
+        return readBoolean() ? readLongUTF() : null;
+    }
 }
