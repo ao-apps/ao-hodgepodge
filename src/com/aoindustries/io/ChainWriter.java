@@ -5,6 +5,7 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
+import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.BufferManager;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -208,6 +209,98 @@ final public class ChainWriter {
         writeHtmlAttribute(url, out);
         out.write("';\n"
                 + "  // --></SCRIPT>");
+    }
+
+    /**
+     * Print a JavaScript script tag that shows a date in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * if the date is <code>-1</code>.
+     */
+    public static void writeDateJavaScript(long date, Writer out) throws IOException {
+        if(date==-1) out.write("&nbsp;");
+        else {
+            out.write("<SCRIPT language='JavaScript1.3'><!--\n"
+                      +"  var date=new Date(");
+            out.write(Long.toString(date));
+            out.write(");\n"
+                    + "  document.write(date.getFullYear());\n"
+                    + "  document.write('-');\n"
+                    + "  var month=date.getMonth()+1;\n"
+                    + "  if(month<10) document.write('0');\n"
+                    + "  document.write(month);\n"
+                    + "  document.write('-');\n"
+                    + "  var day=date.getDate();\n"
+                    + "  if(day<10) document.write('0');\n"
+                    + "  document.write(day);\n"
+                    + "// --></SCRIPT><NOSCRIPT>");
+            out.write(SQLUtility.getDate(date));
+            out.write("</NOSCRIPT>");
+        }
+    }
+
+    /**
+     * Print a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * if the date is <code>-1</code>.
+     */
+    public static void writeDateTimeJavaScript(long date, Writer out) throws IOException {
+        if(date==-1) out.write("&nbsp;");
+        else {
+            out.write("<SCRIPT language='JavaScript1.1'><!--\n"
+                    + "  var date=new Date(");
+            out.write(Long.toString(date));
+            out.write(");\n"
+                    + "  document.write(date.getFullYear());\n"
+                    + "  document.write('-');\n"
+                    + "  var month=date.getMonth()+1;\n"
+                    + "  if(month<10) document.write('0');\n"
+                    + "  document.write(month);\n"
+                    + "  document.write('-');\n"
+                    + "  var day=date.getDate();\n"
+                    + "  if(day<10) document.write('0');\n"
+                    + "  document.write(day);\n"
+                    + "  document.write(' ');\n"
+                    + "  var hour=date.getHours();\n"
+                    + "  if(hour<10) document.write('0');\n"
+                    + "  document.write(hour);\n"
+                    + "  document.write(':');\n"
+                    + "  var minute=date.getMinutes();\n"
+                    + "  if(minute<10) document.write('0');\n"
+                    + "  document.write(minute);\n"
+                    + "  document.write(':');\n"
+                    + "  var second=date.getSeconds();\n"
+                    + "  if(second<10) document.write('0');\n"
+                    + "  document.write(second);\n"
+                    + "// --></SCRIPT><NOSCRIPT>");
+            out.write(SQLUtility.getDateTime(date));
+            out.write("</NOSCRIPT>");
+        }
+    }
+
+    /**
+     * Print a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * if the date is <code>-1</code>.
+     */
+    public static void writeTimeJavaScript(long date, Writer out) throws IOException {
+        if(date==-1) out.write("&nbsp;");
+        else {
+            out.write("<SCRIPT language='JavaScript1.3'><!--\n"
+                    + "  var date=new Date(");
+            out.write(Long.toString(date));
+            out.write(");\n"
+                    + "  var hour=date.getHours();\n"
+                    + "  if(hour<10) document.write('0');\n"
+                    + "  document.write(hour);\n"
+                    + "  document.write(':');\n"
+                    + "  var minute=date.getMinutes();\n"
+                    + "  if(minute<10) document.write('0');\n"
+                    + "  document.write(minute);\n"
+                    + "  document.write(':');\n"
+                    + "  var second=date.getSeconds();\n"
+                    + "  if(second<10) document.write('0');\n"
+                    + "  document.write(second);\n"
+                    + "// --></SCRIPT><NOSCRIPT>");
+            out.write(SQLUtility.getTime(date));
+            out.write("</NOSCRIPT>");
+        }
     }
 
     private final PrintWriter out;
@@ -455,24 +548,8 @@ final public class ChainWriter {
      * if the date is <code>-1</code>.
      * Writes to the internal <code>PrintWriter</code>.
      */
-    public ChainWriter printDateJS(long date) {
-        if(date==-1) out.print("&nbsp;");
-        else {
-            out.print("<SCRIPT language='JavaScript1.3'><!--\n"
-                      +"  var date=new Date(");
-            out.print(date);
-            out.print(");\n"
-                    + "  document.write(date.getFullYear());\n"
-                    + "  document.write('-');\n"
-                    + "  var month=date.getMonth()+1;\n"
-                    + "  if(month<10) document.write('0');\n"
-                    + "  document.write(month);\n"
-                    + "  document.write('-');\n"
-                    + "  var day=date.getDate();\n"
-                    + "  if(day<10) document.write('0');\n"
-                    + "  document.write(day);\n"
-                    + "// --></SCRIPT>");
-        }
+    public ChainWriter printDateJS(long date) throws IOException {
+        writeDateJavaScript(date, out);
         return this;
     }
 
@@ -481,36 +558,8 @@ final public class ChainWriter {
      * if the date is <code>-1</code>.
      * Writes to the internal <code>PrintWriter</code>.
      */
-    public ChainWriter printDateTimeJS(long date) {
-        if(date==-1) out.print("&nbsp;");
-        else {
-            out.print("<SCRIPT language='JavaScript1.1'><!--\n"
-                    + "  var date=new Date(");
-            out.print(date);
-            out.print(");\n"
-                    + "  document.write(date.getFullYear());\n"
-                    + "  document.write('-');\n"
-                    + "  var month=date.getMonth()+1;\n"
-                    + "  if(month<10) document.write('0');\n"
-                    + "  document.write(month);\n"
-                    + "  document.write('-');\n"
-                    + "  var day=date.getDate();\n"
-                    + "  if(day<10) document.write('0');\n"
-                    + "  document.write(day);\n"
-                    + "  document.write(' ');\n"
-                    + "  var hour=date.getHours();\n"
-                    + "  if(hour<10) document.write('0');\n"
-                    + "  document.write(hour);\n"
-                    + "  document.write(':');\n"
-                    + "  var minute=date.getMinutes();\n"
-                    + "  if(minute<10) document.write('0');\n"
-                    + "  document.write(minute);\n"
-                    + "  document.write(':');\n"
-                    + "  var second=date.getSeconds();\n"
-                    + "  if(second<10) document.write('0');\n"
-                    + "  document.write(second);\n"
-                    + "// --></SCRIPT>");
-        }
+    public ChainWriter printDateTimeJS(long date) throws IOException {
+        writeDateTimeJavaScript(date, out);
         return this;
     }
 
@@ -819,26 +868,8 @@ final public class ChainWriter {
      * if the date is <code>-1</code>.
      * Writes to the internal <code>PrintWriter</code>.
      */
-    public ChainWriter printTimeJS(long date) {
-        if(date==-1) out.print("&nbsp;");
-        else {
-            out.print("<SCRIPT language='JavaScript1.3'><!--\n"
-                    + "  var date=new Date(");
-            out.print(date);
-            out.print(");\n"
-                    + "  var hour=date.getHours();\n"
-                    + "  if(hour<10) document.write('0');\n"
-                    + "  document.write(hour);\n"
-                    + "  document.write(':');\n"
-                    + "  var minute=date.getMinutes();\n"
-                    + "  if(minute<10) document.write('0');\n"
-                    + "  document.write(minute);\n"
-                    + "  document.write(':');\n"
-                    + "  var second=date.getSeconds();\n"
-                    + "  if(second<10) document.write('0');\n"
-                    + "  document.write(second);\n"
-                    + "// --></SCRIPT>");
-        }
+    public ChainWriter printTimeJS(long date) throws IOException {
+        writeTimeJavaScript(date, out);
         return this;
     }
 

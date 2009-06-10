@@ -269,6 +269,14 @@ public class SQLUtility {
     }
 
     /**
+     * Gets the database format for a time field.
+     * If the time is <code>-1</code>, returns <code>null</code>
+     */
+    public static String getTime(long time) {
+        return time==-1 ? null : new Timestamp(time).toString().substring(11, 19);
+    }
+
+    /**
      * Gets the number of days from epoch
      */
     public static long getDaysFromMillis(long time) {
