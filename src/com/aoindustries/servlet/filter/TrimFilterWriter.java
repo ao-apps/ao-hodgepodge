@@ -16,8 +16,6 @@ import java.util.Locale;
  * for maximum performance.  Careful attention has been paid to minimize the internal buffering in this class.  As many write/print operations as possible
  * are passed directly to the wrapped <code>PrintWriter</code>.  Please note that these methods are not synchronized, as servlet output is normally written
  * by the thread allocated for the request.  If synchronization is required it should be provided externally.
- *
- * TODO: Don't trim inside PRE tags.
  * 
  * @author  AO Industries, Inc.
  */
@@ -41,10 +39,12 @@ public class TrimFilterWriter extends PrintWriter {
         this.wrapped = wrapped;
     }
 
+    @Override
     public void flush() {
         wrapped.flush();
     }
     
+    @Override
     public void close() {
         wrapped.close();
         readCharMatchCount = 0;
@@ -54,6 +54,7 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = true;
     }
 
+    @Override
     public boolean checkError() {
         return wrapped.checkError();
     }
@@ -154,10 +155,12 @@ public class TrimFilterWriter extends PrintWriter {
         }
     }
 
+    @Override
     public void write(int c) {
         if(processChar((char)c)) wrapped.write(c);
     }
 
+    @Override
     public void write(char buf[], int off, int len) {
         outputBufferUsed = 0;
         // If len > OUPUT_BUFFER_SIZE, process in blocks
@@ -178,10 +181,12 @@ public class TrimFilterWriter extends PrintWriter {
         }
     }
 
+    @Override
     public void write(char buf[]) {
         write(buf, 0, buf.length);
     }
 
+    @Override
     public void write(String s, int off, int len) {
         outputBufferUsed = 0;
         // If len > OUPUT_BUFFER_SIZE, process in blocks
@@ -202,6 +207,7 @@ public class TrimFilterWriter extends PrintWriter {
         }
     }
 
+    @Override
     public void print(boolean b) {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -209,10 +215,12 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.print(b);
     }
 
+    @Override
     public void print(char c) {
         if(processChar(c)) wrapped.print(c);
     }
 
+    @Override
     public void print(int i) {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -220,6 +228,7 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.print(i);
     }
 
+    @Override
     public void print(long l) {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -227,6 +236,7 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.print(l);
     }
 
+    @Override
     public void print(float f) {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -234,6 +244,7 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.print(f);
     }
 
+    @Override
     public void print(double d) {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -241,10 +252,12 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.print(d);
     }
 
+    @Override
     public void println() {
         write(lineSeparator);
     }
 
+    @Override
     public void println(boolean b) {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -252,11 +265,13 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.println(b);
     }
 
+    @Override
     public void println(char x) {
         if(processChar(x)) wrapped.print(x);
         write(lineSeparator);
     }
 
+    @Override
     public void println(int i) {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -264,6 +279,7 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.println(i);
     }
 
+    @Override
     public void println(long l) {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -271,6 +287,7 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.println(l);
     }
 
+    @Override
     public void println(float f) {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -278,6 +295,7 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.println(f);
     }
 
+    @Override
     public void println(double d) {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -285,21 +303,25 @@ public class TrimFilterWriter extends PrintWriter {
         wrapped.println(d);
     }
     
+    @Override
     public void println(char x[]) {
         write(x);
         write(lineSeparator);
     }
 
+    @Override
     public void println(String x) {
         write(x);
         write(lineSeparator);
     }
     
+    @Override
     public void println(Object x) {
         print(x);
         write(lineSeparator);
     }
 
+    @Override
     public PrintWriter format(String format, Object ... args) {
         throw new RuntimeException("TODO: Method not implemented");
         //System.err.println("DEBUG: TrimFilterWriter: format(String format, Object ... args): TODO: Not implemented");
@@ -307,6 +329,7 @@ public class TrimFilterWriter extends PrintWriter {
         //return this;
     }
 
+    @Override
     public PrintWriter format(Locale l, String format, Object ... args) {
         throw new RuntimeException("TODO: Method not implemented");
         //System.err.println("DEBUG: TrimFilterWriter: format(Locale l, String format, Object ... args): TODO: Not implemented");

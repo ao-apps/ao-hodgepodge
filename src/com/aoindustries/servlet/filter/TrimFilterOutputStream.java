@@ -17,8 +17,6 @@ import javax.servlet.ServletOutputStream;
  * for maximum performance.  Careful attention has been paid to minimize the internal buffering in this class.  As many write/print operations as possible
  * are passed directly to the wrapped <code>ServletOutputStream</code>.  Please note that these methods are not synchronized, as servlet output is normally written
  * by the thread allocated for the request.  If synchronization is required it should be provided externally.
- *
- * TODO: Don't trim inside PRE tags.
  * 
  * @author  AO Industries, Inc.
  */
@@ -41,6 +39,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         this.wrapped = wrapped;
     }
 
+    @Override
     public void close() throws IOException {
         wrapped.close();
         readCharMatchCount = 0;
@@ -50,6 +49,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         atLineStart = true;
     }
     
+    @Override
     public void flush() throws IOException {
         wrapped.flush();
     }
@@ -142,6 +142,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         if(processChar((char)b)) wrapped.write(b);
     }
 
+    @Override
     public void write(byte[] buf, int off, int len) throws IOException {
         outputBufferUsed = 0;
         // If len > OUPUT_BUFFER_SIZE, process in blocks
@@ -162,10 +163,12 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         }
     }
 
+    @Override
     public void write(byte[] b) throws IOException {
         write(b, 0, b.length);
     }
 
+    @Override
     public void print(boolean b) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -173,10 +176,12 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.print(b);
     }
 
+    @Override
     public void print(char c) throws IOException {
         if(processChar(c)) wrapped.print(c);
     }
 
+    @Override
     public void print(double d) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -184,6 +189,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.print(d);
     }
 
+    @Override
     public void print(float f) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -191,6 +197,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.print(f);
     }
 
+    @Override
     public void print(int i) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -198,6 +205,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.print(i);
     }
 
+    @Override
     public void print(long l) throws IOException {
         atLineStart = false;
         readCharMatchCount = 0;
@@ -205,6 +213,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.print(l);
     }
 
+    @Override
     public void print(String s) throws IOException {
         outputBufferUsed = 0;
         // If len > OUPUT_BUFFER_SIZE, process in blocks
@@ -227,10 +236,12 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         }
     }
 
+    @Override
     public void println() throws IOException {
         print(lineSeparator);
     }
 
+    @Override
     public void println(boolean b) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -238,11 +249,13 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.println(b);
     }
 
+    @Override
     public void println(char c) throws IOException {
         if(processChar(c)) wrapped.print(c);
         print(lineSeparator);
     }
 
+    @Override
     public void println(double d) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -250,6 +263,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.println(d);
     }
     
+    @Override
     public void println(float f) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -257,6 +271,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.println(f);
     }
     
+    @Override
     public void println(int i) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -264,6 +279,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.println(i);
     }
     
+    @Override
     public void println(long l) throws IOException {
         atLineStart = true;
         readCharMatchCount = 0;
@@ -271,6 +287,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         wrapped.println(l);
     }
 
+    @Override
     public void println(String s) throws IOException {
         print(s);
         print(lineSeparator);
