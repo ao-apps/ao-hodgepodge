@@ -5,9 +5,11 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import java.awt.*;
-import java.util.*;
-import javax.swing.*;
+import java.awt.FlowLayout;
+import java.util.Calendar;
+import javax.swing.Icon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 /**
  * @version  1.0
@@ -77,5 +79,13 @@ public class USDateLabel extends JLabel {
         if(minute<10) SB.append('0');
         SB.append(minute).append(' ').append(cal.get(Calendar.AM_PM)==Calendar.PM?"PM":"AM");
         return SB;
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("USDateLabel");
+        frame.getContentPane().setLayout(new FlowLayout());
+        frame.getContentPane().add(new USDateLabel(System.currentTimeMillis()));
+        frame.pack();
+        frame.setVisible(true);
     }
 }

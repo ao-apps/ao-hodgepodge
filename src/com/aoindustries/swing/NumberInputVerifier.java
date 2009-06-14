@@ -5,7 +5,8 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import javax.swing.*;
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
 
 /**
  * @version  1.0

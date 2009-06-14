@@ -15,6 +15,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -51,15 +52,15 @@ public class JCalendar extends JPanel implements MouseListener {
     private List<CalendarListener> calendarListeners;
 
     public JCalendar() {
-        Calendar cal=Calendar.getInstance();
-        cal.setTimeInMillis(System.currentTimeMillis());
-        init(cal);
+        Calendar localCal=Calendar.getInstance();
+        localCal.setTimeInMillis(System.currentTimeMillis());
+        init(localCal);
     }
 
     public JCalendar(long time) {
-        Calendar cal=Calendar.getInstance();
-        cal.setTimeInMillis(time);
-        init(cal);
+        Calendar localCal=Calendar.getInstance();
+        localCal.setTimeInMillis(time);
+        init(localCal);
     }
     
     public JCalendar(Calendar cal) {
@@ -263,5 +264,12 @@ public class JCalendar extends JPanel implements MouseListener {
     
     public Calendar getDate() {
         return cal;
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("JCalendar");
+        frame.getContentPane().add(new JCalendar());
+        frame.pack();
+        frame.setVisible(true);
     }
 }

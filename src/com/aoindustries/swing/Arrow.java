@@ -30,6 +30,7 @@ public class Arrow extends JComponent {
         setBorder(border);
     }
     
+    @Override
     public void paintComponent(Graphics G) {
         Dimension size=getSize();
         //G.draw3DRect(0, 0, size.width-1, size.height-1, direction!=NONE);
@@ -69,5 +70,16 @@ public class Arrow extends JComponent {
         } finally {
             G2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, previousHint);
         }
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Arrow");
+        frame.getContentPane().setLayout(new FlowLayout());
+        frame.getContentPane().add(new Arrow(UP, BorderFactory.createEmptyBorder()));
+        frame.getContentPane().add(new Arrow(DOWN, BorderFactory.createEmptyBorder()));
+        frame.getContentPane().add(new Arrow(LEFT, BorderFactory.createEmptyBorder()));
+        frame.getContentPane().add(new Arrow(RIGHT, BorderFactory.createEmptyBorder()));
+        frame.pack();
+        frame.setVisible(true);
     }
 }

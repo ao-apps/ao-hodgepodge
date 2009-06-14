@@ -5,9 +5,9 @@ package com.aoindustries.table;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import java.io.*;
-import java.sql.*;
-import java.util.*;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * An abstract structure for tables.
@@ -27,7 +27,7 @@ public interface Table<T extends Row> {
 
     /**
      * Registers a <code>TableListener</code> to be notified when
-     * the cached data for this table expires.  Repetative incoming
+     * the cached data for this table expires.  Repetitive incoming
      * requests will be batched into fewer events, in increments
      * provided by batchTime.  If batchTime is 0, the event is immediately
      * and always distributed.  Batched events are performed in

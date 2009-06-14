@@ -5,7 +5,7 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import java.util.*;
+import java.util.Calendar;
 
 /**
  * @author  AO Industries, Inc.

@@ -94,6 +94,7 @@ public class DefaultJDialog extends JDialog implements WindowListener, Component
     public void componentHidden(ComponentEvent e) {
     }
     
+    @Override
     public void pack() {
         super.pack();
         checkMin();

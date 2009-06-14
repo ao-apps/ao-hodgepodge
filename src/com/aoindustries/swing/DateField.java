@@ -5,12 +5,16 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.awt.*;
-import java.awt.*;
-import java.util.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
+import com.aoindustries.awt.MultiBorderLayout;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.util.Calendar;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 
 /**
  * @version  1.0
@@ -115,5 +119,13 @@ public class DateField extends JPanel implements DocumentListener {
     }
 
     public void changedUpdate(DocumentEvent e) {
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("DateField");
+        frame.getContentPane().setLayout(new FlowLayout());
+        frame.getContentPane().add(new DateField());
+        frame.pack();
+        frame.setVisible(true);
     }
 }

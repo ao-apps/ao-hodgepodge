@@ -7,7 +7,6 @@ package com.aoindustries.swing;
  */
 import com.aoindustries.awt.*;
 import java.awt.*;
-import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
@@ -115,5 +114,13 @@ public class SSNField extends JPanel implements DocumentListener {
     }
 
     public void changedUpdate(DocumentEvent e) {
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("SSNField");
+        frame.getContentPane().setLayout(new FlowLayout());
+        frame.getContentPane().add(new SSNField());
+        frame.pack();
+        frame.setVisible(true);
     }
 }

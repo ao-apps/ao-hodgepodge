@@ -5,8 +5,10 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import javax.swing.Icon;
+import javax.swing.JLabel;
 
 /**
  * @version  1.0
@@ -47,6 +49,7 @@ public class WidthMatchingLabel extends JLabel {
         this.component=component;
     }
     
+    @Override
     public Dimension getPreferredSize() {
         int totalWidth;
         if(component instanceof Component) totalWidth=((Component)component).getPreferredSize().width;

@@ -17,15 +17,8 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-//import com.aoindustries.util.*;
-//import java.awt.*;
-//import java.awt.event.*;
-//import java.util.*;
-//import javax.swing.*;
 
 /**
- * @version  1.0
- *
  * @author  AO Industries, Inc.
  */
 public class MessageDialog extends DefaultJDialog implements ActionListener {

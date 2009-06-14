@@ -5,10 +5,7 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.sql.*;
-import java.awt.*;
-import java.util.*;
-import javax.swing.*;
+import com.aoindustries.sql.SQLUtility;
 
 /**
  * @version  1.0

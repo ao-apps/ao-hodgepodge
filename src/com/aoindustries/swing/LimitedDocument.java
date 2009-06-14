@@ -5,7 +5,9 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import javax.swing.text.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 /**
  * @version  1.0
@@ -26,6 +28,7 @@ public class LimitedDocument extends PlainDocument {
         this.numbersOnly=numbersOnly;
     }
 
+    @Override
     public void insertString(int offset, String  str, AttributeSet attr) throws BadLocationException {
         if(str==null) return;
         if((getLength()+str.length())<=limit) {

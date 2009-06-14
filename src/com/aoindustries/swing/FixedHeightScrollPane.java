@@ -5,8 +5,9 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import javax.swing.JScrollPane;
 
 /**
  * @version  1.0
@@ -42,6 +43,7 @@ public class FixedHeightScrollPane extends JScrollPane {
 
     private int maximum=0;
 
+    @Override
     public Dimension getPreferredSize() {
         int newWidth=super.getPreferredSize().width;
         if(newWidth>maximum) maximum=newWidth;

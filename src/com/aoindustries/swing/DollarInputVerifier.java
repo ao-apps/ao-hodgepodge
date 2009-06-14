@@ -5,12 +5,11 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.sql.*;
-import javax.swing.*;
+import com.aoindustries.sql.SQLUtility;
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
 
 /**
- * @version  1.0
- *
  * @author  AO Industries, Inc.
  */
 public class DollarInputVerifier extends InputVerifier {

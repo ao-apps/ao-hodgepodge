@@ -28,6 +28,7 @@ public class AutoSelectTextField extends JTextField implements FocusListener {
     public void focusLost(FocusEvent e) {
     }
     
+    @Override
     public Dimension getPreferredSize() {
         Dimension pref=super.getPreferredSize();
         return new Dimension(pref.width, pref.height+2);
