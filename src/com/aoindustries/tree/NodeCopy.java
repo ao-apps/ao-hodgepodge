@@ -47,6 +47,34 @@ public class NodeCopy<E> implements Node<E> {
         }
     }
 
+    public NodeCopy(Node<E> node, NodeFilter<E> nodeFilter) throws IOException, SQLException {
+        this.value = node.getValue();
+        List<Node<E>> nodeChildren = node.getChildren();
+        if(nodeChildren==null) {
+            // No children allowed
+            children = null;
+        } else {
+            // Apply filter
+            List<Node<E>> filteredChildren = new ArrayList<Node<E>>(nodeChildren.size());
+            for(Node<E> child : nodeChildren) if(!nodeFilter.isNodeFiltered(child)) filteredChildren.add(child);
+
+            int size = filteredChildren.size();
+            if(size==0) {
+                // No children
+                children = Collections.emptyList();
+            } else if(size==1) {
+                // One child
+                Node<E> nodeCopy = new NodeCopy<E>(filteredChildren.get(0), nodeFilter);
+                children = Collections.singletonList(nodeCopy);
+            } else {
+                // Multiple children
+                List<Node<E>> childrenCopy = new ArrayList<Node<E>>(size);
+                for(Node<E> child : filteredChildren) childrenCopy.add(new NodeCopy<E>(child, nodeFilter));
+                children = Collections.unmodifiableList(childrenCopy);
+            }
+        }
+    }
+
     public List<Node<E>> getChildren() {
         return children;
     }

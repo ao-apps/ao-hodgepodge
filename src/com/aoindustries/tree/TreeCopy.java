@@ -51,6 +51,29 @@ public class TreeCopy<E> implements Tree<E> {
         }
     }
 
+    public TreeCopy(Tree<E> source, NodeFilter<E> nodeFilter) throws IOException, SQLException {
+        List<Node<E>> sourceRootNodes = source.getRootNodes();
+
+        // Apply filter
+        List<Node<E>> filteredRootNodes = new ArrayList<Node<E>>(sourceRootNodes.size());
+        for(Node<E> sourceRootNode : sourceRootNodes) if(!nodeFilter.isNodeFiltered(sourceRootNode)) filteredRootNodes.add(sourceRootNode);
+
+        int size = filteredRootNodes.size();
+        if(size==0) {
+            // No roots
+            rootNodes = Collections.emptyList();
+        } else if(size==1) {
+            // Single root
+            Node<E> nodeCopy = new NodeCopy<E>(filteredRootNodes.get(0), nodeFilter);
+            rootNodes = Collections.singletonList(nodeCopy);
+        } else {
+            // Multiple roots
+            List<Node<E>> newRootNodes = new ArrayList<Node<E>>(size);
+            for(Node<E> rootNode : filteredRootNodes) newRootNodes.add(new NodeCopy<E>(rootNode, nodeFilter));
+            rootNodes = Collections.unmodifiableList(newRootNodes);
+        }
+    }
+
     /**
      * Gets the list of root nodes.
      */
