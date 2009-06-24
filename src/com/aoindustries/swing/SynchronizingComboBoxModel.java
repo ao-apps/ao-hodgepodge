@@ -7,7 +7,7 @@ package com.aoindustries.swing;
  */
 import java.util.List;
 import java.util.Locale;
-import javax.swing.DefaultListModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
 
 /**
@@ -22,15 +22,15 @@ import javax.swing.SwingUtilities;
  *
  * @author  AO Industries, Inc.
  */
-public class SynchronizingListModel extends DefaultListModel {
+public class SynchronizingComboBoxModel extends DefaultComboBoxModel {
 
     private final Object constantFirstRow;
 
-    public SynchronizingListModel() {
+    public SynchronizingComboBoxModel() {
         constantFirstRow = null;
     }
 
-    public SynchronizingListModel(Object constantFirstRow) {
+    public SynchronizingComboBoxModel(Object constantFirstRow) {
         this.constantFirstRow = constantFirstRow;
         addElement(constantFirstRow);
     }
@@ -47,7 +47,7 @@ public class SynchronizingListModel extends DefaultListModel {
         int modelOffset;
         if(constantFirstRow!=null) {
             modelOffset = 1;
-            if(isEmpty()) addElement(constantFirstRow);
+            if(getSize()==0) addElement(constantFirstRow);
             else if(!getElementAt(0).equals(constantFirstRow)) {
                 insertElementAt(constantFirstRow, 0);
             }
@@ -57,23 +57,32 @@ public class SynchronizingListModel extends DefaultListModel {
         int size = list.size();
         for(int index=0; index<size; index++) {
             Object obj = list.get(index);
-            if(index>=(size()-modelOffset)) addElement(obj);
+            if(index>=(getSize()-modelOffset)) addElement(obj);
             else if(!obj.equals(getElementAt(index+modelOffset))) {
                 // Objects don't match
                 // If this object is found further down the list, then delete up to that object
                 int foundIndex = -1;
-                for(int searchIndex = index+1; searchIndex<(size()-modelOffset); searchIndex++) {
+                for(int searchIndex = index+1; searchIndex<(getSize()-modelOffset); searchIndex++) {
                     if(obj.equals(getElementAt(searchIndex+modelOffset))) {
                         foundIndex = searchIndex;
                         break;
                     }
                 }
-                if(foundIndex!=-1) removeRange(index+modelOffset, foundIndex-1+modelOffset);
-                // Otherwise, insert in the current index
-                else insertElementAt(obj, index+modelOffset);
+                if(foundIndex!=-1) {
+                    // No removeRange
+                    // removeRange(index+modelOffset, foundIndex-1+modelOffset);
+                    for(
+                        int removeIndex = foundIndex-1+modelOffset, end = index+modelOffset;
+                        removeIndex>=end;
+                        removeIndex--
+                    ) removeElementAt(removeIndex);
+                } else {
+                    // Otherwise, insert in the current index
+                    insertElementAt(obj, index+modelOffset);
+                }
             }
         }
         // Remove any extra
-        if((size()-modelOffset) > size) removeRange(size+modelOffset, size()-1);
+        while((getSize()-modelOffset) > size) removeElementAt(getSize()-1);
     }
 }
