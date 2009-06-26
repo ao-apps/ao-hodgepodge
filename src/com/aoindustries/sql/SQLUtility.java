@@ -489,7 +489,7 @@ public class SQLUtility {
         ResultSetMetaData metaData=results.getMetaData();
         int columnCount=metaData.getColumnCount();
 
-        out.print("<TABLE border=1 cellspacing=0 cellpadding=2>\n");
+        out.print("<TABLE border=1 cellspacing='0' cellpadding='2'>\n");
         if(title!=null) {
             out.print("  <TR><TH colspan=").print(columnCount).print('>').print(title).print("</TH></TR>\n");
         }

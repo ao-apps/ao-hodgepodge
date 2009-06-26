@@ -205,7 +205,7 @@ final public class AOConnectionPool extends AOPool {
     }
 
     protected void printConnectionStats(ChainWriter out) {
-        out.print("  <TR><TH colspan=2><FONT size=+1>JDBC Driver</FONT></TH></TR>\n"
+        out.print("  <TR><TH colspan='2'><FONT size=+1>JDBC Driver</FONT></TH></TR>\n"
                 + "  <TR><TD>Driver:</TD><TD>").print(driver).print("</TD></TR>\n"
                 + "  <TR><TD>URL:</TD><TD>").print(url).print("</TD></TR>\n"
                 + "  <TR><TD>User:</TD><TD>").print(user).print("</TD></TR>\n"

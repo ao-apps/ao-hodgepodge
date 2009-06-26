@@ -203,12 +203,12 @@ final public class ChainWriter {
      * Prints a JavaScript script that will preload the image at the provided URL.
      */
     public static void writeHtmlImagePreloadJavaScript(String url, Writer out) throws IOException {
-        out.write("<SCRIPT language='JavaScript1.2'><!--\n"
+        out.write("<script type='text/javascript'>\n"
                 + "  var img=new Image();\n"
                 + "  img.src='");
         writeHtmlAttribute(url, out);
         out.write("';\n"
-                + "  // --></SCRIPT>");
+                + "</script><noscript><!-- Do nothing --></noscript>");
     }
 
     /**
@@ -218,7 +218,7 @@ final public class ChainWriter {
     public static void writeDateJavaScript(long date, Writer out) throws IOException {
         if(date==-1) out.write("&nbsp;");
         else {
-            out.write("<SCRIPT language='JavaScript1.3'><!--\n"
+            out.write("<script type='text/javascript'>\n"
                       +"  var date=new Date(");
             out.write(Long.toString(date));
             out.write(");\n"
@@ -231,9 +231,9 @@ final public class ChainWriter {
                     + "  var day=date.getDate();\n"
                     + "  if(day<10) document.write('0');\n"
                     + "  document.write(day);\n"
-                    + "// --></SCRIPT><NOSCRIPT>");
+                    + "</script><noscript>");
             out.write(SQLUtility.getDate(date));
-            out.write("</NOSCRIPT>");
+            out.write("</noscript>");
         }
     }
 
@@ -244,7 +244,7 @@ final public class ChainWriter {
     public static void writeDateTimeJavaScript(long date, Writer out) throws IOException {
         if(date==-1) out.write("&nbsp;");
         else {
-            out.write("<SCRIPT language='JavaScript1.1'><!--\n"
+            out.write("<script type='text/javascript'>\n"
                     + "  var date=new Date(");
             out.write(Long.toString(date));
             out.write(");\n"
@@ -269,9 +269,9 @@ final public class ChainWriter {
                     + "  var second=date.getSeconds();\n"
                     + "  if(second<10) document.write('0');\n"
                     + "  document.write(second);\n"
-                    + "// --></SCRIPT><NOSCRIPT>");
+                    + "</script><noscript>");
             out.write(SQLUtility.getDateTime(date));
-            out.write("</NOSCRIPT>");
+            out.write("</noscript>");
         }
     }
 
@@ -282,7 +282,7 @@ final public class ChainWriter {
     public static void writeTimeJavaScript(long date, Writer out) throws IOException {
         if(date==-1) out.write("&nbsp;");
         else {
-            out.write("<SCRIPT language='JavaScript1.3'><!--\n"
+            out.write("<script type='text/javascript'>\n"
                     + "  var date=new Date(");
             out.write(Long.toString(date));
             out.write(");\n"
@@ -297,9 +297,9 @@ final public class ChainWriter {
                     + "  var second=date.getSeconds();\n"
                     + "  if(second<10) document.write('0');\n"
                     + "  document.write(second);\n"
-                    + "// --></SCRIPT><NOSCRIPT>");
+                    + "</script><noscript>");
             out.write(SQLUtility.getTime(date));
-            out.write("</NOSCRIPT>");
+            out.write("</noscript>");
         }
     }
 

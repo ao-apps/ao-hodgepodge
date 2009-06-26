@@ -313,27 +313,27 @@ abstract public class AOPool extends Thread {
      * Prints complete statistics about connection pool use.
      */
     final protected void printStatisticsHTMLImp(ChainWriter out) throws Exception {
-        out.print("<TABLE cellspacing=0 cellpadding=2 border=1>\n");
+        out.print("<table cellspacing='0' cellpadding=2 border=1>\n");
         printConnectionStats(out);
-        out.print("  <TR><TD>Max Connection Pool Size:</TD><TD>").print(numConnections).print("</TD></TR>\n"
-                + "  <TR><TD>Max Connection Age:</TD><TD>").print(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge)).print("</TD></TR>\n"
-                + "</TABLE>\n"
-                + "<BR><BR>\n"
-                + "<TABLE cellspacing=0 cellpadding=2 border=1>\n"
-                + "  <TR><TH colspan=11><FONT size=+1>Connections</FONT></TH></TR>\n"
-                + "  <TR>\n"
-                + "    <TH>Connection #</TH>\n"
-                + "    <TH>Is Connected</TH>\n"
-                + "    <TH>Conn Age</TH>\n"
-                + "    <TH>Conn Count</TH>\n"
-                + "    <TH>Use Count</TH>\n"
-                + "    <TH>Total Time</TH>\n"
-                + "    <TH>% of Time</TH>\n"
-                + "    <TH>State</TH>\n"
-                + "    <TH>State Time</TH>\n"
-                + "    <TH>Ave Trans Time</TH>\n"
-                + "    <TH>Stack Trace</TH>\n"
-                + "  </TR>\n");
+        out.print("  <tr><td>Max Connection Pool Size:</td><td>").print(numConnections).print("</td></tr>\n"
+                + "  <tr><td>Max Connection Age:</td><td>").print(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge)).print("</td></tr>\n"
+                + "</table>\n"
+                + "<br /><br />\n"
+                + "<table cellspacing='0' cellpadding=2 border=1>\n"
+                + "  <tr><th colspan=11><font size=+1>Connections</font></th></tr>\n"
+                + "  <tr>\n"
+                + "    <th>Connection #</th>\n"
+                + "    <th>Is Connected</th>\n"
+                + "    <th>Conn Age</th>\n"
+                + "    <th>Conn Count</th>\n"
+                + "    <th>Use Count</th>\n"
+                + "    <th>Total Time</th>\n"
+                + "    <th>% of Time</th>\n"
+                + "    <th>State</th>\n"
+                + "    <th>State Time</th>\n"
+                + "    <th>Ave Trans Time</th>\n"
+                + "    <th>Stack Trace</th>\n"
+                + "  </tr>\n");
         synchronized(connectionLock) {
             long time=System.currentTimeMillis();
             long timeLen=time-startTime;
@@ -353,32 +353,32 @@ abstract public class AOPool extends Thread {
                     boolean isBusy=busyConnections[c];
                     if(isBusy) totalTime+=time-startTimes[c];
                     long stateTime=isBusy?(time-startTimes[c]):(time-releaseTimes[c]);
-                    out.print("  <TR>\n"
-                            + "    <TD>").print(c+1).print("</TD>\n"
-                            + "    <TD>").print(isConnected?"Yes":"No").print("</TD>\n"
-                            + "    <TD>");
+                    out.print("  <tr>\n"
+                            + "    <td>").print(c+1).print("</td>\n"
+                            + "    <td>").print(isConnected?"Yes":"No").print("</td>\n"
+                            + "    <td>");
                     if(isConnected) out.print(StringUtility.getDecimalTimeLengthString(System.currentTimeMillis()-createTimes[c]));
                     else out.print("&nbsp;");
-                    out.print("    <TD>").print(connCount).print("</TD>\n"
-                            + "    <TD>").print(useCount).print("</TD>\n"
-                            + "    <TD>").print(StringUtility.getDecimalTimeLengthString(totalTime)).print("</TD>\n"
-                            + "    <TD>").print(totalTime*100/(float)timeLen).print("%</TD>\n"
-                            + "    <TD>").print(isBusy?"In Use":isConnected?"Idle":"Closed").print("</TD>\n"
-                            + "    <TD>").print(StringUtility.getDecimalTimeLengthString(stateTime)).print("</TD>\n"
-                            + "    <TD>").print((totalTime*1000/useCount)).print("&micro;s</TD>\n"
-                            + "    <TD>");
+                    out.print("    <td>").print(connCount).print("</td>\n"
+                            + "    <td>").print(useCount).print("</td>\n"
+                            + "    <td>").print(StringUtility.getDecimalTimeLengthString(totalTime)).print("</td>\n"
+                            + "    <td>").print(totalTime*100/(float)timeLen).print("%</td>\n"
+                            + "    <td>").print(isBusy?"In Use":isConnected?"Idle":"Closed").print("</td>\n"
+                            + "    <td>").print(StringUtility.getDecimalTimeLengthString(stateTime)).print("</td>\n"
+                            + "    <td>").print((totalTime*1000/useCount)).print("&micro;s</td>\n"
+                            + "    <td>");
                     Throwable T = allocateStackTraces[c];
                     if(T == null) out.print("&nbsp;");
                     else {
-                        out.print("      <A href='#' onClick='var elem = document.getElementById(\"stack_").print(c).print("\").style; elem.visibility=(elem.visibility==\"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</A>\n"
-                                + "      <SPAN width='100%' id='stack_").print(c).print("' style='align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:").print(c+1).print("'>\n"
-                                + "        <PRE style='align:left; background-color:white; border: 2px solid; border-color: black;'>\n");
+                        out.print("      <a href='#' onclick='var elem = document.getElementById(\"stack_").print(c).print("\").style; elem.visibility=(elem.visibility==\"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
+                                + "      <span id='stack_").print(c).print("' style='align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:").print(c+1).print("'>\n"
+                                + "        <pre style='align:left; background-color:white; border: 2px solid; border-color: black;'>\n");
                         ErrorPrinter.printStackTraces(T, out.getPrintWriter());
-                        out.print("        </PRE>\n"
-                                + "      </SPAN>\n");
+                        out.print("        </pre>\n"
+                                + "      </span>\n");
                     }
-                    out.print("</TD>\n"
-                            + "  </TR>\n");
+                    out.print("</td>\n"
+                            + "  </tr>\n");
 
                     // Update totals
                     if(isConnected) totalConnected++;
@@ -388,21 +388,21 @@ abstract public class AOPool extends Thread {
                     if(isBusy) totalBusy++;
                 }
             }
-            out.print("  <TR>\n"
-                    + "    <TD><B>Total</B></TD>\n"
-                    + "    <TD>").print(totalConnected).print("</TD>\n"
-                    + "    <TD>&nbsp;</TD>\n"
-                    + "    <TD>").print(totalConnects).print("</TD>\n"
-                    + "    <TD>").print(totalUses).print("</TD>\n"
-                    + "    <TD>").print(StringUtility.getDecimalTimeLengthString(totalTotalTime)).print("</TD>\n"
-                    + "    <TD>").print(timeLen==0 ? 0 : (totalTotalTime*100/(float)timeLen)).print("%</TD>\n"
-                    + "    <TD>").print(totalBusy).print("</TD>\n"
-                    + "    <TD>").print(StringUtility.getDecimalTimeLengthString(timeLen)).print("</TD>\n"
-                    + "    <TD>").print(totalUses==0 ? 0 : (totalTotalTime*1000/totalUses)).print("&micro;s</TD>\n"
-                    + "    <TD>&nbsp;</TD>\n"
-                    + "  </TD>\n");
+            out.print("  <tr>\n"
+                    + "    <td><b>Total</b></td>\n"
+                    + "    <td>").print(totalConnected).print("</td>\n"
+                    + "    <td>&nbsp;</td>\n"
+                    + "    <td>").print(totalConnects).print("</td>\n"
+                    + "    <td>").print(totalUses).print("</td>\n"
+                    + "    <td>").print(StringUtility.getDecimalTimeLengthString(totalTotalTime)).print("</td>\n"
+                    + "    <td>").print(timeLen==0 ? 0 : (totalTotalTime*100/(float)timeLen)).print("%</td>\n"
+                    + "    <td>").print(totalBusy).print("</td>\n"
+                    + "    <td>").print(StringUtility.getDecimalTimeLengthString(timeLen)).print("</td>\n"
+                    + "    <td>").print(totalUses==0 ? 0 : (totalTotalTime*1000/totalUses)).print("&micro;s</td>\n"
+                    + "    <td>&nbsp;</td>\n"
+                    + "  </tr>\n");
         }
-        out.print("</TABLE>\n");
+        out.print("</table>\n");
     }
 
     /**
