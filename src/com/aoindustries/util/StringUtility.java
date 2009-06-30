@@ -962,6 +962,29 @@ public final class StringUtility {
         return getStringArray(words);
     }
 
+    public static List<String> splitString(String line, String delim) {
+        int delimLen = delim.length();
+        if(delimLen==0) throw new IllegalArgumentException("Delimiter may not be empty");
+        List<String> words = new ArrayList<String>();
+        int len = line.length();
+        int pos = 0;
+        while (pos < len) {
+            int start = pos;
+            pos = line.indexOf(delim, pos);
+            if (pos == -1) {
+                words.add(line.substring(start, len));
+                pos = len;
+            } else {
+                words.add(line.substring(start, pos));
+                pos += delimLen;
+            }
+        }
+        // If ending in a delimeter, add the empty string
+        if(len>=delimLen && line.substring(len-delimLen).equals(delim)) words.add("");
+
+        return words;
+    }
+
     /**
      * Splits a string into multiple words on either whitespace or commas
      * @return java.lang.String[]
