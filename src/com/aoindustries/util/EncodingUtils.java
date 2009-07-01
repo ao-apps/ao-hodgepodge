@@ -187,7 +187,7 @@ public final class EncodingUtils {
 
     /**
      * Escapes for use in a HTML document and writes to the provided <code>Appendable</code>.
-     * It turns newlines into &lt;br /&gt; and extra spaces to &amp;nbsp;
+     * It turns newlines into &lt;br /&gt; and extra spaces to &amp;#160;
      *
      * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
      */
@@ -214,7 +214,7 @@ public final class EncodingUtils {
      *
      * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
      * @param make_br  will write &lt;BR&gt; tags for every newline character
-     * @param make_nbsp  will write &amp;nbsp; for a space when another space follows
+     * @param make_nbsp  will write &amp;#160; for a space when another space follows
      */
     public static void encodeHtml(String S, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
         if (S != null) {

@@ -555,7 +555,7 @@ final public class ChainWriter implements Appendable {
         EncodingUtils.encodeJavaScriptString(url, out);
         out.append("';\n"
                 + "  // ]]>\n"
-                + "</script><noscript><!-- Do nothing --></noscript>");
+                + "</script>");
     }
 
     /**
@@ -574,23 +574,27 @@ final public class ChainWriter implements Appendable {
     }
 
     /**
-     * Writes a JavaScript script tag that shows a date in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * Writes a JavaScript script tag that shows a date in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
+     *
+     * Because this needs to modify the DOM it can lead to poor performance or large data sets.
+     * To provide more performance options, the JavaScript is written to scriptOut.  This could
+     * then be buffered into one long script to execute at once or using body.onload.
      */
-    public static void writeDateJavaScript(long date, Sequence sequence, Appendable out) throws IOException {
+    public static void writeDateJavaScript(long date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
         if(date==-1) out.append("&#160;");
         else {
             String dateString = SQLUtility.getDate(date);
             String id = Long.toString(sequence.getNextSequenceValue());
+            // Write the element
             out.append("<span id=\"chainWriterDate");
             out.append(id);
             out.append("\">");
             EncodingUtils.encodeHtml(dateString, out);
-            out.append("</span><script type=\"text/javascript\">\n"
-                    + "  // <![CDATA[\n"
-                    + "  if (document.getElementById) {\n"
-            // // TODO: Remove offset!!! - DEBUGGING ONLY
-                    + "    var chainWriterDate=new Date("); out.append(Long.toString(date+25L*60*60*1000)); out.append(");\n"
+            out.append("</span>");
+            // Write the script, which may be written later for performance
+            scriptOut.append("  if(document.getElementById) {\n"
+                    + "    var chainWriterDate=new Date("); scriptOut.append(Long.toString(date)); scriptOut.append(");\n"
                     + "    var chainWriterResult=chainWriterDate.getFullYear() + \"-\";\n"
                     + "    var chainWriterMonth=chainWriterDate.getMonth()+1;\n"
                     + "    if(chainWriterMonth<10) chainWriterResult+=\"0\";\n"
@@ -598,18 +602,15 @@ final public class ChainWriter implements Appendable {
                     + "    var chainWriterDay=chainWriterDate.getDate();\n"
                     + "    if(chainWriterDay<10) chainWriterResult+=\"0\";\n"
                     + "    chainWriterResult+=chainWriterDay;\n"
-                    + "    if(chainWriterResult!=\""); EncodingUtils.encodeHtml(dateString, out); out.append("\") {\n"
-                    + "      document.getElementById(\"chainWriterDate"); out.append(id); out.append("\").firstChild.nodeValue=chainWriterResult;\n"
-            // out.append("\").appendChild(document.createTextNode(chainWriterResult));\n"
+                    + "    if(chainWriterResult!=\""); EncodingUtils.encodeHtml(dateString, scriptOut); scriptOut.append("\") {\n"
+                    + "      document.getElementById(\"chainWriterDate"); scriptOut.append(id); scriptOut.append("\").firstChild.nodeValue=chainWriterResult;\n"
                     + "    }\n"
-                    + "  }\n"
-                    + "  // ]]>\n"
-                    + "</script>");
+                    + "  }\n");
         }
     }
 
     /**
-     * Prints a JavaScript script tag that shows a date in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * Prints a JavaScript script tag that shows a date in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
      * Writes to the internal <code>PrintWriter</code>.
      *
@@ -617,27 +618,29 @@ final public class ChainWriter implements Appendable {
      * @see  #writeDateJavaScript(long)
      */
     @Deprecated
-    final public ChainWriter printDateJS(long date, Sequence sequence) throws IOException {
-        return writeDateJavaScript(date, sequence);
+    final public ChainWriter printDateJS(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+        return writeDateJavaScript(date, sequence, scriptOut);
     }
 
     /**
-     * Writes a JavaScript script tag that shows a date in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * Writes a JavaScript script tag that shows a date in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
      * Writes to the internal <code>PrintWriter</code>.
      *
      * @see  #writeDateJavaScript(long,Appendable)
      */
-    public ChainWriter writeDateJavaScript(long date, Sequence sequence) throws IOException {
-        writeDateJavaScript(date, sequence, out);
+    public ChainWriter writeDateJavaScript(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+        writeDateJavaScript(date, sequence, out, scriptOut);
         return this;
     }
 
     /**
-     * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
      */
-    public static void writeDateTimeJavaScript(long date, Sequence sequence, Appendable out) throws IOException {
+    public static void writeDateTimeJavaScript(long date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
+        // TODO: Use scriptOut
+
         if(date==-1) out.append("&#160;");
         else {
             out.append("<script type='text/javascript'>\n"
@@ -674,7 +677,7 @@ final public class ChainWriter implements Appendable {
     }
 
     /**
-     * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
      * Writes to the internal <code>PrintWriter</code>.
      *
@@ -682,26 +685,27 @@ final public class ChainWriter implements Appendable {
      * @see #writeDateTimeJavaScript(long)
      */
     @Deprecated
-    final public ChainWriter printDateTimeJS(long date, Sequence sequence) throws IOException {
-        return writeDateTimeJavaScript(date, sequence);
+    final public ChainWriter printDateTimeJS(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+        return writeDateTimeJavaScript(date, sequence, scriptOut);
     }
 
     /**
-     * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
      * Writes to the internal <code>PrintWriter</code>.
      * @see #writeDateTimeJavaScript(long, Appendable)
      */
-    public ChainWriter writeDateTimeJavaScript(long date, Sequence sequence) throws IOException {
-        writeDateTimeJavaScript(date, sequence, out);
+    public ChainWriter writeDateTimeJavaScript(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+        writeDateTimeJavaScript(date, sequence, out, scriptOut);
         return this;
     }
 
     /**
-     * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
      */
-    public static void writeTimeJavaScript(long date, Sequence sequence, Appendable out) throws IOException {
+    public static void writeTimeJavaScript(long date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
+        // TODO: use scriptOut
         if(date==-1) out.append("&#160;");
         else {
             out.append("<script type='text/javascript'>\n"
@@ -728,7 +732,7 @@ final public class ChainWriter implements Appendable {
     }
 
     /**
-     * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
      * Writes to the internal <code>PrintWriter</code>.
      *
@@ -736,19 +740,19 @@ final public class ChainWriter implements Appendable {
      * @see #writeTimeJavaScript(long)
      */
     @Deprecated
-    final public ChainWriter printTimeJS(long date, Sequence sequence) throws IOException {
-        return writeTimeJavaScript(date, sequence);
+    final public ChainWriter printTimeJS(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+        return writeTimeJavaScript(date, sequence, scriptOut);
     }
 
     /**
-     * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;nbsp;</code>
+     * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
      * Writes to the internal <code>PrintWriter</code>.
      *
      * @see #writeTimeJavaScript(long,Appendable)
      */
-    public ChainWriter writeTimeJavaScript(long date, Sequence sequence) throws IOException {
-        writeTimeJavaScript(date, sequence, out);
+    public ChainWriter writeTimeJavaScript(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+        writeTimeJavaScript(date, sequence, out, scriptOut);
         return this;
     }
     // </editor-fold>
