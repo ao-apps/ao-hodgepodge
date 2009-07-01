@@ -6,6 +6,8 @@ package com.aoindustries.io;
  * All rights reserved.
  */
 import com.aoindustries.sql.SQLUtility;
+import com.aoindustries.util.EncodingUtils;
+import com.aoindustries.util.Sequence;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -399,218 +401,34 @@ final public class ChainWriter implements Appendable {
     }
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Escape Methods">
+    // <editor-fold defaultstate="collapsed" desc="Encoding Methods">
     /**
-     * Escapes for use in a XML attribute and writes to the provided <code>Appendable</code>.
-     *
-     * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
-     *
-     * @see  #writeXml(java.lang.String, Appendable)
-     */
-    public static void writeXmlAttribute(String S, Appendable out) throws IOException {
-        if (S != null) {
-            int len = S.length();
-            int toPrint = 0;
-            for (int c = 0; c < len; c++) {
-                char ch = S.charAt(c);
-                switch(ch) {
-                    case '&':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&amp;");
-                        break;
-                    case '<':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&lt;");
-                        break;
-                    case '>':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&gt;");
-                        break;
-                    case '\r':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&#xD;");
-                        break;
-                    case '\t':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&#x9;");
-                        break;
-                    case '\n':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&#xA;");
-                        break;
-                    case '"':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&quot;");
-                        break;
-                    case '\'':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&apos;");
-                        break;
-                    default:
-                        toPrint++;
-                }
-            }
-            if(toPrint>0) {
-                out.append(S, len-toPrint, toPrint);
-            }
-        }
-    }
-
-    /**
-     * @see #writeXmlAttribute(java.lang.String, Appendable)
-     *
-     * @param S the string to be escaped.
-     *
-     * @return if S is null then null otherwise value escaped
-     */
-    public static String escapeXmlAttribute(String S) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length()*2);
-        writeXmlAttribute(S, result);
-        return result.toString();
-    }
-
-    /**
-     * @deprecated  Please use writeXmlAttribute instead.
+     * @deprecated  Please use encodeXmlAttribute instead.
      *
      * @param S the string to be escaped.
      */
     public ChainWriter printEI(String S) throws IOException {
-        return writeXmlAttribute(S);
+        return encodeXmlAttribute(S);
     }
 
     /**
-     * @see  #writeXmlAttribute(String, Appendable)
+     * @see  EncodingUtils#encodeXmlAttribute(String, Appendable)
      *
      * @param S the string to be escaped
      */
-    public ChainWriter writeXmlAttribute(String S) throws IOException {
-        writeXmlAttribute(S, out);
+    public ChainWriter encodeXmlAttribute(String S) throws IOException {
+        EncodingUtils.encodeXmlAttribute(S, out);
         return this;
     }
 
     /**
-     * Escapes for use in a XML body and writes to the provided <code>Appendable</code>.
-     *
-     * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
-     *
-     * @see  #writeXmlAttribute(java.lang.String, Appendable)
-     */
-    public static void writeXml(String S, Appendable out) throws IOException {
-        if (S != null) {
-            int len = S.length();
-            int toPrint = 0;
-            for (int c = 0; c < len; c++) {
-                char ch = S.charAt(c);
-                switch(ch) {
-                    case '&':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&amp;");
-                        break;
-                    case '<':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&lt;");
-                        break;
-                    case '>':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&gt;");
-                        break;
-                    case '\t':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&#x9;");
-                        break;
-                    default:
-                        toPrint++;
-                }
-            }
-            if(toPrint>0) {
-                out.append(S, len-toPrint, toPrint);
-            }
-        }
-    }
-
-    /**
-     * @see #writeXml(java.lang.String, Appendable)
-     *
-     * @param S the string to be escaped.
-     *
-     * @return if S is null then null otherwise value escaped
-     */
-    public static String escapeXml(String S) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length()*2);
-        writeXml(S, result);
-        return result.toString();
-    }
-
-    /**
-     * @see  #writeXml(String, Appendable)
+     * @see  EncodingUtils#encodeXml(String, Appendable)
      *
      * @param S the string to be escaped
      */
-    public ChainWriter writeXml(String S) throws IOException {
-        writeXml(S, out);
+    public ChainWriter encodeXml(String S) throws IOException {
+        EncodingUtils.encodeXml(S, out);
         return this;
-    }
-
-    /**
-     * Escapes for use in a HTML document and writes to the provided <code>Appendable</code>.
-     * It turns newlines into &lt;br /&gt; and extra spaces to &amp;nbsp;
-     *
-     * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
-     */
-    public static void writeHtml(String S, Appendable out) throws IOException {
-        writeHtml(S, true, true, out);
-    }
-
-    /**
-     * @see #writeHtml(java.lang.String, Appendable)
-     *
-     * @param S the string to be escaped.
-     *
-     * @return if S is null then null otherwise value escaped
-     */
-    public static String escapeHtml(String S) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length()*2);
-        writeHtml(S, result);
-        return result.toString();
     }
 
     /**
@@ -618,258 +436,49 @@ final public class ChainWriter implements Appendable {
      *
      * @param S the string to be escaped.
      */
-    public ChainWriter writeHtml(String S) throws IOException {
-        writeHtml(S, true, true, out);
+    public ChainWriter encodeHtml(String S) throws IOException {
+        EncodingUtils.encodeHtml(S, true, true, out);
         return this;
     }
 
     /**
-     * Escapes for use in a HTML document and writes to the provided <code>Appendable</code>.
-     *
-     * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
-     * @param make_br  will write &lt;BR&gt; tags for every newline character
-     * @param make_nbsp  will write &amp;nbsp; for a space when another space follows
-     */
-    public static void writeHtml(String S, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
-        if (S != null) {
-            int len = S.length();
-            int toPrint = 0;
-            for (int c = 0; c < len; c++) {
-                char ch = S.charAt(c);
-                switch(ch) {
-                    case ' ':
-                        if(make_nbsp && c<(len-1) && S.charAt(c+1)==' ') {
-                            if(toPrint>0) {
-                                out.append(S, c-toPrint, toPrint);
-                                toPrint=0;
-                            }
-                            out.append("&nbsp;");
-                        } else {
-                            toPrint++;
-                        }
-                        break;
-                    case '<':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&lt;");
-                        break;
-                    case '>':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&gt;");
-                        break;
-                    case '&':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&amp;");
-                        break;
-                    case '"':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&quot;");
-                        break;
-                    case '\'':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        out.append("&apos;");
-                        break;
-                    case '\r':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, toPrint);
-                            toPrint=0;
-                        }
-                        // skip '\r'
-                        break;
-                    case '\n':
-                        if(make_br) {
-                            if(toPrint>0) {
-                                out.append(S, c-toPrint, toPrint);
-                                toPrint=0;
-                            }
-                            out.append("<br />\n");
-                        } else {
-                            toPrint++;
-                        }
-                        break;
-                    default:
-                        toPrint++;
-                }
-            }
-            if(toPrint>0) {
-                out.append(S, len-toPrint, toPrint);
-            }
-        }
-    }
-
-    /**
-     * @see #writeHtml(java.lang.String, boolean, boolean, Appendable)
-     *
-     * @param S the string to be escaped.
-     *
-     * @return if S is null then null otherwise value escaped
-     */
-    public static String escapeHtml(String S, boolean make_br, boolean make_nbsp) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length()*2);
-        writeHtml(S, make_br, make_nbsp, result);
-        return result.toString();
-    }
-
-    /**
-     * @deprecated  Please use writeHtml instead.
-     */
-    public ChainWriter printEH(String S, boolean make_br, boolean make_nbsp) throws IOException {
-        return writeHtml(S, make_br, make_nbsp);
-    }
-
-    /**
-     * Escapes HTML for displaying in browsers and writes to the internal <code>PrintWriter</code>.
-     *
-     * @param S the string to be escaped.
-     * @param make_br  will write &lt;BR&gt; tags for every newline character
-     */
-    public ChainWriter writeHtml(String S, boolean make_br, boolean make_nbsp) throws IOException {
-        writeHtml(S, make_br, make_nbsp, out);
-        return this;
-    }
-
-    /**
-     * @deprecated  Please use writeHtml instead.
+     * @deprecated  Please use encodeHtml instead.
      */
     public ChainWriter printEH(String S) throws IOException {
-        writeHtml(S, true, true, out);
+        return encodeHtml(S);
+    }
+
+    /**
+     * @deprecated  Please use encodeHtml instead.
+     */
+    public ChainWriter printEH(String S, boolean make_br, boolean make_nbsp) throws IOException {
+        return encodeHtml(S, make_br, make_nbsp);
+    }
+
+    /**
+     * Escapes HTML for displaying in browsers and writes to the internal <code>PrintWriter</code>.
+     *
+     * @param S the string to be escaped.
+     * @param make_br  will write &lt;BR&gt; tags for every newline character
+     */
+    public ChainWriter encodeHtml(String S, boolean make_br, boolean make_nbsp) throws IOException {
+        EncodingUtils.encodeHtml(S, make_br, make_nbsp, out);
         return this;
     }
 
     /**
-     * Escapes the specified <code>String</code> so that it can be put in a JavaScript string in
-     * a XML CDATA area.  The string should be in double quotes, the quotes are not provided by
-     * this call.
-     *
-     * Writes to the provided <code>Appendable</code>.
-     *
-     * @param S the string to be escaped.
+     * @see EncodingUtils#encodeJavaScriptString(java.lang.String, Appendable)
      */
-    public static void writeJavaScriptString(String S, Appendable out) throws IOException {
-        if (S != null) {
-            int len = S.length();
-            for (int c = 0; c < len; c++) {
-                char ch = S.charAt(c);
-                if (ch == '"') out.append("\\\"");
-                else if (ch == '\'') out.append("\\'");
-                else if (ch == '\b') out.append("\\b");
-                else if (ch == '\f') out.append("\\f");
-                else if (ch == '\r') out.append("\\r");
-                else if (ch == '\n') out.append("\\n");
-                else if (ch == '\t') out.append("\\t");
-                // Also escape any < > & and ] to avoid early end of XHTML CDATA sections
-                // and to not allow data to interfere with the XML parser.
-                else if (ch == '<') out.append("\\u003c");
-                else if (ch == '>') out.append("\\u003e");
-                else if (ch == '&') out.append("\\u0026");
-                else if (ch == ']') out.append("\\u005d");
-                else if (ch<' ') {
-                    out.append("\\u00");
-                    int chInt = ch;
-                    out.append(getHex((chInt>>>4)&15));
-                    out.append(getHex(chInt&15));
-                } else {
-                    out.append(ch);
-                }
-            }
-        }
-    }
-
-    /**
-     * @see #writeJavaScriptString(java.lang.String, Appendable)
-     *
-     * @param S the string to be escaped.
-     *
-     * @return if S is null then null otherwise value escaped
-     */
-    public static String escapeJavaScriptString(String S) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length()*2);
-        writeJavaScriptString(S, result);
-        return result.toString();
-    }
-
-    /**
-     * @see #writeJavaScriptString(java.lang.String, Appendable)
-     */
-    public ChainWriter writeJavaScriptString(String S) throws IOException {
-        writeJavaScriptString(S, out);
+    public ChainWriter encodeJavaScriptString(String S) throws IOException {
+        EncodingUtils.encodeJavaScriptString(S, out);
         return this;
     }
 
     /**
-     * Escapes the specified <code>String</code> so that it can be put in a JavaScript string in
-     * an HTML attribute.  The string should be in JavaScript quotes, the quotes
-     * are not provided by this call.
-     *
-     * Writes to the provided <code>Appendable</code>.
-     *
-     * @param S the string to be escaped.
+     * @see EncodingUtils#encodeJavaScriptStringInXmlAttribute(java.lang.String, Appendable)
      */
-    public static void writeJavaScriptStringInXmlAttribute(String S, Appendable out) throws IOException {
-        if (S != null) {
-            int len = S.length();
-            for (int c = 0; c < len; c++) {
-                char ch = S.charAt(c);
-                if (ch == '"') out.append("\\&quot;");
-                else if (ch == '\'') out.append("\\&apos;");
-                else if (ch == '\b') out.append("\\b");
-                else if (ch == '\f') out.append("\\f");
-                else if (ch == '\r') out.append("\\r");
-                else if (ch == '\n') out.append("\\n");
-                else if (ch == '\t') out.append("\\t");
-                // Also escape any < > & and ] to avoid early end of XHTML CDATA sections
-                // and to not allow data to interfere with the XML parser.
-                else if (ch == '<') out.append("\\u003c");
-                else if (ch == '>') out.append("\\u003e");
-                else if (ch == '&') out.append("\\u0026");
-                else if (ch == ']') out.append("\\u005d");
-                else if (ch<' ') {
-                    out.append("\\u00");
-                    int chInt = ch;
-                    out.append(getHex((chInt>>>4)&15));
-                    out.append(getHex(chInt&15));
-                } else {
-                    out.append(ch);
-                }
-            }
-        }
-    }
-
-    /**
-     * @see #writeJavaScriptStringInXmlAttribute(java.lang.String, Appendable)
-     *
-     * @param S the string to be escaped.
-     *
-     * @return if S is null then null otherwise value escaped to be a JavaScript string in a XML attribute.
-     */
-    public static String encodeJavaScriptStringInXmlAttribute(String S) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length()*2);
-        writeJavaScriptStringInXmlAttribute(S, result);
-        return result.toString();
-    }
-
-    /**
-     * @see #writeJavaScriptStringInXmlAttribute(java.lang.String, Appendable)
-     */
-    public ChainWriter writeJavaScriptStringInXmlAttribute(String S) throws IOException {
-        writeJavaScriptStringInXmlAttribute(S, out);
+    public ChainWriter encodeJavaScriptStringInXmlAttribute(String S) throws IOException {
+        EncodingUtils.encodeJavaScriptStringInXmlAttribute(S, out);
         return this;
     }
 
@@ -900,7 +509,6 @@ final public class ChainWriter implements Appendable {
     
     // <editor-fold defaultstate="collapsed" desc="HTML Utilities">
     private static final char[] hexChars={'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
     private static char getHex(int value) {
         return hexChars[value & 15];
     }
@@ -910,12 +518,12 @@ final public class ChainWriter implements Appendable {
      */
     public static void writeHtmlColor(int color, Appendable out) throws IOException {
         out.append('#');
-        out.append(hexChars[(color>>>20)&15]);
-        out.append(hexChars[(color>>>16)&15]);
-        out.append(hexChars[(color>>>12)&15]);
-        out.append(hexChars[(color>>>8)&15]);
-        out.append(hexChars[(color>>>4)&15]);
-        out.append(hexChars[color&15]);
+        out.append(getHex(color>>>20));
+        out.append(getHex(color>>>16));
+        out.append(getHex(color>>>12));
+        out.append(getHex(color>>>8));
+        out.append(getHex(color>>>4));
+        out.append(getHex(color));
     }
 
     /**
@@ -944,7 +552,7 @@ final public class ChainWriter implements Appendable {
                 + "  // <![CDATA[\n"
                 + "  var img=new Image();\n"
                 + "  img.src='");
-        writeJavaScriptString(url, out);
+        EncodingUtils.encodeJavaScriptString(url, out);
         out.append("';\n"
                 + "  // ]]>\n"
                 + "</script><noscript><!-- Do nothing --></noscript>");
@@ -965,31 +573,36 @@ final public class ChainWriter implements Appendable {
         return this;
     }
 
-    // <editor-fold defaultstate="collapsed" desc="JavaScript Date/Time functions">
     /**
      * Writes a JavaScript script tag that shows a date in the user's locale.  Prints <code>&amp;nbsp;</code>
      * if the date is <code>-1</code>.
      */
-    public static void writeDateJavaScript(long date, Appendable out) throws IOException {
-        if(date==-1) out.append("&nbsp;");
+    public static void writeDateJavaScript(long date, Sequence sequence, Appendable out) throws IOException {
+        if(date==-1) out.append("&#160;");
         else {
-            out.append("<script type='text/javascript'>\n"
+            String id = Long.toString(sequence.getNextSequenceValue());
+            out.append("<span id=\"chainWriterDate");
+            out.append(id);
+            out.append("\"></span><script type=\"text/javascript\">\n"
                     + "  // <![CDATA[\n"
-                    + "  var date=new Date(");
+                    + "  if (document.getElementById) {\n"
+                    + "    var chainWriterDate=new Date(");
             out.append(Long.toString(date));
             out.append(");\n"
-                    + "  document.write(date.getFullYear());\n"
-                    + "  document.write('-');\n"
-                    + "  var month=date.getMonth()+1;\n"
-                    + "  if(month<10) document.write('0');\n"
-                    + "  document.write(month);\n"
-                    + "  document.write('-');\n"
-                    + "  var day=date.getDate();\n"
-                    + "  if(day<10) document.write('0');\n"
-                    + "  document.write(day);\n"
+                    + "    var chainWriterResult=chainWriterDate.getFullYear() + \"-\";\n"
+                    + "    var chainWriterMonth=chainWriterDate.getMonth()+1;\n"
+                    + "    if(chainWriterMonth<10) chainWriterResult+=\"0\";\n"
+                    + "    chainWriterResult+=chainWriterMonth+\"-\";\n"
+                    + "    var chainWriterDay=chainWriterDate.getDate();\n"
+                    + "    if(chainWriterDay<10) chainWriterResult+=\"0\";\n"
+                    + "    chainWriterResult+=chainWriterDay;\n"
+                    + "    document.getElementById(\"chainWriterDate");
+            out.append(id);
+            out.append("\").appendChild(document.createTextNode(chainWriterResult));\n"
+                    + "  }\n"
                     + "  // ]]>\n"
                     + "</script><noscript>");
-            writeHtml(SQLUtility.getDate(date), out);
+            EncodingUtils.encodeHtml(SQLUtility.getDate(date), out);
             out.append("</noscript>");
         }
     }
@@ -1003,8 +616,8 @@ final public class ChainWriter implements Appendable {
      * @see  #writeDateJavaScript(long)
      */
     @Deprecated
-    final public ChainWriter printDateJS(long date) throws IOException {
-        return writeDateJavaScript(date);
+    final public ChainWriter printDateJS(long date, Sequence sequence) throws IOException {
+        return writeDateJavaScript(date, sequence);
     }
 
     /**
@@ -1014,8 +627,8 @@ final public class ChainWriter implements Appendable {
      *
      * @see  #writeDateJavaScript(long,Appendable)
      */
-    public ChainWriter writeDateJavaScript(long date) throws IOException {
-        writeDateJavaScript(date, out);
+    public ChainWriter writeDateJavaScript(long date, Sequence sequence) throws IOException {
+        writeDateJavaScript(date, sequence, out);
         return this;
     }
 
@@ -1023,8 +636,8 @@ final public class ChainWriter implements Appendable {
      * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;nbsp;</code>
      * if the date is <code>-1</code>.
      */
-    public static void writeDateTimeJavaScript(long date, Appendable out) throws IOException {
-        if(date==-1) out.append("&nbsp;");
+    public static void writeDateTimeJavaScript(long date, Sequence sequence, Appendable out) throws IOException {
+        if(date==-1) out.append("&#160;");
         else {
             out.append("<script type='text/javascript'>\n"
                     + "  // <![CDATA[\n"
@@ -1054,7 +667,7 @@ final public class ChainWriter implements Appendable {
                     + "  document.write(second);\n"
                     + "  // ]]>\n"
                     + "</script><noscript>");
-            writeHtml(SQLUtility.getDateTime(date), out);
+            EncodingUtils.encodeHtml(SQLUtility.getDateTime(date), out);
             out.append("</noscript>");
         }
     }
@@ -1068,8 +681,8 @@ final public class ChainWriter implements Appendable {
      * @see #writeDateTimeJavaScript(long)
      */
     @Deprecated
-    final public ChainWriter printDateTimeJS(long date) throws IOException {
-        return writeDateTimeJavaScript(date);
+    final public ChainWriter printDateTimeJS(long date, Sequence sequence) throws IOException {
+        return writeDateTimeJavaScript(date, sequence);
     }
 
     /**
@@ -1078,8 +691,8 @@ final public class ChainWriter implements Appendable {
      * Writes to the internal <code>PrintWriter</code>.
      * @see #writeDateTimeJavaScript(long, Appendable)
      */
-    public ChainWriter writeDateTimeJavaScript(long date) throws IOException {
-        writeDateTimeJavaScript(date, out);
+    public ChainWriter writeDateTimeJavaScript(long date, Sequence sequence) throws IOException {
+        writeDateTimeJavaScript(date, sequence, out);
         return this;
     }
 
@@ -1087,8 +700,8 @@ final public class ChainWriter implements Appendable {
      * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;nbsp;</code>
      * if the date is <code>-1</code>.
      */
-    public static void writeTimeJavaScript(long date, Appendable out) throws IOException {
-        if(date==-1) out.append("&nbsp;");
+    public static void writeTimeJavaScript(long date, Sequence sequence, Appendable out) throws IOException {
+        if(date==-1) out.append("&#160;");
         else {
             out.append("<script type='text/javascript'>\n"
                     + "  // <![CDATA[\n"
@@ -1108,7 +721,7 @@ final public class ChainWriter implements Appendable {
                     + "  document.write(second);\n"
                     + "  // ]]>\n"
                     + "</script><noscript>");
-            writeHtml(SQLUtility.getTime(date), out);
+            EncodingUtils.encodeHtml(SQLUtility.getTime(date), out);
             out.append("</noscript>");
         }
     }
@@ -1122,8 +735,8 @@ final public class ChainWriter implements Appendable {
      * @see #writeTimeJavaScript(long)
      */
     @Deprecated
-    final public ChainWriter printTimeJS(long date) throws IOException {
-        return writeTimeJavaScript(date);
+    final public ChainWriter printTimeJS(long date, Sequence sequence) throws IOException {
+        return writeTimeJavaScript(date, sequence);
     }
 
     /**
@@ -1133,10 +746,9 @@ final public class ChainWriter implements Appendable {
      *
      * @see #writeTimeJavaScript(long,Appendable)
      */
-    public ChainWriter writeTimeJavaScript(long date) throws IOException {
-        writeTimeJavaScript(date, out);
+    public ChainWriter writeTimeJavaScript(long date, Sequence sequence) throws IOException {
+        writeTimeJavaScript(date, sequence, out);
         return this;
     }
-    // </editor-fold>
     // </editor-fold>
 }

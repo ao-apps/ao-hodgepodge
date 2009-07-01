@@ -358,7 +358,7 @@ abstract public class AOPool extends Thread {
                             + "    <td>").print(isConnected?"Yes":"No").print("</td>\n"
                             + "    <td>");
                     if(isConnected) out.print(StringUtility.getDecimalTimeLengthString(System.currentTimeMillis()-createTimes[c]));
-                    else out.print("&nbsp;");
+                    else out.print("&#160;");
                     out.print("    <td>").print(connCount).print("</td>\n"
                             + "    <td>").print(useCount).print("</td>\n"
                             + "    <td>").print(StringUtility.getDecimalTimeLengthString(totalTime)).print("</td>\n"
@@ -368,7 +368,7 @@ abstract public class AOPool extends Thread {
                             + "    <td>").print((totalTime*1000/useCount)).print("&micro;s</td>\n"
                             + "    <td>");
                     Throwable T = allocateStackTraces[c];
-                    if(T == null) out.print("&nbsp;");
+                    if(T == null) out.print("&#160;");
                     else {
                         out.print("      <a href='#' onclick='var elem = document.getElementById(\"stack_").print(c).print("\").style; elem.visibility=(elem.visibility==\"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
                                 + "      <span id='stack_").print(c).print("' style='align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:").print(c+1).print("'>\n"
@@ -391,7 +391,7 @@ abstract public class AOPool extends Thread {
             out.print("  <tr>\n"
                     + "    <td><b>Total</b></td>\n"
                     + "    <td>").print(totalConnected).print("</td>\n"
-                    + "    <td>&nbsp;</td>\n"
+                    + "    <td>&#160;</td>\n"
                     + "    <td>").print(totalConnects).print("</td>\n"
                     + "    <td>").print(totalUses).print("</td>\n"
                     + "    <td>").print(StringUtility.getDecimalTimeLengthString(totalTotalTime)).print("</td>\n"
@@ -399,7 +399,7 @@ abstract public class AOPool extends Thread {
                     + "    <td>").print(totalBusy).print("</td>\n"
                     + "    <td>").print(StringUtility.getDecimalTimeLengthString(timeLen)).print("</td>\n"
                     + "    <td>").print(totalUses==0 ? 0 : (totalTotalTime*1000/totalUses)).print("&micro;s</td>\n"
-                    + "    <td>&nbsp;</td>\n"
+                    + "    <td>&#160;</td>\n"
                     + "  </tr>\n");
         }
         out.print("</table>\n");

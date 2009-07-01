@@ -22,10 +22,10 @@ package com.aoindustries.util;
  * 2003-07-22 Christian d'Heureuse (chdh): Module created.<br>
  * 2005-08-11 chdh: Lincense changed from GPL to LGPL.<br>
  * 2006-11-21 chdh:<br>
- *  &nbsp; Method encode(String) renamed to encodeString(String).<br>
- *  &nbsp; Method decode(String) renamed to decodeString(String).<br>
- *  &nbsp; New method encode(byte[],int) added.<br>
- *  &nbsp; New method decode(String) added.<br>
+ *  &#160; Method encode(String) renamed to encodeString(String).<br>
+ *  &#160; Method decode(String) renamed to decodeString(String).<br>
+ *  &#160; New method encode(byte[],int) added.<br>
+ *  &#160; New method decode(String) added.<br>
  */
 public class Base64Coder {
 

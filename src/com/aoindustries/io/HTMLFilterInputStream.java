@@ -70,7 +70,7 @@ public class HTMLFilterInputStream extends FilterInputStream {
 	    while(ch!='>'&&ch!=-1) ch=in.read();
 	    if(ch!=-1) ch=in.read();
 	}
-	// convert &quot; to ", &nbsp; to space, and &amp; to &
+	// convert &quot; to ", &#160; to space, and &amp; to &
 	if(ch=='&') {
             if((buff[0]=in.read())=='q'||buff[0]=='Q') {
 		if((buff[1]=in.read())=='u'||buff[1]=='U') {
