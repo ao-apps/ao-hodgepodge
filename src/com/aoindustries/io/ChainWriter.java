@@ -580,15 +580,17 @@ final public class ChainWriter implements Appendable {
     public static void writeDateJavaScript(long date, Sequence sequence, Appendable out) throws IOException {
         if(date==-1) out.append("&#160;");
         else {
+            String dateString = SQLUtility.getDate(date);
             String id = Long.toString(sequence.getNextSequenceValue());
             out.append("<span id=\"chainWriterDate");
             out.append(id);
-            out.append("\"></span><script type=\"text/javascript\">\n"
+            out.append("\">");
+            EncodingUtils.encodeHtml(dateString, out);
+            out.append("</span><script type=\"text/javascript\">\n"
                     + "  // <![CDATA[\n"
                     + "  if (document.getElementById) {\n"
-                    + "    var chainWriterDate=new Date(");
-            out.append(Long.toString(date));
-            out.append(");\n"
+            // // TODO: Remove offset!!! - DEBUGGING ONLY
+                    + "    var chainWriterDate=new Date("); out.append(Long.toString(date+25L*60*60*1000)); out.append(");\n"
                     + "    var chainWriterResult=chainWriterDate.getFullYear() + \"-\";\n"
                     + "    var chainWriterMonth=chainWriterDate.getMonth()+1;\n"
                     + "    if(chainWriterMonth<10) chainWriterResult+=\"0\";\n"
@@ -596,14 +598,13 @@ final public class ChainWriter implements Appendable {
                     + "    var chainWriterDay=chainWriterDate.getDate();\n"
                     + "    if(chainWriterDay<10) chainWriterResult+=\"0\";\n"
                     + "    chainWriterResult+=chainWriterDay;\n"
-                    + "    document.getElementById(\"chainWriterDate");
-            out.append(id);
-            out.append("\").appendChild(document.createTextNode(chainWriterResult));\n"
+                    + "    if(chainWriterResult!=\""); EncodingUtils.encodeHtml(dateString, out); out.append("\") {\n"
+                    + "      document.getElementById(\"chainWriterDate"); out.append(id); out.append("\").firstChild.nodeValue=chainWriterResult;\n"
+            // out.append("\").appendChild(document.createTextNode(chainWriterResult));\n"
+                    + "    }\n"
                     + "  }\n"
                     + "  // ]]>\n"
-                    + "</script><noscript>");
-            EncodingUtils.encodeHtml(SQLUtility.getDate(date), out);
-            out.append("</noscript>");
+                    + "</script>");
         }
     }
 
