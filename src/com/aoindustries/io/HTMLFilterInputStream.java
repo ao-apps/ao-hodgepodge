@@ -40,6 +40,7 @@ public class HTMLFilterInputStream extends FilterInputStream {
         }
     }
 
+    @Override
     synchronized public int read() throws IOException {
 	if(buffused>0) {
 	    int returnme=buff[0];
@@ -49,7 +50,7 @@ public class HTMLFilterInputStream extends FilterInputStream {
 	int ch=in.read();
 	if(ch<=' ') return ch;
 	while(ch=='<') {
-	    // Skip HTML tags, except search for <TITLE> and </TITLE>
+	    // Skip HTML tags, except search for <title> and </title>
 	    if((ch=in.read())=='T'||ch=='t') {
 		if(
                     ((ch=in.read())=='I'||ch=='i')

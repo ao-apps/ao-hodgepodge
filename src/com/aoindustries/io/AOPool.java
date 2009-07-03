@@ -5,6 +5,7 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
+import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.ErrorHandler;
 import com.aoindustries.util.ErrorPrinter;
 import com.aoindustries.util.StandardErrorHandler;
@@ -14,8 +15,6 @@ import java.sql.SQLException;
 
 /**
  * Reusable generic connection pooling with dynamic flaming tiger feature.
- *
- * @version  1.0
  *
  * @author  AO Industries, Inc.
  */
@@ -96,7 +95,7 @@ abstract public class AOPool extends Thread {
     protected final ErrorHandler errorHandler;
 
     /** Lock for wait/notify */
-    public Object connectionLock = new Object();
+    public final Object connectionLock = new Object(); // Why public?
 
     /**
      * The RefreshConnection thread polls every connection in the connection pool. If it
@@ -307,20 +306,22 @@ abstract public class AOPool extends Thread {
 
     protected abstract boolean isClosed(Object O) throws Exception;
 
-    protected abstract void printConnectionStats(ChainWriter out) throws IOException;
+    protected abstract void printConnectionStats(Appendable out) throws IOException;
 
     /**
      * Prints complete statistics about connection pool use.
      */
-    final protected void printStatisticsHTMLImp(ChainWriter out) throws Exception {
-        out.print("<table cellspacing='0' cellpadding=2 border=1>\n");
+    final protected void printStatisticsHTMLImp(Appendable out) throws Exception {
+        out.append("<table style='border:1px;' cellspacing='0' cellpadding='2'>\n");
         printConnectionStats(out);
-        out.print("  <tr><td>Max Connection Pool Size:</td><td>").print(numConnections).print("</td></tr>\n"
-                + "  <tr><td>Max Connection Age:</td><td>").print(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge)).print("</td></tr>\n"
+        out.append("  <tr><td>Max Connection Pool Size:</td><td>").append(Integer.toString(numConnections)).append("</td></tr>\n"
+                + "  <tr><td>Max Connection Age:</td><td>");
+        EncodingUtils.encodeHtml(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge), out);
+        out.append("</td></tr>\n"
                 + "</table>\n"
                 + "<br /><br />\n"
-                + "<table cellspacing='0' cellpadding=2 border=1>\n"
-                + "  <tr><th colspan=11><font size=+1>Connections</font></th></tr>\n"
+                + "<table style='border:1px;' cellspacing='0' cellpadding='2'>\n"
+                + "  <tr><th colspan='11'><span style='font-size:large;'>Connections</span></th></tr>\n"
                 + "  <tr>\n"
                 + "    <th>Connection #</th>\n"
                 + "    <th>Is Connected</th>\n"
@@ -353,31 +354,35 @@ abstract public class AOPool extends Thread {
                     boolean isBusy=busyConnections[c];
                     if(isBusy) totalTime+=time-startTimes[c];
                     long stateTime=isBusy?(time-startTimes[c]):(time-releaseTimes[c]);
-                    out.print("  <tr>\n"
-                            + "    <td>").print(c+1).print("</td>\n"
-                            + "    <td>").print(isConnected?"Yes":"No").print("</td>\n"
+                    out.append("  <tr>\n"
+                            + "    <td>").append(Integer.toString(c+1)).append("</td>\n"
+                            + "    <td>").append(isConnected?"Yes":"No").append("</td>\n"
                             + "    <td>");
-                    if(isConnected) out.print(StringUtility.getDecimalTimeLengthString(System.currentTimeMillis()-createTimes[c]));
-                    else out.print("&#160;");
-                    out.print("    <td>").print(connCount).print("</td>\n"
-                            + "    <td>").print(useCount).print("</td>\n"
-                            + "    <td>").print(StringUtility.getDecimalTimeLengthString(totalTime)).print("</td>\n"
-                            + "    <td>").print(totalTime*100/(float)timeLen).print("%</td>\n"
-                            + "    <td>").print(isBusy?"In Use":isConnected?"Idle":"Closed").print("</td>\n"
-                            + "    <td>").print(StringUtility.getDecimalTimeLengthString(stateTime)).print("</td>\n"
-                            + "    <td>").print((totalTime*1000/useCount)).print("&micro;s</td>\n"
+                    if(isConnected) EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(System.currentTimeMillis()-createTimes[c]), out);
+                    else out.append("&#160;");
+                    out.append("    <td>").append(Long.toString(connCount)).append("</td>\n"
+                            + "    <td>").append(Long.toString(useCount)).append("</td>\n"
+                            + "    <td>");
+                    EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTime), out);
+                    out.append("</td>\n"
+                            + "    <td>").append(Float.toString(totalTime*100/(float)timeLen)).append("%</td>\n"
+                            + "    <td>").append(isBusy?"In Use":isConnected?"Idle":"Closed").append("</td>\n"
+                            + "    <td>");
+                    EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(stateTime), out);
+                    out.append("</td>\n"
+                            + "    <td>").append(Long.toString(totalTime*1000/useCount)).append("&#181;s</td>\n"
                             + "    <td>");
                     Throwable T = allocateStackTraces[c];
-                    if(T == null) out.print("&#160;");
+                    if(T == null) out.append("&#160;");
                     else {
-                        out.print("      <a href='#' onclick='var elem = document.getElementById(\"stack_").print(c).print("\").style; elem.visibility=(elem.visibility==\"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
-                                + "      <span id='stack_").print(c).print("' style='align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:").print(c+1).print("'>\n"
-                                + "        <pre style='align:left; background-color:white; border: 2px solid; border-color: black;'>\n");
-                        ErrorPrinter.printStackTraces(T, out.getPrintWriter());
-                        out.print("        </pre>\n"
+                        out.append("      <a href='#' onclick='var elem = document.getElementById(\"stack_").append(Integer.toString(c)).append("\").style; elem.visibility=(elem.visibility==\"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
+                                + "      <span id='stack_").append(Integer.toString(c)).append("' style='text-align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:").append(Integer.toString(c+1)).append("'>\n"
+                                + "        <pre style='text-align:left; background-color:white; border: 2px solid; border-color: black;'>\n");
+                        ErrorPrinter.printStackTraces(T, out);
+                        out.append("        </pre>\n"
                                 + "      </span>\n");
                     }
-                    out.print("</td>\n"
+                    out.append("</td>\n"
                             + "  </tr>\n");
 
                     // Update totals
@@ -388,21 +393,25 @@ abstract public class AOPool extends Thread {
                     if(isBusy) totalBusy++;
                 }
             }
-            out.print("  <tr>\n"
+            out.append("  <tr>\n"
                     + "    <td><b>Total</b></td>\n"
-                    + "    <td>").print(totalConnected).print("</td>\n"
+                    + "    <td>").append(Integer.toString(totalConnected)).append("</td>\n"
                     + "    <td>&#160;</td>\n"
-                    + "    <td>").print(totalConnects).print("</td>\n"
-                    + "    <td>").print(totalUses).print("</td>\n"
-                    + "    <td>").print(StringUtility.getDecimalTimeLengthString(totalTotalTime)).print("</td>\n"
-                    + "    <td>").print(timeLen==0 ? 0 : (totalTotalTime*100/(float)timeLen)).print("%</td>\n"
-                    + "    <td>").print(totalBusy).print("</td>\n"
-                    + "    <td>").print(StringUtility.getDecimalTimeLengthString(timeLen)).print("</td>\n"
-                    + "    <td>").print(totalUses==0 ? 0 : (totalTotalTime*1000/totalUses)).print("&micro;s</td>\n"
+                    + "    <td>").append(Long.toString(totalConnects)).append("</td>\n"
+                    + "    <td>").append(Long.toString(totalUses)).append("</td>\n"
+                    + "    <td>");
+            EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTotalTime), out);
+            out.append("</td>\n"
+                    + "    <td>").append(Float.toString(timeLen==0 ? 0 : (totalTotalTime*100/(float)timeLen))).append("%</td>\n"
+                    + "    <td>").append(Integer.toString(totalBusy)).append("</td>\n"
+                    + "    <td>");
+            EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(timeLen), out);
+            out.append("</td>\n"
+                    + "    <td>").append(Long.toString(totalUses==0 ? 0 : (totalTotalTime*1000/totalUses))).append("&#181;s</td>\n"
                     + "    <td>&#160;</td>\n"
                     + "  </tr>\n");
         }
-        out.print("</table>\n");
+        out.append("</table>\n");
     }
 
     /**
@@ -448,6 +457,7 @@ abstract public class AOPool extends Thread {
 
     protected abstract void resetConnection(Object O) throws Exception;
 
+    @Override
     final public void run() {
         while (runMore) {
             try {
@@ -455,15 +465,15 @@ abstract public class AOPool extends Thread {
                     sleep(delayTime);
                     long time = System.currentTimeMillis();
                     synchronized (connectionLock) {
-                        Object[] connections = this.connections;
-                        int size = connections.length;
+                        Object[] myConnections = this.connections;
+                        int size = myConnections.length;
                         boolean[] busyConnection = busyConnections;
                         long[] releaseTime = releaseTimes;
                         int maxIdle = maxIdleTime;
                         synchronized (this) {
                             for (int c = 0; c < size; c++) {
                                 if(
-                                    connections[c]!=null
+                                    myConnections[c]!=null
                                     && !busyConnection[c]
                                     && (
                                         (time-releaseTime[c]) > maxIdle
@@ -476,8 +486,8 @@ abstract public class AOPool extends Thread {
                                         )
                                     )
                                 ) {
-                                    if(!isClosed(connections[c])) close(connections[c]);
-                                    connections[c] = null;
+                                    if(!isClosed(myConnections[c])) close(myConnections[c]);
+                                    myConnections[c] = null;
                                     releaseTimes[c] = System.currentTimeMillis();
                                 }
                             }

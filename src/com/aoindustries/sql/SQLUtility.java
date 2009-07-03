@@ -484,29 +484,37 @@ public class SQLUtility {
         return S;
     }
 
-    public static void printResultSetHTMLTable(ResultSet results, ChainWriter out, String title, boolean wordWrap) throws SQLException {
+    public static void printResultSetHTMLTable(ResultSet results, Appendable out, String title, boolean wordWrap) throws SQLException, IOException {
         // Figure out the number of columns in the result set
         ResultSetMetaData metaData=results.getMetaData();
         int columnCount=metaData.getColumnCount();
 
-        out.print("<TABLE border=1 cellspacing='0' cellpadding='2'>\n");
+        out.append("<table style='border:1px;' cellspacing='0' cellpadding='2'>\n");
         if(title!=null) {
-            out.print("  <TR><TH colspan=").print(columnCount).print('>').print(title).print("</TH></TR>\n");
+            out.append("  <tr><th colspan='").append(Integer.toString(columnCount)).append("'>");
+            EncodingUtils.encodeHtml(title, out);
+            out.append("</th></tr>\n");
         }
-        out.print("  <TR>\n");
-        for(int c=0;c<columnCount;c++) out.print("    <TH>").print(metaData.getColumnLabel(c+1)).print("</TH>\n");
-        out.print("  </TR>\n");
+        out.append("  <tr>\n");
+        for(int c=0;c<columnCount;c++) {
+            out.append("    <th>");
+            EncodingUtils.encodeHtml(metaData.getColumnLabel(c+1), out);
+            out.append("</th>\n");
+        }
+        out.append("  </tr>\n");
         while(results.next()) {
-            out.print("  <TR>\n");
+            out.append("  <tr>\n");
             for(int c=0;c<columnCount;c++) {
                 String S=results.getString(c+1);
-                out.print(wordWrap?"    <TD>":"    <TD nowrap>");
-                if(S!=null) out.print(S);
-                out.print("</TD>\n");
+                out.append(wordWrap?"    <td>":"    <td style='white-space:nowrap'>");
+                if(S!=null) {
+                    EncodingUtils.encodeHtml(S, out);
+                }
+                out.append("</td>\n");
             }
-            out.print("  </TR>\n");
+            out.append("  </tr>\n");
         }
-        out.print("</TABLE>\n");
+        out.append("</table>\n");
     }
 
     /**

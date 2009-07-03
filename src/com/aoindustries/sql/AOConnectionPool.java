@@ -5,10 +5,16 @@ package com.aoindustries.sql;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.io.*;
-import com.aoindustries.util.*;
-import java.io.*;
-import java.sql.*;
+import com.aoindustries.io.AOPool;
+import com.aoindustries.io.ChainWriter;
+import com.aoindustries.util.EncodingUtils;
+import com.aoindustries.util.ErrorHandler;
+import com.aoindustries.util.StandardErrorHandler;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
 
 /**
  * Reusable connection pooling with dynamic flaming tiger feature.
@@ -27,6 +33,11 @@ final public class AOConnectionPool extends AOPool {
     private String password;
 
     /**
+     * @param driver
+     * @param url
+     * @param user 
+     * @param password
+     * @param numConnections
      * @deprecated  Please call AOConnectionPool(String,String,String,String,int,long,ErrorHandler)
      *
      * @see #AOConnectionPool(String,String,String,String,int,long,ErrorHandler)
@@ -36,6 +47,12 @@ final public class AOConnectionPool extends AOPool {
     }
 
     /**
+     * @param driver
+     * @param url
+     * @param user
+     * @param password
+     * @param numConnections
+     * @param maxConnectionAge
      * @deprecated  Please call AOConnectionPool(String,String,String,String,int,long,ErrorHandler)
      *
      * @see #AOConnectionPool(String,String,String,String,int,long,ErrorHandler)
@@ -69,6 +86,8 @@ final public class AOConnectionPool extends AOPool {
 
     /**
      * Gets a read/write connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
+     * @return
+     * @throws SQLException
      */
     public Connection getConnection() throws SQLException {
         return getConnection(Connection.TRANSACTION_READ_COMMITTED, false, 1);
@@ -76,6 +95,9 @@ final public class AOConnectionPool extends AOPool {
 
     /**
      * Gets a connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
+     * @param readOnly
+     * @return
+     * @throws SQLException
      */
     public Connection getConnection(boolean readOnly) throws SQLException {
         return getConnection(Connection.TRANSACTION_READ_COMMITTED, readOnly, 1);
@@ -83,6 +105,10 @@ final public class AOConnectionPool extends AOPool {
 
     /**
      * Gets a connection to the database with a maximum connections of 1.
+     * @param isolationLevel
+     * @param readOnly
+     * @return
+     * @throws SQLException
      */
     public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {
         return getConnection(isolationLevel, readOnly, 1);
@@ -204,15 +230,23 @@ final public class AOConnectionPool extends AOPool {
         return ((Connection)O).isClosed();
     }
 
-    protected void printConnectionStats(ChainWriter out) {
-        out.print("  <TR><TH colspan='2'><FONT size=+1>JDBC Driver</FONT></TH></TR>\n"
-                + "  <TR><TD>Driver:</TD><TD>").print(driver).print("</TD></TR>\n"
-                + "  <TR><TD>URL:</TD><TD>").print(url).print("</TD></TR>\n"
-                + "  <TR><TD>User:</TD><TD>").print(user).print("</TD></TR>\n"
-                + "  <TR><TD>Password:</TD><TD>");
+    protected void printConnectionStats(Appendable out) throws IOException {
+        out.append("  <tr><th colspan='2'><span style='font-size:large;'>JDBC Driver</span></th></tr>\n"
+                + "  <tr><td>Driver:</td><td>");
+        EncodingUtils.encodeHtml(driver, out);
+        out.append("</td></tr>\n"
+                + "  <tr><td>URL:</td><td>");
+        EncodingUtils.encodeHtml(url, out);
+        out.append("</td></tr>\n"
+                + "  <tr><td>User:</td><td>");
+        EncodingUtils.encodeHtml(user, out);
+        out.append("</td></tr>\n"
+                + "  <tr><td>Password:</td><td>");
         int len=password.length();
-        for(int c=0;c<len;c++) out.print('*');
-        out.print("</TD></TR>\n");
+        for(int c=0;c<len;c++) {
+            out.append('*');
+        }
+        out.append("</td></tr>\n");
     }
 
     public void printStatisticsHTML(ChainWriter out) throws SQLException {
@@ -290,6 +324,7 @@ final public class AOConnectionPool extends AOPool {
         throw err;
     }
 
+    @Override
     public String toString() {
         return "AOConnectionPool(url=\""+url+"\", user=\""+user+"\")";
     }

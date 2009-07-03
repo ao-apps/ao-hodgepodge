@@ -6,9 +6,8 @@ package com.aoindustries.util;
  * All rights reserved.
  */
 import com.aoindustries.sql.WrappedSQLException;
-import java.io.CharArrayWriter;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.Flushable;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.AccessControlException;
@@ -24,6 +23,10 @@ import java.sql.SQLWarning;
  */
 public class ErrorPrinter {
 
+    private static final String EOL = System.getProperty("line.separator");
+
+    private ErrorPrinter() {}
+
     public static void printStackTraces(Throwable T) {
         printStackTraces(T, System.err, null);
     }
@@ -32,135 +35,188 @@ public class ErrorPrinter {
         printStackTraces(T, System.err, extraInfo);
     }
 
-    public static void printStackTraces(Throwable T, PrintStream out) {
+    public static void printStackTraces(Throwable T, Appendable out) {
         printStackTraces(T, out, null);
     }
 
-    public static void printStackTraces(Throwable T, PrintStream out, Object[] extraInfo) {
+    private static void appendln(Appendable out) {
+        try {
+            out.append(EOL);
+        } catch(IOException err) {
+            // Ignored
+        }
+    }
+
+    private static void append(String S, Appendable out) {
+        try {
+            out.append(S);
+        } catch(IOException err) {
+            // Ignored
+        }
+    }
+
+    private static void appendln(String S, Appendable out) {
+        try {
+            out.append(S);
+            out.append(EOL);
+        } catch(IOException err) {
+            // Ignored
+        }
+    }
+
+    private static void append(char ch, Appendable out) {
+        try {
+            out.append(ch);
+        } catch(IOException err) {
+            // Ignored
+        }
+    }
+
+    private static void append(Object O, Appendable out) {
+        append(O==null ? "null" : O.toString(), out);
+    }
+
+    private static void appendln(Object O, Appendable out) {
+        appendln(O==null ? "null" : O.toString(), out);
+    }
+
+    /**
+     * Prints a detailed error report, including all stack traces, to the provided out.
+     * Synchronizes on out to make sure concurrently reported errors will not be mixed.
+     * If out is <code>Flushable</code>, will flush the output.
+     * @param T
+     * @param out
+     * @param extraInfo
+     */
+    public static void printStackTraces(Throwable T, Appendable out, Object[] extraInfo) {
+        
         synchronized(out) {
-            out.println();
-            out.println("**************************");
-            out.println("* BEGIN EXCEPTION REPORT *");
-            out.println("**************************");
-            out.println();
-            out.println("    Time ");
-            out.print("        ");
+            appendln(out);
+            appendln("**************************", out);
+            appendln("* BEGIN EXCEPTION REPORT *", out);
+            appendln("**************************", out);
+            appendln(out);
+            appendln("    Time ", out);
+            append("        ", out);
             try {
-                out.println(new java.util.Date(System.currentTimeMillis()).toString());
+                appendln(new java.util.Date(System.currentTimeMillis()).toString(), out);
             } catch(Exception err) {
-                out.println("Unable to display date: "+err.toString());
+                append("Unable to display date: ", out); appendln(err.toString(), out);
             }
 
             // Extra info
             if(extraInfo!=null && extraInfo.length>0) {
-                out.println("    Extra Information");
+                appendln("    Extra Information", out);
                 for(int c=0;c<extraInfo.length;c++) {
-                    out.print("        ");
-                    out.println(extraInfo[c]);
+                    append("        ", out); appendln(extraInfo[c], out);
                 }
             }
 
             // Threads
-            out.println("    Threading");
-            out.println("        Thread");
-            out.print("            Name........: ");
+            appendln("    Threading", out);
+            appendln("        Thread", out);
+            append("            Name........: ", out);
             Thread thread=Thread.currentThread();
-            out.println(thread.getName());
-            out.print("            Class.......: ");
-            out.println(thread.getClass().getName());
-            out.print("            Priority....: ");
-            out.println(thread.getPriority());
+            appendln(thread.getName(), out);
+            append("            Class.......: ", out);
+            appendln(thread.getClass().getName(), out);
+            append("            Priority....: ", out);
+            appendln(thread.getPriority(), out);
             try {
                 ThreadGroup TG=thread.getThreadGroup();
                 while(TG!=null) {
                     String name=TG.getName();
                     String classname=TG.getClass().getName();
                     int maxPriority=TG.getMaxPriority();
-                    out.println("        ThreadGroup");
-                    out.print("            Name........: "); out.println(name);
-                    out.print("            Class.......: "); out.println(classname);
-                    out.print("            Max Priority: "); out.println(maxPriority);
+                    appendln("        ThreadGroup", out);
+                    append("            Name........: ", out); appendln(name, out);
+                    append("            Class.......: ", out); appendln(classname, out);
+                    append("            Max Priority: ", out); appendln(maxPriority, out);
                     TG=TG.getParent();
                 }
             } catch(SecurityException err) {
-                out.println("Unable to print all Thread Groups: "+err.toString());
+                append("Unable to print all Thread Groups: ", out); appendln(err.toString(), out);
             }
 
-            out.println("    Exceptions");
+            appendln("    Exceptions", out);
             printThrowables(T, out, 8);
 
             // End Report
-            out.println();
-            out.println("**************************");
-            out.println("*  END EXCEPTION REPORT  *");
-            out.println("**************************");
+            appendln(out);
+            appendln("**************************", out);
+            appendln("*  END EXCEPTION REPORT  *", out);
+            appendln("**************************", out);
 
             // Flush output
-            out.flush();
+            try {
+                if(out instanceof Flushable) ((Flushable)out).flush();
+            } catch(IOException err) {
+                // Ignored
+            }
         }
     }
 
-    private static void printThrowables(Throwable T, PrintStream out, int indent) {
-        for(int c=0;c<indent;c++) out.print(' ');
-        out.println(T.getClass().getName());
+    private static void printThrowables(Throwable T, Appendable out, int indent) {
+        for(int c=0;c<indent;c++) append(' ', out);
+        appendln(T.getClass().getName(), out);
         printMessage(out, indent+4, "Message...........: ", T.getMessage());
         printMessage(out, indent+4, "Localized Message.: ", T.getLocalizedMessage());
         if(T instanceof SQLException) {
             SQLException sql=(SQLException)T;
             if(sql instanceof WrappedSQLException) printMessage(out, indent+4, "SQL Statement.....: ", ((WrappedSQLException)sql).getSqlString());
-            for(int c=0;c<(indent+4);c++) out.print(' ');
-            out.print("SQL Error Code....: ");
-            out.println(sql.getErrorCode());
-            for(int c=0;c<(indent+4);c++) out.print(' ');
-            out.print("SQL State.........: ");
-            out.println(sql.getSQLState());
+            for(int c=0;c<(indent+4);c++) append(' ', out);
+            append("SQL Error Code....: ", out);
+            appendln(sql.getErrorCode(), out);
+            for(int c=0;c<(indent+4);c++) append(' ', out);
+            append("SQL State.........: ", out);
+            appendln(sql.getSQLState(), out);
         } else if(T instanceof WrappedException) {
             WrappedException wrapped=(WrappedException)T;
             Object[] wrappedInfo=wrapped.getExtraInfo();
             if(wrappedInfo!=null && wrappedInfo.length>0) {
-                for(int c=0;c<(indent+4);c++) out.print(' ');
-                out.println("Extra Information");
+                for(int c=0;c<(indent+4);c++) append(' ', out);
+                appendln("Extra Information", out);
                 for(int c=0;c<wrappedInfo.length;c++) {
-                    for(int d=0;d<(indent+8);d++) out.print(' ');
-                    out.println(wrappedInfo[c]);
+                    for(int d=0;d<(indent+8);d++) append(' ', out);
+                    appendln(wrappedInfo[c], out);
                 }
             }
         } else if(T instanceof AccessControlException) {
             try {
                 AccessControlException ace = (AccessControlException)T;
                 Permission permission = ace.getPermission();
-                for(int c=0;c<(indent+4);c++) out.print(' ');
-                out.print("Permission........: ");
-                out.println(permission);
+                for(int c=0;c<(indent+4);c++) append(' ', out);
+                append("Permission........: ", out);
+                appendln(permission, out);
                 if(permission!=null) {
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.print("Permission Class..: ");
-                    out.println(permission.getClass().getName());
+                    for(int c=0;c<(indent+4);c++) append(' ', out);
+                    append("Permission Class..: ", out);
+                    appendln(permission.getClass().getName(), out);
 
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.print("Permission Name...: ");
-                    out.println(permission.getName());
+                    for(int c=0;c<(indent+4);c++) append(' ', out);
+                    append("Permission Name...: ", out);
+                    appendln(permission.getName(), out);
 
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.print("Permission Actions: ");
-                    out.println(permission.getActions());
+                    for(int c=0;c<(indent+4);c++) append(' ', out);
+                    append("Permission Actions: ", out);
+                    appendln(permission.getActions(), out);
                 }
             } catch(SecurityException err) {
-                out.print("Permission........: Unable to get permission details: "+err.toString());
+                appendln("Permission........: Unable to get permission details: ", out); append(err.toString(), out);
             }
         }
-        for(int c=0;c<(indent+4);c++) out.print(' ');
-        out.println("Stack Trace");
+        for(int c=0;c<(indent+4);c++) append(' ', out);
+        appendln("Stack Trace", out);
         StackTraceElement[] stack=T.getStackTrace();
         for(int c=0;c<stack.length;c++) {
-            for(int d=0;d<(indent+8);d++) out.print(' ');
-            out.print("at ");
-            out.println(stack[c].toString());
+            for(int d=0;d<(indent+8);d++) append(' ', out);
+            append("at ", out);
+            appendln(stack[c].toString(), out);
         }
         Throwable cause=T.getCause();
         if(cause!=null) {
-            for(int c=0;c<(indent+4);c++) out.print(' ');
-            out.println("Caused By");
+            for(int c=0;c<(indent+4);c++) append(' ', out);
+            appendln("Caused By", out);
             printThrowables(cause, out, indent+8);
         }
         // Uses reflection avoid binding to JspException directly.
@@ -170,8 +226,8 @@ public class ErrorPrinter {
                 Method method=clazz.getMethod("getRootCause", new Class[0]);
                 Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);
                 if(rootCause!=null) {
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.println("Caused By");
+                    for(int c=0;c<(indent+4);c++) append(' ', out);
+                    appendln("Caused By", out);
                     printThrowables(rootCause, out, indent+8);
                 }
             }
@@ -190,209 +246,8 @@ public class ErrorPrinter {
                 Method method=clazz.getMethod("getRootCause", new Class[0]);
                 Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);
                 if(rootCause!=null) {
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.println("Caused By");
-                    printThrowables(rootCause, out, indent+8);
-                }
-            }
-        } catch(NoSuchMethodException err) {
-            // OK, future versions of ServletException might not have getRootCause
-        } catch(IllegalAccessException err) {
-            // OK, future versions of ServletException could make it private
-        } catch(InvocationTargetException err) {
-            // Ignored because we are dealing with one exception at a time
-            // Afterall, this is the exception handling code
-        }
-        if(T instanceof SQLException) {
-            if(T instanceof SQLWarning) {
-                SQLWarning nextSQL=((SQLWarning)T).getNextWarning();
-                if(nextSQL!=null) printThrowables(nextSQL, out, indent);
-            } else {
-                SQLException nextSQL=((SQLException)T).getNextException();
-                if(nextSQL!=null) printThrowables(nextSQL, out, indent);
-            }
-        }
-    }
-    
-    private static void printMessage(PrintStream out, int indent, String label, String message) {
-        for(int c=0;c<indent;c++) out.print(' ');
-        out.print(label);
-        if(message==null) out.println("null");
-        else {
-            message=message.trim();
-            int messageLen=message.length();
-            for(int c=0;c<messageLen;c++) {
-                char ch=message.charAt(c);
-                if(ch=='\n') {
-                    int lineIndent=indent+label.length();
-                    out.println();
-                    for(int d=0;d<lineIndent;d++) out.print(' ');
-                } else if(ch!='\r') out.print(ch);
-            }
-            out.println();
-        }
-    }
-
-    public static void printStackTraces(Throwable T, PrintWriter out) {
-        printStackTraces(T, out, null);
-    }
-
-    public static void printStackTraces(Throwable T, PrintWriter out, Object[] extraInfo) {
-        synchronized(out) {
-            out.println();
-            out.println("**************************");
-            out.println("* BEGIN EXCEPTION REPORT *");
-            out.println("**************************");
-            out.println();
-            out.println("    Time ");
-            out.print("        ");
-            try {
-                out.println(new java.util.Date(System.currentTimeMillis()).toString());
-            } catch(Exception err) {
-                out.println("Unable to display date: "+err.toString());
-            }
-
-            // Extra info
-            if(extraInfo!=null && extraInfo.length>0) {
-                out.println("    Extra Information");
-                for(int c=0;c<extraInfo.length;c++) {
-                    out.print("        ");
-                    out.println(extraInfo[c]);
-                }
-            }
-
-            // Threads
-            out.println("    Threading");
-            out.println("        Thread");
-            out.print("            Name........: ");
-            Thread thread=Thread.currentThread();
-            out.println(thread.getName());
-            out.print("            Class.......: ");
-            out.println(thread.getClass().getName());
-            out.print("            Priority....: ");
-            out.println(thread.getPriority());
-            try {
-                ThreadGroup TG=thread.getThreadGroup();
-                while(TG!=null) {
-                    String name=TG.getName();
-                    String classname=TG.getClass().getName();
-                    int maxPriority=TG.getMaxPriority();
-                    out.println("        ThreadGroup");
-                    out.print("            Name........: "); out.println(name);
-                    out.print("            Class.......: "); out.println(classname);
-                    out.print("            Max Priority: "); out.println(maxPriority);
-                    TG=TG.getParent();
-                }
-            } catch(SecurityException err) {
-                out.println("Unable to print all Thread Groups: "+err.toString());
-            }
-
-            out.println("    Exceptions");
-            printThrowables(T, out, 8);
-
-            // End Report
-            out.println();
-            out.println("**************************");
-            out.println("*  END EXCEPTION REPORT  *");
-            out.println("**************************");
-
-            // Flush output
-            out.flush();
-        }
-    }
-
-    private static void printThrowables(Throwable T, PrintWriter out, int indent) {
-        for(int c=0;c<indent;c++) out.print(' ');
-        out.println(T.getClass().getName());
-        printMessage(out, indent+4, "Message...........: ", T.getMessage());
-        printMessage(out, indent+4, "Localized Message.: ", T.getLocalizedMessage());
-        if(T instanceof SQLException) {
-            SQLException sql=(SQLException)T;
-            if(sql instanceof WrappedSQLException) printMessage(out, indent+4, "SQL Statement.....: ", ((WrappedSQLException)sql).getSqlString());
-            for(int c=0;c<(indent+4);c++) out.print(' ');
-            out.print("SQL Error Code....: ");
-            out.println(sql.getErrorCode());
-            for(int c=0;c<(indent+4);c++) out.print(' ');
-            out.print("SQL State.........: ");
-            out.println(sql.getSQLState());
-        } else if(T instanceof WrappedException) {
-            WrappedException wrapped=(WrappedException)T;
-            Object[] wrappedInfo=wrapped.getExtraInfo();
-            if(wrappedInfo!=null && wrappedInfo.length>0) {
-                for(int c=0;c<(indent+4);c++) out.print(' ');
-                out.println("Extra Information");
-                for(int c=0;c<wrappedInfo.length;c++) {
-                    for(int d=0;d<(indent+8);d++) out.print(' ');
-                    out.println(wrappedInfo[c]);
-                }
-            }
-        } else if(T instanceof AccessControlException) {
-            try {
-                AccessControlException ace = (AccessControlException)T;
-                Permission permission = ace.getPermission();
-                for(int c=0;c<(indent+4);c++) out.print(' ');
-                out.print("Permission........: ");
-                out.println(permission);
-                if(permission!=null) {
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.print("Permission Class..: ");
-                    out.println(permission.getClass().getName());
-
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.print("Permission Name...: ");
-                    out.println(permission.getName());
-
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.print("Permission Actions: ");
-                    out.println(permission.getActions());
-                }
-            } catch(SecurityException err) {
-                out.print("Permission........: Unable to get permission details: "+err.toString());
-            }
-        }
-        for(int c=0;c<(indent+4);c++) out.print(' ');
-        out.println("Stack Trace");
-        StackTraceElement[] stack=T.getStackTrace();
-        for(int c=0;c<stack.length;c++) {
-            for(int d=0;d<(indent+8);d++) out.print(' ');
-            out.print("at ");
-            out.println(stack[c].toString());
-        }
-        Throwable cause=T.getCause();
-        if(cause!=null) {
-            for(int c=0;c<(indent+4);c++) out.print(' ');
-            out.println("Caused By");
-            printThrowables(cause, out, indent+8);
-        }
-        // Uses reflection avoid binding to JspException directly.
-        try {
-            Class<?> clazz=T.getClass();
-            if(isSubclass(clazz, "javax.servlet.jsp.JspException")) {
-                Method method=clazz.getMethod("getRootCause", new Class[0]);
-                Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);
-                if(rootCause!=null) {
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.println("Caused By");
-                    printThrowables(rootCause, out, indent+8);
-                }
-            }
-        } catch(NoSuchMethodException err) {
-            // OK, future versions of JspException might not have getRootCause
-        } catch(IllegalAccessException err) {
-            // OK, future versions of JspException could make it private
-        } catch(InvocationTargetException err) {
-            // Ignored because we are dealing with one exception at a time
-            // Afterall, this is the exception handling code
-        }
-        // Uses reflection avoid binding to ServletException directly.
-        try {
-            Class<?> clazz=T.getClass();
-            if(isSubclass(clazz, "javax.servlet.ServletException")) {
-                Method method=clazz.getMethod("getRootCause", new Class[0]);
-                Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);
-                if(rootCause!=null) {
-                    for(int c=0;c<(indent+4);c++) out.print(' ');
-                    out.println("Caused By");
+                    for(int c=0;c<(indent+4);c++) append(' ', out);
+                    appendln("Caused By", out);
                     printThrowables(rootCause, out, indent+8);
                 }
             }
@@ -415,22 +270,23 @@ public class ErrorPrinter {
         }
     }
 
-    private static void printMessage(PrintWriter out, int indent, String label, String message) {
-        for(int c=0;c<indent;c++) out.print(' ');
-        out.print(label);
-        if(message==null) out.println("null");
-        else {
+    private static void printMessage(Appendable out, int indent, String label, String message) {
+        for(int c=0;c<indent;c++) append(' ', out);
+        append(label, out);
+        if(message==null) {
+            appendln("null", out);
+        } else {
             message=message.trim();
             int messageLen=message.length();
             for(int c=0;c<messageLen;c++) {
                 char ch=message.charAt(c);
                 if(ch=='\n') {
                     int lineIndent=indent+label.length();
-                    out.println();
-                    for(int d=0;d<lineIndent;d++) out.print(' ');
-                } else if(ch!='\r') out.print(ch);
+                    appendln(out);
+                    for(int d=0;d<lineIndent;d++) append(' ', out);
+                } else if(ch!='\r') append(ch, out);
             }
-            out.println();
+            appendln(out);
         }
     }
     
@@ -451,11 +307,8 @@ public class ErrorPrinter {
      * as efficient as directly writing the report due to the extra buffering.
      */
     public static String getStackTraces(Throwable T, Object[] extraInfo) {
-        CharArrayWriter cout = new CharArrayWriter();
-        PrintWriter pw = new PrintWriter(cout);
-        printStackTraces(T, pw, extraInfo);
-        pw.flush();
-        pw.close();
-        return cout.toString();
+        StringBuilder out = new StringBuilder();
+        printStackTraces(T, out, extraInfo);
+        return out.toString();
     }
 }

@@ -580,32 +580,45 @@ final public class ChainWriter implements Appendable {
      * Because this needs to modify the DOM it can lead to poor performance or large data sets.
      * To provide more performance options, the JavaScript is written to scriptOut.  This could
      * then be buffered into one long script to execute at once or using body.onload.
+     *
+     * The provided sequence should start at one for any given HTML page because parts of the
+     * script will only be written when the sequence is equal to one.
      */
     public static void writeDateJavaScript(long date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
         if(date==-1) out.append("&#160;");
         else {
             String dateString = SQLUtility.getDate(date);
-            String id = Long.toString(sequence.getNextSequenceValue());
+            long id = sequence.getNextSequenceValue();
+            String idString = Long.toString(id);
             // Write the element
             out.append("<span id=\"chainWriterDate");
-            out.append(id);
+            out.append(idString);
             out.append("\">");
             EncodingUtils.encodeHtml(dateString, out);
             out.append("</span>");
-            // Write the script, which may be written later for performance
-            scriptOut.append("  if(document.getElementById) {\n"
-                    + "    var chainWriterDate=new Date("); scriptOut.append(Long.toString(date)); scriptOut.append(");\n"
-                    + "    var chainWriterResult=chainWriterDate.getFullYear() + \"-\";\n"
-                    + "    var chainWriterMonth=chainWriterDate.getMonth()+1;\n"
-                    + "    if(chainWriterMonth<10) chainWriterResult+=\"0\";\n"
-                    + "    chainWriterResult+=chainWriterMonth+\"-\";\n"
-                    + "    var chainWriterDay=chainWriterDate.getDate();\n"
-                    + "    if(chainWriterDay<10) chainWriterResult+=\"0\";\n"
-                    + "    chainWriterResult+=chainWriterDay;\n"
-                    + "    if(chainWriterResult!=\""); EncodingUtils.encodeHtml(dateString, scriptOut); scriptOut.append("\") {\n"
-                    + "      document.getElementById(\"chainWriterDate"); scriptOut.append(id); scriptOut.append("\").firstChild.nodeValue=chainWriterResult;\n"
-                    + "    }\n"
-                    + "  }\n");
+            // Write the shared script only on first sequence
+            if(id==1) {
+                scriptOut.append("  function chainWriterUpdateDate(id, millis, serverValue) {\n"
+                               + "    if(document.getElementById) {\n"
+                               + "      var date=new Date(millis);\n"
+                               + "      var clientValue=date.getFullYear() + \"-\";\n"
+                               + "      var month=date.getMonth()+1;\n"
+                               + "      if(month<10) clientValue+=\"0\";\n"
+                               + "      clientValue+=month+\"-\";\n"
+                               + "      var day=date.getDate();\n"
+                               + "      if(day<10) clientValue+=\"0\";\n"
+                               + "      clientValue+=day;\n"
+                               + "      if(clientValue!=serverValue) document.getElementById(\"chainWriterDate\"+id).firstChild.nodeValue=clientValue;\n"
+                               + "    }\n"
+                               + "  }\n");
+            }
+            scriptOut.append("  chainWriterUpdateDate(");
+            scriptOut.append(idString);
+            scriptOut.append(", ");
+            scriptOut.append(Long.toString(date));
+            scriptOut.append(", \"");
+            EncodingUtils.encodeHtml(dateString, scriptOut);
+            scriptOut.append("\");\n");
         }
     }
 
@@ -637,42 +650,58 @@ final public class ChainWriter implements Appendable {
     /**
      * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
+     *
+     * Because this needs to modify the DOM it can lead to poor performance or large data sets.
+     * To provide more performance options, the JavaScript is written to scriptOut.  This could
+     * then be buffered into one long script to execute at once or using body.onload.
+     *
+     * The provided sequence should start at one for any given HTML page because parts of the
+     * script will only be written when the sequence is equal to one.
      */
     public static void writeDateTimeJavaScript(long date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
-        // TODO: Use scriptOut
-
         if(date==-1) out.append("&#160;");
         else {
-            out.append("<script type='text/javascript'>\n"
-                    + "  // <![CDATA[\n"
-                    + "  var date=new Date(");
-            out.append(Long.toString(date));
-            out.append(");\n"
-                    + "  document.write(date.getFullYear());\n"
-                    + "  document.write('-');\n"
-                    + "  var month=date.getMonth()+1;\n"
-                    + "  if(month<10) document.write('0');\n"
-                    + "  document.write(month);\n"
-                    + "  document.write('-');\n"
-                    + "  var day=date.getDate();\n"
-                    + "  if(day<10) document.write('0');\n"
-                    + "  document.write(day);\n"
-                    + "  document.write(' ');\n"
-                    + "  var hour=date.getHours();\n"
-                    + "  if(hour<10) document.write('0');\n"
-                    + "  document.write(hour);\n"
-                    + "  document.write(':');\n"
-                    + "  var minute=date.getMinutes();\n"
-                    + "  if(minute<10) document.write('0');\n"
-                    + "  document.write(minute);\n"
-                    + "  document.write(':');\n"
-                    + "  var second=date.getSeconds();\n"
-                    + "  if(second<10) document.write('0');\n"
-                    + "  document.write(second);\n"
-                    + "  // ]]>\n"
-                    + "</script><noscript>");
-            EncodingUtils.encodeHtml(SQLUtility.getDateTime(date), out);
-            out.append("</noscript>");
+            String dateTimeString = SQLUtility.getDateTime(date);
+            long id = sequence.getNextSequenceValue();
+            String idString = Long.toString(id);
+            // Write the element
+            out.append("<span id=\"chainWriterDateTime");
+            out.append(idString);
+            out.append("\">");
+            EncodingUtils.encodeHtml(dateTimeString, out);
+            out.append("</span>");
+            // Write the shared script only on first sequence
+            if(id==1) {
+                scriptOut.append("  function chainWriterUpdateDateTime(id, millis, serverValue) {\n"
+                               + "    if(document.getElementById) {\n"
+                               + "      var date=new Date(millis);\n"
+                               + "      var clientValue=date.getFullYear() + \"-\";\n"
+                               + "      var month=date.getMonth()+1;\n"
+                               + "      if(month<10) clientValue+=\"0\";\n"
+                               + "      clientValue+=month+\"-\";\n"
+                               + "      var day=date.getDate();\n"
+                               + "      if(day<10) clientValue+=\"0\";\n"
+                               + "      clientValue+=day+\" \";\n"
+                               + "      var hour=date.getHours();\n"
+                               + "      if(hour<10) clientValue+=\"0\";\n"
+                               + "      clientValue+=hour+\":\";\n"
+                               + "      var minute=date.getMinutes();\n"
+                               + "      if(minute<10) clientValue+=\"0\";\n"
+                               + "      clientValue+=minute+\":\";\n"
+                               + "      var second=date.getSeconds();\n"
+                               + "      if(second<10) clientValue+=\"0\";\n"
+                               + "      clientValue+=second;\n"
+                               + "      if(clientValue!=serverValue) document.getElementById(\"chainWriterDateTime\"+id).firstChild.nodeValue=clientValue;\n"
+                               + "    }\n"
+                               + "  }\n");
+            }
+            scriptOut.append("  chainWriterUpdateDateTime(");
+            scriptOut.append(idString);
+            scriptOut.append(", ");
+            scriptOut.append(Long.toString(date));
+            scriptOut.append(", \"");
+            EncodingUtils.encodeHtml(dateTimeString, scriptOut);
+            scriptOut.append("\");\n");
         }
     }
 
@@ -703,31 +732,51 @@ final public class ChainWriter implements Appendable {
     /**
      * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;#160;</code>
      * if the date is <code>-1</code>.
+     *
+     * Because this needs to modify the DOM it can lead to poor performance or large data sets.
+     * To provide more performance options, the JavaScript is written to scriptOut.  This could
+     * then be buffered into one long script to execute at once or using body.onload.
+     *
+     * The provided sequence should start at one for any given HTML page because parts of the
+     * script will only be written when the sequence is equal to one.
      */
     public static void writeTimeJavaScript(long date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
-        // TODO: use scriptOut
         if(date==-1) out.append("&#160;");
         else {
-            out.append("<script type='text/javascript'>\n"
-                    + "  // <![CDATA[\n"
-                    + "  var date=new Date(");
-            out.append(Long.toString(date));
-            out.append(");\n"
-                    + "  var hour=date.getHours();\n"
-                    + "  if(hour<10) document.write('0');\n"
-                    + "  document.write(hour);\n"
-                    + "  document.write(':');\n"
-                    + "  var minute=date.getMinutes();\n"
-                    + "  if(minute<10) document.write('0');\n"
-                    + "  document.write(minute);\n"
-                    + "  document.write(':');\n"
-                    + "  var second=date.getSeconds();\n"
-                    + "  if(second<10) document.write('0');\n"
-                    + "  document.write(second);\n"
-                    + "  // ]]>\n"
-                    + "</script><noscript>");
-            EncodingUtils.encodeHtml(SQLUtility.getTime(date), out);
-            out.append("</noscript>");
+            String timeString = SQLUtility.getTime(date);
+            long id = sequence.getNextSequenceValue();
+            String idString = Long.toString(id);
+            // Write the element
+            out.append("<span id=\"chainWriterTime");
+            out.append(idString);
+            out.append("\">");
+            EncodingUtils.encodeHtml(timeString, out);
+            out.append("</span>");
+            // Write the shared script only on first sequence
+            if(id==1) {
+                scriptOut.append("  function chainWriterUpdateTime(id, millis, serverValue) {\n"
+                               + "    if(document.getElementById) {\n"
+                               + "      var date=new Date(millis);\n"
+                               + "      var hour=date.getHours();\n"
+                               + "      var clientValue=(hour<10)?\"0\":\"\";\n"
+                               + "      clientValue+=hour+\":\";\n"
+                               + "      var minute=date.getMinutes();\n"
+                               + "      if(minute<10) clientValue+=\"0\";\n"
+                               + "      clientValue+=minute+\":\";\n"
+                               + "      var second=date.getSeconds();\n"
+                               + "      if(second<10) clientValue+=\"0\";\n"
+                               + "      clientValue+=second;\n"
+                               + "      if(clientValue!=serverValue) document.getElementById(\"chainWriterTime\"+id).firstChild.nodeValue=clientValue;\n"
+                               + "    }\n"
+                               + "  }\n");
+            }
+            scriptOut.append("  chainWriterUpdateTime(");
+            scriptOut.append(idString);
+            scriptOut.append(", ");
+            scriptOut.append(Long.toString(date));
+            scriptOut.append(", \"");
+            EncodingUtils.encodeHtml(timeString, scriptOut);
+            scriptOut.append("\");\n");
         }
     }
 
