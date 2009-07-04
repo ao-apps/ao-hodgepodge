@@ -17,16 +17,14 @@ import java.nio.CharBuffer;
  */
 public class JavaScriptInXhtmlEncoder extends MediaEncoder {
 
-    private static final String EOL = System.getProperty("line.separator");
-
     protected JavaScriptInXhtmlEncoder(Writer out) {
         super(out);
     }
 
     @Override
     public void writePrefix() throws IOException {
+        System.out.println("<script lang=\"text/javascript\">");
         out.write("<script lang=\"text/javascript\">");
-        out.write(EOL);
     }
 
     /**
@@ -34,6 +32,7 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
      */
     @Override
     public void write(int c) throws IOException {
+        System.out.println(c);
         EncodingUtils.encodeXml((char)c, out);
     }
 
@@ -42,6 +41,7 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
      */
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
+        System.out.println(new String(cbuf, off, len));
         EncodingUtils.encodeXml(CharBuffer.wrap(cbuf, off, len), out);
     }
 
@@ -50,12 +50,13 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
      */
     @Override
     public void write(String str, int off, int len) throws IOException {
+        System.out.println(str.substring(off, off+len));
         EncodingUtils.encodeXml(str, off, off+len, out);
     }
 
     @Override
     public void writeSuffix() throws IOException {
+        System.out.println("</script>");
         out.write("</script>");
-        out.write(EOL);
     }
 }

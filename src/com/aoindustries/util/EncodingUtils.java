@@ -45,9 +45,8 @@ public final class EncodingUtils {
      */
     public static void encodeXml(CharSequence S, int start, int end, Appendable out) throws IOException {
         if (S != null) {
-            int len = S.length();
             int toPrint = 0;
-            for (int c = 0; c < len; c++) {
+            for (int c = start; c < end; c++) {
                 char ch = S.charAt(c);
                 switch(ch) {
                     case '<':
@@ -83,9 +82,7 @@ public final class EncodingUtils {
                         }
                 }
             }
-            if(toPrint>0) {
-                out.append(S, len-toPrint, len);
-            }
+            if(toPrint>0) out.append(S, end-toPrint, end);
         }
     }
 
