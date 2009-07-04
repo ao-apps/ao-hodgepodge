@@ -16,17 +16,18 @@ import java.util.Locale;
 public enum MediaType {
 
     /**
-     * Arbitrary data (<code>application/octet-stream</code>).  Please note
-     * that some conversions of this will possibly lose data, such as being
-     * contained by XML.  In this case control characters except \t, \r, and \n
-     * will be discarded.
+     * Arbitrary 8-bit binary data (<code>application/octet-stream</code>).
+     * Please note that some conversions of this will possibly lose data, such
+     * as being contained by XML.  In this case control characters except \t,
+     * \r, and \n will be discarded.  TODO: Consider what to do about character
+     * encodings before enabling this.
      */
-    DATA("application/octet-stream"),
+    // DATA("application/octet-stream"),
 
     /**
      * An HTML document (<code>text/html</code>).
      */
-    HTML("text/html"),
+    // HTML("text/html"),
 
     /**
      * A JavaScript script (<code>text/javascript</code>).
@@ -34,13 +35,11 @@ public enum MediaType {
     JAVASCRIPT("text/javascript"),
 
     /**
-     * A plaintext document (<code>text/plain</code>).  Please note that this
-     * represents an entire document, to embed just a little bit of text without
-     * any formatting, use <code>DATA</code>.
+     * Any plaintext document comprised of unicode characters (<code>text/plain</code>).
      *
      * @see #DATA
      */
-    PLAINTEXT("text/plain"),
+    TEXT("text/plain"),
 
     /**
      * An XHTML 1.0 document (<code>application/xhtml+xml</code>).

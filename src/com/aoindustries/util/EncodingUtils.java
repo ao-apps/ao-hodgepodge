@@ -426,44 +426,104 @@ public final class EncodingUtils {
     }
     // </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="JavaScript string">
     /**
-     * Escapes the specified <code>CharSequence</code> so that it can be put in a JavaScript string in
-     * a XML CDATA area.  The string should be in double quotes, the quotes are not provided by
+     * @see #encodeJavaScriptString(java.lang.CharSequence, int, int, java.lang.Appendable)
+     * @param S
+     * @param out
+     * @throws java.io.IOException
+     */
+    public static void encodeJavaScriptString(CharSequence S, Appendable out) throws IOException {
+        if(S!=null) encodeJavaScriptString(S, 0, S.length(), out);
+    }
+
+    /**
+     * Escapes the specified <code>CharSequence</code> so that it can be put in a JavaScript string.
+     * The string may be surrounded by either double or single quotes, the quotes are not provided by
      * this call.
      *
      * Writes to the provided <code>Appendable</code>.
      *
-     * @param S the string to be escaped.
+     * @param S the string to be escaped.  If null, will not output anything.
      */
-    // TODO: Review
-    public static void encodeJavaScriptString(CharSequence S, Appendable out) throws IOException {
+    public static void encodeJavaScriptString(CharSequence S, int start, int end, Appendable out) throws IOException {
         if (S != null) {
-            int len = S.length();
-            for (int c = 0; c < len; c++) {
+            int toPrint = 0;
+            for (int c = start; c < end; c++) {
                 char ch = S.charAt(c);
-                if (ch == '"') out.append("\\\"");
-                else if (ch == '\'') out.append("\\'");
-                else if (ch == '\\') out.append("\\\\");
-                else if (ch == '\b') out.append("\\b");
-                else if (ch == '\f') out.append("\\f");
-                else if (ch == '\r') out.append("\\r");
-                else if (ch == '\n') out.append("\\n");
-                else if (ch == '\t') out.append("\\t");
-                // Also escape any < > & and ] to avoid early end of XHTML CDATA sections
-                // and to not allow data to interfere with the XML parser.
-                else if (ch == '<') out.append("\\u003c");
-                else if (ch == '>') out.append("\\u003e");
-                else if (ch == '&') out.append("\\u0026");
-                else if (ch == ']') out.append("\\u005d");
-                else if (ch<' ') {
-                    out.append("\\u00");
-                    int chInt = ch;
-                    out.append(getHex(chInt>>>4));
-                    out.append(getHex(chInt));
-                } else {
-                    out.append(ch);
+                switch(ch) {
+                    case '"':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\\"");
+                        break;
+                    case '\'':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\'");
+                        break;
+                    case '\\':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\\\");
+                        break;
+                    case '\b':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\b");
+                        break;
+                    case '\f':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\f");
+                        break;
+                    case '\r':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\r");
+                        break;
+                    case '\n':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\n");
+                        break;
+                    case '\t':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\t");
+                        break;
+                    default:
+                        if(ch<' ') {
+                            if(toPrint>0) {
+                                out.append(S, c-toPrint, c);
+                                toPrint=0;
+                            }
+                            out.append("\\u00");
+                            int chInt = ch;
+                            out.append(getHex(chInt>>>4));
+                            out.append(getHex(chInt));
+                        } else {
+                            toPrint++;
+                        }
                 }
             }
+            if(toPrint>0) out.append(S, end-toPrint, end);
         }
     }
 
@@ -482,36 +542,36 @@ public final class EncodingUtils {
     }
 
     /**
-     * Escapes the specified <code>CharSequence</code> so that it can be put in a JavaScript string in
-     * an HTML attribute.  The string should be in JavaScript quotes, the quotes
-     * are not provided by this call.
-     *
-     * Writes to the provided <code>Appendable</code>.
-     *
-     * @param S the string to be escaped.
+     * @see #encodeJavaScriptString(CharSequence, Appendable)
      */
-    // TODO: Review - combine with encodeJavaScriptString without in XML attribute?
-    public static void encodeJavaScriptStringInXmlAttribute(CharSequence S, Appendable out) throws IOException {
-        if (S != null) {
-            int len = S.length();
-            for (int c = 0; c < len; c++) {
-                char ch = S.charAt(c);
-                if (ch == '"') out.append("\\&quot;");
-                else if (ch == '\'') out.append("\\&#39;");
-                else if (ch == '\\') out.append("\\\\");
-                else if (ch == '\b') out.append("\\b");
-                else if (ch == '\f') out.append("\\f");
-                else if (ch == '\r') out.append("\\r");
-                else if (ch == '\n') out.append("\\n");
-                else if (ch == '\t') out.append("\\t");
-                else if (ch == ' ') out.append("\\u0020");
-                // Also escape any < > & and ] to avoid early end of XHTML CDATA sections
-                // and to not allow data to interfere with the XML parser.
-                else if (ch == '<') out.append("\\u003c");
-                else if (ch == '>') out.append("\\u003e");
-                else if (ch == '&') out.append("\\u0026");
-                else if (ch == ']') out.append("\\u005d");
-                else if (ch<' ') {
+    public static void encodeJavaScriptString(char ch, Appendable out) throws IOException {
+        switch(ch) {
+            case '"':
+                out.append("\\\"");
+                break;
+            case '\'':
+                out.append("\\'");
+                break;
+            case '\\':
+                out.append("\\\\");
+                break;
+            case '\b':
+                out.append("\\b");
+                break;
+            case '\f':
+                out.append("\\f");
+                break;
+            case '\r':
+                out.append("\\r");
+                break;
+            case '\n':
+                out.append("\\n");
+                break;
+            case '\t':
+                out.append("\\t");
+                break;
+            default:
+                if(ch<' ') {
                     out.append("\\u00");
                     int chInt = ch;
                     out.append(getHex(chInt>>>4));
@@ -519,21 +579,145 @@ public final class EncodingUtils {
                 } else {
                     out.append(ch);
                 }
+        }
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="JavaScript in XML (body, CDATA, or attribute)">
+    public static void encodeJavaScriptStringInXml(CharSequence S, Appendable out) throws IOException {
+        if(S!=null) encodeJavaScriptStringInXml(S, 0, S.length(), out);
+    }
+
+    /**
+     * Escapes the specified <code>CharSequence</code> so that it can be put in a JavaScript string in
+     * a XML (body, CDATA, or attribute).  The string should be in double quotes, the quotes are not provided by
+     * this call.  The quotes will need to be escaped when in an XML attribute.
+     *
+     * Writes to the provided <code>Appendable</code>.
+     *
+     * @param S the string to be escaped.
+     */
+    public static void encodeJavaScriptStringInXml(CharSequence S, int start, int end, Appendable out) throws IOException {
+        if (S != null) {
+            int toPrint = 0;
+            for (int c = start; c < end; c++) {
+                char ch = S.charAt(c);
+                switch(ch) {
+                    case '"':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\u0022");
+                        break;
+                    case '\'':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\u0027");
+                        break;
+                    case '\\':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\u005c");
+                        break;
+                    case '\b':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\b");
+                        break;
+                    case '\f':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\f");
+                        break;
+                    case '\r':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\r");
+                        break;
+                    case '\n':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\n");
+                        break;
+                    case '\t':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\t");
+                        break;
+                    case '<':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\u003c");
+                        break;
+                    case '>':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\u003e");
+                        break;
+                    case '&':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\u0026");
+                        break;
+                    case ']':
+                        if(toPrint>0) {
+                            out.append(S, c-toPrint, c);
+                            toPrint=0;
+                        }
+                        out.append("\\u005d");
+                        break;
+                    default:
+                        if(ch<' ') {
+                            if(toPrint>0) {
+                                out.append(S, c-toPrint, c);
+                                toPrint=0;
+                            }
+                            out.append("\\u00");
+                            int chInt = ch;
+                            out.append(getHex(chInt>>>4));
+                            out.append(getHex(chInt));
+                        } else {
+                            toPrint++;
+                        }
+                }
             }
+            if(toPrint>0) out.append(S, end-toPrint, end);
         }
     }
 
     /**
-     * @see #encodeJavaScriptStringInXmlAttribute(CharSequence, Appendable)
+     * @see #encodeJavaScriptStringInXml(CharSequence, Appendable)
      *
      * @param S the string to be escaped.
      *
-     * @return if S is null then null otherwise value escaped to be a JavaScript string in a XML attribute.
+     * @return if S is null then null otherwise value escaped
      */
-    public static String encodeJavaScriptStringInXmlAttribute(CharSequence S) throws IOException {
+    public static String encodeJavaScriptStringInXml(CharSequence S) throws IOException {
         if(S==null) return null;
         StringBuilder result = new StringBuilder(S.length());
-        encodeJavaScriptStringInXmlAttribute(S, result);
+        encodeJavaScriptStringInXml(S, result);
         return result.toString();
     }
+    // </editor-fold>
 }

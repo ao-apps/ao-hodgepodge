@@ -475,10 +475,10 @@ final public class ChainWriter implements Appendable {
     }
 
     /**
-     * @see EncodingUtils#encodeJavaScriptStringInXmlAttribute(java.lang.String, Appendable)
+     * @see EncodingUtils#encodeJavaScriptStringInXml(java.lang.String, Appendable)
      */
-    public ChainWriter encodeJavaScriptStringInXmlAttribute(String S) throws IOException {
-        EncodingUtils.encodeJavaScriptStringInXmlAttribute(S, out);
+    public ChainWriter encodeJavaScriptStringInXml(String S) throws IOException {
+        EncodingUtils.encodeJavaScriptStringInXml(S, out);
         return this;
     }
 
@@ -552,7 +552,7 @@ final public class ChainWriter implements Appendable {
                 + "  // <![CDATA[\n"
                 + "  var img=new Image();\n"
                 + "  img.src='");
-        EncodingUtils.encodeJavaScriptString(url, out);
+        EncodingUtils.encodeJavaScriptStringInXml(url, out);
         out.append("';\n"
                 + "  // ]]>\n"
                 + "</script>");
