@@ -1,0 +1,83 @@
+package com.aoindustries.media;
+
+/*
+ * Copyright 2009 by AO Industries, Inc.,
+ * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
+ * All rights reserved.
+ */
+import java.io.FilterWriter;
+import java.io.Writer;
+import java.util.Locale;
+
+/**
+ * Encodes media to allow it to be contained in a different type of media.
+ * For example, one may have plaintext inside of HTML, or arbitrary data inside
+ * a JavaScript String inside an onclick attribute of an area tag in a XHTML
+ * document.
+ *
+ * @author  AO Industries, Inc.
+ */
+abstract public class MediaEncoder extends FilterWriter {
+
+    /**
+     * Gets the media encoder for the requested types.
+     *
+     * @return the converter or <code>null</code> if no encoding is necessary
+     *
+     * @exception MediaEncoderException when unable to encode the content into the container
+     *                                   either because it is impossible or not yet implemented.
+     */
+    public static MediaEncoder getMediaEncoder(Locale userLocale, MediaType contentType, MediaType containerType, Writer out) throws MediaException {
+        switch(contentType) {
+            case DATA:
+                switch(containerType) {
+                    case DATA: return null; // No conversion necessary
+                    case HTML: return new DataInXhtmlEncoder(out);
+                    case HTML_PRE: return new DataInXmlEncoder(out);
+                    case XHTML: return new DataInXhtmlEncoder(out);
+                }
+                break;
+            case HTML:
+                switch(containerType) {
+                    case DATA: return null; // No conversion necessary
+                    case HTML: return null; // No conversion necessary
+                    case HTML_PRE: return new DataInXmlEncoder(out);
+                }
+                break;
+            case HTML_PRE:
+                switch(containerType) {
+                    case DATA: return null; // No conversion necessary
+                    case HTML_PRE: return null; // No conversion necessary
+                }
+                break;
+            case JAVASCRIPT:
+                switch(containerType) {
+                    case DATA: return null; // No conversion necessary
+                    case JAVASCRIPT: return null; // No conversion necessary
+                    case HTML_PRE: return new DataInXmlEncoder(out);
+                }
+                break;
+            case PLAINTEXT:
+                switch(containerType) {
+                    case DATA: return null; // No conversion necessary
+                    case PLAINTEXT: return null; // No conversion necessary
+                    case HTML: return new DataInXhtmlEncoder(out);
+                    case HTML_PRE: return new DataInXmlEncoder(out);
+                    case XHTML: return new DataInXhtmlEncoder(out);
+                }
+                break;
+            case XHTML:
+                switch(containerType) {
+                    case DATA: return null; // No conversion necessary
+                    case HTML_PRE: return new DataInXmlEncoder(out);
+                    case XHTML: return null; // No conversion necessary
+                }
+                break;
+        }
+        throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+    }
+
+    protected MediaEncoder(Writer out) {
+        super(out);
+    }
+}

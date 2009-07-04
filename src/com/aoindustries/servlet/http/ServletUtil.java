@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class ServletUtil {
 
+    private ServletUtil() {
+    }
+
     /**
      * Converts a possibly-relative path to a context-relative absolute path.
      */
