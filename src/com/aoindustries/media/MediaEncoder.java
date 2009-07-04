@@ -6,6 +6,7 @@ package com.aoindustries.media;
  * All rights reserved.
  */
 import java.io.FilterWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.Locale;
 
@@ -33,28 +34,24 @@ abstract public class MediaEncoder extends FilterWriter {
                 switch(containerType) {
                     case DATA: return null; // No conversion necessary
                     case HTML: return new DataInXhtmlEncoder(out);
-                    case HTML_PRE: return new DataInXmlEncoder(out);
                     case XHTML: return new DataInXhtmlEncoder(out);
+                    case XHTML_PRE: return new DataInXmlEncoder(out);
                 }
                 break;
             case HTML:
                 switch(containerType) {
                     case DATA: return null; // No conversion necessary
                     case HTML: return null; // No conversion necessary
-                    case HTML_PRE: return new DataInXmlEncoder(out);
-                }
-                break;
-            case HTML_PRE:
-                switch(containerType) {
-                    case DATA: return null; // No conversion necessary
-                    case HTML_PRE: return null; // No conversion necessary
+                    case XHTML_PRE: return new DataInXmlEncoder(out);
                 }
                 break;
             case JAVASCRIPT:
                 switch(containerType) {
                     case DATA: return null; // No conversion necessary
                     case JAVASCRIPT: return null; // No conversion necessary
-                    case HTML_PRE: return new DataInXmlEncoder(out);
+                    case HTML : return new JavaScriptInXhtmlEncoder(out); // XHTML is allowed to pass directly to HTML
+                    case XHTML : return new JavaScriptInXhtmlEncoder(out);
+                    case XHTML_PRE: return new DataInXmlEncoder(out);
                 }
                 break;
             case PLAINTEXT:
@@ -62,15 +59,24 @@ abstract public class MediaEncoder extends FilterWriter {
                     case DATA: return null; // No conversion necessary
                     case PLAINTEXT: return null; // No conversion necessary
                     case HTML: return new DataInXhtmlEncoder(out);
-                    case HTML_PRE: return new DataInXmlEncoder(out);
                     case XHTML: return new DataInXhtmlEncoder(out);
+                    case XHTML_PRE: return new DataInXmlEncoder(out);
                 }
                 break;
             case XHTML:
                 switch(containerType) {
                     case DATA: return null; // No conversion necessary
-                    case HTML_PRE: return new DataInXmlEncoder(out);
+                    case HTML: return null; // XHTML is allowed to pass directly to HTML
                     case XHTML: return null; // No conversion necessary
+                    case XHTML_PRE: return new DataInXmlEncoder(out);
+                }
+                break;
+            case XHTML_PRE:
+                switch(containerType) {
+                    case DATA: return null; // No conversion necessary
+                    case HTML: return new XhtmlPreInXhtmlEncoder(out);
+                    case XHTML: return new XhtmlPreInXhtmlEncoder(out);
+                    case XHTML_PRE: return null; // No conversion necessary
                 }
                 break;
         }
@@ -79,5 +85,17 @@ abstract public class MediaEncoder extends FilterWriter {
 
     protected MediaEncoder(Writer out) {
         super(out);
+    }
+
+    /**
+     * This is called before any data is written.
+     */
+    public void writePrefix() throws IOException {
+    }
+
+    /**
+     * This is called when no more data will be written.
+     */
+    public void writeSuffix() throws IOException {
     }
 }

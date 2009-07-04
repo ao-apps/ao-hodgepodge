@@ -29,14 +29,6 @@ public enum MediaType {
     HTML("text/html"),
 
     /**
-     * A preformatted element within an HTML document, such as the <code>pre</code>
-     * or <code>textarea</code> tags.  <code>text/html+pre</code>).  This is
-     * a non-standard media type and is only used during internal conversions.  The
-     * final output should not be this type.
-     */
-    HTML_PRE("text/html+pre"),
-
-    /**
      * A JavaScript script (<code>text/javascript</code>).
      */
     JAVASCRIPT("text/javascript"),
@@ -53,7 +45,15 @@ public enum MediaType {
     /**
      * An XHTML 1.0 document (<code>application/xhtml+xml</code>).
      */
-    XHTML("application/xhtml+xml");
+    XHTML("application/xhtml+xml"),
+
+    /**
+     * A preformatted element within a (X)HTML document, such as the <code>pre</code>
+     * or <code>textarea</code> tags. (<code>application/xhtml+xml</code>).  This is
+     * a non-standard media type and is only used during internal conversions.  The
+     * final output should not be this type.
+     */
+    XHTML_PRE("application/xhtml+xml");
 
     private final String mediaType;
 
