@@ -42,17 +42,22 @@ public enum MediaType {
     TEXT("text/plain"),
 
     /**
+     * A URL-encoded, &amp; (not &amp;amp;) separated URL.
+     */
+    URL("text/url"),
+
+    /**
      * An XHTML 1.0 document (<code>application/xhtml+xml</code>).
      */
     XHTML("application/xhtml+xml"),
 
     /**
      * A preformatted element within a (X)HTML document, such as the <code>pre</code>
-     * or <code>textarea</code> tags. (<code>application/xhtml+xml</code>).  This is
+     * or <code>textarea</code> tags. (<code>application/xhtml+xml+pre</code>).  This is
      * a non-standard media type and is only used during internal conversions.  The
      * final output should not be this type.
      */
-    XHTML_PRE("application/xhtml+xml");
+    XHTML_PRE("application/xhtml+xml+pre");
 
     private final String mediaType;
 

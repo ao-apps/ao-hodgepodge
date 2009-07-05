@@ -17,6 +17,8 @@ import java.nio.CharBuffer;
  * This will make the document generally look like its source within
  * the (X)HTML.
  *
+ * TODO: http://www.w3.org/TR/REC-xml/#charsets
+ * 
  * @author  AO Industries, Inc.
  */
 public class DataInXhtmlEncoder extends MediaEncoder {

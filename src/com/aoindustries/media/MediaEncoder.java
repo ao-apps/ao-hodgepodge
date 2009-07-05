@@ -25,7 +25,7 @@ abstract public class MediaEncoder extends FilterWriter {
      *
      * @return the converter or <code>null</code> if no encoding is necessary
      *
-     * @exception MediaEncoderException when unable to encode the content into the container
+     * @exception MediaException when unable to encode the content into the container
      *                                   either because it is impossible or not yet implemented.
      */
     public static MediaEncoder getMediaEncoder(Locale userLocale, MediaType contentType, MediaType containerType, Writer out) throws MediaException {
