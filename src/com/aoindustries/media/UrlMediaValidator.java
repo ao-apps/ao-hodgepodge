@@ -66,6 +66,14 @@ public class UrlMediaValidator extends MediaValidator {
         this.userLocale = userLocale;
     }
 
+    public boolean isValidatingMediaInputType(MediaType inputType) {
+        return inputType==MediaType.URL;
+    }
+
+    public MediaType getValidMediaOutputType() {
+        return MediaType.URL;
+    }
+
     @Override
     public void write(int c) throws IOException {
         checkCharacter(userLocale, c);

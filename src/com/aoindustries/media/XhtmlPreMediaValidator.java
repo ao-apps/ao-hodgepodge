@@ -61,6 +61,14 @@ public class XhtmlPreMediaValidator extends MediaValidator {
         this.userLocale = userLocale;
     }
 
+    public boolean isValidatingMediaInputType(MediaType inputType) {
+        return inputType==MediaType.XHTML_PRE || inputType==MediaType.XHTML;
+    }
+
+    public MediaType getValidMediaOutputType() {
+        return MediaType.XHTML_PRE;
+    }
+
     @Override
     public void write(int c) throws IOException {
         checkCharacter(userLocale, c);

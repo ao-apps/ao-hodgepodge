@@ -11,8 +11,8 @@ import java.util.Locale;
 
 /**
  * Makes sure that all data going through this writer has the correct characters
- * for XML.
- *
+ * for XHTML.
+ * TODO: Rename to XhtmlMediaValidator
  * {@link http://www.w3.org/TR/REC-xml/#charsets}
  *
  * @author  AO Industries, Inc.
@@ -56,6 +56,14 @@ public class XmlMediaValidator extends MediaValidator {
     protected XmlMediaValidator(Writer out, Locale userLocale) {
         super(out);
         this.userLocale = userLocale;
+    }
+
+    public boolean isValidatingMediaInputType(MediaType inputType) {
+        return inputType==MediaType.XHTML;
+    }
+
+    public MediaType getValidMediaOutputType() {
+        return MediaType.XHTML;
     }
 
     @Override

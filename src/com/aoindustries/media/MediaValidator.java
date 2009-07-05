@@ -14,7 +14,7 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class MediaValidator extends FilterWriter {
+abstract public class MediaValidator extends FilterWriter implements MediaInputValidator, ValidMediaOutput {
 
     /**
      * Gets the media validator for the given type.  If no validation is necessary,
@@ -24,26 +24,25 @@ abstract public class MediaValidator extends FilterWriter {
      * @exception MediaException when unable to find an appropriate validator.
      */
     public static Writer getMediaValidator(Locale userLocale, MediaType contentType, Writer out) throws MediaException {
+        if(
+            contentType==MediaType.JAVASCRIPT
+            || contentType==MediaType.TEXT
+        ) {
+            // No character restrictions
+            return out;
+        }
+        // If the existing out is already validating for this type, use it
+        if(out instanceof MediaInputValidator) {
+            MediaInputValidator inputValidator = (MediaInputValidator)out;
+            if(inputValidator.isValidatingMediaInputType(contentType)) return out;
+        }
         switch(contentType) {
-            case JAVASCRIPT:
-                return out; // No character restrictions
-            case TEXT:
-                return out; // No character restrictions
             case URL:
-                return (out instanceof UrlMediaValidator) ? out : new UrlMediaValidator(out, userLocale);
+                return new UrlMediaValidator(out, userLocale);
             case XHTML:
-                return
-                    (out instanceof XmlMediaValidator)
-                    || (out instanceof XhtmlPreMediaValidator) // This is more restrictive so is an acceptable substitution
-                    ? out
-                    : new XmlMediaValidator(out, userLocale)
-                ;
+                return new XmlMediaValidator(out, userLocale);
             case XHTML_PRE:
-                return
-                    (out instanceof XhtmlPreMediaValidator)
-                    ? out
-                    : new XhtmlPreMediaValidator(out, userLocale)
-                ;
+                return new XhtmlPreMediaValidator(out, userLocale);
             default:
                 throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaValidator.unableToFindValidator", contentType.getMediaType()));
         }
