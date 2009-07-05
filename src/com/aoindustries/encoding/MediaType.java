@@ -1,4 +1,4 @@
-package com.aoindustries.media;
+package com.aoindustries.encoding;
 
 import java.util.Locale;
 

@@ -1,4 +1,4 @@
-package com.aoindustries.media;
+package com.aoindustries.encoding;
 
 /*
  * Copyright 2009 by AO Industries, Inc.,
@@ -11,28 +11,36 @@ import java.util.Locale;
 
 /**
  * Makes sure that all data going through this writer has the correct characters
- * for XHTML.
- * TODO: Rename to XhtmlMediaValidator
- * {@link http://www.w3.org/TR/REC-xml/#charsets}
+ * for URI/URL data.
  *
  * @author  AO Industries, Inc.
  */
-public class XmlMediaValidator extends MediaValidator {
+public class UrlMediaValidator extends MediaValidator {
 
     /**
      * Checks one character, throws IOException if invalid.
-     *
-     * {@link http://www.w3.org/TR/REC-xml/#charsets}
+     * @see java.net.URLEncoder
      */
     public static void checkCharacter(Locale userLocale, int c) throws IOException {
         if(
-            c!=0x9
-            && c!=0xA
-            && c!=0xD
-            && (c<0x20 || c>0xD7FF)
-            && (c<0xE000 || c>0xFFFD)
-            && (c<0x10000 || c>0x10FFFF)
-        ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "XmlMediaValidator.invalidCharacter", Integer.toHexString(c)));
+            (c<'a' || c>'z')
+            && (c<'A' || c>'Z')
+            && (c<'0' || c>'9')
+            && c!='.'
+            && c!='-'
+            && c!='*'
+            && c!='_'
+            && c!='+' // converted space
+            && c!='%' // encoded value
+            // Other characters used outside the URL data
+            && c!=':'
+            && c!='/'
+            && c!=';'
+            && c!='?'
+            && c!='='
+            && c!='&'
+            && c!='#'
+        ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "UrlMediaValidator.invalidCharacter", Integer.toHexString(c)));
     }
 
     /**
@@ -53,17 +61,23 @@ public class XmlMediaValidator extends MediaValidator {
 
     private final Locale userLocale;
 
-    protected XmlMediaValidator(Writer out, Locale userLocale) {
+    protected UrlMediaValidator(Writer out, Locale userLocale) {
         super(out);
         this.userLocale = userLocale;
     }
 
     public boolean isValidatingMediaInputType(MediaType inputType) {
-        return inputType==MediaType.XHTML;
+        return
+            inputType==MediaType.URL
+            || inputType==MediaType.XHTML_PRE   // All valid URL characters are also valid XHTML+PRE characters
+            || inputType==MediaType.XHTML       // All valid URL characters are also valid XHTML characters
+            || inputType==MediaType.JAVASCRIPT  // No validation required
+            || inputType==MediaType.TEXT        // No validation required
+        ;
     }
 
     public MediaType getValidMediaOutputType() {
-        return MediaType.XHTML;
+        return MediaType.URL;
     }
 
     @Override

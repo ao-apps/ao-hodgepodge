@@ -1,4 +1,4 @@
-package com.aoindustries.media;
+package com.aoindustries.encoding;
 
 /*
  * Copyright 2009 by AO Industries, Inc.,
@@ -20,7 +20,7 @@ final class ApplicationResourcesAccessor {
     private ApplicationResourcesAccessor() {
     }
 
-    private static final com.aoindustries.util.ApplicationResourcesAccessor accessor = new com.aoindustries.util.ApplicationResourcesAccessor("com.aoindustries.media.ApplicationResources");
+    private static final com.aoindustries.util.ApplicationResourcesAccessor accessor = new com.aoindustries.util.ApplicationResourcesAccessor("com.aoindustries.encoding.ApplicationResources");
 
     static String getMessage(Locale locale, String key) {
         return accessor.getMessage(locale, key);

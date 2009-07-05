@@ -1,4 +1,4 @@
-package com.aoindustries.media;
+package com.aoindustries.encoding;
 
 /*
  * Copyright 2009 by AO Industries, Inc.,
@@ -11,13 +11,13 @@ import java.util.Locale;
 
 /**
  * Makes sure that all data going through this writer has the correct characters
- * for XML and is also not &lt; or &gt;.
+ * for XHTML.
  *
  * {@link http://www.w3.org/TR/REC-xml/#charsets}
  *
  * @author  AO Industries, Inc.
  */
-public class XhtmlPreMediaValidator extends MediaValidator {
+public class XhtmlMediaValidator extends MediaValidator {
 
     /**
      * Checks one character, throws IOException if invalid.
@@ -32,10 +32,7 @@ public class XhtmlPreMediaValidator extends MediaValidator {
             && (c<0x20 || c>0xD7FF)
             && (c<0xE000 || c>0xFFFD)
             && (c<0x10000 || c>0x10FFFF)
-            // Also don't allow any XML tags
-            && c!='<'
-            && c!='>'
-        ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "XhtmlPreMediaValidator.invalidCharacter", Integer.toHexString(c)));
+        ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "XhtmlMediaValidator.invalidCharacter", Integer.toHexString(c)));
     }
 
     /**
@@ -56,17 +53,21 @@ public class XhtmlPreMediaValidator extends MediaValidator {
 
     private final Locale userLocale;
 
-    protected XhtmlPreMediaValidator(Writer out, Locale userLocale) {
+    protected XhtmlMediaValidator(Writer out, Locale userLocale) {
         super(out);
         this.userLocale = userLocale;
     }
 
     public boolean isValidatingMediaInputType(MediaType inputType) {
-        return inputType==MediaType.XHTML_PRE || inputType==MediaType.XHTML;
+        return
+            inputType==MediaType.XHTML
+            || inputType==MediaType.JAVASCRIPT  // No validation required
+            || inputType==MediaType.TEXT        // No validation required
+        ;
     }
 
     public MediaType getValidMediaOutputType() {
-        return MediaType.XHTML_PRE;
+        return MediaType.XHTML;
     }
 
     @Override

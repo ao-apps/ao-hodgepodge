@@ -1,4 +1,4 @@
-package com.aoindustries.media;
+package com.aoindustries.encoding;
 
 /*
  * Copyright 2009 by AO Industries, Inc.,
@@ -11,36 +11,31 @@ import java.util.Locale;
 
 /**
  * Makes sure that all data going through this writer has the correct characters
- * for URI/URL data.
+ * for XML and is also not &lt; or &gt;.
+ *
+ * {@link http://www.w3.org/TR/REC-xml/#charsets}
  *
  * @author  AO Industries, Inc.
  */
-public class UrlMediaValidator extends MediaValidator {
+public class XhtmlPreMediaValidator extends MediaValidator {
 
     /**
      * Checks one character, throws IOException if invalid.
-     * @see java.net.URLEncoder
+     *
+     * {@link http://www.w3.org/TR/REC-xml/#charsets}
      */
     public static void checkCharacter(Locale userLocale, int c) throws IOException {
         if(
-            (c<'a' || c>'z')
-            && (c<'A' || c>'Z')
-            && (c<'0' || c>'9')
-            && c!='.'
-            && c!='-'
-            && c!='*'
-            && c!='_'
-            && c!='+' // converted space
-            && c!='%' // encoded value
-            // Other characters used outside the URL data
-            && c!=':'
-            && c!='/'
-            && c!=';'
-            && c!='?'
-            && c!='='
-            && c!='&'
-            && c!='#'
-        ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "UrlMediaValidator.invalidCharacter", Integer.toHexString(c)));
+            c!=0x9
+            && c!=0xA
+            && c!=0xD
+            && (c<0x20 || c>0xD7FF)
+            && (c<0xE000 || c>0xFFFD)
+            && (c<0x10000 || c>0x10FFFF)
+            // Also don't allow any XML tags
+            && c!='<'
+            && c!='>'
+        ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "XhtmlPreMediaValidator.invalidCharacter", Integer.toHexString(c)));
     }
 
     /**
@@ -61,17 +56,22 @@ public class UrlMediaValidator extends MediaValidator {
 
     private final Locale userLocale;
 
-    protected UrlMediaValidator(Writer out, Locale userLocale) {
+    protected XhtmlPreMediaValidator(Writer out, Locale userLocale) {
         super(out);
         this.userLocale = userLocale;
     }
 
     public boolean isValidatingMediaInputType(MediaType inputType) {
-        return inputType==MediaType.URL;
+        return
+            inputType==MediaType.XHTML_PRE
+            || inputType==MediaType.XHTML       // All valid XHTML+PRE characters are also valid XHTML characters
+            || inputType==MediaType.JAVASCRIPT  // No validation required
+            || inputType==MediaType.TEXT        // No validation required
+        ;
     }
 
     public MediaType getValidMediaOutputType() {
-        return MediaType.URL;
+        return MediaType.XHTML_PRE;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.aoindustries.media;
+package com.aoindustries.encoding;
 
 /*
  * Copyright 2009 by AO Industries, Inc.,
@@ -8,7 +8,8 @@ package com.aoindustries.media;
 
 /**
  * Indicates that at object can be trusted to generate output with only
- * valid characters for the provided type.
+ * valid characters for the provided type.  This will allow input validation
+ * of the same type to be skipped.
  *
  * @author  AO Industries, Inc.
  */

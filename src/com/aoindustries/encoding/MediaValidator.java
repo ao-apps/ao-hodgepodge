@@ -1,4 +1,4 @@
-package com.aoindustries.media;
+package com.aoindustries.encoding;
 
 /*
  * Copyright 2009 by AO Industries, Inc.,
@@ -24,23 +24,23 @@ abstract public class MediaValidator extends FilterWriter implements MediaInputV
      * @exception MediaException when unable to find an appropriate validator.
      */
     public static Writer getMediaValidator(Locale userLocale, MediaType contentType, Writer out) throws MediaException {
-        if(
-            contentType==MediaType.JAVASCRIPT
-            || contentType==MediaType.TEXT
-        ) {
-            // No character restrictions
-            return out;
-        }
         // If the existing out is already validating for this type, use it
         if(out instanceof MediaInputValidator) {
             MediaInputValidator inputValidator = (MediaInputValidator)out;
             if(inputValidator.isValidatingMediaInputType(contentType)) return out;
         }
+        // Add filter if needed for the given type
         switch(contentType) {
+            case JAVASCRIPT:
+                // No character restrictions
+                return out;
+            case TEXT:
+                // No character restrictions
+                return out;
             case URL:
                 return new UrlMediaValidator(out, userLocale);
             case XHTML:
-                return new XmlMediaValidator(out, userLocale);
+                return new XhtmlMediaValidator(out, userLocale);
             case XHTML_PRE:
                 return new XhtmlPreMediaValidator(out, userLocale);
             default:

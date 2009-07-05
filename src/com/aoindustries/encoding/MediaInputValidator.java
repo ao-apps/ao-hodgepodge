@@ -1,4 +1,4 @@
-package com.aoindustries.media;
+package com.aoindustries.encoding;
 
 /*
  * Copyright 2009 by AO Industries, Inc.,
@@ -9,6 +9,8 @@ package com.aoindustries.media;
 /**
  * Indicates that the object validates its input for the provided type.
  * If invalid characters are received it will throw an appropriate exception.
+ * When the input is already being validated against equal or more restrive
+ * filtering, the redundant validation is not performed.
  *
  * @author  AO Industries, Inc.
  */
