@@ -9,45 +9,44 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Encode JavaScript into XHTML.  The static utility methods only encode
- * the characters.  When used as a MediaEncoder, it automatically adds
- * the &lt;script&gt; tags.
+ * Encodes arbitrary text into a JavaScript string.  The static utility
+ * methods to not add the quotes.  When used as a MediaEncoder, the text is
+ * automatically surrounded by double quotes.  Any binary data is encoded with
+ * \\uxxxx escapes.
  *
  * @author  AO Industries, Inc.
  */
-public class JavaScriptInXhtmlEncoder extends MediaEncoder {
+public class TextInJavaScriptEncoder extends MediaEncoder {
 
     // <editor-fold defaultstate="collapsed" desc="Static Utility Methods">
     /**
      * Encodes a single character and returns its String representation
-     * or null if no modification is necessary.  Any character that is
-     * not valid in XHTML, or is '&lt;', '&amp;', or '&gt;' is encoded to
-     * JavaScript \\uxxxx escapes.  XHTML entities are not used so they script
-     * may or may not be in CDATA with no impact.
+     * or null if no modification is necessary.
      */
     private static String getEscapedCharacter(char ch) {
-        if(
-            // These characters are allowed in JavaScript but not need escaped for HTML
-            ch!='<'
-            && ch!='>'
-            && ch!='&'
-            && (
-                // These character ranges are passed through unmodified
-                (ch>=0x20 && ch<=0xD7FF)
-                || (ch>=0xE000 && ch<=0xFFFD)
-                // Out or 16-bit unicode range: || (ch>=0x10000 && ch<=0x10FFFF)
-            )
-        ) return null;
-
-        // Escape using JavaScript unicode escape.
-        return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
+        switch(ch) {
+            case '"': return "\\\"";
+            case '\'': return "\\'";
+            case '\\': return "\\\\";
+            case '\b': return "\\b";
+            case '\f': return "\\f";
+            case '\r': return "\\r";
+            case '\n': return "\\n";
+            case '\t': return "\\t";
+            default:
+            {
+                if(ch<' ') return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
+                // No conversion necessary
+                return null;
+            }
+        }
     }
 
-    public static void encodeJavaScriptInXhtml(CharSequence S, Appendable out) throws IOException {
-        if(S!=null) encodeJavaScriptInXhtml(S, 0, S.length(), out);
+    public static void encodeTextInJavaScript(CharSequence S, Appendable out) throws IOException {
+        if(S!=null) encodeTextInJavaScript(S, 0, S.length(), out);
     }
 
-    public static void encodeJavaScriptInXhtml(CharSequence S, int start, int end, Appendable out) throws IOException {
+    public static void encodeTextInJavaScript(CharSequence S, int start, int end, Appendable out) throws IOException {
         if (S != null) {
             int toPrint = 0;
             for (int c = start; c < end; c++) {
@@ -66,7 +65,7 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
         }
     }
 
-    public static void encodeJavaScriptInXhtml(char[] cbuf, int start, int len, Writer out) throws IOException {
+    public static void encodeTextInJavaScript(char[] cbuf, int start, int len, Writer out) throws IOException {
         if(cbuf != null) {
             int end = start+len;
             int toPrint = 0;
@@ -86,51 +85,51 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
         }
     }
 
-    public static void encodeJavaScriptInXhtml(char ch, Appendable out) throws IOException {
+    public static void encodeTextInJavaScript(char ch, Appendable out) throws IOException {
         String escaped = getEscapedCharacter(ch);
         if(escaped!=null) out.append(escaped);
         else out.append(ch);
     }
     // </editor-fold>
 
-    protected JavaScriptInXhtmlEncoder(Writer out) {
+    protected TextInJavaScriptEncoder(Writer out) {
         super(out);
     }
 
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
-            inputType==MediaType.JAVASCRIPT
-            || inputType==MediaType.TEXT  // No validation required
+            inputType==MediaType.TEXT
+            || inputType==MediaType.JAVASCRIPT  // No validation required
         ;
     }
 
     public MediaType getValidMediaOutputType() {
-        return MediaType.XHTML;
+        return MediaType.JAVASCRIPT;
     }
 
     @Override
     public void writePrefix() throws IOException {
-        out.write("<script lang=\"text/javascript\">");
+        out.write('"');
     }
 
     @Override
     public void write(int c) throws IOException {
         if(c>Character.MAX_VALUE) throw new AssertionError("Character value out of range: 0x"+Integer.toHexString(c));
-        encodeJavaScriptInXhtml((char)c, out);
+        encodeTextInJavaScript((char)c, out);
     }
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        encodeJavaScriptInXhtml(cbuf, off, len, out);
+        encodeTextInJavaScript(cbuf, off, len, out);
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-        encodeJavaScriptInXhtml(str, off, off+len, out);
+        encodeTextInJavaScript(str, off, off+len, out);
     }
 
     @Override
     public void writeSuffix() throws IOException {
-        out.write("</script>");
+        out.write('"');
     }
 }

@@ -182,7 +182,7 @@ public final class EncodingUtils {
                             out.append(S, c-toPrint, c);
                             toPrint=0;
                         }
-                        out.append("&#9;");
+                        out.append("&#x9;");
                         break;
                     case '\r':
                         if(toPrint>0) {
@@ -330,7 +330,7 @@ public final class EncodingUtils {
                             out.append(S, c-toPrint, c);
                             toPrint=0;
                         }
-                        out.append("&#9;");
+                        out.append("&#x9;");
                         break;
                     case '\r':
                         if(toPrint>0) {
@@ -404,7 +404,7 @@ public final class EncodingUtils {
                 }
                 break;
             case '\t':
-                out.append("&#9;");
+                out.append("&#x9;");
                 break;
             case '\r':
                 // skip '\r'
@@ -426,162 +426,6 @@ public final class EncodingUtils {
     }
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="JavaScript string">
-    /**
-     * @see #encodeJavaScriptString(java.lang.CharSequence, int, int, java.lang.Appendable)
-     * @param S
-     * @param out
-     * @throws java.io.IOException
-     */
-    public static void encodeJavaScriptString(CharSequence S, Appendable out) throws IOException {
-        if(S!=null) encodeJavaScriptString(S, 0, S.length(), out);
-    }
-
-    /**
-     * Escapes the specified <code>CharSequence</code> so that it can be put in a JavaScript string.
-     * The string may be surrounded by either double or single quotes, the quotes are not provided by
-     * this call.
-     *
-     * Writes to the provided <code>Appendable</code>.
-     *
-     * @param S the string to be escaped.  If null, will not output anything.
-     */
-    public static void encodeJavaScriptString(CharSequence S, int start, int end, Appendable out) throws IOException {
-        if (S != null) {
-            int toPrint = 0;
-            for (int c = start; c < end; c++) {
-                char ch = S.charAt(c);
-                switch(ch) {
-                    case '"':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("\\\"");
-                        break;
-                    case '\'':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("\\'");
-                        break;
-                    case '\\':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("\\\\");
-                        break;
-                    case '\b':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("\\b");
-                        break;
-                    case '\f':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("\\f");
-                        break;
-                    case '\r':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("\\r");
-                        break;
-                    case '\n':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("\\n");
-                        break;
-                    case '\t':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("\\t");
-                        break;
-                    default:
-                        if(ch<' ') {
-                            if(toPrint>0) {
-                                out.append(S, c-toPrint, c);
-                                toPrint=0;
-                            }
-                            out.append("\\u00");
-                            int chInt = ch;
-                            out.append(getHex(chInt>>>4));
-                            out.append(getHex(chInt));
-                        } else {
-                            toPrint++;
-                        }
-                }
-            }
-            if(toPrint>0) out.append(S, end-toPrint, end);
-        }
-    }
-
-    /**
-     * @see #encodeJavaScriptString(CharSequence, Appendable)
-     *
-     * @param S the string to be escaped.
-     *
-     * @return if S is null then null otherwise value escaped
-     */
-    public static String encodeJavaScriptString(CharSequence S) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length());
-        encodeJavaScriptString(S, result);
-        return result.toString();
-    }
-
-    /**
-     * @see #encodeJavaScriptString(CharSequence, Appendable)
-     */
-    public static void encodeJavaScriptString(char ch, Appendable out) throws IOException {
-        switch(ch) {
-            case '"':
-                out.append("\\\"");
-                break;
-            case '\'':
-                out.append("\\'");
-                break;
-            case '\\':
-                out.append("\\\\");
-                break;
-            case '\b':
-                out.append("\\b");
-                break;
-            case '\f':
-                out.append("\\f");
-                break;
-            case '\r':
-                out.append("\\r");
-                break;
-            case '\n':
-                out.append("\\n");
-                break;
-            case '\t':
-                out.append("\\t");
-                break;
-            default:
-                if(ch<' ') {
-                    out.append("\\u00");
-                    int chInt = ch;
-                    out.append(getHex(chInt>>>4));
-                    out.append(getHex(chInt));
-                } else {
-                    out.append(ch);
-                }
-        }
-    }
-    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="JavaScript in XML (body, CDATA, or attribute)">
     public static void encodeJavaScriptStringInXml(CharSequence S, Appendable out) throws IOException {

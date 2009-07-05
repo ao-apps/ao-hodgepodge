@@ -5,6 +5,7 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
+import com.aoindustries.encoding.TextInJavaScriptEncoder;
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.Sequence;
@@ -467,10 +468,13 @@ final public class ChainWriter implements Appendable {
     }
 
     /**
-     * @see EncodingUtils#encodeJavaScriptString(java.lang.String, Appendable)
+     * @see TextInJavaScriptEncoder#encodeTextInJavaScript(java.lang.String, Appendable)
+     *
+     * @deprecated
      */
+    @Deprecated
     public ChainWriter encodeJavaScriptString(String S) throws IOException {
-        EncodingUtils.encodeJavaScriptString(S, out);
+        TextInJavaScriptEncoder.encodeTextInJavaScript(S, out);
         return this;
     }
 
