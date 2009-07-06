@@ -31,52 +31,50 @@ public class TextInXhtmlEncoder extends MediaEncoder {
             case '>': return "&gt;";
             case '&': return "&amp;";
             default:
-                XhtmlMediaValidator.checkCharacter(userLocale, c);
+                XhtmlValidator.checkCharacter(userLocale, c);
                 return null;
         }
     }
 
     public static void encodeTextInXhtml(Locale userLocale, CharSequence S, Appendable out) throws IOException {
-        if(S!=null) encodeTextInXhtml(userLocale, S, 0, S.length(), out);
+        if(S==null) S = "null";
+        encodeTextInXhtml(userLocale, S, 0, S.length(), out);
     }
 
     public static void encodeTextInXhtml(Locale userLocale, CharSequence S, int start, int end, Appendable out) throws IOException {
-        if (S != null) {
-            int toPrint = 0;
-            for (int c = start; c < end; c++) {
-                String escaped = getEscapedCharacter(userLocale, S.charAt(c));
-                if(escaped!=null) {
-                    if(toPrint>0) {
-                        out.append(S, c-toPrint, c);
-                        toPrint=0;
-                    }
-                    out.append(escaped);
-                } else {
-                    toPrint++;
+        if(S==null) S = "null";
+        int toPrint = 0;
+        for (int c = start; c < end; c++) {
+            String escaped = getEscapedCharacter(userLocale, S.charAt(c));
+            if(escaped!=null) {
+                if(toPrint>0) {
+                    out.append(S, c-toPrint, c);
+                    toPrint=0;
                 }
+                out.append(escaped);
+            } else {
+                toPrint++;
             }
-            if(toPrint>0) out.append(S, end-toPrint, end);
         }
+        if(toPrint>0) out.append(S, end-toPrint, end);
     }
 
     public static void encodeTextInXhtml(Locale userLocale, char[] cbuf, int start, int len, Writer out) throws IOException {
-        if(cbuf != null) {
-            int end = start+len;
-            int toPrint = 0;
-            for (int c = start; c < end; c++) {
-                String escaped = getEscapedCharacter(userLocale, cbuf[c]);
-                if(escaped!=null) {
-                    if(toPrint>0) {
-                        out.write(cbuf, c-toPrint, toPrint);
-                        toPrint=0;
-                    }
-                    out.append(escaped);
-                } else {
-                    toPrint++;
+        int end = start+len;
+        int toPrint = 0;
+        for (int c = start; c < end; c++) {
+            String escaped = getEscapedCharacter(userLocale, cbuf[c]);
+            if(escaped!=null) {
+                if(toPrint>0) {
+                    out.write(cbuf, c-toPrint, toPrint);
+                    toPrint=0;
                 }
+                out.append(escaped);
+            } else {
+                toPrint++;
             }
-            if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
         }
+        if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
     }
 
     public static void encodeTextInXhtml(Locale userLocale, char ch, Appendable out) throws IOException {
@@ -122,6 +120,25 @@ public class TextInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
+        if(str==null) throw new IllegalArgumentException("str is null");
         encodeTextInXhtml(userLocale, str, off, off+len, out);
+    }
+
+    @Override
+    public TextInXhtmlEncoder append(CharSequence csq) throws IOException {
+        encodeTextInXhtml(userLocale, csq, out);
+        return this;
+    }
+
+    @Override
+    public TextInXhtmlEncoder append(CharSequence csq, int start, int end) throws IOException {
+        encodeTextInXhtml(userLocale, csq, start, end, out);
+        return this;
+    }
+
+    @Override
+    public TextInXhtmlEncoder append(char c) throws IOException {
+        encodeTextInXhtml(userLocale, c, out);
+        return this;
     }
 }

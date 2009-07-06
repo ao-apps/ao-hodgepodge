@@ -11,36 +11,28 @@ import java.util.Locale;
 
 /**
  * Makes sure that all data going through this writer has the correct characters
- * for URI/URL data.
+ * for XHTML.
+ *
+ * {@link http://www.w3.org/TR/REC-xml/#charsets}
  *
  * @author  AO Industries, Inc.
  */
-public class UrlMediaValidator extends MediaValidator {
+public class XhtmlValidator extends MediaValidator {
 
     /**
      * Checks one character, throws IOException if invalid.
-     * @see java.net.URLEncoder
+     *
+     * {@link http://www.w3.org/TR/REC-xml/#charsets}
      */
     public static void checkCharacter(Locale userLocale, int c) throws IOException {
         if(
-            (c<'a' || c>'z')
-            && (c<'A' || c>'Z')
-            && (c<'0' || c>'9')
-            && c!='.'
-            && c!='-'
-            && c!='*'
-            && c!='_'
-            && c!='+' // converted space
-            && c!='%' // encoded value
-            // Other characters used outside the URL data
-            && c!=':'
-            && c!='/'
-            && c!=';'
-            && c!='?'
-            && c!='='
-            && c!='&'
-            && c!='#'
-        ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "UrlMediaValidator.invalidCharacter", Integer.toHexString(c)));
+            c!=0x9
+            && c!=0xA
+            && c!=0xD
+            && (c<0x20 || c>0xD7FF)
+            && (c<0xE000 || c>0xFFFD)
+            && (c<0x10000 || c>0x10FFFF)
+        ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "XhtmlMediaValidator.invalidCharacter", Integer.toHexString(c)));
     }
 
     /**
@@ -54,30 +46,27 @@ public class UrlMediaValidator extends MediaValidator {
     /**
      * Checks a set of characters, throws IOException if invalid
      */
-    public static void checkCharacters(Locale userLocale, CharSequence str, int off, int len) throws IOException {
-        int end = off + len;
+    public static void checkCharacters(Locale userLocale, CharSequence str, int off, int end) throws IOException {
         while(off<end) checkCharacter(userLocale, str.charAt(off++));
     }
 
     private final Locale userLocale;
 
-    protected UrlMediaValidator(Writer out, Locale userLocale) {
+    protected XhtmlValidator(Writer out, Locale userLocale) {
         super(out);
         this.userLocale = userLocale;
     }
 
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
-            inputType==MediaType.URL
-            || inputType==MediaType.XHTML_PRE   // All valid URL characters are also valid XHTML+PRE characters
-            || inputType==MediaType.XHTML       // All valid URL characters are also valid XHTML characters
+            inputType==MediaType.XHTML
             || inputType==MediaType.JAVASCRIPT  // No validation required
             || inputType==MediaType.TEXT        // No validation required
         ;
     }
 
     public MediaType getValidMediaOutputType() {
-        return MediaType.URL;
+        return MediaType.XHTML;
     }
 
     @Override
@@ -94,7 +83,29 @@ public class UrlMediaValidator extends MediaValidator {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-        checkCharacters(userLocale, str, off, len);
+        if(str==null) throw new IllegalArgumentException("str is null");
+        checkCharacters(userLocale, str, off, off + len);
         out.write(str, off, len);
+    }
+
+    @Override
+    public XhtmlValidator append(CharSequence csq) throws IOException {
+        checkCharacters(userLocale, csq, 0, csq.length());
+        out.append(csq);
+        return this;
+    }
+
+    @Override
+    public XhtmlValidator append(CharSequence csq, int start, int end) throws IOException {
+        checkCharacters(userLocale, csq, start, end);
+        out.append(csq, start, end);
+        return this;
+    }
+
+    @Override
+    public XhtmlValidator append(char c) throws IOException {
+        checkCharacter(userLocale, c);
+        out.append(c);
+        return this;
     }
 }

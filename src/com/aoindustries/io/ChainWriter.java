@@ -6,6 +6,7 @@ package com.aoindustries.io;
  * All rights reserved.
  */
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
+import com.aoindustries.encoding.TextInXhtmlEncoder;
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.Sequence;
@@ -427,8 +428,8 @@ final public class ChainWriter implements Appendable {
      *
      * @param S the string to be escaped
      */
-    public ChainWriter encodeXml(String S) throws IOException {
-        EncodingUtils.encodeXml(S, out);
+    public ChainWriter encodeXhtml(String S) throws IOException {
+        TextInXhtmlEncoder.encodeTextInXhtml(Locale.getDefault(), S, out);
         return this;
     }
 

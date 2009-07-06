@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * Encoding helper utilities.
+ * TODO: Rename to EncodingUtils once com.aoindustries.util.EncodingUtils has been eliminated.
  *
  * @author  AO Industries, Inc.
  */

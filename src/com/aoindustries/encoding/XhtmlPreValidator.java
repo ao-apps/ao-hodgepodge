@@ -17,7 +17,7 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-public class XhtmlPreMediaValidator extends MediaValidator {
+public class XhtmlPreValidator extends MediaValidator {
 
     /**
      * Checks one character, throws IOException if invalid.
@@ -49,14 +49,13 @@ public class XhtmlPreMediaValidator extends MediaValidator {
     /**
      * Checks a set of characters, throws IOException if invalid
      */
-    public static void checkCharacters(Locale userLocale, CharSequence str, int off, int len) throws IOException {
-        int end = off + len;
+    public static void checkCharacters(Locale userLocale, CharSequence str, int off, int end) throws IOException {
         while(off<end) checkCharacter(userLocale, str.charAt(off++));
     }
 
     private final Locale userLocale;
 
-    protected XhtmlPreMediaValidator(Writer out, Locale userLocale) {
+    protected XhtmlPreValidator(Writer out, Locale userLocale) {
         super(out);
         this.userLocale = userLocale;
     }
@@ -88,7 +87,29 @@ public class XhtmlPreMediaValidator extends MediaValidator {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-        checkCharacters(userLocale, str, off, len);
+        if(str==null) throw new IllegalArgumentException("str is null");
+        checkCharacters(userLocale, str, off, off + len);
         out.write(str, off, len);
+    }
+
+    @Override
+    public XhtmlPreValidator append(CharSequence csq) throws IOException {
+        checkCharacters(userLocale, csq, 0, csq.length());
+        out.append(csq);
+        return this;
+    }
+
+    @Override
+    public XhtmlPreValidator append(CharSequence csq, int start, int end) throws IOException {
+        checkCharacters(userLocale, csq, start, end);
+        out.append(csq, start, end);
+        return this;
+    }
+
+    @Override
+    public XhtmlPreValidator append(char c) throws IOException {
+        checkCharacter(userLocale, c);
+        out.append(c);
+        return this;
     }
 }

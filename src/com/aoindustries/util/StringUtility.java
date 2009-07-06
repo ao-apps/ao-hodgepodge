@@ -5,9 +5,15 @@ package com.aoindustries.util;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.sql.*;
-import com.aoindustries.util.sort.*;
-import java.util.*;
+import com.aoindustries.sql.SQLUtility;
+import com.aoindustries.util.sort.AutoSort;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @version  1.0
@@ -583,28 +589,56 @@ public final class StringUtility {
         StringBuilder SB = new StringBuilder();
         int lastpos = 0;
         do {
-            SB.append(string.substring(lastpos, pos)).append(replacement);
+            SB.append(string, lastpos, pos).append(replacement);
             lastpos = pos + 1;
             pos = string.indexOf(ch, lastpos);
         } while (pos != -1);
-        return SB.append(string.substring(lastpos)).toString();
+        int len = string.length();
+        if(lastpos<len) SB.append(string, lastpos, len);
+        return SB.toString();
     }
 
     /**
-     * Replaces all occurances of a character with a String
+     * Replaces all occurances of a String with a String
+     * Please consider the variant with the Appendable for higher performance.
      */
-    public static String replace(String string, String find, String replacement) {
+    public static String replace(final String string, final String find, final String replacement) {
         int pos = string.indexOf(find);
         //System.out.println(string+": "+find+" at "+pos);
         if (pos == -1) return string;
         StringBuilder SB = new StringBuilder();
         int lastpos = 0;
+        final int findLen = find.length();
         do {
-            SB.append(string.substring(lastpos, pos)).append(replacement);
-            lastpos = pos + find.length();
+            SB.append(string, lastpos, pos).append(replacement);
+            lastpos = pos + findLen;
             pos = string.indexOf(find, lastpos);
         } while (pos != -1);
-        return SB.append(string.substring(lastpos)).toString();
+        int len = string.length();
+        if(lastpos<len) SB.append(string, lastpos, len);
+        return SB.toString();
+    }
+
+    /**
+     * Replaces all occurances of a String with a String, appends the replacement
+     * to <code>out</code>.
+     */
+    public static void replace(final String string, final String find, final String replacement, final Appendable out) throws IOException {
+        int pos = string.indexOf(find);
+        //System.out.println(string+": "+find+" at "+pos);
+        if (pos == -1) {
+            out.append(string);
+        } else {
+            int lastpos = 0;
+            final int findLen = find.length();
+            do {
+                out.append(string, lastpos, pos).append(replacement);
+                lastpos = pos + findLen;
+                pos = string.indexOf(find, lastpos);
+            } while (pos != -1);
+            int len = string.length();
+            if(lastpos<len) out.append(string, lastpos, len);
+        }
     }
 
     /**
@@ -828,14 +862,17 @@ public final class StringUtility {
         int start=0;
         int pos;
         while((pos=S.indexOf('\n', start))!=-1) {
-            String line = S.substring(start, pos);
-            if(line.endsWith("\r")) line=line.substring(0, line.length()-1);
+            String line;
+            if(pos>start && S.charAt(pos-1)=='\r') line = S.substring(start, pos-1);
+            else line = S.substring(start, pos);
             V.add(line);
             start=pos+1;
         }
-        if(start<S.length()) {
-            String line = S.substring(start);
-            if(line.endsWith("\r")) line=line.substring(0, line.length()-1);
+        int slen = S.length();
+        if(start<slen) {
+            // Ignore any trailing '\r'
+            if(S.charAt(slen-1)=='\r') slen--;
+            String line = S.substring(start, slen);
             V.add(line);
         }
         return V;
@@ -980,7 +1017,7 @@ public final class StringUtility {
             }
         }
         // If ending in a delimeter, add the empty string
-        if(len>=delimLen && line.substring(len-delimLen).equals(delim)) words.add("");
+        if(len>=delimLen && line.endsWith(delim)) words.add("");
 
         return words;
     }
@@ -1076,6 +1113,8 @@ public final class StringUtility {
 
     /**
      * Word wraps a <code>String</code> to be no longer than the provided number of characters wide.
+     *
+     * TODO: Make this more efficient by using Appendable and eliminating the internal use of substring.
      */
     public static String wordWrap(String string, int width) {
         width++;
@@ -1306,15 +1345,18 @@ public final class StringUtility {
         for (int i = fromIndex; i <= max; i++) {
             /* Look for first character. */
             if (source.charAt(i) != first) {
-                while (++i <= max && source.charAt(i) != first);
+                while (++i <= max && source.charAt(i) != first) {
+                    // Intentionally empty
+                }
             }
 
             /* Found first character, now look at the rest of v2 */
             if (i <= max) {
                 int j = i + 1;
                 int end = j + targetCount - 1;
-                for (int k = 1; j < end && source.charAt(j) ==
-                         target.charAt(k); j++, k++);
+                for (int k = 1; j < end && source.charAt(j) == target.charAt(k); j++, k++) {
+                    // Intentionally empty
+                }
 
                 if (j == end) {
                     /* Found whole string. */

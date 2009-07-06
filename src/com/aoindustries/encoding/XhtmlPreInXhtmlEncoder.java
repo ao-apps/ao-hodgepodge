@@ -44,20 +44,42 @@ public class XhtmlPreInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void write(int c) throws IOException {
-        XhtmlPreMediaValidator.checkCharacter(userLocale, c);
+        XhtmlPreValidator.checkCharacter(userLocale, c);
         out.write(c);
     }
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        XhtmlPreMediaValidator.checkCharacters(userLocale, cbuf, off, len);
+        XhtmlPreValidator.checkCharacters(userLocale, cbuf, off, len);
         out.write(cbuf, off, len);
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-        XhtmlPreMediaValidator.checkCharacters(userLocale, str, off, len);
+        if(str==null) throw new IllegalArgumentException("str is null");
+        XhtmlPreValidator.checkCharacters(userLocale, str, off, off + len);
         out.write(str, off, len);
+    }
+
+    @Override
+    public XhtmlPreInXhtmlEncoder append(CharSequence csq) throws IOException {
+        XhtmlPreValidator.checkCharacters(userLocale, csq, 0, csq.length());
+        out.append(csq);
+        return this;
+    }
+
+    @Override
+    public XhtmlPreInXhtmlEncoder append(CharSequence csq, int start, int end) throws IOException {
+        XhtmlPreValidator.checkCharacters(userLocale, csq, start, end);
+        out.append(csq, start, end);
+        return this;
+    }
+
+    @Override
+    public XhtmlPreInXhtmlEncoder append(char c) throws IOException {
+        XhtmlPreValidator.checkCharacter(userLocale, c);
+        out.append(c);
+        return this;
     }
 
     @Override

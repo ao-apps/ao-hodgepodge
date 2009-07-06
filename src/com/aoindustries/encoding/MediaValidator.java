@@ -6,6 +6,7 @@ package com.aoindustries.encoding;
  * All rights reserved.
  */
 import java.io.FilterWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.Locale;
 
@@ -35,11 +36,11 @@ abstract public class MediaValidator extends FilterWriter implements ValidMediaF
             case TEXT:
                 return new TextValidator(out);
             case URL:
-                return new UrlMediaValidator(out, userLocale);
+                return new UrlValidator(out, userLocale);
             case XHTML:
-                return new XhtmlMediaValidator(out, userLocale);
+                return new XhtmlValidator(out, userLocale);
             case XHTML_PRE:
-                return new XhtmlPreMediaValidator(out, userLocale);
+                return new XhtmlPreValidator(out, userLocale);
             default:
                 throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaValidator.unableToFindValidator", contentType.getMediaType()));
         }
@@ -47,5 +48,38 @@ abstract public class MediaValidator extends FilterWriter implements ValidMediaF
 
     protected MediaValidator(Writer out) {
         super(out);
+    }
+
+    /**
+     * The default implementation of this append method in Writer converts
+     * to a String for backward-compatibility.  This passes the append directly
+     * to the wrapped Writer.
+     */
+    @Override
+    public MediaValidator append(CharSequence csq) throws IOException {
+        out.append(csq);
+        return this;
+    }
+
+    /**
+     * The default implementation of this append method in Writer converts
+     * to a String for backward-compatibility.  This passes the append directly
+     * to the wrapped Writer.
+     */
+    @Override
+    public MediaValidator append(CharSequence csq, int start, int end) throws IOException {
+        out.append(csq, start, end);
+        return this;
+    }
+
+    /**
+     * The default implementation of this append method in Writer calls
+     * the write(int) method for backward-compatibility.  This passes the
+     * append directly to the wrapped Writer.
+     */
+    @Override
+    public MediaValidator append(char c) throws IOException {
+        out.append(c);
+        return this;
     }
 }

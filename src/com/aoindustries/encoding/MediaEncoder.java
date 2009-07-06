@@ -9,6 +9,7 @@ import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Locale;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Encodes media to allow it to be contained in a different type of media.
@@ -35,7 +36,7 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
      * @exception MediaException when unable to encode the content into the container
      *                            either because it is impossible or not yet implemented.
      */
-    public static MediaEncoder getMediaEncoder(Locale userLocale, MediaType contentType, MediaType containerType, Writer out) throws MediaException {
+    public static MediaEncoder getMediaEncoder(Locale userLocale, HttpServletResponse response, MediaType contentType, MediaType containerType, Writer out) throws MediaException {
         // If the types match then no conversion is necessary
         if(contentType==containerType) return null;
         final MediaEncoder encoder;
@@ -58,9 +59,8 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
                 break;
             case URL:
                 switch(containerType) {
-                    case TEXT: encoder = null; break; // No conversion necessary
-                    case XHTML: encoder = new TextInXhtmlEncoder(out, userLocale); break; // Just treat as text
-                    case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out, userLocale); break; // Just treat as text
+                    case JAVASCRIPT: encoder = new UrlInJavaScriptEncoder(out, userLocale, response); break;
+                    case XHTML: encoder = new UrlInXhtmlEncoder(out, userLocale, response); break;
                     default: throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
@@ -100,6 +100,39 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
      * </p>
      */
     public void writePrefix() throws IOException {
+    }
+
+    /**
+     * The default implementation of this append method in Writer converts
+     * to a String for backward-compatibility.  This passes the append directly
+     * to the wrapped Writer.
+     */
+    @Override
+    public MediaEncoder append(CharSequence csq) throws IOException {
+        out.append(csq);
+        return this;
+    }
+
+    /**
+     * The default implementation of this append method in Writer converts
+     * to a String for backward-compatibility.  This passes the append directly
+     * to the wrapped Writer.
+     */
+    @Override
+    public MediaEncoder append(CharSequence csq, int start, int end) throws IOException {
+        out.append(csq, start, end);
+        return this;
+    }
+
+    /**
+     * The default implementation of this append method in Writer calls
+     * the write(int) method for backward-compatibility.  This passes the
+     * append directly to the wrapped Writer.
+     */
+    @Override
+    public MediaEncoder append(char c) throws IOException {
+        out.append(c);
+        return this;
     }
 
     /**

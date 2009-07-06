@@ -26,20 +26,18 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
      * may or may not be in CDATA with no impact.
      */
     private static String getEscapedCharacter(char ch) {
+        // These characters are allowed in JavaScript but need encoded for XHTML
+        if(ch=='<') return "&lt;";
+        if(ch=='>') return "&gt;";
+        if(ch=='&') return "&amp;";
         if(
-            // These characters are allowed in JavaScript but need escaped for XHTML
-            ch!='<'
-            && ch!='>'
-            && ch!='&'
-            && (
-                // These character ranges are passed through unmodified
-                ch=='\r'
-                || ch=='\n'
-                || ch=='\t'
-                || (ch>=0x20 && ch<=0xD7FF)
-                || (ch>=0xE000 && ch<=0xFFFD)
-                // Out of 16-bit unicode range: || (ch>=0x10000 && ch<=0x10FFFF)
-            )
+            // These character ranges are passed through unmodified
+            ch=='\r'
+            || ch=='\n'
+            || ch=='\t'
+            || (ch>=0x20 && ch<=0xD7FF)
+            || (ch>=0xE000 && ch<=0xFFFD)
+            // Out of 16-bit unicode range: || (ch>=0x10000 && ch<=0x10FFFF)
         ) return null;
 
         // Escape using JavaScript unicode escape.
