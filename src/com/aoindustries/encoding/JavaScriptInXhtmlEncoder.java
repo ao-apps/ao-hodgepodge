@@ -47,46 +47,44 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
     }
 
     public static void encodeJavaScriptInXhtml(CharSequence S, Appendable out) throws IOException {
-        if(S!=null) encodeJavaScriptInXhtml(S, 0, S.length(), out);
+        if(S==null) S = "null";
+        encodeJavaScriptInXhtml(S, 0, S.length(), out);
     }
 
     public static void encodeJavaScriptInXhtml(CharSequence S, int start, int end, Appendable out) throws IOException {
-        if (S != null) {
-            int toPrint = 0;
-            for (int c = start; c < end; c++) {
-                String escaped = getEscapedCharacter(S.charAt(c));
-                if(escaped!=null) {
-                    if(toPrint>0) {
-                        out.append(S, c-toPrint, c);
-                        toPrint=0;
-                    }
-                    out.append(escaped);
-                } else {
-                    toPrint++;
+        if(S==null) S = "null";
+        int toPrint = 0;
+        for (int c = start; c < end; c++) {
+            String escaped = getEscapedCharacter(S.charAt(c));
+            if(escaped!=null) {
+                if(toPrint>0) {
+                    out.append(S, c-toPrint, c);
+                    toPrint=0;
                 }
+                out.append(escaped);
+            } else {
+                toPrint++;
             }
-            if(toPrint>0) out.append(S, end-toPrint, end);
         }
+        if(toPrint>0) out.append(S, end-toPrint, end);
     }
 
     public static void encodeJavaScriptInXhtml(char[] cbuf, int start, int len, Writer out) throws IOException {
-        if(cbuf != null) {
-            int end = start+len;
-            int toPrint = 0;
-            for (int c = start; c < end; c++) {
-                String escaped = getEscapedCharacter(cbuf[c]);
-                if(escaped!=null) {
-                    if(toPrint>0) {
-                        out.write(cbuf, c-toPrint, toPrint);
-                        toPrint=0;
-                    }
-                    out.append(escaped);
-                } else {
-                    toPrint++;
+        int end = start+len;
+        int toPrint = 0;
+        for (int c = start; c < end; c++) {
+            String escaped = getEscapedCharacter(cbuf[c]);
+            if(escaped!=null) {
+                if(toPrint>0) {
+                    out.write(cbuf, c-toPrint, toPrint);
+                    toPrint=0;
                 }
+                out.append(escaped);
+            } else {
+                toPrint++;
             }
-            if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
         }
+        if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
     }
 
     public static void encodeJavaScriptInXhtml(char ch, Appendable out) throws IOException {
@@ -129,7 +127,26 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
+        if(str==null) throw new IllegalArgumentException("str is null");
         encodeJavaScriptInXhtml(str, off, off+len, out);
+    }
+
+    @Override
+    public JavaScriptInXhtmlEncoder append(CharSequence csq) throws IOException {
+        encodeJavaScriptInXhtml(csq, out);
+        return this;
+    }
+
+    @Override
+    public JavaScriptInXhtmlEncoder append(CharSequence csq, int start, int end) throws IOException {
+        encodeJavaScriptInXhtml(csq, start, end, out);
+        return this;
+    }
+
+    @Override
+    public JavaScriptInXhtmlEncoder append(char c) throws IOException {
+        encodeJavaScriptInXhtml(c, out);
+        return this;
     }
 
     @Override

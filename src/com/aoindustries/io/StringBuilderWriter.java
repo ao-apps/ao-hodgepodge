@@ -92,4 +92,13 @@ public class StringBuilderWriter extends Writer {
     public StringBuilder getBuffer() {
         return buffer;
     }
+
+    /**
+     * Gets the captured body as a String.
+     * This is equivalent to <code>getBuffer().toString()</code>.
+     */
+    @Override
+    public String toString() {
+        return buffer.toString();
+    }
 }
