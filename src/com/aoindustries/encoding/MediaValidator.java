@@ -22,10 +22,10 @@ abstract public class MediaValidator extends FilterWriter implements ValidMediaF
      *
      * @exception MediaException when unable to find an appropriate validator.
      */
-    public static ValidMediaInput getMediaValidator(Locale userLocale, MediaType contentType, Writer out) throws MediaException {
+    public static MediaValidator getMediaValidator(Locale userLocale, MediaType contentType, Writer out) throws MediaException {
         // If the existing out is already validating for this type, use it
-        if(out instanceof ValidMediaInput) {
-            ValidMediaInput inputValidator = (ValidMediaInput)out;
+        if(out instanceof MediaValidator) {
+            MediaValidator inputValidator = (MediaValidator)out;
             if(inputValidator.isValidatingMediaInputType(contentType)) return inputValidator;
         }
         // Add filter if needed for the given type
