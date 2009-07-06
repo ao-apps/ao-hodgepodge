@@ -14,29 +14,26 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class MediaValidator extends FilterWriter implements MediaInputValidator, ValidMediaOutput {
+abstract public class MediaValidator extends FilterWriter implements ValidMediaFilter {
 
     /**
-     * Gets the media validator for the given type.  If no validation is necessary,
-     * will return the provided writer.  If the given writer is already validator
-     * for the requested type, will return the provided writer.
+     * Gets the media validator for the given type.  If the given writer is
+     * already validator for the requested type, will return the provided writer.
      *
      * @exception MediaException when unable to find an appropriate validator.
      */
-    public static Writer getMediaValidator(Locale userLocale, MediaType contentType, Writer out) throws MediaException {
+    public static ValidMediaInput getMediaValidator(Locale userLocale, MediaType contentType, Writer out) throws MediaException {
         // If the existing out is already validating for this type, use it
-        if(out instanceof MediaInputValidator) {
-            MediaInputValidator inputValidator = (MediaInputValidator)out;
-            if(inputValidator.isValidatingMediaInputType(contentType)) return out;
+        if(out instanceof ValidMediaInput) {
+            ValidMediaInput inputValidator = (ValidMediaInput)out;
+            if(inputValidator.isValidatingMediaInputType(contentType)) return inputValidator;
         }
         // Add filter if needed for the given type
         switch(contentType) {
             case JAVASCRIPT:
-                // No character restrictions
-                return out;
+                return new JavaScriptValidator(out);
             case TEXT:
-                // No character restrictions
-                return out;
+                return new TextValidator(out);
             case URL:
                 return new UrlMediaValidator(out, userLocale);
             case XHTML:

@@ -21,13 +21,14 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class MediaEncoder extends FilterWriter implements MediaInputValidator, ValidMediaOutput {
+abstract public class MediaEncoder extends FilterWriter implements ValidMediaFilter {
 
     /**
      * Gets the media encoder for the requested types or <code>null</code> if
      * no encoding is necessary.  When an encoder is returned it is also a validator
-     * for the contentType.  If no encoder is returned, it may be necessary to
-     * use a separate validator if character validation is required.
+     * for the contentType and produces valid output for the containerType.
+     * If no encoder is returned, it may be necessary to use a separate validator
+     * if character validation is required.
      *
      * @return the encoder or <code>null</code> if no encoding is necessary
      *
@@ -91,13 +92,26 @@ abstract public class MediaEncoder extends FilterWriter implements MediaInputVal
     }
 
     /**
+     * <p>
      * This is called before any data is written.
+     * </p>
+     * <p>
+     * This default implementation does nothing.
+     * </p>
      */
     public void writePrefix() throws IOException {
     }
 
     /**
+     * <p>
      * This is called when no more data will be written.
+     * This should also flush any internal buffers to <code>out</code>.  It
+     * should not, however, call flush on <code>out</code> itself.  This is
+     * to not interfere with any output buffering of <code>out</code>.
+     * </p>
+     * <p>
+     * This default implementation does nothing.
+     * </p>
      */
     public void writeSuffix() throws IOException {
     }

@@ -40,7 +40,7 @@ public class XhtmlMediaValidator extends MediaValidator {
      */
     public static void checkCharacters(Locale userLocale, char[] cbuf, int off, int len) throws IOException {
         int end = off + len;
-        while(off<end) checkCharacter(userLocale, cbuf[off]);
+        while(off<end) checkCharacter(userLocale, cbuf[off++]);
     }
 
     /**
@@ -48,7 +48,7 @@ public class XhtmlMediaValidator extends MediaValidator {
      */
     public static void checkCharacters(Locale userLocale, CharSequence str, int off, int len) throws IOException {
         int end = off + len;
-        while(off<end) checkCharacter(userLocale, str.charAt(off));
+        while(off<end) checkCharacter(userLocale, str.charAt(off++));
     }
 
     private final Locale userLocale;

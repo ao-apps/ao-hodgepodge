@@ -27,15 +27,18 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
      */
     private static String getEscapedCharacter(char ch) {
         if(
-            // These characters are allowed in JavaScript but not need escaped for HTML
+            // These characters are allowed in JavaScript but need escaped for XHTML
             ch!='<'
             && ch!='>'
             && ch!='&'
             && (
                 // These character ranges are passed through unmodified
-                (ch>=0x20 && ch<=0xD7FF)
+                ch=='\r'
+                || ch=='\n'
+                || ch=='\t'
+                || (ch>=0x20 && ch<=0xD7FF)
                 || (ch>=0xE000 && ch<=0xFFFD)
-                // Out or 16-bit unicode range: || (ch>=0x10000 && ch<=0x10FFFF)
+                // Out of 16-bit unicode range: || (ch>=0x10000 && ch<=0x10FFFF)
             )
         ) return null;
 
@@ -110,7 +113,7 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void writePrefix() throws IOException {
-        out.write("<script lang=\"text/javascript\">");
+        out.write("<script type=\"text/javascript\">");
     }
 
     @Override

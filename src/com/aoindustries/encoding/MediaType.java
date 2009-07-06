@@ -32,7 +32,11 @@ public enum MediaType {
     /**
      * A JavaScript script (<code>text/javascript</code>).
      */
-    JAVASCRIPT("text/javascript"),
+    JAVASCRIPT("text/javascript") {
+        boolean isUsedFor(String contentType) {
+            return "text/javascript".equalsIgnoreCase(contentType);
+        }
+    },
 
     /**
      * Any plaintext document comprised of unicode characters (<code>text/plain</code>).
@@ -40,17 +44,32 @@ public enum MediaType {
      *
      * @see #DATA
      */
-    TEXT("text/plain"),
+    TEXT("text/plain") {
+        boolean isUsedFor(String contentType) {
+            return "text/plain".equalsIgnoreCase(contentType);
+        }
+    },
 
     /**
      * A URL-encoded, &amp; (not &amp;amp;) separated URL.
      */
-    URL("text/url"),
+    URL("text/url") {
+        boolean isUsedFor(String contentType) {
+            return "text/url".equalsIgnoreCase(contentType);
+        }
+    },
 
     /**
      * An XHTML 1.0 document (<code>application/xhtml+xml</code>).
      */
-    XHTML("application/xhtml+xml"),
+    XHTML("application/xhtml+xml") {
+        boolean isUsedFor(String contentType) {
+            return
+                "application/xhtml+xml".equalsIgnoreCase(contentType)
+                || "text/html".equalsIgnoreCase(contentType)
+            ;
+        }
+    },
 
     /**
      * A preformatted element within a (X)HTML document, such as the <code>pre</code>
@@ -58,13 +77,19 @@ public enum MediaType {
      * a non-standard media type and is only used during internal conversions.  The
      * final output should not be this type.
      */
-    XHTML_PRE("application/xhtml+xml+pre");
+    XHTML_PRE("application/xhtml+xml+pre") {
+        boolean isUsedFor(String contentType) {
+            return "application/xhtml+xml+pre".equalsIgnoreCase(contentType);
+        }
+    };
 
     private final String mediaType;
 
     private MediaType(String mediaType) {
         this.mediaType = mediaType;
     }
+
+    abstract boolean isUsedFor(String contentType);
 
     /**
      * Gets the actual media type, such as <code>text/html</code>.
@@ -82,7 +107,7 @@ public enum MediaType {
         int semiPos = fullContentType.indexOf(';');
         String contentType = ((semiPos==-1) ? fullContentType : fullContentType.substring(0, semiPos)).trim();
         for(MediaType value : values) {
-            if(value.getMediaType().equalsIgnoreCase(contentType)) return value;
+            if(value.isUsedFor(contentType)) return value;
         }
         throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaType.getMediaType.unknownType", fullContentType));
     }

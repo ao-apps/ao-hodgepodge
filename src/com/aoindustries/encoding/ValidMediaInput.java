@@ -14,7 +14,7 @@ package com.aoindustries.encoding;
  *
  * @author  AO Industries, Inc.
  */
-public interface MediaInputValidator {
+public interface ValidMediaInput {
 
     /**
      * Checks if this is validating the provided type.
