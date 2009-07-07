@@ -8,7 +8,10 @@ package com.aoindustries.util;
 
 /**
  * @author  AO Industries, Inc.
+ *
+ * @deprecated  Please use the logging facilities provided by JDK 1.4+
  */
+@Deprecated
 public interface ErrorHandler {
     
     void reportError(Throwable T, Object[] extraInfo);

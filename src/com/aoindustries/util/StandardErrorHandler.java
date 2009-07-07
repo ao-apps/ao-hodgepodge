@@ -15,7 +15,10 @@ import java.io.PrintWriter;
  * @see ErrorPrinter#printStackTraces(Throwable,Object[])
  *
  * @author  AO Industries, Inc.
+ *
+ * @deprecated  Please use the logging facilities provided by JDK 1.4+
  */
+@Deprecated
 public class StandardErrorHandler implements ErrorHandler {
     
     private PrintWriter errWriter;

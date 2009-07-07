@@ -20,7 +20,15 @@ import java.util.logging.LogRecord;
  */
 public class ErrorPrinterFormatter extends Formatter {
 
-    public String format(LogRecord record) {
+    private static final ErrorPrinterFormatter errorPrinterFormatter = new ErrorPrinterFormatter();
+    public static ErrorPrinterFormatter getInstance() {
+        return errorPrinterFormatter;
+    }
+
+    private ErrorPrinterFormatter() {
+    }
+
+    public void format(LogRecord record, Appendable out) {
         List<Object> extraInfo = new ArrayList<Object>(9); // At most 9 elements added below
         String loggerName = record.getLoggerName();
         if(loggerName!=null) extraInfo.add("record.loggerName="+loggerName);
@@ -39,9 +47,16 @@ public class ErrorPrinterFormatter extends Formatter {
         extraInfo.add("record.threadID="+record.getThreadID());
         extraInfo.add("record.millis="+record.getMillis());
         Throwable thrown = record.getThrown();
-        return ErrorPrinter.getStackTraces(
+        ErrorPrinter.printStackTraces(
             thrown,
+            out,
             extraInfo.toArray()
         );
+    }
+
+    public String format(LogRecord record) {
+        StringBuilder buffer = new StringBuilder(1024);
+        format(record, buffer);
+        return buffer.toString();
     }
 }

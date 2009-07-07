@@ -6,12 +6,12 @@ package com.aoindustries.io;
  * All rights reserved.
  */
 import com.aoindustries.util.EncodingUtils;
-import com.aoindustries.util.ErrorHandler;
 import com.aoindustries.util.ErrorPrinter;
-import com.aoindustries.util.StandardErrorHandler;
 import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Reusable generic connection pooling with dynamic flaming tiger feature.
@@ -92,7 +92,7 @@ abstract public class AOPool extends Thread {
     /**
      * All warnings are sent here if available, otherwise will be written to <code>System.err</code>.
      */
-    protected final ErrorHandler errorHandler;
+    protected final Logger logger;
 
     /** Lock for wait/notify */
     public final Object connectionLock = new Object(); // Why public?
@@ -106,48 +106,12 @@ abstract public class AOPool extends Thread {
 
     private int maxConcurrency=0;
 
-    /**
-     * @deprecated  Please call AOPool(String,int,long,ErrorHandler)
-     *
-     * @see #AOPool(String,int,long,ErrorHandler)
-     */
-    protected AOPool(String name, int numConnections) {
-        this(DEFAULT_DELAY_TIME, DEFAULT_MAX_IDLE_TIME, name, numConnections, DEFAULT_MAX_CONNECTION_AGE, new StandardErrorHandler());
+    protected AOPool(String name, int numConnections, long maxConnectionAge, Logger logger) {
+        this(DEFAULT_DELAY_TIME, DEFAULT_MAX_IDLE_TIME, name, numConnections, maxConnectionAge, logger);
     }
 
-    /**
-     * @deprecated  Please call AOPool(String,int,long,ErrorHandler)
-     *
-     * @see #AOPool(String,int,long,ErrorHandler)
-     */
-    protected AOPool(String name, int numConnections, long maxConnectionAge) {
-        this(DEFAULT_DELAY_TIME, DEFAULT_MAX_IDLE_TIME, name, numConnections, maxConnectionAge, new StandardErrorHandler());
-    }
-
-    protected AOPool(String name, int numConnections, long maxConnectionAge, ErrorHandler errorHandler) {
-        this(DEFAULT_DELAY_TIME, DEFAULT_MAX_IDLE_TIME, name, numConnections, maxConnectionAge, errorHandler);
-    }
-
-    /**
-     * @deprecated  Please call AOPool(int,int,String,int,long,ErrorHandler)
-     *
-     * @see #AOPool(int,int,String,int,long,ErrorHandler)
-     */
-    protected AOPool(int delayTime, int maxIdleTime, String name, int numConnections) {
-        this(delayTime, maxIdleTime, name, numConnections, DEFAULT_MAX_CONNECTION_AGE, new StandardErrorHandler());
-    }
-
-    /**
-     * @deprecated  Please call AOPool(int,int,String,int,long,ErrorHandler)
-     *
-     * @see #AOPool(int,int,String,int,long,ErrorHandler)
-     */
-    protected AOPool(int delayTime, int maxIdleTime, String name, int numConnections, long maxConnectionAge) {
-        this(delayTime, maxIdleTime, name, numConnections, maxConnectionAge, new StandardErrorHandler());
-    }
-
-    protected AOPool(int delayTime, int maxIdleTime, String name, int numConnections, long maxConnectionAge, ErrorHandler errorHandler) {
-	super(name+"&delayTime="+delayTime+"&maxIdleTime="+maxIdleTime+"&size="+numConnections+"&maxConnectionAge="+(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":Long.toString(maxConnectionAge)));
+    protected AOPool(int delayTime, int maxIdleTime, String name, int numConnections, long maxConnectionAge, Logger logger) {
+    	super(name+"&delayTime="+delayTime+"&maxIdleTime="+maxIdleTime+"&size="+numConnections+"&maxConnectionAge="+(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":Long.toString(maxConnectionAge)));
         this.delayTime=delayTime;
         this.maxIdleTime=maxIdleTime;
         this.startTime=System.currentTimeMillis();
@@ -155,8 +119,8 @@ abstract public class AOPool extends Thread {
         setDaemon(true);
         this.numConnections = numConnections;
         this.maxConnectionAge=maxConnectionAge;
-        if(errorHandler==null) throw new AssertionError("errorHandler is null");
-        this.errorHandler=errorHandler;
+        if(logger==null) throw new IllegalArgumentException("logger is null");
+        this.logger=logger;
         connections = new Object[numConnections];
         createTimes = new long[numConnections];
         busyConnections = new boolean[numConnections];
@@ -224,12 +188,12 @@ abstract public class AOPool extends Thread {
                 }
                 if(useCount>=maxConnections) {
                     if(useCount>=(numConnections/2)) throwException("Thread attempting to allocate more than half of the connection pool: "+thisThread.toString(), allocateStackTrace);
-                    errorHandler.reportWarning(
-                        new Throwable("Warning: Thread allocated more than one connection", allocateStackTrace),
-                        new Object[] {
-                            "useCount="+useCount,
-                            "maxConnections="+maxConnections
-                        }
+                    logger.logp(
+                        Level.WARNING,
+                        AOPool.class.getName(),
+                        "getConnectionImp",
+                        null,
+                        new Throwable("Warning: Thread allocated more than one connection.  The stack trace at allocation time is included.", allocateStackTrace)
                     );
                 }
                 for (int c = 0; c < numConnections; c++) {
@@ -263,7 +227,7 @@ abstract public class AOPool extends Thread {
                 try {
                     connectionLock.wait();
                 } catch (InterruptedException err) {
-                    errorHandler.reportWarning(err, null);
+                    logger.logp(Level.WARNING, AOPool.class.getName(), "getConnectionImp", null, err);
                 }
             }
         }
@@ -495,23 +459,23 @@ abstract public class AOPool extends Thread {
                     }
                 }
             } catch(SQLException err) {
-                errorHandler.reportError(err, null);
+                logger.logp(Level.SEVERE, AOPool.class.getName(), "run", null, err);
             } catch (ThreadDeath TD) {
                 throw TD;
             } catch (Throwable T) {
-                errorHandler.reportError(T, null);
+                logger.logp(Level.SEVERE, AOPool.class.getName(), "run", null, T);
             }
             try {
                 sleep(delayTime);
             } catch (InterruptedException err) {
-                errorHandler.reportWarning(err, null);
+                logger.logp(Level.WARNING, AOPool.class.getName(), "run", null, err);
             }
         }
     }
 
     protected abstract void throwException(String message, Throwable allocateStackTrace) throws Exception;
     
-    final public ErrorHandler getErrorHandler() {
-        return errorHandler;
+    final public Logger getLogger() {
+        return logger;
     }
 }

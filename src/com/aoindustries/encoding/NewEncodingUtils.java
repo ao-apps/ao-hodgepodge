@@ -1,5 +1,6 @@
 package com.aoindustries.encoding;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /*
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  *
  * @author  AO Industries, Inc.
  */
-class NewEncodingUtils {
+public class NewEncodingUtils {
 
     private NewEncodingUtils() {
     }
@@ -39,5 +40,23 @@ class NewEncodingUtils {
             javaScriptUnicodeEscapeStrings.set(chInt, escaped);
         }
         return escaped;
+    }
+
+    public static void encodeTextInJavaScriptInXhtml(String text, Appendable out) throws IOException {
+        StringBuilder javascript = new StringBuilder(text.length());
+        TextInJavaScriptEncoder.encodeTextInJavaScript(text, javascript);
+        JavaScriptInXhtmlEncoder.encodeJavaScriptInXhtml(javascript, out);
+    }
+
+    public static void encodeTextInJavaScriptInXhtmlAttribute(String text, Appendable out) throws IOException {
+        StringBuilder javascript = new StringBuilder(text.length());
+        TextInJavaScriptEncoder.encodeTextInJavaScript(text, javascript);
+        JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute(javascript, out);
+    }
+
+    public static String getTextInJavaScriptInXhtmlAttribute(String text) throws IOException {
+        StringBuilder xhtml = new StringBuilder(text.length());
+        encodeTextInJavaScriptInXhtmlAttribute(text, xhtml);
+        return xhtml.toString();
     }
 }

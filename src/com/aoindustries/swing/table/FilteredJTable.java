@@ -9,7 +9,6 @@ import com.aoindustries.reflect.MethodCall;
 import com.aoindustries.table.Row;
 import com.aoindustries.table.Table;
 import com.aoindustries.table.Type;
-import com.aoindustries.util.ErrorHandler;
 import java.awt.Dimension;
 import javax.swing.JScrollBar;
 import javax.swing.JTable;
@@ -27,8 +26,9 @@ import javax.swing.table.TableCellRenderer;
  */
 public class FilteredJTable<T extends Row> extends JTable {
 
+    private static final long serialVersionUID = 1L;
+
     public FilteredJTable(
-        ErrorHandler errorHandler,
         Table<T> table,
         String[] columnHeaders,
         Type[] columnTypes,
@@ -37,7 +37,6 @@ public class FilteredJTable<T extends Row> extends JTable {
         Table[] invalidateTables
     ) {
         FilteredTableModel tableModel=new FilteredTableModel<T>(
-            errorHandler,
             table,
             columnHeaders,
             columnTypes,
@@ -61,7 +60,6 @@ public class FilteredJTable<T extends Row> extends JTable {
     }
 
     public FilteredJTable(
-        ErrorHandler errorHandler,
         Table<T> table,
         String[] columnHeaders,
         Type[] columnTypes,
@@ -69,7 +67,6 @@ public class FilteredJTable<T extends Row> extends JTable {
         MethodCall[] setValueMethods
     ) {
         this(
-            errorHandler,
             table,
             columnHeaders,
             columnTypes,
@@ -79,11 +76,13 @@ public class FilteredJTable<T extends Row> extends JTable {
         );
     }
 
+    @Override
     public TableCellRenderer getCellRenderer(int row, int column) {
         if(row==0) return new BeveledTableCellRenderer(getDefaultRenderer(Object.class), BevelBorder.LOWERED);
         return super.getCellRenderer(row, column);
     }
 
+    @Override
     public void tableChanged(TableModelEvent e) {
         super.tableChanged(e);
         setFirstRowHeight();
@@ -93,6 +92,7 @@ public class FilteredJTable<T extends Row> extends JTable {
         setRowHeight(0, getRowHeight()+4);
     }
     
+    @Override
     public int getSelectedRow() {
         int selectedRow=super.getSelectedRow();
 
@@ -104,6 +104,7 @@ public class FilteredJTable<T extends Row> extends JTable {
 
     private static final JScrollBar tempSB=new JScrollBar(JScrollBar.VERTICAL);
 
+    @Override
     public Dimension getPreferredScrollableViewportSize() {
         Dimension D1=getUI().getPreferredSize(this);
         Dimension D2=tempSB.getUI().getPreferredSize(tempSB);

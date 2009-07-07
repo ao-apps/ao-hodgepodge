@@ -8,13 +8,13 @@ package com.aoindustries.sql;
 import com.aoindustries.io.AOPool;
 import com.aoindustries.io.ChainWriter;
 import com.aoindustries.util.EncodingUtils;
-import com.aoindustries.util.ErrorHandler;
-import com.aoindustries.util.StandardErrorHandler;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Reusable connection pooling with dynamic flaming tiger feature.
@@ -32,37 +32,8 @@ final public class AOConnectionPool extends AOPool {
     private String user;
     private String password;
 
-    /**
-     * @param driver
-     * @param url
-     * @param user 
-     * @param password
-     * @param numConnections
-     * @deprecated  Please call AOConnectionPool(String,String,String,String,int,long,ErrorHandler)
-     *
-     * @see #AOConnectionPool(String,String,String,String,int,long,ErrorHandler)
-     */
-    public AOConnectionPool(String driver, String url, String user, String password, int numConnections) {
-        this(driver, url, user, password, numConnections, DEFAULT_MAX_CONNECTION_AGE, new StandardErrorHandler());
-    }
-
-    /**
-     * @param driver
-     * @param url
-     * @param user
-     * @param password
-     * @param numConnections
-     * @param maxConnectionAge
-     * @deprecated  Please call AOConnectionPool(String,String,String,String,int,long,ErrorHandler)
-     *
-     * @see #AOConnectionPool(String,String,String,String,int,long,ErrorHandler)
-     */
-    public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge) {
-        this(driver, url, user, password, numConnections, maxConnectionAge, new StandardErrorHandler());
-    }
-
-    public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge, ErrorHandler errorHandler) {
-	super(AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, errorHandler);
+    public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge, Logger logger) {
+    	super(AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, logger);
         this.driver = driver;
         this.url = url;
         this.user = user;
@@ -198,30 +169,22 @@ final public class AOConnectionPool extends AOPool {
             }
             return conn;
         } catch(SQLException err) {
-            errorHandler.reportError(
-                err, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
-            );
+            logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", err);
             throw err;
         } catch (ClassNotFoundException err) {
             SQLException sqlErr=new SQLException();
             sqlErr.initCause(err);
-            errorHandler.reportError(
-                sqlErr, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
-            );
+            logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
             throw sqlErr;
         } catch (InstantiationException err) {
             SQLException sqlErr=new SQLException();
             sqlErr.initCause(err);
-            errorHandler.reportError(
-                sqlErr, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
-            );
+            logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
             throw sqlErr;
         } catch (IllegalAccessException err) {
             SQLException sqlErr=new SQLException();
             sqlErr.initCause(err);
-            errorHandler.reportError(
-                sqlErr, new Object[] {"url="+url, "user="+user, "password=XXXXXXXX"}
-            );
+            logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
             throw sqlErr;
         }
     }
@@ -276,7 +239,9 @@ final public class AOConnectionPool extends AOPool {
 
         // Dump all warnings to System.err and clear warnings
         SQLWarning warning=connection.getWarnings();
-        if(warning!=null) errorHandler.reportWarning(warning, null);
+        if(warning!=null) {
+            logger.logp(Level.WARNING, AOConnectionPool.class.getName(), "resetConnection", null, warning);
+        }
         connection.clearWarnings();
 
         // Autocommit will always be turned on, regardless what a previous transaction might have done

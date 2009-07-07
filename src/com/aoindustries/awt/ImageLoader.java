@@ -5,10 +5,12 @@ package com.aoindustries.awt;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.util.*;
-import java.awt.*;
-import java.awt.image.*;
-import java.util.*;
+import java.awt.Image;
+import java.awt.image.ColorModel;
+import java.awt.image.ImageConsumer;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Preloads an image for use in <code>Graphics.drawImage</code> calls.
@@ -22,40 +24,33 @@ final public class ImageLoader implements ImageConsumer {
     private int status=0;
 
     private Image image;
-    private ErrorHandler errorHandler;
+    private Logger logger;
 
-    /**
-     * @deprecated  Please use <code>ImageLoader(Image,ErrorHandler)
-     */
-    public ImageLoader(Image image) {
-        this(image, new StandardErrorHandler());
-    }
-    
-    public ImageLoader(Image image, ErrorHandler errorHandler) {
-	this.image=image;
-        this.errorHandler=errorHandler;
+    public ImageLoader(Image image, Logger logger) {
+        this.image=image;
+        this.logger=logger;
     }
 
     synchronized public void imageComplete(int status) {
-	this.status|=status;
-	notify();
+        this.status|=status;
+        notify();
     }
 
     /**
      * Loads an image and returns when a frame is done, the image is done, an error occurs, or the image is aborted.
      */
     public void loadImage() {
-	status=0;
-	image.getSource().startProduction(this);
-	while((status&(IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE))==0) {
-	    try {
-		synchronized(this) {
-		    wait();
-		}
-	    } catch(InterruptedException err) {
-                errorHandler.reportWarning(err, null);
-	    }
-	}
+        status=0;
+        image.getSource().startProduction(this);
+        while((status&(IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE))==0) {
+            try {
+            synchronized(this) {
+                wait();
+            }
+            } catch(InterruptedException err) {
+                logger.log(Level.WARNING, null, err);
+            }
+        }
     }
 
     public void setColorModel(ColorModel mode) {}

@@ -20,7 +20,6 @@ import javax.swing.table.*;
  */
 public class FilteredTableModel<T extends Row> extends AbstractTableModel implements AncestorListener, TableListener {
 
-    private final ErrorHandler errorHandler;
     private final Table<T> table;
     private final String[] columnHeaders;
     private final Type[] columnTypes;
@@ -34,7 +33,6 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
     private List<T> filteredCache;
 
     public FilteredTableModel(
-        ErrorHandler errorHandler,
         Table<T> table,
         String[] columnHeaders,
         Type[] columnTypes,
@@ -42,7 +40,6 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
         MethodCall[] setValueMethods,
         Table[] invalidateTables
     ) {
-        this.errorHandler=errorHandler;
         this.table=table;
         this.columnHeaders=columnHeaders;
         this.columnTypes=columnTypes;
@@ -107,11 +104,10 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
         try {
             return getFilteredRows().size()+1;
         } catch(IOException err) {
-            errorHandler.reportError(err, null);
+            throw new WrappedException(err);
         } catch(SQLException err) {
-            errorHandler.reportError(err, null);
+            throw new WrappedException(err);
         }
-        return 1;
     }
 
     public String getColumnName(int col) {
@@ -143,11 +139,10 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
                 List rows=getFilteredRows();
                 return columnTypes[col].getDisplay(getRowValue((Row)rows.get(row), col));
             } catch(IOException err) {
-                errorHandler.reportError(err, null);
+                throw new WrappedException(err);
             } catch(SQLException err) {
-                errorHandler.reportError(err, null);
+                throw new WrappedException(err);
             }
-            return null;
         }
     }
 
@@ -162,15 +157,14 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
                 List rows=getFilteredRows();
                 return getRowValue((Row)rows.get(row), col);
             } catch(IOException err) {
-                errorHandler.reportError(err, null);
-                return null;
+                throw new WrappedException(err);
             } catch(SQLException err) {
-                errorHandler.reportError(err, null);
-                return null;
+                throw new WrappedException(err);
             }
         }
     }
 
+    @Override
     public void setValueAt(Object value, int row, int col) {
         if(row==0) {
             if(value==null) filters[col]=null;
@@ -191,9 +185,9 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
                 Row R=(Row)getFilteredRows().get(row);
                 setMethod.invokeOn(R, new Object[] {value});
             } catch(IOException err) {
-                errorHandler.reportError(err, null);
+                throw new WrappedException(err);
             } catch(SQLException err) {
-                errorHandler.reportError(err, null);
+                throw new WrappedException(err);
             }
         }
     }

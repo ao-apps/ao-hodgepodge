@@ -5,7 +5,8 @@ package com.aoindustries.cron;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Each <code>CronJob</code> is ran in a separate <code>CronDaemonThread</code>.
@@ -17,7 +18,7 @@ import com.aoindustries.util.*;
 final public class CronDaemonThread extends Thread {
     
     final CronJob cronJob;
-    final ErrorHandler errorHandler;
+    final Logger logger;
     final int minute;
     final int hour;
     final int dayOfMonth;
@@ -25,10 +26,10 @@ final public class CronDaemonThread extends Thread {
     final int dayOfWeek;
     final int year;
     
-    CronDaemonThread(CronJob cronJob, ErrorHandler errorHandler, int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
+    CronDaemonThread(CronJob cronJob, Logger logger, int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
         super(cronJob.getCronJobName());
         this.cronJob=cronJob;
-        this.errorHandler=errorHandler;
+        this.logger=logger;
         this.minute=minute;
         this.hour=hour;
         this.dayOfMonth=dayOfMonth;
@@ -40,6 +41,7 @@ final public class CronDaemonThread extends Thread {
     /**
      * For internal API use only.
      */
+    @Override
     public void run() {
         try {
             try {
@@ -47,10 +49,7 @@ final public class CronDaemonThread extends Thread {
             } catch(ThreadDeath TD) {
                 throw TD;
             } catch(Throwable T) {
-                Object[] extraInfo={
-                    "cron_job.name="+cronJob.getCronJobName()
-                };
-                errorHandler.reportError(T, extraInfo);
+                logger.log(Level.SEVERE, "cron_job.name="+cronJob.getCronJobName(), T);
             }
         } finally {
             CronDaemon.threadDone(this);

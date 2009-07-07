@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * A <code>DatabaseConnection</code> is used to only get actual database connections when needed.
@@ -163,36 +164,25 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        BigDecimal b=results.getBigDecimal(1);
-                        if(results.next()) throw new SQLException("More than one row returned.");
-                        return b;
-                    }
-                    if(rowRequired) throw new SQLException("No row returned.");
-                    return null;
-                } finally {
-                    results.close();
+                if(results.next()) {
+                    BigDecimal b=results.getBigDecimal(1);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return b;
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                if(rowRequired) throw new SQLException("No row returned.");
+                return null;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
@@ -204,70 +194,48 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        boolean b=results.getBoolean(1);
-                        if(results.next()) throw new SQLException("More than one row returned.");
-                        return b;
-                    }
-                    if(rowRequired) throw new SQLException("No row returned.");
-                    return false;
-                } finally {
-                    results.close();
+                if(results.next()) {
+                    boolean b=results.getBoolean(1);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return b;
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                if(rowRequired) throw new SQLException("No row returned.");
+                return false;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
     public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        byte[] b=results.getBytes(1);
-                        if(results.next()) throw new SQLException("More than one row returned.");
-                        return b;
-                    }
-                    if(rowRequired) throw new SQLException("No row returned.");
-                    return null;
-                } finally {
-                    results.close();
+                if(results.next()) {
+                    byte[] b=results.getBytes(1);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return b;
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                if(rowRequired) throw new SQLException("No row returned.");
+                return null;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
@@ -279,66 +247,44 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        java.sql.Date D=results.getDate(1);
-                        if(results.next()) throw new SQLException("More than one row returned.");
-                        return D;
-                    }
-                    if(rowRequired) throw new SQLException("No row returned.");
-                    return null;
-                } finally {
-                    results.close();
+                if(results.next()) {
+                    java.sql.Date D=results.getDate(1);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return D;
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                if(rowRequired) throw new SQLException("No row returned.");
+                return null;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
     public IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    IntList V=new IntArrayList();
-                    while(results.next()) V.add(results.getInt(1));
-                    return V;
-                } finally {
-                    results.close();
-                }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                IntList V=new IntArrayList();
+                while(results.next()) V.add(results.getInt(1));
+                return V;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
@@ -350,36 +296,25 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        int i=results.getInt(1);
-                        if(results.next()) throw new SQLException("More than one row returned.");
-                        return i;
-                    }
-                    if(rowRequired) throw new SQLException("No row returned.");
-                    return 0;
-                } finally {
-                    results.close();
+                if(results.next()) {
+                    int i=results.getInt(1);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return i;
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                if(rowRequired) throw new SQLException("No row returned.");
+                return 0;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
@@ -387,32 +322,21 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
      * TODO: Should we use cursors for this?
      */
     public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    LongList V=new LongArrayList();
-                    while(results.next()) V.add(results.getLong(1));
-                    return V;
-                } finally {
-                    results.close();
-                }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                LongList V=new LongArrayList();
+                while(results.next()) V.add(results.getLong(1));
+                return V;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
@@ -424,340 +348,263 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        long l=results.getLong(1);
-                        if(results.next()) throw new SQLException("More than one row returned.");
-                        return l;
-                    }
-                    if(rowRequired) throw new SQLException("No row returned.");
-                    return 0;
-                } finally {
-                    results.close();
+                if(results.next()) {
+                    long l=results.getLong(1);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return l;
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                if(rowRequired) throw new SQLException("No row returned.");
+                return 0;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
-        try {
-            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
-            Connection conn = getConnection(isolationLevel, readOnly);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: getConnection in "+(endTime-startTime)+" ms");
-            }
-
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: prepareStatement in "+(endTime-startTime)+" ms");
-            }
-            try {
-                try {
-                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                    setParams(pstmt, params);
-                    if(DEBUG_TIMING) {
-                        long endTime = System.currentTimeMillis();
-                        System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: setParams in "+(endTime-startTime)+" ms");
-                    }
-
-                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                    ResultSet results=pstmt.executeQuery();
-                    if(DEBUG_TIMING) {
-                        long endTime = System.currentTimeMillis();
-                        System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: executeQuery in "+(endTime-startTime)+" ms");
-                    }
-
-                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                    try {
-                        if(results.next()) {
-                            Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
-                            T object = constructor.newInstance(results);
-                            if(results.next()) throw new SQLException("More than one row returned.");
-                            return object;
-                        }
-                        if(rowRequired) throw new SQLException("No row returned.");
-                        return null;
-                    } finally {
-                        if(DEBUG_TIMING) {
-                            long endTime = System.currentTimeMillis();
-                            System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: got all results in "+(endTime-startTime)+" ms");
-                        }
-
-                        if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                        results.close();
-                        if(DEBUG_TIMING) {
-                            long endTime = System.currentTimeMillis();
-                            System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: results.close() in "+(endTime-startTime)+" ms");
-                        }
-                    }
-                } catch(NoSuchMethodException err) {
-                    SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                    sqlErr.initCause(err);
-                    throw sqlErr;
-                } catch(InstantiationException err) {
-                    SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
-                    sqlErr.initCause(err);
-                    throw sqlErr;
-                } catch(IllegalAccessException err) {
-                    SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                    sqlErr.initCause(err);
-                    throw sqlErr;
-                } catch(InvocationTargetException err) {
-                    SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                    sqlErr.initCause(err);
-                    throw sqlErr;
-                }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
-            } finally {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                pstmt.close();
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: pstmt.close() in "+(endTime-startTime)+" ms");
-                }
-            }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+        long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+        Connection conn = getConnection(isolationLevel, readOnly);
+        if(DEBUG_TIMING) {
+            long endTime = System.currentTimeMillis();
+            System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: getConnection in "+(endTime-startTime)+" ms");
         }
-    }
 
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
-        try {
-            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
-            Connection conn = getConnection(isolationLevel, readOnly);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: getConnection in "+(endTime-startTime)+" ms");
-            }
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: prepareStatement in "+(endTime-startTime)+" ms");
-            }
-            try {
-                try {
-                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                    setParams(pstmt, params);
-                    if(DEBUG_TIMING) {
-                        long endTime = System.currentTimeMillis();
-                        System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: setParams in "+(endTime-startTime)+" ms");
-                    }
-
-                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                    ResultSet results=pstmt.executeQuery();
-                    if(DEBUG_TIMING) {
-                        long endTime = System.currentTimeMillis();
-                        System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: executeQuery in "+(endTime-startTime)+" ms");
-                    }
-
-                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                    try {
-                        Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
-                        List<T> list=new ArrayList<T>();
-                        while(results.next()) list.add(constructor.newInstance(results));
-                        return list;
-                    } finally {
-                        results.close();
-                        if(DEBUG_TIMING) {
-                            long endTime = System.currentTimeMillis();
-                            System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: get results in "+(endTime-startTime)+" ms");
-                        }
-                    }
-                } catch(NoSuchMethodException err) {
-                    SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                    sqlErr.initCause(err);
-                    throw sqlErr;
-                } catch(InstantiationException err) {
-                    SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
-                    sqlErr.initCause(err);
-                    throw sqlErr;
-                } catch(IllegalAccessException err) {
-                    SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                    sqlErr.initCause(err);
-                    throw sqlErr;
-                } catch(InvocationTargetException err) {
-                    SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                    sqlErr.initCause(err);
-                    throw sqlErr;
-                }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
-            } finally {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                pstmt.close();
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: pstmt.close() in "+(endTime-startTime)+" ms");
-                }
-            }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+        if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        if(DEBUG_TIMING) {
+            long endTime = System.currentTimeMillis();
+            System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: prepareStatement in "+(endTime-startTime)+" ms");
         }
-    }
-
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
         try {
-            Connection conn = getConnection(isolationLevel, readOnly);
-
-            PreparedStatement pstmt = conn.prepareStatement(sql);
             try {
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                 setParams(pstmt, params);
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: setParams in "+(endTime-startTime)+" ms");
+                }
 
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                 ResultSet results=pstmt.executeQuery();
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: executeQuery in "+(endTime-startTime)+" ms");
+                }
+
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                 try {
                     if(results.next()) {
-                        T object = objectFactory.createObject(results);
+                        Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
+                        T object = constructor.newInstance(results);
                         if(results.next()) throw new SQLException("More than one row returned.");
                         return object;
                     }
                     if(rowRequired) throw new SQLException("No row returned.");
                     return null;
                 } finally {
+                    if(DEBUG_TIMING) {
+                        long endTime = System.currentTimeMillis();
+                        System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: got all results in "+(endTime-startTime)+" ms");
+                    }
+
+                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                     results.close();
+                    if(DEBUG_TIMING) {
+                        long endTime = System.currentTimeMillis();
+                        System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: results.close() in "+(endTime-startTime)+" ms");
+                    }
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
-            } finally {
-                pstmt.close();
+            } catch(NoSuchMethodException err) {
+                SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(InstantiationException err) {
+                SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(IllegalAccessException err) {
+                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(InvocationTargetException err) {
+                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+            pstmt.close();
+            if(DEBUG_TIMING) {
+                long endTime = System.currentTimeMillis();
+                System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: pstmt.close() in "+(endTime-startTime)+" ms");
+            }
+        }
+    }
+
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+        long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+        Connection conn = getConnection(isolationLevel, readOnly);
+        if(DEBUG_TIMING) {
+            long endTime = System.currentTimeMillis();
+            System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: getConnection in "+(endTime-startTime)+" ms");
+        }
+        if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        if(DEBUG_TIMING) {
+            long endTime = System.currentTimeMillis();
+            System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: prepareStatement in "+(endTime-startTime)+" ms");
+        }
+        try {
+            try {
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                setParams(pstmt, params);
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: setParams in "+(endTime-startTime)+" ms");
+                }
+
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                ResultSet results=pstmt.executeQuery();
+                if(DEBUG_TIMING) {
+                    long endTime = System.currentTimeMillis();
+                    System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: executeQuery in "+(endTime-startTime)+" ms");
+                }
+
+                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+                try {
+                    Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
+                    List<T> list=new ArrayList<T>();
+                    while(results.next()) list.add(constructor.newInstance(results));
+                    return list;
+                } finally {
+                    results.close();
+                    if(DEBUG_TIMING) {
+                        long endTime = System.currentTimeMillis();
+                        System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: get results in "+(endTime-startTime)+" ms");
+                    }
+                }
+            } catch(NoSuchMethodException err) {
+                SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(InstantiationException err) {
+                SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(IllegalAccessException err) {
+                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(InvocationTargetException err) {
+                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            }
+        } catch(SQLException err) {
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
+            pstmt.close();
+            if(DEBUG_TIMING) {
+                long endTime = System.currentTimeMillis();
+                System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: pstmt.close() in "+(endTime-startTime)+" ms");
+            }
+        }
+    }
+
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        Connection conn = getConnection(isolationLevel, readOnly);
+
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            setParams(pstmt, params);
+
+            ResultSet results=pstmt.executeQuery();
+            try {
+                if(results.next()) {
+                    T object = objectFactory.createObject(results);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return object;
+                }
+                if(rowRequired) throw new SQLException("No row returned.");
+                return null;
+            } finally {
+                results.close();
+            }
+        } catch(SQLException err) {
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
     public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            Connection conn = getConnection(isolationLevel, readOnly);
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            try {
-                setParams(pstmt, params);
+            setParams(pstmt, params);
 
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    List<T> list=new ArrayList<T>();
-                    while(results.next()) list.add(objectFactory.createObject(results));
-                    return list;
-                } finally {
-                    results.close();
-                }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+            ResultSet results=pstmt.executeQuery();
+            try {
+                List<T> list=new ArrayList<T>();
+                while(results.next()) list.add(objectFactory.createObject(results));
+                return list;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
     public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {
+        Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            Connection conn = getConnection(isolationLevel, readOnly);
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            try {
-                setParams(pstmt, params);
+            setParams(pstmt, params);
 
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    while(results.next()) resultSetHandler.handleResultSet(results);
-                } finally {
-                    results.close();
-                }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+            ResultSet results=pstmt.executeQuery();
+            try {
+                while(results.next()) resultSetHandler.handleResultSet(results);
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
     public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    List<Short> V=new ArrayList<Short>();
-                    while(results.next()) V.add(results.getShort(1));
-                    return V;
-                } finally {
-                    results.close();
-                }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                List<Short> V=new ArrayList<Short>();
+                while(results.next()) V.add(results.getShort(1));
+                return V;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
@@ -769,36 +616,25 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        short s=results.getShort(1);
-                        if(results.next()) throw new SQLException("More than one row returned.");
-                        return s;
-                    }
-                    if(rowRequired) throw new SQLException("No row returned.");
-                    return 0;
-                } finally {
-                    results.close();
+                if(results.next()) {
+                    short s=results.getShort(1);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return s;
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                if(rowRequired) throw new SQLException("No row returned.");
+                return 0;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
@@ -810,66 +646,44 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        String S=results.getString(1);
-                        if(results.next()) throw new SQLException("More than one row returned.");
-                        return S;
-                    }
-                    if(rowRequired) throw new SQLException("No row returned.");
-                    return null;
-                } finally {
-                    results.close();
+                if(results.next()) {
+                    String S=results.getString(1);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return S;
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                if(rowRequired) throw new SQLException("No row returned.");
+                return null;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
     public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    List<String> V=new ArrayList<String>();
-                    while(results.next()) V.add(results.getString(1));
-                    return V;
-                } finally {
-                    results.close();
-                }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                List<String> V=new ArrayList<String>();
+                while(results.next()) V.add(results.getString(1));
+                return V;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
@@ -881,59 +695,37 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+            setParams(pstmt, params);
+            ResultSet results=pstmt.executeQuery();
             try {
-                setParams(pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        Timestamp T=results.getTimestamp(1);
-                        if(results.next()) throw new SQLException("More than one row returned.");
-                        return T;
-                    }
-                    if(rowRequired) throw new SQLException("No row returned.");
-                    return null;
-                } finally {
-                    results.close();
+                if(results.next()) {
+                    Timestamp T=results.getTimestamp(1);
+                    if(results.next()) throw new SQLException("More than one row returned.");
+                    return T;
                 }
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
+                if(rowRequired) throw new SQLException("No row returned.");
+                return null;
             } finally {
-                pstmt.close();
+                results.close();
             }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
     public int executeUpdate(String sql, Object ... params) throws IOException, SQLException {
+        PreparedStatement pstmt = getConnection(Connection.TRANSACTION_READ_COMMITTED, false).prepareStatement(sql);
         try {
-            PreparedStatement pstmt = getConnection(Connection.TRANSACTION_READ_COMMITTED, false).prepareStatement(sql);
-            try {
-                setParams(pstmt, params);
-                return pstmt.executeUpdate();
-            } catch(SQLException err) {
-                throw new WrappedSQLException(err, pstmt);
-            } finally {
-                pstmt.close();
-            }
-        } catch(RuntimeException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
-        } catch(IOException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            setParams(pstmt, params);
+            return pstmt.executeUpdate();
         } catch(SQLException err) {
-            getDatabase().getConnectionPool().getErrorHandler().reportError(err, null);
-            throw err;
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
         }
     }
 
@@ -964,7 +756,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                 _conn.close();
             }
         } catch(SQLException err) {
-            database.getConnectionPool().getErrorHandler().reportError(err, null);
+            database.getConnectionPool().getLogger().logp(Level.SEVERE, DatabaseConnection.class.getName(), "rollbackAndClose", null, err);
         }
         return rolledBack;
     }

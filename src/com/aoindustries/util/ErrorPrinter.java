@@ -15,6 +15,8 @@ import java.security.AccessControlException;
 import java.security.Permission;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Prints errors with more detail than a standard printStackTrace() call.  Is also able to
@@ -143,7 +145,11 @@ public class ErrorPrinter {
 
             appendln("    Exceptions", out);
             if(thrown==null) appendln("        No exceptions", out);
-            else printThrowables(thrown, out, 8);
+            else {
+                List<Throwable> closed = new ArrayList<Throwable>();
+                closed.add(thrown);
+                printThrowables(thrown, out, 8, closed);
+            }
 
             // End Report
             appendln(out);
@@ -160,7 +166,13 @@ public class ErrorPrinter {
         }
     }
 
-    private static void printThrowables(Throwable thrown, Appendable out, int indent) {
+    private static boolean isClosed(Throwable thrown, List<Throwable> closed) {
+        for(Throwable T : closed) {
+            if(T==thrown) return true;
+        }
+        return false;
+    }
+    private static void printThrowables(Throwable thrown, Appendable out, int indent, List<Throwable> closed) {
         for(int c=0;c<indent;c++) append(' ', out);
         appendln(thrown.getClass().getName(), out);
         printMessage(out, indent+4, "Message...........: ", thrown.getMessage());
@@ -219,9 +231,12 @@ public class ErrorPrinter {
         }
         Throwable cause=thrown.getCause();
         if(cause!=null) {
-            for(int c=0;c<(indent+4);c++) append(' ', out);
-            appendln("Caused By", out);
-            printThrowables(cause, out, indent+8);
+            if(!isClosed(cause, closed)) {
+                closed.add(cause);
+                for(int c=0;c<(indent+4);c++) append(' ', out);
+                appendln("Caused By", out);
+                printThrowables(cause, out, indent+8, closed);
+            }
         }
         // Uses reflection avoid binding to JspException directly.
         try {
@@ -230,9 +245,12 @@ public class ErrorPrinter {
                 Method method=clazz.getMethod("getRootCause", new Class[0]);
                 Throwable rootCause=(Throwable)method.invoke(thrown, new Object[0]);
                 if(rootCause!=null) {
-                    for(int c=0;c<(indent+4);c++) append(' ', out);
-                    appendln("Caused By", out);
-                    printThrowables(rootCause, out, indent+8);
+                    if(!isClosed(rootCause, closed)) {
+                        closed.add(rootCause);
+                        for(int c=0;c<(indent+4);c++) append(' ', out);
+                        appendln("Caused By", out);
+                        printThrowables(rootCause, out, indent+8, closed);
+                    }
                 }
             }
         } catch(NoSuchMethodException err) {
@@ -250,9 +268,12 @@ public class ErrorPrinter {
                 Method method=clazz.getMethod("getRootCause", new Class[0]);
                 Throwable rootCause=(Throwable)method.invoke(thrown, new Object[0]);
                 if(rootCause!=null) {
-                    for(int c=0;c<(indent+4);c++) append(' ', out);
-                    appendln("Caused By", out);
-                    printThrowables(rootCause, out, indent+8);
+                    if(!isClosed(rootCause, closed)) {
+                        closed.add(rootCause);
+                        for(int c=0;c<(indent+4);c++) append(' ', out);
+                        appendln("Caused By", out);
+                        printThrowables(rootCause, out, indent+8, closed);
+                    }
                 }
             }
         } catch(NoSuchMethodException err) {
@@ -266,10 +287,20 @@ public class ErrorPrinter {
         if(thrown instanceof SQLException) {
             if(thrown instanceof SQLWarning) {
                 SQLWarning nextSQL=((SQLWarning)thrown).getNextWarning();
-                if(nextSQL!=null) printThrowables(nextSQL, out, indent);
+                if(nextSQL!=null) {
+                    if(!isClosed(nextSQL, closed)) {
+                        closed.add(nextSQL);
+                        printThrowables(nextSQL, out, indent, closed);
+                    }
+                }
             } else {
                 SQLException nextSQL=((SQLException)thrown).getNextException();
-                if(nextSQL!=null) printThrowables(nextSQL, out, indent);
+                if(nextSQL!=null) {
+                    if(!isClosed(nextSQL, closed)) {
+                        closed.add(nextSQL);
+                        printThrowables(nextSQL, out, indent, closed);
+                    }
+                }
             }
         }
     }

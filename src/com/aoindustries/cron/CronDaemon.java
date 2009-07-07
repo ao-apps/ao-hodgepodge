@@ -5,11 +5,11 @@ package com.aoindustries.cron;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.util.ErrorHandler;
-import com.aoindustries.util.StandardErrorHandler;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Run cron jobs based on their scheduling requirements.  Once per minute
@@ -30,13 +30,13 @@ public final class CronDaemon extends Thread {
     /**
      * The cron daemon errors will be reported here (not the individual cron jobs).
      */
-    private static ErrorHandler errorHandler=new StandardErrorHandler();
+    private static Logger logger = Logger.getLogger(CronDaemon.class.getName());
 
     /**
-     * Sets the error handler for the cron daemon errors (not the individual cron jobs).
+     * Sets the logger for the cron daemon errors (not the individual cron jobs).
      */
-    public static void setErrorHandler(ErrorHandler eh) {
-        errorHandler=eh;
+    public static void setLogger(Logger logger) {
+        CronDaemon.logger = logger;
     }
 
     /**
@@ -45,24 +45,15 @@ public final class CronDaemon extends Thread {
     private static CronDaemon runningDaemon;
 
     private static final List<CronJob> cronJobs=new ArrayList<CronJob>();
-    private static final List<ErrorHandler> errorHandlers=new ArrayList<ErrorHandler>();
+    private static final List<Logger> loggers=new ArrayList<Logger>();
     private static final List<CronDaemonThread> runningJobs=new ArrayList<CronDaemonThread>();
     
     /**
-     * @deprecated  Please use <code>addCronJob(CronJob,ErrorHandler)</code>.
-     *
-     * @see  #addCronJob(CronJob,ErrorHandler)
-     */
-    public static void addCronJob(CronJob job) {
-        addCronJob(job, new StandardErrorHandler());
-    }
-
-    /**
      * Adds a <code>CronJob</code> to the list of jobs.
      */
-    synchronized public static void addCronJob(CronJob job, ErrorHandler errorHandler) {
+    synchronized public static void addCronJob(CronJob job, Logger logger) {
         cronJobs.add(job);
-        errorHandlers.add(errorHandler);
+        loggers.add(logger);
         if(runningDaemon==null) {
             runningDaemon=new CronDaemon();
             runningDaemon.setPriority(Thread.MAX_PRIORITY);
@@ -83,12 +74,12 @@ public final class CronDaemon extends Thread {
             } catch(ThreadDeath TD) {
                 throw TD;
             } catch(Throwable T) {
-                errorHandler.reportError(T, null);
+                logger.log(Level.SEVERE, null, T);
             }
             try {
                 Thread.sleep(30000);
             } catch(InterruptedException err) {
-                errorHandler.reportWarning(err, null);
+                logger.log(Level.WARNING, null, err);
             }
         }
     }
@@ -106,7 +97,7 @@ public final class CronDaemon extends Thread {
         int year = cal.get(Calendar.YEAR);
         for(int c=0;c<cronJobs.size();c++) {
             CronJob job=cronJobs.get(c);
-            ErrorHandler jobErrorHandler=errorHandlers.get(c);
+            Logger jobLogger=loggers.get(c);
             try {
                 if(job.isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek, year)) {
                     int scheduleMode=job.getCronJobScheduleMode();
@@ -125,7 +116,7 @@ public final class CronDaemon extends Thread {
                         run=true;
                     } else throw new RuntimeException("Unknown value from CronJob.getCronJobScheduleMode: "+scheduleMode);
                     if(run) {
-                        CronDaemonThread thread=new CronDaemonThread(job, jobErrorHandler, minute, hour, dayOfMonth, month, dayOfWeek, year);
+                        CronDaemonThread thread=new CronDaemonThread(job, jobLogger, minute, hour, dayOfMonth, month, dayOfWeek, year);
                         thread.setDaemon(false);
                         thread.setPriority(job.getCronJobThreadPriority());
                         runningJobs.add(thread);
@@ -135,8 +126,7 @@ public final class CronDaemon extends Thread {
             } catch(ThreadDeath TD) {
                 throw TD;
             } catch(Throwable T) {
-                Object[] extraInfo=new Object[] {"cron_job.name="+job.getCronJobName()};
-                jobErrorHandler.reportError(T, extraInfo);
+                jobLogger.log(Level.SEVERE, "cron_job.name="+job.getCronJobName(), T);
             }
         }
         cal.add(Calendar.MINUTE, 1);
@@ -152,9 +142,6 @@ public final class CronDaemon extends Thread {
             }
         }
         Throwable T=new Throwable("Warning: thread not found on threadDone(CronDaemonThread)");
-        Object[] extraInfo={
-            "cron_job.name="+thread.cronJob.getCronJobName()
-        };
-        thread.errorHandler.reportWarning(T, extraInfo);
+        thread.logger.log(Level.WARNING, "cron_job.name="+thread.cronJob.getCronJobName(), T);
     }
 }

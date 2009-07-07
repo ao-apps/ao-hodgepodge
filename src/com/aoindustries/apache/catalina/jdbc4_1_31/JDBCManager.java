@@ -13,7 +13,6 @@ package com.aoindustries.apache.catalina.jdbc4_1_31;
 import com.aoindustries.io.AOPool;
 import com.aoindustries.sql.AOConnectionPool;
 import com.aoindustries.sql.WrappedSQLException;
-import com.aoindustries.util.ErrorHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -48,7 +47,9 @@ import org.apache.catalina.util.LifecycleSupport;
  *
  * @author  AO Industries, Inc.
  */
-public class JDBCManager extends ManagerBase implements ErrorHandler, Lifecycle, Runnable {
+public class JDBCManager extends ManagerBase implements Lifecycle, Runnable {
+
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(JDBCManager.class.getName());
 
     private static final int DEBUG_LEVEL=2;
 
@@ -262,7 +263,7 @@ public class JDBCManager extends ManagerBase implements ErrorHandler, Lifecycle,
                     jdbcPassword,
                     jdbcMaxConnections,
                     AOPool.DEFAULT_MAX_CONNECTION_AGE,
-                    this
+                    logger
                 );
             }
             return pool;
@@ -270,10 +271,10 @@ public class JDBCManager extends ManagerBase implements ErrorHandler, Lifecycle,
     }
 
     public void reportWarning(Throwable T, Object[] extraInfo) {
-        Logger logger = null;
-        if (container != null) logger = container.getLogger();
-        if (logger != null) {
-            logger.log(getName() + "[" + container.getName() + "]: AOConnectionPool", T, Logger.WARNING);
+        Logger myLogger = null;
+        if (container != null) myLogger = container.getLogger();
+        if (myLogger != null) {
+            myLogger.log(getName() + "[" + container.getName() + "]: AOConnectionPool", T, Logger.WARNING);
         } else {
             String containerName = null;
             if (container != null) containerName = container.getName();
@@ -1254,7 +1255,7 @@ public class JDBCManager extends ManagerBase implements ErrorHandler, Lifecycle,
                 try {
                     JDBCSession loadedSession;
                     synchronized(loadedSessions) {
-                        loadedSession=(JDBCSession)loadedSessions.get(id);
+                        loadedSession=loadedSessions.get(id);
                     }
                     if(loadedSession!=null) {
                         // Remove using normal expire method

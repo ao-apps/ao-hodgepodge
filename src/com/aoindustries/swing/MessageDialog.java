@@ -5,7 +5,6 @@ package com.aoindustries.swing;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.util.ErrorHandler;
 import com.aoindustries.util.StringUtility;
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -23,14 +22,12 @@ import javax.swing.JPanel;
  */
 public class MessageDialog extends DefaultJDialog implements ActionListener {
 
-    private final ErrorHandler errorHandler;
+    private static final long serialVersionUID = 2L;
 
     private EnterJButton okButton;
 
-    public MessageDialog(JFrame parent, ErrorHandler errorHandler, String title, String message) {
+    public MessageDialog(JFrame parent, String title, String message) {
         super(parent, title, true, -1, -1);
-
-        this.errorHandler=errorHandler;
 
         Container contentPane=getContentPane();
         contentPane.setLayout(new BorderLayout());
