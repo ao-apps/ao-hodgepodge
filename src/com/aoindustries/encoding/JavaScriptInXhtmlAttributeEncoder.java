@@ -9,32 +9,33 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Encode JavaScript into XHTML.  The static utility methods only encode
- * the characters.  When used as a MediaEncoder, it automatically adds
- * the &lt;script&gt; tags.
+ * Encode JavaScript into an XHTML attribute.  This does not add any quotes or
+ * tags.
  *
  * @author  AO Industries, Inc.
  */
-public class JavaScriptInXhtmlEncoder extends MediaEncoder {
+public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
 
     // <editor-fold defaultstate="collapsed" desc="Static Utility Methods">
     /**
      * Encodes a single character and returns its String representation
      * or null if no modification is necessary.  Any character that is
-     * not valid in XHTML, or is '&lt;', '&amp;', or '&gt;' is encoded to
-     * JavaScript \\uxxxx escapes.
+     * not valid in XHTML is encoded to JavaScript \\uxxxx escapes.
+     * " and ' are changed to XHTML entities.
      */
     private static String getEscapedCharacter(char ch) {
         // These characters are allowed in JavaScript but need encoded for XHTML
         if(ch=='<') return "&lt;";
         if(ch=='>') return "&gt;";
         if(ch=='&') return "&amp;";
+        if(ch=='"') return "&quot;";
+        if(ch=='\'') return "&#39;";
+        if(ch=='\r') return "&#xD;";
+        if(ch=='\n') return "&#xA;";
+        if(ch=='\t') return "&#x9;";
         if(
             // These character ranges are passed through unmodified
-            ch=='\r'
-            || ch=='\n'
-            || ch=='\t'
-            || (ch>=0x20 && ch<=0xD7FF)
+               (ch>=0x20 && ch<=0xD7FF)
             || (ch>=0xE000 && ch<=0xFFFD)
             // Out of 16-bit unicode range: || (ch>=0x10000 && ch<=0x10FFFF)
         ) return null;
@@ -43,12 +44,12 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
         return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
     }
 
-    public static void encodeJavaScriptInXhtml(CharSequence S, Appendable out) throws IOException {
+    public static void encodeJavaScriptInXhtmlAttribute(CharSequence S, Appendable out) throws IOException {
         if(S==null) S = "null";
-        encodeJavaScriptInXhtml(S, 0, S.length(), out);
+        encodeJavaScriptInXhtmlAttribute(S, 0, S.length(), out);
     }
 
-    public static void encodeJavaScriptInXhtml(CharSequence S, int start, int end, Appendable out) throws IOException {
+    public static void encodeJavaScriptInXhtmlAttribute(CharSequence S, int start, int end, Appendable out) throws IOException {
         if(S==null) S = "null";
         int toPrint = 0;
         for (int c = start; c < end; c++) {
@@ -66,7 +67,7 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
         if(toPrint>0) out.append(S, end-toPrint, end);
     }
 
-    public static void encodeJavaScriptInXhtml(char[] cbuf, int start, int len, Writer out) throws IOException {
+    public static void encodeJavaScriptInXhtmlAttribute(char[] cbuf, int start, int len, Writer out) throws IOException {
         int end = start+len;
         int toPrint = 0;
         for (int c = start; c < end; c++) {
@@ -84,14 +85,14 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
         if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
     }
 
-    public static void encodeJavaScriptInXhtml(char ch, Appendable out) throws IOException {
+    public static void encodeJavaScriptInXhtmlAttribute(char ch, Appendable out) throws IOException {
         String escaped = getEscapedCharacter(ch);
         if(escaped!=null) out.append(escaped);
         else out.append(ch);
     }
     // </editor-fold>
 
-    protected JavaScriptInXhtmlEncoder(Writer out) {
+    protected JavaScriptInXhtmlAttributeEncoder(Writer out) {
         super(out);
     }
 
@@ -107,47 +108,37 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
     }
 
     @Override
-    public void writePrefix() throws IOException {
-        out.write("<script type=\"text/javascript\">");
-    }
-
-    @Override
     public void write(int c) throws IOException {
         if(c>Character.MAX_VALUE) throw new AssertionError("Character value out of range: 0x"+Integer.toHexString(c));
-        encodeJavaScriptInXhtml((char)c, out);
+        encodeJavaScriptInXhtmlAttribute((char)c, out);
     }
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        encodeJavaScriptInXhtml(cbuf, off, len, out);
+        encodeJavaScriptInXhtmlAttribute(cbuf, off, len, out);
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
         if(str==null) throw new IllegalArgumentException("str is null");
-        encodeJavaScriptInXhtml(str, off, off+len, out);
+        encodeJavaScriptInXhtmlAttribute(str, off, off+len, out);
     }
 
     @Override
-    public JavaScriptInXhtmlEncoder append(CharSequence csq) throws IOException {
-        encodeJavaScriptInXhtml(csq, out);
+    public JavaScriptInXhtmlAttributeEncoder append(CharSequence csq) throws IOException {
+        encodeJavaScriptInXhtmlAttribute(csq, out);
         return this;
     }
 
     @Override
-    public JavaScriptInXhtmlEncoder append(CharSequence csq, int start, int end) throws IOException {
-        encodeJavaScriptInXhtml(csq, start, end, out);
+    public JavaScriptInXhtmlAttributeEncoder append(CharSequence csq, int start, int end) throws IOException {
+        encodeJavaScriptInXhtmlAttribute(csq, start, end, out);
         return this;
     }
 
     @Override
-    public JavaScriptInXhtmlEncoder append(char c) throws IOException {
-        encodeJavaScriptInXhtml(c, out);
+    public JavaScriptInXhtmlAttributeEncoder append(char c) throws IOException {
+        encodeJavaScriptInXhtmlAttribute(c, out);
         return this;
-    }
-
-    @Override
-    public void writeSuffix() throws IOException {
-        out.write("</script>");
     }
 }

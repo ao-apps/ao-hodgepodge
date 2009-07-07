@@ -81,6 +81,17 @@ public enum MediaType {
         boolean isUsedFor(String contentType) {
             return "application/xhtml+xml+pre".equalsIgnoreCase(contentType);
         }
+    },
+
+    /**
+     * Indicates that a value contains a XHTML attribute only.  This is a non-standard
+     * media type and is only used during internal conversions.  The final output
+     * should not be this type.
+     */
+    XHTML_ATTRIBUTE("application/xhtml+xml+attribute") {
+        boolean isUsedFor(String contentType) {
+            return "application/xhtml+xml+attribute".equalsIgnoreCase(contentType);
+        }
     };
 
     private final String mediaType;

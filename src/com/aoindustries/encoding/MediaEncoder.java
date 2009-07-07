@@ -45,6 +45,7 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
                 switch(containerType) {
                     case TEXT: encoder = null; break; // No conversion necessary
                     case XHTML : encoder = new JavaScriptInXhtmlEncoder(out); break;
+                    case XHTML_ATTRIBUTE : encoder = new JavaScriptInXhtmlAttributeEncoder(out); break;
                     case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out, userLocale); break; // Just treat as text
                     default: throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }

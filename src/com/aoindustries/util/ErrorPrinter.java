@@ -6,6 +6,7 @@ package com.aoindustries.util;
  * All rights reserved.
  */
 import com.aoindustries.sql.WrappedSQLException;
+import com.aoindustries.util.logging.ErrorPrinterFormatter;
 import java.io.Flushable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +19,8 @@ import java.sql.SQLWarning;
 /**
  * Prints errors with more detail than a standard printStackTrace() call.  Is also able to
  * capture the error into a <code>String</code>.
+ *
+ * @see  ErrorPrinterFormatter
  *
  * @author  AO Industries, Inc.
  */
@@ -88,7 +91,7 @@ public class ErrorPrinter {
      * @param out
      * @param extraInfo
      */
-    public static void printStackTraces(Throwable T, Appendable out, Object[] extraInfo) {
+    public static void printStackTraces(Throwable thrown, Appendable out, Object[] extraInfo) {
         
         synchronized(out) {
             appendln(out);
@@ -139,7 +142,8 @@ public class ErrorPrinter {
             }
 
             appendln("    Exceptions", out);
-            printThrowables(T, out, 8);
+            if(thrown==null) appendln("        No exceptions", out);
+            else printThrowables(thrown, out, 8);
 
             // End Report
             appendln(out);
@@ -156,13 +160,13 @@ public class ErrorPrinter {
         }
     }
 
-    private static void printThrowables(Throwable T, Appendable out, int indent) {
+    private static void printThrowables(Throwable thrown, Appendable out, int indent) {
         for(int c=0;c<indent;c++) append(' ', out);
-        appendln(T.getClass().getName(), out);
-        printMessage(out, indent+4, "Message...........: ", T.getMessage());
-        printMessage(out, indent+4, "Localized Message.: ", T.getLocalizedMessage());
-        if(T instanceof SQLException) {
-            SQLException sql=(SQLException)T;
+        appendln(thrown.getClass().getName(), out);
+        printMessage(out, indent+4, "Message...........: ", thrown.getMessage());
+        printMessage(out, indent+4, "Localized Message.: ", thrown.getLocalizedMessage());
+        if(thrown instanceof SQLException) {
+            SQLException sql=(SQLException)thrown;
             if(sql instanceof WrappedSQLException) printMessage(out, indent+4, "SQL Statement.....: ", ((WrappedSQLException)sql).getSqlString());
             for(int c=0;c<(indent+4);c++) append(' ', out);
             append("SQL Error Code....: ", out);
@@ -170,8 +174,8 @@ public class ErrorPrinter {
             for(int c=0;c<(indent+4);c++) append(' ', out);
             append("SQL State.........: ", out);
             appendln(sql.getSQLState(), out);
-        } else if(T instanceof WrappedException) {
-            WrappedException wrapped=(WrappedException)T;
+        } else if(thrown instanceof WrappedException) {
+            WrappedException wrapped=(WrappedException)thrown;
             Object[] wrappedInfo=wrapped.getExtraInfo();
             if(wrappedInfo!=null && wrappedInfo.length>0) {
                 for(int c=0;c<(indent+4);c++) append(' ', out);
@@ -181,9 +185,9 @@ public class ErrorPrinter {
                     appendln(wrappedInfo[c], out);
                 }
             }
-        } else if(T instanceof AccessControlException) {
+        } else if(thrown instanceof AccessControlException) {
             try {
-                AccessControlException ace = (AccessControlException)T;
+                AccessControlException ace = (AccessControlException)thrown;
                 Permission permission = ace.getPermission();
                 for(int c=0;c<(indent+4);c++) append(' ', out);
                 append("Permission........: ", out);
@@ -207,13 +211,13 @@ public class ErrorPrinter {
         }
         for(int c=0;c<(indent+4);c++) append(' ', out);
         appendln("Stack Trace", out);
-        StackTraceElement[] stack=T.getStackTrace();
+        StackTraceElement[] stack=thrown.getStackTrace();
         for(int c=0;c<stack.length;c++) {
             for(int d=0;d<(indent+8);d++) append(' ', out);
             append("at ", out);
             appendln(stack[c].toString(), out);
         }
-        Throwable cause=T.getCause();
+        Throwable cause=thrown.getCause();
         if(cause!=null) {
             for(int c=0;c<(indent+4);c++) append(' ', out);
             appendln("Caused By", out);
@@ -221,10 +225,10 @@ public class ErrorPrinter {
         }
         // Uses reflection avoid binding to JspException directly.
         try {
-            Class<?> clazz=T.getClass();
+            Class<?> clazz=thrown.getClass();
             if(isSubclass(clazz, "javax.servlet.jsp.JspException")) {
                 Method method=clazz.getMethod("getRootCause", new Class[0]);
-                Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);
+                Throwable rootCause=(Throwable)method.invoke(thrown, new Object[0]);
                 if(rootCause!=null) {
                     for(int c=0;c<(indent+4);c++) append(' ', out);
                     appendln("Caused By", out);
@@ -241,10 +245,10 @@ public class ErrorPrinter {
         }
         // Uses reflection avoid binding to ServletException directly.
         try {
-            Class<?> clazz=T.getClass();
+            Class<?> clazz=thrown.getClass();
             if(isSubclass(clazz, "javax.servlet.ServletException")) {
                 Method method=clazz.getMethod("getRootCause", new Class[0]);
-                Throwable rootCause=(Throwable)method.invoke(T, new Object[0]);
+                Throwable rootCause=(Throwable)method.invoke(thrown, new Object[0]);
                 if(rootCause!=null) {
                     for(int c=0;c<(indent+4);c++) append(' ', out);
                     appendln("Caused By", out);
@@ -259,12 +263,12 @@ public class ErrorPrinter {
             // Ignored because we are dealing with one exception at a time
             // Afterall, this is the exception handling code
         }
-        if(T instanceof SQLException) {
-            if(T instanceof SQLWarning) {
-                SQLWarning nextSQL=((SQLWarning)T).getNextWarning();
+        if(thrown instanceof SQLException) {
+            if(thrown instanceof SQLWarning) {
+                SQLWarning nextSQL=((SQLWarning)thrown).getNextWarning();
                 if(nextSQL!=null) printThrowables(nextSQL, out, indent);
             } else {
-                SQLException nextSQL=((SQLException)T).getNextException();
+                SQLException nextSQL=((SQLException)thrown).getNextException();
                 if(nextSQL!=null) printThrowables(nextSQL, out, indent);
             }
         }
@@ -306,9 +310,9 @@ public class ErrorPrinter {
      * Gets the entire exception report as a <code>String</code>.  This is not
      * as efficient as directly writing the report due to the extra buffering.
      */
-    public static String getStackTraces(Throwable T, Object[] extraInfo) {
+    public static String getStackTraces(Throwable thrown, Object[] extraInfo) {
         StringBuilder out = new StringBuilder();
-        printStackTraces(T, out, extraInfo);
+        printStackTraces(thrown, out, extraInfo);
         return out.toString();
     }
 }

@@ -5,6 +5,7 @@ package com.aoindustries.io;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
+import com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder;
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
 import com.aoindustries.encoding.TextInXhtmlEncoder;
 import com.aoindustries.sql.SQLUtility;
@@ -481,9 +482,16 @@ final public class ChainWriter implements Appendable {
 
     /**
      * @see EncodingUtils#encodeJavaScriptStringInXml(java.lang.String, Appendable)
+     *
+     * @deprecated
      */
-    public ChainWriter encodeJavaScriptStringInXml(String S) throws IOException {
-        EncodingUtils.encodeJavaScriptStringInXml(S, out);
+    @Deprecated
+    public ChainWriter encodeJavaScriptStringInXml(String text) throws IOException {
+        // Escape for javascript
+        StringBuilder javascript = new StringBuilder(text.length());
+        TextInJavaScriptEncoder.encodeTextInJavaScript(text, javascript);
+        // Encode for XML attribute
+        JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute(javascript, out);
         return this;
     }
 
@@ -549,17 +557,19 @@ final public class ChainWriter implements Appendable {
     /**
      * Prints a JavaScript script that will preload the image at the provided URL.
      *
-     * @param url This should be the URL-encoded URL, but with &amp; as parameter separator
+     * @param url This should be the URL-encoded URL, but with only a standalone ampersand (&amp;) as parameter separator
      *             (not &amp;amp;)
      */
     public static void writeHtmlImagePreloadJavaScript(String url, Appendable out) throws IOException {
         out.append("<script type='text/javascript'>\n"
-                + "  // <![CDATA[\n"
                 + "  var img=new Image();\n"
-                + "  img.src='");
-        EncodingUtils.encodeJavaScriptStringInXml(url, out);
-        out.append("';\n"
-                + "  // ]]>\n"
+                + "  img.src=\"");
+        // Escape for javascript
+        StringBuilder javascript = new StringBuilder(url.length());
+        TextInJavaScriptEncoder.encodeTextInJavaScript(url, javascript);
+        // Encode for XML attribute
+        JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute(javascript, out);
+        out.append("\";\n"
                 + "</script>");
     }
 
