@@ -517,33 +517,6 @@ public class SQLUtility {
         out.append("</table>\n");
     }
 
-    /**
-     * @deprecated  Please use <code>ErrorPrinter.printStackTraces(Throwable)</code> instead.
-     *
-     * @see  ErrorPrinter#printStackTraces(Throwable)
-     */
-    public static void printStackTraces(SQLException err) {
-        ErrorPrinter.printStackTraces(err);
-    }
-
-    /**
-     * @deprecated  Please use <code>ErrorPrinter.printStackTraces(Throwable,PrintStream)</code> instead.
-     *
-     * @see  ErrorPrinter#printStackTraces(Throwable,PrintStream)
-     */
-    public static void printStackTraces(SQLException err, PrintStream out) {
-        ErrorPrinter.printStackTraces(err, out);
-    }
-
-    /**
-     * @deprecated  Please use <code>ErrorPrinter.printStackTraces(Throwable,PrintWriter)</code> instead.
-     *
-     * @see  ErrorPrinter#printStackTraces(Throwable,PrintWriter)
-     */
-    public static void printStackTraces(SQLException err, PrintWriter out) {
-        ErrorPrinter.printStackTraces(err, out);
-    }
-
     public static void printTable(Object[] titles, Object[] values, PrintWriter out, boolean isInteractive, boolean[] alignRights) {
         if(isInteractive) {
             // Find the widest for each column, taking the line wraps into account and skipping the '\r' characters

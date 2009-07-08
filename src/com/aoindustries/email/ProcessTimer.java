@@ -5,26 +5,24 @@ package com.aoindustries.email;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.io.*;
-import com.aoindustries.sql.*;
-import com.aoindustries.util.*;
-import com.oreilly.servlet.*;
-import java.io.*;
-import java.util.*;
+import com.aoindustries.util.StringUtility;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A <code>ProcessTimer</code> monitors how long something takes,
- * and notifies administrative personnel via email when the task
- * takes too long.
+ * and logs warnings when the task takes too long.
+ *
+ * This should be submitted to an <code>ExecutorService</code>, but probably
+ * one that is unbounded and prepared for long-running tasks.
  *
  * @author  AO Industries, Inc.
  */
 public class ProcessTimer implements Runnable {
-    
+
+    final private Logger logger;
     final private Random random;
-    final private String smtpServer;
-    final private String from;
-    final private String toList;
     final private String subject;
     final private String processDescription;
     final private long startTime;
@@ -34,19 +32,15 @@ public class ProcessTimer implements Runnable {
     private boolean isSleeping;
 
     public ProcessTimer(
+        Logger logger,
         Random random,
-        String smtpServer,
-        String from,
-        String toList,
         String subject,
         String processDescription,
         long maximumTime,
         long reminderInterval
     ) {
+        this.logger = logger;
         this.random=random;
-        this.smtpServer=smtpServer;
-        this.from=from;
-        this.toList=toList;
         this.subject=subject;
         this.processDescription=processDescription;
         this.startTime=System.currentTimeMillis();
@@ -54,15 +48,7 @@ public class ProcessTimer implements Runnable {
         this.reminderInterval=reminderInterval;
     }
     
-    public void start() {
-        synchronized(this) {
-            if(thread==null) {
-                (thread=new Thread(this)).start();
-            }
-        }
-    }
-    
-    public void stop() {
+    public void finished() {
         synchronized(this) {
             Thread T=thread;
             if(T!=null) {
@@ -73,18 +59,21 @@ public class ProcessTimer implements Runnable {
     }
     
     public void run() {
+        synchronized(this) {
+            thread=Thread.currentThread();
+        }
         try {
             isSleeping=true;
             Thread.sleep(maximumTime);
             isSleeping=false;
             if(thread==Thread.currentThread()) {
-                sendEmail(false);
+                logWarning(false);
                 while(thread==Thread.currentThread()) {
                     isSleeping=true;
                     Thread.sleep(reminderInterval);
                     isSleeping=false;
                     if(thread==Thread.currentThread()) {
-                        sendEmail(true);
+                        logWarning(true);
                     }
                 }
             }
@@ -93,17 +82,8 @@ public class ProcessTimer implements Runnable {
         }
     }
     
-    private void sendEmail(boolean isReminder) {
+    private void logWarning(boolean isReminder) {
         long currentTime=System.currentTimeMillis();
-        StringBuilder SB=new StringBuilder();
-        SB.append("Desc.: ").append(processDescription).append("\n"
-                + "Start: ").append(SQLUtility.getDateTime(startTime)).append("\n"
-                + "Maximum Duration: ").append(StringUtility.getTimeLengthString(currentTime-startTime)).append("\n");
-        String message=SB.toString();
-        System.err.println(message);
-        List<String> addys=StringUtility.splitStringCommaSpace(toList);
-        for(int c=0;c<addys.size();c++) {
-            ErrorMailer.reportError(random, message, smtpServer, from, addys.get(c), subject);
-        }
+        logger.log(Level.WARNING, subject+": Process="+processDescription+", Duration="+StringUtility.getTimeLengthString(currentTime-startTime));
     }
 }

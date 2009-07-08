@@ -5,11 +5,9 @@ package com.aoindustries.email;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.sql.*;
 import com.aoindustries.util.*;
 import com.oreilly.servlet.*;
 import java.io.*;
-import java.sql.*;
 import java.util.*;
 
 /**
@@ -21,7 +19,10 @@ import java.util.*;
  * @version  1.0
  *
  * @author  AO Industries, Inc.
+ *
+ * @deprecated  Please use standard java logging api.
  */
+@Deprecated
 public final class ErrorMailer {
 
     public static final int MINIMUM_PERIOD=15*60*1000;
