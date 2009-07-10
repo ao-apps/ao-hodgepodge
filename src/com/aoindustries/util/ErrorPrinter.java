@@ -229,13 +229,24 @@ public class ErrorPrinter {
             append("at ", out);
             appendln(stack[c].toString(), out);
         }
-        Throwable cause=thrown.getCause();
-        if(cause!=null) {
-            if(!isClosed(cause, closed)) {
-                closed.add(cause);
-                for(int c=0;c<(indent+4);c++) append(' ', out);
-                appendln("Caused By", out);
-                printThrowables(cause, out, indent+8, closed);
+        if(thrown instanceof WrappedExceptions) {
+            for(Throwable cause : ((WrappedExceptions)thrown).getCauses()) {
+                if(!isClosed(cause, closed)) {
+                    closed.add(cause);
+                    for(int c=0;c<(indent+4);c++) append(' ', out);
+                    appendln("Caused By", out);
+                    printThrowables(cause, out, indent+8, closed);
+                }
+            }
+        } else {
+            Throwable cause=thrown.getCause();
+            if(cause!=null) {
+                if(!isClosed(cause, closed)) {
+                    closed.add(cause);
+                    for(int c=0;c<(indent+4);c++) append(' ', out);
+                    appendln("Caused By", out);
+                    printThrowables(cause, out, indent+8, closed);
+                }
             }
         }
         // Uses reflection avoid binding to JspException directly.

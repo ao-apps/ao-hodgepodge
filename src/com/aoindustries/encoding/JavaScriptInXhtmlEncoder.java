@@ -11,7 +11,7 @@ import java.io.Writer;
 /**
  * Encode JavaScript into XHTML.  The static utility methods only encode
  * the characters.  When used as a MediaEncoder, it automatically adds
- * the &lt;script&gt; tags.
+ * the &lt;script&gt; tags and CDATA block.
  *
  * @author  AO Industries, Inc.
  */
@@ -108,7 +108,8 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void writePrefix() throws IOException {
-        out.write("<script type=\"text/javascript\">");
+        out.write("<script type=\"text/javascript\">\n"
+                + "  // <![CDATA[\n");
     }
 
     @Override
@@ -148,6 +149,7 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void writeSuffix() throws IOException {
-        out.write("</script>");
+        out.write("  // ]]>\n"
+                + "</script>");
     }
 }
