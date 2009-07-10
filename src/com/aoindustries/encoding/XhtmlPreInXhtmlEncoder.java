@@ -11,7 +11,7 @@ import java.util.Locale;
 
 /**
  * Writes XHTML preformatted text into (X)HTML by adding a pre tag wrapper.
- * Also validates its input (and thus its output) for XML-compatible characters.
+ * Also validates its input (and thus its output) for (X)HTML-compatible characters.
  *
  * @author  AO Industries, Inc.
  */

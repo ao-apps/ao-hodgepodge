@@ -482,10 +482,7 @@ final public class ChainWriter implements Appendable {
 
     /**
      * @see EncodingUtils#encodeJavaScriptStringInXml(java.lang.String, Appendable)
-     *
-     * @deprecated
      */
-    @Deprecated
     public ChainWriter encodeJavaScriptStringInXml(String text) throws IOException {
         // Escape for javascript
         StringBuilder javascript = new StringBuilder(text.length());

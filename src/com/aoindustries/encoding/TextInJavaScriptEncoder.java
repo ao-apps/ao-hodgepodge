@@ -35,7 +35,13 @@ public class TextInJavaScriptEncoder extends MediaEncoder {
             case '\t': return "\\t";
             default:
             {
-                if(ch<' ') return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
+                if(
+                    ch<' '
+                    // Encode the following as unicode because escape for HTML and XHTML is different
+                    || ch=='&' 
+                    || ch=='<'
+                    || ch=='>'
+                ) return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
                 // No conversion necessary
                 return null;
             }

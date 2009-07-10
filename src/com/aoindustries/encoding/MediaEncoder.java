@@ -61,6 +61,7 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
             case URL:
                 switch(containerType) {
                     case JAVASCRIPT: encoder = new UrlInJavaScriptEncoder(out, userLocale, response); break;
+                    case TEXT: encoder = new UrlInTextEncoder(out, userLocale); break;
                     case XHTML: encoder = new UrlInXhtmlEncoder(out, userLocale, response); break;
                     default: throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
