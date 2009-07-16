@@ -6,9 +6,8 @@ package com.aoindustries.util.logging;
  * All rights reserved.
  */
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -37,12 +36,7 @@ abstract public class QueuedHandler extends Handler {
 
     protected QueuedHandler(final String consoleExecutorThreadName, final String customExecutorThreadName) {
         setFormatter(ErrorPrinterFormatter.getInstance());
-        consoleExecutor = new ThreadPoolExecutor(
-            0,
-            1,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<Runnable>(),
+        consoleExecutor = Executors.newSingleThreadExecutor(
             new ThreadFactory() {
                 public Thread newThread(Runnable r) {
                     Thread thread = new Thread(r);
@@ -53,12 +47,7 @@ abstract public class QueuedHandler extends Handler {
                 }
             }
         );
-        customExecutor = new ThreadPoolExecutor(
-            0,
-            1,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<Runnable>(),
+        customExecutor = Executors.newSingleThreadExecutor(
             new ThreadFactory() {
                 public Thread newThread(Runnable r) {
                     Thread thread = new Thread(r);
@@ -118,13 +107,15 @@ abstract public class QueuedHandler extends Handler {
         customExecutor.shutdown();
         try {
             // Wait up to one minute for System.err to complete its tasks
-            consoleExecutor.awaitTermination(1, TimeUnit.MINUTES);
+            // NoSuchFieldError in Java 1.5: consoleExecutor.awaitTermination(1, TimeUnit.MINUTES);
+            consoleExecutor.awaitTermination(60, TimeUnit.SECONDS);
         } catch(InterruptedException err) {
             // Ignored
         }
         try {
             // Wait up to one minute for tickets to complete its tasks
-            customExecutor.awaitTermination(1, TimeUnit.MINUTES);
+            // NoSuchFieldError in Java 1.5: consoleExecutor.awaitTermination(1, TimeUnit.MINUTES);
+            consoleExecutor.awaitTermination(60, TimeUnit.SECONDS);
         } catch(InterruptedException err) {
             // Ignored
         }

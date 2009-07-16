@@ -5,10 +5,14 @@ package com.aoindustries.sql;
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
-import com.aoindustries.io.*;
-import com.aoindustries.util.*;
-import java.io.*;
-import java.sql.*;
+import com.aoindustries.util.EncodingUtils;
+import com.aoindustries.util.StringUtility;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Collection;
 
@@ -20,6 +24,9 @@ import java.util.Collection;
  * @author  AO Industries, Inc.
  */
 public class SQLUtility {
+
+    private SQLUtility() {
+    }
 
     /**
      * Escapes SQL so that it can be used safely in queries.
@@ -51,7 +58,7 @@ public class SQLUtility {
             char c = S.charAt(i);
 
             if (c == '\\' || c == '\'' || c == '"' || c == '%' || c == '_') {
-                B.append((char) '\\');
+                B.append('\\');
             }
             B.append(c);
         }
@@ -393,6 +400,9 @@ public class SQLUtility {
             isNegative = true;
             decimal = decimal.substring(1);
         } else isNegative = false;
+
+        // Add zero to beginning if starts with .
+        if(decimal.length()>0 && decimal.charAt(0)=='.') decimal='0'+decimal;
 
         // Allow for incomplete data like 2, 2., 2.3, and 2.34
         if(decimal.indexOf('.')==-1) decimal=decimal+".000";
