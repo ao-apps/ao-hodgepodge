@@ -26,9 +26,10 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
      */
     private static String getEscapedCharacter(char ch) {
         // These characters are allowed in JavaScript but need encoded for XHTML
-        if(ch=='<') return "&lt;";
-        if(ch=='>') return "&gt;";
-        if(ch=='&') return "&amp;";
+        // Commented-out because now using CDATA
+        // if(ch=='<') return "&lt;";
+        // if(ch=='>') return "&gt;";
+        // if(ch=='&') return "&amp;";
         if(
             // These character ranges are passed through unmodified
             ch=='\r'
