@@ -6,30 +6,42 @@
 package com.aoindustries.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * <code>BufferManager</code> manages a pool of <code>byte[]</code> and <code>char[]</code>
- * buffers that any <code>Thread</code> may use and then release.  This avoids the allocation
- * of memory for an operation that only needs a temporary buffer.
+ * <code>BufferManager</code> manages a reusable pool of <code>byte[]</code> and <code>char[]</code>
+ * buffers.  The buffers are stored as <code>ThreadLocal</code> to avoid overhead in NUMA architectures.
+ * This avoids the repetitive allocation of memory for an operation that only needs a temporary buffer.
  *
  * @author  AO Industries, Inc.
  */
 final public class BufferManager {
 
     /**
-     * The maximum number of buffers to keep for reuse.
+     * The maximum number of buffers to keep for reuse, per thread.
      */
-    private static final int MAXIMUM_BUFFERS=1024;
+    private static final int MAXIMUM_BUFFERS_PER_THREAD = 16;
 
     /**
      * The size of buffers that are returned.
      */
-    public static final int BUFFER_SIZE=4096;
+    public static final int BUFFER_SIZE = 4096;
 
-    private static final List<byte[]> bytes = new ArrayList<byte[]>();
+    private static final ThreadLocal<List<byte[]>> bytes = new ThreadLocal<List<byte[]>>() {
+        @Override
+        public List<byte[]> initialValue() {
+            return new ArrayList<byte[]>(MAXIMUM_BUFFERS_PER_THREAD);
+        }
+    };
 
-    private static final List<char[]> chars = new ArrayList<char[]>();
+    private static final ThreadLocal<List<char[]>> chars = new ThreadLocal<List<char[]>>() {
+        @Override
+        public List<char[]> initialValue() {
+            return new ArrayList<char[]>(MAXIMUM_BUFFERS_PER_THREAD);
+        }
+    };
 
     /**
      * Make no instances.
@@ -40,11 +52,11 @@ final public class BufferManager {
     /**
      * Various statistics
      */
-    private static long
-        bytesCreates=0,
-        bytesUses=0,
-        charsCreates=0,
-        charsUses=0
+    private static AtomicLong
+        bytesCreates = new AtomicLong(),
+        bytesUses = new AtomicLong(),
+        charsCreates = new AtomicLong(),
+        charsUses = new AtomicLong()
     ;
 
     /**
@@ -54,15 +66,16 @@ final public class BufferManager {
      * in a <code>finally</code> block.
      */
     public static byte[] getBytes() {
-        synchronized(bytes) {
-            bytesUses++;
-            int len = bytes.size();
-            if(len==0) {
-                bytesCreates++;
-                return new byte[BUFFER_SIZE];
-            }
-            return bytes.remove(len-1);
+        bytesUses.getAndIncrement();
+        List<byte[]> myBytes = bytes.get();
+        int len = myBytes.size();
+        if(len==0) {
+            bytesCreates.getAndIncrement();
+            return new byte[BUFFER_SIZE];
         }
+        byte[] buffer = myBytes.remove(len-1);
+        Arrays.fill(buffer, (byte)0);
+        return buffer;
     }
 
     /**
@@ -72,15 +85,16 @@ final public class BufferManager {
      * in a <code>finally</code> block.
      */
     public static char[] getChars() {
-        synchronized(chars) {
-            charsUses++;
-            int len = chars.size();
-            if(len==0) {
-                charsCreates++;
-                return new char[BUFFER_SIZE];
-            }
-            return chars.remove(len-1);
+        charsUses.getAndIncrement();
+        List<char[]> myChars = chars.get();
+        int len = myChars.size();
+        if(len==0) {
+            charsCreates.getAndIncrement();
+            return new char[BUFFER_SIZE];
         }
+        char[] buffer = myChars.remove(len-1);
+        Arrays.fill(buffer, (char)0);
+        return buffer;
     }
 
     /**
@@ -90,14 +104,13 @@ final public class BufferManager {
      * @param  buffer  the <code>byte[]</code> to release
      */
     public static void release(byte[] buffer) {
-        synchronized(bytes) {
-            // Error if already in the buffer list
-            assert !inList(buffer); // Better - to make a set
-            if(bytes.size()<MAXIMUM_BUFFERS) bytes.add(buffer);
-        }
+        List<byte[]> myBytes = bytes.get();
+        assert buffer.length==BUFFER_SIZE;
+        assert !inList(myBytes, buffer); // Error if already in the buffer list
+        if(myBytes.size()<MAXIMUM_BUFFERS_PER_THREAD) myBytes.add(buffer);
     }
-    private static boolean inList(byte[] buffer) {
-        for(byte[] inList : bytes) if(inList==buffer) return true;
+    private static boolean inList(List<byte[]> myBytes, byte[] buffer) {
+        for(byte[] inList : myBytes) if(inList==buffer) return true;
         return false;
     }
 
@@ -108,38 +121,29 @@ final public class BufferManager {
      * @param  buffer  the <code>char[]</code> to release
      */
     public static void release(char[] buffer) {
-        synchronized(chars) {
-            // Error if already in the buffer list
-            assert !inList(buffer); // Better - to make a set
-            if(chars.size()<MAXIMUM_BUFFERS) chars.add(buffer);
-        }
+        List<char[]> myChars = chars.get();
+        assert buffer.length==BUFFER_SIZE;
+        assert !inList(myChars, buffer); // Error if already in the buffer list
+        if(myChars.size()<MAXIMUM_BUFFERS_PER_THREAD) myChars.add(buffer);
     }
-    private static boolean inList(char[] buffer) {
-        for(char[] inList : chars) if(inList==buffer) return true;
+    private static boolean inList(List<char[]> myChars, char[] buffer) {
+        for(char[] inList : myChars) if(inList==buffer) return true;
         return false;
     }
 
     public static long getByteBufferCreates() {
-        synchronized(bytes) {
-            return bytesCreates;
-        }
+        return bytesCreates.get();
     }
 
     public static long getByteBufferUses() {
-        synchronized(bytes) {
-            return bytesUses;
-        }
+        return bytesUses.get();
     }
 
     public static long getCharBufferCreates() {
-        synchronized(chars) {
-            return charsCreates;
-        }
+        return charsCreates.get();
     }
 
     public static long getCharBufferUses() {
-        synchronized(chars) {
-            return charsUses;
-        }
+        return charsUses.get();
     }
 }
