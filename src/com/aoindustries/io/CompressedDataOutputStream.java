@@ -149,4 +149,19 @@ public class CompressedDataOutputStream extends DataOutputStream {
         writeBoolean(str!=null);
         if(str!=null) writeLongUTF(str);
     }
+
+    public void writeNullInteger(Integer i) throws IOException {
+        writeBoolean(i!=null);
+        if(i!=null) writeInt(i.intValue());
+    }
+
+    public void writeNullEnum(Enum e) throws IOException {
+        writeBoolean(e!=null);
+        if(e!=null) writeUTF(e.name());
+    }
+
+    public void writeNullLong(Long l) throws IOException {
+        writeBoolean(l!=null);
+        if(l!=null) writeLong(l.longValue());
+    }
 }

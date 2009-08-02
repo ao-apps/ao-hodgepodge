@@ -161,4 +161,22 @@ public class CompressedDataInputStream extends DataInputStream {
     public String readNullLongUTF() throws IOException {
         return readBoolean() ? readLongUTF() : null;
     }
+
+    public Integer readNullInteger() throws IOException {
+        return readBoolean() ? readInt() : null;
+    }
+
+    public <T extends Enum<T>> T readNullEnum(Class<T> enumType) throws IOException {
+        try {
+            return readBoolean() ? Enum.valueOf(enumType, readUTF()) : null;
+        } catch(IllegalArgumentException err) {
+            IOException ioErr = new IOException();
+            ioErr.initCause(err);
+            throw ioErr;
+        }
+    }
+
+    public Long readNullLong() throws IOException {
+        return readBoolean() ? readLong() : null;
+    }
 }
