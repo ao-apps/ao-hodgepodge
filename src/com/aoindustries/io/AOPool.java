@@ -9,7 +9,7 @@ import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.ErrorPrinter;
 import com.aoindustries.util.StringUtility;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.lang.reflect.Array;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class AOPool extends Thread {
+abstract public class AOPool<C,E extends Exception> extends Thread {
 
     public static final int DEFAULT_DELAY_TIME = 1 * 60 * 1000;
     public static final int DEFAULT_MAX_IDLE_TIME = 10 * 60 * 1000;
@@ -29,6 +29,7 @@ abstract public class AOPool extends Thread {
     public static final int DEFAULT_CONNECT_TIMEOUT = 5 * 1000;
     public static final int DEFAULT_SOCKET_SO_LINGER = 15;
 
+    final private Class<C> connectionClass;
     final private int delayTime;
     final private int maxIdleTime;
     private long startTime;
@@ -41,7 +42,7 @@ abstract public class AOPool extends Thread {
      *
      * @see  #getConnectionObject
      */
-    private final Object[] connections;
+    private final C[] connections;
 
     /**
      * The time each connection was created
@@ -95,7 +96,7 @@ abstract public class AOPool extends Thread {
     protected final Logger logger;
 
     /** Lock for wait/notify */
-    public final Object connectionLock = new Object(); // Why public?
+    private final Object connectionLock = new Object();
 
     /**
      * The RefreshConnection thread polls every connection in the connection pool. If it
@@ -106,22 +107,24 @@ abstract public class AOPool extends Thread {
 
     private int maxConcurrency=0;
 
-    protected AOPool(String name, int numConnections, long maxConnectionAge, Logger logger) {
-        this(DEFAULT_DELAY_TIME, DEFAULT_MAX_IDLE_TIME, name, numConnections, maxConnectionAge, logger);
+    protected AOPool(Class<C> connectionClass, String name, int numConnections, long maxConnectionAge, Logger logger) {
+        this(connectionClass, DEFAULT_DELAY_TIME, DEFAULT_MAX_IDLE_TIME, name, numConnections, maxConnectionAge, logger);
     }
 
-    protected AOPool(int delayTime, int maxIdleTime, String name, int numConnections, long maxConnectionAge, Logger logger) {
+    @SuppressWarnings("unchecked")
+    protected AOPool(Class<C> connectionClass, int delayTime, int maxIdleTime, String name, int numConnections, long maxConnectionAge, Logger logger) {
     	super(name+"&delayTime="+delayTime+"&maxIdleTime="+maxIdleTime+"&size="+numConnections+"&maxConnectionAge="+(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":Long.toString(maxConnectionAge)));
-        this.delayTime=delayTime;
-        this.maxIdleTime=maxIdleTime;
-        this.startTime=System.currentTimeMillis();
+        this.connectionClass = connectionClass;
+        this.delayTime = delayTime;
+        this.maxIdleTime = maxIdleTime;
+        this.startTime = System.currentTimeMillis();
         setPriority(Thread.NORM_PRIORITY);
         setDaemon(true);
         this.numConnections = numConnections;
         this.maxConnectionAge=maxConnectionAge;
         if(logger==null) throw new IllegalArgumentException("logger is null");
         this.logger=logger;
-        connections = new Object[numConnections];
+        connections = (C[])Array.newInstance(connectionClass, numConnections);
         createTimes = new long[numConnections];
         busyConnections = new boolean[numConnections];
         totalTimes = new long[numConnections];
@@ -134,12 +137,16 @@ abstract public class AOPool extends Thread {
         start();
     }
 
-    protected abstract void close(Object O) throws Exception;
+    protected abstract void close(C conn) throws E;
 
-    final protected void closeImp() throws Exception {
+    /**
+     * Shuts down the pool.
+     * TODO: Add mechanism to allow clean shutdown, don't just close immediately.
+     */
+    final public void close() throws E {
         runMore = false;
         for (int c = 0; c < numConnections; c++) {
-            Object conn = connections[c];
+            C conn = connections[c];
             if (conn != null) {
                 connections[c] = null;
                 close(conn);
@@ -147,16 +154,31 @@ abstract public class AOPool extends Thread {
         }
     }
 
+    /**
+     * Gets the number of connections that are currently busy.
+     */
     final public int getConcurrency() {
         int total=0;
         for(int c=0;c<numConnections;c++) if(busyConnections[c]) total++;
         return total;
     }
 
+    /**
+     * Gets the number of connections currently connected.
+     */
     final public int getConnectionCount() {
         int total=0;
         for(int c=0;c<numConnections;c++) if(connections[c]!=null) total++;
         return total;
+    }
+
+    /**
+     * Gets a connection, warning of a connection is already used by this thread.
+     *
+     * @see  #getConnection(int)
+     */
+    public C getConnection() throws E {
+        return getConnection(1);
     }
 
     /**
@@ -165,7 +187,7 @@ abstract public class AOPool extends Thread {
      * <code>Connection</code> sequentially. If found and the <code>Connection</code> is
      * a valid one, it returns that <code>Connection</code> object, otherwise creates a new
      * <code>connection</code>, adds it to the pool and also returns the <code>Connection</code>
-     * object. If all the connections in the pool are busy, it waits till a connection becomes
+     * object. If all the connections in the pool are busy, it waits until a connection becomes
      * available.
      *
      * @return     a <code>Connection</code> object
@@ -173,10 +195,10 @@ abstract public class AOPool extends Thread {
      * @exception  IOException if unable to access the <code>aoserv</code> file using
      *             <code>AOServConfiguration</code>
      */
-    final protected Object getConnectionImp(int maxConnections) throws Exception {
+    public C getConnection(int maxConnections) throws E {
         Thread thisThread=Thread.currentThread();
-        synchronized (connectionLock) {
-            while (true) {
+        while (true) {
+            synchronized (connectionLock) {
                 // Warn if this thread already has a conneciton
                 Throwable allocateStackTrace=null;
                 int useCount=0;
@@ -191,7 +213,7 @@ abstract public class AOPool extends Thread {
                     logger.logp(
                         Level.WARNING,
                         AOPool.class.getName(),
-                        "getConnectionImp",
+                        "getConnection",
                         null,
                         new Throwable("Warning: Thread allocated more than one connection.  The stack trace at allocation time is included.", allocateStackTrace)
                     );
@@ -200,7 +222,7 @@ abstract public class AOPool extends Thread {
                     if (!busyConnections[c]) {
                         long currentTime=System.currentTimeMillis();
                         startTimes[c] = currentTime;
-                        Object connection = connections[c];
+                        C connection = connections[c];
                         boolean doReset;
                         if (connection == null || isClosed(connection)) {
                             connection=connections[c]=getConnectionObject();
@@ -212,7 +234,7 @@ abstract public class AOPool extends Thread {
                         releaseTimes[c] = 0;
                         connectionUses[c]++;
                         threads[c]=thisThread;
-                        allocateStackTraces[c]=new Throwable("StackTrace at getConnectionImp(" + maxConnections + ") for Thread named \"" + thisThread.getName() + "\"");
+                        allocateStackTraces[c]=new Throwable("StackTrace at getConnection(" + maxConnections + ") for Thread named \"" + thisThread.getName() + "\"");
 
                         // Keep track of the maximum concurrency hit
                         if(maxConcurrency<numConnections) {
@@ -227,14 +249,20 @@ abstract public class AOPool extends Thread {
                 try {
                     connectionLock.wait();
                 } catch (InterruptedException err) {
-                    logger.logp(Level.WARNING, AOPool.class.getName(), "getConnectionImp", null, err);
+                    logger.logp(Level.WARNING, AOPool.class.getName(), "getConnection", null, err);
                 }
             }
         }
     }
 
-    protected abstract Object getConnectionObject() throws Exception;
+    /**
+     * Creates a new connection.
+     */
+    protected abstract C getConnectionObject() throws E;
 
+    /**
+     * Gets the total number of connects for the entire pool.
+     */
     final public long getConnects() {
         long total=0;
         for(int c=0;c<numConnections;c++) total+=connectCount[c];
@@ -268,14 +296,17 @@ abstract public class AOPool extends Thread {
         return total;
     }
 
-    protected abstract boolean isClosed(Object O) throws Exception;
+    protected abstract boolean isClosed(C conn) throws E;
 
+    /**
+     * Prints additional connection pool details.
+     */
     protected abstract void printConnectionStats(Appendable out) throws IOException;
 
     /**
      * Prints complete statistics about connection pool use.
      */
-    final protected void printStatisticsHTMLImp(Appendable out) throws Exception {
+    public final void printStatisticsHTML(Appendable out) throws IOException, E {
         out.append("<table style='border:1px;' cellspacing='0' cellpadding='2'>\n");
         printConnectionStats(out);
         out.append("  <tr><td>Max Connection Pool Size:</td><td>").append(Integer.toString(numConnections)).append("</td></tr>\n"
@@ -382,7 +413,7 @@ abstract public class AOPool extends Thread {
      * Releases the database <code>Connection</code> to the <code>Connection</code> pool.
      * @param connection java.sql.Connection
      */
-    final protected void releaseConnectionImp(Object connection) throws Exception {
+    final public void releaseConnection(C connection) throws E {
         // Reset connections as they are released
         if(!isClosed(connection)) resetConnection(connection);
 
@@ -419,7 +450,7 @@ abstract public class AOPool extends Thread {
         }
     }
 
-    protected abstract void resetConnection(Object O) throws Exception;
+    protected abstract void resetConnection(C conn) throws E;
 
     @Override
     final public void run() {
@@ -429,7 +460,7 @@ abstract public class AOPool extends Thread {
                     sleep(delayTime);
                     long time = System.currentTimeMillis();
                     synchronized (connectionLock) {
-                        Object[] myConnections = this.connections;
+                        C[] myConnections = this.connections;
                         int size = myConnections.length;
                         boolean[] busyConnection = busyConnections;
                         long[] releaseTime = releaseTimes;
@@ -458,8 +489,6 @@ abstract public class AOPool extends Thread {
                         }
                     }
                 }
-            } catch(SQLException err) {
-                logger.logp(Level.SEVERE, AOPool.class.getName(), "run", null, err);
             } catch (ThreadDeath TD) {
                 throw TD;
             } catch (Throwable T) {
@@ -473,7 +502,7 @@ abstract public class AOPool extends Thread {
         }
     }
 
-    protected abstract void throwException(String message, Throwable allocateStackTrace) throws Exception;
+    protected abstract void throwException(String message, Throwable allocateStackTrace) throws E;
     
     final public Logger getLogger() {
         return logger;

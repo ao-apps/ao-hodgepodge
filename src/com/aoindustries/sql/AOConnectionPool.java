@@ -6,7 +6,6 @@ package com.aoindustries.sql;
  * All rights reserved.
  */
 import com.aoindustries.io.AOPool;
-import com.aoindustries.io.ChainWriter;
 import com.aoindustries.util.EncodingUtils;
 import java.io.IOException;
 import java.sql.Connection;
@@ -19,11 +18,9 @@ import java.util.logging.Logger;
 /**
  * Reusable connection pooling with dynamic flaming tiger feature.
  *
- * @version  1.0
-*
  * @author  AO Industries, Inc.
  */
-final public class AOConnectionPool extends AOPool {
+final public class AOConnectionPool extends AOPool<Connection,SQLException> {
 
     private static final boolean DEBUG_TIMING = false;
 
@@ -33,26 +30,15 @@ final public class AOConnectionPool extends AOPool {
     private String password;
 
     public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge, Logger logger) {
-    	super(AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, logger);
+    	super(Connection.class, AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, logger);
         this.driver = driver;
         this.url = url;
         this.user = user;
         this.password = password;
     }
 
-    public void close() throws SQLException {
-        try {
-            closeImp();
-        } catch(Exception err) {
-            if(err instanceof SQLException) throw (SQLException)err;
-            SQLException sqlErr=new SQLException();
-            sqlErr.initCause(err);
-            throw sqlErr;
-        }
-    }
-
-    protected void close(Object O) throws SQLException {
-        ((Connection)O).close();
+    protected void close(Connection conn) throws SQLException {
+        conn.close();
     }
 
     /**
@@ -60,6 +46,7 @@ final public class AOConnectionPool extends AOPool {
      * @return
      * @throws SQLException
      */
+    @Override
     public Connection getConnection() throws SQLException {
         return getConnection(Connection.TRANSACTION_READ_COMMITTED, false, 1);
     }
@@ -90,10 +77,10 @@ final public class AOConnectionPool extends AOPool {
         try {
             while(conn==null) {
                 long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
-                conn=(Connection)getConnectionImp(maxConnections);
+                conn=super.getConnection(maxConnections);
                 if(DEBUG_TIMING) {
                     long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: AOConnectionPool: getConnection: getConnectionImp in "+(endTime-startTime)+" ms");
+                    System.err.println("DEBUG: AOConnectionPool: getConnection: super.getConnection in "+(endTime-startTime)+" ms");
                 }
                 try {
                     if(DEBUG_TIMING) startTime = System.currentTimeMillis();
@@ -115,7 +102,7 @@ final public class AOConnectionPool extends AOPool {
                     // TODO: InterBase has a problem with setReadOnly(true), this is a workaround
                     if(message!=null && message.indexOf("[interclient] Invalid operation when transaction is in progress.")!=-1) {
                         conn.close();
-                        releaseConnectionImp(conn);
+                        releaseConnection(conn);
                         conn=null;
                     } else throw err;
                 }
@@ -138,7 +125,7 @@ final public class AOConnectionPool extends AOPool {
         } catch(SQLException err) {
             if(conn!=null) {
                 try {
-                    releaseConnectionImp(conn);
+                    releaseConnection(conn);
                 } catch(Exception err2) {
                     // Will throw original error instead
                 }
@@ -147,7 +134,7 @@ final public class AOConnectionPool extends AOPool {
         } catch(Exception err) {
             if(conn!=null) {
                 try {
-                    releaseConnectionImp(conn);
+                    releaseConnection(conn);
                 } catch(Exception err2) {
                     // Will throw original error instead
                 }
@@ -158,7 +145,7 @@ final public class AOConnectionPool extends AOPool {
         }
     }
 
-    protected Object getConnectionObject() throws SQLException {
+    protected Connection getConnectionObject() throws SQLException {
         try {
             Class.forName(driver).newInstance();
             Connection conn = DriverManager.getConnection(url, user, password);
@@ -189,8 +176,8 @@ final public class AOConnectionPool extends AOPool {
         }
     }
 
-    protected boolean isClosed(Object O) throws SQLException {
-        return ((Connection)O).isClosed();
+    protected boolean isClosed(Connection conn) throws SQLException {
+        return conn.isClosed();
     }
 
     protected void printConnectionStats(Appendable out) throws IOException {
@@ -212,42 +199,18 @@ final public class AOConnectionPool extends AOPool {
         out.append("</td></tr>\n");
     }
 
-    public void printStatisticsHTML(ChainWriter out) throws SQLException {
-        try {
-            printStatisticsHTMLImp(out);
-        } catch(Exception err) {
-            if(err instanceof SQLException) throw (SQLException)err;
-            SQLException sqlErr=new SQLException();
-            sqlErr.initCause(err);
-            throw sqlErr;
-        }
-    }
-
-    public void releaseConnection(Connection connection) throws SQLException {
-        try {
-            releaseConnectionImp((Object)connection);
-        } catch(Exception err) {
-            if(err instanceof SQLException) throw (SQLException)err;
-            SQLException sqlErr=new SQLException();
-            sqlErr.initCause(err);
-            throw sqlErr;
-        }
-    }
-
-    protected void resetConnection(Object O) throws SQLException {
-        Connection connection=(Connection)O;
-
+    protected void resetConnection(Connection conn) throws SQLException {
         // Dump all warnings to System.err and clear warnings
-        SQLWarning warning=connection.getWarnings();
+        SQLWarning warning=conn.getWarnings();
         if(warning!=null) {
             logger.logp(Level.WARNING, AOConnectionPool.class.getName(), "resetConnection", null, warning);
         }
-        connection.clearWarnings();
+        conn.clearWarnings();
 
         // Autocommit will always be turned on, regardless what a previous transaction might have done
-        if(connection.getAutoCommit()==false) {
+        if(conn.getAutoCommit()==false) {
             long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
-            connection.setAutoCommit(true);
+            conn.setAutoCommit(true);
             if(DEBUG_TIMING) {
                 long endTime = System.currentTimeMillis();
                 System.err.println("DEBUG: AOConnectionPool: resetConnection: setAutoCommit(true) in "+(endTime-startTime)+" ms");
@@ -255,9 +218,9 @@ final public class AOConnectionPool extends AOPool {
         }
 
         // Restore to default transaction level
-        if(connection.getTransactionIsolation()!=Connection.TRANSACTION_READ_COMMITTED) {
+        if(conn.getTransactionIsolation()!=Connection.TRANSACTION_READ_COMMITTED) {
             long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
-            connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             if(DEBUG_TIMING) {
                 long endTime = System.currentTimeMillis();
                 System.err.println("DEBUG: AOConnectionPool: resetConnection: setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED) in "+(endTime-startTime)+" ms");
@@ -265,10 +228,10 @@ final public class AOConnectionPool extends AOPool {
         }
 
         // Restore the connection to a read-only state
-        if(!connection.isReadOnly()) {
+        if(!conn.isReadOnly()) {
             try {
                 long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
-                connection.setReadOnly(true);
+                conn.setReadOnly(true);
                 if(DEBUG_TIMING) {
                     long endTime = System.currentTimeMillis();
                     System.err.println("DEBUG: AOConnectionPool: resetConnection: setReadOnly(true) in "+(endTime-startTime)+" ms");
@@ -277,14 +240,14 @@ final public class AOConnectionPool extends AOPool {
                 String message=err.getMessage();
                 // TODO: InterBase has a problem with setReadOnly(true), this is a workaround
                 if(message!=null && message.indexOf("[interclient] Invalid operation when transaction is in progress.")!=-1) {
-                    connection.close();
+                    conn.close();
                 } else throw err;
             }
         }
     }
 
-    protected void throwException(String message, Throwable allocateStackTrace) throws IOException {
-        IOException err=new IOException(message);
+    protected void throwException(String message, Throwable allocateStackTrace) throws SQLException {
+        SQLException err=new SQLException(message);
         err.initCause(allocateStackTrace);
         throw err;
     }
