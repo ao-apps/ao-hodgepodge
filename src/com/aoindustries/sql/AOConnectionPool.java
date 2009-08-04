@@ -30,7 +30,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException> {
     private String password;
 
     public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge, Logger logger) {
-    	super(Connection.class, AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, logger);
+    	super(AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, logger);
         this.driver = driver;
         this.url = url;
         this.user = user;
@@ -246,10 +246,10 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException> {
         }
     }
 
-    protected void throwException(String message, Throwable allocateStackTrace) throws SQLException {
+    protected SQLException newException(String message, Throwable cause) {
         SQLException err=new SQLException(message);
-        err.initCause(allocateStackTrace);
-        throw err;
+        if(cause!=null) err.initCause(cause);
+        return err;
     }
 
     @Override
