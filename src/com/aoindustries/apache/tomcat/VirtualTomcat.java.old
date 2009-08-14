@@ -1,0 +1,155 @@
+/*
+ * aocode-public - Reusable Java library of general tools with minimal external dependencies.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009  AO Industries, Inc.
+ *     support@aoindustries.com
+ *     7262 Bull Pen Cir
+ *     Mobile, AL 36695
+ *
+ * This file is part of aocode-public.
+ *
+ * aocode-public is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aocode-public is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.aoindustries.apache.tomcat;
+
+import com.aoindustries.profiler.*;
+import com.aoindustries.util.*;
+import java.io.*;
+import java.util.*;
+import org.apache.tomcat.startup.Tomcat;
+
+/**
+ * @author  AO Industries, Inc.
+ */
+final public class VirtualTomcat extends Thread {
+
+    public static final String WWW_DIRECTORY="/www";
+
+    private final String site;
+    private final ThreadGroup threadGroup;
+    private final String action;
+
+    private VirtualTomcat(
+        String site,
+        ThreadGroup threadGroup,
+        String action
+    ) {
+	super(threadGroup, "Tomcat Startup");
+        Profiler.startProfile(Profiler.INSTANTANEOUS, VirtualTomcat.class, "VirtualTomcat(String,ThreadGroup,String)", null);
+        try {
+            this.site=site;
+            this.threadGroup=threadGroup;
+            this.action=action;
+
+            start();
+        } finally {
+            Profiler.endProfile(Profiler.INSTANTANEOUS);
+        }
+    }
+
+    public static void main(String[] args) {
+        Profiler.startProfile(Profiler.UNKNOWN, VirtualTomcat.class, "main(String[])", null);
+        try {
+            int len = args.length;
+            String action;
+            if (len >= 2 && ((action = args[0]).equals("start") || action.equals("stop"))) {
+                String smtpHost;
+                try {
+                    Process P=Runtime.getRuntime().exec(new String[] {"/bin/hostname"});
+                    BufferedReader in=new BufferedReader(new InputStreamReader(P.getInputStream()));
+                    try {
+                        smtpHost=in.readLine();
+                    } finally {
+                        in.close();
+                    }
+                } catch(IOException err) {
+                    smtpHost="localhost";
+                }
+
+                // Set the SMTP server
+                System.setProperty("mail.smtp.host", smtpHost);
+
+                // Calculate the number of sites
+                int siteCount = len - 1;
+
+                // Build the list of site names
+                String[] sites = new String[siteCount];
+                System.arraycopy(args, 1, sites, 0, siteCount);
+
+                // Find the top most thread group
+                ThreadGroup TG = Thread.currentThread().getThreadGroup();
+                {
+                        ThreadGroup temp;
+                        while ((temp = TG.getParent()) != null)
+                                TG = temp;
+                }
+                TG = new ThreadGroup(TG, "VirtualTomcat");
+
+                // Build the thread groups that will be used
+                ThreadGroup[] threadGroups = new ThreadGroup[siteCount];
+                for (int c = 0; c < siteCount; c++)
+                        threadGroups[c] = new ThreadGroup(TG, sites[c]);
+
+                // Redirect the standard out and standard err
+                PrintStream out = new PrintStream(new VirtualTomcatOutputStream(System.err, sites, threadGroups));
+                System.setOut(out);
+                System.setErr(out);
+
+                // Start or stop each virtual tomcat
+                for (int c = 0; c < siteCount; c++) {
+                    try {
+                        new VirtualTomcat(sites[c], threadGroups[c], action);
+                        Thread.currentThread().sleep("start".equals(action) ? 1000 : 200);
+                    } catch (InterruptedException err) {
+                        ErrorPrinter.printStackTraces(err);
+                    }
+                }
+            } else {
+                System.err.println("usage: " + VirtualTomcat.class.getName() + " {start|stop} sitename [sitename] [...]");
+                System.exit(1);
+            }
+        } finally {
+            Profiler.endProfile(Profiler.UNKNOWN);
+        }
+    }
+
+    public void run() {
+        Profiler.startProfile(Profiler.UNKNOWN, VirtualTomcat.class, "run()", null);
+        try {
+            String[] params;
+            if(action.equals("start")) {
+                String[] SA={
+                    "-f",
+                    WWW_DIRECTORY+'/'+site+"/conf/server.xml"
+                };
+                params=SA;
+            } else {
+                String[] SA={
+                    "-f",
+                    WWW_DIRECTORY+'/'+site+"/conf/server.xml",
+                    "-stop"
+                };
+                params=SA;
+            }
+            try {
+                Tomcat.main(params);
+            } catch(ThreadDeath TD) {
+                throw TD;
+            } catch(Throwable T) {
+                ErrorPrinter.printStackTraces(T);
+            }
+        } finally {
+            Profiler.endProfile(Profiler.UNKNOWN);
+        }
+    }
+}

@@ -1,11 +1,28 @@
+/*
+ * aocode-public - Reusable Java library of general tools with minimal external dependencies.
+ * Copyright (C) 2006, 2007, 2008, 2009  AO Industries, Inc.
+ *     support@aoindustries.com
+ *     7262 Bull Pen Cir
+ *     Mobile, AL 36695
+ *
+ * This file is part of aocode-public.
+ *
+ * aocode-public is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aocode-public is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.aoindustries.util;
 
-import java.util.AbstractList;
 import java.util.Collection;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.RandomAccess;
 
 /**
  * A primitive collection.
@@ -14,45 +31,11 @@ import java.util.RandomAccess;
  */
 public interface LongCollection extends Collection<Long> {
 
-    /**
-     * Returns <tt>true</tt> if this list contains the specified element.
-     *
-     * @param elem element whose presence in this List is to be tested.
-     * @return  <code>true</code> if the specified element is present;
-     *		<code>false</code> otherwise.
-     */
     boolean contains(long elem);
 
-    /**
-     * Returns an array containing all of the elements in this list
-     * in the correct order.
-     *
-     * @return an array containing all of the elements in this list
-     * 	       in the correct order.
-     */
     long[] toArrayLong();
 
-    // Positional Access Operations
-
-    /**
-     * Appends the specified element to the end of this list.
-     *
-     * @param o element to be appended to this list.
-     * @return <tt>true</tt> (as per the general contract of Collection.add).
-     */
     boolean add(long o);
 
-    /**
-     * Removes a single instance of the specified element from this
-     * list, if it is present (optional operation).  More formally,
-     * removes an element <tt>e</tt> such that <tt>(o==null ? e==null :
-     * o.equals(e))</tt>, if the list contains one or more such
-     * elements.  Returns <tt>true</tt> if the list contained the
-     * specified element (or equivalently, if the list changed as a
-     * result of the call).<p>
-     *
-     * @param value element to be removed from this list, if present.
-     * @return <tt>true</tt> if the list contained the specified element.
-     */
     boolean removeByValue(long value);
 }

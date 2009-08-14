@@ -1,19 +1,38 @@
+/*
+ * aocode-public - Reusable Java library of general tools with minimal external dependencies.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009  AO Industries, Inc.
+ *     support@aoindustries.com
+ *     7262 Bull Pen Cir
+ *     Mobile, AL 36695
+ *
+ * This file is part of aocode-public.
+ *
+ * aocode-public is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aocode-public is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.aoindustries.sql;
 
-/*
- * Copyright 2001-2009 by AO Industries, Inc.,
- * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
- * All rights reserved.
- */
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.LongList;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 
 /**
  * Wraps and simplifies access to a JDBC database.  If used directly as a <code>DatabaseAccess</code> each individual call is a separate transaction.
@@ -33,20 +52,71 @@ public class Database extends AbstractDatabaseAccess {
      */
     private final AOConnectionPool pool;
 
+    private final DataSource dataSource;
+    private final Logger logger;
+
     public Database(String driver, String url, String user, String password, int numConnections, long maxConnectionAge, Logger logger) {
         this(new AOConnectionPool(driver, url, user, password, numConnections, maxConnectionAge, logger));
     }
 
     public Database(AOConnectionPool pool) {
-        this.pool=pool;
+        this.pool = pool;
+        this.dataSource = null;
+        this.logger = null;
+    }
+
+    public Database(DataSource dataSource, Logger logger) {
+        this.pool = null;
+        this.dataSource = dataSource;
+        this.logger = logger;
     }
 
     public DatabaseConnection createDatabaseConnection() {
         return new DatabaseConnection(this);
     }
 
+    /**
+     * Gets the pool or <code>null</code> if using a <code>DataSource</code>.
+     */
     public AOConnectionPool getConnectionPool() {
         return pool;
+    }
+
+    /**
+     * Gets the data source or <code>null</code> if using an <code>AOConnectionPool</code>.
+     */
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
+        // From pool
+        if(pool!=null) return pool.getConnection(isolationLevel, readOnly, maxConnections);
+        // From dataSource
+        Connection conn = dataSource.getConnection();
+        boolean successful = false;
+        try {
+            if(isolationLevel!=conn.getTransactionIsolation()) conn.setTransactionIsolation(isolationLevel);
+            if(readOnly!=conn.isReadOnly()) conn.setReadOnly(readOnly);
+            successful = true;
+            return conn;
+        } finally {
+            if(!successful) conn.close();
+        }
+    }
+
+    public void releaseConnection(Connection conn) throws SQLException {
+        // From pool
+        if(pool!=null) pool.releaseConnection(conn);
+        // From dataSource
+        if(!conn.isClosed()) conn.close();
+    }
+
+    public Logger getLogger() {
+        // From pool
+        if(pool!=null) return pool.getLogger();
+        // From dataSource
+        return logger;
     }
 
     public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
@@ -439,6 +509,6 @@ public class Database extends AbstractDatabaseAccess {
 
     @Override
     public String toString() {
-        return "Database("+pool.toString()+")";
+        return "Database("+(pool!=null ? pool.toString() : dataSource.toString())+")";
     }
 }

@@ -1,7 +1,10 @@
 package com.aoindustries.email;
 
-import java.io.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * This source is Copyright 1997 by Matthew Hixson &lt;hixson@frozenwave.com&gt; and Mark Spadoni &lt;speed@linux.dpilink.com&gt;
@@ -31,6 +34,7 @@ public class UUEncoder extends Thread {
 	output_buffer = new byte[BUFFER_SIZE];
     }
 
+    @Override
     public void run() {
 	try {
             int a = 0;
