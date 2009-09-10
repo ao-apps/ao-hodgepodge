@@ -29,4 +29,6 @@ package com.aoindustries.util;
  */
 public interface Sequence {
     long getNextSequenceValue();
+
+    void setNextSequenceValue(long nextValue);
 }

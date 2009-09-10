@@ -48,4 +48,8 @@ public class AtomicSequence implements Sequence {
     public long getNextSequenceValue() {
         return counter.getAndIncrement();
     }
+
+    public void setNextSequenceValue(long nextValue) {
+        counter.set(nextValue);
+    }
 }

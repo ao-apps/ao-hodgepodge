@@ -45,7 +45,7 @@ import sun.util.ResourceBundleEnumeration;
 
 /**
  * <p>
- * Obtains Wraps the resources with XHTML and scripts to allow the modification of the
+ * Wraps the resources with XHTML and scripts to allow the modification of the
  * resource bundle contents directly through the web interface.  Also adds an
  * indicator when the resource need to be verified.  Verification is required
  * when any other locale has a modified time greater than the verified time

@@ -46,4 +46,8 @@ public class UnsynchronizedSequence implements Sequence {
     public long getNextSequenceValue() {
         return counter++;
     }
+
+    public void setNextSequenceValue(long nextValue) {
+        counter = nextValue;
+    }
 }
