@@ -204,6 +204,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "  <div id=\"EditableResourceBundleEditorHeader\" style=\"border-bottom:1px solid black; background-color:#c0c0c0; height:2em; overflow:hidden\">\n"
                         + "    <div style=\"float:right; border:2px outset black; margin:.3em\"><a href=\"#\" onclick=\"if(EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility('hidden'); return false;\" style=\"text-decoration:none; color:black; background-color:white; padding-left:2px; padding-right:2px;\">✕</a></div>\n"
                         + "    <script type='text/javascript'>\n"
+                        + "      // <![CDATA[\n"
                         + "      function EditableResourceBundleEditorSetCookie(c_name,value,expiredays) {\n"
                         + "        var exdate=new Date();\n"
                         + "        exdate.setDate(exdate.getDate()+expiredays);\n"
@@ -227,6 +228,18 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "      function EditableResourceBundleEditorSetVisibility(visibility) {\n"
                         + "        document.getElementById('EditableResourceBundleEditor').style.visibility=visibility;\n"
                         + "        EditableResourceBundleEditorSetCookie(\"EditableResourceBundleEditorVisibility\", visibility, 31);\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      var EditableResourceBundleEditorSelectedRow = null;\n"
+                        + "      function EditableResourceBundleEditorSelectedRowOnClick(row, originalBackground) {\n"
+                        + "        row.EditableResourceBundleEditorSelectedRowOriginalBackground=originalBackground;\n"
+                        + "        if(EditableResourceBundleEditorSelectedRow!=row) {\n"
+                        + "          if(EditableResourceBundleEditorSelectedRow!=null) {\n" // && EditableResourceBundleEditorSelectedRow.style.backgroundColor!='yellow'
+                        + "            EditableResourceBundleEditorSelectedRow.style.backgroundColor=EditableResourceBundleEditorSelectedRow.EditableResourceBundleEditorSelectedRowOriginalBackground;\n"
+                        + "          }\n"
+                        + "          EditableResourceBundleEditorSelectedRow=row;\n"
+                        + "        }\n"
+                        + "        row.style.backgroundColor=\"red\";\n"
                         + "      }\n"
                         + "\n"
                         + "      var EditableResourceBundleEditorDragElem=null;\n"
@@ -307,6 +320,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "        event.preventDefault();\n"
                         + "        return false;\n"
                         + "      }\n"
+                        + "      // ]]>\n"
                         + "    </script>\n"
                         + "    <div"
                             + " style=\"text-align:center; font-weight:bold; font-size:x-large\""
@@ -332,8 +346,9 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     out.append("      <tr"
                             + " id=\"EditableResourceBundleEditorRow").append(id).append("\""
                             + " style=\"background-color:").append((i&1)==1 ? "white" : "#e0e0e0").append('"'
-                            + " onmouseover=\"if(EditableResourceBundleHighlightAll) EditableResourceBundleHighlightAll(").append(id).append(", false);\""
-                            + " onmouseout=\"if(EditableResourceBundleUnhighlightAll) EditableResourceBundleUnhighlightAll(").append(ids.get(0).toString()).append(");\""
+                            + " onclick=\"EditableResourceBundleEditorSelectedRowOnClick(this, '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\""
+                            + " onmouseover=\"if(typeof EditableResourceBundleHighlightAll == 'function') EditableResourceBundleHighlightAll(").append(id).append(", false);\""
+                            + " onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == 'function') EditableResourceBundleUnhighlightAll(").append(ids.get(0).toString()).append(");\""
                             + ">\n"
                             + "        <td style=\"text-align:right\">").append(Long.toString(lookupValue.id)).append("</td>\n"
                             + "        <td>");
@@ -400,7 +415,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     + "        if(id==ids[d]) {\n"
                     + "          var elem=document.getElementById(\"EditableResourceBundleEditorRow\"+ids[0]);\n"
                     + "          if(elem!=null) {\n"
-                    + "            elem.style.backgroundColor=background!=\"transparent\" ? background : (c&1)==0 ? \"white\" : \"#e0e0e0\";\n"
+                    + "            elem.style.backgroundColor=elem==(!scrollEditor && EditableResourceBundleEditorSelectedRow) ? \"red\" : background!=\"transparent\" ? background : elem==EditableResourceBundleEditorSelectedRow ? \"red\" : (c&1)==0 ? \"white\" : \"#e0e0e0\";\n"
                     + "            if(scrollEditor) {\n"
                     + "              var scroller=document.getElementById(\"EditableResourceBundleEditorScroller\");\n"
                     + "              scroller.scrollTop=elem.offsetTop-(scroller.clientHeight-elem.offsetHeight)/2;\n" // Centered
@@ -473,13 +488,14 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                 case XHTML :
                     StringBuilder SB = new StringBuilder();
                     SB
+                        .append("<!--").append(lookupValue.id).append("-->")
                         .append(isBlockElement ? "<div" : "<span")
                         .append(" id=\"EditableResourceBundleElement").append(elementId).append("\"")
                     ;
                     if(!validated) SB.append(" style=\"color:red\"");
                     SB
-                        .append(" onmouseover=\"if(EditableResourceBundleHighlightAll) EditableResourceBundleHighlightAll(").append(elementId).append(", true);\"")
-                        .append(" onmouseout=\"if(EditableResourceBundleUnhighlightAll) EditableResourceBundleUnhighlightAll(").append(elementId).append(");\"")
+                        .append(" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == 'function') EditableResourceBundleHighlightAll(").append(elementId).append(", true);\"")
+                        .append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == 'function') EditableResourceBundleUnhighlightAll(").append(elementId).append(");\"")
                         .append('>')
                         .append(value)
                         .append(isBlockElement ? "</div>" : "</span>")

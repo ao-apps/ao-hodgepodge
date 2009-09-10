@@ -130,20 +130,27 @@ public class ApplicationResourcesAccessor {
     }
 
     /**
+     * Disabled because causes duplicate XHTML element ids from EditableResourceBundle.
+     * 
+     * @see EditableResourceBundle
+     */
+    private static final boolean CACHE_ENABLED = false;
+
+    /**
      * Cache for resource lookups.
      */
-    private final ConcurrentMap<Locale,ConcurrentMap<String,String>> concurrentCache = new ConcurrentHashMap<Locale,ConcurrentMap<String,String>>();
+    private final ConcurrentMap<Locale,ConcurrentMap<String,String>> concurrentCache = CACHE_ENABLED ? new ConcurrentHashMap<Locale,ConcurrentMap<String,String>>() : null;
 
     /**
      * Looks for a match, caches successful results.
      */
     private String getString(String missingDefault, Locale locale, String key) {
         // Find the locale-specific cache
-        ConcurrentMap<String,String> concurrentLocaleMap = concurrentCache.get(locale);
-        if(concurrentLocaleMap==null) concurrentCache.putIfAbsent(locale, concurrentLocaleMap = new ConcurrentHashMap<String,String>());
+        ConcurrentMap<String,String> concurrentLocaleMap = CACHE_ENABLED ? concurrentCache.get(locale) : null;
+        if(CACHE_ENABLED && concurrentLocaleMap==null) concurrentCache.putIfAbsent(locale, concurrentLocaleMap = new ConcurrentHashMap<String,String>());
 
         // Look in the cache
-        String string = concurrentLocaleMap.get(key);
+        String string = CACHE_ENABLED ? concurrentLocaleMap.get(key) : null;
         if(string==null) {
             try {
                 ResourceBundle applicationResources = ResourceBundle.getBundle(resourceName, locale);
@@ -157,7 +164,7 @@ public class ApplicationResourcesAccessor {
                 string = missingDefault!=null ? missingDefault : ("???"+locale.toString()+"."+key+"???");
             } else {
                 // Add to cache to avoid subsequent lookups to ResourceBundle
-                concurrentLocaleMap.putIfAbsent(key, string);
+                if(CACHE_ENABLED) concurrentLocaleMap.putIfAbsent(key, string);
             }
         }
         return string;
