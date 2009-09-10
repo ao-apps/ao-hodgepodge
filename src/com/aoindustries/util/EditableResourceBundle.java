@@ -26,9 +26,11 @@ import com.aoindustries.encoding.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Map;
 
 /**
  * Wraps the resources with XHTML and scripts to allow the modification of the
@@ -48,7 +50,14 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         }
     };
 
-    private static final ThreadLocal<Sequence> idGenerator = new ThreadLocal<Sequence>() {
+    private static final ThreadLocal<Sequence> elementIdGenerator = new ThreadLocal<Sequence>() {
+        @Override
+        protected Sequence initialValue() {
+            return new UnsynchronizedSequence();
+        }
+    };
+
+    private static final ThreadLocal<Sequence> lookupIdGenerator = new ThreadLocal<Sequence>() {
         @Override
         protected Sequence initialValue() {
             return new UnsynchronizedSequence();
@@ -58,16 +67,16 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
     /**
      * Every lookup during a request is logged when editing enabled.
      */
-    private class Lookup implements Comparable<Lookup> {
+    static class LookupKey implements Comparable<LookupKey> {
 
-        private final EditableResourceBundle bundle;
-        private final String key;
-        private final String value;
-        private final MediaType mediaType;
-        private final Boolean isBlockElement;
-        private final boolean validated;
+        final EditableResourceBundle bundle;
+        final String key;
+        final String value;
+        final MediaType mediaType;
+        final Boolean isBlockElement;
+        final boolean validated;
 
-        private Lookup(
+        LookupKey(
             EditableResourceBundle bundle,
             String key,
             String value,
@@ -86,8 +95,8 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         @Override
         public boolean equals(Object obj) {
             if(obj == null) return false;
-            if(!(obj instanceof Lookup)) return false;
-            final Lookup other = (Lookup) obj;
+            if(!(obj instanceof LookupKey)) return false;
+            final LookupKey other = (LookupKey) obj;
             return
                 bundle==other.bundle
                 && key.equals(other.key)
@@ -102,55 +111,25 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
             return hash;
         }
 
-        public int compareTo(Lookup o) {
+        public int compareTo(LookupKey o) {
             int diff = bundle.compareTo(o.bundle);
             if(diff!=0) return diff;
             diff = key.compareToIgnoreCase(o.key);
             if(diff!=0) return diff;
             return key.compareTo(o.key);
         }
-
-        /**
-         * @return the bundle
-         */
-        EditableResourceBundle getBundle() {
-            return bundle;
-        }
-
-        /**
-         * @return the key
-         */
-        String getKey() {
-            return key;
-        }
-
-        /**
-         * @return the value
-         */
-        String getValue() {
-            return value;
-        }
-
-        MediaType getMediaType() {
-            return mediaType;
-        }
-
-        Boolean isBlockElement() {
-            return isBlockElement;
-        }
-
-        /**
-         * @return the validated
-         */
-        boolean isValidated() {
-            return validated;
-        }
     }
 
-    private static final ThreadLocal<SortedMap<Lookup,List<Long>>> requestLookups = new ThreadLocal<SortedMap<Lookup,List<Long>>>() {
+    static class LookupValue {
+        final long id = lookupIdGenerator.get().getNextSequenceValue();
+        final List<Long> ids = new ArrayList<Long>();
+        LookupValue() {}
+    }
+
+    private static final ThreadLocal<Map<LookupKey,LookupValue>> requestLookups = new ThreadLocal<Map<LookupKey,LookupValue>>() {
         @Override
-        protected SortedMap<Lookup,List<Long>> initialValue() {
-            return new TreeMap<Lookup,List<Long>>();
+        protected Map<LookupKey,LookupValue> initialValue() {
+            return new HashMap<LookupKey,LookupValue>();
         }
     };
 
@@ -168,7 +147,8 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
     public static void resetRequest(boolean canEditResources, String setStringUrl) {
         if(canEditResources && setStringUrl==null) throw new IllegalArgumentException("setStringUrl is null when canEditResources is true");
         EditableResourceBundle.canEditResources.set(canEditResources);
-        idGenerator.get().setNextSequenceValue(1);
+        elementIdGenerator.get().setNextSequenceValue(1);
+        lookupIdGenerator.get().setNextSequenceValue(1);
         requestLookups.remove();
         EditableResourceBundle.setStringUrl.set(setStringUrl);
     }
@@ -181,69 +161,269 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
      */
     public static void printEditableResourceBundleLookups(Appendable out) throws IOException {
         String setUrl = setStringUrl.get();
-        SortedMap<Lookup,List<Long>> lookups = requestLookups.get();
+        final Map<LookupKey,LookupValue> lookups = requestLookups.get();
         resetRequest(false, null);
-        if(setUrl!=null && !lookups.isEmpty()) {
-            out.append("<div style='position:fixed; bottom:0px; left:0px; width:100%; text-align:center'>\n");
-            int invalidCount = 0;
-            int missingCount = 0;
-            for(Lookup lookup : lookups.keySet()) {
-                if(lookup.getValue()==null) missingCount++;
-                else if(!lookup.isValidated()) invalidCount++;
-            }
-            out.append("  <a href=\"#\" onclick=\"document.getElementById('EditableResourceBundleEditor').style.visibility=document.getElementById('EditableResourceBundleEditor').style.visibility=='visible' ? 'hidden' : 'visible'; return false;\" style=\"text-decoration:none; color:black\"><span style='border:1px solid black; opacity:.875; background-color:white'>")
-                .append(Integer.toString(lookups.size())).append(lookups.size()==1 ? " Resource" : " Resources");
-            if(missingCount>0) {
-                out
-                    .append(" | ")
-                    .append(Integer.toString(missingCount))
-                    .append(" Missing")
-                ;
-            }
-            if(invalidCount>0) {
-                out
-                    .append(" | <span style='color:red; text-decoration:blink;'>")
-                    .append(Integer.toString(invalidCount))
-                    .append(" Invalidated</span>")
-                ;
-            }
-            out.append("</span></a>\n"
-                    + "</div>\n"
-                    + "<div id=\"EditableResourceBundleEditor\" style=\"position:fixed; left:10%; right:10%; top:10%; bottom:10%; visibility:hidden; border-left:1px solid black; border-top:1px solid black; border-right:2px solid black; border-bottom:2px solid black; background-color:white\">\n"
-                    + "  <div style=\"border-bottom:1px solid black; background-color:#c0c0c0; height:2em; overflow:hidden\">\n"
-                    + "    <div style=\"float:right; border:2px outset black; margin:.3em\"><a href=\"#\" onclick=\"document.getElementById('EditableResourceBundleEditor').style.visibility='hidden'; return false;\" style=\"text-decoration:none; color:black; background-color:white; padding-left:2px; padding-right:2px;\">Close</a></div>\n"
-                    + "    <div style=\"text-align:center; font-weight:bold; font-size:x-large\">Resource Editor</div>\n"
-                    + "  </div>\n"
-                    + "  <div style=\"position:absolute; left:0px; width:100%; top:2em; bottom:0px; overflow:auto\">\n"
-                    + "    <table border=\"1\" cellspacing=\"0\" cellpadding=\"2\" style=\"width:100%\">\n"
-                    + "      <tr>\n"
-                    + "        <th>Bundle</th>\n"
-                    + "        <th>Key</th>\n"
-                    + "        <th>Media Type</th>\n"
-                    + "        <th>Value</th>\n"
-                    //+ "        <th>State</th>\n"
-                    + "      </tr>\n");
-            for(Lookup lookup : lookups.keySet()) {
-                out.append("      <tr>\n"
-                        + "        <td>");
-                EncodingUtils.encodeHtml(lookup.getBundle().getClass().getName(), out);
-                out.append("</td>\n"
-                        + "        <td>");
-                EncodingUtils.encodeHtml(lookup.getKey(), out);
-                out.append("</td>\n"
-                        + "        <td>");
-                MediaType mediaType = lookup.getMediaType();
-                out.append(mediaType.getMediaType());
-                if(lookup.isBlockElement()!=null) out.append(" (").append(lookup.isBlockElement() ? "block" : "inline").append(')');
-                out.append("</td>\n"
-                        + "        <td></td>\n"
-                        //+ "        <td>").append(lookup.getMediaType()==MediaType.XHTML ? lookup.isBlockElement()?"Yes":"No").append("</td>\n"
-                        //+ "        <td>").append(lookup.getValue()==null?"Missing":lookup.isValidated()?"Up-to-date":"Invalidated").append("</td>\n"
+        if(!lookups.isEmpty()) {
+            // Sort by lookupValue.id to present the information in the same order as first seen in the request
+            List<LookupKey> lookupKeys = new ArrayList<LookupKey>(lookups.keySet());
+            Collections.sort(
+                lookupKeys,
+                new Comparator<LookupKey>() {
+                    public int compare(LookupKey key1, LookupKey key2) {
+                        return Long.valueOf(lookups.get(key1).id).compareTo(Long.valueOf(lookups.get(key2).id));
+                    }
+                }
+            );
+            if(setUrl!=null) {
+                out.append("<div style='position:fixed; bottom:0px; left:0px; width:100%; text-align:center'>\n");
+                int invalidCount = 0;
+                int missingCount = 0;
+                for(LookupKey lookup : lookupKeys) {
+                    if(lookup.value==null) missingCount++;
+                    else if(!lookup.validated) invalidCount++;
+                }
+                out.append("  <a href=\"#\" onclick=\"if(EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility(document.getElementById('EditableResourceBundleEditor').style.visibility=='visible' ? 'hidden' : 'visible'); return false;\" style=\"text-decoration:none; color:black\"><span style='border:1px solid black; background-color:white'>")
+                    .append(Integer.toString(lookups.size())).append(lookups.size()==1 ? " Resource" : " Resources");
+                if(missingCount>0) {
+                    out
+                        .append(" | ")
+                        .append(Integer.toString(missingCount))
+                        .append(" Missing")
+                    ;
+                }
+                if(invalidCount>0) {
+                    out
+                        .append(" | <span style='color:red; text-decoration:blink;'>")
+                        .append(Integer.toString(invalidCount))
+                        .append(" Invalidated</span>")
+                    ;
+                }
+                out.append("</span></a>\n"
+                        + "</div>\n"
+                        + "<div id=\"EditableResourceBundleEditor\" style=\"position:fixed; left:50px; width:640px; top:50px; height:480px; visibility:hidden; border-left:1px solid black; border-top:1px solid black; border-right:2px solid black; border-bottom:2px solid black; background-color:white\">\n"
+                        + "  <div id=\"EditableResourceBundleEditorHeader\" style=\"border-bottom:1px solid black; background-color:#c0c0c0; height:2em; overflow:hidden\">\n"
+                        + "    <div style=\"float:right; border:2px outset black; margin:.3em\"><a href=\"#\" onclick=\"if(EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility('hidden'); return false;\" style=\"text-decoration:none; color:black; background-color:white; padding-left:2px; padding-right:2px;\">✕</a></div>\n"
+                        + "    <script type='text/javascript'>\n"
+                        + "      function EditableResourceBundleEditorSetCookie(c_name,value,expiredays) {\n"
+                        + "        var exdate=new Date();\n"
+                        + "        exdate.setDate(exdate.getDate()+expiredays);\n"
+                        + "        document.cookie=c_name+\"=\"+escape(value)+((expiredays==null)?\"\":\"; expires=\"+exdate.toGMTString())+\"; path=/\";\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      // From http://www.w3schools.com/JS/js_cookies.asp\n"
+                        + "      function EditableResourceBundleEditorGetCookie(c_name) {\n"
+                        + "        if (document.cookie.length>0) {\n"
+                        + "          c_start=document.cookie.indexOf(c_name + \"=\");\n"
+                        + "          if (c_start!=-1) {\n"
+                        + "            c_start=c_start + c_name.length+1;\n"
+                        + "            c_end=document.cookie.indexOf(\";\",c_start);\n"
+                        + "            if (c_end==-1) c_end=document.cookie.length;\n"
+                        + "              return unescape(document.cookie.substring(c_start,c_end));\n"
+                        + "            }\n"
+                        + "        }\n"
+                        + "        return \"\";\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      function EditableResourceBundleEditorSetVisibility(visibility) {\n"
+                        + "        document.getElementById('EditableResourceBundleEditor').style.visibility=visibility;\n"
+                        + "        EditableResourceBundleEditorSetCookie(\"EditableResourceBundleEditorVisibility\", visibility, 31);\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      var EditableResourceBundleEditorDragElem=null;\n"
+                        + "      var EditableResourceBundleEditorResizeElem=null;\n"
+                        + "      var EditableResourceBundleEditorDownScreenX;\n"
+                        + "      var EditableResourceBundleEditorDownScreenY;\n"
+                        + "      var EditableResourceBundleEditorDownElemX;\n"
+                        + "      var EditableResourceBundleEditorDownElemY;\n"
+                        + "      var EditableResourceBundleEditorDownElemWidth;\n"
+                        + "      var EditableResourceBundleEditorDownElemHeight;\n"
+                        + "\n"
+                        + "      function EditableResourceBundleEditorDragMouseMove(event) {\n"
+                        + "        if(EditableResourceBundleEditorDragElem!=null) {\n"
+                        + "          var editorStyle=document.getElementById('EditableResourceBundleEditor').style;"
+                        + "          editorStyle.left=(EditableResourceBundleEditorDownElemX+event.screenX-EditableResourceBundleEditorDownScreenX)+'px';\n"
+                        + "          editorStyle.top=(EditableResourceBundleEditorDownElemY+event.screenY-EditableResourceBundleEditorDownScreenY)+'px';\n"
+                        + "          EditableResourceBundleEditorSetCookie(\"EditableResourceBundleEditorLeft\", editorStyle.left, 31);\n"
+                        + "          EditableResourceBundleEditorSetCookie(\"EditableResourceBundleEditorTop\", editorStyle.top, 31);\n"
+                        + "          event.preventDefault();\n"
+                        + "          return false;\n"
+                        + "        }\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      function EditableResourceBundleEditorDragMouseUp(event) {\n"
+                        + "        if(EditableResourceBundleEditorDragElem!=null) EditableResourceBundleEditorDragElem.style.cursor='auto';\n"
+                        + "        EditableResourceBundleEditorDragElem=null;\n"
+                        + "        document.removeEventListener('mousemove', EditableResourceBundleEditorDragMouseMove, true);\n"
+                        + "        document.removeEventListener('mouseup', EditableResourceBundleEditorDragMouseUp, true);\n"
+                        + "        document.getElementById('EditableResourceBundleEditorHeader').style.backgroundColor='#c0c0c0';\n"
+                        + "        event.preventDefault();\n"
+                        + "        return false;\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      function EditableResourceBundleEditorDragMouseDown(elem, event) {\n"
+                        + "        EditableResourceBundleEditorDragElem=elem;\n"
+                        + "        EditableResourceBundleEditorDownScreenX=event.screenX;\n"
+                        + "        EditableResourceBundleEditorDownScreenY=event.screenY;\n"
+                        + "        EditableResourceBundleEditorDownElemX=parseInt(document.getElementById('EditableResourceBundleEditor').style.left);\n"
+                        + "        EditableResourceBundleEditorDownElemY=parseInt(document.getElementById('EditableResourceBundleEditor').style.top);\n"
+                        + "        document.addEventListener('mousemove', EditableResourceBundleEditorDragMouseMove, true);\n"
+                        + "        document.addEventListener('mouseup', EditableResourceBundleEditorDragMouseUp, true);\n"
+                        + "        elem.style.cursor='move';\n"
+                        + "        document.getElementById('EditableResourceBundleEditorHeader').style.backgroundColor='red';\n"
+                        + "        event.preventDefault();\n"
+                        + "        return false;\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      function EditableResourceBundleEditorResizeMouseMove(event) {\n"
+                        + "        if(EditableResourceBundleEditorResizeElem!=null) {\n"
+                        + "          var editorStyle=document.getElementById('EditableResourceBundleEditor').style;"
+                        + "          editorStyle.width=Math.max(100, EditableResourceBundleEditorDownElemWidth+event.screenX-EditableResourceBundleEditorDownScreenX)+'px';\n"
+                        + "          editorStyle.height=Math.max(100, EditableResourceBundleEditorDownElemHeight+event.screenY-EditableResourceBundleEditorDownScreenY)+'px';\n"
+                        + "          EditableResourceBundleEditorSetCookie(\"EditableResourceBundleEditorWidth\", editorStyle.width, 31);\n"
+                        + "          EditableResourceBundleEditorSetCookie(\"EditableResourceBundleEditorHeight\", editorStyle.height, 31);\n"
+                        + "          event.preventDefault();\n"
+                        + "          return false;\n"
+                        + "        }\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      function EditableResourceBundleEditorResizeMouseUp(event) {\n"
+                        + "        EditableResourceBundleEditorResizeElem=null;\n"
+                        + "        document.removeEventListener('mousemove', EditableResourceBundleEditorResizeMouseMove, true);\n"
+                        + "        document.removeEventListener('mouseup', EditableResourceBundleEditorResizeMouseUp, true);\n"
+                        + "        document.getElementById('EditableResourceBundleEditor').style.borderColor='black black black black';\n"
+                        + "        event.preventDefault();\n"
+                        + "        return false;\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      function EditableResourceBundleEditorResizeMouseDown(elem, event) {\n"
+                        + "        EditableResourceBundleEditorResizeElem=elem;\n"
+                        + "        EditableResourceBundleEditorDownScreenX=event.screenX;\n"
+                        + "        EditableResourceBundleEditorDownScreenY=event.screenY;\n"
+                        + "        EditableResourceBundleEditorDownElemWidth=parseInt(document.getElementById('EditableResourceBundleEditor').style.width);\n"
+                        + "        EditableResourceBundleEditorDownElemHeight=parseInt(document.getElementById('EditableResourceBundleEditor').style.height);\n"
+                        + "        document.addEventListener('mousemove', EditableResourceBundleEditorResizeMouseMove, true);\n"
+                        + "        document.addEventListener('mouseup', EditableResourceBundleEditorResizeMouseUp, true);\n"
+                        + "        document.getElementById('EditableResourceBundleEditor').style.borderColor='red red red red';\n"
+                        + "        event.preventDefault();\n"
+                        + "        return false;\n"
+                        + "      }\n"
+                        + "    </script>\n"
+                        + "    <div"
+                            + " style=\"text-align:center; font-weight:bold; font-size:x-large\""
+                            + " onmousedown=\"return EditableResourceBundleEditorDragMouseDown(this, event);\""
+                            + ">Resource Editor</div>\n"
+                        + "  </div>\n"
+                        + "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:0px; overflow:auto\">\n"
+                        + "    <table border=\"1\" cellspacing=\"0\" cellpadding=\"2\" style=\"width:100%\">\n"
+                        + "      <tr style=\"background-color:#e0e0e0\">\n"
+                        + "        <th></th>\n"
+                        + "        <th>Bundle</th>\n"
+                        + "        <th>Key</th>\n"
+                        + "        <th>Media Type</th>\n"
+                        + "        <th>Value</th>\n"
+                        //+ "        <th>State</th>\n"
                         + "      </tr>\n");
+                int i = 0;
+                for(LookupKey lookupKey : lookupKeys) {
+                    LookupValue lookupValue = lookups.get(lookupKey);
+                    List<Long> ids = lookupValue.ids;
+                    i++;
+                    String id = ids.get(0).toString();
+                    out.append("      <tr"
+                            + " id=\"EditableResourceBundleEditorRow").append(id).append("\""
+                            + " style=\"background-color:").append((i&1)==1 ? "white" : "#e0e0e0").append('"'
+                            + " onmouseover=\"if(EditableResourceBundleHighlightAll) EditableResourceBundleHighlightAll(").append(id).append(", false);\""
+                            + " onmouseout=\"if(EditableResourceBundleUnhighlightAll) EditableResourceBundleUnhighlightAll(").append(ids.get(0).toString()).append(");\""
+                            + ">\n"
+                            + "        <td style=\"text-align:right\">").append(Long.toString(lookupValue.id)).append("</td>\n"
+                            + "        <td>");
+                    EncodingUtils.encodeHtml(lookupKey.bundle.getClass().getName(), out);
+                    out.append("</td>\n"
+                            + "        <td>");
+                    EncodingUtils.encodeHtml(lookupKey.key, out);
+                    out.append("</td>\n"
+                            + "        <td>");
+                    MediaType mediaType = lookupKey.mediaType;
+                    out.append(mediaType.getMediaType());
+                    if(lookupKey.isBlockElement!=null) out.append(" (").append(lookupKey.isBlockElement ? "block" : "inline").append(')');
+                    out.append("</td>\n"
+                            + "        <td></td>\n"
+                            //+ "        <td>").append(lookup.getMediaType()==MediaType.XHTML ? lookup.isBlockElement()?"Yes":"No").append("</td>\n"
+                            //+ "        <td>").append(lookup.getValue()==null?"Missing":lookup.isValidated()?"Up-to-date":"Invalidated").append("</td>\n"
+                            + "      </tr>\n");
+                }
+                out.append("    </table>\n"
+                        + "  </div>\n"
+                        + "  <div"
+                            + " style=\"position:absolute; right:-4px; width:19px; bottom:-4px; height:19px; overflow:hidden; cursor:nw-resize\""
+                            + " onmousedown=\"return EditableResourceBundleEditorResizeMouseDown(this, event);\""
+                        + "></div>\n"
+                        + "</div>\n");
             }
-            out.append("    </table>\n"
-                    + "  </div>\n"
-                    + "</div>\n");
+            // Highlight and editor functions
+            out.append("<script type='text/javascript'>\n"
+                    + "  // <![CDATA[\n"
+                    + "\n"
+                    + "  // Restore the editor to its previous position\n"
+                    + "  var EditableResourceBundleEditorStyle=document.getElementById(\"EditableResourceBundleEditor\").style;\n"
+                    + "  var EditableResourceBundleEditorWidth = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorWidth\");\n"
+                    + "  if(EditableResourceBundleEditorWidth!=\"\") EditableResourceBundleEditorStyle.width=EditableResourceBundleEditorWidth;\n"
+                    + "  var EditableResourceBundleEditorHeight = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorHeight\");\n"
+                    + "  if(EditableResourceBundleEditorHeight!=\"\") EditableResourceBundleEditorStyle.height=EditableResourceBundleEditorHeight;\n"
+                    + "  var EditableResourceBundleEditorTop = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorTop\");\n"
+                    + "  if(EditableResourceBundleEditorTop!=\"\" && (parseInt(EditableResourceBundleEditorTop)+parseInt(EditableResourceBundleEditorStyle.height))<=window.innerHeight) EditableResourceBundleEditorStyle.top=EditableResourceBundleEditorTop;\n"
+                    + "  var EditableResourceBundleEditorLeft = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorLeft\");\n"
+                    + "  if(EditableResourceBundleEditorLeft!=\"\" && (parseInt(EditableResourceBundleEditorLeft)+parseInt(EditableResourceBundleEditorStyle.width))<=window.innerWidth) EditableResourceBundleEditorStyle.left=EditableResourceBundleEditorLeft;\n"
+                    + "  var EditableResourceBundleEditorVisibility = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorVisibility\");\n"
+                    + "  if(EditableResourceBundleEditorVisibility!=\"\") EditableResourceBundleEditorStyle.visibility=EditableResourceBundleEditorVisibility;\n"
+                    + "\n"
+                    + "  var EditableResourceBundleElementSets=[");
+            boolean didOne1 = false;
+            for(LookupKey lookupKey : lookupKeys) {
+                LookupValue lookupValue = lookups.get(lookupKey);
+                if(didOne1) out.append(',');
+                else didOne1 = true;
+                out.append("\n    [");
+                boolean didOne2 = false;
+                for(Long id : lookupValue.ids) {
+                    if(didOne2) out.append(',');
+                    else didOne2 = true;
+                    out.append(id.toString());
+                }
+                out.append(']');
+            }
+            out.append("\n  ];\n"
+                    + "  function EditableResourceBundleSetAllBackgrounds(id, background, scrollEditor) {\n"
+                    + "    for(var c=0; c<EditableResourceBundleElementSets.length; c++) {\n"
+                    + "      var ids = EditableResourceBundleElementSets[c];\n"
+                    + "      for(var d=0; d<ids.length; d++) {\n"
+                    + "        if(id==ids[d]) {\n"
+                    + "          var elem=document.getElementById(\"EditableResourceBundleEditorRow\"+ids[0]);\n"
+                    + "          if(elem!=null) {\n"
+                    + "            elem.style.backgroundColor=background!=\"transparent\" ? background : (c&1)==0 ? \"white\" : \"#e0e0e0\";\n"
+                    + "            if(scrollEditor) {\n"
+                    + "              var scroller=document.getElementById(\"EditableResourceBundleEditorScroller\");\n"
+                    + "              scroller.scrollTop=elem.offsetTop-(scroller.clientHeight-elem.offsetHeight)/2;\n" // Centered
+                    + "            }\n"
+                    + "          }\n"
+                    + "          for(var e=0; e<ids.length; e++) {\n"
+                    + "            elem=document.getElementById(\"EditableResourceBundleElement\"+ids[e]);\n"
+                    + "            if(elem!=null) elem.style.backgroundColor=background;\n"
+                    + "          }\n"
+                    + "          return;\n"
+                    + "        }\n"
+                    + "      }\n"
+                    + "    }\n"
+                    + "  }\n"
+                    + "  function EditableResourceBundleHighlightAll(id, scrollEditor) {\n"
+                    + "    EditableResourceBundleSetAllBackgrounds(id, \"yellow\", scrollEditor);\n"
+                    + "  }\n"
+                    + "  function EditableResourceBundleUnhighlightAll(id) {\n"
+                    + "    EditableResourceBundleSetAllBackgrounds(id, \"transparent\", false);\n"
+                    + "  }\n"
+                    + "  // ]]>\n"
+                    + "</script>\n"
+            );
         }
     }
 
@@ -273,21 +453,43 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         // all translations
         boolean validated = false; //value!=null; // TODO
 
-        long id = idGenerator.get().getNextSequenceValue();
+        long elementId = elementIdGenerator.get().getNextSequenceValue();
         MediaType mediaType = getMediaType(key);
         Boolean isBlockElement = mediaType==MediaType.XHTML ? isBlockElement(key) : null;
+
+        // Add to the log
+        Map<LookupKey,LookupValue> lookups = requestLookups.get();
+        LookupKey lookupKey = new LookupKey(this, key, value, mediaType, isBlockElement, validated);
+        LookupValue lookupValue = lookups.get(lookupKey);
+        if(lookupValue==null) lookups.put(lookupKey, lookupValue = new LookupValue());
+        lookupValue.ids.add(elementId);
+
+        // Modify and return the value
         String modifiedValue;
         if(value==null) modifiedValue = null;
         else {
             // Perform optional type-specific modification
             switch(mediaType) {
                 case XHTML :
-                    if(isBlockElement) modifiedValue = "<div style=\"color:red\">"+value+"</div>";
-                    else modifiedValue = "<span style=\"color:red\">"+value+"</span>";
+                    StringBuilder SB = new StringBuilder();
+                    SB
+                        .append(isBlockElement ? "<div" : "<span")
+                        .append(" id=\"EditableResourceBundleElement").append(elementId).append("\"")
+                    ;
+                    if(!validated) SB.append(" style=\"color:red\"");
+                    SB
+                        .append(" onmouseover=\"if(EditableResourceBundleHighlightAll) EditableResourceBundleHighlightAll(").append(elementId).append(", true);\"")
+                        .append(" onmouseout=\"if(EditableResourceBundleUnhighlightAll) EditableResourceBundleUnhighlightAll(").append(elementId).append(");\"")
+                        .append('>')
+                        .append(value)
+                        .append(isBlockElement ? "</div>" : "</span>")
+                    ;
+                    modifiedValue = SB.toString();
                     break;
                 case TEXT :
                 case XHTML_PRE :
-                    modifiedValue = "<<<"+value+">>>";
+                    // <#< and >#> used to cause XHTML parse errors if text value not properly escaped
+                    modifiedValue = validated ? value : ("<"+lookupValue.id+"<"+value+">"+lookupValue.id+">");
                     break;
                 case URL :
                 case XHTML_ATTRIBUTE :
@@ -298,12 +500,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     throw new AssertionError("Unexpected type: "+mediaType);
             }
         }
-        // Add to the log
-        SortedMap<Lookup,List<Long>> lookups = requestLookups.get();
-        Lookup lookup = new Lookup(this, key, value, mediaType, isBlockElement, validated);
-        List<Long> ids = lookups.get(lookup);
-        if(ids==null) lookups.put(lookup, ids=new ArrayList<Long>());
-        ids.add(id);
         return modifiedValue==null ? value : modifiedValue;
     }
 }
