@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -438,8 +439,14 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         }
     }
 
-    public EditableResourceBundle(File sourceFile) {
+    final Locale locale;
+    private final EditableResourceBundleSet bundleSet;
+
+    public EditableResourceBundle(File sourceFile, Locale locale, EditableResourceBundleSet bundleSet) {
         super(sourceFile);
+        this.locale = locale;
+        this.bundleSet = bundleSet;
+        bundleSet.addBundle(this);
     }
 
     /**
@@ -475,7 +482,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         if(lookupValue==null) lookups.put(lookupKey, lookupValue = new LookupValue());
         lookupValue.ids.add(elementId);
         if(value==null) lookupValue.missingCount++;
-        if(invalidated) lookupValue.invalidatedCount++;
+        else if(invalidated) lookupValue.invalidatedCount++;
 
         // Modify and return the value
         String modifiedValue;
@@ -503,7 +510,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                 case TEXT :
                 case XHTML_PRE :
                     // <#< and >#> used to cause XHTML parse errors if text value not properly escaped
-                    modifiedValue = invalidated ? value : ("<"+lookupValue.id+"<"+value+">"+lookupValue.id+">");
+                    modifiedValue = invalidated ? ("<"+lookupValue.id+"<"+value+">"+lookupValue.id+">") : value;
                     break;
                 case URL :
                 case XHTML_ATTRIBUTE :
