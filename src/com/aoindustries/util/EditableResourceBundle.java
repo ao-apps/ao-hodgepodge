@@ -71,25 +71,19 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
         final EditableResourceBundle bundle;
         final String key;
-        final String value;
         final MediaType mediaType;
         final Boolean isBlockElement;
-        final boolean validated;
 
         LookupKey(
             EditableResourceBundle bundle,
             String key,
-            String value,
             MediaType mediaType,
-            Boolean isBlockElement,
-            boolean validated
+            Boolean isBlockElement
         ) {
             this.bundle = bundle;
             this.key = key;
-            this.value = value;
             this.mediaType = mediaType;
             this.isBlockElement = isBlockElement;
-            this.validated = validated;
         }
 
         @Override
@@ -123,6 +117,8 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
     static class LookupValue {
         final long id = lookupIdGenerator.get().getNextSequenceValue();
         final List<Long> ids = new ArrayList<Long>();
+        int missingCount = 0;
+        int invalidatedCount = 0;
         LookupValue() {}
     }
 
@@ -176,11 +172,11 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
             );
             if(setUrl!=null) {
                 out.append("<div style='position:fixed; bottom:0px; left:0px; width:100%; text-align:center'>\n");
-                int invalidCount = 0;
+                int invalidatedCount = 0;
                 int missingCount = 0;
-                for(LookupKey lookup : lookupKeys) {
-                    if(lookup.value==null) missingCount++;
-                    else if(!lookup.validated) invalidCount++;
+                for(LookupValue lookupValue : lookups.values()) {
+                    missingCount += lookupValue.missingCount;
+                    invalidatedCount += lookupValue.invalidatedCount;
                 }
                 out.append("  <a href=\"#\" onclick=\"if(EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility(document.getElementById('EditableResourceBundleEditor').style.visibility=='visible' ? 'hidden' : 'visible'); return false;\" style=\"text-decoration:none; color:black\"><span style='border:1px solid black; background-color:white'>")
                     .append(Integer.toString(lookups.size())).append(lookups.size()==1 ? " Resource" : " Resources");
@@ -191,10 +187,10 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         .append(" Missing")
                     ;
                 }
-                if(invalidCount>0) {
+                if(invalidatedCount>0) {
                     out
                         .append(" | <span style='color:red; text-decoration:blink;'>")
-                        .append(Integer.toString(invalidCount))
+                        .append(Integer.toString(invalidatedCount))
                         .append(" Invalidated</span>")
                     ;
                 }
@@ -466,7 +462,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         // Determine if the value is validated.  The value is validated
         // when its validated time is greater than the modified time of
         // all translations
-        boolean validated = false; //value!=null; // TODO
+        boolean invalidated = true; //value!=null; // TODO
 
         long elementId = elementIdGenerator.get().getNextSequenceValue();
         MediaType mediaType = getMediaType(key);
@@ -474,10 +470,12 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
         // Add to the log
         Map<LookupKey,LookupValue> lookups = requestLookups.get();
-        LookupKey lookupKey = new LookupKey(this, key, value, mediaType, isBlockElement, validated);
+        LookupKey lookupKey = new LookupKey(this, key, mediaType, isBlockElement);
         LookupValue lookupValue = lookups.get(lookupKey);
         if(lookupValue==null) lookups.put(lookupKey, lookupValue = new LookupValue());
         lookupValue.ids.add(elementId);
+        if(value==null) lookupValue.missingCount++;
+        if(invalidated) lookupValue.invalidatedCount++;
 
         // Modify and return the value
         String modifiedValue;
@@ -492,7 +490,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         .append(isBlockElement ? "<div" : "<span")
                         .append(" id=\"EditableResourceBundleElement").append(elementId).append("\"")
                     ;
-                    if(!validated) SB.append(" style=\"color:red\"");
+                    if(invalidated) SB.append(" style=\"color:red\"");
                     SB
                         .append(" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == 'function') EditableResourceBundleHighlightAll(").append(elementId).append(", true);\"")
                         .append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == 'function') EditableResourceBundleUnhighlightAll(").append(elementId).append(");\"")
@@ -505,7 +503,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                 case TEXT :
                 case XHTML_PRE :
                     // <#< and >#> used to cause XHTML parse errors if text value not properly escaped
-                    modifiedValue = validated ? value : ("<"+lookupValue.id+"<"+value+">"+lookupValue.id+">");
+                    modifiedValue = invalidated ? value : ("<"+lookupValue.id+"<"+value+">"+lookupValue.id+">");
                     break;
                 case URL :
                 case XHTML_ATTRIBUTE :
