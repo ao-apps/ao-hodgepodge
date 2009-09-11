@@ -23,6 +23,7 @@
 package com.aoindustries.util;
 
 import com.aoindustries.encoding.MediaType;
+import com.aoindustries.encoding.TextInJavaScriptEncoder;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Wraps the resources with XHTML and scripts to allow the modification of the
@@ -68,20 +71,20 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
     /**
      * Every lookup during a request is logged when editing enabled.
      */
-    static class LookupKey implements Comparable<LookupKey> {
+    static class LookupKey {
 
-        final EditableResourceBundle bundle;
+        final EditableResourceBundleSet bundleSet;
         final String key;
         final MediaType mediaType;
         final Boolean isBlockElement;
 
         LookupKey(
-            EditableResourceBundle bundle,
+            EditableResourceBundleSet bundleSet,
             String key,
             MediaType mediaType,
             Boolean isBlockElement
         ) {
-            this.bundle = bundle;
+            this.bundleSet = bundleSet;
             this.key = key;
             this.mediaType = mediaType;
             this.isBlockElement = isBlockElement;
@@ -93,7 +96,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
             if(!(obj instanceof LookupKey)) return false;
             final LookupKey other = (LookupKey) obj;
             return
-                bundle==other.bundle
+                bundleSet==other.bundleSet
                 && key.equals(other.key)
             ;
         }
@@ -101,25 +104,31 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         @Override
         public int hashCode() {
             int hash = 5;
-            hash = 97 * hash + bundle.hashCode();
+            hash = 97 * hash + bundleSet.hashCode();
             hash = 97 * hash + key.hashCode();
             return hash;
         }
+    }
 
-        public int compareTo(LookupKey o) {
-            int diff = bundle.compareTo(o.bundle);
-            if(diff!=0) return diff;
-            diff = key.compareToIgnoreCase(o.key);
-            if(diff!=0) return diff;
-            return key.compareTo(o.key);
+    static class LookupLocaleValue {
+        final boolean missing;
+        final boolean invalidated;
+        LookupLocaleValue(boolean missing, boolean invalidated) {
+            assert !(missing && invalidated) : "May not be invalidated when missing";
+            this.missing = missing;
+            this.invalidated = invalidated;
         }
     }
 
     static class LookupValue {
         final long id = lookupIdGenerator.get().getNextSequenceValue();
         final List<Long> ids = new ArrayList<Long>();
-        int missingCount = 0;
-        int invalidatedCount = 0;
+
+        /**
+         * The set of locales that were queried.
+         */
+        final Map<Locale,LookupLocaleValue> locales = new HashMap<Locale,LookupLocaleValue>();
+
         LookupValue() {}
     }
 
@@ -154,7 +163,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
      * Prints the resource bundle lookup editor.  This should be called at the end of a request,
      * just before the body tag is closed.
      *
-     * TODO: Add language resources to properties files
+     * TODO: Add language resources to properties files (but do not make it an editable properties file to avoid possible infinite recursion?)
      */
     public static void printEditableResourceBundleLookups(Appendable out) throws IOException {
         String setUrl = setStringUrl.get();
@@ -172,33 +181,63 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                 }
             );
             if(setUrl!=null) {
+                // Get the set of all locales
+                SortedSet<Locale> allLocales = new TreeSet<Locale>(LocaleComparator.getInstance());
+                for(LookupKey lookupKey : lookupKeys) allLocales.addAll(lookupKey.bundleSet.getLocales());
+
                 out.append("<div style='position:fixed; bottom:0px; left:0px; width:100%; text-align:center'>\n");
                 int invalidatedCount = 0;
                 int missingCount = 0;
                 for(LookupValue lookupValue : lookups.values()) {
-                    missingCount += lookupValue.missingCount;
-                    invalidatedCount += lookupValue.invalidatedCount;
+                    for(LookupLocaleValue localeValue : lookupValue.locales.values()) {
+                        if(localeValue.missing) missingCount++;
+                        else if(localeValue.invalidated) invalidatedCount++;
+                    }
                 }
                 out.append("  <a href=\"#\" onclick=\"if(EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility(document.getElementById('EditableResourceBundleEditor').style.visibility=='visible' ? 'hidden' : 'visible'); return false;\" style=\"text-decoration:none; color:black\"><span style='border:1px solid black; background-color:white'>")
                     .append(Integer.toString(lookups.size())).append(lookups.size()==1 ? " Resource" : " Resources");
                 if(missingCount>0) {
                     out
-                        .append(" | ")
+                        .append(" | <span style='color:red'>")
                         .append(Integer.toString(missingCount))
-                        .append(" Missing")
+                        .append(" Missing</span>")
                     ;
                 }
                 if(invalidatedCount>0) {
                     out
-                        .append(" | <span style='color:red; text-decoration:blink;'>")
+                        .append(" | <span style='color:blue'>")
                         .append(Integer.toString(invalidatedCount))
                         .append(" Invalidated</span>")
                     ;
                 }
                 out.append("</span></a>\n"
                         + "</div>\n"
-                        + "<div id=\"EditableResourceBundleEditor\" style=\"position:fixed; left:50px; width:640px; top:50px; height:480px; visibility:hidden; border-left:1px solid black; border-top:1px solid black; border-right:2px solid black; border-bottom:2px solid black; background-color:white\">\n"
-                        + "  <div id=\"EditableResourceBundleEditorHeader\" style=\"border-bottom:1px solid black; background-color:#c0c0c0; height:2em; overflow:hidden\">\n"
+                        + "<div id=\"EditableResourceBundleEditor\" style=\"position:fixed; left:50px; width:640px; top:50px; height:480px; visibility:hidden; border-left:1px solid black; border-top:1px solid black; border-right:2px solid black; border-bottom:2px solid black; background-color:white; overflow:hidden\">\n"
+                        + "  <div style=\"border-top:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; bottom:0px; height:").append(Integer.toString(allLocales.size()*4)).append("em; overflow:hidden\">\n");
+                int i = 0;
+                for(Locale locale : allLocales) {
+                    String toString = locale.toString();
+                    out.append("    <div style=\"position:absolute; left:0px; width:6em; top:").append(Integer.toString(i*4)).append("em; height:4em\">\n"
+                            // Vertical centering uses Method 1 from http://phrogz.net/CSS/vertical-align/index.html
+                            + "      <div style=\"position:absolute; top:50%; height:1em; margin-top:-.5em; padding-left:4px; padding-right:2px\">\n"
+                            + "        ").append(toString.length()==0 ? "Default" : toString).append("\n"
+                            + "      </div>\n"
+                            + "    </div>\n"
+                            + "    <div style=\"position:absolute; left:6em; right:10em; top:").append(Integer.toString(i*4)).append("em; height:4em\">\n"
+                            + "      <textarea disabled=\"disabled\" id=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i+1)).append("\" cols=\"40\" rows=\"4\" style=\"width:100%; height:100%\"></textarea>\n"
+                            + "    </div>\n"
+                            + "    <div style=\"position:absolute; width:10em; right:0px; top:").append(Integer.toString(i*4)).append("em; height:4em\">\n"
+                            + "      <div style=\"position:absolute; left:0px; width:100%; top:30%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
+                            + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
+                            + "      </div>\n"
+                            + "      <div style=\"position:absolute; left:0px; width:100%; top:70%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
+                            + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
+                            + "      </div>\n"
+                            + "    </div>\n");
+                    i++;
+                }
+                out.append("  </div>\n"
+                        + "  <div id=\"EditableResourceBundleEditorHeader\" style=\"border-bottom:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; top:0px; height:2em; overflow:hidden\">\n"
                         + "    <div style=\"float:right; border:2px outset black; margin:.3em\"><a href=\"#\" onclick=\"if(EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility('hidden'); return false;\" style=\"text-decoration:none; color:black; background-color:white; padding-left:2px; padding-right:2px;\">✕</a></div>\n"
                         + "    <script type='text/javascript'>\n"
                         + "      // <![CDATA[\n"
@@ -227,16 +266,149 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "        EditableResourceBundleEditorSetCookie(\"EditableResourceBundleEditorVisibility\", visibility, 31);\n"
                         + "      }\n"
                         + "\n"
+                        + "      var EditableResourceBundleEditorRowValues=[");
+                boolean didOne1 = false;
+                for(LookupKey lookupKey : lookupKeys) {
+                    EditableResourceBundleSet bundleSet = lookupKey.bundleSet;
+                    if(didOne1) out.append(',');
+                    else didOne1 = true;
+                    out.append("\n        [");
+                    boolean didOne2 = false;
+                    for(Locale locale : allLocales) {
+                        if(didOne2) out.append(',');
+                        else didOne2 = true;
+                        if(bundleSet.getLocales().contains(locale)) {
+                            // Value allowed
+                            out.append('"');
+                            String value = bundleSet.getResourceBundle(locale).getValue(lookupKey.key);
+                            if(value!=null) TextInJavaScriptEncoder.encodeTextInJavaScript(value, out);
+                            out.append('"');
+                        } else {
+                            // null means not allowed
+                            out.append("null");
+                        }
+                    }
+                    out.append(']');
+                }
+                out.append("\n  ];\n"
+                        + "\n"
+                        + "      var EditableResourceBundleEditorRowBaseNames=[");
+                didOne1 = false;
+                for(LookupKey lookupKey : lookupKeys) {
+                    if(didOne1) out.append(',');
+                    else didOne1 = true;
+                    out.append("\n        \"");
+                    TextInJavaScriptEncoder.encodeTextInJavaScript(lookupKey.bundleSet.getBaseName(), out);
+                    out.append('"');
+                }
+                out.append("\n  ];\n"
+                        + "\n"
+                        + "      var EditableResourceBundleEditorLocales=[");
+                didOne1 = false;
+                for(Locale locale : allLocales) {
+                    if(didOne1) out.append(',');
+                    else didOne1 = true;
+                    out.append("\n        \"");
+                    TextInJavaScriptEncoder.encodeTextInJavaScript(locale.toString(), out);
+                    out.append('"');
+                }
+                out.append("\n  ];\n"
+                        + "\n"
+                        + "      var EditableResourceBundleEditorRowKeys=[");
+                didOne1 = false;
+                for(LookupKey lookupKey : lookupKeys) {
+                    if(didOne1) out.append(',');
+                    else didOne1 = true;
+                    out.append("\n        \"");
+                    TextInJavaScriptEncoder.encodeTextInJavaScript(lookupKey.key, out);
+                    out.append('"');
+                }
+                out.append("\n  ];\n"
+                        + "\n"
                         + "      var EditableResourceBundleEditorSelectedRow = null;\n"
-                        + "      function EditableResourceBundleEditorSelectedRowOnClick(row, originalBackground) {\n"
+                        + "      var EditableResourceBundleEditorSelectedIndex = -1;\n"
+                        + "      function EditableResourceBundleEditorSelectedRowOnClick(index, row, originalBackground) {\n"
                         + "        row.EditableResourceBundleEditorSelectedRowOriginalBackground=originalBackground;\n"
                         + "        if(EditableResourceBundleEditorSelectedRow!=row) {\n"
                         + "          if(EditableResourceBundleEditorSelectedRow!=null) {\n" // && EditableResourceBundleEditorSelectedRow.style.backgroundColor!='yellow'
                         + "            EditableResourceBundleEditorSelectedRow.style.backgroundColor=EditableResourceBundleEditorSelectedRow.EditableResourceBundleEditorSelectedRowOriginalBackground;\n"
                         + "          }\n"
                         + "          EditableResourceBundleEditorSelectedRow=row;\n"
+                        + "          EditableResourceBundleEditorSelectedIndex=index;\n"
+                        + "          var rowValues=EditableResourceBundleEditorRowValues[index];\n"
+                        + "          for(var c=0; c<").append(Integer.toString(allLocales.size())).append("; c++) {\n"
+                        + "            var value=rowValues[c];\n"
+                        + "            var textArea=document.getElementById(\"EditableResourceBundleEditorTextArea\"+(c+1));\n"
+                        + "            var modifyButton=document.getElementById(\"EditableResourceBundleEditorModifyButton\"+(c+1));\n"
+                        + "            var validateButton=document.getElementById(\"EditableResourceBundleEditorValidateButton\"+(c+1));\n"
+                        + "            if(value==null) {\n"
+                        + "              textArea.disabled=true;\n"
+                        + "              modifyButton.disabled=true;\n"
+                        + "              validateButton.disabled=true;\n"
+                        + "              textArea.value=\"\";\n"
+                        + "            } else {\n"
+                        + "              textArea.value=value;\n"
+                        + "              textArea.disabled=false;\n"
+                        + "              modifyButton.disabled=false;\n"
+                        + "              validateButton.disabled=false;\n"
+                        + "            }\n"
+                        + "          }\n"
                         + "        }\n"
                         + "        row.style.backgroundColor=\"red\";\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      function EditableResourceBundleEditorUpdateElements(rowIndex, value) {\n"
+                        + "        var ids = EditableResourceBundleElementSets[rowIndex];\n"
+                        + "        for(var e=0; e<ids.length; e++) {\n"
+                        + "          elem=document.getElementById(\"EditableResourceBundleElement\"+ids[e]);\n"
+                        + "          if(elem!=null) {\n"
+                        //+ "            elem.firstChild.nodeValue=value;\n"
+                        + "            elem.innerHTML=value;\n"
+                        // From http://www.webdeveloper.com/forum/showthread.php?t=71464
+                        //+ "            var parser = new DOMParser();\n"
+                        //+ "            var doc=parser.parseFromString('<div xmlns=\"http://www.w3.org/1999/xhtml\">' + value + '<\\/div>', 'application/xhtml+xml');\n"
+                        //+ "            var root=doc.documentElement;\n"
+                        //+ "            for(var i=0; i<root.childNodes.length; ++i) {\n"
+                        //+ "              elem.appendChild(document.importNode(root.childNodes[i], true));\n"
+                        //+ "            }\n"
+                        + "          }\n"
+                        + "        }\n"
+                        + "      }\n"
+                        + "\n"
+                        + "      function EditableResourceBundleEditorModifyOnClick(localeIndex, modified) {\n"
+                        + "        if(EditableResourceBundleEditorSelectedIndex!=null) {\n"
+                        + "          var textArea=document.getElementById(\"EditableResourceBundleEditorTextArea\"+(localeIndex+1));\n"
+                        + "          var value=textArea.value;\n"
+                        // Update server
+                        + "          var request=new XMLHttpRequest();\n"
+                        + "          var url=\"").append(setUrl).append("?baseName=\"+encodeURI(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])+\"&locale=\"+encodeURI(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURI(EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURI(value)+\"&modified=\"+modified;\n"
+                        + "          request.open('GET', url, false);\n"
+                        + "          request.send(null);\n"
+                        + "          if(request.status!=200) {\n"
+                        + "            window.alert(\"Update failed: \"+request.status+\" from \"+url);\n"
+                        + "          } else {\n"
+                        // Updated local data
+                        + "            EditableResourceBundleEditorRowValues[EditableResourceBundleEditorSelectedIndex][localeIndex]=value;\n"
+                        // Updated in editor row
+                        + "            var rowLocaleElem=document.getElementById(\"EditableResourceBundleEditorRow\"+(EditableResourceBundleEditorSelectedIndex+1)+\"Locale\"+(localeIndex+1));\n"
+                        + "            if(rowLocaleElem==null) window.alert(\"rowLocaleElem is null\");\n"
+                        + "            else {\n"
+                        + "              var rowValue=(value.length>30) ? value.substring(0, 30)+\"\\u2026\" : value;\n"
+                        + "              if(rowLocaleElem.firstChild==null) rowLocaleElem.appendChild(document.createTextNode(rowValue));\n"
+                        + "              else rowLocaleElem.firstChild.nodeValue=rowValue;\n"
+                        + "              if(!modified) rowLocaleElem.style.backgroundColor=\"#c0ffcc\";\n"
+                        + "            }\n"
+                        // Update background colors in editor row for modify
+                        + "            if(modified) {\n"
+                        + "              for(var c=0;c<").append(Integer.toString(allLocales.size())).append(";c++) {\n"
+                        + "                rowLocaleElem=document.getElementById(\"EditableResourceBundleEditorRow\"+(EditableResourceBundleEditorSelectedIndex+1)+\"Locale\"+(c+1));\n"
+                        + "                if(rowLocaleElem!=null) rowLocaleElem.style.backgroundColor=c==localeIndex ? \"#c0ffc0\" : \"#c0c0ff\";\n"
+                        + "              }\n"
+                        + "            }\n"
+                        + "            EditableResourceBundleEditorUpdateElements(EditableResourceBundleEditorSelectedIndex, value);\n"
+                        + "          }\n"
+                        + "        }\n"
+                        + "        return false;\n"
                         + "      }\n"
                         + "\n"
                         + "      var EditableResourceBundleEditorDragElem=null;\n"
@@ -324,32 +496,103 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                             + " onmousedown=\"return EditableResourceBundleEditorDragMouseDown(this, event);\""
                             + ">Resource Editor</div>\n"
                         + "  </div>\n"
-                        + "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:0px; overflow:auto\">\n"
+                        + "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:").append(Integer.toString(allLocales.size()*4)).append("em; overflow:auto\">\n"
                         + "    <table border=\"1\" cellspacing=\"0\" cellpadding=\"2\" style=\"width:100%\">\n"
                         + "      <tr style=\"background-color:#e0e0e0\">\n"
-                        + "        <th></th>\n"
-                        + "        <th>Bundle</th>\n"
+                        + "        <th></th>\n");
+                for(Locale locale : allLocales) {
+                    String toString = locale.toString();
+                    out.append("        <th>").append(toString.length()==0 ? "Default" : toString).append("</th>\n");
+                }
+                out.append("        <th>Bundle Set</th>\n"
                         + "        <th>Key</th>\n"
                         + "        <th>Media Type</th>\n"
-                        + "        <th>Value</th>\n"
-                        //+ "        <th>State</th>\n"
                         + "      </tr>\n");
-                int i = 0;
+                i = 0;
                 for(LookupKey lookupKey : lookupKeys) {
+                    EditableResourceBundleSet bundleSet = lookupKey.bundleSet;
                     LookupValue lookupValue = lookups.get(lookupKey);
                     List<Long> ids = lookupValue.ids;
+                    String key = lookupKey.key;
                     i++;
                     String id = ids.get(0).toString();
                     out.append("      <tr"
                             + " id=\"EditableResourceBundleEditorRow").append(id).append("\""
                             + " style=\"background-color:").append((i&1)==1 ? "white" : "#e0e0e0").append('"'
-                            + " onclick=\"EditableResourceBundleEditorSelectedRowOnClick(this, '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\""
+                            + " onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", this, '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\""
                             + " onmouseover=\"if(typeof EditableResourceBundleHighlightAll == 'function') EditableResourceBundleHighlightAll(").append(id).append(", false);\""
                             + " onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == 'function') EditableResourceBundleUnhighlightAll(").append(ids.get(0).toString()).append(");\""
                             + ">\n"
-                            + "        <td style=\"text-align:right\">").append(Long.toString(lookupValue.id)).append("</td>\n"
-                            + "        <td>");
-                    EncodingUtils.encodeHtml(lookupKey.bundle.getClass().getName(), out);
+                            + "        <td style=\"text-align:right\">").append(Long.toString(lookupValue.id)).append("</td>\n");
+                    int localeIndex = 0;
+                    for(Locale locale : allLocales) {
+                        localeIndex++;
+                        if(bundleSet.getLocales().contains(locale)) {
+                            // Supported by this bundleSet
+                            LookupLocaleValue localeValue = lookupValue.locales.get(locale);
+
+                            // The border color represents the specific lookups performed.
+                            // Red: missing
+                            // Blue: invalidated
+                            // Black: validated
+                            String borderColor = null;
+                            if(localeValue!=null) {
+                                if(localeValue.missing) borderColor = "red";
+                                else if(localeValue.invalidated) borderColor = "blue";
+                                else borderColor = "black";
+                            }
+
+                            // The background color represents the value status.
+                            // Green: is most recently modified (only one unless somehow multiple modified at same exact moment)
+                            // Red: is missing
+                            // Blue: is invalidated
+                            // White: is validated
+                            String backgroundColor;
+                            EditableResourceBundle localeBundle = bundleSet.getResourceBundle(locale);
+                            String currentValue = localeBundle.getValue(key);
+                            if(currentValue==null) backgroundColor = "#ffc0c0"; // Missing
+                            else {
+                                // Find the most recently updated item
+                                Long newestModifiedTime = null;
+                                for(Locale possLocale : bundleSet.getLocales()) {
+                                    EditableResourceBundle possBundle = bundleSet.getResourceBundle(possLocale);
+                                    Long possModifiedTime = possBundle.getModifiedTime(key);
+                                    if(possModifiedTime!=null && (newestModifiedTime==null || possModifiedTime>newestModifiedTime)) newestModifiedTime = possModifiedTime;
+                                }
+                                Long modifiedTime = localeBundle.getModifiedTime(key);
+                                if(modifiedTime!=null && modifiedTime.equals(newestModifiedTime)) backgroundColor = "#c0ffc0"; // Newest modified time
+                                else {
+                                    Long validatedTime = localeBundle.getValidatedTime(key);
+                                    if(validatedTime==null) backgroundColor = newestModifiedTime==null ? "white" : "#c0c0ff"; // Not yet validated
+                                    else {
+                                        if(newestModifiedTime==null) backgroundColor = "white"; // Nothing modified, assume OK
+                                        else {
+                                            if(validatedTime<newestModifiedTime) backgroundColor = "#c0c0ff"; // Invalidated
+                                            else backgroundColor = "white";
+                                        }
+                                    }
+                                }
+                            }
+
+                            out.append("        <td id=\"EditableResourceBundleEditorRow").append(Integer.toString(i)).append("Locale").append(Integer.toString(localeIndex)).append("\" style=\"white-space:nowrap; ");
+                            if(borderColor!=null) out.append("border:2px solid ").append(borderColor).append("; ");
+                            out.append("background-color:").append(backgroundColor).append("\">");
+                            if(currentValue!=null) {
+                                if(currentValue.length()>30) {
+                                    EncodingUtils.encodeHtml(currentValue.substring(0, 30), out);
+                                    out.append("\u2026");
+                                } else {
+                                    EncodingUtils.encodeHtml(currentValue, out);
+                                }
+                            }
+                            out.append("</td>\n");
+                        } else {
+                            // Not supported by this bundleSet
+                            out.append("        <td style=\"opacity:.5;background-color:#404040;\"></td>\n");
+                        }
+                    }
+                    out.append("        <td>");
+                    EncodingUtils.encodeHtml(bundleSet.getBaseName(), out);
                     out.append("</td>\n"
                             + "        <td>");
                     EncodingUtils.encodeHtml(lookupKey.key, out);
@@ -359,15 +602,12 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     out.append(mediaType.getMediaType());
                     if(lookupKey.isBlockElement!=null) out.append(" (").append(lookupKey.isBlockElement ? "block" : "inline").append(')');
                     out.append("</td>\n"
-                            + "        <td></td>\n"
-                            //+ "        <td>").append(lookup.getMediaType()==MediaType.XHTML ? lookup.isBlockElement()?"Yes":"No").append("</td>\n"
-                            //+ "        <td>").append(lookup.getValue()==null?"Missing":lookup.isValidated()?"Up-to-date":"Invalidated").append("</td>\n"
                             + "      </tr>\n");
                 }
                 out.append("    </table>\n"
                         + "  </div>\n"
                         + "  <div"
-                            + " style=\"position:absolute; right:-4px; width:19px; bottom:-4px; height:19px; overflow:hidden; cursor:nw-resize\""
+                            + " style=\"position:absolute; right:0px; width:20px; bottom:0px; height:20px; overflow:hidden; cursor:nw-resize\""
                             + " onmousedown=\"return EditableResourceBundleEditorResizeMouseDown(this, event);\""
                         + "></div>\n"
                         + "</div>\n");
@@ -440,7 +680,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
     }
 
     final Locale locale;
-    private final EditableResourceBundleSet bundleSet;
+    final EditableResourceBundleSet bundleSet;
 
     public EditableResourceBundle(File sourceFile, Locale locale, EditableResourceBundleSet bundleSet) {
         super(sourceFile);
@@ -469,7 +709,21 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         // Determine if the value is validated.  The value is validated
         // when its validated time is greater than the modified time of
         // all translations
-        boolean invalidated = true; //value!=null; // TODO
+
+        // Find the most recently updated item
+        Long newestModifiedTime = null;
+        for(Locale possLocale : bundleSet.getLocales()) {
+            EditableResourceBundle possBundle = bundleSet.getResourceBundle(possLocale);
+            Long possModifiedTime = possBundle.getModifiedTime(key);
+            if(possModifiedTime!=null && (newestModifiedTime==null || possModifiedTime>newestModifiedTime)) newestModifiedTime = possModifiedTime;
+        }
+        boolean invalidated;
+        Long validatedTime = bundleSet.getResourceBundle(locale).getValidatedTime(key);
+        if(newestModifiedTime==null) invalidated = false; // Nothing modified, assume OK
+        else {
+            if(validatedTime==null) invalidated = true; // Only invalidated when at least one other item
+            else invalidated = validatedTime<newestModifiedTime;
+        }
 
         long elementId = elementIdGenerator.get().getNextSequenceValue();
         MediaType mediaType = getMediaType(key);
@@ -477,12 +731,12 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
         // Add to the log
         Map<LookupKey,LookupValue> lookups = requestLookups.get();
-        LookupKey lookupKey = new LookupKey(this, key, mediaType, isBlockElement);
+        LookupKey lookupKey = new LookupKey(bundleSet, key, mediaType, isBlockElement);
         LookupValue lookupValue = lookups.get(lookupKey);
         if(lookupValue==null) lookups.put(lookupKey, lookupValue = new LookupValue());
         lookupValue.ids.add(elementId);
-        if(value==null) lookupValue.missingCount++;
-        else if(invalidated) lookupValue.invalidatedCount++;
+        // Add this locale if not already set
+        if(!lookupValue.locales.containsKey(locale)) lookupValue.locales.put(locale, new LookupLocaleValue(value==null, invalidated));
 
         // Modify and return the value
         String modifiedValue;

@@ -24,9 +24,9 @@ package com.aoindustries.util;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,17 +54,7 @@ public class EditableResourceBundleSet {
      */
     public EditableResourceBundleSet(String baseName, Collection<Locale> locales) {
         // The locales are sorted by language, country, then variant.
-        SortedSet<Locale> modifiableSet = new TreeSet<Locale>(
-            new Comparator<Locale>() {
-                public int compare(Locale l1, Locale l2) {
-                    int diff = l1.getLanguage().compareToIgnoreCase(l2.getLanguage());
-                    if(diff!=0) return diff;
-                    diff = l1.getCountry().compareToIgnoreCase(l2.getCountry());
-                    if(diff!=0) return diff;
-                    return l1.getVariant().compareToIgnoreCase(l2.getVariant());
-                }
-            }
-        );
+        SortedSet<Locale> modifiableSet = new TreeSet<Locale>(LocaleComparator.getInstance());
         modifiableSet.addAll(locales);
         this.baseName = baseName;
         this.locales = Collections.unmodifiableSortedSet(modifiableSet);
@@ -81,5 +71,29 @@ public class EditableResourceBundleSet {
 
     public String getBaseName() {
         return baseName;
+    }
+
+    /**
+     * Gets the unmodifiable set of all locales supported by this bundle set.
+     */
+    public SortedSet<Locale> getLocales() {
+        return locales;
+    }
+
+    /**
+     * Gets the editable bundle for the provided locale.
+     */
+    public EditableResourceBundle getResourceBundle(Locale locale) {
+        EditableResourceBundle localeBundle = bundles.get(locale);
+        if(localeBundle==null) {
+            ResourceBundle resourceBundle = ResourceBundle.getBundle(baseName, locale);
+            if(!resourceBundle.getLocale().equals(locale)) throw new AssertionError("ResourceBundle not for this locale: "+locale);
+            if(!(resourceBundle instanceof EditableResourceBundle)) throw new AssertionError("ResourceBundle is not a EditableResourceBundle: "+resourceBundle);
+            localeBundle = (EditableResourceBundle)resourceBundle;
+            if(localeBundle.bundleSet!=this) throw new AssertionError("EditableResourceBundle not for this EditableResourceBundleSet: "+localeBundle);
+            if(!localeBundle.locale.equals(locale)) throw new AssertionError("EditableResourceBundle not for this locale: "+locale);
+            // EditableResourceBundle will have added the bundle to the bundles map.
+        }
+        return localeBundle;
     }
 }

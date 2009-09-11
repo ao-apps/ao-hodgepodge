@@ -94,6 +94,16 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     private final Map<String,String> valueMap = new ConcurrentHashMap<String,String>();
 
     /**
+     * All validated queries are performed on this concurrent map.
+     */
+    private final Map<String,Long> validatedMap = new ConcurrentHashMap<String,Long>();
+
+    /**
+     * All modified queries are performed on this concurrent map.
+     */
+    private final Map<String,Long> modifiedMap = new ConcurrentHashMap<String,Long>();
+
+    /**
      * All type queries are performed on this concurrent map.
      */
     private final Map<String,MediaType> typeMap = new ConcurrentHashMap<String,MediaType>();
@@ -160,10 +170,13 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
                 }
             } else if(key.endsWith(ISBLOCKELEMENT_SUFFIX)) {
                 isBlockElementMap.put(key.substring(0, key.length()-ISBLOCKELEMENT_SUFFIX.length()), Boolean.parseBoolean(value));
-            } else if(
-                !key.endsWith(VALIDATED_SUFFIX)
-                && !key.endsWith(MODIFIED_SUFFIX)
-            ) valueMap.put(key, value);
+            } else if(key.endsWith(VALIDATED_SUFFIX)) {
+                validatedMap.put(key.substring(0, key.length()-VALIDATED_SUFFIX.length()), Long.parseLong(value));
+            } else if(key.endsWith(MODIFIED_SUFFIX)) {
+                modifiedMap.put(key.substring(0, key.length()-MODIFIED_SUFFIX.length()), Long.parseLong(value));
+            } else {
+                valueMap.put(key, value);
+            }
         }
     }
 
@@ -188,9 +201,9 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
     protected void handleSetObject(String key, Object value, boolean modified) {
         if(key.endsWith(VALIDATED_SUFFIX)) throw new RuntimeException("Key may not end with "+VALIDATED_SUFFIX+": "+key);
-        if(key.endsWith(ISBLOCKELEMENT_SUFFIX)) throw new RuntimeException("Key may not end with "+ISBLOCKELEMENT_SUFFIX+": "+key);
         if(key.endsWith(MODIFIED_SUFFIX)) throw new RuntimeException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
         if(key.endsWith(MEDIATYPE_SUFFIX)) throw new RuntimeException("Key may not end with "+MEDIATYPE_SUFFIX+": "+key);
+        if(key.endsWith(ISBLOCKELEMENT_SUFFIX)) throw new RuntimeException("Key may not end with "+ISBLOCKELEMENT_SUFFIX+": "+key);
         // Updates are serialized
         synchronized(properties) {
             String currentTime = Long.toString(System.currentTimeMillis());
@@ -221,5 +234,26 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     protected Boolean handleIsBlockElement(String key) {
         if(key==null) throw new NullPointerException();
         return isBlockElementMap.get(key);
+    }
+
+    /**
+     * Provides direct read access to the value.
+     */
+    protected String getValue(String key) {
+        return valueMap.get(key);
+    }
+
+    /**
+     * Provides direct read access to the validated times.
+     */
+    protected Long getValidatedTime(String key) {
+        return validatedMap.get(key);
+    }
+
+    /**
+     * Provides direct read access to the modified times.
+     */
+    protected Long getModifiedTime(String key) {
+        return modifiedMap.get(key);
     }
 }
