@@ -382,6 +382,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         // Update server
                         + "          var request=new XMLHttpRequest();\n"
                         + "          var url=\"").append(setUrl).append("?baseName=\"+encodeURI(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])+\"&locale=\"+encodeURI(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURI(EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURI(value)+\"&modified=\"+modified;\n"
+                        //+ "          window.alert(url);\n"
                         + "          request.open('GET', url, false);\n"
                         + "          request.send(null);\n"
                         + "          if(request.status!=200) {\n"

@@ -32,12 +32,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.Collator;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -211,10 +215,22 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             properties.setProperty(key+VALIDATED_SUFFIX, currentTime);
             if(modified) properties.setProperty(key+MODIFIED_SUFFIX, currentTime);
             try {
+                // Create a properties instance that sorts the output by keys (case-insensitive)
+                Properties writer = new Properties() {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    public Enumeration<Object> keys() {
+                        SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ENGLISH));
+                        Enumeration<Object> e = super.keys();
+                        while(e.hasMoreElements()) sortedSet.add(e.nextElement());
+                        return Collections.enumeration(sortedSet);
+                    }
+                };
+                writer.putAll(properties);
                 File tmpFile = File.createTempFile("ApplicationResources", null, sourceFile.getParentFile());
                 OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile));
                 try {
-                    properties.store(out, null);
+                    writer.store(out, null);
                 } finally {
                     out.close();
                 }
