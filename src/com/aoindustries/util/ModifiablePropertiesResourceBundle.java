@@ -210,10 +210,11 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         if(key.endsWith(ISBLOCKELEMENT_SUFFIX)) throw new RuntimeException("Key may not end with "+ISBLOCKELEMENT_SUFFIX+": "+key);
         // Updates are serialized
         synchronized(properties) {
-            String currentTime = Long.toString(System.currentTimeMillis());
+            Long currentTimeLong = System.currentTimeMillis();
+            String currentTimeString = currentTimeLong.toString();
             properties.setProperty(key, (String)value);
-            properties.setProperty(key+VALIDATED_SUFFIX, currentTime);
-            if(modified) properties.setProperty(key+MODIFIED_SUFFIX, currentTime);
+            properties.setProperty(key+VALIDATED_SUFFIX, currentTimeString);
+            if(modified) properties.setProperty(key+MODIFIED_SUFFIX, currentTimeString);
             try {
                 // Create a properties instance that sorts the output by keys (case-insensitive)
                 Properties writer = new Properties() {
@@ -239,6 +240,8 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
                 throw new RuntimeException(err);
             }
             valueMap.put(key, (String)value);
+            validatedMap.put(key, currentTimeLong);
+            if(modified) modifiedMap.put(key, currentTimeLong);
         }
     }
 

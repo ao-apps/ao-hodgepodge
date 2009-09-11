@@ -54,6 +54,13 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         }
     };
 
+    private static final ThreadLocal<Boolean> modifyAllText = new ThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return Boolean.FALSE;
+        }
+    };
+
     private static final ThreadLocal<Sequence> elementIdGenerator = new ThreadLocal<Sequence>() {
         @Override
         protected Sequence initialValue() {
@@ -150,13 +157,14 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
      *
      * @see  #printEditableResourceBundleLookups(Appendable)
      */
-    public static void resetRequest(boolean canEditResources, String setStringUrl) {
+    public static void resetRequest(boolean canEditResources, String setStringUrl, boolean modifyAllText) {
         if(canEditResources && setStringUrl==null) throw new IllegalArgumentException("setStringUrl is null when canEditResources is true");
         EditableResourceBundle.canEditResources.set(canEditResources);
         elementIdGenerator.get().setNextSequenceValue(1);
         lookupIdGenerator.get().setNextSequenceValue(1);
         requestLookups.remove();
         EditableResourceBundle.setStringUrl.set(setStringUrl);
+        EditableResourceBundle.modifyAllText.set(modifyAllText);
     }
 
     /**
@@ -168,7 +176,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
     public static void printEditableResourceBundleLookups(Appendable out) throws IOException {
         String setUrl = setStringUrl.get();
         final Map<LookupKey,LookupValue> lookups = requestLookups.get();
-        resetRequest(false, null);
+        resetRequest(false, null, false);
         if(!lookups.isEmpty()) {
             // Sort by lookupValue.id to present the information in the same order as first seen in the request
             List<LookupKey> lookupKeys = new ArrayList<LookupKey>(lookups.keySet());
@@ -452,7 +460,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "        document.addEventListener('mousemove', EditableResourceBundleEditorDragMouseMove, true);\n"
                         + "        document.addEventListener('mouseup', EditableResourceBundleEditorDragMouseUp, true);\n"
                         + "        elem.style.cursor='move';\n"
-                        + "        document.getElementById('EditableResourceBundleEditorHeader').style.backgroundColor='red';\n"
+                        + "        document.getElementById('EditableResourceBundleEditorHeader').style.backgroundColor=\"red\";\n"
                         + "        event.preventDefault();\n"
                         + "        return false;\n"
                         + "      }\n"
@@ -740,6 +748,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         if(!lookupValue.locales.containsKey(locale)) lookupValue.locales.put(locale, new LookupLocaleValue(value==null, invalidated));
 
         // Modify and return the value
+        boolean myModifyAllText = modifyAllText.get();
         String modifiedValue;
         if(value==null) modifiedValue = null;
         else {
@@ -752,7 +761,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         .append(isBlockElement ? "<div" : "<span")
                         .append(" id=\"EditableResourceBundleElement").append(elementId).append("\"")
                     ;
-                    if(invalidated) SB.append(" style=\"color:red\"");
+                    //if(invalidated) SB.append(" style=\"color:red\"");
                     SB
                         .append(" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == 'function') EditableResourceBundleHighlightAll(").append(elementId).append(", true);\"")
                         .append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == 'function') EditableResourceBundleUnhighlightAll(").append(elementId).append(");\"")
@@ -765,7 +774,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                 case TEXT :
                 case XHTML_PRE :
                     // <#< and >#> used to cause XHTML parse errors if text value not properly escaped
-                    modifiedValue = invalidated ? ("<"+lookupValue.id+"<"+value+">"+lookupValue.id+">") : value;
+                    modifiedValue = invalidated ? ("<<<"+lookupValue.id+"<"+value+">"+lookupValue.id+">>>") : myModifyAllText ? ("<"+lookupValue.id+"<"+value+">"+lookupValue.id+">") : value;
                     break;
                 case URL :
                 case XHTML_ATTRIBUTE :
