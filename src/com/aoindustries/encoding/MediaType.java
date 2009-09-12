@@ -41,6 +41,41 @@ public enum MediaType {
     // DATA("application/octet-stream"),
 
     /**
+     * An XHTML 1.0 document (<code>application/xhtml+xml</code>).
+     */
+    XHTML("application/xhtml+xml") {
+        boolean isUsedFor(String contentType) {
+            return
+                "application/xhtml+xml".equalsIgnoreCase(contentType)
+                || "text/html".equalsIgnoreCase(contentType)
+            ;
+        }
+    },
+
+    /**
+     * Indicates that a value contains a XHTML attribute only.  This is a non-standard
+     * media type and is only used during internal conversions.  The final output
+     * should not be this type.
+     */
+    XHTML_ATTRIBUTE("application/xhtml+xml+attribute") {
+        boolean isUsedFor(String contentType) {
+            return "application/xhtml+xml+attribute".equalsIgnoreCase(contentType);
+        }
+    },
+
+    /**
+     * A preformatted element within a (X)HTML document, such as the <code>pre</code>
+     * or <code>textarea</code> tags. (<code>application/xhtml+xml+pre</code>).  This is
+     * a non-standard media type and is only used during internal conversions.  The
+     * final output should not be this type.
+     */
+    XHTML_PRE("application/xhtml+xml+pre") {
+        boolean isUsedFor(String contentType) {
+            return "application/xhtml+xml+pre".equalsIgnoreCase(contentType);
+        }
+    },
+
+    /**
      * An HTML document (<code>text/html</code>).
      */
     // HTML("text/html"),
@@ -72,41 +107,6 @@ public enum MediaType {
     URL("text/url") {
         boolean isUsedFor(String contentType) {
             return "text/url".equalsIgnoreCase(contentType);
-        }
-    },
-
-    /**
-     * An XHTML 1.0 document (<code>application/xhtml+xml</code>).
-     */
-    XHTML("application/xhtml+xml") {
-        boolean isUsedFor(String contentType) {
-            return
-                "application/xhtml+xml".equalsIgnoreCase(contentType)
-                || "text/html".equalsIgnoreCase(contentType)
-            ;
-        }
-    },
-
-    /**
-     * A preformatted element within a (X)HTML document, such as the <code>pre</code>
-     * or <code>textarea</code> tags. (<code>application/xhtml+xml+pre</code>).  This is
-     * a non-standard media type and is only used during internal conversions.  The
-     * final output should not be this type.
-     */
-    XHTML_PRE("application/xhtml+xml+pre") {
-        boolean isUsedFor(String contentType) {
-            return "application/xhtml+xml+pre".equalsIgnoreCase(contentType);
-        }
-    },
-
-    /**
-     * Indicates that a value contains a XHTML attribute only.  This is a non-standard
-     * media type and is only used during internal conversions.  The final output
-     * should not be this type.
-     */
-    XHTML_ATTRIBUTE("application/xhtml+xml+attribute") {
-        boolean isUsedFor(String contentType) {
-            return "application/xhtml+xml+attribute".equalsIgnoreCase(contentType);
         }
     };
 

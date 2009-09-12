@@ -110,7 +110,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     /**
      * All type queries are performed on this concurrent map.
      */
-    private final Map<String,MediaType> typeMap = new ConcurrentHashMap<String,MediaType>();
+    private final Map<String,MediaType> mediaTypeMap = new ConcurrentHashMap<String,MediaType>();
 
     /**
      * All isBlockElement queries are performed on this concurrent map.
@@ -168,7 +168,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             String value = (String)entry.getValue();
             if(key.endsWith(MEDIATYPE_SUFFIX)) {
                 try {
-                    typeMap.put(key.substring(0, key.length()-MEDIATYPE_SUFFIX.length()), MediaType.getMediaType(Locale.getDefault(), value));
+                    mediaTypeMap.put(key.substring(0, key.length()-MEDIATYPE_SUFFIX.length()), MediaType.getMediaType(Locale.getDefault(), value));
                 } catch(MediaException err) {
                     throw new RuntimeException(err);
                 }
@@ -203,11 +203,50 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         return isModifiable;
     }
 
+    /**
+     * Makes sure the key is allowed, throws <code>IllegalArgumentException</code> when not allowed.
+     */
+    private static void checkKey(String key) throws IllegalArgumentException {
+        if(key.endsWith(VALIDATED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+VALIDATED_SUFFIX+": "+key);
+        if(key.endsWith(MODIFIED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
+        if(key.endsWith(MEDIATYPE_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MEDIATYPE_SUFFIX+": "+key);
+        if(key.endsWith(ISBLOCKELEMENT_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+ISBLOCKELEMENT_SUFFIX+": "+key);
+    }
+
+    /**
+     * Saves the properties file in ascending key order.  All accesses must
+     * already hold a lock on the properties object.
+     */
+    private void saveProperties() {
+        assert Thread.holdsLock(properties);
+        try {
+            // Create a properties instance that sorts the output by keys (case-insensitive)
+            Properties writer = new Properties() {
+                private static final long serialVersionUID = 1L;
+                @Override
+                public Enumeration<Object> keys() {
+                    SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ENGLISH));
+                    Enumeration<Object> e = super.keys();
+                    while(e.hasMoreElements()) sortedSet.add(e.nextElement());
+                    return Collections.enumeration(sortedSet);
+                }
+            };
+            writer.putAll(properties);
+            File tmpFile = File.createTempFile("ApplicationResources", null, sourceFile.getParentFile());
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile));
+            try {
+                writer.store(out, getClass().getName());
+            } finally {
+                out.close();
+            }
+            if(!tmpFile.renameTo(sourceFile)) throw new IOException("Unable to rename \""+tmpFile+"\" to \""+sourceFile+'"');
+        } catch(IOException err) {
+            throw new RuntimeException(err);
+        }
+    }
+
     protected void handleSetObject(String key, Object value, boolean modified) {
-        if(key.endsWith(VALIDATED_SUFFIX)) throw new RuntimeException("Key may not end with "+VALIDATED_SUFFIX+": "+key);
-        if(key.endsWith(MODIFIED_SUFFIX)) throw new RuntimeException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
-        if(key.endsWith(MEDIATYPE_SUFFIX)) throw new RuntimeException("Key may not end with "+MEDIATYPE_SUFFIX+": "+key);
-        if(key.endsWith(ISBLOCKELEMENT_SUFFIX)) throw new RuntimeException("Key may not end with "+ISBLOCKELEMENT_SUFFIX+": "+key);
+        checkKey(key);
         // Updates are serialized
         synchronized(properties) {
             Long currentTimeLong = System.currentTimeMillis();
@@ -215,30 +254,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             properties.setProperty(key, (String)value);
             properties.setProperty(key+VALIDATED_SUFFIX, currentTimeString);
             if(modified) properties.setProperty(key+MODIFIED_SUFFIX, currentTimeString);
-            try {
-                // Create a properties instance that sorts the output by keys (case-insensitive)
-                Properties writer = new Properties() {
-                    private static final long serialVersionUID = 1L;
-                    @Override
-                    public Enumeration<Object> keys() {
-                        SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ENGLISH));
-                        Enumeration<Object> e = super.keys();
-                        while(e.hasMoreElements()) sortedSet.add(e.nextElement());
-                        return Collections.enumeration(sortedSet);
-                    }
-                };
-                writer.putAll(properties);
-                File tmpFile = File.createTempFile("ApplicationResources", null, sourceFile.getParentFile());
-                OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile));
-                try {
-                    writer.store(out, null);
-                } finally {
-                    out.close();
-                }
-                if(!tmpFile.renameTo(sourceFile)) throw new IOException("Unable to rename \""+tmpFile+"\" to \""+sourceFile+'"');
-            } catch(IOException err) {
-                throw new RuntimeException(err);
-            }
+            saveProperties();
             valueMap.put(key, (String)value);
             validatedMap.put(key, currentTimeLong);
             if(modified) modifiedMap.put(key, currentTimeLong);
@@ -247,7 +263,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
     protected MediaType handleGetMediaType(String key) {
         if(key==null) throw new NullPointerException();
-        return typeMap.get(key);
+        return mediaTypeMap.get(key);
     }
 
     protected Boolean handleIsBlockElement(String key) {
@@ -274,5 +290,19 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
      */
     protected Long getModifiedTime(String key) {
         return modifiedMap.get(key);
+    }
+
+    protected void handleSetMediaType(String key, MediaType mediaType, Boolean isBlockDevice) {
+        checkKey(key);
+        // Updates are serialized
+        synchronized(properties) {
+            properties.setProperty(key+MEDIATYPE_SUFFIX, mediaType.getMediaType());
+            if(isBlockDevice==null) properties.remove(key+ISBLOCKELEMENT_SUFFIX);
+            else properties.setProperty(key+ISBLOCKELEMENT_SUFFIX, isBlockDevice.toString());
+            saveProperties();
+            mediaTypeMap.put(key, mediaType);
+            if(isBlockDevice==null) isBlockElementMap.remove(key);
+            else isBlockElementMap.put(key, isBlockDevice);
+        }
     }
 }

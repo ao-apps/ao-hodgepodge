@@ -23,6 +23,7 @@
 package com.aoindustries.util;
 
 import com.aoindustries.encoding.MediaType;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -59,7 +60,7 @@ abstract public class ModifiableResourceBundle extends ResourceBundle {
      * cause other locales to require verification.
      */
     public final void setObject(String key, Object value, boolean modified) {
-        if(!isModifiable()) throw new RuntimeException("ResourceBundle is not modifiable: "+this);
+        if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
         handleSetObject(key, value, modified);
     }
 
@@ -106,4 +107,28 @@ abstract public class ModifiableResourceBundle extends ResourceBundle {
      * Gets the block element flag within this bundle only.
      */
     protected abstract Boolean handleIsBlockElement(String key);
+
+    /**
+     * Sets the media type.  This bundle must be the default locale.  The
+     * isBlockElement must be non-null when the mediaType is XHTML, and must
+     * by null otherwise.
+     */
+    public final void setMediaType(String key, MediaType mediaType, Boolean isBlockElement) {
+        if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
+        if(!getLocale().equals(new Locale(""))) throw new AssertionError("ResourceBundle is not for the base locale: "+this);
+        if(mediaType==MediaType.XHTML) {
+            if(isBlockElement==null) throw new IllegalArgumentException("isBlockElement is null when mediaType is "+mediaType);
+        } else {
+            if(isBlockElement!=null) throw new IllegalArgumentException("isBlockElement is not null when mediaType is not "+MediaType.XHTML);
+        }
+        handleSetMediaType(key, mediaType, isBlockElement);
+    }
+
+    /**
+     * This will only be called on modifiable bundles.
+     *
+     * @see #isModifiable
+     * @see #setMediaType
+     */
+    protected abstract void handleSetMediaType(String key, MediaType mediaType, Boolean isBlockElement);
 }
