@@ -39,7 +39,7 @@ import java.util.TreeSet;
 /**
  * Wraps the resources with XHTML and scripts to allow the modification of the
  * resource bundle contents directly through the web interface.  Also adds an
- * indicator when the resource need to be verified.  Verification is required
+ * indicator when the resource needs to be verified.  Verification is required
  * when any other locale has a modified time greater than the verified time
  * of this locale.
  *
@@ -546,12 +546,11 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     out.append("      <tr"
                             + " id=\"EditableResourceBundleEditorRow").append(id).append("\""
                             + " style=\"background-color:").append((i&1)==1 ? "white" : "#e0e0e0").append('"'
-                            + " onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", this, '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\""
                             + " onmouseover=\"if(typeof EditableResourceBundleHighlightAll == 'function') EditableResourceBundleHighlightAll(").append(id).append(", false);\""
                             + " onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == 'function') EditableResourceBundleUnhighlightAll(").append(ids.get(0).toString()).append(");\""
                             + ">\n"
-                            + "        <td style=\"text-align:right\">").append(Long.toString(lookupValue.id)).append("</td>\n"
-                            + "        <td>");
+                            + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\" style=\"text-align:right\">").append(Long.toString(lookupValue.id)).append("</td>\n"
+                            + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\">");
                     EncodingUtils.encodeHtml(lookupKey.key, out);
                     out.append("</td>\n");
                     int localeIndex = 0;
@@ -606,7 +605,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
                             out.append("        <td id=\"EditableResourceBundleEditorRow").append(Integer.toString(i)).append("Locale").append(Integer.toString(localeIndex)).append("\" style=\"white-space:nowrap; ");
                             if(borderColor!=null) out.append("border:2px solid ").append(borderColor).append("; ");
-                            out.append("background-color:").append(backgroundColor).append("\">");
+                            out.append("background-color:").append(backgroundColor).append("\" onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("'); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').select(); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').focus();\">");
                             if(currentValue!=null) {
                                 if(currentValue.length()>30) {
                                     EncodingUtils.encodeHtml(currentValue.substring(0, 30), out);
@@ -623,7 +622,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     }
                     // Media Type
                     MediaType mediaType = lookupKey.mediaType;
-                    out.append("        <td>\n"
+                    out.append("        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\">\n"
                             + "          <select"
                                 + " id=\"EditableResourceBundleEditorMediaType").append(Integer.toString(i)).append("\""
                                 + " name=\"EditableResourceBundleEditorMediaType").append(Integer.toString(i)).append("\""
@@ -655,7 +654,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     out.append("          </select>\n"
                             + "        </td>\n"
                     // Base Name
-                            + "        <td>");
+                            + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\">");
                     EncodingUtils.encodeHtml(bundleSet.getBaseName(), out);
                     out.append("</td>\n"
                             + "      </tr>\n");
