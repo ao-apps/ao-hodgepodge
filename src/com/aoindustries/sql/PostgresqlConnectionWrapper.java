@@ -134,7 +134,7 @@ public class PostgresqlConnectionWrapper implements Connection {
 
     public int getTransactionIsolation() throws SQLException {
         // We call on wrapped connection when isClosed to get the error from the wrapped driver.
-        if(conn.isClosed()) return getTransactionIsolation();
+        if(conn.isClosed()) return conn.getTransactionIsolation();
         return transactionIsolationLevel;
     }
 
