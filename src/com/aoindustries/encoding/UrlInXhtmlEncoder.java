@@ -30,8 +30,8 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Encodes a URL into a JavaScript string.  It uses HttpServletRequest.encodeURL
- * rewrite the URL as needed and surrounds it in double quotes.
+ * Encodes a URL into XHTML.  It uses HttpServletRequest.encodeURL
+ * rewrite the URL as needed.
  *
  * @author  AO Industries, Inc.
  */

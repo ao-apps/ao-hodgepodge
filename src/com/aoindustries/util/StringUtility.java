@@ -541,9 +541,22 @@ public final class StringUtility {
      * @return  the index of the first occurance of <code>-1</code> if none found
      */
     public static int indexOf(String S, char[] chars) {
+        return indexOf(S, chars, 0);
+    }
+
+    /**
+     * Finds the first occurance of any of the supplied characters starting at the specified index.
+     *
+     * @param  S  the <code>String</code> to search
+     * @param  chars  the characters to look for
+     * @param  start  the starting index.
+     *
+     * @return  the index of the first occurance of <code>-1</code> if none found
+     */
+    public static int indexOf(String S, char[] chars, int start) {
         int Slen=S.length();
         int clen=chars.length;
-        for(int c=0;c<Slen;c++) {
+        for(int c=start;c<Slen;c++) {
             char ch=S.charAt(c);
             for(int d=0;d<clen;d++) if(ch==chars[d]) return c;
         }
