@@ -125,8 +125,11 @@ public class Database extends AbstractDatabaseAccess {
             BigDecimal value=conn.executeBigDecimalQuery(isolationLevel, readOnly, rowRequired, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -142,8 +145,11 @@ public class Database extends AbstractDatabaseAccess {
             boolean value=conn.executeBooleanQuery(isolationLevel, readOnly, rowRequired, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -159,8 +165,11 @@ public class Database extends AbstractDatabaseAccess {
             byte[] value=conn.executeByteArrayQuery(isolationLevel, readOnly, rowRequired, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -176,8 +185,11 @@ public class Database extends AbstractDatabaseAccess {
             Date value=conn.executeDateQuery(isolationLevel, readOnly, rowRequired, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -193,8 +205,11 @@ public class Database extends AbstractDatabaseAccess {
             IntList value=conn.executeIntListQuery(isolationLevel, readOnly, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -210,8 +225,11 @@ public class Database extends AbstractDatabaseAccess {
             int value=conn.executeIntQuery(isolationLevel, readOnly, rowRequired, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -227,8 +245,11 @@ public class Database extends AbstractDatabaseAccess {
             LongList value=conn.executeLongListQuery(isolationLevel, readOnly, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -244,8 +265,11 @@ public class Database extends AbstractDatabaseAccess {
             long value=conn.executeLongQuery(isolationLevel, readOnly, rowRequired, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -261,8 +285,11 @@ public class Database extends AbstractDatabaseAccess {
             T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, clazz, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -295,8 +322,11 @@ public class Database extends AbstractDatabaseAccess {
                 }
             }
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -317,8 +347,11 @@ public class Database extends AbstractDatabaseAccess {
             T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, objectFactory, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -351,8 +384,11 @@ public class Database extends AbstractDatabaseAccess {
                 }
             }
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -389,8 +425,11 @@ public class Database extends AbstractDatabaseAccess {
                     System.err.println("DEBUG: Database: executeQuery: commit in "+(endTime-startTime)+" ms");
                 }
             }
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -411,8 +450,11 @@ public class Database extends AbstractDatabaseAccess {
             List<Short> value=conn.executeShortListQuery(isolationLevel, readOnly, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -428,8 +470,11 @@ public class Database extends AbstractDatabaseAccess {
             short value=conn.executeShortQuery(isolationLevel, readOnly, rowRequired, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -445,8 +490,11 @@ public class Database extends AbstractDatabaseAccess {
             String value=conn.executeStringQuery(isolationLevel, readOnly, rowRequired, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -462,8 +510,11 @@ public class Database extends AbstractDatabaseAccess {
             List<String> value=conn.executeStringListQuery(isolationLevel, readOnly, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -479,8 +530,11 @@ public class Database extends AbstractDatabaseAccess {
             Timestamp value=conn.executeTimestampQuery(isolationLevel, readOnly, rowRequired, sql, params);
             if(!readOnly) conn.commit();
             return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -496,8 +550,11 @@ public class Database extends AbstractDatabaseAccess {
             int updateCount = conn.executeUpdate(sql, params);
             conn.commit();
             return updateCount;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
         } catch(IOException err) {
-            conn.rollbackAndClose();
+            conn.rollback();
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();

@@ -764,6 +764,19 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
     
+    public boolean rollback() {
+        boolean rolledBack=false;
+        try {
+            if(_conn!=null && !_conn.isClosed()) {
+                rolledBack=true;
+                _conn.rollback();
+            }
+        } catch(SQLException err) {
+            database.getLogger().logp(Level.SEVERE, DatabaseConnection.class.getName(), "rollback", null, err);
+        }
+        return rolledBack;
+    }
+
     public boolean rollbackAndClose() {
         boolean rolledBack=false;
         try {
