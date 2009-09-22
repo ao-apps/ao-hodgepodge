@@ -60,6 +60,8 @@ public final class StringUtility {
 
     private static final char[] wordWrapChars = { ' ', '\t', '-', '=', ',', ';' };
 
+    private static final String lineSeparator = System.getProperty("line.separator");
+
     /**
      * StringUtilitly constructor comment.
      */
@@ -1393,5 +1395,17 @@ public final class StringUtility {
             }
         }
         return -1;
+    }
+
+    /**
+     * Returns the first line only, and only up to the maximum number of characters.  If the
+     * value is modified, will append a horizontal ellipsis (Unicode 0x2026).
+     */
+    public static String firstLineOnly(String value, int maxCharacters) {
+        if(value==null) return value;
+        int pos = value.indexOf(lineSeparator);
+        if(pos==-1) pos = value.length();
+        if(pos>maxCharacters) pos = maxCharacters;
+        return pos==value.length() ? value : (value.substring(0, pos) + '\u2026');
     }
 }

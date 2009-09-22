@@ -90,33 +90,42 @@ public class Database extends AbstractDatabaseAccess {
     }
 
     public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
-        // From pool
-        if(pool!=null) return pool.getConnection(isolationLevel, readOnly, maxConnections);
-        // From dataSource
-        Connection conn = dataSource.getConnection();
-        boolean successful = false;
-        try {
-            if(isolationLevel!=conn.getTransactionIsolation()) conn.setTransactionIsolation(isolationLevel);
-            if(readOnly!=conn.isReadOnly()) conn.setReadOnly(readOnly);
-            successful = true;
-            return conn;
-        } finally {
-            if(!successful) conn.close();
+        if(pool!=null) {
+            // From pool
+            return pool.getConnection(isolationLevel, readOnly, maxConnections);
+        } else {
+            // From dataSource
+            Connection conn = dataSource.getConnection();
+            boolean successful = false;
+            try {
+                if(isolationLevel!=conn.getTransactionIsolation()) conn.setTransactionIsolation(isolationLevel);
+                if(readOnly!=conn.isReadOnly()) conn.setReadOnly(readOnly);
+                successful = true;
+                return conn;
+            } finally {
+                if(!successful) conn.close();
+            }
         }
     }
 
     public void releaseConnection(Connection conn) throws SQLException {
-        // From pool
-        if(pool!=null) pool.releaseConnection(conn);
-        // From dataSource
-        if(!conn.isClosed()) conn.close();
+        if(pool!=null) {
+            // From pool
+            pool.releaseConnection(conn);
+        } else {
+            // From dataSource
+            if(!conn.isClosed()) conn.close();
+        }
     }
 
     public Logger getLogger() {
-        // From pool
-        if(pool!=null) return pool.getLogger();
-        // From dataSource
-        return logger;
+        if(pool!=null) {
+            // From pool
+            return pool.getLogger();
+        } else {
+            // From dataSource
+            return logger;
+        }
     }
 
     public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {

@@ -421,11 +421,11 @@ abstract public class AOPool<C,E extends Exception> extends Thread {
      */
     private void release(PooledConnection<C> pooledConnection) {
         long currentTime = System.currentTimeMillis();
-        long timeSpan;
+        long useTime;
         synchronized(pooledConnection) {
             pooledConnection.releaseTime = currentTime;
-            timeSpan = currentTime - pooledConnection.startTime;
-            if(timeSpan>0) pooledConnection.totalTime += timeSpan;
+            useTime = currentTime - pooledConnection.startTime;
+            if(useTime>0) pooledConnection.totalTime += useTime;
             pooledConnection.allocateStackTrace = null;
         }
         // Remove from the pool
@@ -551,6 +551,12 @@ abstract public class AOPool<C,E extends Exception> extends Thread {
         out.append("<table style='border:1px;' cellspacing='0' cellpadding='2'>\n");
         printConnectionStats(out);
         out.append("  <tr><td>Max Connection Pool Size:</td><td>").append(Integer.toString(poolSize)).append("</td></tr>\n"
+                + "  <tr><td>Connection Clean Interval:</td><td>");
+        EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(delayTime), out);
+        out.append("</td></tr>\n"
+                + "  <tr><td>Max Idle Time:</td><td>");
+        EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(maxIdleTime), out);
+        out.append("</td></tr>\n"
                 + "  <tr><td>Max Connection Age:</td><td>");
         EncodingUtils.encodeHtml(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge), out);
         out.append("</td></tr>\n"
