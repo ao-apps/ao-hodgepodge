@@ -310,7 +310,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
     /**
      * Gets the filesystem roots.  It will only include the root if it has
-     * at least one backup-enabled rule.  An empty rule ("") will implicitely
+     * at least one backup-enabled rule.  An empty rule ("") will implicitly
      * allow all roots.
      */
     protected String[] getFilesystemRoots() throws IOException {

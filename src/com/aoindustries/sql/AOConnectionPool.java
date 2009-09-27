@@ -29,6 +29,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +39,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
-final public class AOConnectionPool extends AOPool<Connection,SQLException> {
+final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
 
     private static final boolean DEBUG_TIMING = false;
 
@@ -162,16 +164,36 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException> {
         }
     }
 
+    private static final ConcurrentMap<String,Object> driversLoaded = new ConcurrentHashMap<String,Object>();
+
+    /**
+     * Loads a driver at most once.
+     */
+    private static void loadDriver(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        if(!driversLoaded.containsKey(classname)) {
+            Object O = Class.forName(classname).newInstance();
+            driversLoaded.put(classname, O);
+        }
+    }
+
     protected Connection getConnectionObject() throws SQLException {
         try {
-            Class.forName(driver).newInstance();
+            if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+            loadDriver(driver);
             Connection conn = DriverManager.getConnection(url, user, password);
-            if(conn.getClass().getName().startsWith("org.postgresql.")) {
-                // getTransactionIsolation causes a round-trip to the database, this wrapper caches the value and avoids unnecessary sets
-                // to eliminate unnecessary round-trips and improve performance over high-latency links.
-                conn = new PostgresqlConnectionWrapper(conn);
+            boolean successful = false;
+            try {
+                if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+                if(conn.getClass().getName().startsWith("org.postgresql.")) {
+                    // getTransactionIsolation causes a round-trip to the database, this wrapper caches the value and avoids unnecessary sets
+                    // to eliminate unnecessary round-trips and improve performance over high-latency links.
+                    conn = new PostgresqlConnectionWrapper(conn);
+                }
+                successful = true;
+                return conn;
+            } finally {
+                if(!successful) conn.close();
             }
-            return conn;
         } catch(SQLException err) {
             logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", err);
             throw err;
@@ -217,6 +239,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException> {
     }
 
     protected void resetConnection(Connection conn) throws SQLException {
+        if(Thread.interrupted()) throw new SQLException("Thread interrupted");
         // Dump all warnings to System.err and clear warnings
         SQLWarning warning=conn.getWarnings();
         if(warning!=null) {
@@ -226,6 +249,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException> {
 
         // Autocommit will always be turned on, regardless what a previous transaction might have done
         if(conn.getAutoCommit()==false) {
+            if(Thread.interrupted()) throw new SQLException("Thread interrupted");
             long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
             conn.setAutoCommit(true);
             if(DEBUG_TIMING) {
@@ -236,6 +260,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException> {
 
         // Restore to default transaction level
         if(conn.getTransactionIsolation()!=Connection.TRANSACTION_READ_COMMITTED) {
+            if(Thread.interrupted()) throw new SQLException("Thread interrupted");
             long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
             conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             if(DEBUG_TIMING) {
@@ -246,6 +271,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException> {
 
         // Restore the connection to a read-only state
         if(!conn.isReadOnly()) {
+            if(Thread.interrupted()) throw new SQLException("Thread interrupted");
             try {
                 long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
                 conn.setReadOnly(true);
@@ -267,6 +293,10 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException> {
         SQLException err=new SQLException(message);
         if(cause!=null) err.initCause(cause);
         return err;
+    }
+
+    protected SQLException newInterruptedException(String message, Throwable cause) {
+        return newException(message, cause);
     }
 
     @Override

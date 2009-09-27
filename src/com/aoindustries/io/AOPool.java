@@ -59,7 +59,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class AOPool<C,E extends Exception> extends Thread {
+abstract public class AOPool<C,E extends Exception,I extends Exception> extends Thread {
 
     public static final int DEFAULT_DELAY_TIME = 1 * 60 * 1000;
     public static final int DEFAULT_MAX_IDLE_TIME = 10 * 60 * 1000;
@@ -280,8 +280,11 @@ abstract public class AOPool<C,E extends Exception> extends Thread {
      * Gets a connection, warning of a connection is already used by this thread.
      *
      * @see  #getConnection(int)
+     *
+     * @throws I when interrupted
+     * @throws E when error
      */
-    public C getConnection() throws E {
+    public C getConnection() throws I, E {
         return getConnection(1);
     }
 
@@ -296,8 +299,14 @@ abstract public class AOPool<C,E extends Exception> extends Thread {
      *                         This should normally be one to avoid potential deadlock.
      *
      * @return either a reused or new connection
+     *
+     * @throws I when interrupted
+     * @throws E when error
      */
-    public C getConnection(int maxConnections) throws E {
+    public C getConnection(int maxConnections) throws I, E {
+        // Return immediately if already interrupted
+        if(Thread.interrupted()) throw newInterruptedException(null, null);
+
         Thread thisThread = Thread.currentThread();
         // Error or warn if this thread already has too many connections
         List<PooledConnection<C>> threadConnections = currentThreadConnections.get();
@@ -327,6 +336,8 @@ abstract public class AOPool<C,E extends Exception> extends Thread {
         PooledConnection<C> pooledConnection = null;
         synchronized(poolLock) {
             while(pooledConnection==null) {
+                if(Thread.interrupted()) throw newInterruptedException(null, null);
+
                 if(allConnections.size() != (availableConnections.size() + busyConnections.size())) throw new AssertionError("allConnections.size!=(availableConnections.size+busyConnections.size)");
                 if(isClosed) throw newException("Pool is closed", null);
                 if(!availableConnections.isEmpty()) {
@@ -344,7 +355,7 @@ abstract public class AOPool<C,E extends Exception> extends Thread {
                         try {
                             poolLock.wait();
                         } catch(InterruptedException err) {
-                            logger.logp(Level.WARNING, AOPool.class.getName(), "getConnection", null, err);
+                            throw newInterruptedException(null, err);
                         }
                     }
                 }
@@ -410,8 +421,11 @@ abstract public class AOPool<C,E extends Exception> extends Thread {
 
     /**
      * Creates a new connection.
+     *
+     * @throws I when interrupted
+     * @throws E when error
      */
-    protected abstract C getConnectionObject() throws E;
+    protected abstract C getConnectionObject() throws I, E;
 
     /**
      * Releases a PooledConnection.  It is safe to release
@@ -730,7 +744,7 @@ abstract public class AOPool<C,E extends Exception> extends Thread {
         }
     }
 
-    protected abstract void resetConnection(C conn) throws E;
+    protected abstract void resetConnection(C conn) throws I, E;
 
     /**
      * The RefreshConnection thread polls every connection in the connection pool. If it
@@ -791,6 +805,8 @@ abstract public class AOPool<C,E extends Exception> extends Thread {
     }
 
     protected abstract E newException(String message, Throwable cause);
+
+    protected abstract I newInterruptedException(String message, Throwable cause);
 
     final public Logger getLogger() {
         return logger;
