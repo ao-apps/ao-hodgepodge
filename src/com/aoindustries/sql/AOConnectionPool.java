@@ -172,7 +172,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
     private static void loadDriver(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         if(!driversLoaded.containsKey(classname)) {
             Object O = Class.forName(classname).newInstance();
-            driversLoaded.put(classname, O);
+            driversLoaded.putIfAbsent(classname, O);
         }
     }
 
