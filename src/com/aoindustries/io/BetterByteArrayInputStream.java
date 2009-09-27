@@ -22,7 +22,10 @@
  */
 package com.aoindustries.io;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * Provides direct access to the internal <code>byte[]</code>
@@ -39,12 +42,21 @@ public class BetterByteArrayInputStream extends ByteArrayInputStream {
         return this.buf;
     }
 
-    public void readFrom(RandomAccessFile raf) throws IOException {
+    public void readFrom(DataInput in) throws IOException {
         synchronized(this) {
-            raf.readFully(buf);
+            in.readFully(buf);
             mark=0;
             pos=0;
             count=buf.length;
+        }
+    }
+
+    public void readFrom(DataInput in, int len) throws IOException {
+        synchronized(this) {
+            in.readFully(buf, 0, len);
+            mark=0;
+            pos=0;
+            count=len;
         }
     }
 }
