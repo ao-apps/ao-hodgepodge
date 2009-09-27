@@ -39,6 +39,7 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -346,11 +347,20 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      * The entry must be allocated.
      */
     private void deallocate(long ptr) throws IOException {
+        deallocate(ptr, getMaxBits(ptr));
+    }
+
+    /**
+     * Deallocates the entry at the provided location.
+     * The entry must be allocated.
+     */
+    private void deallocate(long ptr, int maxBits) throws IOException {
         assert isAllocated(ptr);
         raf.seek(ptr);
         raf.writeLong(-1);
         raf.writeLong(-1);
         _size--;
+        addFreeSpaceMap(ptr, maxBits);
     }
     // </editor-fold>
 
@@ -367,8 +377,18 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      * The entry must not be allocated.
      */
     private void addFreeSpaceMap(long ptr) throws IOException {
+        addFreeSpaceMap(ptr, getMaxBits(ptr));
+    }
+
+    /**
+     * Adds the block at the provided location to the free space maps.
+     * The entry must not be allocated.
+     */
+    private void addFreeSpaceMap(long ptr, int maxBits) throws IOException {
         assert !isAllocated(ptr);
-// TODO
+        Set<Long> fsm = freeSpaceMaps.get(maxBits);
+        if(fsm==null) freeSpaceMaps.set(maxBits, fsm = new TreeSet<Long>());
+        if(!fsm.add(ptr)) throw new AssertionError("Free space map already contains entry: "+ptr);
     }
 
     /**
@@ -405,38 +425,37 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      * Allocates the first free space available that can hold the requested amount of
      * data.  The amount of data should not include the pointer space.
      *
-     * Operates in worst-case linear time.  This is a very simple implementation,
-     * there is a lot of room for improvement when needed.
+     * Operates in logarithic complexity on the amount of free entries.
      */
     private long allocateEntry(long next, long prev, boolean compress, int dataSize, byte[] data) throws IOException {
         assert next==TAIL_PTR || isAllocated(next);
         assert prev==HEAD_PTR || isAllocated(prev);
         assert (dataSize==-1 && data==null) || (dataSize>=0 && data!=null);
-        // Simple linear search from the beginning
-        long ptr = 16;
-        long len = raf.length();
-        while(ptr<len) {
-            int maxBits = getMaxBits(ptr);
-            if((1L<<maxBits)>=dataSize && !isAllocated(ptr)) {
-                // Update existing entry
-                raf.seek(ptr);
-                raf.writeLong(next);
-                raf.writeLong(prev);
-                raf.seek(ptr+17);
-                raf.writeBoolean(compress);
-                raf.writeInt(dataSize);
-                if(dataSize>0) raf.write(data, 0, dataSize);
-                _size++;
-                return ptr;
-            }
-            ptr += getEntrySize(maxBits);
+        // Determine the maxBits value
+        int maxBits = 0;
+        while((1L<<maxBits)<dataSize) maxBits++;
+        // Look in the free space maps
+        Set<Long> fsm = freeSpaceMaps.get(maxBits);
+        if(fsm!=null && !fsm.isEmpty()) {
+            Iterator<Long> iter = fsm.iterator();
+            long ptr = iter.next();
+            iter.remove();
+            // Update existing entry
+            raf.seek(ptr);
+            raf.writeLong(next);
+            raf.writeLong(prev);
+            raf.seek(ptr+17);
+            raf.writeBoolean(compress);
+            raf.writeInt(dataSize);
+            if(dataSize>0) raf.write(data, 0, dataSize);
+            _size++;
+            return ptr;
         }
         // Allocate more space at the end of the file
+        long ptr = raf.length();
         raf.seek(ptr);
         raf.writeLong(next);
         raf.writeLong(prev);
-        int maxBits = 0;
-        while((1L<<maxBits)<dataSize) maxBits++;
         raf.writeByte(maxBits);
         raf.writeBoolean(compress);
         raf.writeInt(dataSize);
@@ -470,7 +489,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
 
     /**
      * Adds the provided element before the element at the provided location.
-     * Operates in worst-case linear time to find free space.
+     * Operates in log time for free space.
      */
     private void addBefore(final E element, final long ptr, final boolean compress) throws IOException {
         assert isAllocated(ptr);
@@ -494,7 +513,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
 
     /**
      * Adds the provided element after the element at the provided location.
-     * Operates in worst-case linear time to find free space.
+     * Operates in log time for free space.
      */
     private void addAfter(final E element, final long ptr, final boolean compress) throws IOException {
         assert isAllocated(ptr);
@@ -596,7 +615,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
 
     /**
      * Inserts the specified element at the beginning of this list.
-     * Operates in worst-case linear time searching for free space.
+     * Operates in log time for free space.
      *
      * @param e the element to add
      */
@@ -616,7 +635,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
 
     /**
      * Appends the specified element to the end of this list.
-     * Operates in worst-case linear time searching for free space.
+     * Operates in log time for free space.
      *
      * <p>This method is equivalent to {@link #add}.
      *

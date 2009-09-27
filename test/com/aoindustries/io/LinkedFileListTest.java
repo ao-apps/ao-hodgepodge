@@ -62,10 +62,58 @@ public class LinkedFileListTest extends TestCase {
             }
             // Check size match
             assertEquals(linkedFileList.size(), linkedList.size());
-            // Check first
-            if(numElements>0) assertEquals(linkedFileList.getFirst(), linkedList.getFirst());
-            // Check last
-            if(numElements>0) assertEquals(linkedFileList.getLast(), linkedList.getLast());
+            if(numElements>0) {
+                // Check first
+                assertEquals(linkedFileList.getFirst(), linkedList.getFirst());
+                // Check last
+                assertEquals(linkedFileList.getLast(), linkedList.getLast());
+                // Update random locations to random values
+                for(int c=0;c<numElements;c++) {
+                    int index = random.nextInt(numElements);
+                    int newVal = random.nextInt();
+                    assertEquals(linkedFileList.set(index, newVal), linkedList.set(index, newVal));
+                }
+            }
+            // Check equality
+            assertEquals(linkedFileList, linkedList);
+            // Remove random indexes
+            if(numElements>0) {
+                int numRemove = random.nextInt(numElements);
+                for(int c=0;c<numRemove;c++) {
+                    assertEquals(linkedFileList.size(), linkedList.size());
+                    int index = random.nextInt(linkedFileList.size());
+                    assertEquals(
+                        linkedFileList.remove(index),
+                        linkedList.remove(index)
+                    );
+                }
+            }
+            // Add random values to end
+            if(numElements>0) {
+                int numAdd = random.nextInt(numElements);
+                for(int c=0;c<numAdd;c++) {
+                    assertEquals(linkedFileList.size(), linkedList.size());
+                    int newVal = random.nextInt();
+                    assertEquals(linkedFileList.add(newVal), linkedList.add(newVal));
+                }
+            }
+            // Check equality
+            assertEquals(linkedFileList, linkedList);
+            // Add random values in middle
+            if(numElements>0) {
+                int numAdd = random.nextInt(numElements);
+                for(int c=0;c<numAdd;c++) {
+                    assertEquals(linkedFileList.size(), linkedList.size());
+                    int index = random.nextInt(linkedFileList.size());
+                    int newVal = random.nextInt();
+                    linkedFileList.add(index, newVal);
+                    linkedList.add(index, newVal);
+                    assertEquals(
+                        linkedFileList.remove(index),
+                        linkedList.remove(index)
+                    );
+                }
+            }
             // Check equality
             assertEquals(linkedFileList, linkedList);
             // Save and restore, checking matches
@@ -86,6 +134,6 @@ public class LinkedFileListTest extends TestCase {
     public void testList() throws Exception {
         doTest(0);
         doTest(1);
-        for(int c=0; c<10; c++) doTest(100 + random.nextInt(901));
+        for(int c=0; c<10; c++) doTest(100 + random.nextInt(101));
     }
 }
