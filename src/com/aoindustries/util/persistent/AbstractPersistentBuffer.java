@@ -39,9 +39,9 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #read(long, byte[], int, int)
      */
-    public void readFully(long position, byte[] buff, int off, int len) throws IOException {
+    public void get(long position, byte[] buff, int off, int len) throws IOException {
         while(len>0) {
-            int count = read(position, buff, off, len);
+            int count = getSome(position, buff, off, len);
             position += count;
             off += count;
             len -= count;
@@ -53,8 +53,8 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #readByte(long)
      */
-    public boolean readBoolean(long position) throws IOException {
-        return readByte(position)!=0;
+    public boolean getBoolean(long position) throws IOException {
+        return get(position)!=0;
     }
 
     /**
@@ -62,8 +62,8 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #readFully(long, byte[], int, int)
      */
-    public byte readByte(long position) throws IOException {
-        readFully(position, ioBuffer, 0, 1);
+    public byte get(long position) throws IOException {
+        get(position, ioBuffer, 0, 1);
         return ioBuffer[0];
     }
 
@@ -72,8 +72,8 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #readFully(long, byte[], int, int)
      */
-    public int readInt(long position) throws IOException {
-        readFully(position, ioBuffer, 0, 4);
+    public int getInt(long position) throws IOException {
+        get(position, ioBuffer, 0, 4);
         return Utils.bufferToInt(ioBuffer, 0);
     }
 
@@ -82,8 +82,8 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #readFully(long, byte[], int, int)
      */
-    public long readLong(long position) throws IOException {
-        readFully(position, ioBuffer, 0, 8);
+    public long getLong(long position) throws IOException {
+        get(position, ioBuffer, 0, 8);
         return
             ((ioBuffer[0]&255L) << 56)
             + ((ioBuffer[1]&255L) << 48)
@@ -101,9 +101,9 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #write(long, byte[], int, int)
      */
-    public void writeInt(long position, int value) throws IOException {
+    public void putInt(long position, int value) throws IOException {
         Utils.intToBuffer(value, ioBuffer, 0);
-        write(position, ioBuffer, 0, 4);
+        put(position, ioBuffer, 0, 4);
     }
 
     /**
@@ -111,8 +111,8 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #write(long, byte[], int, int)
      */
-    public void writeLong(long position, long value) throws IOException {
+    public void putLong(long position, long value) throws IOException {
         Utils.longToBuffer(value, ioBuffer, 0);
-        write(position, ioBuffer, 0, 8);
+        put(position, ioBuffer, 0, 8);
     }
 }

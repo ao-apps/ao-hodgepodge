@@ -59,82 +59,82 @@ public interface PersistentBuffer {
     boolean isReadOnly();
 
     /**
-     * Gets the length of this buffer.
+     * Gets the capacity of this buffer.
      */
-    long length() throws IOException;
+    long capacity() throws IOException;
 
     /**
-     * Sets the length of this buffer.  If the buffer is increased in size, the
+     * Sets the capacity of this buffer.  If the buffer is increased in size, the
      * new space will be zero-filled.
      */
-    void setLength(long newLength) throws IOException;
+    void setCapacity(long newCapacity) throws IOException;
 
     /**
      * Reads to the provided <code>byte[]</code>, starting at the provided
      * position and for the designated number of bytes.
      *
-     * @exception  EOFException on end of file
+     * @exception  BufferUnderflowException on end of file
      * @exception  IOException
      */
-    void readFully(long position, byte[] buff, int off, int len) throws IOException;
+    void get(long position, byte[] buff, int off, int len) throws IOException;
 
     /**
      * Reads to the provided <code>byte[]</code>, may read fewer than <code>len</code>
      * bytes, but will always reads at least one byte.  Blocks if no data is
      * available.
      *
-     * @exception  EOFException on end of file
+     * @exception  BufferUnderflowException on end of file
      * @exception  IOException
      */
-    int read(long position, byte[] buff, int off, int len) throws IOException;
+    int getSome(long position, byte[] buff, int off, int len) throws IOException;
 
     /**
      * Reads a boolean at the provided position, zero is considered <code>false</code>
      * and any non-zero value is <code>true</code>.
      */
-    boolean readBoolean(long position) throws IOException;
+    boolean getBoolean(long position) throws IOException;
 
     /**
      * Reads a byte at the provided position.
      */
-    byte readByte(long position) throws IOException;
+    byte get(long position) throws IOException;
 
     /**
      * Reads an integer at the provided position.
      */
-    int readInt(long position) throws IOException;
+    int getInt(long position) throws IOException;
 
     /**
      * Reads a long at the provided position.
      */
-    long readLong(long position) throws IOException;
+    long getLong(long position) throws IOException;
 
     /**
      * Writes the bytes to the provided position.  The buffer will not be expanded
      * automatically.
      *
-     * @exception  EOFException on end of file
+     * @exception  BufferOverflowException on end of file
      */
-    void write(long position, byte[] buff, int off, int len) throws IOException;
+    void put(long position, byte[] buff, int off, int len) throws IOException;
 
     /**
      * Writes an integer at the provided position.  The buffer will not be expanded
      * automatically.
      *
-     * @exception  EOFException on end of file
+     * @exception  BufferOverflowException on end of file
      */
-    void writeInt(long position, int value) throws IOException;
+    void putInt(long position, int value) throws IOException;
 
     /**
      * Writes a long at the provided position.  The buffer will not be expanded
      * automatically.
      *
-     * @exception  EOFException on end of file
+     * @exception  BufferOverflowException on end of file
      */
-    void writeLong(long position, long value) throws IOException;
+    void putLong(long position, long value) throws IOException;
 
     /**
      * Syncs any unwritten data to the underlying storage.
      */
-    void sync() throws IOException;
+    void force() throws IOException;
 }

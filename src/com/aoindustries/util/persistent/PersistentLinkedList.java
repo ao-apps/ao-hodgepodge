@@ -201,16 +201,16 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
         this.useFsync = useFsync;
         for(int c=0;c<32;c++) freeSpaceMaps.add(null);
         // Read the head and tail to maintain in cache
-        long len = pbuffer.length();
+        long len = pbuffer.capacity();
         if(len==0) clear();
         else if(len<HEADER_SIZE) throw new IOException("File does not have a complete header");
         else {
-            pbuffer.readFully(0, ioBuffer, 0, MAGIC.length);
+            pbuffer.get(0, ioBuffer, 0, MAGIC.length);
             if(!equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a LinkedFileList (MAGIC mismatch)");
-            int version = pbuffer.readInt(MAGIC.length);
+            int version = pbuffer.getInt(MAGIC.length);
             if(version!=VERSION) throw new IOException("Unsupported file version: "+version);
-            _head = pbuffer.readLong(MAGIC.length+4);
-            _tail = pbuffer.readLong(MAGIC.length+12);
+            _head = pbuffer.getLong(MAGIC.length+4);
+            _tail = pbuffer.getLong(MAGIC.length+12);
             assert _head==TAIL_PTR || isAllocated(_head);
             assert _tail==HEAD_PTR || isAllocated(_tail);
             int count = 0;
@@ -230,7 +230,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      * Checks that the ptr is in the valid address range.
      */
     private boolean isValidRange(long ptr) throws IOException {
-        return ptr>=HEADER_SIZE && ptr<pbuffer.length();
+        return ptr>=HEADER_SIZE && ptr<pbuffer.capacity();
     }
 
     /**
@@ -238,7 +238,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private boolean isAllocated(long ptr) throws IOException {
         assert isValidRange(ptr) : "Invalid range: "+ptr;
-        return pbuffer.readLong(ptr+1)!=-1 && pbuffer.readLong(ptr+9)!=-1;
+        return pbuffer.getLong(ptr+1)!=-1 && pbuffer.getLong(ptr+9)!=-1;
     }
     // </editor-fold>
 
@@ -255,7 +255,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private void setHead(long head) throws IOException {
         assert head==TAIL_PTR || isAllocated(head);
-        pbuffer.writeLong(HEAD_PTR, head);
+        pbuffer.putLong(HEAD_PTR, head);
         this._head = head;
     }
 
@@ -268,7 +268,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private void setTail(long tail) throws IOException {
         assert tail==HEAD_PTR || isAllocated(tail);
-        pbuffer.writeLong(TAIL_PTR, tail);
+        pbuffer.putLong(TAIL_PTR, tail);
         this._tail = tail;
     }
 
@@ -278,7 +278,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private long getNext(long ptr) throws IOException {
         assert isAllocated(ptr);
-        return pbuffer.readLong(ptr+1);
+        return pbuffer.getLong(ptr+1);
     }
 
     /**
@@ -288,7 +288,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     private void setNext(long ptr, long next) throws IOException {
         assert isAllocated(ptr);
         assert next==TAIL_PTR || isAllocated(next);
-        pbuffer.writeLong(ptr+1, next);
+        pbuffer.putLong(ptr+1, next);
     }
 
     /**
@@ -297,7 +297,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private long getPrev(long ptr) throws IOException {
         assert isAllocated(ptr);
-        return pbuffer.readLong(ptr+9);
+        return pbuffer.getLong(ptr+9);
     }
 
     /**
@@ -307,7 +307,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     private void setPrev(long ptr, long prev) throws IOException {
         assert isAllocated(ptr);
         assert prev==HEAD_PTR || isAllocated(prev);
-        pbuffer.writeLong(ptr+9, prev);
+        pbuffer.putLong(ptr+9, prev);
     }
 
     /**
@@ -315,7 +315,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private int getMaxBits(long ptr) throws IOException {
         assert isValidRange(ptr);
-        int maxBits = pbuffer.readByte(ptr);
+        int maxBits = pbuffer.get(ptr);
         assert maxBits>=0 && maxBits<=31;
         return maxBits;
     }
@@ -326,7 +326,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private boolean isCompressed(long ptr) throws IOException {
         assert isAllocated(ptr);
-        return pbuffer.readBoolean(ptr+17);
+        return pbuffer.getBoolean(ptr+17);
     }
 
     /**
@@ -336,7 +336,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private int getDataSize(long ptr) throws IOException {
         assert isAllocated(ptr);
-        return pbuffer.readInt(ptr+18);
+        return pbuffer.getInt(ptr+18);
     }
 
     /**
@@ -354,7 +354,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     @SuppressWarnings("unchecked")
     private E getElement(long ptr) throws IOException {
         assert isAllocated(ptr);
-        pbuffer.readFully(ptr+17, ioBuffer, 0, 5);
+        pbuffer.get(ptr+17, ioBuffer, 0, 5);
         boolean isCompressed = ioBuffer[0]!=0;
         int dataSize =
               ((ioBuffer[1]&255) << 24)
@@ -363,7 +363,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
             + (ioBuffer[4]&255)
         ;
         if(dataSize==-1) return null;
-        assert ((ptr+22)+dataSize)<=pbuffer.length(); // Must not extend past end of file
+        assert ((ptr+22)+dataSize)<=pbuffer.capacity(); // Must not extend past end of file
 
         // assert dataSize>=0 && ((long)dataSize)<=(1L << getMaxBits(ptr)); // Must not exceed maximum size
         // Only Required for previous assertion: raf.seek(ptr+22);
@@ -409,8 +409,8 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     private void deallocate(long ptr, int maxBits) throws IOException {
         assert isAllocated(ptr);
         assert _size>0;
-        pbuffer.writeLong(ptr+1, -1);
-        pbuffer.writeLong(ptr+9, -1);
+        pbuffer.putLong(ptr+1, -1);
+        pbuffer.putLong(ptr+9, -1);
         _size--;
         addFreeSpaceMap(ptr, maxBits);
     }
@@ -421,7 +421,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      * Will perform fsync only if fsync is enabled.
      */
     private void fsync() throws IOException {
-        if(useFsync) pbuffer.sync();
+        if(useFsync) pbuffer.force();
     }
 
     /**
@@ -498,22 +498,22 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
             Utils.longToBuffer(prev, ioBuffer, 8);                 // 8-15
             ioBuffer[16] = compress ? (byte)1 : (byte)0;     // 16
             Utils.intToBuffer(dataSize, ioBuffer, 17);             // 17-20
-            pbuffer.write(ptr+1, ioBuffer, 0, 21);
-            if(dataSize>0) pbuffer.write(ptr+22, data, 0, dataSize);
+            pbuffer.put(ptr+1, ioBuffer, 0, 21);
+            if(dataSize>0) pbuffer.put(ptr+22, data, 0, dataSize);
             _size++;
             return ptr;
         }
         // Allocate more space at the end of the file
-        long ptr = pbuffer.length();
+        long ptr = pbuffer.capacity();
         long newLen = ptr + 22 + (1L<<(long)maxBits);
-        pbuffer.setLength(newLen);
+        pbuffer.setCapacity(newLen);
         ioBuffer[0] = (byte)maxBits;                     // 0
         Utils.longToBuffer(next, ioBuffer, 1);                 // 1-8
         Utils.longToBuffer(prev, ioBuffer, 9);                 // 9-16
         ioBuffer[17] = compress ? (byte)1 : (byte)0;     // 17
         Utils.intToBuffer(dataSize, ioBuffer, 18);             // 18-21
-        pbuffer.write(ptr, ioBuffer, 0, 22);
-        if(dataSize>0) pbuffer.write(ptr+22, data, 0, dataSize);
+        pbuffer.put(ptr, ioBuffer, 0, 22);
+        if(dataSize>0) pbuffer.put(ptr+22, data, 0, dataSize);
         _size++;
         return ptr;
     }
@@ -865,9 +865,9 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     public void clear() {
         try {
             modCount++;
-            pbuffer.setLength(HEADER_SIZE);
-            pbuffer.write(0, MAGIC, 0, MAGIC.length);
-            pbuffer.writeInt(MAGIC.length, VERSION);
+            pbuffer.setCapacity(HEADER_SIZE);
+            pbuffer.put(0, MAGIC, 0, MAGIC.length);
+            pbuffer.putInt(MAGIC.length, VERSION);
             setHead(TAIL_PTR);
             setTail(HEAD_PTR);
             _size = 0;

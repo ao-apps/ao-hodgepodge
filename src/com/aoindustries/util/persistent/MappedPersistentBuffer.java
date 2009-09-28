@@ -25,26 +25,24 @@ package com.aoindustries.util.persistent;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Uses <code>RandomAccessFile</code> for persistence.  Obtains a shared lock
- * on the channel for read-only mode or an exclusive lock for write mode.  The
- * lock is held until the buffer is closed.
+ * Uses <code>MappedByteBuffer</code> for persistence.
  *
  * @author  AO Industries, Inc.
  */
-public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
+public class MappedPersistentBuffer implements PersistentBuffer {
 
-    private static final Logger logger = Logger.getLogger(RandomAccessFileBuffer.class.getName());
+    private static final Logger logger = Logger.getLogger(MappedPersistentBuffer.class.getName());
 
     private final File tempFile;
     private final RandomAccessFile raf;
     private final FileChannel channel;
+    private MappedByteBuffer mappedBuffer;
     private final boolean readOnly;
     private boolean closed;
 
@@ -52,11 +50,12 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
      * Creates a read-write buffer backed by a temporary file.  The temporary
      * file will be deleted when this buffer is closed or on JVM shutdown.
      */
-    public RandomAccessFileBuffer() throws IOException {
+    public MappedPersistentBuffer() throws IOException {
         tempFile = File.createTempFile("RandomAccessFileBuffer", null);
         tempFile.deleteOnExit();
         raf = new RandomAccessFile(tempFile, "rw");
         channel = raf.getChannel();
+        mappedBuffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, 0);
         readOnly = false;
         // Lock the file
         channel.lock(0L, Long.MAX_VALUE, false);
@@ -65,38 +64,39 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
     /**
      * Creates a read-write buffer.
      */
-    public RandomAccessFileBuffer(String name) throws IOException {
+    public MappedPersistentBuffer(String name) throws IOException {
         this(new RandomAccessFile(name, "rw"), false);
     }
 
     /**
      * Creates a buffer.
      */
-    public RandomAccessFileBuffer(String name, boolean readOnly) throws IOException {
+    public MappedPersistentBuffer(String name, boolean readOnly) throws IOException {
         this(new RandomAccessFile(name, readOnly ? "r" : "rw"), readOnly);
     }
 
     /**
      * Creates a read-write buffer.
      */
-    public RandomAccessFileBuffer(File file) throws IOException {
+    public MappedPersistentBuffer(File file) throws IOException {
         this(new RandomAccessFile(file, "rw"), false);
     }
 
     /**
      * Creates a buffer.
      */
-    public RandomAccessFileBuffer(File file, boolean readOnly) throws IOException {
+    public MappedPersistentBuffer(File file, boolean readOnly) throws IOException {
         this(new RandomAccessFile(file, readOnly ? "r" : "rw"), readOnly);
     }
 
     /**
      * Creates a buffer using the provided <code>RandomAccessFile</code>.
      */
-    public RandomAccessFileBuffer(RandomAccessFile raf, boolean readOnly) throws IOException {
+    public MappedPersistentBuffer(RandomAccessFile raf, boolean readOnly) throws IOException {
         this.tempFile = null;
         this.raf = raf;
         channel = raf.getChannel();
+        mappedBuffer = channel.map(readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, raf.length());
         this.readOnly = readOnly;
         // Lock the file
         channel.lock(0L, Long.MAX_VALUE, readOnly);
@@ -129,36 +129,73 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         return raf.length();
     }
 
+    /**
+     * Gets the position as an integer or throws IOException if too big for a mapped buffer.
+     */
+    private int getIndex(long position) throws IOException {
+        if(position<0) throw new IllegalArgumentException("position<0: "+position);
+        if(position>=Integer.MAX_VALUE) throw new IOException("position too large for MappedByteBuffer: "+position);
+        return (int)position;
+    }
+
     public void setCapacity(long newLength) throws IOException {
         long oldLength = capacity();
-        raf.setLength(newLength);
-        if(newLength>oldLength) {
-            // Ensure zero-filled
-            raf.seek(oldLength);
-            Utils.fillZeros(raf, newLength - oldLength);
+        if(oldLength!=newLength) {
+            if(newLength<oldLength) {
+                mappedBuffer = channel.map(readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, newLength);
+            }
+            raf.setLength(newLength);
+            if(newLength>oldLength) {
+                mappedBuffer = channel.map(readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, newLength);
+                // Ensure zero-filled
+                mappedBuffer.position(getIndex(oldLength));
+                Utils.fillZeros(mappedBuffer, newLength - oldLength);
+            }
         }
     }
 
-    public int getSome(long position, byte[] buff, int off, int len) throws IOException {
-        raf.seek(position);
-        int count = raf.read(buff, off, len);
-        if(count<0) throw new BufferUnderflowException();
-        return count;
+    public void get(long position, byte[] buff, int off, int len) throws IOException {
+        mappedBuffer.position(getIndex(position));
+        mappedBuffer.get(buff, off, len);
     }
 
-    @Override
+    public int getSome(long position, byte[] buff, int off, int len) throws IOException {
+        mappedBuffer.position(getIndex(position));
+        mappedBuffer.get(buff, off, len);
+        return len;
+    }
+
     public byte get(long position) throws IOException {
-        raf.seek(position);
-        return raf.readByte();
+        return mappedBuffer.get(getIndex(position));
     }
 
     public void put(long position, byte[] buff, int off, int len) throws IOException {
-        if((position+len)>capacity()) throw new BufferOverflowException();
-        raf.seek(position);
-        raf.write(buff, off, len);
+        mappedBuffer.position(getIndex(position));
+        mappedBuffer.put(buff, off, len);
     }
 
     public void force() throws IOException {
+        mappedBuffer.force();
         channel.force(true);
+    }
+
+    public boolean getBoolean(long position) throws IOException {
+        return mappedBuffer.get(getIndex(position))!=0;
+    }
+
+    public int getInt(long position) throws IOException {
+        return mappedBuffer.getInt(getIndex(position));
+    }
+
+    public long getLong(long position) throws IOException {
+        return mappedBuffer.getLong(getIndex(position));
+    }
+
+    public void putInt(long position, int value) throws IOException {
+        mappedBuffer.putInt(getIndex(position), value);
+    }
+
+    public void putLong(long position, long value) throws IOException {
+        mappedBuffer.putLong(getIndex(position), value);
     }
 }

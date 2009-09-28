@@ -62,7 +62,7 @@ public class BetterByteArrayInputStream extends ByteArrayInputStream {
 
     public void readFrom(PersistentBuffer pbuffer, long position, int len) throws IOException {
         synchronized(this) {
-            pbuffer.readFully(position, buf, 0, len);
+            pbuffer.get(position, buf, 0, len);
             mark=0;
             pos=0;
             count=len;

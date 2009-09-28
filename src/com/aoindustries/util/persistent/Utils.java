@@ -24,6 +24,7 @@ package com.aoindustries.util.persistent;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Buffer utilities.
@@ -84,6 +85,18 @@ class Utils {
             count -= 4096;
         }
         if(count>0) out.write(zeros, 0, (int)count);
+    }
+
+    /**
+     * Writes the requested number of zeros to the provided buffer.
+     */
+    static void fillZeros(ByteBuffer buffer, long count) throws IOException {
+        if(count<0) throw new IllegalArgumentException("count<0: "+count);
+        while(count>4096) {
+            buffer.put(zeros, 0, 4096);
+            count -= 4096;
+        }
+        if(count>0) buffer.put(zeros, 0, (int)count);
     }
 
     private Utils() {
