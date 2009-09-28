@@ -47,7 +47,8 @@ public interface Serializer<E> {
      *   <li>Write serialized object with <code>serialize</code></li>
      * </ol>
      * It may be best to remember the most recently used object between calls
-     * to <code>getSerializedSize</code> and <code>serialize</code>
+     * to <code>getSerializedSize</code> and <code>serialize</code> when it can
+     * reduce processing time.
      *
      * @return  the exact number of bytes the object will take to serialize
      */
