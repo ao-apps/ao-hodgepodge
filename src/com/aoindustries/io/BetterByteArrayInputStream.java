@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.util.persistent.PersistentBuffer;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.IOException;
@@ -53,6 +54,15 @@ public class BetterByteArrayInputStream extends ByteArrayInputStream {
     public void readFrom(DataInput in, int len) throws IOException {
         synchronized(this) {
             in.readFully(buf, 0, len);
+            mark=0;
+            pos=0;
+            count=len;
+        }
+    }
+
+    public void readFrom(PersistentBuffer pbuffer, long position, int len) throws IOException {
+        synchronized(this) {
+            pbuffer.readFully(position, buf, 0, len);
             mark=0;
             pos=0;
             count=len;

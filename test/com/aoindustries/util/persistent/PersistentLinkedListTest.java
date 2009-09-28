@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.util.persistent;
 
 import com.aoindustries.sql.SQLUtility;
 import java.io.File;
@@ -37,9 +37,9 @@ import junit.framework.TestSuite;
  *
  * @author  AO Industries, Inc.
  */
-public class LinkedFileListTest extends TestCase {
+public class PersistentLinkedListTest extends TestCase {
 
-    public LinkedFileListTest(String testName) {
+    public PersistentLinkedListTest(String testName) {
         super(testName);
     }
 
@@ -47,7 +47,7 @@ public class LinkedFileListTest extends TestCase {
     private Random random = new Random(secureRandom.nextLong());
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(LinkedFileListTest.class);
+        TestSuite suite = new TestSuite(PersistentLinkedListTest.class);
         return suite;
     }
 
@@ -62,7 +62,7 @@ public class LinkedFileListTest extends TestCase {
     private void doTestCorrectness(int numElements) throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        LinkedFileList<String> linkedFileList = new LinkedFileList<String>(tempFile, false, false);
+        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomAccessFileBuffer(tempFile), false, false);
         LinkedList<String> linkedList = new LinkedList<String>();
         try {
             // Populate the list
@@ -128,7 +128,7 @@ public class LinkedFileListTest extends TestCase {
             assertEquals(linkedFileList, linkedList);
             // Save and restore, checking matches
             linkedFileList.close();
-            LinkedFileList<Integer> newFileList = new LinkedFileList<Integer>(tempFile, true, true);
+            PersistentLinkedList<Integer> newFileList = new PersistentLinkedList<Integer>(new RandomAccessFileBuffer(tempFile), true, true);
             assertEquals(newFileList, linkedList);
         } finally {
             linkedFileList.close();
@@ -153,7 +153,7 @@ public class LinkedFileListTest extends TestCase {
     public void testAddRandomStrings() throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        LinkedFileList<String> linkedFileList = new LinkedFileList<String>(tempFile, false, false);
+        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomAccessFileBuffer(tempFile), false, false);
         try {
             // Add in groups of 1000, timing the add
             String[] toAdd = new String[1000];
@@ -178,7 +178,7 @@ public class LinkedFileListTest extends TestCase {
     public void testAddNull() throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        LinkedFileList<Integer> linkedFileList = new LinkedFileList<Integer>(tempFile, false, false);
+        PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(new RandomAccessFileBuffer(tempFile), false, false);
         try {
             // Add in groups of 1000, timing the add
             for(int c=0;c<100;c++) {
@@ -201,7 +201,7 @@ public class LinkedFileListTest extends TestCase {
     public void testIterationPerformance() throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        LinkedFileList<String> linkedFileList = new LinkedFileList<String>(tempFile, false, false);
+        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomAccessFileBuffer(tempFile), false, false);
         try {
             for(int c=0;c<=100;c++) {
                 if(c>0) for(int d=0;d<100;d++) linkedFileList.add(getRandomString(random));

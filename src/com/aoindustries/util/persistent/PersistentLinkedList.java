@@ -20,15 +20,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.BetterByteArrayInputStream;
+import com.aoindustries.io.BetterByteArrayOutputStream;
 import com.aoindustries.util.WrappedException;
-import java.io.DataOutput;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.AbstractSequentialList;
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * <p>
- * Serializes and stores objects in a persistent file.  Unlike <code>FileList</code> which
+ * Serializes and stores objects in a persistent buffer.  Unlike <code>FileList</code> which
  * is intended for efficient <code>RandomAccess</code>,
  * this is a linked list implementation and has the expected qualities and costs.
  * There are no size limits to the stored data.  Fragmentation may occur in the file
@@ -92,27 +91,32 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author  AO Industries, Inc.
  */
-public class LinkedFileList<E extends Serializable> extends AbstractSequentialList<E> implements List<E>, Queue<E> {
+public class PersistentLinkedList<E extends Serializable> extends AbstractSequentialList<E> implements List<E>, Queue<E> {
 
     private static final long serialVersionUID = 1L;
 
     private static final byte[] MAGIC={
+        'P',
+        'e',
+        'r',
+        's',
+        'i',
+        's',
+        't',
+        'e',
+        'n',
+        't',
         'L',
         'i',
         'n',
         'k',
         'e',
         'd',
-        'F',
-        'i',
-        'l',
-        'e',
         'L',
         'i',
         's',
         't',
-        '\n',
-        '\0'
+        '\n'
     };
 
     private static final int VERSION = 1;
@@ -144,12 +148,12 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
 
     private final byte[] ioBuffer = new byte[22];
 
-    final private RandomAccessFile raf;
+    final private PersistentBuffer pbuffer;
     final private boolean defaultGZIP;
     final private boolean useFsync;
 
-    private BetterByteArrayInputStream bufferIn;
-    final private BetterByteArrayOutputStream bufferOut = new BetterByteArrayOutputStream();
+    private BetterByteArrayInputStream bufferIn; // Used during deserialization - could get directly from underlying stream, but would involve more I/Os.
+    final private BetterByteArrayOutputStream bufferOut = new BetterByteArrayOutputStream(); // Used during serialization
 
     private long _head;
     private long _tail;
@@ -163,14 +167,14 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
 
     // <editor-fold desc="Constructors">
     /**
-     * Constructs a list with a temporary file.  The temporary file will be removed
-     * at JVM shutdown.
+     * Constructs a list backed by a temporary file.  The temporary file will be
+     * deleted at JVM shutdown.
      * Operates in constant time.
+     *
+     * @see  RandomAccessFileBuffer#RandomAccessFileBuffer()
      */
-    public LinkedFileList() throws IOException {
-        File tempFile = File.createTempFile("LinkedFileList", null);
-        tempFile.deleteOnExit();
-        raf = new RandomAccessFile(tempFile, "rw");
+    public PersistentLinkedList() throws IOException {
+        pbuffer = new RandomAccessFileBuffer();
         defaultGZIP = false;
         useFsync = false;
         for(int c=0;c<32;c++) freeSpaceMaps.add(null);
@@ -179,117 +183,54 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
 
     /**
      * Constructs a list with a temporary file containing all of the provided elements.
-     * The temporary file will be removed at JVM shutdown.
+     * The temporary file will be deleted at JVM shutdown.
      * Operates in linear time.
      */
-    public LinkedFileList(Collection<? extends E> c) throws IOException {
+    public PersistentLinkedList(Collection<? extends E> c) throws IOException {
         this();
         addAll(c);
     }
 
     /**
-     * Constructs a list backed by the provided file.
-     * Operates in constant time.
-     */
-    public LinkedFileList(File file, boolean defaultGZIP, boolean useFsync) throws IOException {
-        this(new RandomAccessFile(file, "rw"), defaultGZIP, useFsync);
-    }
-
-    /**
-     * Constructs a list backed by the provided random access file.
+     * Constructs a list backed by the provided persisent buffer.
      * Operates in linear time in order to cache the size.
      */
-    public LinkedFileList(RandomAccessFile raf, boolean defaultGZIP, boolean useFsync) throws IOException {
-        this.raf = raf;
+    public PersistentLinkedList(PersistentBuffer pbuffer, boolean defaultGZIP, boolean useFsync) throws IOException {
+        this.pbuffer = pbuffer;
         this.defaultGZIP = defaultGZIP;
         this.useFsync = useFsync;
         for(int c=0;c<32;c++) freeSpaceMaps.add(null);
         // Read the head and tail to maintain in cache
-        long len = raf.length();
+        long len = pbuffer.length();
         if(len==0) clear();
         else if(len<HEADER_SIZE) throw new IOException("File does not have a complete header");
         else {
-            raf.seek(0);
-            raf.readFully(ioBuffer, 0, MAGIC.length);
+            pbuffer.readFully(0, ioBuffer, 0, MAGIC.length);
             if(!equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a LinkedFileList (MAGIC mismatch)");
-            int version = raf.readInt();
+            int version = pbuffer.readInt(MAGIC.length);
             if(version!=VERSION) throw new IOException("Unsupported file version: "+version);
-            _head = readLong();
-            _tail = readLong();
+            _head = pbuffer.readLong(MAGIC.length+4);
+            _tail = pbuffer.readLong(MAGIC.length+12);
             assert _head==TAIL_PTR || isAllocated(_head);
             assert _tail==HEAD_PTR || isAllocated(_tail);
             int count = 0;
-            for(long ptr = _head; ptr!=TAIL_PTR; ptr = getNext(ptr)) {
+            long ptr = HEADER_SIZE;
+            for(; ptr<len; ptr+=getEntrySize(getMaxBits(ptr))) {
                 if(isAllocated(ptr)) count++;
                 else addFreeSpaceMap(ptr);
             }
+            if(ptr!=len) throw new IOException("ptr!=len: "+ptr+"!="+len);
             _size = count;
         }
     }
     // </editor-fold>
-
-    // <editor-fold desc="Input/Output">
-    private static void longToBuffer(long l, byte[] ioBuffer, int off) {
-        ioBuffer[off++] = (byte)(l >>> 56);
-        ioBuffer[off++] = (byte)(l >>> 48);
-        ioBuffer[off++] = (byte)(l >>> 40);
-        ioBuffer[off++] = (byte)(l >>> 32);
-        ioBuffer[off++] = (byte)(l >>> 24);
-        ioBuffer[off++] = (byte)(l >>> 16);
-        ioBuffer[off++] = (byte)(l >>> 8);
-        ioBuffer[off] = (byte)l;
-    }
-
-    private static void intToBuffer(int i, byte[] ioBuffer, int off) {
-        ioBuffer[off++] = (byte)(i >>> 24);
-        ioBuffer[off++] = (byte)(i >>> 16);
-        ioBuffer[off++] = (byte)(i >>> 8);
-        ioBuffer[off] = (byte)i;
-    }
-
-    /**
-     * Random access file is pretty slow at writing longs.  This uses the buffer
-     * to issue one write request.
-     */
-    private void writeLong(long ptr) throws IOException {
-        longToBuffer(ptr, ioBuffer, 0);
-        raf.write(ioBuffer, 0, 8);
-    }
-
-    /**
-     * Writes two longs at once.
-     */
-    private void writeLongs(long ptr1, long ptr2) throws IOException {
-        longToBuffer(ptr1, ioBuffer, 0);
-        longToBuffer(ptr2, ioBuffer, 8);
-        raf.write(ioBuffer, 0, 16);
-    }
-
-    /**
-     * Reads a long.
-     */
-    private long readLong() throws IOException {
-        raf.readFully(ioBuffer, 0, 8);
-        long value =
-            ((ioBuffer[0]&255L) << 56)
-            + ((ioBuffer[1]&255L) << 48)
-            + ((ioBuffer[2]&255L) << 40)
-            + ((ioBuffer[3]&255L) << 32)
-            + ((ioBuffer[4]&255L) << 24)
-            + ((ioBuffer[5]&255L) << 16)
-            + ((ioBuffer[6]&255L) << 8)
-            + (ioBuffer[7]&255L)
-        ;
-        return value;
-    }
-    // <editor-fold>
 
     // <editor-fold desc="Pointer Assertions">
     /**
      * Checks that the ptr is in the valid address range.
      */
     private boolean isValidRange(long ptr) throws IOException {
-        return ptr>=HEADER_SIZE && ptr<raf.length();
+        return ptr>=HEADER_SIZE && ptr<pbuffer.length();
     }
 
     /**
@@ -297,8 +238,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      */
     private boolean isAllocated(long ptr) throws IOException {
         assert isValidRange(ptr) : "Invalid range: "+ptr;
-        raf.seek(ptr+1);
-        return readLong()!=-1 && readLong()!=-1;
+        return pbuffer.readLong(ptr+1)!=-1 && pbuffer.readLong(ptr+9)!=-1;
     }
     // </editor-fold>
 
@@ -315,8 +255,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      */
     private void setHead(long head) throws IOException {
         assert head==TAIL_PTR || isAllocated(head);
-        raf.seek(HEAD_PTR);
-        writeLong(head);
+        pbuffer.writeLong(HEAD_PTR, head);
         this._head = head;
     }
 
@@ -329,8 +268,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      */
     private void setTail(long tail) throws IOException {
         assert tail==HEAD_PTR || isAllocated(tail);
-        raf.seek(TAIL_PTR);
-        writeLong(tail);
+        pbuffer.writeLong(TAIL_PTR, tail);
         this._tail = tail;
     }
 
@@ -340,8 +278,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      */
     private long getNext(long ptr) throws IOException {
         assert isAllocated(ptr);
-        raf.seek(ptr+1);
-        return readLong();
+        return pbuffer.readLong(ptr+1);
     }
 
     /**
@@ -351,8 +288,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
     private void setNext(long ptr, long next) throws IOException {
         assert isAllocated(ptr);
         assert next==TAIL_PTR || isAllocated(next);
-        raf.seek(ptr+1);
-        writeLong(next);
+        pbuffer.writeLong(ptr+1, next);
     }
 
     /**
@@ -361,8 +297,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      */
     private long getPrev(long ptr) throws IOException {
         assert isAllocated(ptr);
-        raf.seek(ptr+9);
-        return readLong();
+        return pbuffer.readLong(ptr+9);
     }
 
     /**
@@ -372,8 +307,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
     private void setPrev(long ptr, long prev) throws IOException {
         assert isAllocated(ptr);
         assert prev==HEAD_PTR || isAllocated(prev);
-        raf.seek(ptr+9);
-        writeLong(prev);
+        pbuffer.writeLong(ptr+9, prev);
     }
 
     /**
@@ -381,8 +315,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      */
     private int getMaxBits(long ptr) throws IOException {
         assert isValidRange(ptr);
-        raf.seek(ptr);
-        int maxBits = raf.readByte();
+        int maxBits = pbuffer.readByte(ptr);
         assert maxBits>=0 && maxBits<=31;
         return maxBits;
     }
@@ -393,8 +326,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      */
     private boolean isCompressed(long ptr) throws IOException {
         assert isAllocated(ptr);
-        raf.seek(ptr+17);
-        return raf.readBoolean();
+        return pbuffer.readBoolean(ptr+17);
     }
 
     /**
@@ -404,8 +336,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      */
     private int getDataSize(long ptr) throws IOException {
         assert isAllocated(ptr);
-        raf.seek(ptr+18);
-        return raf.readInt();
+        return pbuffer.readInt(ptr+18);
     }
 
     /**
@@ -423,17 +354,16 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
     @SuppressWarnings("unchecked")
     private E getElement(long ptr) throws IOException {
         assert isAllocated(ptr);
-        raf.seek(ptr+17);
-        raf.readFully(ioBuffer, 0, 5);
+        pbuffer.readFully(ptr+17, ioBuffer, 0, 5);
         boolean isCompressed = ioBuffer[0]!=0;
         int dataSize =
-            + ((ioBuffer[1]&255) << 24)
+              ((ioBuffer[1]&255) << 24)
             + ((ioBuffer[2]&255) << 16)
             + ((ioBuffer[3]&255) << 8)
             + (ioBuffer[4]&255)
         ;
         if(dataSize==-1) return null;
-        assert ((ptr+22)+dataSize)<=raf.length(); // Must not extend past end of file
+        assert ((ptr+22)+dataSize)<=pbuffer.length(); // Must not extend past end of file
 
         // assert dataSize>=0 && ((long)dataSize)<=(1L << getMaxBits(ptr)); // Must not exceed maximum size
         // Only Required for previous assertion: raf.seek(ptr+22);
@@ -441,7 +371,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
         // Create or grow the buffer
         if(bufferIn==null || bufferIn.getInternalByteArray().length<dataSize) bufferIn = new BetterByteArrayInputStream(new byte[dataSize]);
         // Fill the buffer
-        bufferIn.readFrom(raf, dataSize);
+        bufferIn.readFrom(pbuffer, ptr+22, dataSize);
         // Read the object
         ObjectInputStream oin = new ObjectInputStream(isCompressed ? new GZIPInputStream(bufferIn) : bufferIn);
         try {
@@ -479,8 +409,8 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
     private void deallocate(long ptr, int maxBits) throws IOException {
         assert isAllocated(ptr);
         assert _size>0;
-        raf.seek(ptr+1);
-        writeLongs(-1, -1);
+        pbuffer.writeLong(ptr+1, -1);
+        pbuffer.writeLong(ptr+9, -1);
         _size--;
         addFreeSpaceMap(ptr, maxBits);
     }
@@ -491,7 +421,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      * Will perform fsync only if fsync is enabled.
      */
     private void fsync() throws IOException {
-        if(useFsync) raf.getChannel().force(true);
+        if(useFsync) pbuffer.sync();
     }
 
     /**
@@ -543,22 +473,6 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
         }
     }
 
-    private static final byte[] zeros = new byte[4096];
-
-    /**
-     * Writes the requested number of zeros to the provided output.
-     */
-    private static void fillZeros(DataOutput out, long count) throws IOException {
-        if(count<0) throw new IllegalArgumentException("count<0: "+count);
-        while(count>4096) {
-            out.write(zeros, 0, 4096);
-            count -= 4096;
-        }
-        if(count>0) {
-            out.write(zeros, 0, (int)count);
-        }
-    }
-
     /**
      * Allocates the first free space available that can hold the requested amount of
      * data.  The amount of data should not include the pointer space.
@@ -580,31 +494,26 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
             long ptr = iter.next();
             iter.remove();
             // Update existing entry
-            longToBuffer(next, ioBuffer, 0);                 // 0-7
-            longToBuffer(prev, ioBuffer, 8);                 // 8-15
+            Utils.longToBuffer(next, ioBuffer, 0);                 // 0-7
+            Utils.longToBuffer(prev, ioBuffer, 8);                 // 8-15
             ioBuffer[16] = compress ? (byte)1 : (byte)0;     // 16
-            intToBuffer(dataSize, ioBuffer, 17);             // 17-20
-            raf.seek(ptr+1);
-            raf.write(ioBuffer, 0, 21);
-            if(dataSize>0) raf.write(data, 0, dataSize);
+            Utils.intToBuffer(dataSize, ioBuffer, 17);             // 17-20
+            pbuffer.write(ptr+1, ioBuffer, 0, 21);
+            if(dataSize>0) pbuffer.write(ptr+22, data, 0, dataSize);
             _size++;
             return ptr;
         }
         // Allocate more space at the end of the file
-        long ptr = raf.length();
+        long ptr = pbuffer.length();
+        long newLen = ptr + 22 + (1L<<(long)maxBits);
+        pbuffer.setLength(newLen);
         ioBuffer[0] = (byte)maxBits;                     // 0
-        longToBuffer(next, ioBuffer, 1);                 // 1-8
-        longToBuffer(prev, ioBuffer, 9);                 // 9-16
+        Utils.longToBuffer(next, ioBuffer, 1);                 // 1-8
+        Utils.longToBuffer(prev, ioBuffer, 9);                 // 9-16
         ioBuffer[17] = compress ? (byte)1 : (byte)0;     // 17
-        intToBuffer(dataSize, ioBuffer, 18);             // 18-21
-        raf.seek(ptr);
-        raf.write(ioBuffer, 0, 22);
-        long written;
-        if(dataSize>0) {
-            raf.write(data, 0, dataSize);
-            written = dataSize;
-        } else written = 0;
-        fillZeros(raf, (1L<<(long)maxBits) - written);
+        Utils.intToBuffer(dataSize, ioBuffer, 18);             // 18-21
+        pbuffer.write(ptr, ioBuffer, 0, 22);
+        if(dataSize>0) pbuffer.write(ptr+22, data, 0, dataSize);
         _size++;
         return ptr;
     }
@@ -956,16 +865,15 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
     public void clear() {
         try {
             modCount++;
-            raf.seek(0);
-            raf.write(MAGIC);
-            raf.writeInt(VERSION);
+            pbuffer.setLength(HEADER_SIZE);
+            pbuffer.write(0, MAGIC, 0, MAGIC.length);
+            pbuffer.writeInt(MAGIC.length, VERSION);
             setHead(TAIL_PTR);
             setTail(HEAD_PTR);
             _size = 0;
             for(Set<Long> fsm : freeSpaceMaps) {
                 if(fsm!=null) fsm.clear();
             }
-            raf.setLength(HEADER_SIZE);
             fsync();
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -1453,7 +1361,7 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
             try {
                 long lastNext = getNext(lastReturned);
                 try {
-                    LinkedFileList.this.remove(lastReturned);
+                    PersistentLinkedList.this.remove(lastReturned);
                     fsync();
                 } catch (NoSuchElementException e) {
                     throw new IllegalStateException();
@@ -1555,6 +1463,6 @@ public class LinkedFileList<E extends Serializable> extends AbstractSequentialLi
      * Closes the random access file backing this list.
      */
     public void close() throws IOException {
-        raf.close();
+        pbuffer.close();
     }
 }
