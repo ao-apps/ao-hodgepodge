@@ -174,6 +174,10 @@ public class MappedPersistentBuffer implements PersistentBuffer {
         return mappedBuffer.get(getIndex(position));
     }
 
+    public void put(long position, byte value) throws IOException {
+        mappedBuffer.put(getIndex(position), value);
+    }
+
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         mappedBuffer.position(getIndex(position));
         mappedBuffer.put(buff, off, len);

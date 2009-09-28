@@ -110,6 +110,11 @@ public interface PersistentBuffer {
     long getLong(long position) throws IOException;
 
     /**
+     * Puts a single value in the buffer.
+     */
+    void put(long position, byte value) throws IOException;
+
+    /**
      * Writes the bytes to the provided position.  The buffer will not be expanded
      * automatically.
      *

@@ -46,4 +46,30 @@ public class LargeMappedPersistentLinkedListTest extends PersistentLinkedListTes
     protected PersistentBuffer getPersistentBuffer(File tempFile) throws Exception {
         return new LargeMappedPersistentBuffer(tempFile);
     }
+
+    /**
+     * Test larger files.
+     */
+    /*
+    public void testLargeList() throws Exception {
+        File tempFile = File.createTempFile("LinkedFileListTest", null);
+        tempFile.deleteOnExit();
+        PersistentLinkedList<byte[]> linkedFileList = new PersistentLinkedList<byte[]>(getPersistentBuffer(tempFile), false, false);
+        try {
+            byte[] buff = new byte[1024*1024];
+            System.out.println("Filling list");
+            for(int c=0;c<1024;c++) {
+                linkedFileList.add(buff);
+            }
+            System.out.println("Testing as circular list");
+            for(int c=0;c<1000000;c++) {
+                linkedFileList.removeLast();
+                linkedFileList.addFirst(buff);
+            }
+        } finally {
+            linkedFileList.close();
+            linkedFileList = null;
+            tempFile.delete();
+        }
+    }*/
 }

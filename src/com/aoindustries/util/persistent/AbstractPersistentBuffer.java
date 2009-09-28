@@ -35,7 +35,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
     private final byte[] ioBuffer = new byte[8];
 
     /**
-     * Implemented as calls to <code>read(long,byte[],int,int)</code>
+     * Implemented as calls to <code>getSome(long,byte[],int,int)</code>
      *
      * @see  #read(long, byte[], int, int)
      */
@@ -58,9 +58,9 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
     }
 
     /**
-     * Implemented as call to <code>readFully(long,byte[],int,int)</code>
+     * Implemented as call to <code>get(long,byte[],int,int)</code>
      *
-     * @see  #readFully(long, byte[], int, int)
+     * @see  #get(long, byte[], int, int)
      */
     public byte get(long position) throws IOException {
         get(position, ioBuffer, 0, 1);
@@ -68,9 +68,9 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
     }
 
     /**
-     * Implemented as call to <code>readFully(long,byte[],int,int)</code>
+     * Implemented as call to <code>get(long,byte[],int,int)</code>
      *
-     * @see  #readFully(long, byte[], int, int)
+     * @see  #get(long, byte[], int, int)
      */
     public int getInt(long position) throws IOException {
         get(position, ioBuffer, 0, 4);
@@ -78,9 +78,9 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
     }
 
     /**
-     * Implemented as call to <code>readFully(long,byte[],int,int)</code>
+     * Implemented as call to <code>get(long,byte[],int,int)</code>
      *
-     * @see  #readFully(long, byte[], int, int)
+     * @see  #get(long, byte[], int, int)
      */
     public long getLong(long position) throws IOException {
         get(position, ioBuffer, 0, 8);
@@ -94,6 +94,16 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
             + ((ioBuffer[6]&255L) << 8)
             + (ioBuffer[7]&255L)
         ;
+    }
+
+    /**
+     * Implemented as call to <code>put(long,byte[],int,int)</code>
+     *
+     * @see  #put(long, byte[], int, int)
+     */
+    public void put(long position, byte value) throws IOException {
+        ioBuffer[0] = value;
+        put(position, ioBuffer, 0, 1);
     }
 
     /**

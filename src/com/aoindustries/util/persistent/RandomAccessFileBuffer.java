@@ -152,6 +152,13 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         return raf.readByte();
     }
 
+    @Override
+    public void put(long position, byte value) throws IOException {
+        if(position>=capacity()) throw new BufferOverflowException();
+        raf.seek(position);
+        raf.write(value);
+    }
+
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         if((position+len)>capacity()) throw new BufferOverflowException();
         raf.seek(position);

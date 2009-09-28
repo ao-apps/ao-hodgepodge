@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 /**
  * Uses a set of <code>MappedByteBuffer</code> for persistence.  Each buffer
  * covers a maximum of 2^30 bytes.  This handles mapping of up to
- * 2^30 * 2^31-1 bytes.
+ * 2^30 * 2^31-2 bytes.
  *
  * @see  MappedPersistentBuffer
  *
@@ -44,6 +44,14 @@ import java.util.logging.Logger;
 public class LargeMappedPersistentBuffer implements PersistentBuffer {
 
     private static final Logger logger = Logger.getLogger(LargeMappedPersistentBuffer.class.getName());
+
+    // For testing, change this value to something smaller, like 12.  This will
+    // allow the testing of the buffer boundary conditions.
+    // 12 matches Linux page size of 4096 bytes and still performs well.
+    // 10 performed less consistently, with frequently higher CPU usage.
+    private static final int BUFFER_NUM_BIT_SHIFT = 30; // 12 for testing.
+    private static final int BUFFER_SIZE = 1<<BUFFER_NUM_BIT_SHIFT;
+    private static final int BUFFER_INDEX_MASK = BUFFER_SIZE-1;
 
     private final File tempFile;
     private final RandomAccessFile raf;
@@ -64,6 +72,7 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
         readOnly = false;
         // Lock the file
         channel.lock(0L, Long.MAX_VALUE, false);
+        fillMappedBuffers();
     }
 
     /**
@@ -104,6 +113,7 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
         this.readOnly = readOnly;
         // Lock the file
         channel.lock(0L, Long.MAX_VALUE, readOnly);
+        fillMappedBuffers();
     }
 
     public boolean isClosed() {
@@ -133,93 +143,196 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
         return raf.length();
     }
 
-    private MappedByteBuffer getMappedBuffer(long position) throws IOException {
-        if(position<0) throw new IllegalArgumentException("position<0: "+position);
-        long buffNum = position>>>30;
-        if(buffNum>Integer.MAX_VALUE) throw new IOException("position too large for LargeMappedPersistentBuffer: "+position);
-        int buffNumInt = (int)buffNum;
+    /**
+     * Fills the buffers to cover the entire file length.
+     */
+    private void fillMappedBuffers() throws IOException {
+        long len = raf.length();
+        long maxBuffNum = len>>>BUFFER_NUM_BIT_SHIFT;
+        if(maxBuffNum>=Integer.MAX_VALUE) throw new IOException("file too large for LargeMappedPersistentBuffer: "+len);
+        int buffNumInt = (int)maxBuffNum;
         // Expand list
-        while(mappedBuffers.size()<=buffNumInt) mappedBuffers.add(null);
-        // Create map if missing
-        MappedByteBuffer mappedBuffer = mappedBuffers.get(buffNumInt);
-        if(mappedBuffer==null) {
-            long mapStart = buffNum<<30;
+        while(mappedBuffers.size()<=buffNumInt) {
+            long mapStart = ((long)mappedBuffers.size())<<BUFFER_NUM_BIT_SHIFT;
             long size = raf.length() - mapStart;
-            if(size>0x40000000) size = 0x40000000;
-            mappedBuffers.set(buffNumInt, mappedBuffer = channel.map(readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, mapStart, size));
+            if(size>BUFFER_SIZE) size = BUFFER_SIZE;
+            mappedBuffers.add(channel.map(readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, mapStart, size));
         }
-        return mappedBuffer;
+    }
+
+    private int getBufferNum(long position) throws IOException {
+        if(position<0) throw new IllegalArgumentException("position<0: "+position);
+        long buffNum = position>>>BUFFER_NUM_BIT_SHIFT;
+        if(buffNum>=Integer.MAX_VALUE) throw new IOException("position too large for LargeMappedPersistentBuffer: "+position);
+        return (int)buffNum;
     }
 
     /**
      * Gets the position as an integer or throws IOException if too big for a mapped buffer.
      */
     private int getIndex(long position) throws IOException {
-        return (int)(position&0x3fffffff);
+        return (int)(position&BUFFER_INDEX_MASK);
+    }
+
+    private void fillZeros(long position, long len) throws IOException {
+        while(len>0) {
+            long bufferStart = position & BUFFER_INDEX_MASK;
+            long bufferSize = BUFFER_SIZE - bufferStart;
+            if(bufferSize > len) bufferSize = len;
+            MappedByteBuffer mappedBuffer = mappedBuffers.get(getBufferNum(position));
+            mappedBuffer.position((int)bufferStart);
+            Utils.fillZeros(mappedBuffer, bufferSize);
+            position += bufferSize;
+            len -= bufferSize;
+        }
     }
 
     public void setCapacity(long newLength) throws IOException {
         long oldLength = capacity();
         if(oldLength!=newLength) {
             // Remove any buffers that could be affected
-            long affectedFrom = Math.min(oldLength, newLength) >>> 30;
+            long affectedFrom = getBufferNum(Math.min(oldLength, newLength));
             while(mappedBuffers.size()>affectedFrom) mappedBuffers.remove(mappedBuffers.size()-1);
             raf.setLength(newLength);
+            fillMappedBuffers();
             if(newLength>oldLength) {
                 // Ensure zero-filled
-                raf.seek(oldLength);
-                Utils.fillZeros(raf, newLength - oldLength);
+                fillZeros(oldLength, newLength-oldLength);
             }
         }
     }
 
     public void get(long position, byte[] buff, int off, int len) throws IOException {
-        MappedByteBuffer mappedBuffer = getMappedBuffer(position);
-        mappedBuffer.position(getIndex(position));
-        mappedBuffer.get(buff, off, len);
+        if(len>0) {
+            int startBufferNum = getBufferNum(position);
+            int endBufferNum = getBufferNum(position+len-1);
+            if(startBufferNum==endBufferNum) {
+                MappedByteBuffer mappedBuffer = mappedBuffers.get(startBufferNum);
+                mappedBuffer.position(getIndex(position));
+                mappedBuffer.get(buff, off, len);
+            } else {
+                do {
+                    int bufferStart = (int)(position & BUFFER_INDEX_MASK);
+                    int bufferSize = BUFFER_SIZE - bufferStart;
+                    if(bufferSize > len) bufferSize = len;
+                    MappedByteBuffer mappedBuffer = mappedBuffers.get(getBufferNum(position));
+                    mappedBuffer.position(bufferStart);
+                    mappedBuffer.get(buff, off, bufferSize);
+                    position += bufferSize;
+                    off += bufferSize;
+                    len -= bufferSize;
+                } while(len>0);
+            }
+        }
     }
 
     public int getSome(long position, byte[] buff, int off, int len) throws IOException {
-        MappedByteBuffer mappedBuffer = getMappedBuffer(position);
-        mappedBuffer.position(getIndex(position));
-        mappedBuffer.get(buff, off, len);
+        get(position, buff, off, len);
         return len;
     }
 
     public byte get(long position) throws IOException {
-        return getMappedBuffer(position).get(getIndex(position));
+        return mappedBuffers.get(getBufferNum(position)).get(getIndex(position));
+    }
+
+    public void put(long position, byte value) throws IOException {
+        mappedBuffers.get(getBufferNum(position)).put(getIndex(position), value);
     }
 
     public void put(long position, byte[] buff, int off, int len) throws IOException {
-        MappedByteBuffer mappedBuffer = getMappedBuffer(position);
-        mappedBuffer.position(getIndex(position));
-        mappedBuffer.put(buff, off, len);
+        if(len>0) {
+            int startBufferNum = getBufferNum(position);
+            int endBufferNum = getBufferNum(position+len-1);
+            if(startBufferNum==endBufferNum) {
+                MappedByteBuffer mappedBuffer = mappedBuffers.get(startBufferNum);
+                mappedBuffer.position(getIndex(position));
+                mappedBuffer.put(buff, off, len);
+            } else {
+                do {
+                    int bufferStart = (int)(position & BUFFER_INDEX_MASK);
+                    int bufferSize = BUFFER_SIZE - bufferStart;
+                    if(bufferSize > len) bufferSize = len;
+                    MappedByteBuffer mappedBuffer = mappedBuffers.get(getBufferNum(position));
+                    mappedBuffer.position(bufferStart);
+                    mappedBuffer.put(buff, off, bufferSize);
+                    position += bufferSize;
+                    off += bufferSize;
+                    len -= bufferSize;
+                } while(len>0);
+            }
+        }
     }
 
     public void force() throws IOException {
-        for(MappedByteBuffer mappedBuffer : mappedBuffers) {
-            if(mappedBuffer!=null) mappedBuffer.force();
-        }
+        for(MappedByteBuffer mappedBuffer : mappedBuffers) mappedBuffer.force();
         channel.force(true);
     }
 
     public boolean getBoolean(long position) throws IOException {
-        return getMappedBuffer(position).get(getIndex(position))!=0;
+        return get(position)!=0;
     }
 
     public int getInt(long position) throws IOException {
-        return getMappedBuffer(position).getInt(getIndex(position));
+        int startBufferNum = getBufferNum(position);
+        int endBufferNum = getBufferNum(position+3);
+        if(startBufferNum==endBufferNum) {
+            return mappedBuffers.get(startBufferNum).getInt(getIndex(position));
+        } else {
+            return
+                  ((get(position)&255) << 24)
+                + ((get(position+1)&255) << 16)
+                + ((get(position+2)&255) << 8)
+                + (get(position+3)&255)
+            ;
+        }
     }
 
     public long getLong(long position) throws IOException {
-        return getMappedBuffer(position).getLong(getIndex(position));
+        int startBufferNum = getBufferNum(position);
+        int endBufferNum = getBufferNum(position+7);
+        if(startBufferNum==endBufferNum) {
+            return mappedBuffers.get(startBufferNum).getLong(getIndex(position));
+        } else {
+            return
+                  ((get(position)&255L) << 56)
+                + ((get(position+1)&255L) << 48)
+                + ((get(position+2)&255L) << 40)
+                + ((get(position+3)&255L) << 32)
+                + ((get(position+4)&255L) << 24)
+                + ((get(position+5)&255L) << 16)
+                + ((get(position+6)&255L) << 8)
+                + (get(position+7)&255L)
+            ;
+        }
     }
 
     public void putInt(long position, int value) throws IOException {
-        getMappedBuffer(position).putInt(getIndex(position), value);
+        int startBufferNum = getBufferNum(position);
+        int endBufferNum = getBufferNum(position+3);
+        if(startBufferNum==endBufferNum) {
+            mappedBuffers.get(startBufferNum).putInt(getIndex(position), value);
+        } else {
+            put(position, (byte)(value >>> 24));
+            put(position+1, (byte)(value >>> 16));
+            put(position+2, (byte)(value >>> 8));
+            put(position+3, (byte)value);
+        }
     }
 
     public void putLong(long position, long value) throws IOException {
-        getMappedBuffer(position).putLong(getIndex(position), value);
+        int startBufferNum = getBufferNum(position);
+        int endBufferNum = getBufferNum(position+7);
+        if(startBufferNum==endBufferNum) {
+            mappedBuffers.get(startBufferNum).putLong(getIndex(position), value);
+        } else {
+            put(position, (byte)(value >>> 56));
+            put(position+1, (byte)(value >>> 48));
+            put(position+2, (byte)(value >>> 40));
+            put(position+3, (byte)(value >>> 32));
+            put(position+4, (byte)(value >>> 24));
+            put(position+5, (byte)(value >>> 16));
+            put(position+6, (byte)(value >>> 8));
+            put(position+7, (byte)value);
+        }
     }
 }
