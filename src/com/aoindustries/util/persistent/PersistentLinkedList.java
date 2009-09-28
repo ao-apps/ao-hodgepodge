@@ -206,7 +206,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
         else if(len<HEADER_SIZE) throw new IOException("File does not have a complete header");
         else {
             pbuffer.get(0, ioBuffer, 0, MAGIC.length);
-            if(!equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a LinkedFileList (MAGIC mismatch)");
+            if(!equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
             int version = pbuffer.getInt(MAGIC.length);
             if(version!=VERSION) throw new IOException("Unsupported file version: "+version);
             _head = pbuffer.getLong(MAGIC.length+4);
