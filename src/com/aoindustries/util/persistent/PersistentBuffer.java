@@ -32,11 +32,9 @@ import java.io.IOException;
  * communication.
  * </p>
  * <p>
- * The ensure the data integrity of higher-level data structures, the write order
- * should be maintained and all data modified since the last <code>sync</code> should
- * be flushed and synced when <code>sync</code> is called.  In the event <code>sync</code>
- * is never called, the information should still be persisted in order and in a timely
- * manner.
+ * The ensure the data integrity of higher-level data structures, all writes must
+ * be committed to physical media when <code>force</code> is called.  Writer order
+ * between <code>force</code> calls is not maintained.
  * </p>
  *
  * @author  AO Industries, Inc.
@@ -139,7 +137,8 @@ public interface PersistentBuffer {
     void putLong(long position, long value) throws IOException;
 
     /**
-     * Syncs any unwritten data to the underlying storage.
+     * Writes any unwritten data to the underlying storage.  Does not return
+     * until the data is physically persisted.
      */
     void force() throws IOException;
 }

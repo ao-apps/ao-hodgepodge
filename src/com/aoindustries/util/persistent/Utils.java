@@ -23,7 +23,9 @@
 package com.aoindustries.util.persistent;
 
 import java.io.DataOutput;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -32,6 +34,50 @@ import java.nio.ByteBuffer;
  * @author  AO Industries, Inc.
  */
 class Utils {
+
+    static void charToBuffer(char ch, byte[] ioBuffer, int off) {
+        ioBuffer[off] = (byte)(ch >>> 8);
+        ioBuffer[off+1] = (byte)ch;
+    }
+
+    static char bufferToChar(byte[] ioBuffer, int off) {
+        return
+            (char)(
+                ((ioBuffer[off+0]&255) << 8)
+                + (ioBuffer[off+1]&255)
+            )
+        ;
+    }
+
+    static void shortToBuffer(short s, byte[] ioBuffer, int off) {
+        ioBuffer[off] = (byte)(s >>> 8);
+        ioBuffer[off+1] = (byte)s;
+    }
+
+    static short bufferToShort(byte[] ioBuffer, int off) {
+        return
+            (short)(
+                ((ioBuffer[off+0]&255) << 8)
+                + (ioBuffer[off+1]&255)
+            )
+        ;
+    }
+
+    static void intToBuffer(int i, byte[] ioBuffer, int off) {
+        ioBuffer[off] = (byte)(i >>> 24);
+        ioBuffer[off+1] = (byte)(i >>> 16);
+        ioBuffer[off+2] = (byte)(i >>> 8);
+        ioBuffer[off+3] = (byte)i;
+    }
+
+    static int bufferToInt(byte[] ioBuffer, int off) {
+        return
+              ((ioBuffer[off]&255) << 24)
+            + ((ioBuffer[off+1]&255) << 16)
+            + ((ioBuffer[off+2]&255) << 8)
+            + (ioBuffer[off+3]&255)
+        ;
+    }
 
     static void longToBuffer(long l, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(l >>> 56);
@@ -54,22 +100,6 @@ class Utils {
             + ((ioBuffer[off+5]&255L) << 16)
             + ((ioBuffer[off+6]&255L) << 8)
             + (ioBuffer[off+7]&255L)
-        ;
-    }
-
-    static void intToBuffer(int i, byte[] ioBuffer, int off) {
-        ioBuffer[off++] = (byte)(i >>> 24);
-        ioBuffer[off++] = (byte)(i >>> 16);
-        ioBuffer[off++] = (byte)(i >>> 8);
-        ioBuffer[off] = (byte)i;
-    }
-
-    static int bufferToInt(byte[] ioBuffer, int off) {
-        return
-              ((ioBuffer[off]&255) << 24)
-            + ((ioBuffer[off+1]&255) << 16)
-            + ((ioBuffer[off+2]&255) << 8)
-            + (ioBuffer[off+3]&255)
         ;
     }
 
@@ -97,6 +127,28 @@ class Utils {
             count -= 4096;
         }
         if(count>0) buffer.put(zeros, 0, (int)count);
+    }
+
+    /**
+     * Fully reads a buffer.
+     */
+    static void readFully(InputStream in, byte[] buffer, int off, int len) throws IOException {
+        while(len>0) {
+            int count = in.read(buffer, off, len);
+            if(count==-1) throw new EOFException();
+            off += count;
+            len -= count;
+        }
+    }
+
+    /**
+     * Checks if the subrange of two byte arrays is equal.
+     */
+    static boolean equals(byte[] b1, byte[] b2, int off, int len) {
+        for(int end=off+len; off<end; off++) {
+            if(b1[off]!=b2[off]) return false;
+        }
+        return true;
     }
 
     private Utils() {

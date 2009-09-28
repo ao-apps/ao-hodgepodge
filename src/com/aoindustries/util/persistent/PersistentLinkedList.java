@@ -26,9 +26,6 @@ import com.aoindustries.io.BetterByteArrayInputStream;
 import com.aoindustries.io.BetterByteArrayOutputStream;
 import com.aoindustries.util.WrappedException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,8 +37,6 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * <p>
@@ -55,6 +50,12 @@ import java.util.zip.GZIPOutputStream;
  * <p>
  * This class is not thread-safe.  It is absolutely critical that external
  * synchronization be applied.
+ * </p>
+ * <p>
+ * The objects are serialized using the standard Java serialization, unless a
+ * <code>Serializer</code> is provided.  If an object that is not <code>Serializable</code>
+ * is to be stored, a <code>Serializer</code> must be provided.  <code>Serializer</code>s
+ * may also provide a more efficient or more compact representation of an object.
  * </p>
  * <p>
  * This class is intended for persistence, not for intra-process or intra-thread
@@ -76,9 +77,8 @@ import java.util.zip.GZIPOutputStream;
  *                                   data segment of this entry (used to determine block size).
  *     +1       next        long     position of next, <code>8</code> for last element, or <code>-1</code> for entry available.
  *     +9       prev        long     position of prev, <code>0</code> for first element, or <code>-1</code> for entry available.
- *     +17      compressed  boolean  flag indicating the data is gzip compressed.
- *     +18      dataSize    int      the size of the serialized (and optionally compressed) data, must always be &lt;= 2^maxBits, <code>-1</code> means null element
- *     +22      data        byte[]   the binary data.
+ *     +17      dataSize    int      the size of the serialized data, must always be &lt;= 2^maxBits, <code>-1</code> means null element
+ *     +21      data        byte[]   the binary data.
  * </p>
  *
  * <pre>
@@ -91,9 +91,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author  AO Industries, Inc.
  */
-public class PersistentLinkedList<E extends Serializable> extends AbstractSequentialList<E> implements List<E>, Queue<E> {
-
-    private static final long serialVersionUID = 1L;
+public class PersistentLinkedList<E> extends AbstractSequentialList<E> implements List<E>, Queue<E> {
 
     private static final byte[] MAGIC={
         'P',
@@ -119,7 +117,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
         '\n'
     };
 
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     /**
      * The constant location of the head pointer.
@@ -137,23 +135,35 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     private static final int HEADER_SIZE = (int)(TAIL_PTR + 8);
 
     /**
-     * Checks if the subrange of two byte arrays is equal.
+     * The block offset for <code>maxBits</code>.
      */
-    private static boolean equals(byte[] b1, byte[] b2, int off, int len) {
-        for(int end=off+len; off<end; off++) {
-            if(b1[off]!=b2[off]) return false;
-        }
-        return true;
-    }
+    private static final int MAX_BITS_OFFSET = 0;
 
-    private final byte[] ioBuffer = new byte[22];
+    /**
+     * The block offset for <code>next</code>.
+     */
+    private static final int NEXT_OFFSET = 1;
 
+    /**
+     * The block offset for <code>prev</code>.
+     */
+    private static final int PREV_OFFSET = 9;
+
+    /**
+     * The block offset for <code>dataSize</code>.
+     */
+    private static final int DATA_SIZE_OFFSET = 17;
+
+    /**
+     * The block offset for the beginning of the data.
+     */
+    private static final int DATA_OFFSET = 21;
+
+    private final byte[] ioBuffer = new byte[Math.max(DATA_OFFSET, MAGIC.length)];
+
+    final private Serializer<E> serializer;
     final private PersistentBuffer pbuffer;
-    final private boolean defaultGZIP;
     final private boolean useFsync;
-
-    private BetterByteArrayInputStream bufferIn; // Used during deserialization - could get directly from underlying stream, but would involve more I/Os.
-    final private BetterByteArrayOutputStream bufferOut = new BetterByteArrayOutputStream(); // Used during serialization
 
     private long _head;
     private long _tail;
@@ -167,22 +177,22 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
 
     // <editor-fold desc="Constructors">
     /**
-     * Constructs a list backed by a temporary file.  The temporary file will be
-     * deleted at JVM shutdown.
+     * Constructs a list backed by a temporary file using standard serialization.
+     * The temporary file will be deleted at JVM shutdown.
      * Operates in constant time.
      *
      * @see  RandomAccessFileBuffer#RandomAccessFileBuffer()
      */
     public PersistentLinkedList() throws IOException {
+        serializer = new ObjectSerializer<E>();
         pbuffer = new RandomAccessFileBuffer();
-        defaultGZIP = false;
         useFsync = false;
         for(int c=0;c<32;c++) freeSpaceMaps.add(null);
         clear();
     }
 
     /**
-     * Constructs a list with a temporary file containing all of the provided elements.
+     * Constructs a list with a temporary file using standard serialization containing all of the provided elements.
      * The temporary file will be deleted at JVM shutdown.
      * Operates in linear time.
      */
@@ -192,12 +202,20 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     }
 
     /**
+     * Constructs a list backed by the provided persisent buffer using standard serialization.
+     * Operates in linear time in order to cache the size.
+     */
+    public PersistentLinkedList(PersistentBuffer pbuffer, boolean useFsync) throws IOException {
+        this(pbuffer, useFsync, new ObjectSerializer<E>());
+    }
+
+    /**
      * Constructs a list backed by the provided persisent buffer.
      * Operates in linear time in order to cache the size.
      */
-    public PersistentLinkedList(PersistentBuffer pbuffer, boolean defaultGZIP, boolean useFsync) throws IOException {
+    public PersistentLinkedList(PersistentBuffer pbuffer, boolean useFsync, Serializer<E> serializer) throws IOException {
+        this.serializer = serializer;
         this.pbuffer = pbuffer;
-        this.defaultGZIP = defaultGZIP;
         this.useFsync = useFsync;
         for(int c=0;c<32;c++) freeSpaceMaps.add(null);
         // Read the head and tail to maintain in cache
@@ -206,7 +224,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
         else if(len<HEADER_SIZE) throw new IOException("File does not have a complete header");
         else {
             pbuffer.get(0, ioBuffer, 0, MAGIC.length);
-            if(!equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
+            if(!Utils.equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
             int version = pbuffer.getInt(MAGIC.length);
             if(version!=VERSION) throw new IOException("Unsupported file version: "+version);
             _head = pbuffer.getLong(MAGIC.length+4);
@@ -238,7 +256,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private boolean isAllocated(long ptr) throws IOException {
         assert isValidRange(ptr) : "Invalid range: "+ptr;
-        return pbuffer.getLong(ptr+1)!=-1 && pbuffer.getLong(ptr+9)!=-1;
+        return pbuffer.getLong(ptr+NEXT_OFFSET)!=-1 && pbuffer.getLong(ptr+PREV_OFFSET)!=-1;
     }
     // </editor-fold>
 
@@ -278,7 +296,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private long getNext(long ptr) throws IOException {
         assert isAllocated(ptr);
-        return pbuffer.getLong(ptr+1);
+        return pbuffer.getLong(ptr+NEXT_OFFSET);
     }
 
     /**
@@ -288,7 +306,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     private void setNext(long ptr, long next) throws IOException {
         assert isAllocated(ptr);
         assert next==TAIL_PTR || isAllocated(next);
-        pbuffer.putLong(ptr+1, next);
+        pbuffer.putLong(ptr+NEXT_OFFSET, next);
     }
 
     /**
@@ -297,7 +315,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private long getPrev(long ptr) throws IOException {
         assert isAllocated(ptr);
-        return pbuffer.getLong(ptr+9);
+        return pbuffer.getLong(ptr+PREV_OFFSET);
     }
 
     /**
@@ -307,7 +325,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     private void setPrev(long ptr, long prev) throws IOException {
         assert isAllocated(ptr);
         assert prev==HEAD_PTR || isAllocated(prev);
-        pbuffer.putLong(ptr+9, prev);
+        pbuffer.putLong(ptr+PREV_OFFSET, prev);
     }
 
     /**
@@ -315,18 +333,9 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private int getMaxBits(long ptr) throws IOException {
         assert isValidRange(ptr);
-        int maxBits = pbuffer.get(ptr);
+        int maxBits = pbuffer.get(ptr+MAX_BITS_OFFSET);
         assert maxBits>=0 && maxBits<=31;
         return maxBits;
-    }
-
-    /**
-     * Gets the compressed flag for the entry.
-     * The entry must be allocated.
-     */
-    private boolean isCompressed(long ptr) throws IOException {
-        assert isAllocated(ptr);
-        return pbuffer.getBoolean(ptr+17);
     }
 
     /**
@@ -336,7 +345,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private int getDataSize(long ptr) throws IOException {
         assert isAllocated(ptr);
-        return pbuffer.getInt(ptr+18);
+        return pbuffer.getInt(ptr+DATA_SIZE_OFFSET);
     }
 
     /**
@@ -347,42 +356,28 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
         return getDataSize(ptr)==-1;
     }
 
+    // TODO: Use direct buffer access
+    private BetterByteArrayInputStream bufferIn;
+
     /**
      * Gets the element for the entry at the provided location.
      * The entry must be allocated.
      */
-    @SuppressWarnings("unchecked")
     private E getElement(long ptr) throws IOException {
         assert isAllocated(ptr);
-        pbuffer.get(ptr+17, ioBuffer, 0, 5);
-        boolean isCompressed = ioBuffer[0]!=0;
-        int dataSize =
-              ((ioBuffer[1]&255) << 24)
-            + ((ioBuffer[2]&255) << 16)
-            + ((ioBuffer[3]&255) << 8)
-            + (ioBuffer[4]&255)
-        ;
+        int dataSize = getDataSize(ptr);
         if(dataSize==-1) return null;
-        assert ((ptr+22)+dataSize)<=pbuffer.capacity(); // Must not extend past end of file
+        assert (ptr+DATA_OFFSET+dataSize)<=pbuffer.capacity(); // Must not extend past end of file
 
         // assert dataSize>=0 && ((long)dataSize)<=(1L << getMaxBits(ptr)); // Must not exceed maximum size
-        // Only Required for previous assertion: raf.seek(ptr+22);
+        // Only Required for previous assertion: raf.seek(ptr+DATA_OFFSET);
 
         // Create or grow the buffer
         if(bufferIn==null || bufferIn.getInternalByteArray().length<dataSize) bufferIn = new BetterByteArrayInputStream(new byte[dataSize]);
         // Fill the buffer
-        bufferIn.readFrom(pbuffer, ptr+22, dataSize);
+        bufferIn.readFrom(pbuffer, ptr+DATA_OFFSET, dataSize);
         // Read the object
-        ObjectInputStream oin = new ObjectInputStream(isCompressed ? new GZIPInputStream(bufferIn) : bufferIn);
-        try {
-            return (E)oin.readObject();
-        } catch(ClassNotFoundException err) {
-            IOException ioErr = new IOException();
-            ioErr.initCause(err);
-            throw ioErr;
-        } finally {
-            oin.close();
-        }
+        return serializer.deserialize(bufferIn);
     }
 
     /**
@@ -391,7 +386,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      */
     private static long getEntrySize(int maxBits) {
         assert maxBits>=0 && maxBits<=31;
-        return 22L + (1L << maxBits);
+        return DATA_OFFSET + (1L << maxBits);
     }
 
     /**
@@ -409,8 +404,8 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     private void deallocate(long ptr, int maxBits) throws IOException {
         assert isAllocated(ptr);
         assert _size>0;
-        pbuffer.putLong(ptr+1, -1);
-        pbuffer.putLong(ptr+9, -1);
+        pbuffer.putLong(ptr+NEXT_OFFSET, -1);
+        pbuffer.putLong(ptr+PREV_OFFSET, -1);
         _size--;
         addFreeSpaceMap(ptr, maxBits);
     }
@@ -460,26 +455,12 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     }
 
     /**
-     * Serializes the object to bufferOut.
-     * Operates in constant time.
-     */
-    private void serialize(E element, boolean compress) throws IOException {
-        bufferOut.reset();
-        ObjectOutputStream oout = new ObjectOutputStream(compress ? new GZIPOutputStream(bufferOut) : bufferOut);
-        try {
-            oout.writeObject(element);
-        } finally {
-            oout.close();
-        }
-    }
-
-    /**
      * Allocates the first free space available that can hold the requested amount of
      * data.  The amount of data should not include the pointer space.
      *
      * Operates in logarithic complexity on the amount of free entries.
      */
-    private long allocateEntry(long next, long prev, boolean compress, int dataSize, byte[] data) throws IOException {
+    private long allocateEntry(long next, long prev, int dataSize, byte[] data) throws IOException {
         assert next==TAIL_PTR || isAllocated(next);
         assert prev==HEAD_PTR || isAllocated(prev);
         assert (dataSize==-1 && data==null) || (dataSize>=0 && data!=null);
@@ -494,35 +475,36 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
             long ptr = iter.next();
             iter.remove();
             // Update existing entry
-            Utils.longToBuffer(next, ioBuffer, 0);                 // 0-7
-            Utils.longToBuffer(prev, ioBuffer, 8);                 // 8-15
-            ioBuffer[16] = compress ? (byte)1 : (byte)0;     // 16
-            Utils.intToBuffer(dataSize, ioBuffer, 17);             // 17-20
-            pbuffer.put(ptr+1, ioBuffer, 0, 21);
-            if(dataSize>0) pbuffer.put(ptr+22, data, 0, dataSize);
+            Utils.longToBuffer(next, ioBuffer, NEXT_OFFSET-NEXT_OFFSET);
+            Utils.longToBuffer(prev, ioBuffer, PREV_OFFSET-NEXT_OFFSET);
+            Utils.intToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET-NEXT_OFFSET);
+            pbuffer.put(ptr+NEXT_OFFSET, ioBuffer, 0, 20);
+            if(dataSize>0) pbuffer.put(ptr+DATA_OFFSET, data, 0, dataSize);
             _size++;
             return ptr;
         }
         // Allocate more space at the end of the file
         long ptr = pbuffer.capacity();
-        long newLen = ptr + 22 + (1L<<(long)maxBits);
+        long newLen = ptr + DATA_OFFSET + (1L<<(long)maxBits);
         pbuffer.setCapacity(newLen);
-        ioBuffer[0] = (byte)maxBits;                     // 0
-        Utils.longToBuffer(next, ioBuffer, 1);                 // 1-8
-        Utils.longToBuffer(prev, ioBuffer, 9);                 // 9-16
-        ioBuffer[17] = compress ? (byte)1 : (byte)0;     // 17
-        Utils.intToBuffer(dataSize, ioBuffer, 18);             // 18-21
-        pbuffer.put(ptr, ioBuffer, 0, 22);
-        if(dataSize>0) pbuffer.put(ptr+22, data, 0, dataSize);
+        ioBuffer[MAX_BITS_OFFSET] = (byte)maxBits;
+        Utils.longToBuffer(next, ioBuffer, NEXT_OFFSET);
+        Utils.longToBuffer(prev, ioBuffer, PREV_OFFSET);
+        Utils.intToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);
+        pbuffer.put(ptr, ioBuffer, 0, DATA_OFFSET);
+        if(dataSize>0) pbuffer.put(ptr+DATA_OFFSET, data, 0, dataSize);
         _size++;
         return ptr;
     }
+
+    // TODO: Use direct streams
+    private final BetterByteArrayOutputStream bufferOut = new BetterByteArrayOutputStream();
 
     /**
      * Adds the first entry to the list.
      * Operates in constant time.
      */
-    private void addFirstEntry(final E element, final boolean compress) throws IOException {
+    private void addFirstEntry(final E element) throws IOException {
         assert getHead()==TAIL_PTR;
         assert getTail()==HEAD_PTR;
         int dataSize;
@@ -532,11 +514,13 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
             data = null;
         }
         else {
-            serialize(element, compress);
-            dataSize = bufferOut.size();
+            dataSize = serializer.getSerializedSize(element);
+            bufferOut.reset();
+            serializer.serialize(element, bufferOut);
+            if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
             data = bufferOut.getInternalByteArray();
         }
-        long newPtr = allocateEntry(TAIL_PTR, HEAD_PTR, compress, dataSize, data);
+        long newPtr = allocateEntry(TAIL_PTR, HEAD_PTR, dataSize, data);
         setHead(newPtr);
         setTail(newPtr);
     }
@@ -545,7 +529,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      * Adds the provided element before the element at the provided location.
      * Operates in log time for free space.
      */
-    private void addBefore(final E element, final long ptr, final boolean compress) throws IOException {
+    private void addBefore(final E element, final long ptr) throws IOException {
         assert isAllocated(ptr);
         int dataSize;
         byte[] data;
@@ -554,12 +538,14 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
             data = null;
         }
         else {
-            serialize(element, compress);
-            dataSize = bufferOut.size();
+            dataSize = serializer.getSerializedSize(element);
+            bufferOut.reset();
+            serializer.serialize(element, bufferOut);
+            if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
             data = bufferOut.getInternalByteArray();
         }
         long prev = getPrev(ptr);
-        long newPtr = allocateEntry(ptr, prev, compress, dataSize, data);
+        long newPtr = allocateEntry(ptr, prev, dataSize, data);
         if(prev==HEAD_PTR) setHead(newPtr);
         else setNext(prev, newPtr);
         setPrev(ptr, newPtr);
@@ -569,7 +555,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
      * Adds the provided element after the element at the provided location.
      * Operates in log time for free space.
      */
-    private void addAfter(final E element, final long ptr, final boolean compress) throws IOException {
+    private void addAfter(final E element, final long ptr) throws IOException {
         assert isAllocated(ptr);
         int dataSize;
         byte[] data;
@@ -578,12 +564,14 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
             data = null;
         }
         else {
-            serialize(element, compress);
-            dataSize = bufferOut.size();
+            dataSize = serializer.getSerializedSize(element);
+            bufferOut.reset();
+            serializer.serialize(element, bufferOut);
+            if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
             data = bufferOut.getInternalByteArray();
         }
         long next = getNext(ptr);
-        long newPtr = allocateEntry(next, ptr, compress, dataSize, data);
+        long newPtr = allocateEntry(next, ptr, dataSize, data);
         if(next==TAIL_PTR) setTail(newPtr);
         else setPrev(next, newPtr);
         setNext(ptr, newPtr);
@@ -677,9 +665,9 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
         try {
             modCount++;
             long head = getHead();
-            if(head==TAIL_PTR) addFirstEntry(element, defaultGZIP);
+            if(head==TAIL_PTR) addFirstEntry(element);
             else {
-                addBefore(element, head, defaultGZIP);
+                addBefore(element, head);
             }
             fsync();
         } catch(IOException err) {
@@ -699,9 +687,9 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
         try {
             modCount++;
             long tail = getTail();
-            if(tail==HEAD_PTR) addFirstEntry(element, defaultGZIP);
+            if(tail==HEAD_PTR) addFirstEntry(element);
             else {
-                addAfter(element, tail, defaultGZIP);
+                addAfter(element, tail);
             }
             fsync();
         } catch(IOException err) {
@@ -825,7 +813,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
     	modCount++;
         try {
             long ptr = getPointerForIndex(index);
-            for(E element : c) addBefore(element, ptr, defaultGZIP);
+            for(E element : c) addBefore(element, ptr);
             fsync();
             return true;
         } catch(IOException err) {
@@ -913,7 +901,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
             remove(ptr);
             if(prev==HEAD_PTR) addFirst(element);
             else {
-                addAfter(element, prev, defaultGZIP);
+                addAfter(element, prev);
                 fsync();
             }
         } catch(IOException err) {
@@ -959,7 +947,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
             long prev = getPrev(ptr);
             if(prev==HEAD_PTR) addFirst(element);
             else {
-                addAfter(element, prev, defaultGZIP);
+                addAfter(element, prev);
                 fsync();
             }
         } catch(IOException err) {
@@ -1387,7 +1375,7 @@ public class PersistentLinkedList<E extends Serializable> extends AbstractSequen
             try {
                 lastReturned = TAIL_PTR;
                 modCount++;
-                addBefore(e, nextPtr, defaultGZIP);
+                addBefore(e, nextPtr);
                 fsync();
                 nextIndex++;
                 expectedModCount++;
