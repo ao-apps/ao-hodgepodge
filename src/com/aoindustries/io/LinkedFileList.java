@@ -51,7 +51,7 @@ import java.util.zip.GZIPOutputStream;
  * this is a linked list implementation and has the expected qualities and costs.
  * There are no size limits to the stored data.  Fragmentation may occur in the file
  * over time, but is minimized by the use of per-block size free space maps.
- * There is currently no compaction tool.
+ * There is currently no compaction tool or conversion between block sizes.
  * </p>
  * <p>
  * This class is not thread-safe.  It is absolutely critical that external
@@ -82,10 +82,15 @@ import java.util.zip.GZIPOutputStream;
  *     +22      data        byte[]   the binary data.
  * </p>
  *
- * @author  AO Industries, Inc.
+ * <pre>
+ * TODO: Should we align on OS-level block sizes, or fixed block of 4096?
+ *           This implies that blocks themselves must be 2^n in size, not 22+2^n like now.
+ *           This would also make merging and splitting blocks pretty easy to better use free space on varying data sizes
+ * TODO: In Java 1.6 support Deque interface instead of just Queue
+ * TODO: Check for consistency in the constructor (all prevs and nexts match without loops), can set size there, too.
+ * </pre>
  *
- * // TODO: In Java 1.6 support Deque interface instead of just Queue
- * // TODO: Check for consistency in the constructor (all prevs and nexts match without loops), can set size there, too.
+ * @author  AO Industries, Inc.
  */
 public class LinkedFileList<E extends Serializable> extends AbstractSequentialList<E> implements List<E>, Queue<E> {
 
