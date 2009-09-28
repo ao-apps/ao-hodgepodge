@@ -25,7 +25,6 @@ package com.aoindustries.io;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
 /**
  * Provides direct access to the internal <code>byte[]</code>
