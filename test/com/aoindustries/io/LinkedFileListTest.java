@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.sql.SQLUtility;
 import java.io.File;
 import java.security.SecureRandom;
 import java.util.LinkedList;
@@ -42,23 +43,32 @@ public class LinkedFileListTest extends TestCase {
         super(testName);
     }
 
-    private Random random = new SecureRandom();
+    private Random secureRandom = new SecureRandom();
+    private Random random = new Random(secureRandom.nextLong());
 
     public static Test suite() {
         TestSuite suite = new TestSuite(LinkedFileListTest.class);
         return suite;
     }
 
-    private void doTest(int numElements) throws Exception {
+    private static String getRandomString(Random random) {
+        int len = random.nextInt(130)-1;
+        if(len==-1) return null;
+        StringBuilder SB = new StringBuilder(len);
+        for(int d=0;d<len;d++) SB.append((char)random.nextInt(Character.MAX_VALUE+1));
+        return SB.toString();
+    }
+
+    private void doTestCorrectness(int numElements) throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        LinkedFileList<Integer> linkedFileList = new LinkedFileList<Integer>(tempFile, false, false);
-        LinkedList<Integer> linkedList = new LinkedList<Integer>();
+        LinkedFileList<String> linkedFileList = new LinkedFileList<String>(tempFile, false, false);
+        LinkedList<String> linkedList = new LinkedList<String>();
         try {
             // Populate the list
             for(int c=0;c<numElements;c++) {
-                Integer i = random.nextInt();
-                assertEquals(linkedFileList.add(i), linkedList.add(i));
+                String s = getRandomString(random);
+                assertEquals(linkedFileList.add(s), linkedList.add(s));
             }
             // Check size match
             assertEquals(linkedFileList.size(), linkedList.size());
@@ -70,7 +80,7 @@ public class LinkedFileListTest extends TestCase {
                 // Update random locations to random values
                 for(int c=0;c<numElements;c++) {
                     int index = random.nextInt(numElements);
-                    int newVal = random.nextInt();
+                    String newVal = getRandomString(random);
                     assertEquals(linkedFileList.set(index, newVal), linkedList.set(index, newVal));
                 }
             }
@@ -93,7 +103,7 @@ public class LinkedFileListTest extends TestCase {
                 int numAdd = random.nextInt(numElements);
                 for(int c=0;c<numAdd;c++) {
                     assertEquals(linkedFileList.size(), linkedList.size());
-                    int newVal = random.nextInt();
+                    String newVal = getRandomString(random);
                     assertEquals(linkedFileList.add(newVal), linkedList.add(newVal));
                 }
             }
@@ -105,7 +115,7 @@ public class LinkedFileListTest extends TestCase {
                 for(int c=0;c<numAdd;c++) {
                     assertEquals(linkedFileList.size(), linkedList.size());
                     int index = random.nextInt(linkedFileList.size());
-                    int newVal = random.nextInt();
+                    String newVal = getRandomString(random);
                     linkedFileList.add(index, newVal);
                     linkedList.add(index, newVal);
                     assertEquals(
@@ -129,11 +139,83 @@ public class LinkedFileListTest extends TestCase {
     }
 
     /**
-     * Adds 1000 items to the list, comparing for equality after each add.
+     * Tests for correctness comparing to standard LinkedList implementation.
      */
-    public void testList() throws Exception {
-        doTest(0);
-        doTest(1);
-        for(int c=0; c<10; c++) doTest(100 + random.nextInt(101));
+    public void testCorrectness() throws Exception {
+        doTestCorrectness(0);
+        doTestCorrectness(1);
+        for(int c=0; c<10; c++) doTestCorrectness(100 + random.nextInt(101));
+    }
+
+    /**
+     * Tests the time complexity by adding many elements and making sure the time stays near linear
+     */
+    public void testAddRandomStrings() throws Exception {
+        File tempFile = File.createTempFile("LinkedFileListTest", null);
+        tempFile.deleteOnExit();
+        LinkedFileList<String> linkedFileList = new LinkedFileList<String>(tempFile, false, false);
+        try {
+            // Add in groups of 1000, timing the add
+            String[] toAdd = new String[1000];
+            for(int d=0;d<1000;d++) toAdd[d] = getRandomString(random);
+            for(int c=0;c<100;c++) {
+                long startNanos = System.nanoTime();
+                for(int d=0;d<1000;d++) linkedFileList.add(toAdd[d]);
+                long endNanos = System.nanoTime();
+                System.out.println((c+1)+" of 100: Added 1000 random strings in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+            }
+            // TODO: Calculate the mean and standard deviation, compare for linear
+        } finally {
+            linkedFileList.close();
+            linkedFileList = null;
+            tempFile.delete();
+        }
+    }
+
+    /**
+     * Tests the time complexity for integers (all null to avoid serialization)
+     */
+    public void testAddNull() throws Exception {
+        File tempFile = File.createTempFile("LinkedFileListTest", null);
+        tempFile.deleteOnExit();
+        LinkedFileList<Integer> linkedFileList = new LinkedFileList<Integer>(tempFile, false, false);
+        try {
+            // Add in groups of 1000, timing the add
+            for(int c=0;c<100;c++) {
+                long startNanos = System.nanoTime();
+                for(int d=0;d<1000;d++) linkedFileList.add(null);
+                long endNanos = System.nanoTime();
+                System.out.println((c+1)+" of 100: Added 1000 null Integer in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+            }
+            // TODO: Calculate the mean and standard deviation, compare for linear
+        } finally {
+            linkedFileList.close();
+            linkedFileList = null;
+            tempFile.delete();
+        }
+    }
+
+    /**
+     * Test iteration performance.
+     */
+    public void testIterationPerformance() throws Exception {
+        File tempFile = File.createTempFile("LinkedFileListTest", null);
+        tempFile.deleteOnExit();
+        LinkedFileList<String> linkedFileList = new LinkedFileList<String>(tempFile, false, false);
+        try {
+            for(int c=0;c<=100;c++) {
+                if(c>0) for(int d=0;d<100;d++) linkedFileList.add(getRandomString(random));
+                long startNanos = System.nanoTime();
+                for(String value : linkedFileList) {
+                    // Do nothing
+                }
+                long endNanos = System.nanoTime();
+                System.out.println("Iterated "+linkedFileList.size()+" random strings in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+            }
+        } finally {
+            linkedFileList.close();
+            linkedFileList = null;
+            tempFile.delete();
+        }
     }
 }
