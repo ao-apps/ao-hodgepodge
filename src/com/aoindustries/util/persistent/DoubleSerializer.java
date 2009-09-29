@@ -34,19 +34,23 @@ import java.io.OutputStream;
  */
 public class DoubleSerializer implements Serializer<Double> {
 
-    public int getSerializedSize(Double value) throws IOException {
+    public boolean isFixedSerializedSize() {
+        return true;
+    }
+
+    public long getSerializedSize(Double value) {
         return 8;
     }
 
     private final byte[] buffer = new byte[8];
 
     public void serialize(Double value, OutputStream out) throws IOException {
-        Utils.longToBuffer(Double.doubleToRawLongBits(value), buffer, 0);
+        PersistentCollections.longToBuffer(Double.doubleToRawLongBits(value), buffer, 0);
         out.write(buffer, 0, 8);
     }
 
     public Double deserialize(InputStream in) throws IOException {
-        Utils.readFully(in, buffer, 0, 8);
-        return Double.longBitsToDouble(Utils.bufferToLong(buffer, 0));
+        PersistentCollections.readFully(in, buffer, 0, 8);
+        return Double.longBitsToDouble(PersistentCollections.bufferToLong(buffer, 0));
     }
 }

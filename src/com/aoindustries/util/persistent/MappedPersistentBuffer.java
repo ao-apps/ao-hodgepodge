@@ -154,7 +154,7 @@ public class MappedPersistentBuffer implements PersistentBuffer {
                 mappedBuffer = channel.map(readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, newLength);
                 // Ensure zero-filled
                 mappedBuffer.position(getIndex(oldLength));
-                Utils.fillZeros(mappedBuffer, newLength - oldLength);
+                PersistentCollections.fillZeros(mappedBuffer, newLength - oldLength);
             }
         }
     }
@@ -183,9 +183,13 @@ public class MappedPersistentBuffer implements PersistentBuffer {
         mappedBuffer.put(buff, off, len);
     }
 
-    public void force() throws IOException {
+    /**
+     * There is not currently a way to provide a barrier without using <code>force</code>.
+     * This just uses force for each case.
+     */
+    public void barrier(boolean force) throws IOException {
         mappedBuffer.force();
-        channel.force(true);
+        // channel.force(true);
     }
 
     public boolean getBoolean(long position) throws IOException {

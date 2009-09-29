@@ -35,7 +35,11 @@ import java.io.OutputStream;
  */
 public class CharArraySerializer implements Serializer<char[]> {
 
-    public int getSerializedSize(char[] value) throws IOException {
+    public boolean isFixedSerializedSize() {
+        return false;
+    }
+
+    public long getSerializedSize(char[] value) {
         return 4+value.length/2;
     }
 
@@ -43,14 +47,14 @@ public class CharArraySerializer implements Serializer<char[]> {
         byte[] bytes = BufferManager.getBytes();
         try {
             int len = chars.length;
-            Utils.intToBuffer(len, bytes, 0);
+            PersistentCollections.intToBuffer(len, bytes, 0);
             out.write(bytes, 0, 4);
             int pos = 0;
             while(len>0) {
                 int count = BufferManager.BUFFER_SIZE/2;
                 if(len<count) count = len;
                 for(int charsIndex=0, bytesIndex = 0; charsIndex<count; charsIndex++, bytesIndex+=2) {
-                    Utils.charToBuffer(chars[pos+charsIndex], bytes, bytesIndex);
+                    PersistentCollections.charToBuffer(chars[pos+charsIndex], bytes, bytesIndex);
                 }
                 out.write(bytes, 0, count*2);
                 pos += count;
@@ -64,16 +68,16 @@ public class CharArraySerializer implements Serializer<char[]> {
     public char[] deserialize(InputStream in) throws IOException {
         byte[] bytes = BufferManager.getBytes();
         try {
-            Utils.readFully(in, bytes, 0, 4);
-            int len = Utils.bufferToInt(bytes, 0);
+            PersistentCollections.readFully(in, bytes, 0, 4);
+            int len = PersistentCollections.bufferToInt(bytes, 0);
             char[] chars = new char[len];
             int pos = 0;
             while(len>0) {
                 int count = BufferManager.BUFFER_SIZE/2;
                 if(len<count) count = len;
-                Utils.readFully(in, bytes, pos, len);
+                PersistentCollections.readFully(in, bytes, pos, len);
                 for(int charsIndex=0, bytesIndex = 0; charsIndex<count; charsIndex++, bytesIndex+=2) {
-                    chars[pos+charsIndex] = Utils.bufferToChar(bytes, bytesIndex);
+                    chars[pos+charsIndex] = PersistentCollections.bufferToChar(bytes, bytesIndex);
                 }
                 pos += count;
                 len -= count;

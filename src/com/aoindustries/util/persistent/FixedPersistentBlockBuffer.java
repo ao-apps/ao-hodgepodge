@@ -23,34 +23,38 @@
 package com.aoindustries.util.persistent;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.Iterator;
 
 /**
- * Serializes <code>Long</code> objects.
- * This class is not thread safe.
+ * <p>
+ * Treats a <code>PersistentBuffer</code> as a set of allocatable blocks.
+ * Each block is stored in a block of fixed size.  This provides fast
+ * random access and is marked with the <code>RandomAccess</code> interface.
+ * </p>
+ * <p>
+ * Free space maps are ... TODO
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
-public class LongSerializer implements Serializer<Long> {
+public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer implements RandomAccessPersistentBlockBuffer {
 
-    public boolean isFixedSerializedSize() {
-        return true;
+    private final long blockSize;
+
+    public FixedPersistentBlockBuffer(PersistentBuffer pbuffer, long blockSize) {
+        super(pbuffer);
+        this.blockSize = blockSize;
     }
 
-    public long getSerializedSize(Long value) {
-        return 8;
+    public Iterator<Long> iterateBlockIds() {
+        throw new UnsupportedOperationException("TODO: Not supported yet.");
     }
 
-    private final byte[] buffer = new byte[8];
-
-    public void serialize(Long value, OutputStream out) throws IOException {
-        PersistentCollections.longToBuffer(value, buffer, 0);
-        out.write(buffer, 0, 8);
+    public long getBlockCount() throws IOException {
+        throw new UnsupportedOperationException("TODO: Not supported yet.");
     }
 
-    public Long deserialize(InputStream in) throws IOException {
-        PersistentCollections.readFully(in, buffer, 0, 8);
-        return PersistentCollections.bufferToLong(buffer, 0);
+    public long getBlockId(long index) throws IOException {
+        throw new UnsupportedOperationException("TODO: Not supported yet.");
     }
 }

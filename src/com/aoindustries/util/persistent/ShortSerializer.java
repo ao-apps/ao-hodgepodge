@@ -34,19 +34,23 @@ import java.io.OutputStream;
  */
 public class ShortSerializer implements Serializer<Short> {
 
-    public int getSerializedSize(Short value) throws IOException {
+    public boolean isFixedSerializedSize() {
+        return true;
+    }
+
+    public long getSerializedSize(Short value) {
         return 2;
     }
 
     private final byte[] buffer = new byte[2];
 
     public void serialize(Short value, OutputStream out) throws IOException {
-        Utils.shortToBuffer(value, buffer, 0);
+        PersistentCollections.shortToBuffer(value, buffer, 0);
         out.write(buffer, 0, 2);
     }
 
     public Short deserialize(InputStream in) throws IOException {
-        Utils.readFully(in, buffer, 0, 2);
-        return Utils.bufferToShort(buffer, 0);
+        PersistentCollections.readFully(in, buffer, 0, 2);
+        return PersistentCollections.bufferToShort(buffer, 0);
     }
 }

@@ -34,7 +34,11 @@ import java.io.OutputStream;
  */
 public class ByteSerializer implements Serializer<Byte> {
 
-    public int getSerializedSize(Byte value) throws IOException {
+    public boolean isFixedSerializedSize() {
+        return true;
+    }
+
+    public long getSerializedSize(Byte value) {
         return 1;
     }
 

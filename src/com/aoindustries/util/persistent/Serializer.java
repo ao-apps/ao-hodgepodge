@@ -36,6 +36,19 @@ import java.io.OutputStream;
 public interface Serializer<E> {
 
     /**
+     * If a serializer always creates the same number of bytes, containers can
+     * choose a fixed-size block for higher performance.  If this method
+     * returns <code>true</code>, <code>getSerializedSize</code> must return
+     * the same value for every access, it may be accessed with a <code>null</code>
+     * parameter, and it may be accessed less than once per serialized object.
+     *
+     * @return  To indicate that the same number of bytes will be created, return
+     *          <code>true</code>.  Otherwise, there may be a dynamic number of
+     *          bytes and return <code>false</code>.
+     */
+    boolean isFixedSerializedSize();
+
+    /**
      * <p>
      * Determines the size of the object after serialization.
      * This allows some optimizations avoiding unnecessary copying of data.
@@ -52,7 +65,7 @@ public interface Serializer<E> {
      *
      * @return  the exact number of bytes the object will take to serialize
      */
-    int getSerializedSize(E value) throws IOException;
+    long getSerializedSize(E value) throws IOException;
 
     /**
      * Writes the object to the <code>OutputStream</code>.  <code>null</code> will

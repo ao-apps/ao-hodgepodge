@@ -23,34 +23,23 @@
 package com.aoindustries.util.persistent;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.Iterator;
 
 /**
- * Serializes <code>Long</code> objects.
- * This class is not thread safe.
+ * A persistent set of blocks of arbitrary data that also allows efficient
+ * random access.
  *
  * @author  AO Industries, Inc.
  */
-public class LongSerializer implements Serializer<Long> {
+public interface RandomAccessPersistentBlockBuffer extends PersistentBlockBuffer {
 
-    public boolean isFixedSerializedSize() {
-        return true;
-    }
+    /**
+     * Gets the number of blocks.
+     */
+    long getBlockCount() throws IOException;
 
-    public long getSerializedSize(Long value) {
-        return 8;
-    }
-
-    private final byte[] buffer = new byte[8];
-
-    public void serialize(Long value, OutputStream out) throws IOException {
-        PersistentCollections.longToBuffer(value, buffer, 0);
-        out.write(buffer, 0, 8);
-    }
-
-    public Long deserialize(InputStream in) throws IOException {
-        PersistentCollections.readFully(in, buffer, 0, 8);
-        return PersistentCollections.bufferToLong(buffer, 0);
-    }
+    /**
+     * Gets the block id at the provided index.
+     */
+    long getBlockId(long index) throws IOException;
 }

@@ -23,34 +23,33 @@
 package com.aoindustries.util.persistent;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.Iterator;
 
 /**
- * Serializes <code>Long</code> objects.
- * This class is not thread safe.
+ * <p>
+ * Treats a <code>PersistentBuffer</code> as a set of allocatable blocks.
+ * Each block is stored in a 2^n area of the buffer, where the usable
+ * space is 2^n-1 (the first byte of that area of the buffer indicates
+ * the block size and allocated status).
+ * </p>
+ * <p>
+ * Free space maps are generated upon instantiation.  This means that startup
+ * costs can be fairly high.  This class is designed for long-lifetime situations.
+ * </p>
+ * <p>
+ * Blocks that are allocated take no space in memory, while blocks that are allocated consume space.
+ * Blocks may be merged and split as needed to manage free space.
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
-public class LongSerializer implements Serializer<Long> {
+public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer {
 
-    public boolean isFixedSerializedSize() {
-        return true;
+    public DynamicPersistentBlockBuffer(PersistentBuffer pbuffer) {
+        super(pbuffer);
     }
 
-    public long getSerializedSize(Long value) {
-        return 8;
-    }
-
-    private final byte[] buffer = new byte[8];
-
-    public void serialize(Long value, OutputStream out) throws IOException {
-        PersistentCollections.longToBuffer(value, buffer, 0);
-        out.write(buffer, 0, 8);
-    }
-
-    public Long deserialize(InputStream in) throws IOException {
-        PersistentCollections.readFully(in, buffer, 0, 8);
-        return PersistentCollections.bufferToLong(buffer, 0);
+    public Iterator<Long> iterateBlockIds() throws IOException {
+        throw new UnsupportedOperationException("TODO: Not supported yet.");
     }
 }

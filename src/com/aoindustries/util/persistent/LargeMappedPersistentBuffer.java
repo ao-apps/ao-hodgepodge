@@ -181,7 +181,7 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
             if(bufferSize > len) bufferSize = len;
             MappedByteBuffer mappedBuffer = mappedBuffers.get(getBufferNum(position));
             mappedBuffer.position((int)bufferStart);
-            Utils.fillZeros(mappedBuffer, bufferSize);
+            PersistentCollections.fillZeros(mappedBuffer, bufferSize);
             position += bufferSize;
             len -= bufferSize;
         }
@@ -263,9 +263,13 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
         }
     }
 
-    public void force() throws IOException {
+    /**
+     * There is not currently a way to provide a barrier without using <code>force</code>.
+     * This just uses force for each case.
+     */
+    public void barrier(boolean force) throws IOException {
         for(MappedByteBuffer mappedBuffer : mappedBuffers) mappedBuffer.force();
-        channel.force(true);
+        // channel.force(true);
     }
 
     public boolean getBoolean(long position) throws IOException {

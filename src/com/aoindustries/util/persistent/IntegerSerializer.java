@@ -34,19 +34,23 @@ import java.io.OutputStream;
  */
 public class IntegerSerializer implements Serializer<Integer> {
 
-    public int getSerializedSize(Integer value) throws IOException {
+    public boolean isFixedSerializedSize() {
+        return true;
+    }
+
+    public long getSerializedSize(Integer value) {
         return 4;
     }
 
     private final byte[] buffer = new byte[4];
 
     public void serialize(Integer value, OutputStream out) throws IOException {
-        Utils.intToBuffer(value, buffer, 0);
+        PersistentCollections.intToBuffer(value, buffer, 0);
         out.write(buffer, 0, 4);
     }
 
     public Integer deserialize(InputStream in) throws IOException {
-        Utils.readFully(in, buffer, 0, 4);
-        return Utils.bufferToInt(buffer, 0);
+        PersistentCollections.readFully(in, buffer, 0, 4);
+        return PersistentCollections.bufferToInt(buffer, 0);
     }
 }

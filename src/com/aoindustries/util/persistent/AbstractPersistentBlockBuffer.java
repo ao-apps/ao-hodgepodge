@@ -23,34 +23,34 @@
 package com.aoindustries.util.persistent;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
- * Serializes <code>Long</code> objects.
- * This class is not thread safe.
+ * Base class for any implementation that treats a <code>PersistentBuffer</code>
+ * as a set of allocatable blocks.
  *
  * @author  AO Industries, Inc.
  */
-public class LongSerializer implements Serializer<Long> {
+abstract public class AbstractPersistentBlockBuffer implements PersistentBlockBuffer {
 
-    public boolean isFixedSerializedSize() {
-        return true;
+    protected final PersistentBuffer pbuffer;
+
+    public AbstractPersistentBlockBuffer(PersistentBuffer pbuffer) {
+        this.pbuffer = pbuffer;
     }
 
-    public long getSerializedSize(Long value) {
-        return 8;
+    public boolean isClosed() {
+        return pbuffer.isClosed();
     }
 
-    private final byte[] buffer = new byte[8];
-
-    public void serialize(Long value, OutputStream out) throws IOException {
-        PersistentCollections.longToBuffer(value, buffer, 0);
-        out.write(buffer, 0, 8);
+    public void close() throws IOException {
+        pbuffer.close();
     }
 
-    public Long deserialize(InputStream in) throws IOException {
-        PersistentCollections.readFully(in, buffer, 0, 8);
-        return PersistentCollections.bufferToLong(buffer, 0);
+    public boolean isReadOnly() {
+        return pbuffer.isReadOnly();
+    }
+
+    public void barrier(boolean force) throws IOException {
+        pbuffer.barrier(force);
     }
 }

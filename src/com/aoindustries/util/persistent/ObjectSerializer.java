@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 
 /**
  * Serializes any <code>Serializable</code> objects.
@@ -37,8 +38,15 @@ import java.io.OutputStream;
  */
 public class ObjectSerializer<E> implements Serializer<E> {
 
+    private final Class<E> type;
+
     private E lastSerialized = null;
     final private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+    public ObjectSerializer(Class<E> type) {
+        if(!Serializable.class.isAssignableFrom(type)) throw new IllegalArgumentException("Class is not Serializable: "+type.getName());
+        this.type = type;
+    }
 
     private void serializeToBuffer(E value) throws IOException {
         if(lastSerialized!=value) {
@@ -53,7 +61,12 @@ public class ObjectSerializer<E> implements Serializer<E> {
             lastSerialized = value;
         }
     }
-    public int getSerializedSize(E value) throws IOException {
+
+    public boolean isFixedSerializedSize() {
+        return false;
+    }
+
+    public long getSerializedSize(E value) throws IOException {
         serializeToBuffer(value);
         return buffer.size();
     }
@@ -62,12 +75,15 @@ public class ObjectSerializer<E> implements Serializer<E> {
         buffer.writeTo(out);
     }
 
-    @SuppressWarnings("unchecked")
     public E deserialize(InputStream in) throws IOException {
         ObjectInputStream oin = new ObjectInputStream(in);
         try {
-            return (E)oin.readObject();
+            return type.cast(oin.readObject());
         } catch(ClassNotFoundException err) {
+            IOException ioErr = new IOException();
+            ioErr.initCause(err);
+            throw ioErr;
+        } catch(ClassCastException err) {
             IOException ioErr = new IOException();
             ioErr.initCause(err);
             throw ioErr;

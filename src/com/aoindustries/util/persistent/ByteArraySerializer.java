@@ -34,23 +34,27 @@ import java.io.OutputStream;
  */
 public class ByteArraySerializer implements Serializer<byte[]> {
 
-    public int getSerializedSize(byte[] value) throws IOException {
+    public boolean isFixedSerializedSize() {
+        return false;
+    }
+
+    public long getSerializedSize(byte[] value) {
         return 4+value.length;
     }
 
     private final byte[] buffer = new byte[4];
 
     public void serialize(byte[] value, OutputStream out) throws IOException {
-        Utils.intToBuffer(value.length, buffer, 0);
+        PersistentCollections.intToBuffer(value.length, buffer, 0);
         out.write(buffer, 0, 4);
         out.write(value);
     }
 
     public byte[] deserialize(InputStream in) throws IOException {
-        Utils.readFully(in, buffer, 0, 4);
-        int length = Utils.bufferToInt(buffer, 0);
+        PersistentCollections.readFully(in, buffer, 0, 4);
+        int length = PersistentCollections.bufferToInt(buffer, 0);
         byte[] value = new byte[length];
-        Utils.readFully(in, value, 0, length);
+        PersistentCollections.readFully(in, value, 0, length);
         return value;
     }
 }

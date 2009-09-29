@@ -77,7 +77,7 @@ import java.util.TreeSet;
  *                                   data segment of this entry (used to determine block size).
  *     +1       next        long     position of next, <code>8</code> for last element, or <code>-1</code> for entry available.
  *     +9       prev        long     position of prev, <code>0</code> for first element, or <code>-1</code> for entry available.
- *     +17      dataSize    int      the size of the serialized data, must always be &lt;= 2^maxBits, <code>-1</code> means null element
+ *     +17      dataSize    int      the size of the serialized data, must always be &lt;= 2^maxBits, <code>-1</code> means null element (TODO: Make 64-bit)
  *     +21      data        byte[]   the binary data.
  * </p>
  *
@@ -181,11 +181,11 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * The temporary file will be deleted at JVM shutdown.
      * Operates in constant time.
      *
-     * @see  RandomAccessFileBuffer#RandomAccessFileBuffer()
+     * @see  PersistentCollections#getPersistentBuffer(long)
      */
-    public PersistentLinkedList() throws IOException {
-        serializer = new ObjectSerializer<E>();
-        pbuffer = new RandomAccessFileBuffer();
+    public PersistentLinkedList(Class<E> type) throws IOException {
+        serializer = PersistentCollections.getSerializer(type);
+        pbuffer = PersistentCollections.getPersistentBuffer(Long.MAX_VALUE);
         useFsync = false;
         for(int c=0;c<32;c++) freeSpaceMaps.add(null);
         clear();
@@ -196,21 +196,24 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * The temporary file will be deleted at JVM shutdown.
      * Operates in linear time.
      */
-    public PersistentLinkedList(Collection<? extends E> c) throws IOException {
-        this();
+    public PersistentLinkedList(Class<E> type, Collection<? extends E> c) throws IOException {
+        this(type);
         addAll(c);
     }
 
     /**
-     * Constructs a list backed by the provided persisent buffer using standard serialization.
+     * Constructs a list backed by the provided persistent buffer using the most efficient serialization
+     * for the provided type.
      * Operates in linear time in order to cache the size.
+     *
+     * @see  PersistentCollections#getSerializer(java.lang.Class)
      */
-    public PersistentLinkedList(PersistentBuffer pbuffer, boolean useFsync) throws IOException {
-        this(pbuffer, useFsync, new ObjectSerializer<E>());
+    public PersistentLinkedList(PersistentBuffer pbuffer, boolean useFsync, Class<E> type) throws IOException {
+        this(pbuffer, useFsync, PersistentCollections.getSerializer(type));
     }
 
     /**
-     * Constructs a list backed by the provided persisent buffer.
+     * Constructs a list backed by the provided persistent buffer.
      * Operates in linear time in order to cache the size.
      */
     public PersistentLinkedList(PersistentBuffer pbuffer, boolean useFsync, Serializer<E> serializer) throws IOException {
@@ -224,7 +227,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         else if(len<HEADER_SIZE) throw new IOException("File does not have a complete header");
         else {
             pbuffer.get(0, ioBuffer, 0, MAGIC.length);
-            if(!Utils.equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
+            if(!PersistentCollections.equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
             int version = pbuffer.getInt(MAGIC.length);
             if(version!=VERSION) throw new IOException("Unsupported file version: "+version);
             _head = pbuffer.getLong(MAGIC.length+4);
@@ -415,8 +418,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * Will perform fsync only if fsync is enabled.
      */
-    private void fsync() throws IOException {
-        if(useFsync) pbuffer.force();
+    private void barrier() throws IOException {
+        if(useFsync) pbuffer.barrier(true);
     }
 
     /**
@@ -475,9 +478,9 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             long ptr = iter.next();
             iter.remove();
             // Update existing entry
-            Utils.longToBuffer(next, ioBuffer, NEXT_OFFSET-NEXT_OFFSET);
-            Utils.longToBuffer(prev, ioBuffer, PREV_OFFSET-NEXT_OFFSET);
-            Utils.intToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET-NEXT_OFFSET);
+            PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET-NEXT_OFFSET);
+            PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET-NEXT_OFFSET);
+            PersistentCollections.intToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET-NEXT_OFFSET);
             pbuffer.put(ptr+NEXT_OFFSET, ioBuffer, 0, 20);
             if(dataSize>0) pbuffer.put(ptr+DATA_OFFSET, data, 0, dataSize);
             _size++;
@@ -488,9 +491,9 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         long newLen = ptr + DATA_OFFSET + (1L<<(long)maxBits);
         pbuffer.setCapacity(newLen);
         ioBuffer[MAX_BITS_OFFSET] = (byte)maxBits;
-        Utils.longToBuffer(next, ioBuffer, NEXT_OFFSET);
-        Utils.longToBuffer(prev, ioBuffer, PREV_OFFSET);
-        Utils.intToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);
+        PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
+        PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
+        PersistentCollections.intToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);
         pbuffer.put(ptr, ioBuffer, 0, DATA_OFFSET);
         if(dataSize>0) pbuffer.put(ptr+DATA_OFFSET, data, 0, dataSize);
         _size++;
@@ -514,7 +517,9 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             data = null;
         }
         else {
-            dataSize = serializer.getSerializedSize(element);
+            long size = serializer.getSerializedSize(element);
+            if(size>Integer.MAX_VALUE) throw new IOException("Serialized value too large: size="+size);
+            dataSize = (int)size;
             bufferOut.reset();
             serializer.serialize(element, bufferOut);
             if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
@@ -538,7 +543,9 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             data = null;
         }
         else {
-            dataSize = serializer.getSerializedSize(element);
+            long size = serializer.getSerializedSize(element);
+            if(size>Integer.MAX_VALUE) throw new IOException("Serialized value too large: size="+size);
+            dataSize = (int)size;
             bufferOut.reset();
             serializer.serialize(element, bufferOut);
             if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
@@ -564,7 +571,9 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             data = null;
         }
         else {
-            dataSize = serializer.getSerializedSize(element);
+            long size = serializer.getSerializedSize(element);
+            if(size>Integer.MAX_VALUE) throw new IOException("Serialized value too large: size="+size);
+            dataSize = (int)size;
             bufferOut.reset();
             serializer.serialize(element, bufferOut);
             if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
@@ -627,7 +636,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             modCount++;
             E element = getElement(head);
             remove(head);
-            fsync();
+            barrier();
             return element;
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -648,7 +657,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             modCount++;
             E element = getElement(tail);
             remove(tail);
-            fsync();
+            barrier();
             return element;
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -669,7 +678,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             else {
                 addBefore(element, head);
             }
-            fsync();
+            barrier();
         } catch(IOException err) {
             throw new WrappedException(err);
         }
@@ -691,7 +700,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             else {
                 addAfter(element, tail);
             }
-            fsync();
+            barrier();
         } catch(IOException err) {
             throw new WrappedException(err);
         }
@@ -750,7 +759,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                     if(isNull(ptr)) {
                         modCount++;
                         remove(ptr);
-                        fsync();
+                        barrier();
                         return true;
                     }
                 }
@@ -759,7 +768,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                     if(o.equals(getElement(ptr))) {
                         modCount++;
                         remove(ptr);
-                        fsync();
+                        barrier();
                         return true;
                     }
                 }
@@ -814,7 +823,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         try {
             long ptr = getPointerForIndex(index);
             for(E element : c) addBefore(element, ptr);
-            fsync();
+            barrier();
             return true;
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -862,7 +871,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             for(Set<Long> fsm : freeSpaceMaps) {
                 if(fsm!=null) fsm.clear();
             }
-            fsync();
+            barrier();
         } catch(IOException err) {
             throw new WrappedException(err);
         }
@@ -902,7 +911,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             if(prev==HEAD_PTR) addFirst(element);
             else {
                 addAfter(element, prev);
-                fsync();
+                barrier();
             }
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -948,7 +957,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             if(prev==HEAD_PTR) addFirst(element);
             else {
                 addAfter(element, prev);
-                fsync();
+                barrier();
             }
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -971,7 +980,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             long ptr = getPointerForIndex(index);
             E oldElement = getElement(ptr);
             remove(ptr);
-            fsync();
+            barrier();
             return oldElement;
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -1226,7 +1235,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                     if(isNull(ptr)) {
                         modCount++;
                         remove(ptr);
-                        fsync();
+                        barrier();
                         return true;
                     }
                 }
@@ -1235,7 +1244,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                     if(o.equals(getElement(ptr))) {
                         modCount++;
                         remove(ptr);
-                        fsync();
+                        barrier();
                         return true;
                     }
                 }
@@ -1350,7 +1359,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                 long lastNext = getNext(lastReturned);
                 try {
                     PersistentLinkedList.this.remove(lastReturned);
-                    fsync();
+                    barrier();
                 } catch (NoSuchElementException e) {
                     throw new IllegalStateException();
                 }
@@ -1376,7 +1385,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                 lastReturned = TAIL_PTR;
                 modCount++;
                 addBefore(e, nextPtr);
-                fsync();
+                barrier();
                 nextIndex++;
                 expectedModCount++;
             } catch(IOException err) {

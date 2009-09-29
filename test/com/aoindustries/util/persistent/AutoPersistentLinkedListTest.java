@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009  AO Industries, Inc.
+ * Copyright (C) 2008, 2009  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,35 +22,29 @@
  */
 package com.aoindustries.util.persistent;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.File;
+import java.io.RandomAccessFile;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * Serializes <code>Long</code> objects.
- * This class is not thread safe.
+ * Tests the <code>LinkedFileList</code> against the standard <code>LinkedList</code>
+ * by performing equal, random actions on each and ensuring equal results.
  *
  * @author  AO Industries, Inc.
  */
-public class LongSerializer implements Serializer<Long> {
+public class AutoPersistentLinkedListTest extends PersistentLinkedListTestParent {
 
-    public boolean isFixedSerializedSize() {
-        return true;
+    public static Test suite() {
+        TestSuite suite = new TestSuite(AutoPersistentLinkedListTest.class);
+        return suite;
     }
 
-    public long getSerializedSize(Long value) {
-        return 8;
+    public AutoPersistentLinkedListTest(String testName) {
+        super(testName);
     }
 
-    private final byte[] buffer = new byte[8];
-
-    public void serialize(Long value, OutputStream out) throws IOException {
-        PersistentCollections.longToBuffer(value, buffer, 0);
-        out.write(buffer, 0, 8);
-    }
-
-    public Long deserialize(InputStream in) throws IOException {
-        PersistentCollections.readFully(in, buffer, 0, 8);
-        return PersistentCollections.bufferToLong(buffer, 0);
+    protected PersistentBuffer getPersistentBuffer(File tempFile) throws Exception {
+        return PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), false, Long.MAX_VALUE);
     }
 }

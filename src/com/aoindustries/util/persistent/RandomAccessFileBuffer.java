@@ -135,7 +135,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         if(newLength>oldLength) {
             // Ensure zero-filled
             raf.seek(oldLength);
-            Utils.fillZeros(raf, newLength - oldLength);
+            PersistentCollections.fillZeros(raf, newLength - oldLength);
         }
     }
 
@@ -165,7 +165,11 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         raf.write(buff, off, len);
     }
 
-    public void force() throws IOException {
-        channel.force(true);
+    /**
+     * There is not currently a way to provide a barrier without using <code>force</code>.
+     * This just uses force for each case.
+     */
+    public void barrier(boolean force) throws IOException {
+        channel.force(false);
     }
 }

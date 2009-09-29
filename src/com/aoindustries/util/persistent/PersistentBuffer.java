@@ -32,9 +32,11 @@ import java.io.IOException;
  * communication.
  * </p>
  * <p>
- * The ensure the data integrity of higher-level data structures, all writes must
- * be committed to physical media when <code>force</code> is called.  Writer order
- * between <code>force</code> calls is not maintained.
+ * The ensure the data integrity of higher-level data structures, the barrier method
+ * must be used.  The barrier ensures that all writes before the barrier happen before
+ * all writes after the barrier.  It also accepts a parameter meaning that it should
+ * also force (fsync) all writes before the barrier to physical media.  Write order
+ * between <code>barrier</code> calls is not maintained.
  * </p>
  *
  * @author  AO Industries, Inc.
@@ -137,8 +139,9 @@ public interface PersistentBuffer {
     void putLong(long position, long value) throws IOException;
 
     /**
-     * Writes any unwritten data to the underlying storage.  Does not return
-     * until the data is physically persisted.
+     * Ensures that all writes before this barrier occur before all writes after
+     * this barrier.  If <code>force</code> is <code>true</code>, will also
+     * commit to physical media synchronously before returning.
      */
-    void force() throws IOException;
+    void barrier(boolean force) throws IOException;
 }

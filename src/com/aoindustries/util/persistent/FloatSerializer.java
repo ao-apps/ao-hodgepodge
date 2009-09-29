@@ -34,19 +34,23 @@ import java.io.OutputStream;
  */
 public class FloatSerializer implements Serializer<Float> {
 
-    public int getSerializedSize(Float value) throws IOException {
+    public boolean isFixedSerializedSize() {
+        return true;
+    }
+
+    public long getSerializedSize(Float value) {
         return 4;
     }
 
     private final byte[] buffer = new byte[4];
 
     public void serialize(Float value, OutputStream out) throws IOException {
-        Utils.intToBuffer(Float.floatToRawIntBits(value), buffer, 0);
+        PersistentCollections.intToBuffer(Float.floatToRawIntBits(value), buffer, 0);
         out.write(buffer, 0, 4);
     }
 
     public Float deserialize(InputStream in) throws IOException {
-        Utils.readFully(in, buffer, 0, 4);
-        return Float.intBitsToFloat(Utils.bufferToInt(buffer, 0));
+        PersistentCollections.readFully(in, buffer, 0, 4);
+        return Float.intBitsToFloat(PersistentCollections.bufferToInt(buffer, 0));
     }
 }

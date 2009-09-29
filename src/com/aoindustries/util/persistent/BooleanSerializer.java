@@ -34,7 +34,11 @@ import java.io.OutputStream;
  */
 public class BooleanSerializer implements Serializer<Boolean> {
 
-    public int getSerializedSize(Boolean value) throws IOException {
+    public boolean isFixedSerializedSize() {
+        return true;
+    }
+
+    public long getSerializedSize(Boolean value) {
         return 1;
     }
 

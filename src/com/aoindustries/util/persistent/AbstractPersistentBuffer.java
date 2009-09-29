@@ -74,7 +74,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      */
     public int getInt(long position) throws IOException {
         get(position, ioBuffer, 0, 4);
-        return Utils.bufferToInt(ioBuffer, 0);
+        return PersistentCollections.bufferToInt(ioBuffer, 0);
     }
 
     /**
@@ -112,7 +112,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #write(long, byte[], int, int)
      */
     public void putInt(long position, int value) throws IOException {
-        Utils.intToBuffer(value, ioBuffer, 0);
+        PersistentCollections.intToBuffer(value, ioBuffer, 0);
         put(position, ioBuffer, 0, 4);
     }
 
@@ -122,7 +122,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #write(long, byte[], int, int)
      */
     public void putLong(long position, long value) throws IOException {
-        Utils.longToBuffer(value, ioBuffer, 0);
+        PersistentCollections.longToBuffer(value, ioBuffer, 0);
         put(position, ioBuffer, 0, 8);
     }
 }

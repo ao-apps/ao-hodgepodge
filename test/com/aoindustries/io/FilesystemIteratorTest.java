@@ -98,7 +98,7 @@ public class FilesystemIteratorTest extends TestCase {
     }
     
     public void testIterateAll() throws IOException {
-        Map<String,FilesystemIteratorRule> rules = Collections.singletonMap(tempDir.getFilename(), FilesystemIteratorRule.OK);
+        Map<String,FilesystemIteratorRule> rules = Collections.singletonMap(tempDir.getPath(), FilesystemIteratorRule.OK);
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
         expectedResults.add("/");
@@ -106,16 +106,16 @@ public class FilesystemIteratorTest extends TestCase {
         expectedResults.add("/home/o");
         expectedResults.add("/home/o/orion");
         expectedResults.add("/home/o/orion/tmp");
-        expectedResults.add(tempDir.getFilename());
-        expectedResults.add(tempDir.getFilename()+"/home");
-        expectedResults.add(tempDir.getFilename()+"/home/a");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/badlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/brokenlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/something");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/something2");
-        expectedResults.add(tempDir.getFilename()+"/tmp");
-        expectedResults.add(tempDir.getFilename()+"/tmp/something");
+        expectedResults.add(tempDir.getPath());
+        expectedResults.add(tempDir.getPath()+"/home");
+        expectedResults.add(tempDir.getPath()+"/home/a");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/badlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/brokenlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/something");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/something2");
+        expectedResults.add(tempDir.getPath()+"/tmp");
+        expectedResults.add(tempDir.getPath()+"/tmp/something");
         doTest(
             rules,
             prefixRules,
@@ -125,8 +125,8 @@ public class FilesystemIteratorTest extends TestCase {
 
     public void testIncludeDirectoryAndSkipContents() throws IOException {
         Map<String,FilesystemIteratorRule> rules = new HashMap<String,FilesystemIteratorRule>();
-        rules.put(tempDir.getFilename(), FilesystemIteratorRule.OK);
-        rules.put(tempDir.getFilename()+"/tmp/", FilesystemIteratorRule.SKIP);
+        rules.put(tempDir.getPath(), FilesystemIteratorRule.OK);
+        rules.put(tempDir.getPath()+"/tmp/", FilesystemIteratorRule.SKIP);
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
         expectedResults.add("/");
@@ -134,15 +134,15 @@ public class FilesystemIteratorTest extends TestCase {
         expectedResults.add("/home/o");
         expectedResults.add("/home/o/orion");
         expectedResults.add("/home/o/orion/tmp");
-        expectedResults.add(tempDir.getFilename());
-        expectedResults.add(tempDir.getFilename()+"/home");
-        expectedResults.add(tempDir.getFilename()+"/home/a");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/badlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/brokenlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/something");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/something2");
-        expectedResults.add(tempDir.getFilename()+"/tmp");
+        expectedResults.add(tempDir.getPath());
+        expectedResults.add(tempDir.getPath()+"/home");
+        expectedResults.add(tempDir.getPath()+"/home/a");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/badlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/brokenlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/something");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/something2");
+        expectedResults.add(tempDir.getPath()+"/tmp");
         doTest(
             rules,
             prefixRules,
@@ -152,10 +152,10 @@ public class FilesystemIteratorTest extends TestCase {
 
     public void testFileExistsRuleExists() throws IOException {
         Map<String,FilesystemIteratorRule> rules = new HashMap<String,FilesystemIteratorRule>();
-        rules.put(tempDir.getFilename(), FilesystemIteratorRule.OK);
+        rules.put(tempDir.getPath(), FilesystemIteratorRule.OK);
         rules.put(
-            tempDir.getFilename()+"/home/a/aoadmin/something",
-            new FileExistsRule(new String[] {tempDir.getFilename()+"/home/a/aoadmin/something2"}, FilesystemIteratorRule.SKIP, FilesystemIteratorRule.OK)
+            tempDir.getPath()+"/home/a/aoadmin/something",
+            new FileExistsRule(new String[] {tempDir.getPath()+"/home/a/aoadmin/something2"}, FilesystemIteratorRule.SKIP, FilesystemIteratorRule.OK)
         );
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
@@ -164,15 +164,15 @@ public class FilesystemIteratorTest extends TestCase {
         expectedResults.add("/home/o");
         expectedResults.add("/home/o/orion");
         expectedResults.add("/home/o/orion/tmp");
-        expectedResults.add(tempDir.getFilename());
-        expectedResults.add(tempDir.getFilename()+"/home");
-        expectedResults.add(tempDir.getFilename()+"/home/a");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/badlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/brokenlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/something2");
-        expectedResults.add(tempDir.getFilename()+"/tmp");
-        expectedResults.add(tempDir.getFilename()+"/tmp/something");
+        expectedResults.add(tempDir.getPath());
+        expectedResults.add(tempDir.getPath()+"/home");
+        expectedResults.add(tempDir.getPath()+"/home/a");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/badlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/brokenlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/something2");
+        expectedResults.add(tempDir.getPath()+"/tmp");
+        expectedResults.add(tempDir.getPath()+"/tmp/something");
         doTest(
             rules,
             prefixRules,
@@ -182,10 +182,10 @@ public class FilesystemIteratorTest extends TestCase {
 
     public void testFileExistsRuleNotExists() throws IOException {
         Map<String,FilesystemIteratorRule> rules = new HashMap<String,FilesystemIteratorRule>();
-        rules.put(tempDir.getFilename(), FilesystemIteratorRule.OK);
+        rules.put(tempDir.getPath(), FilesystemIteratorRule.OK);
         rules.put(
-            tempDir.getFilename()+"/home/a/aoadmin/something",
-            new FileExistsRule(new String[] {tempDir.getFilename()+"/home/a/aoadmin/somethingNotHere"}, FilesystemIteratorRule.SKIP, FilesystemIteratorRule.OK)
+            tempDir.getPath()+"/home/a/aoadmin/something",
+            new FileExistsRule(new String[] {tempDir.getPath()+"/home/a/aoadmin/somethingNotHere"}, FilesystemIteratorRule.SKIP, FilesystemIteratorRule.OK)
         );
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
@@ -194,16 +194,16 @@ public class FilesystemIteratorTest extends TestCase {
         expectedResults.add("/home/o");
         expectedResults.add("/home/o/orion");
         expectedResults.add("/home/o/orion/tmp");
-        expectedResults.add(tempDir.getFilename());
-        expectedResults.add(tempDir.getFilename()+"/home");
-        expectedResults.add(tempDir.getFilename()+"/home/a");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/badlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/brokenlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/something");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/something2");
-        expectedResults.add(tempDir.getFilename()+"/tmp");
-        expectedResults.add(tempDir.getFilename()+"/tmp/something");
+        expectedResults.add(tempDir.getPath());
+        expectedResults.add(tempDir.getPath()+"/home");
+        expectedResults.add(tempDir.getPath()+"/home/a");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/badlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/brokenlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/something");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/something2");
+        expectedResults.add(tempDir.getPath()+"/tmp");
+        expectedResults.add(tempDir.getPath()+"/tmp/something");
         doTest(
             rules,
             prefixRules,
@@ -213,10 +213,10 @@ public class FilesystemIteratorTest extends TestCase {
 
     public void testFileExistsRuleBrokenLink() throws IOException {
         Map<String,FilesystemIteratorRule> rules = new HashMap<String,FilesystemIteratorRule>();
-        rules.put(tempDir.getFilename(), FilesystemIteratorRule.OK);
+        rules.put(tempDir.getPath(), FilesystemIteratorRule.OK);
         rules.put(
-            tempDir.getFilename()+"/home/a/aoadmin/something",
-            new FileExistsRule(new String[] {tempDir.getFilename()+"/home/a/aoadmin/brokenlink"}, FilesystemIteratorRule.SKIP, FilesystemIteratorRule.OK)
+            tempDir.getPath()+"/home/a/aoadmin/something",
+            new FileExistsRule(new String[] {tempDir.getPath()+"/home/a/aoadmin/brokenlink"}, FilesystemIteratorRule.SKIP, FilesystemIteratorRule.OK)
         );
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
@@ -225,16 +225,16 @@ public class FilesystemIteratorTest extends TestCase {
         expectedResults.add("/home/o");
         expectedResults.add("/home/o/orion");
         expectedResults.add("/home/o/orion/tmp");
-        expectedResults.add(tempDir.getFilename());
-        expectedResults.add(tempDir.getFilename()+"/home");
-        expectedResults.add(tempDir.getFilename()+"/home/a");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/badlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/brokenlink");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/something");
-        expectedResults.add(tempDir.getFilename()+"/home/a/aoadmin/something2");
-        expectedResults.add(tempDir.getFilename()+"/tmp");
-        expectedResults.add(tempDir.getFilename()+"/tmp/something");
+        expectedResults.add(tempDir.getPath());
+        expectedResults.add(tempDir.getPath()+"/home");
+        expectedResults.add(tempDir.getPath()+"/home/a");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/badlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/brokenlink");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/something");
+        expectedResults.add(tempDir.getPath()+"/home/a/aoadmin/something2");
+        expectedResults.add(tempDir.getPath()+"/tmp");
+        expectedResults.add(tempDir.getPath()+"/tmp/something");
         doTest(
             rules,
             prefixRules,

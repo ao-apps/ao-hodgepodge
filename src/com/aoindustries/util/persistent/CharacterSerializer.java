@@ -34,19 +34,23 @@ import java.io.OutputStream;
  */
 public class CharacterSerializer implements Serializer<Character> {
 
-    public int getSerializedSize(Character value) throws IOException {
+    public boolean isFixedSerializedSize() {
+        return true;
+    }
+
+    public long getSerializedSize(Character value) {
         return 2;
     }
 
     private final byte[] buffer = new byte[2];
 
     public void serialize(Character value, OutputStream out) throws IOException {
-        Utils.charToBuffer(value, buffer, 0);
+        PersistentCollections.charToBuffer(value, buffer, 0);
         out.write(buffer, 0, 2);
     }
 
     public Character deserialize(InputStream in) throws IOException {
-        Utils.readFully(in, buffer, 0, 2);
-        return Utils.bufferToChar(buffer, 0);
+        PersistentCollections.readFully(in, buffer, 0, 2);
+        return PersistentCollections.bufferToChar(buffer, 0);
     }
 }
