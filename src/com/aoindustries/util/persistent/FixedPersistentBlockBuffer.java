@@ -41,6 +41,17 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer im
 
     private final long blockSize;
 
+    /**
+     * Creates a persistent buffer with the provided block size.  There may be
+     * performance advantages to block sizes that match or are multiples of the
+     * system page size.  For smaller block sizes, there may also be reliability
+     * advantages to block sizes that are fractions of the system page size
+     * or the physical media block size.  A good overall approach would be to
+     * select even powers of two (1, 2, 4, 8, ...).
+     *
+     * @param pbuffer
+     * @param blockSize
+     */
     public FixedPersistentBlockBuffer(PersistentBuffer pbuffer, long blockSize) {
         super(pbuffer);
         this.blockSize = blockSize;

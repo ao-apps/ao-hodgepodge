@@ -258,7 +258,9 @@ public class PersistentCollections {
 
     /**
      * Gets the most efficient <code>PersistentBlockBuffer</code> for the provided
-     * provided <code>Serializer</code>.
+     * provided <code>Serializer</code>.  If using fixed record sizes, the size of
+     * the block buffer is rounded up to the nearest power of two, to help
+     * alignment with system page tables.
      *
      * @param serializer            The <code>Serializer</code> that will be used to write to the blocks
      * @param pbuffer               The <code>PersistenceBuffer</code> that will be wrapped by the block buffer
@@ -267,9 +269,38 @@ public class PersistentCollections {
      */
     public static PersistentBlockBuffer getPersistentBlockBuffer(Serializer<?> serializer, PersistentBuffer pbuffer, long additionalBlockSpace) throws IOException {
         if(additionalBlockSpace<0) throw new IllegalArgumentException("additionalBlockSpace<0: "+additionalBlockSpace);
-        // Use fixed size blocks if possible
-        if(serializer.isFixedSerializedSize()) return new FixedPersistentBlockBuffer(pbuffer, serializer.getSerializedSize(null) + additionalBlockSpace);
+        // Use power-of-two fixed size blocks if possible
+        if(serializer.isFixedSerializedSize()) return getRandomAccessPersistentBlockBuffer(serializer, pbuffer, additionalBlockSpace);
         // Then use dynamic sized blocks
         return new DynamicPersistentBlockBuffer(pbuffer);
+    }
+
+    /**
+     * Gets the most efficient <code>RandomAccessPersistentBlockBuffer</code> for the provided
+     * provided <code>Serializer</code>.  The serializer must be provide a fixed serializer size.
+     * The size of the block buffer is rounded up to the nearest power of two, to help alignment
+     * with system page tables.
+     *
+     * @param serializer            The <code>Serializer</code> that will be used to write to the blocks
+     * @param pbuffer               The <code>PersistenceBuffer</code> that will be wrapped by the block buffer
+     * @param additionalBlockSpace  The maximum additional space needed beyond the space used by the serializer.  This may be used
+     *                              for linked list pointers, for example.
+     */
+    public static RandomAccessPersistentBlockBuffer getRandomAccessPersistentBlockBuffer(Serializer<?> serializer, PersistentBuffer pbuffer, long additionalBlockSpace) throws IOException {
+        if(additionalBlockSpace<0) throw new IllegalArgumentException("additionalBlockSpace<0: "+additionalBlockSpace);
+        // Use power-of-two fixed size blocks if possible
+        if(!serializer.isFixedSerializedSize()) throw new IllegalArgumentException("serializer does not created fixed size output");
+        long serSize = serializer.getSerializedSize(null);
+        long minimumSize = serSize + additionalBlockSpace;
+        if(minimumSize<0) throw new AssertionError("Long wraparound: "+serSize+"+"+minimumSize+"="+minimumSize);
+        long highestOneBit = Long.highestOneBit(minimumSize);
+        return new FixedPersistentBlockBuffer(
+            pbuffer,
+            highestOneBit==(1L<<62)
+            ? minimumSize           // In range 2^62-2^63-1, cannot round up to next highest, use minimum size
+            : minimumSize==highestOneBit
+            ? minimumSize           // minimumSize is a power of two
+            : (highestOneBit<<1)    // use next-highest power of two
+        );
     }
 }
