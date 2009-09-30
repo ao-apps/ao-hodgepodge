@@ -180,17 +180,17 @@ public class PersistentCollections {
             return new MappedPersistentBuffer();
         }
         // No mmap for 32-bit
-        String arch = System.getProperty("os.arch");
+        String dataModel = System.getProperty("sun.arch.data.model");
         if(
-            "i386".equals(arch)
+            "32".equals(dataModel)
         ) {
             return new RandomAccessFileBuffer();
         }
         // Use mmap for 64-bit
         if(
-            !"x86_64".equals(arch)
+            !"64".equals(dataModel)
         ) {
-            logger.warning("Unexpected value for system property os.arch, assuming 64-bit virtual machine: os.arch="+arch);
+            logger.warning("Unexpected value for system property sun.arch.data.model, assuming 64-bit virtual machine: sun.arch.data.model="+dataModel);
         }
         return new LargeMappedPersistentBuffer();
     }
@@ -219,17 +219,17 @@ public class PersistentCollections {
             return new MappedPersistentBuffer(raf, readOnly);
         }
         // No mmap for 32-bit
-        String arch = System.getProperty("os.arch");
+        String dataModel = System.getProperty("sun.arch.data.model");
         if(
-            "i386".equals(arch)
+            "32".equals(dataModel)
         ) {
             return new RandomAccessFileBuffer(raf, readOnly);
         }
         // Use mmap for 64-bit
         if(
-            !"x86_64".equals(arch)
+            !"64".equals(dataModel)
         ) {
-            logger.warning("Unexpected value for system property os.arch, assuming 64-bit virtual machine: os.arch="+arch);
+            logger.warning("Unexpected value for system property sun.arch.data.model, assuming 64-bit virtual machine: sun.arch.data.model="+dataModel);
         }
         return new LargeMappedPersistentBuffer(raf, readOnly);
     }
