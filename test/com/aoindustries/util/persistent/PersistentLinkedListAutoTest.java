@@ -44,7 +44,7 @@ public class PersistentLinkedListAutoTest extends PersistentLinkedListTestParent
         super(testName);
     }
 
-    protected PersistentBuffer getPersistentBuffer(File tempFile) throws Exception {
-        return PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), ProtectionLevel.NONE, Long.MAX_VALUE);
+    protected PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception {
+        return PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), protectionLevel, Long.MAX_VALUE);
     }
 }

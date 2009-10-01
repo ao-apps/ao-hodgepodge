@@ -43,8 +43,8 @@ public class PersistentLinkedListLargeMappedTest extends PersistentLinkedListTes
         super(testName);
     }
 
-    protected PersistentBuffer getPersistentBuffer(File tempFile) throws Exception {
-        return new LargeMappedPersistentBuffer(tempFile);
+    protected PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception {
+        return new LargeMappedPersistentBuffer(tempFile, protectionLevel);
     }
 
     /**

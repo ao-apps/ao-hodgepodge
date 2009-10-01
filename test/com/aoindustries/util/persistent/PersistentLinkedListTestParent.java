@@ -52,12 +52,12 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     private Random secureRandom = new SecureRandom();
     private Random random = new Random(secureRandom.nextLong());
 
-    protected abstract PersistentBuffer getPersistentBuffer(File tempFile) throws Exception;
+    protected abstract PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception;
 
     private void doTestCorrectness(int numElements) throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile), false, String.class);
+        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.FORCE), String.class);
         LinkedList<String> linkedList = new LinkedList<String>();
         try {
             // Populate the list
@@ -123,7 +123,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             assertEquals(linkedFileList, linkedList);
             // Save and restore, checking matches
             linkedFileList.close();
-            PersistentLinkedList<String> newFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile), true, String.class);
+            PersistentLinkedList<String> newFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.READ_ONLY), String.class);
             assertEquals(newFileList, linkedList);
         } finally {
             linkedFileList.close();
@@ -148,11 +148,36 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     public void testAddRandomStrings() throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile), false, String.class);
+        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
         try {
             // Add in groups of 1000, timing the add
             String[] toAdd = new String[1000];
             for(int d=0;d<1000;d++) toAdd[d] = getRandomString(random);
+            for(int c=0;c<100;c++) {
+                long startNanos = System.nanoTime();
+                for(int d=0;d<1000;d++) linkedFileList.add(toAdd[d]);
+                long endNanos = System.nanoTime();
+                System.out.println((c+1)+" of 100: Added 1000 random strings in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+            }
+            // TODO: Calculate the mean and standard deviation, compare for linear
+        } finally {
+            linkedFileList.close();
+            linkedFileList = null;
+            tempFile.delete();
+        }
+    }
+
+    /**
+     * Tests the time complexity by adding many elements and making sure the time stays near linear
+     */
+    public void testAddRandomIntegers() throws Exception {
+        File tempFile = File.createTempFile("LinkedFileListTest", null);
+        tempFile.deleteOnExit();
+        PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
+        try {
+            // Add in groups of 1000, timing the add
+            Integer[] toAdd = new Integer[1000];
+            for(int d=0;d<1000;d++) toAdd[d] = random.nextInt();
             for(int c=0;c<100;c++) {
                 long startNanos = System.nanoTime();
                 for(int d=0;d<1000;d++) linkedFileList.add(toAdd[d]);
@@ -173,7 +198,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     public void testAddNull() throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile), false, Integer.class);
+        PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
         try {
             // Add in groups of 1000, timing the add
             for(int c=0;c<100;c++) {
@@ -193,10 +218,10 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test iteration performance.
      */
-    public void testIterationPerformance() throws Exception {
+    public void testStringIterationPerformance() throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile), false, String.class);
+        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
         try {
             for(int c=0;c<=100;c++) {
                 if(c>0) for(int d=0;d<100;d++) linkedFileList.add(getRandomString(random));
@@ -215,16 +240,61 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     }
 
     /**
-     * Test circular list performance.
+     * Test iteration performance.
      */
-    public void testCircularListPerformance() throws Exception {
+    public void testIntegerIterationPerformance() throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile), false, String.class);
+        PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
+        try {
+            for(int c=0;c<=100;c++) {
+                if(c>0) for(int d=0;d<100;d++) linkedFileList.add(random.nextInt());
+                long startNanos = System.nanoTime();
+                for(Integer value : linkedFileList) {
+                    // Do nothing
+                }
+                long endNanos = System.nanoTime();
+                System.out.println("Iterated "+linkedFileList.size()+" random integers in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+            }
+        } finally {
+            linkedFileList.close();
+            linkedFileList = null;
+            tempFile.delete();
+        }
+    }
+
+    /**
+     * Test circular list performance.
+     */
+    public void testStringCircularListPerformance() throws Exception {
+        File tempFile = File.createTempFile("LinkedFileListTest", null);
+        tempFile.deleteOnExit();
+        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
         try {
             for(int c=0;c<100000;c++) {
                 String newValue = getRandomString(random);
                 String oldValue = null;
+                if(linkedFileList.size()>=1000) oldValue = linkedFileList.removeLast();
+                linkedFileList.addFirst(newValue);
+            }
+        } finally {
+            linkedFileList.close();
+            linkedFileList = null;
+            tempFile.delete();
+        }
+    }
+
+    /**
+     * Test circular list performance.
+     */
+    public void testIntegerCircularListPerformance() throws Exception {
+        File tempFile = File.createTempFile("LinkedFileListTest", null);
+        tempFile.deleteOnExit();
+        PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
+        try {
+            for(int c=0;c<100000;c++) {
+                Integer newValue = random.nextInt();
+                Integer oldValue = null;
                 if(linkedFileList.size()>=1000) oldValue = linkedFileList.removeLast();
                 linkedFileList.addFirst(newValue);
             }

@@ -43,7 +43,7 @@ public class PersistentLinkedListRandomAccessFileTest extends PersistentLinkedLi
         super(testName);
     }
 
-    protected PersistentBuffer getPersistentBuffer(File tempFile) throws Exception {
-        return new RandomAccessFileBuffer(tempFile);
+    protected PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception {
+        return new RandomAccessFileBuffer(tempFile, protectionLevel);
     }
 }

@@ -140,20 +140,105 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
     }
 
     /**
-     * Implemented as calls to <code>getSome(long,byte[],int,int)</code>
+     * Implemented as calls to <code>get(long)</code> and <code>getSome(long,byte[],int,int)</code>
      *
-     * @see  #get(long, byte[], int, int)
+     * @see  #get(long)
+     * @see  #getSome(long, byte[], int, int)
      */
-    public InputStream getInputStream(long position, long length) throws IOException, BufferUnderflowException {
-        throw new RuntimeException("TODO: Not implemented");
+    public InputStream getInputStream(final long position, final long length) throws IOException, BufferUnderflowException {
+        return new InputStream() {
+            private boolean closed = false;
+            private long curPosition = position;
+            private long curRemaining = length;
+
+            @Override
+            public int read() throws IOException {
+                if(closed) throw new IOException("Stream closed");
+                if(curRemaining<1) throw new BufferUnderflowException();
+                byte value = get(curPosition++);
+                curRemaining--;
+                return value;
+            }
+
+            @Override
+            public int read(byte b[], int off, int len) throws IOException {
+                if(closed) throw new IOException("Stream closed");
+                if(len<0) throw new IllegalArgumentException("len<0: "+len);
+                if(len==0) return 0;
+                if(curRemaining<len) {
+                    if(curRemaining<=0) return -1; // End of file
+                    len = (int)curRemaining;
+                }
+                try {
+                    int numBytes = getSome(curPosition, b, off, len);
+                    curPosition+=numBytes;
+                    curRemaining-=numBytes;
+                    return numBytes;
+                } catch(BufferUnderflowException err) {
+                    return -1;
+                }
+            }
+
+            @Override
+            public long skip(long n) throws IOException {
+                if(closed) throw new IOException("Stream closed");
+                if(n<=0) return 0;
+                if(curRemaining<n) {
+                    if(curRemaining<=0) return 0;
+                    n = curRemaining;
+                }
+                curPosition+=n;
+                curRemaining-=n;
+                return n;
+            }
+
+            @Override
+            public int available() throws IOException {
+                if(closed) throw new IOException("Stream closed");
+                return 0;
+            }
+
+            @Override
+            public void close() throws IOException {
+                closed = true;
+            }
+        };
     }
 
     /**
-     * Implemented as call to <code>write(long,byte[],int,int)</code>
+     * Implemented as call to <code>write(long,byte)</code>
+     * and <code>write(long,byte[],int,int)</code>
      *
-     * @see  #write(long, byte[], int, int)
+     * @see  #put(long, byte)
+     * @see  #put(long, byte[], int, int)
      */
-    public OutputStream getOutputStream(long position, long length) throws IOException, BufferOverflowException {
-        throw new RuntimeException("TODO: Not implemented");
+    public OutputStream getOutputStream(final long position, final long length) throws IOException, BufferOverflowException {
+        return new OutputStream() {
+            private boolean closed = false;
+            private long curPosition = position;
+            private long curRemaining = length;
+
+            @Override
+            public void write(int b) throws IOException {
+                if(closed) throw new IOException("Stream closed");
+                if(curRemaining<1) throw new BufferOverflowException();
+                put(curPosition++, (byte)b);
+                curRemaining--;
+            }
+
+            @Override
+            public void write(byte b[], int off, int len) throws IOException {
+                if(closed) throw new IOException("Stream closed");
+                if(curRemaining<len) throw new BufferOverflowException();
+                put(curPosition, b, off, len);
+                curPosition+=len;
+                curRemaining-=len;
+            }
+
+            @Override
+            public void close() throws IOException {
+                closed = true;
+            }
+        };
     }
 }
