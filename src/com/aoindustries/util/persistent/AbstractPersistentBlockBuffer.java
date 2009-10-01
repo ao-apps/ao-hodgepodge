@@ -23,6 +23,10 @@
 package com.aoindustries.util.persistent;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 /**
  * Base class for any implementation that treats a <code>PersistentBuffer</code>
@@ -46,11 +50,78 @@ abstract public class AbstractPersistentBlockBuffer implements PersistentBlockBu
         pbuffer.close();
     }
 
-    public boolean isReadOnly() {
-        return pbuffer.isReadOnly();
+    public ProtectionLevel getProtectionLevel() {
+        return pbuffer.getProtectionLevel();
     }
 
     public void barrier(boolean force) throws IOException {
         pbuffer.barrier(force);
     }
+
+    public void get(long id, long offset, byte[] buff, int off, int len) throws IOException, BufferUnderflowException {
+        if((offset+len)>getBlockSize(id)) throw new BufferOverflowException();
+        long startAddress = getBlockAddress(id)+offset;
+        ensureCapacity(startAddress+len);
+        pbuffer.get(startAddress, buff, off, len);
+    }
+
+    public int getInt(long id, long offset) throws IOException, BufferUnderflowException {
+        if((offset+4)>getBlockSize(id)) throw new BufferOverflowException();
+        long startAddress = getBlockAddress(id)+offset;
+        ensureCapacity(startAddress+4);
+        return pbuffer.getInt(startAddress);
+    }
+
+    public long getLong(long id, long offset) throws IOException, BufferUnderflowException {
+        if((offset+8)>getBlockSize(id)) throw new BufferOverflowException();
+        long startAddress = getBlockAddress(id)+offset;
+        ensureCapacity(startAddress+8);
+        return pbuffer.getLong(startAddress);
+    }
+
+    public InputStream getInputStream(long id, long offset, long length) throws IOException, BufferUnderflowException {
+        if((offset+length)>getBlockSize(id)) throw new BufferOverflowException();
+        long startAddress = getBlockAddress(id)+offset;
+        ensureCapacity(startAddress+length);
+        return pbuffer.getInputStream(startAddress, length);
+    }
+
+    public void put(long id, long offset, byte[] buff, int off, int len) throws IOException, BufferOverflowException {
+        if((offset+len)>getBlockSize(id)) throw new BufferOverflowException();
+        long startAddress = getBlockAddress(id)+offset;
+        ensureCapacity(startAddress+len);
+        pbuffer.put(startAddress, buff, off, len);
+    }
+
+    public void putInt(long id, long offset, int value) throws IOException, BufferOverflowException {
+        if((offset+4)>getBlockSize(id)) throw new BufferOverflowException();
+        long startAddress = getBlockAddress(id)+offset;
+        ensureCapacity(startAddress+4);
+        pbuffer.putInt(startAddress, value);
+    }
+
+    public void putLong(long id, long offset, long value) throws IOException, BufferOverflowException {
+        if((offset+8)>getBlockSize(id)) throw new BufferOverflowException();
+        long startAddress = getBlockAddress(id)+offset;
+        ensureCapacity(startAddress+8);
+        pbuffer.putLong(startAddress, value);
+    }
+
+    public OutputStream getOutputStream(long id, long offset, long length) throws IOException, BufferOverflowException {
+        if((offset+length)>getBlockSize(id)) throw new BufferOverflowException();
+        long startAddress = getBlockAddress(id)+offset;
+        ensureCapacity(startAddress+length);
+        return pbuffer.getOutputStream(startAddress, length);
+    }
+
+    /**
+     * Gets the address of the block in the underlying persistent buffer.
+     */
+    abstract protected long getBlockAddress(long id);
+
+    /**
+     * Ensures the underlying persistent buffer is of adequate capacity.  Grows the
+     * underlying storage if needed.
+     */
+    abstract protected void ensureCapacity(long capacity) throws IOException;
 }

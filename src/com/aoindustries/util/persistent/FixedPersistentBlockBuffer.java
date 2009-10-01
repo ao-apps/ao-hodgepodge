@@ -133,7 +133,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
      * Gets the address that stores the beginning of the block with the provided id.
      * This is algorithmic and may be beyond the end of the buffer capacity.
      */
-    private long getBlockAddress(long id) {
+    protected long getBlockAddress(long id) {
         if(singleBitmap) {
             return bitmapSize + id * blockSize;
         } else {
@@ -178,16 +178,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         // 1) Allocate enough room for 64 blocks, but not to exceed 1 MB
         // 2) Round-up to the nearest 4096 block, always
         modCount++;
-        long newCapacity;
-        /*if(singleBitmap)*/ newCapacity = bitmapBitsAddress+1;
-        /*else {
-            long amountToAdd = blockSize*64;
-            if(amountToAdd > 1048576) amountToAdd = 1048576;
-            newCapacity = bitmapBitsAddress+amountToAdd;
-        }*/
-        if((newCapacity&0xfff)!=0) newCapacity = (newCapacity & 0xfffffffffffff000L)+4096L;
-        //System.out.println("DEBUG: newCapacity="+newCapacity);
-        pbuffer.setCapacity(newCapacity);
+        expandCapacity(bitmapBitsAddress+1);
         pbuffer.put(bitmapBitsAddress, (byte)1);
         return lowestFreeId++;
     }
@@ -270,6 +261,27 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
                 }
             }
         };
+    }
+
+    public long getBlockSize(long id) {
+        return blockSize;
+    }
+
+    protected void expandCapacity(long newCapacity) throws IOException {
+        /*if(singleBitmap) newCapacity = bitmapBitsAddress+1;
+        else {
+            long amountToAdd = blockSize*64;
+            if(amountToAdd > 1048576) amountToAdd = 1048576;
+            newCapacity = bitmapBitsAddress+amountToAdd;
+        }*/
+        if((newCapacity&0xfff)!=0) newCapacity = (newCapacity & 0xfffffffffffff000L)+4096L;
+        //System.out.println("DEBUG: newCapacity="+newCapacity);
+        pbuffer.setCapacity(newCapacity);
+    }
+
+    @Override
+    protected void ensureCapacity(long capacity) throws IOException {
+        if(pbuffer.capacity()<capacity) expandCapacity(capacity);
     }
 
     /*public long getBlockCount() throws IOException {

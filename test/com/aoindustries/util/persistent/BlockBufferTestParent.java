@@ -52,7 +52,7 @@ abstract public class BlockBufferTestParent extends TestCase {
         try {
             Set<Long> allocatedIds = new HashSet<Long>();
             for(int c=0;c<100;c++) {
-                if(((c+1)%10)==0) System.out.println(getClass()+": testAllocateDeallocate: Test loop "+(c+1)+" of "+10);
+                if(((c+1)%10)==0) System.out.println(getClass()+": testAllocateDeallocate: Test loop "+(c+1)+" of 100");
                 // Allocate some blocks, must not return duplicate ids.
                 for(int d=0;d<1000;d++) {
                     assertTrue(allocatedIds.add(blockBuffer.allocate(getAllocationSize(random))));

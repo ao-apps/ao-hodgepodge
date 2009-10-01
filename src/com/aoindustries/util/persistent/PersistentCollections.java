@@ -164,7 +164,8 @@ public class PersistentCollections {
     /**
      * Selects the most efficient temporary <code>PersistentBuffer</code> for the current
      * machine and the provided maximum buffer size.  The buffer will be backed by a temporary
-     * file that will be deleted on buffer close or JVM shutdown.  The order of preference is:
+     * file that will be deleted on buffer close or JVM shutdown.  The protection level will be
+     * <code>NONE</code>.  The order of preference is:
      * <ol>
      *   <li><code>MappedPersistentBuffer</code></li>
      *   <li><code>LargeMappedPersistentBuffer</code></li>
@@ -209,21 +210,21 @@ public class PersistentCollections {
      *                        the length of the file is used instead.
      *                        To ensure no limits, use <code>Long.MAX_VALUE</code>.
      */
-    public static PersistentBuffer getPersistentBuffer(RandomAccessFile raf, boolean readOnly, long maximumCapacity) throws IOException {
+    public static PersistentBuffer getPersistentBuffer(RandomAccessFile raf, ProtectionLevel protectionLevel, long maximumCapacity) throws IOException {
         if(maximumCapacity<(1L<<30)) {
             long len = raf.length();
             if(maximumCapacity<len) maximumCapacity = len;
         }
         // If < 1 GB, use mapped buffer
         if(maximumCapacity<(1L<<30)) {
-            return new MappedPersistentBuffer(raf, readOnly);
+            return new MappedPersistentBuffer(raf, protectionLevel);
         }
         // No mmap for 32-bit
         String dataModel = System.getProperty("sun.arch.data.model");
         if(
             "32".equals(dataModel)
         ) {
-            return new RandomAccessFileBuffer(raf, readOnly);
+            return new RandomAccessFileBuffer(raf, protectionLevel);
         }
         // Use mmap for 64-bit
         if(
@@ -231,7 +232,7 @@ public class PersistentCollections {
         ) {
             logger.warning("Unexpected value for system property sun.arch.data.model, assuming 64-bit virtual machine: sun.arch.data.model="+dataModel);
         }
-        return new LargeMappedPersistentBuffer(raf, readOnly);
+        return new LargeMappedPersistentBuffer(raf, protectionLevel);
     }
 
     /**

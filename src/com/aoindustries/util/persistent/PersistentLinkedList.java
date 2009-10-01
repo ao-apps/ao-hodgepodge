@@ -22,12 +22,12 @@
  */
 package com.aoindustries.util.persistent;
 
-import com.aoindustries.io.BetterByteArrayInputStream;
 import com.aoindustries.io.BetterByteArrayOutputStream;
 import com.aoindustries.util.WrappedException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.AbstractSequentialList;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -35,17 +35,13 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * <p>
  * Serializes and stores objects in a persistent buffer.  Unlike <code>FileList</code> which
  * is intended for efficient <code>RandomAccess</code>,
- * this is a linked list implementation and has the expected qualities and costs.
- * There are no size limits to the stored data.  Fragmentation may occur in the file
- * over time, but is minimized by the use of per-block size free space maps.
- * There is currently no compaction tool or conversion between block sizes.
+ * this is a linked list implementation and has the expected benefits and costs.
+ * There are no size limits to the stored data.
  * </p>
  * <p>
  * This class is not thread-safe.  It is absolutely critical that external
@@ -63,117 +59,97 @@ import java.util.TreeSet;
  * cache.
  * </p>
  * <p>
- * The file starts with a header:
+ * The first block allocated is a header:
  *     Offset   Type  Description
- *      0-15    ASCII LinkedFileList\n\0
- *     16-19    int   version
- *     20-27    long  position of the head or <code>TAIL_PTR (24)</code> if empty.
- *     28-35    long  position of the tail or <code>HEAD_PTR (20)</code> if empty.
+ *      0- 3    ASCII "PLL\n"
+ *      4- 7    int   version
+ *      8-15    long  position of the head or <code>END_PTR</code> if empty.
+ *     16-23    long  position of the tail or <code>END_PTR</code> if empty.
  * </p>
  * <p>
  * Each entry consists of:
  *     Offset   Name        Type     Description
- *     +0       maxBits     byte     (0-31) the power of two that contains the data (0=1, 1=2, 2=4, 3=8, ..., 31=2^31).  Maximum number of bytes that may be stored in the
- *                                   data segment of this entry (used to determine block size).
- *     +1       next        long     position of next, <code>8</code> for last element, or <code>-1</code> for entry available.
- *     +9       prev        long     position of prev, <code>0</code> for first element, or <code>-1</code> for entry available.
- *     +17      dataSize    int      the size of the serialized data, must always be &lt;= 2^maxBits, <code>-1</code> means null element (TODO: Make 64-bit)
- *     +21      data        byte[]   the binary data.
+ *       0- 7   next        long     block id of next, <code>END_PTR</code> for last element, or <code>NULL_PTR</code> for <code>null</code>
+ *       8-15   prev        long     block id of prev, <code>END_PTR</code> for first element, or <code>NULL_PTR</code> for <code>null</code>
+ *      16-23   dataSize    long     the size of the serialized data, <code>-1</code> means null element
+ *      24+     data        data     the binary data
  * </p>
  *
  * <pre>
- * TODO: Should we align on OS-level block sizes, or fixed block of 4096?
- *           This implies that blocks themselves must be 2^n in size, not 22+2^n like now.
- *           This would also make merging and splitting blocks pretty easy to better use free space on varying data sizes
  * TODO: In Java 1.6 support Deque interface instead of just Queue
  * TODO: Check for consistency in the constructor (all prevs and nexts match without loops), can set size there, too.
+ * TODO: Add corrupt flag, set of exceptions?  Cause immediate crash recovery?
  * </pre>
  *
  * @author  AO Industries, Inc.
  */
 public class PersistentLinkedList<E> extends AbstractSequentialList<E> implements List<E>, Queue<E> {
 
-    private static final byte[] MAGIC={
-        'P',
-        'e',
-        'r',
-        's',
-        'i',
-        's',
-        't',
-        'e',
-        'n',
-        't',
-        'L',
-        'i',
-        'n',
-        'k',
-        'e',
-        'd',
-        'L',
-        'i',
-        's',
-        't',
-        '\n'
-    };
+    private static final byte[] MAGIC={'P', 'L', 'L', '\n'};
 
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
+
+    /**
+     * The value used to represent a <code>null</code> pointer.
+     */
+    private static final long NULL_PTR = -1;
+
+    /**
+     * The value used to represent an ending pointer.
+     */
+    private static final long END_PTR = -2;
 
     /**
      * The constant location of the head pointer.
      */
-    private static final long HEAD_PTR = MAGIC.length+4;
+    private static final long HEAD_OFFSET = MAGIC.length+4;
 
     /**
      * The constant location of the tail pointer.
      */
-    private static final long TAIL_PTR = HEAD_PTR+8;
+    private static final long TAIL_OFFSET = HEAD_OFFSET+8;
 
     /**
      * The total number of bytes in the header.
      */
-    private static final int HEADER_SIZE = (int)(TAIL_PTR + 8);
-
-    /**
-     * The block offset for <code>maxBits</code>.
-     */
-    private static final int MAX_BITS_OFFSET = 0;
+    private static final int HEADER_SIZE = (int)(TAIL_OFFSET + 8);
 
     /**
      * The block offset for <code>next</code>.
      */
-    private static final int NEXT_OFFSET = 1;
+    private static final int NEXT_OFFSET = 0;
 
     /**
      * The block offset for <code>prev</code>.
      */
-    private static final int PREV_OFFSET = 9;
+    private static final int PREV_OFFSET = 8;
 
     /**
      * The block offset for <code>dataSize</code>.
      */
-    private static final int DATA_SIZE_OFFSET = 17;
+    private static final int DATA_SIZE_OFFSET = 16;
 
     /**
      * The block offset for the beginning of the data.
      */
-    private static final int DATA_OFFSET = 21;
-
-    private final byte[] ioBuffer = new byte[Math.max(DATA_OFFSET, MAGIC.length)];
-
-    final private Serializer<E> serializer;
-    final private PersistentBuffer pbuffer;
-    final private boolean useFsync;
-
-    private long _head;
-    private long _tail;
-    private int _size;
-
-    private final List<Set<Long>> freeSpaceMaps = new ArrayList<Set<Long>>(32);
+    private static final int DATA_OFFSET = 24;
 
     /**
-     * Tracks free space on a per
+     * Value used to indicate <code>null</code> data.
      */
+    private static final long DATA_SIZE_NULL = -1;
+
+    final private Serializer<E> serializer;
+    final private PersistentBlockBuffer blockBuffer;
+    final private boolean force;
+
+    final private byte[] ioBuffer = new byte[Math.max(DATA_OFFSET, MAGIC.length)];
+
+    // Cached for higher performance
+    private long metaDataBlockId;
+    private long _head;
+    private long _tail;
+    private long _size;
 
     // <editor-fold desc="Constructors">
     /**
@@ -185,9 +161,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     public PersistentLinkedList(Class<E> type) throws IOException {
         serializer = PersistentCollections.getSerializer(type);
-        pbuffer = PersistentCollections.getPersistentBuffer(Long.MAX_VALUE);
-        useFsync = false;
-        for(int c=0;c<32;c++) freeSpaceMaps.add(null);
+        blockBuffer = PersistentCollections.getPersistentBlockBuffer(
+            serializer,
+            PersistentCollections.getPersistentBuffer(Long.MAX_VALUE),
+            Math.max(HEADER_SIZE, DATA_OFFSET)
+        );
+        force = false;
         clear();
     }
 
@@ -208,58 +187,64 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *
      * @see  PersistentCollections#getSerializer(java.lang.Class)
      */
-    public PersistentLinkedList(PersistentBuffer pbuffer, boolean useFsync, Class<E> type) throws IOException {
-        this(pbuffer, useFsync, PersistentCollections.getSerializer(type));
+    public PersistentLinkedList(PersistentBuffer pbuffer, boolean force, Class<E> type) throws IOException {
+        this(pbuffer, force, PersistentCollections.getSerializer(type));
     }
 
     /**
      * Constructs a list backed by the provided persistent buffer.
      * Operates in linear time in order to cache the size.
      */
-    public PersistentLinkedList(PersistentBuffer pbuffer, boolean useFsync, Serializer<E> serializer) throws IOException {
+    public PersistentLinkedList(PersistentBuffer pbuffer, boolean force, Serializer<E> serializer) throws IOException {
         this.serializer = serializer;
-        this.pbuffer = pbuffer;
-        this.useFsync = useFsync;
-        for(int c=0;c<32;c++) freeSpaceMaps.add(null);
-        // Read the head and tail to maintain in cache
-        long len = pbuffer.capacity();
-        if(len==0) clear();
-        else if(len<HEADER_SIZE) throw new IOException("File does not have a complete header");
-        else {
-            pbuffer.get(0, ioBuffer, 0, MAGIC.length);
+        blockBuffer = PersistentCollections.getPersistentBlockBuffer(
+            serializer,
+            pbuffer,
+            Math.max(HEADER_SIZE, DATA_OFFSET)
+        );
+        this.force = force;
+        // Get the meta data block
+        Iterator<Long> ids = blockBuffer.iterateBlockIds();
+        if(ids.hasNext()) {
+            metaDataBlockId = ids.next();
+            blockBuffer.get(metaDataBlockId, 0, ioBuffer, 0, MAGIC.length);
             if(!PersistentCollections.equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
-            int version = pbuffer.getInt(MAGIC.length);
+            int version = blockBuffer.getInt(metaDataBlockId, MAGIC.length);
             if(version!=VERSION) throw new IOException("Unsupported file version: "+version);
-            _head = pbuffer.getLong(MAGIC.length+4);
-            _tail = pbuffer.getLong(MAGIC.length+12);
-            assert _head==TAIL_PTR || isAllocated(_head);
-            assert _tail==HEAD_PTR || isAllocated(_tail);
-            int count = 0;
-            long ptr = HEADER_SIZE;
-            for(; ptr<len; ptr+=getEntrySize(getMaxBits(ptr))) {
-                if(isAllocated(ptr)) count++;
-                else addFreeSpaceMap(ptr);
+            _head = blockBuffer.getLong(metaDataBlockId, HEAD_OFFSET);
+            _tail = blockBuffer.getLong(metaDataBlockId, TAIL_OFFSET);
+            assert _head==END_PTR || hasNonNullNextPrev(_head);
+            assert _tail==END_PTR || hasNonNullNextPrev(_tail);
+            long count = 0;
+            while(ids.hasNext()) {
+                // TODO: Perform crash recovery here
+                count++;
             }
-            if(ptr!=len) throw new IOException("ptr!=len: "+ptr+"!="+len);
             _size = count;
+        } else {
+            clear();
         }
     }
     // </editor-fold>
 
     // <editor-fold desc="Pointer Assertions">
     /**
-     * Checks that the ptr is in the valid address range.
+     * Checks that the ptr is in the valid address range.  It must be >=0 and
+     * not the metadata block pointer.
      */
     private boolean isValidRange(long ptr) throws IOException {
-        return ptr>=HEADER_SIZE && ptr<pbuffer.capacity();
+        return ptr>=0 && ptr!=metaDataBlockId;
     }
 
     /**
-     * Checks if the entry is allocated, also asserts isValidRange first.
+     * Checks if the entry has both next and previous pointers, also asserts isValidRange first.
      */
-    private boolean isAllocated(long ptr) throws IOException {
+    private boolean hasNonNullNextPrev(long ptr) throws IOException {
         assert isValidRange(ptr) : "Invalid range: "+ptr;
-        return pbuffer.getLong(ptr+NEXT_OFFSET)!=-1 && pbuffer.getLong(ptr+PREV_OFFSET)!=-1;
+        return
+            blockBuffer.getLong(ptr, NEXT_OFFSET)!=NULL_PTR
+            && blockBuffer.getLong(ptr, PREV_OFFSET)!=NULL_PTR
+        ;
     }
     // </editor-fold>
 
@@ -275,8 +260,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Sets the head to the provided value.
      */
     private void setHead(long head) throws IOException {
-        assert head==TAIL_PTR || isAllocated(head);
-        pbuffer.putLong(HEAD_PTR, head);
+        assert head==END_PTR || hasNonNullNextPrev(head);
+        blockBuffer.putLong(metaDataBlockId, HEAD_OFFSET, head);
         this._head = head;
     }
 
@@ -288,129 +273,83 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Sets the tail to the provided value.
      */
     private void setTail(long tail) throws IOException {
-        assert tail==HEAD_PTR || isAllocated(tail);
-        pbuffer.putLong(TAIL_PTR, tail);
+        assert tail==END_PTR || hasNonNullNextPrev(tail);
+        blockBuffer.putLong(metaDataBlockId, TAIL_OFFSET, tail);
         this._tail = tail;
     }
 
     /**
      * Gets the next pointer for the entry at the provided location.
-     * The entry must be allocated.
+     * The entry must have non-null next and prev.
      */
     private long getNext(long ptr) throws IOException {
-        assert isAllocated(ptr);
-        return pbuffer.getLong(ptr+NEXT_OFFSET);
+        assert hasNonNullNextPrev(ptr);
+        return blockBuffer.getLong(ptr, NEXT_OFFSET);
     }
 
     /**
      * Sets the next pointer for the entry at the provided location.
-     * The entry must be allocated.
+     * The entry must have non-null next and prev.
      */
     private void setNext(long ptr, long next) throws IOException {
-        assert isAllocated(ptr);
-        assert next==TAIL_PTR || isAllocated(next);
-        pbuffer.putLong(ptr+NEXT_OFFSET, next);
+        assert hasNonNullNextPrev(ptr);
+        assert next==END_PTR || hasNonNullNextPrev(next);
+        blockBuffer.putLong(ptr, NEXT_OFFSET, next);
     }
 
     /**
      * Gets the prev pointer for the entry at the provided location.
-     * The entry must be allocated.
+     * The entry must have non-null next and prev.
      */
     private long getPrev(long ptr) throws IOException {
-        assert isAllocated(ptr);
-        return pbuffer.getLong(ptr+PREV_OFFSET);
+        assert hasNonNullNextPrev(ptr);
+        return blockBuffer.getLong(ptr, PREV_OFFSET);
     }
 
     /**
      * Sets the prev pointer for the entry at the provided location.
-     * The entry must be allocated.
+     * The entry must have non-null next and prev.
      */
     private void setPrev(long ptr, long prev) throws IOException {
-        assert isAllocated(ptr);
-        assert prev==HEAD_PTR || isAllocated(prev);
-        pbuffer.putLong(ptr+PREV_OFFSET, prev);
-    }
-
-    /**
-     * Gets the maximum amount of data that may be stored in the entry.
-     */
-    private int getMaxBits(long ptr) throws IOException {
-        assert isValidRange(ptr);
-        int maxBits = pbuffer.get(ptr+MAX_BITS_OFFSET);
-        assert maxBits>=0 && maxBits<=31;
-        return maxBits;
+        assert hasNonNullNextPrev(ptr);
+        assert prev==END_PTR || hasNonNullNextPrev(prev);
+        blockBuffer.putLong(ptr, PREV_OFFSET, prev);
     }
 
     /**
      * Gets the size of the data for the entry at the provided location.
-     * This does not include pointers or flags.
-     * The entry must be allocated.
+     * This does not include the block header.
+     * The entry must have non-null next and prev.
      */
-    private int getDataSize(long ptr) throws IOException {
-        assert isAllocated(ptr);
-        return pbuffer.getInt(ptr+DATA_SIZE_OFFSET);
+    private long getDataSize(long ptr) throws IOException {
+        assert hasNonNullNextPrev(ptr);
+        return blockBuffer.getLong(ptr, DATA_SIZE_OFFSET);
     }
 
     /**
      * Checks if the provided element is null.
-     * The entry must be allocated.
+     * The entry must have non-null next and prev.
      */
     private boolean isNull(long ptr) throws IOException {
-        return getDataSize(ptr)==-1;
+        return getDataSize(ptr)==DATA_SIZE_NULL;
     }
-
-    // TODO: Use direct buffer access
-    private BetterByteArrayInputStream bufferIn;
 
     /**
      * Gets the element for the entry at the provided location.
-     * The entry must be allocated.
+     * The entry must have non-null next and prev.
      */
     private E getElement(long ptr) throws IOException {
-        assert isAllocated(ptr);
-        int dataSize = getDataSize(ptr);
-        if(dataSize==-1) return null;
-        assert (ptr+DATA_OFFSET+dataSize)<=pbuffer.capacity(); // Must not extend past end of file
+        assert hasNonNullNextPrev(ptr);
+        long dataSize = getDataSize(ptr);
+        if(dataSize==DATA_SIZE_NULL) return null;
 
-        // assert dataSize>=0 && ((long)dataSize)<=(1L << getMaxBits(ptr)); // Must not exceed maximum size
-        // Only Required for previous assertion: raf.seek(ptr+DATA_OFFSET);
-
-        // Create or grow the buffer
-        if(bufferIn==null || bufferIn.getInternalByteArray().length<dataSize) bufferIn = new BetterByteArrayInputStream(new byte[dataSize]);
-        // Fill the buffer
-        bufferIn.readFrom(pbuffer, ptr+DATA_OFFSET, dataSize);
-        // Read the object
-        return serializer.deserialize(bufferIn);
-    }
-
-    /**
-     * Gets the overall size of an entry given its maxBits.
-     * This includes the pointers and flags.
-     */
-    private static long getEntrySize(int maxBits) {
-        assert maxBits>=0 && maxBits<=31;
-        return DATA_OFFSET + (1L << maxBits);
-    }
-
-    /**
-     * Deallocates the entry at the provided location.
-     * The entry must be allocated.
-     */
-    private void deallocate(long ptr) throws IOException {
-        deallocate(ptr, getMaxBits(ptr));
-    }
-
-    /**
-     * Deallocates the entry at the provided location.
-     * The entry must be allocated.
-     */
-    private void deallocate(long ptr, int maxBits) throws IOException {
-        assert isAllocated(ptr);
-        assert _size>0;
-        pbuffer.putLong(ptr+NEXT_OFFSET, -1);
-        pbuffer.putLong(ptr+PREV_OFFSET, -1);
-        _size--;
-        addFreeSpaceMap(ptr, maxBits);
+        InputStream in = blockBuffer.getInputStream(ptr, DATA_OFFSET, dataSize);
+        try {
+            // Read the object
+            return serializer.deserialize(in);
+        } finally {
+            in.close();
+        }
     }
     // </editor-fold>
 
@@ -419,171 +358,134 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Will perform fsync only if fsync is enabled.
      */
     private void barrier() throws IOException {
-        if(useFsync) pbuffer.barrier(true);
-    }
-
-    /**
-     * Adds the block at the provided location to the free space maps.
-     * The entry must not be allocated.
-     */
-    private void addFreeSpaceMap(long ptr) throws IOException {
-        addFreeSpaceMap(ptr, getMaxBits(ptr));
-    }
-
-    /**
-     * Adds the block at the provided location to the free space maps.
-     * The entry must not be allocated.
-     */
-    private void addFreeSpaceMap(long ptr, int maxBits) throws IOException {
-        assert !isAllocated(ptr);
-        Set<Long> fsm = freeSpaceMaps.get(maxBits);
-        if(fsm==null) freeSpaceMaps.set(maxBits, fsm = new TreeSet<Long>());
-        if(!fsm.add(ptr)) throw new AssertionError("Free space map already contains entry: "+ptr);
+        blockBuffer.barrier(force);
     }
 
     /**
      * Removes the entry at the provided location and restores it to an unallocated state.
      * Operates in constant time.
-     * The entry must be allocated.
+     * The entry must have non-null next and prev.
      */
     private void remove(long ptr) throws IOException {
-        assert isAllocated(ptr);
+        assert hasNonNullNextPrev(ptr);
+        assert _size>0;
         long prev = getPrev(ptr);
         long next = getNext(ptr);
-        if(prev==HEAD_PTR) setHead(next);
+        if(prev==END_PTR) setHead(next);
         else setNext(prev, next);
-        if(next==TAIL_PTR) setTail(prev);
+        if(next==END_PTR) setTail(prev);
         else setPrev(next, prev);
-        deallocate(ptr);
-    }
-
-    /**
-     * Allocates the first free space available that can hold the requested amount of
-     * data.  The amount of data should not include the pointer space.
-     *
-     * Operates in logarithic complexity on the amount of free entries.
-     */
-    private long allocateEntry(long next, long prev, int dataSize, byte[] data) throws IOException {
-        assert next==TAIL_PTR || isAllocated(next);
-        assert prev==HEAD_PTR || isAllocated(prev);
-        assert (dataSize==-1 && data==null) || (dataSize>=0 && data!=null);
-        if(_size==Integer.MAX_VALUE) throw new IOException("List is full: _size==Integer.MAX_VALUE");
-        // Determine the maxBits value
-        int maxBits = 0;
-        while((1L<<maxBits)<dataSize) maxBits++;
-        // Look in the free space maps
-        Set<Long> fsm = freeSpaceMaps.get(maxBits);
-        if(fsm!=null && !fsm.isEmpty()) {
-            Iterator<Long> iter = fsm.iterator();
-            long ptr = iter.next();
-            iter.remove();
-            // Update existing entry
-            PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET-NEXT_OFFSET);
-            PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET-NEXT_OFFSET);
-            PersistentCollections.intToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET-NEXT_OFFSET);
-            pbuffer.put(ptr+NEXT_OFFSET, ioBuffer, 0, 20);
-            if(dataSize>0) pbuffer.put(ptr+DATA_OFFSET, data, 0, dataSize);
-            _size++;
-            return ptr;
-        }
-        // Allocate more space at the end of the file
-        long ptr = pbuffer.capacity();
-        long newLen = ptr + DATA_OFFSET + (1L<<(long)maxBits);
-        pbuffer.setCapacity(newLen);
-        ioBuffer[MAX_BITS_OFFSET] = (byte)maxBits;
-        PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
-        PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
-        PersistentCollections.intToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);
-        pbuffer.put(ptr, ioBuffer, 0, DATA_OFFSET);
-        if(dataSize>0) pbuffer.put(ptr+DATA_OFFSET, data, 0, dataSize);
-        _size++;
-        return ptr;
+        // Barrier, to make sure always pointing to complete data
+        barrier();
+        blockBuffer.putLong(ptr, NEXT_OFFSET, NULL_PTR);
+        blockBuffer.putLong(ptr, PREV_OFFSET, NULL_PTR);
+        blockBuffer.deallocate(ptr);
+        // Barrier, to make sure links are correct
+        barrier();
+        _size--;
     }
 
     // TODO: Use direct streams
-    private final BetterByteArrayOutputStream bufferOut = new BetterByteArrayOutputStream();
+    private BetterByteArrayOutputStream bufferOut;
+
+    /**
+     * Adds an entry.  Allocates, writes the header and data, barrier, link-in, barrier, _size++
+     * If the serializer is fixed size, will preallocate and serialize directly
+     * the the block.  Otherwise, it serializes to a buffer, and then allocates the
+     * appropriate amount of space.
+     * Operates in constant time.
+     */
+    private long addEntry(long next, long prev, E element) throws IOException {
+        assert next==END_PTR || hasNonNullNextPrev(next);
+        assert prev==END_PTR || hasNonNullNextPrev(prev);
+        if(_size==Long.MAX_VALUE) throw new IOException("List is full: _size==Long.MAX_VALUE");
+
+        // Allocate and write new entry
+        long dataSize;
+        long newPtr;
+        if(element==null) {
+            dataSize = DATA_SIZE_NULL;
+            newPtr = blockBuffer.allocate(0);
+            PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
+            PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
+            PersistentCollections.longToBuffer(DATA_SIZE_NULL, ioBuffer, DATA_SIZE_OFFSET);
+            blockBuffer.put(newPtr, 0, ioBuffer, 0, DATA_OFFSET);
+        } else if(serializer.isFixedSerializedSize()) {
+            dataSize = serializer.getSerializedSize(null);
+            newPtr = blockBuffer.allocate(dataSize);
+            PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
+            PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
+            PersistentCollections.longToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);
+            blockBuffer.put(newPtr, 0, ioBuffer, 0, DATA_OFFSET);
+            OutputStream out = blockBuffer.getOutputStream(newPtr, DATA_OFFSET, dataSize);
+            try {
+                serializer.serialize(element, out);
+            } finally {
+                out.close();
+            }
+        } else {
+            dataSize = serializer.getSerializedSize(element);
+            if(bufferOut==null) bufferOut = new BetterByteArrayOutputStream(dataSize>Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)dataSize);
+            else bufferOut.reset();
+            serializer.serialize(element, bufferOut);
+            if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
+            byte[] data = bufferOut.getInternalByteArray();
+            newPtr = blockBuffer.allocate(data.length);
+            PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
+            PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
+            PersistentCollections.longToBuffer(data.length, ioBuffer, DATA_SIZE_OFFSET);
+            blockBuffer.put(newPtr, 0, ioBuffer, 0, DATA_OFFSET);
+            blockBuffer.put(newPtr, DATA_OFFSET, data, 0, data.length);
+        }
+        // Barrier, to make sure always pointing to complete data
+        barrier();
+        // Update pointers
+        if(prev==END_PTR) {
+            assert _head==next;
+            setHead(newPtr);
+        } else {
+            assert getNext(prev)==next;
+            setNext(prev, newPtr);
+        }
+        if(next==END_PTR) {
+            assert _tail==prev;
+            setTail(newPtr);
+        } else {
+            assert getPrev(next)==prev;
+            setPrev(next, newPtr);
+        }
+        // Barrier, to make sure links are correct
+        barrier();
+        // Increment size
+        _size++;
+        return newPtr;
+    }
 
     /**
      * Adds the first entry to the list.
-     * Operates in constant time.
      */
     private void addFirstEntry(final E element) throws IOException {
-        assert getHead()==TAIL_PTR;
-        assert getTail()==HEAD_PTR;
-        int dataSize;
-        byte[] data;
-        if(element==null) {
-            dataSize=-1;
-            data = null;
-        }
-        else {
-            long size = serializer.getSerializedSize(element);
-            if(size>Integer.MAX_VALUE) throw new IOException("Serialized value too large: size="+size);
-            dataSize = (int)size;
-            bufferOut.reset();
-            serializer.serialize(element, bufferOut);
-            if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
-            data = bufferOut.getInternalByteArray();
-        }
-        long newPtr = allocateEntry(TAIL_PTR, HEAD_PTR, dataSize, data);
-        setHead(newPtr);
-        setTail(newPtr);
+        assert getHead()==END_PTR;
+        assert getTail()==END_PTR;
+        addEntry(END_PTR, END_PTR, element);
     }
 
     /**
      * Adds the provided element before the element at the provided location.
-     * Operates in log time for free space.
      */
     private void addBefore(final E element, final long ptr) throws IOException {
-        assert isAllocated(ptr);
-        int dataSize;
-        byte[] data;
-        if(element==null) {
-            dataSize=-1;
-            data = null;
-        }
-        else {
-            long size = serializer.getSerializedSize(element);
-            if(size>Integer.MAX_VALUE) throw new IOException("Serialized value too large: size="+size);
-            dataSize = (int)size;
-            bufferOut.reset();
-            serializer.serialize(element, bufferOut);
-            if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
-            data = bufferOut.getInternalByteArray();
-        }
+        assert hasNonNullNextPrev(ptr);
         long prev = getPrev(ptr);
-        long newPtr = allocateEntry(ptr, prev, dataSize, data);
-        if(prev==HEAD_PTR) setHead(newPtr);
-        else setNext(prev, newPtr);
-        setPrev(ptr, newPtr);
+        addEntry(ptr, prev, element);
     }
 
     /**
      * Adds the provided element after the element at the provided location.
-     * Operates in log time for free space.
      */
     private void addAfter(final E element, final long ptr) throws IOException {
-        assert isAllocated(ptr);
-        int dataSize;
-        byte[] data;
-        if(element==null) {
-            dataSize=-1;
-            data = null;
-        }
-        else {
-            long size = serializer.getSerializedSize(element);
-            if(size>Integer.MAX_VALUE) throw new IOException("Serialized value too large: size="+size);
-            dataSize = (int)size;
-            bufferOut.reset();
-            serializer.serialize(element, bufferOut);
-            if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
-            data = bufferOut.getInternalByteArray();
-        }
+        assert hasNonNullNextPrev(ptr);
         long next = getNext(ptr);
-        long newPtr = allocateEntry(next, ptr, dataSize, data);
-        if(next==TAIL_PTR) setTail(newPtr);
-        else setPrev(next, newPtr);
-        setNext(ptr, newPtr);
+        addEntry(next, ptr, element);
     }
     // </editor-fold>
 
@@ -597,7 +499,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     public E getFirst() {
         long head=getHead();
-        if(head==TAIL_PTR) throw new NoSuchElementException();
+        if(head==END_PTR) throw new NoSuchElementException();
         try {
             return getElement(head);
         } catch(IOException err) {
@@ -614,7 +516,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     public E getLast()  {
         long tail=getTail();
-        if(tail==HEAD_PTR) throw new NoSuchElementException();
+        if(tail==END_PTR) throw new NoSuchElementException();
         try {
             return getElement(tail);
         } catch(IOException err) {
@@ -631,12 +533,11 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     public E removeFirst() {
         long head = getHead();
-        if(head==TAIL_PTR) throw new NoSuchElementException();
+        if(head==END_PTR) throw new NoSuchElementException();
         try {
             modCount++;
             E element = getElement(head);
             remove(head);
-            barrier();
             return element;
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -652,12 +553,11 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     public E removeLast() {
         long tail = getTail();
-        if(tail==HEAD_PTR) throw new NoSuchElementException();
+        if(tail==END_PTR) throw new NoSuchElementException();
         try {
             modCount++;
             E element = getElement(tail);
             remove(tail);
-            barrier();
             return element;
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -674,11 +574,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         try {
             modCount++;
             long head = getHead();
-            if(head==TAIL_PTR) addFirstEntry(element);
-            else {
-                addBefore(element, head);
-            }
-            barrier();
+            if(head==END_PTR) addFirstEntry(element);
+            else addBefore(element, head);
         } catch(IOException err) {
             throw new WrappedException(err);
         }
@@ -696,11 +593,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         try {
             modCount++;
             long tail = getTail();
-            if(tail==HEAD_PTR) addFirstEntry(element);
-            else {
-                addAfter(element, tail);
-            }
-            barrier();
+            if(tail==END_PTR) addFirstEntry(element);
+            else addAfter(element, tail);
         } catch(IOException err) {
             throw new WrappedException(err);
         }
@@ -726,7 +620,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * This runs in linear time.
      */
     private long getPointerForIndex(int index) throws IOException {
-        if(index<(_size<<1)) {
+        if(index<(_size >> 1)) {
             long ptr = getHead();
             for(int i=0;i<index;i++) ptr = getNext(ptr);
             return ptr;
@@ -755,20 +649,18 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     public boolean remove(Object o) {
         try {
             if(o==null) {
-                for(long ptr = getHead(); ptr!=TAIL_PTR; ptr = getNext(ptr)) {
+                for(long ptr = getHead(); ptr!=END_PTR; ptr = getNext(ptr)) {
                     if(isNull(ptr)) {
                         modCount++;
                         remove(ptr);
-                        barrier();
                         return true;
                     }
                 }
             } else {
-                for(long ptr = getHead(); ptr!=TAIL_PTR; ptr = getNext(ptr)) {
+                for(long ptr = getHead(); ptr!=END_PTR; ptr = getNext(ptr)) {
                     if(o.equals(getElement(ptr))) {
                         modCount++;
                         remove(ptr);
-                        barrier();
                         return true;
                     }
                 }
@@ -823,7 +715,6 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         try {
             long ptr = getPointerForIndex(index);
             for(E element : c) addBefore(element, ptr);
-            barrier();
             return true;
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -837,7 +728,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return the number of elements in this list
      */
     public int size() {
-        return _size;
+        return _size > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)_size;
     }
 
     /**
@@ -862,16 +753,27 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     public void clear() {
         try {
             modCount++;
-            pbuffer.setCapacity(HEADER_SIZE);
-            pbuffer.put(0, MAGIC, 0, MAGIC.length);
-            pbuffer.putInt(MAGIC.length, VERSION);
-            setHead(TAIL_PTR);
-            setTail(HEAD_PTR);
-            _size = 0;
-            for(Set<Long> fsm : freeSpaceMaps) {
-                if(fsm!=null) fsm.clear();
+            Iterator<Long> ids = blockBuffer.iterateBlockIds();
+            if(ids.hasNext()) {
+                metaDataBlockId = ids.next();
+                setHead(END_PTR);
+                setTail(END_PTR);
+                barrier();
+                // Deallocate all except first block
+                while(ids.hasNext()) {
+                    ids.next();
+                    ids.remove();
+                }
+                barrier();
+            } else {
+                metaDataBlockId = blockBuffer.allocate(HEADER_SIZE);
+                blockBuffer.put(metaDataBlockId, 0, MAGIC, 0, MAGIC.length);
+                blockBuffer.putInt(metaDataBlockId, MAGIC.length, VERSION);
+                setHead(END_PTR);
+                setTail(END_PTR);
+                barrier();
             }
-            barrier();
+            _size = 0;
         } catch(IOException err) {
             throw new WrappedException(err);
         }
@@ -908,11 +810,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         try {
             long prev = getPrev(ptr);
             remove(ptr);
-            if(prev==HEAD_PTR) addFirst(element);
-            else {
-                addAfter(element, prev);
-                barrier();
-            }
+            if(prev==END_PTR) addFirst(element);
+            else addAfter(element, prev);
         } catch(IOException err) {
             throw new WrappedException(err);
         }
@@ -954,11 +853,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         try {
             long ptr = getPointerForIndex(index);
             long prev = getPrev(ptr);
-            if(prev==HEAD_PTR) addFirst(element);
-            else {
-                addAfter(element, prev);
-                barrier();
-            }
+            if(prev==END_PTR) addFirst(element);
+            else addAfter(element, prev);
         } catch(IOException err) {
             throw new WrappedException(err);
         }
@@ -980,7 +876,6 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             long ptr = getPointerForIndex(index);
             E oldElement = getElement(ptr);
             remove(ptr);
-            barrier();
             return oldElement;
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -1003,12 +898,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         try {
             int index = 0;
             if(o==null) {
-                for(long ptr = getHead(); ptr!=TAIL_PTR; ptr = getNext(ptr)) {
+                for(long ptr = getHead(); ptr!=END_PTR; ptr = getNext(ptr)) {
                     if(isNull(ptr)) return index;
                     index++;
                 }
             } else {
-                for(long ptr = getHead(); ptr!=TAIL_PTR; ptr = getNext(ptr)) {
+                for(long ptr = getHead(); ptr!=END_PTR; ptr = getNext(ptr)) {
                     if(o.equals(getElement(ptr))) return index;
                     index++;
                 }
@@ -1033,16 +928,22 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     @Override
     public int lastIndexOf(Object o) {
         try {
-            int index = _size;
+            long index = _size;
             if(o==null) {
-                for(long ptr = getTail(); ptr!=HEAD_PTR; ptr = getPrev(ptr)) {
+                for(long ptr = getTail(); ptr!=END_PTR; ptr = getPrev(ptr)) {
                     --index;
-                    if(isNull(ptr)) return index;
+                    if(isNull(ptr)) {
+                        if(index>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from lastIndexOf: "+index);
+                        return (int)index;
+                    }
                 }
             } else {
-                for(long ptr = getTail(); ptr!=HEAD_PTR; ptr = getPrev(ptr)) {
+                for(long ptr = getTail(); ptr!=END_PTR; ptr = getPrev(ptr)) {
                     --index;
-                    if(o.equals(getElement(ptr))) return index;
+                    if(o.equals(getElement(ptr))) {
+                        if(index>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from lastIndexOf: "+index);
+                        return (int)index;
+                    }
                 }
             }
             return -1;
@@ -1231,20 +1132,18 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     public boolean removeLastOccurrence(Object o) {
         try {
             if(o==null) {
-                for(long ptr = getTail(); ptr!=HEAD_PTR; ptr = getPrev(ptr)) {
+                for(long ptr = getTail(); ptr!=END_PTR; ptr = getPrev(ptr)) {
                     if(isNull(ptr)) {
                         modCount++;
                         remove(ptr);
-                        barrier();
                         return true;
                     }
                 }
             } else {
-                for(long ptr = getTail(); ptr!=HEAD_PTR; ptr = getPrev(ptr)) {
+                for(long ptr = getTail(); ptr!=END_PTR; ptr = getPrev(ptr)) {
                     if(o.equals(getElement(ptr))) {
                         modCount++;
                         remove(ptr);
-                        barrier();
                         return true;
                     }
                 }
@@ -1281,12 +1180,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     }
 
     private class ListItr implements ListIterator<E> {
-        private long lastReturned = TAIL_PTR;
+        private long lastReturned = END_PTR;
         private long nextPtr;
-        private int nextIndex;
+        private long nextIndex;
         private int expectedModCount = modCount;
 
-        ListItr(int index) {
+        ListItr(long index) {
             if (index < 0 || index > _size)
             throw new IndexOutOfBoundsException("Index: "+index+
                                 ", Size: "+_size);
@@ -1296,7 +1195,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                     for (nextIndex=0; nextIndex<index; nextIndex++) nextPtr = getNext(nextPtr);
                 } else {
                     nextPtr = getTail();
-                    if(nextPtr==HEAD_PTR) {
+                    if(nextPtr==END_PTR) {
                         // List empty
                         nextIndex = 0;
                     } else {
@@ -1346,11 +1245,14 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
 
         public int nextIndex() {
-            return nextIndex;
+            if(nextIndex>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from nextIndex: "+nextIndex);
+            return (int)nextIndex;
         }
 
         public int previousIndex() {
-            return nextIndex-1;
+            long prevIndex = nextIndex-1;
+            if(prevIndex>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from previousIndex: "+prevIndex);
+            return (int)prevIndex;
         }
 
         public void remove() {
@@ -1359,13 +1261,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                 long lastNext = getNext(lastReturned);
                 try {
                     PersistentLinkedList.this.remove(lastReturned);
-                    barrier();
                 } catch (NoSuchElementException e) {
                     throw new IllegalStateException();
                 }
                 if(nextPtr==lastReturned) nextPtr = lastNext;
                 else nextIndex--;
-                lastReturned = TAIL_PTR;
+                lastReturned = END_PTR;
                 expectedModCount++;
             } catch(IOException err) {
                 throw new WrappedException(err);
@@ -1373,7 +1274,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
 
         public void set(E e) {
-            if (lastReturned == TAIL_PTR)
+            if (lastReturned == END_PTR)
             throw new IllegalStateException();
             checkForComodification();
             setElement(lastReturned, e);
@@ -1382,10 +1283,9 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         public void add(E e) {
             checkForComodification();
             try {
-                lastReturned = TAIL_PTR;
+                lastReturned = END_PTR;
                 modCount++;
                 addBefore(e, nextPtr);
-                barrier();
                 nextIndex++;
                 expectedModCount++;
             } catch(IOException err) {
@@ -1423,9 +1323,10 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     @Override
     public Object[] toArray() {
         try {
-            Object[] result = new Object[_size];
+            if(_size>Integer.MAX_VALUE) throw new RuntimeException("Too many elements in list to create Object[]: "+_size);
+            Object[] result = new Object[(int)_size];
             int i = 0;
-            for (long ptr = getHead(); ptr != TAIL_PTR; ptr = getNext(ptr)) result[i++] = getElement(ptr);
+            for (long ptr = getHead(); ptr != END_PTR; ptr = getNext(ptr)) result[i++] = getElement(ptr);
             return result;
         } catch(IOException err) {
             throw new WrappedException(err);
@@ -1435,15 +1336,16 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     @Override
     @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
+        if(_size>Integer.MAX_VALUE) throw new RuntimeException("Too many elements in list to fill or create array: "+_size);
         try {
             if (a.length < _size)
                 a = (T[])java.lang.reflect.Array.newInstance(
-                                    a.getClass().getComponentType(), _size);
+                                    a.getClass().getComponentType(), (int)_size);
             int i = 0;
             Object[] result = a;
-            for (long ptr = getHead(); ptr != TAIL_PTR; ptr = getNext(ptr)) result[i++] = getElement(ptr);
+            for (long ptr = getHead(); ptr != END_PTR; ptr = getNext(ptr)) result[i++] = getElement(ptr);
             if (a.length > _size)
-            a[_size] = null;
+            a[(int)_size] = null;
 
             return a;
         } catch(IOException err) {
@@ -1460,6 +1362,6 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Closes the random access file backing this list.
      */
     public void close() throws IOException {
-        pbuffer.close();
+        blockBuffer.close();
     }
 }

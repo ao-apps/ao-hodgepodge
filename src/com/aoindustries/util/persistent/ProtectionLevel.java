@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2009  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,29 +22,28 @@
  */
 package com.aoindustries.util.persistent;
 
-import java.io.File;
-import java.io.RandomAccessFile;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
- * Tests the <code>LinkedFileList</code> against the standard <code>LinkedList</code>
- * by performing equal, random actions on each and ensuring equal results.
- *
- * @author  AO Industries, Inc.
+ * The different protection levels offered.
  */
-public class PersistentLinkedListAutoTest extends PersistentLinkedListTestParent {
+public enum ProtectionLevel {
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(PersistentLinkedListAutoTest.class);
-        return suite;
-    }
+    /**
+     * Read-only access.  Highest performance and protection.
+     */
+    READ_ONLY,
 
-    public PersistentLinkedListAutoTest(String testName) {
-        super(testName);
-    }
+    /**
+     * Offers no data protection.  Highest performance.
+     */
+    NONE,
 
-    protected PersistentBuffer getPersistentBuffer(File tempFile) throws Exception {
-        return PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), ProtectionLevel.NONE, Long.MAX_VALUE);
-    }
+    /**
+     * Prevents data corruption, but does not prevent data loss.  Moderate performance.
+     */
+    BARRIER,
+
+    /**
+     * Prevents both data corruption and data loss.  Lowest performance.
+     */
+    FORCE
 }

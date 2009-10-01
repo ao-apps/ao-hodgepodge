@@ -23,6 +23,10 @@
 package com.aoindustries.util.persistent;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 /**
  * <p>
@@ -52,11 +56,6 @@ public interface PersistentBuffer {
      * Closes this buffer.
      */
     void close() throws IOException;
-
-    /**
-     * Gets the read-only flag for this buffer.
-     */
-    boolean isReadOnly();
 
     /**
      * Gets the capacity of this buffer.
@@ -141,9 +140,33 @@ public interface PersistentBuffer {
     void putLong(long position, long value) throws IOException;
 
     /**
+     * Gets the protection level currently implemented by the buffer.
+     *
+     * @see  #barrier(boolean)
+     */
+    ProtectionLevel getProtectionLevel();
+
+    /**
      * Ensures that all writes before this barrier occur before all writes after
      * this barrier.  If <code>force</code> is <code>true</code>, will also
-     * commit to physical media synchronously before returning.
+     * commit to physical media synchronously before returning.  This request
+     * may be ignored depending on the current protection level.
+     *
+     * @see  #getProtectionLevel()
      */
     void barrier(boolean force) throws IOException;
+
+    /**
+     * Gets an input stream that reads from this buffer.  Bounds checking is performed.
+     *
+     * @throws BufferUnderflowException
+     */
+    InputStream getInputStream(long position, long length) throws IOException, BufferUnderflowException;
+
+    /**
+     * Gets an output stream that writes to this buffer.  Bounds checking is performed.
+     *
+     * @throws BufferOverflowException
+     */
+    OutputStream getOutputStream(long position, long length) throws IOException, BufferOverflowException;
 }

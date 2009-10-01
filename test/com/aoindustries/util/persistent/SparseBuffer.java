@@ -39,20 +39,19 @@ import java.util.Map;
  */
 public class SparseBuffer extends AbstractPersistentBuffer {
 
-    private final boolean readOnly;
     private boolean isClosed = false;
     private long capacity = 0L;
     private Map<Long,byte[]> buffers = new HashMap<Long,byte[]>();
 
     /**
-     * Creates a read-write test buffer.
+     * Creates a read-write test buffer with protection level <code>NONE</code>.
      */
     public SparseBuffer() {
-        this(false);
+        this(ProtectionLevel.NONE);
     }
 
-    public SparseBuffer(boolean readOnly) {
-        this.readOnly = readOnly;
+    public SparseBuffer(ProtectionLevel protectionLevel) {
+        super(protectionLevel);
     }
 
     public boolean isClosed() {
@@ -63,17 +62,13 @@ public class SparseBuffer extends AbstractPersistentBuffer {
         isClosed = true;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
-    }
-
     public long capacity() throws IOException {
         return capacity;
     }
 
     public void setCapacity(long newCapacity) throws IOException {
         if(newCapacity<0) throw new IllegalArgumentException("capacity<0: "+capacity);
-        if(readOnly) throw new ReadOnlyBufferException();
+        if(protectionLevel==ProtectionLevel.READ_ONLY) throw new ReadOnlyBufferException();
         if(newCapacity>capacity) {
             // TODO: Zero the partial part of the last page when growing
         }
@@ -110,7 +105,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
     }
 
     public void put(long position, byte[] buff, int off, int len) throws IOException {
-        if(readOnly) throw new ReadOnlyBufferException();
+        if(protectionLevel==ProtectionLevel.READ_ONLY) throw new ReadOnlyBufferException();
         if((position+len)>capacity) throw new BufferOverflowException();
         // TODO: More efficient algorithm using blocks calling System.arraycopy.
         long lastBufferNum = -1;
@@ -129,6 +124,5 @@ public class SparseBuffer extends AbstractPersistentBuffer {
     }
 
     public void barrier(boolean force) throws IOException {
-        if(readOnly) throw new ReadOnlyBufferException();
     }
 }

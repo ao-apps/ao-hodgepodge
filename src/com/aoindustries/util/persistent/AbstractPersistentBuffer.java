@@ -23,6 +23,10 @@
 package com.aoindustries.util.persistent;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 /**
  * Provides a base implementation of <code>PersistentBuffer</code> in terms of
@@ -32,7 +36,16 @@ import java.io.IOException;
  */
 abstract public class AbstractPersistentBuffer implements PersistentBuffer {
 
+    protected final ProtectionLevel protectionLevel;
     private final byte[] ioBuffer = new byte[8];
+
+    public AbstractPersistentBuffer(ProtectionLevel protectionLevel) {
+        this.protectionLevel = protectionLevel;
+    }
+
+    public ProtectionLevel getProtectionLevel() {
+        return protectionLevel;
+    }
 
     /**
      * Implemented as calls to <code>getSome(long,byte[],int,int)</code>
@@ -124,5 +137,23 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
     public void putLong(long position, long value) throws IOException {
         PersistentCollections.longToBuffer(value, ioBuffer, 0);
         put(position, ioBuffer, 0, 8);
+    }
+
+    /**
+     * Implemented as calls to <code>getSome(long,byte[],int,int)</code>
+     *
+     * @see  #get(long, byte[], int, int)
+     */
+    public InputStream getInputStream(long position, long length) throws IOException, BufferUnderflowException {
+        throw new RuntimeException("TODO: Not implemented");
+    }
+
+    /**
+     * Implemented as call to <code>write(long,byte[],int,int)</code>
+     *
+     * @see  #write(long, byte[], int, int)
+     */
+    public OutputStream getOutputStream(long position, long length) throws IOException, BufferOverflowException {
+        throw new RuntimeException("TODO: Not implemented");
     }
 }

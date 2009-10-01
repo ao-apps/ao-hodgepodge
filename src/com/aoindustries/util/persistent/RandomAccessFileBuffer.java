@@ -45,61 +45,61 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
     private final File tempFile;
     private final RandomAccessFile raf;
     private final FileChannel channel;
-    private final boolean readOnly;
     private boolean closed;
 
     /**
-     * Creates a read-write buffer backed by a temporary file.  The temporary
-     * file will be deleted when this buffer is closed or on JVM shutdown.
+     * Creates a read-write buffer backed by a temporary file.  The protection level
+     * is set to <code>NONE</code>.  The temporary file will be deleted when this
+     * buffer is closed or on JVM shutdown.
      */
     public RandomAccessFileBuffer() throws IOException {
+        super(ProtectionLevel.NONE);
         tempFile = File.createTempFile("RandomAccessFileBuffer", null);
         tempFile.deleteOnExit();
         raf = new RandomAccessFile(tempFile, "rw");
         channel = raf.getChannel();
-        readOnly = false;
         // Lock the file
         channel.lock(0L, Long.MAX_VALUE, false);
     }
 
     /**
-     * Creates a read-write buffer.
+     * Creates a read-write buffer with <code>BARRIER</code> protection level.
      */
     public RandomAccessFileBuffer(String name) throws IOException {
-        this(new RandomAccessFile(name, "rw"), false);
+        this(new RandomAccessFile(name, "rw"), ProtectionLevel.BARRIER);
     }
 
     /**
      * Creates a buffer.
      */
-    public RandomAccessFileBuffer(String name, boolean readOnly) throws IOException {
-        this(new RandomAccessFile(name, readOnly ? "r" : "rw"), readOnly);
+    public RandomAccessFileBuffer(String name, ProtectionLevel protectionLevel) throws IOException {
+        this(new RandomAccessFile(name, protectionLevel==ProtectionLevel.READ_ONLY ? "r" : "rw"), protectionLevel);
     }
 
     /**
-     * Creates a read-write buffer.
+     * Creates a read-write buffer with <code>BARRIER</code> protection level.
      */
     public RandomAccessFileBuffer(File file) throws IOException {
-        this(new RandomAccessFile(file, "rw"), false);
+        this(new RandomAccessFile(file, "rw"), ProtectionLevel.BARRIER);
     }
 
     /**
      * Creates a buffer.
      */
-    public RandomAccessFileBuffer(File file, boolean readOnly) throws IOException {
-        this(new RandomAccessFile(file, readOnly ? "r" : "rw"), readOnly);
+    public RandomAccessFileBuffer(File file, ProtectionLevel protectionLevel) throws IOException {
+        this(new RandomAccessFile(file, protectionLevel==ProtectionLevel.READ_ONLY ? "r" : "rw"), protectionLevel);
     }
 
     /**
      * Creates a buffer using the provided <code>RandomAccessFile</code>.
      */
-    public RandomAccessFileBuffer(RandomAccessFile raf, boolean readOnly) throws IOException {
+    public RandomAccessFileBuffer(RandomAccessFile raf, ProtectionLevel protectionLevel) throws IOException {
+        super(protectionLevel);
         this.tempFile = null;
         this.raf = raf;
         channel = raf.getChannel();
-        this.readOnly = readOnly;
         // Lock the file
-        channel.lock(0L, Long.MAX_VALUE, readOnly);
+        channel.lock(0L, Long.MAX_VALUE, protectionLevel==ProtectionLevel.READ_ONLY);
     }
 
     public boolean isClosed() {
@@ -119,10 +119,6 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         closed = true;
         raf.close();
         if(tempFile!=null && tempFile.exists() && !tempFile.delete()) throw new IOException("Unable to delete temp file: "+tempFile);
-    }
-
-    public boolean isReadOnly() {
-        return readOnly;
     }
 
     public long capacity() throws IOException {
@@ -170,6 +166,12 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
      * This just uses force for each case.
      */
     public void barrier(boolean force) throws IOException {
-        channel.force(false);
+        if(
+            force
+            ? (protectionLevel.compareTo(ProtectionLevel.FORCE)>=0)
+            : (protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)
+        ) {
+            channel.force(false);
+        }
     }
 }
