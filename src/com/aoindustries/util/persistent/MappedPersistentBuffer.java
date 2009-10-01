@@ -48,6 +48,7 @@ public class MappedPersistentBuffer implements PersistentBuffer {
     private final RandomAccessFile raf;
     private final FileChannel channel;
     private MappedByteBuffer mappedBuffer;
+    private boolean modified;
     private final boolean readOnly;
     private boolean closed;
 
@@ -147,14 +148,23 @@ public class MappedPersistentBuffer implements PersistentBuffer {
         long oldLength = capacity();
         if(oldLength!=newLength) {
             if(newLength<oldLength) {
+                if(modified) {
+                    mappedBuffer.force();
+                    modified = false;
+                }
                 mappedBuffer = channel.map(readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, newLength);
             }
             raf.setLength(newLength);
             if(newLength>oldLength) {
+                if(modified) {
+                    mappedBuffer.force();
+                    modified = false;
+                }
                 mappedBuffer = channel.map(readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, newLength);
                 // Ensure zero-filled
                 mappedBuffer.position(getIndex(oldLength));
                 PersistentCollections.fillZeros(mappedBuffer, newLength - oldLength);
+                modified = true;
             }
         }
     }
@@ -176,11 +186,13 @@ public class MappedPersistentBuffer implements PersistentBuffer {
 
     public void put(long position, byte value) throws IOException {
         mappedBuffer.put(getIndex(position), value);
+        modified = true;
     }
 
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         mappedBuffer.position(getIndex(position));
         mappedBuffer.put(buff, off, len);
+        modified = true;
     }
 
     /**
@@ -188,7 +200,10 @@ public class MappedPersistentBuffer implements PersistentBuffer {
      * This just uses force for each case.
      */
     public void barrier(boolean force) throws IOException {
-        mappedBuffer.force();
+        if(modified) {
+            mappedBuffer.force();
+            modified = false;
+        }
         // channel.force(true);
     }
 
@@ -206,9 +221,11 @@ public class MappedPersistentBuffer implements PersistentBuffer {
 
     public void putInt(long position, int value) throws IOException {
         mappedBuffer.putInt(getIndex(position), value);
+        modified = true;
     }
 
     public void putLong(long position, long value) throws IOException {
         mappedBuffer.putLong(getIndex(position), value);
+        modified = true;
     }
 }

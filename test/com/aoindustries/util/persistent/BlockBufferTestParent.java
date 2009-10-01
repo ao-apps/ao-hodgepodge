@@ -71,7 +71,7 @@ abstract public class BlockBufferTestParent extends TestCase {
                 // Randomly deallocate 900 of the entries
                 List<Long> ids = new ArrayList<Long>(allocatedIds);
                 Collections.shuffle(ids, random);
-                for(int d=0;d<900;d++) {
+                for(int d=0;d<500;d++) {
                     long id = ids.get(d);
                     blockBuffer.deallocate(id);
                     allocatedIds.remove(id);

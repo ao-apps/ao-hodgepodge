@@ -30,32 +30,23 @@ import junit.framework.TestSuite;
 /**
  * @author  AO Industries, Inc.
  */
-public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
+public class BlockBufferMultiBitmapFixedMappedTest extends BlockBufferTestParent {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(BlockBufferTinyBitmapFixedTest.class);
+        TestSuite suite = new TestSuite(BlockBufferMultiBitmapFixedMappedTest.class);
         return suite;
     }
 
-    public BlockBufferTinyBitmapFixedTest(String testName) {
+    public BlockBufferMultiBitmapFixedMappedTest(String testName) {
         super(testName);
     }
 
     public PersistentBlockBuffer getBlockBuffer() throws IOException {
-        return new FixedPersistentBlockBuffer(new MappedPersistentBuffer(), 1);
+        return new FixedPersistentBlockBuffer(new MappedPersistentBuffer(), 4096);
     }
 
     @Override
     public long getAllocationSize(Random random) throws IOException {
-        return random.nextBoolean() ? 1 : 0;
-    }
-
-    public void testAllocateOneMillion() throws Exception {
-        PersistentBlockBuffer blockBuffer = getBlockBuffer();
-        try {
-            for(int c=0;c<1000000;c++) blockBuffer.allocate(1);
-        } finally {
-            blockBuffer.close();
-        }
+        return random.nextInt(4097);
     }
 }

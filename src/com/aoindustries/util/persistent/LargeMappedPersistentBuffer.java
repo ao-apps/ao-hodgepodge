@@ -57,6 +57,7 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
     private final RandomAccessFile raf;
     private final FileChannel channel;
     private final List<MappedByteBuffer> mappedBuffers = new ArrayList<MappedByteBuffer>();
+    private final List<Boolean> modifiedBuffers = new ArrayList<Boolean>();
     private final boolean readOnly;
     private boolean closed;
 
@@ -157,6 +158,7 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
             long size = raf.length() - mapStart;
             if(size>BUFFER_SIZE) size = BUFFER_SIZE;
             mappedBuffers.add(channel.map(readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, mapStart, size));
+            modifiedBuffers.add(false);
         }
     }
 
@@ -179,9 +181,11 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
             long bufferStart = position & BUFFER_INDEX_MASK;
             long bufferSize = BUFFER_SIZE - bufferStart;
             if(bufferSize > len) bufferSize = len;
-            MappedByteBuffer mappedBuffer = mappedBuffers.get(getBufferNum(position));
+            int bufferNum = getBufferNum(position);
+            MappedByteBuffer mappedBuffer = mappedBuffers.get(bufferNum);
             mappedBuffer.position((int)bufferStart);
             PersistentCollections.fillZeros(mappedBuffer, bufferSize);
+            modifiedBuffers.set(bufferNum, true);
             position += bufferSize;
             len -= bufferSize;
         }
@@ -192,7 +196,13 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
         if(oldLength!=newLength) {
             // Remove any buffers that could be affected
             long affectedFrom = getBufferNum(Math.min(oldLength, newLength));
-            while(mappedBuffers.size()>affectedFrom) mappedBuffers.remove(mappedBuffers.size()-1);
+            while(mappedBuffers.size()>affectedFrom) {
+                int index = mappedBuffers.size()-1;
+                MappedByteBuffer mappedBuffer = mappedBuffers.get(index);
+                if(modifiedBuffers.get(index)) mappedBuffer.force();
+                mappedBuffers.remove(index);
+                modifiedBuffers.remove(index);
+            }
             raf.setLength(newLength);
             fillMappedBuffers();
             if(newLength>oldLength) {
@@ -236,7 +246,9 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
     }
 
     public void put(long position, byte value) throws IOException {
-        mappedBuffers.get(getBufferNum(position)).put(getIndex(position), value);
+        int bufferNum = getBufferNum(position);
+        mappedBuffers.get(bufferNum).put(getIndex(position), value);
+        modifiedBuffers.set(bufferNum, true);
     }
 
     public void put(long position, byte[] buff, int off, int len) throws IOException {
@@ -247,14 +259,17 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
                 MappedByteBuffer mappedBuffer = mappedBuffers.get(startBufferNum);
                 mappedBuffer.position(getIndex(position));
                 mappedBuffer.put(buff, off, len);
+                modifiedBuffers.set(startBufferNum, true);
             } else {
                 do {
                     int bufferStart = (int)(position & BUFFER_INDEX_MASK);
                     int bufferSize = BUFFER_SIZE - bufferStart;
                     if(bufferSize > len) bufferSize = len;
-                    MappedByteBuffer mappedBuffer = mappedBuffers.get(getBufferNum(position));
+                    int bufferNum = getBufferNum(position);
+                    MappedByteBuffer mappedBuffer = mappedBuffers.get(bufferNum);
                     mappedBuffer.position(bufferStart);
                     mappedBuffer.put(buff, off, bufferSize);
+                    modifiedBuffers.set(bufferNum, true);
                     position += bufferSize;
                     off += bufferSize;
                     len -= bufferSize;
@@ -268,7 +283,12 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
      * This just uses force for each case.
      */
     public void barrier(boolean force) throws IOException {
-        for(MappedByteBuffer mappedBuffer : mappedBuffers) mappedBuffer.force();
+        for(int c=0, len=mappedBuffers.size(); c<len; c++) {
+            if(modifiedBuffers.get(c)) {
+                mappedBuffers.get(c).force();
+                modifiedBuffers.set(c, false);
+            }
+        }
         // channel.force(true);
     }
 
@@ -315,6 +335,7 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
         int endBufferNum = getBufferNum(position+3);
         if(startBufferNum==endBufferNum) {
             mappedBuffers.get(startBufferNum).putInt(getIndex(position), value);
+            modifiedBuffers.set(startBufferNum, true);
         } else {
             put(position, (byte)(value >>> 24));
             put(position+1, (byte)(value >>> 16));
@@ -328,6 +349,7 @@ public class LargeMappedPersistentBuffer implements PersistentBuffer {
         int endBufferNum = getBufferNum(position+7);
         if(startBufferNum==endBufferNum) {
             mappedBuffers.get(startBufferNum).putLong(getIndex(position), value);
+            modifiedBuffers.set(startBufferNum, true);
         } else {
             put(position, (byte)(value >>> 56));
             put(position+1, (byte)(value >>> 48));

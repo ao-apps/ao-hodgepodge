@@ -65,7 +65,9 @@ public interface PersistentBuffer {
 
     /**
      * Sets the capacity of this buffer.  If the buffer is increased in size, the
-     * new space will be zero-filled.
+     * new space will be zero-filled.  Setting the capacity may impose an
+     * automatic <code>barrier(true)</code>, depending on implementation.  This
+     * should be considered an expensive operation.
      */
     void setCapacity(long newCapacity) throws IOException;
 

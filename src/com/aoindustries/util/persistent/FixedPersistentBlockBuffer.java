@@ -111,15 +111,6 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
                 bitmapSize = blockSize;
             }
         }
-        /*long capacity = pbuffer.capacity();
-        if(capacity<bitmapSize) {
-            if(capacity==0) {
-                // Fill the initial capacity
-                pbuffer.setCapacity(bitmapSize);
-            } else {
-                throw new IOException("Incomplete initial bitmap: "+capacity+"<"+bitmapSize);
-            }
-        }*/
     }
 
     /**
@@ -160,6 +151,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
      * where 1 means free (since compacts on zeros).
      */
     public long allocate(long minimumSize) throws IOException {
+        if(minimumSize>blockSize) throw new IOException("minimumSize>blockSize: "+minimumSize+">"+blockSize);
         long bitmapBitsAddress = getBitMapBitsAddress(lowestFreeId);
         long capacity = pbuffer.capacity();
         while(bitmapBitsAddress<capacity) {
@@ -180,9 +172,22 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
             }
             bitmapBitsAddress = getBitMapBitsAddress(lowestFreeId);
         }
-        // Grow the underlying storage
+        // Grow the underlying storage to make room for the bitmap space.
+        // Partial bitmaps are OK.
+        // To avoid many repetitive re-mmaps, do the following:
+        // 1) Allocate enough room for 64 blocks, but not to exceed 1 MB
+        // 2) Round-up to the nearest 4096 block, always
         modCount++;
-        pbuffer.setCapacity(bitmapBitsAddress+1);
+        long newCapacity;
+        /*if(singleBitmap)*/ newCapacity = bitmapBitsAddress+1;
+        /*else {
+            long amountToAdd = blockSize*64;
+            if(amountToAdd > 1048576) amountToAdd = 1048576;
+            newCapacity = bitmapBitsAddress+amountToAdd;
+        }*/
+        if((newCapacity&0xfff)!=0) newCapacity = (newCapacity & 0xfffffffffffff000L)+4096L;
+        //System.out.println("DEBUG: newCapacity="+newCapacity);
+        pbuffer.setCapacity(newCapacity);
         pbuffer.put(bitmapBitsAddress, (byte)1);
         return lowestFreeId++;
     }

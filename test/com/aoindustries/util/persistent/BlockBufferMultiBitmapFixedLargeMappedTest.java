@@ -30,19 +30,19 @@ import junit.framework.TestSuite;
 /**
  * @author  AO Industries, Inc.
  */
-public class BlockBufferMultiBitmapFixedTest extends BlockBufferTestParent {
+public class BlockBufferMultiBitmapFixedLargeMappedTest extends BlockBufferTestParent {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(BlockBufferMultiBitmapFixedTest.class);
+        TestSuite suite = new TestSuite(BlockBufferMultiBitmapFixedLargeMappedTest.class);
         return suite;
     }
 
-    public BlockBufferMultiBitmapFixedTest(String testName) {
+    public BlockBufferMultiBitmapFixedLargeMappedTest(String testName) {
         super(testName);
     }
 
     public PersistentBlockBuffer getBlockBuffer() throws IOException {
-        return new FixedPersistentBlockBuffer(new MappedPersistentBuffer(), 4096);
+        return new FixedPersistentBlockBuffer(new LargeMappedPersistentBuffer(), 4096);
     }
 
     @Override
