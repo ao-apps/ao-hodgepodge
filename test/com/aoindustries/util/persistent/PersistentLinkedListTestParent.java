@@ -54,10 +54,10 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 
     protected abstract PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception;
 
-    private void doTestCorrectness(int numElements) throws Exception {
+    private void doTestCorrectnessString(int numElements) throws Exception {
         File tempFile = File.createTempFile("LinkedFileListTest", null);
         tempFile.deleteOnExit();
-        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.FORCE), String.class);
+        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE /*FORCE*/), String.class);
         LinkedList<String> linkedList = new LinkedList<String>();
         try {
             // Populate the list
@@ -136,10 +136,98 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests for correctness comparing to standard LinkedList implementation.
      */
-    public void testCorrectness() throws Exception {
-        doTestCorrectness(0);
-        doTestCorrectness(1);
-        for(int c=0; c<10; c++) doTestCorrectness(100 + random.nextInt(101));
+    public void testCorrectnessString() throws Exception {
+        doTestCorrectnessString(0);
+        doTestCorrectnessString(1);
+        for(int c=0; c<10; c++) doTestCorrectnessString(100 + random.nextInt(101));
+    }
+
+    private void doTestCorrectnessInteger(int numElements) throws Exception {
+        File tempFile = File.createTempFile("LinkedFileListTest", null);
+        tempFile.deleteOnExit();
+        PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE /*FORCE*/), Integer.class);
+        LinkedList<Integer> linkedList = new LinkedList<Integer>();
+        try {
+            // Populate the list
+            for(int c=0;c<numElements;c++) {
+                Integer I = random.nextInt();
+                assertEquals(linkedFileList.add(I), linkedList.add(I));
+            }
+            // Check size match
+            assertEquals(linkedFileList.size(), linkedList.size());
+            if(numElements>0) {
+                // Check first
+                assertEquals(linkedFileList.getFirst(), linkedList.getFirst());
+                // Check last
+                assertEquals(linkedFileList.getLast(), linkedList.getLast());
+                // Update random locations to random values
+                for(int c=0;c<numElements;c++) {
+                    int index = random.nextInt(numElements);
+                    Integer newVal = random.nextInt();
+                    assertEquals(linkedFileList.set(index, newVal), linkedList.set(index, newVal));
+                }
+            }
+            // Check equality
+            assertEquals(linkedFileList, linkedList);
+            // Remove random indexes
+            if(numElements>0) {
+                int numRemove = random.nextInt(numElements);
+                for(int c=0;c<numRemove;c++) {
+                    assertEquals(linkedFileList.size(), linkedList.size());
+                    int index = random.nextInt(linkedFileList.size());
+                    assertEquals(
+                        linkedFileList.remove(index),
+                        linkedList.remove(index)
+                    );
+                }
+            }
+            // Add random values to end
+            if(numElements>0) {
+                int numAdd = random.nextInt(numElements);
+                for(int c=0;c<numAdd;c++) {
+                    assertEquals(linkedFileList.size(), linkedList.size());
+                    Integer newVal = random.nextInt();
+                    assertEquals(linkedFileList.add(newVal), linkedList.add(newVal));
+                }
+            }
+            // Check equality
+            assertEquals(linkedFileList, linkedList);
+            // Add random values in middle
+            if(numElements>0) {
+                int numAdd = random.nextInt(numElements);
+                for(int c=0;c<numAdd;c++) {
+                    assertEquals(linkedFileList.size(), linkedList.size());
+                    int index = random.nextInt(linkedFileList.size());
+                    Integer newVal = random.nextInt();
+                    linkedFileList.add(index, newVal);
+                    linkedList.add(index, newVal);
+                    assertEquals(
+                        linkedFileList.remove(index),
+                        linkedList.remove(index)
+                    );
+                }
+            }
+            // Check equality
+            assertEquals(linkedFileList, linkedList);
+            // Save and restore, checking matches
+            linkedFileList.close();
+            PersistentLinkedList<Integer> newFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.READ_ONLY), Integer.class);
+            assertEquals(newFileList, linkedList);
+        } finally {
+            linkedFileList.close();
+            linkedFileList = null;
+            tempFile.delete();
+            linkedList = null;
+        }
+    }
+
+    /**
+     * Tests for correctness comparing to standard LinkedList implementation.
+     */
+    public void testCorrectnessInteger() throws Exception {
+        doTestCorrectnessInteger(0);
+        doTestCorrectnessInteger(1);
+        for(int c=0; c<10; c++) doTestCorrectnessInteger(100 + random.nextInt(101));
     }
 
     /**

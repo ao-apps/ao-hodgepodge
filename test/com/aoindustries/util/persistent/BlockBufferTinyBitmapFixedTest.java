@@ -64,7 +64,7 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
         }
     }
 
-    public void testAllocateDeallocateOneMillion() throws Exception {
+    public void testAllocateDeallocateTenMillion() throws Exception {
         PersistentBlockBuffer blockBuffer = getBlockBuffer();
         try {
             final int numAdd = 10000000;
