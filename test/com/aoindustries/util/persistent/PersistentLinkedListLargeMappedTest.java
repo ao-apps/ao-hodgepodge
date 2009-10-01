@@ -32,18 +32,44 @@ import junit.framework.TestSuite;
  *
  * @author  AO Industries, Inc.
  */
-public class RandomAccessFilePersistentLinkedListTest extends PersistentLinkedListTestParent {
+public class PersistentLinkedListLargeMappedTest extends PersistentLinkedListTestParent {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(RandomAccessFilePersistentLinkedListTest.class);
+        TestSuite suite = new TestSuite(PersistentLinkedListLargeMappedTest.class);
         return suite;
     }
 
-    public RandomAccessFilePersistentLinkedListTest(String testName) {
+    public PersistentLinkedListLargeMappedTest(String testName) {
         super(testName);
     }
 
     protected PersistentBuffer getPersistentBuffer(File tempFile) throws Exception {
-        return new RandomAccessFileBuffer(tempFile);
+        return new LargeMappedPersistentBuffer(tempFile);
     }
+
+    /**
+     * Test larger files.
+     */
+    /*
+    public void testLargeList() throws Exception {
+        File tempFile = File.createTempFile("LinkedFileListTest", null);
+        tempFile.deleteOnExit();
+        PersistentLinkedList<byte[]> linkedFileList = new PersistentLinkedList<byte[]>(getPersistentBuffer(tempFile), false, false);
+        try {
+            byte[] buff = new byte[1024*1024];
+            System.out.println("Filling list");
+            for(int c=0;c<1024;c++) {
+                linkedFileList.add(buff);
+            }
+            System.out.println("Testing as circular list");
+            for(int c=0;c<1000000;c++) {
+                linkedFileList.removeLast();
+                linkedFileList.addFirst(buff);
+            }
+        } finally {
+            linkedFileList.close();
+            linkedFileList = null;
+            tempFile.delete();
+        }
+    }*/
 }

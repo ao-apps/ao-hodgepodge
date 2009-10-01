@@ -269,8 +269,22 @@ public class PersistentCollections {
      */
     public static PersistentBlockBuffer getPersistentBlockBuffer(Serializer<?> serializer, PersistentBuffer pbuffer, long additionalBlockSpace) throws IOException {
         if(additionalBlockSpace<0) throw new IllegalArgumentException("additionalBlockSpace<0: "+additionalBlockSpace);
-        // Use power-of-two fixed size blocks if possible
-        if(serializer.isFixedSerializedSize()) return getRandomAccessPersistentBlockBuffer(serializer, pbuffer, additionalBlockSpace);
+        if(serializer.isFixedSerializedSize()) {
+            // Use power-of-two fixed size blocks if possible
+            long serSize = serializer.getSerializedSize(null);
+            long minimumSize = serSize + additionalBlockSpace;
+            if(minimumSize<0) throw new AssertionError("Long wraparound: "+serSize+"+"+minimumSize+"="+minimumSize);
+            if(minimumSize==0) minimumSize=1;
+            long highestOneBit = Long.highestOneBit(minimumSize);
+            return new FixedPersistentBlockBuffer(
+                pbuffer,
+                highestOneBit==(1L<<62)
+                ? minimumSize           // In range 2^62-2^63-1, cannot round up to next highest, use minimum size
+                : minimumSize==highestOneBit
+                ? minimumSize           // minimumSize is a power of two
+                : (highestOneBit<<1)    // use next-highest power of two
+            );
+        }
         // Then use dynamic sized blocks
         return new DynamicPersistentBlockBuffer(pbuffer);
     }
@@ -286,6 +300,7 @@ public class PersistentCollections {
      * @param additionalBlockSpace  The maximum additional space needed beyond the space used by the serializer.  This may be used
      *                              for linked list pointers, for example.
      */
+    /*
     public static RandomAccessPersistentBlockBuffer getRandomAccessPersistentBlockBuffer(Serializer<?> serializer, PersistentBuffer pbuffer, long additionalBlockSpace) throws IOException {
         if(additionalBlockSpace<0) throw new IllegalArgumentException("additionalBlockSpace<0: "+additionalBlockSpace);
         // Use power-of-two fixed size blocks if possible
@@ -302,5 +317,5 @@ public class PersistentCollections {
             ? minimumSize           // minimumSize is a power of two
             : (highestOneBit<<1)    // use next-highest power of two
         );
-    }
+    }*/
 }

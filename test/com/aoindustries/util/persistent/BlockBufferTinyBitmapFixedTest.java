@@ -22,28 +22,31 @@
  */
 package com.aoindustries.util.persistent;
 
-import java.io.File;
+import java.io.IOException;
+import java.util.Random;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests the <code>LinkedFileList</code> against the standard <code>LinkedList</code>
- * by performing equal, random actions on each and ensuring equal results.
- *
  * @author  AO Industries, Inc.
  */
-public class MappedPersistentLinkedListTest extends PersistentLinkedListTestParent {
+public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(MappedPersistentLinkedListTest.class);
+        TestSuite suite = new TestSuite(BlockBufferTinyBitmapFixedTest.class);
         return suite;
     }
 
-    public MappedPersistentLinkedListTest(String testName) {
+    public BlockBufferTinyBitmapFixedTest(String testName) {
         super(testName);
     }
 
-    protected PersistentBuffer getPersistentBuffer(File tempFile) throws Exception {
-        return new MappedPersistentBuffer(tempFile);
+    public PersistentBlockBuffer getBlockBuffer() throws IOException {
+        return new FixedPersistentBlockBuffer(new MappedPersistentBuffer(), 1);
+    }
+
+    @Override
+    public long getAllocationSize(Random random) throws IOException {
+        return random.nextBoolean() ? 1 : 0;
     }
 }

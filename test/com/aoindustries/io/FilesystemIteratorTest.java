@@ -50,7 +50,7 @@ public class FilesystemIteratorTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        tempDir = UnixFile.mktemp("/home/o/orion/tmp/FilesystemIteratorTest.", true);
+        tempDir = UnixFile.mktemp("/tmp/FilesystemIteratorTest.", true);
         tempDir.delete();
         tempDir.mkdir(false, 0700);
         UnixFile tmp = new UnixFile(tempDir, "tmp", true).mkdir(false, 0755);
@@ -102,10 +102,7 @@ public class FilesystemIteratorTest extends TestCase {
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
         expectedResults.add("/");
-        expectedResults.add("/home");
-        expectedResults.add("/home/o");
-        expectedResults.add("/home/o/orion");
-        expectedResults.add("/home/o/orion/tmp");
+        expectedResults.add("/tmp");
         expectedResults.add(tempDir.getPath());
         expectedResults.add(tempDir.getPath()+"/home");
         expectedResults.add(tempDir.getPath()+"/home/a");
@@ -130,10 +127,7 @@ public class FilesystemIteratorTest extends TestCase {
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
         expectedResults.add("/");
-        expectedResults.add("/home");
-        expectedResults.add("/home/o");
-        expectedResults.add("/home/o/orion");
-        expectedResults.add("/home/o/orion/tmp");
+        expectedResults.add("/tmp");
         expectedResults.add(tempDir.getPath());
         expectedResults.add(tempDir.getPath()+"/home");
         expectedResults.add(tempDir.getPath()+"/home/a");
@@ -160,10 +154,7 @@ public class FilesystemIteratorTest extends TestCase {
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
         expectedResults.add("/");
-        expectedResults.add("/home");
-        expectedResults.add("/home/o");
-        expectedResults.add("/home/o/orion");
-        expectedResults.add("/home/o/orion/tmp");
+        expectedResults.add("/tmp");
         expectedResults.add(tempDir.getPath());
         expectedResults.add(tempDir.getPath()+"/home");
         expectedResults.add(tempDir.getPath()+"/home/a");
@@ -190,10 +181,7 @@ public class FilesystemIteratorTest extends TestCase {
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
         expectedResults.add("/");
-        expectedResults.add("/home");
-        expectedResults.add("/home/o");
-        expectedResults.add("/home/o/orion");
-        expectedResults.add("/home/o/orion/tmp");
+        expectedResults.add("/tmp");
         expectedResults.add(tempDir.getPath());
         expectedResults.add(tempDir.getPath()+"/home");
         expectedResults.add(tempDir.getPath()+"/home/a");
@@ -221,10 +209,7 @@ public class FilesystemIteratorTest extends TestCase {
         Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
         List<String> expectedResults = new ArrayList<String>();
         expectedResults.add("/");
-        expectedResults.add("/home");
-        expectedResults.add("/home/o");
-        expectedResults.add("/home/o/orion");
-        expectedResults.add("/home/o/orion/tmp");
+        expectedResults.add("/tmp");
         expectedResults.add(tempDir.getPath());
         expectedResults.add(tempDir.getPath()+"/home");
         expectedResults.add(tempDir.getPath()+"/home/a");

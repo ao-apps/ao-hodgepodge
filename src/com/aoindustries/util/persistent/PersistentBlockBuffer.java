@@ -61,7 +61,23 @@ public interface PersistentBlockBuffer {
     void barrier(boolean force) throws IOException;
 
     /**
-     * Iterates over the block IDs in no specific order.
+     * Iterates over the allocated block IDs in no specific order.  The
+     * <code>remove()</code> method may be used from the iterator in order
+     * to deallocate a block.  The block allocation should not be modified
+     * during the iteration.  An attempt will be made to throw <code>ConcurrentModificationException</code>
+     * in this case, but this is only intended to catch bugs.
      */
     Iterator<Long> iterateBlockIds() throws IOException;
+
+    /**
+     * Allocates a new block buffer that is at least as large as the requested space.
+     */
+    long allocate(long minimumSize) throws IOException;
+
+    /**
+     * Deallocates the block with the provided id.
+     *
+     * @throws IllegalStateException if the block is not allocated.
+     */
+    void deallocate(long id) throws IOException, IllegalStateException;
 }

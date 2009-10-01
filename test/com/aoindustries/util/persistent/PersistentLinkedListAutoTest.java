@@ -33,14 +33,14 @@ import junit.framework.TestSuite;
  *
  * @author  AO Industries, Inc.
  */
-public class AutoPersistentLinkedListTest extends PersistentLinkedListTestParent {
+public class PersistentLinkedListAutoTest extends PersistentLinkedListTestParent {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(AutoPersistentLinkedListTest.class);
+        TestSuite suite = new TestSuite(PersistentLinkedListAutoTest.class);
         return suite;
     }
 
-    public AutoPersistentLinkedListTest(String testName) {
+    public PersistentLinkedListAutoTest(String testName) {
         super(testName);
     }
 

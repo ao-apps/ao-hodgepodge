@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009  AO Industries, Inc.
+ * Copyright (C) 2008, 2009  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,24 +22,28 @@
  */
 package com.aoindustries.util.persistent;
 
-import java.io.IOException;
-import java.util.Iterator;
+import java.io.File;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * A persistent set of blocks of arbitrary data that also allows efficient
- * random access.
+ * Tests the <code>LinkedFileList</code> against the standard <code>LinkedList</code>
+ * by performing equal, random actions on each and ensuring equal results.
  *
  * @author  AO Industries, Inc.
  */
-public interface RandomAccessPersistentBlockBuffer extends PersistentBlockBuffer {
+public class PersistentLinkedListRandomAccessFileTest extends PersistentLinkedListTestParent {
 
-    /**
-     * Gets the number of blocks.
-     */
-    long getBlockCount() throws IOException;
+    public static Test suite() {
+        TestSuite suite = new TestSuite(PersistentLinkedListRandomAccessFileTest.class);
+        return suite;
+    }
 
-    /**
-     * Gets the block id at the provided index.
-     */
-    long getBlockId(long index) throws IOException;
+    public PersistentLinkedListRandomAccessFileTest(String testName) {
+        super(testName);
+    }
+
+    protected PersistentBuffer getPersistentBuffer(File tempFile) throws Exception {
+        return new RandomAccessFileBuffer(tempFile);
+    }
 }

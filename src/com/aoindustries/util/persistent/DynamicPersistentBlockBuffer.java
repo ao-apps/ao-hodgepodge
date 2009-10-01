@@ -50,6 +50,14 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     }
 
     public Iterator<Long> iterateBlockIds() throws IOException {
-        throw new UnsupportedOperationException("TODO: Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public long allocate(long minimumSize) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void deallocate(long id) throws IOException, IllegalStateException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
