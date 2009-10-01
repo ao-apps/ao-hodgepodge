@@ -22,7 +22,12 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.sql.SQLUtility;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -54,6 +59,56 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
         PersistentBlockBuffer blockBuffer = getBlockBuffer();
         try {
             for(int c=0;c<1000000;c++) blockBuffer.allocate(1);
+        } finally {
+            blockBuffer.close();
+        }
+    }
+
+    public void testAllocateDeallocateOneMillion() throws Exception {
+        PersistentBlockBuffer blockBuffer = getBlockBuffer();
+        try {
+            final int numAdd = 10000000;
+            List<Long> ids = new ArrayList<Long>(numAdd);
+            long startNanos = System.nanoTime();
+            for(int c=0;c<numAdd;c++) ids.add(blockBuffer.allocate(1));
+            long endNanos = System.nanoTime();
+            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocating "+numAdd+" blocks in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+            //System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Getting "+numAdd+" ids.");
+            //Iterator<Long> iter = blockBuffer.iterateBlockIds();
+            //int count = 0;
+            //while(iter.hasNext()) {
+            //    ids.add(iter.next());
+            //    count++;
+            //}
+            //assertEquals(numAdd, count);
+            long deallocCount = 0;
+            long deallocTime = 0;
+            long allocCount = 0;
+            long allocTime = 0;
+            for(int c=0;c<100;c++) {
+                // Remove random items
+                int numRemove = random.nextInt(Math.min(10000, ids.size()));
+                List<Long> removeList = new ArrayList<Long>(numRemove);
+                for(int d=0;d<numRemove;d++) {
+                    int index = random.nextInt(ids.size());
+                    removeList.add(ids.get(index));
+                    ids.set(index, ids.get(ids.size()-1));
+                    ids.remove(ids.size()-1);
+                }
+                //System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Shuffling.");
+                //Collections.shuffle(ids, new Random(random.nextLong()));
+                startNanos = System.nanoTime();
+                for(Long id : removeList) blockBuffer.deallocate(id);
+                deallocCount += numRemove;
+                deallocTime += System.nanoTime() - startNanos;
+                int numAddBack = random.nextInt(10000);
+                startNanos = System.nanoTime();
+                for(int d=0;d<numAddBack;d++) ids.add(blockBuffer.allocate(1));
+                allocCount += numAddBack;
+                allocTime += System.nanoTime() - startNanos;
+            }
+            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Deallocated "+deallocCount+" blocks in "+SQLUtility.getMilliDecimal(deallocTime/1000)+" ms");
+            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocated "+allocCount+" blocks in "+SQLUtility.getMilliDecimal(allocTime/1000)+" ms");
         } finally {
             blockBuffer.close();
         }

@@ -42,7 +42,7 @@ abstract public class BlockBufferTestParent extends TestCase {
         super(testName);
     }
 
-    private static final Random random = new SecureRandom();
+    static final Random random = new SecureRandom();
 
     abstract public PersistentBlockBuffer getBlockBuffer() throws IOException;
     abstract public long getAllocationSize(Random random) throws IOException;

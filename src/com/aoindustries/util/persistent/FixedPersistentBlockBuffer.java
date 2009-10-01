@@ -22,11 +22,16 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.util.LongArrayList;
+import com.aoindustries.util.LongList;
 import com.aoindustries.util.WrappedException;
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * <p>
@@ -59,6 +64,8 @@ import java.util.NoSuchElementException;
  * @author  AO Industries, Inc.
  */
 public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*implements RandomAccessPersistentBlockBuffer*/ {
+
+    private static final boolean USE_KNOWN_FREE_ID_LIST = true;
 
     private final long blockSize;
     private final boolean singleBitmap;
@@ -144,7 +151,8 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         }
     }
 
-    private long lowestFreeId = 0;
+    private long lowestFreeId = 0; // One direction scan
+    private final LongList knownFreeIds = USE_KNOWN_FREE_ID_LIST ? new LongArrayList() : null;
 
     /**
      * TODO: Use a more efficient algorithm, possibly a BitSet free space map,
@@ -152,6 +160,19 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
      */
     public long allocate(long minimumSize) throws IOException {
         if(minimumSize>blockSize) throw new IOException("minimumSize>blockSize: "+minimumSize+">"+blockSize);
+        // Check known first
+        if(USE_KNOWN_FREE_ID_LIST) {
+            int knownFreeSize = knownFreeIds.size();
+            if(knownFreeSize>0) {
+                long freeId = knownFreeIds.removeLong(knownFreeSize-1);
+                long bitmapBitsAddress = getBitMapBitsAddress(freeId);
+                int bits = pbuffer.get(bitmapBitsAddress)&255;
+                int bit = 1<<(freeId&7);
+                modCount++;
+                pbuffer.put(bitmapBitsAddress, (byte)(bits | bit));
+                return freeId;
+            }
+        }
         long bitmapBitsAddress = getBitMapBitsAddress(lowestFreeId);
         long capacity = pbuffer.capacity();
         while(bitmapBitsAddress<capacity) {
@@ -191,7 +212,8 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         int bits = pbuffer.get(bitmapBitsAddress)&255;
         int bit = 1<<(id & 7);
         if((bits&bit)==0) throw new IllegalStateException("Block already deallocated: "+id);
-        if(id < lowestFreeId) lowestFreeId = id;
+        if(USE_KNOWN_FREE_ID_LIST) knownFreeIds.add(id);
+        else if(id < lowestFreeId) lowestFreeId = id;
         modCount++;
         pbuffer.put(bitmapBitsAddress, (byte)(bits ^ bit));
     }
