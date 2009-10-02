@@ -25,8 +25,6 @@ package com.aoindustries.util.persistent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 
 /**
  * Base class for any implementation that treats a <code>PersistentBuffer</code>
@@ -58,57 +56,71 @@ abstract public class AbstractPersistentBlockBuffer implements PersistentBlockBu
         pbuffer.barrier(force);
     }
 
-    public void get(long id, long offset, byte[] buff, int off, int len) throws IOException, BufferUnderflowException {
-        if((offset+len)>getBlockSize(id)) throw new BufferOverflowException();
+    /**
+     * Checks that a request is within the bounds of the block.
+     */
+    protected boolean isInBounds(long id, long offset, long len) throws IOException {
+        if(id<0) throw new IllegalArgumentException("id<0: "+id);
+        if(offset<0) throw new IllegalArgumentException("offset<0: "+offset);
+        if(len<0) throw new IllegalArgumentException("len<0: "+len);
+        long totalSize = offset+len;
+        if(totalSize<0) throw new IllegalArgumentException("offset+len>Long.MAX_VALUE: offset="+offset+", len="+len);
+        long blockSize = getBlockSize(id);
+        assert blockSize>=0;
+        return totalSize<=blockSize;
+    }
+
+    public void get(long id, long offset, byte[] buff, int off, int len) throws IOException {
+        assert isInBounds(id, offset, len);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+len);
         pbuffer.get(startAddress, buff, off, len);
     }
 
-    public int getInt(long id, long offset) throws IOException, BufferUnderflowException {
-        if((offset+4)>getBlockSize(id)) throw new BufferOverflowException();
+    public int getInt(long id, long offset) throws IOException {
+        assert isInBounds(id, offset, 4);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+4);
         return pbuffer.getInt(startAddress);
     }
 
-    public long getLong(long id, long offset) throws IOException, BufferUnderflowException {
-        if((offset+8)>getBlockSize(id)) throw new BufferOverflowException();
+    public long getLong(long id, long offset) throws IOException {
+        assert isInBounds(id, offset, 8);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+8);
         return pbuffer.getLong(startAddress);
     }
 
-    public InputStream getInputStream(long id, long offset, long length) throws IOException, BufferUnderflowException {
-        if((offset+length)>getBlockSize(id)) throw new BufferOverflowException();
+    public InputStream getInputStream(long id, long offset, long length) throws IOException {
+        assert isInBounds(id, offset, length);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+length);
         return pbuffer.getInputStream(startAddress, length);
     }
 
-    public void put(long id, long offset, byte[] buff, int off, int len) throws IOException, BufferOverflowException {
-        if((offset+len)>getBlockSize(id)) throw new BufferOverflowException();
+    public void put(long id, long offset, byte[] buff, int off, int len) throws IOException {
+        assert isInBounds(id, offset, len);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+len);
         pbuffer.put(startAddress, buff, off, len);
     }
 
-    public void putInt(long id, long offset, int value) throws IOException, BufferOverflowException {
-        if((offset+4)>getBlockSize(id)) throw new BufferOverflowException();
+    public void putInt(long id, long offset, int value) throws IOException {
+        assert isInBounds(id, offset, 4);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+4);
         pbuffer.putInt(startAddress, value);
     }
 
-    public void putLong(long id, long offset, long value) throws IOException, BufferOverflowException {
-        if((offset+8)>getBlockSize(id)) throw new BufferOverflowException();
+    public void putLong(long id, long offset, long value) throws IOException {
+        assert isInBounds(id, offset, 8);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+8);
         pbuffer.putLong(startAddress, value);
     }
 
-    public OutputStream getOutputStream(long id, long offset, long length) throws IOException, BufferOverflowException {
-        if((offset+length)>getBlockSize(id)) throw new BufferOverflowException();
+    public OutputStream getOutputStream(long id, long offset, long length) throws IOException {
+        assert isInBounds(id, offset, length);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+length);
         return pbuffer.getOutputStream(startAddress, length);

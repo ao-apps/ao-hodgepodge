@@ -25,8 +25,6 @@ package com.aoindustries.util.persistent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 import java.util.Iterator;
 
 /**
@@ -110,58 +108,50 @@ public interface PersistentBlockBuffer {
     long getBlockSize(long id) throws IOException;
 
     /**
-     * Gets bytes from this block.  Bounds checking is performed.
-     *
-     * @throws BufferUnderflowException
+     * Gets bytes from this block.  Bounds checking is performed only when assertions are enabled.
      */
-    void get(long id, long offset, byte[] buff, int off, int len) throws IOException, BufferUnderflowException;
+    void get(long id, long offset, byte[] buff, int off, int len) throws IOException;
 
     /**
-     * Gets an integer from this block.  Bounds checking is performed.
-     *
-     * @throws BufferUnderflowException
+     * Gets an integer from this block.  Bounds checking is performed only when assertions are enabled.
      */
-    int getInt(long id, long offset) throws IOException, BufferUnderflowException;
+    int getInt(long id, long offset) throws IOException;
 
     /**
-     * Gets a long from this block.  Bounds checking is performed.
-     *
-     * @throws BufferUnderflowException
+     * Gets a long from this block.  Bounds checking is performed only when assertions are enabled.
      */
-    long getLong(long id, long offset) throws IOException, BufferUnderflowException;
+    long getLong(long id, long offset) throws IOException;
 
     /**
-     * Gets an input stream that reads from this buffer.  Bounds checking is performed.
-     *
-     * @throws BufferUnderflowException
+     * Gets an input stream that reads from this buffer.  Bounds checking is performed only when assertions are enabled.
      */
-    InputStream getInputStream(long id, long offset, long length) throws IOException, BufferUnderflowException;
+    InputStream getInputStream(long id, long offset, long length) throws IOException;
 
     /**
-     * Puts bytes to this block.  Bounds checking is performed.
+     * Puts bytes to this block.  Bounds checking is performed only when assertions are enabled.
      *
      * @throws BufferOverflowException
      */
-    void put(long id, long offset, byte[] buff, int off, int len) throws IOException, BufferOverflowException;
+    void put(long id, long offset, byte[] buff, int off, int len) throws IOException;
 
     /**
-     * Puts an integer to this block.  Bounds checking is performed.
+     * Puts an integer to this block.  Bounds checking is performed only when assertions are enabled.
      *
      * @throws BufferOverflowException
      */
-    void putInt(long id, long offset, int value) throws IOException, BufferOverflowException;
+    void putInt(long id, long offset, int value) throws IOException;
 
     /**
-     * Puts a long to this block.  Bounds checking is performed.
+     * Puts a long to this block.  Bounds checking is performed only when assertions are enabled.
      *
      * @throws BufferOverflowException
      */
-    void putLong(long id, long offset, long value) throws IOException, BufferOverflowException;
+    void putLong(long id, long offset, long value) throws IOException;
 
     /**
-     * Gets an output stream that writes to this buffer.  Bounds checking is performed.
+     * Gets an output stream that writes to this buffer.  Bounds checking is performed only when assertions are enabled.
      *
      * @throws BufferOverflowException
      */
-    OutputStream getOutputStream(long id, long offset, long length) throws IOException, BufferOverflowException;
+    OutputStream getOutputStream(long id, long offset, long length) throws IOException;
 }
