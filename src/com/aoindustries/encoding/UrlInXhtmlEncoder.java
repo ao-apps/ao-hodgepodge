@@ -58,9 +58,6 @@ public class UrlInXhtmlEncoder extends MediaEncoder {
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.URL
-            || inputType==MediaType.XHTML_ATTRIBUTE // All valid URL characters are also valid XHTML+ATTRIBUTE characters
-            || inputType==MediaType.XHTML_PRE   // All valid URL characters are also valid XHTML+PRE characters
-            || inputType==MediaType.XHTML       // All valid URL characters are also valid XHTML characters
             || inputType==MediaType.JAVASCRIPT  // No validation required
             || inputType==MediaType.TEXT        // No validation required
         ;
@@ -73,7 +70,11 @@ public class UrlInXhtmlEncoder extends MediaEncoder {
     @Override
     public void writeSuffix() throws IOException {
         String url = StringUtility.replace(
-            response.encodeURL(buffer.toString()),
+            response.encodeURL(
+                NewEncodingUtils.encodeURL(
+                    buffer.toString()
+                )
+            ),
             "&amp;",
             "&"
         );

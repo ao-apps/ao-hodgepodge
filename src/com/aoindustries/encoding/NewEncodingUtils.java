@@ -22,7 +22,10 @@
  */
 package com.aoindustries.encoding;
 
+import com.aoindustries.util.StringUtility;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
@@ -74,5 +77,38 @@ public class NewEncodingUtils {
         StringBuilder xhtml = new StringBuilder(text.length());
         encodeTextInJavaScriptInXhtmlAttribute(text, xhtml);
         return xhtml.toString();
+    }
+
+    private static final char[] noEncodeCharacters = {
+        '?', ':', '/', ';', '#'
+    };
+
+    /**
+     * UTF-8 encodes the URL up to the first ?, if present.  Does not encode
+     * any characters in the set { '?', ':', '/', ';', '#' }.
+     */
+    public static String encodeURL(String href) throws UnsupportedEncodingException {
+        int len = href.length();
+        int pos = 0;
+        StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
+        while(pos<len) {
+            int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
+            if(nextPos==-1) {
+                SB.append(URLEncoder.encode(href.substring(pos, len), "UTF-8"));
+                pos = len;
+            } else {
+                SB.append(URLEncoder.encode(href.substring(pos, nextPos), "UTF-8"));
+                char nextChar = href.charAt(nextPos);
+                if(nextChar=='?') {
+                    // End encoding
+                    SB.append(href, nextPos, len);
+                    pos = len;
+                } else {
+                    SB.append(nextChar);
+                    pos = nextPos+1;
+                }
+            }
+        }
+        return SB.toString();
     }
 }
