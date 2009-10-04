@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * <p>
@@ -147,14 +149,15 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
     }
 
     private long lowestFreeId = 0; // One direction scan used before knownFreeIds is populated
-    private final LongList knownFreeIds = new LongArrayList();
+    private final SortedSet<Long> knownFreeIds = new TreeSet<Long>();
 
     public long allocate(long minimumSize) throws IOException {
         if(minimumSize>blockSize) throw new IOException("minimumSize>blockSize: "+minimumSize+">"+blockSize);
         // Check known first
-        int knownFreeSize = knownFreeIds.size();
-        if(knownFreeSize>0) {
-            long freeId = knownFreeIds.removeLong(knownFreeSize-1);
+        if(!knownFreeIds.isEmpty()) {
+            Long freeIdL = knownFreeIds.first();
+            knownFreeIds.remove(freeIdL);
+            long freeId = freeIdL.longValue();
             long bitmapBitsAddress = getBitMapBitsAddress(freeId);
             byte bits = pbuffer.get(bitmapBitsAddress);
             int bit = 1<<(freeId&7);
