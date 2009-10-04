@@ -26,7 +26,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * <p>
@@ -40,13 +41,15 @@ import java.util.Set;
  * costs can be fairly high.  This class is designed for long-lifetime situations.
  * </p>
  * <p>
- * Blocks that are allocated take no space in memory, while blocks that are allocated consume space.
- * Blocks may be merged and split as needed to manage free space.
+ * Blocks that are allocated take no space in memory, while blocks that are deallocated
+ * consume space.  Adjacent blocks are automatically merged into a larger free block of
+ * twice the size.  Blocks are also split into smaller blocks before allocating additional
+ * space.
  * </p>
  * <p>
  * Fragmentation may occur in the file over time, but is minimized by the use of
- * per-block size free space maps.  There is currently no compaction tool or
- * conversion between block sizes.
+ * per-block size free space maps along with block merging and splitting.  There
+ * is currently no compaction tool.
  * </p>
  * <p>
  * Each entry has a one-byte header:
@@ -62,26 +65,35 @@ import java.util.Set;
  */
 public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer {
 
+    private static boolean isAllocated(byte header) {
+        return (header&0x800)!=0;
+    }
+
+    private static long getBlockSize(byte header) {
+        return 1L<<(header&0x3f);
+    }
+
     /**
      * Tracks free space on a per power-of-two basis.
      */
-    private final List<Set<Long>> freeSpaceMaps = new ArrayList<Set<Long>>(64);
+    private final List<SortedSet<Long>> freeSpaceMaps = new ArrayList<SortedSet<Long>>(64);
 
-    public DynamicPersistentBlockBuffer(PersistentBuffer pbuffer) {
+    public DynamicPersistentBlockBuffer(PersistentBuffer pbuffer) throws IOException {
         super(pbuffer);
         for(int c=0;c<64;c++) freeSpaceMaps.add(null);
         // Read the head and tail to maintain in cache
-        /*
-        long len = oldpbuffer.capacity();
-        if(len==0) clear();
-        clear();
-        long ptr = HEADER_SIZE;
-        for(; ptr<len; ptr+=getEntrySize(getMaxBits(ptr))) {
-            if(isAllocated(ptr)) count++;
-            else addFreeSpaceMap(ptr);
+        long capacity = pbuffer.capacity();
+        long ptr = 0;
+        while(ptr<capacity) {
+            byte header = pbuffer.get(ptr);
+            long blockSize = getBlockSize(header);
+            // Auto-expand if underlying buffer doesn't end on a block boundary
+            long blockEnd = ptr + blockSize;
+            if(blockEnd>capacity) capacity = expandCapacity(blockEnd);
+            if(!isAllocated(header)) addFreeSpaceMap(ptr, header&0x3f, capacity);
+            ptr = blockEnd;
         }
-        if(ptr!=len) throw new IOException("ptr!=len: "+ptr+"!="+len);
-         */
+        assert ptr==capacity : "ptr!=len: "+ptr+"!="+capacity;
     }
 
     /*
@@ -94,11 +106,33 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    private long splitAllocate(int maxBits, long capacity) {
+        SortedSet<Long> fsm = freeSpaceMaps.get(maxBits);
+        if(fsm!=null && !fsm.isEmpty()) {
+            // No split needed
+            Long ptr = fsm.first();
+            fsm.remove(ptr);
+            return ptr;
+        } else {
+            // End recursion
+            if(maxBits==63) return -1;
+            // Try split
+            long biggerPtr = splitAllocate(maxBits+1, capacity);
+            // Unsplittable
+            if(biggerPtr==-1) return -1;
+            // Split this one
+            return -1; // TODO
+        }
+    }
+
     public long allocate(long minimumSize) throws IOException {
-        //assert (ptr+DATA_OFFSET+dataSize)<=pbuffer.capacity(); // Must not extend past end of file
-        // assert dataSize>=0 && ((long)dataSize)<=(1L << getMaxBits(ptr)); // Must not exceed maximum size
-        // Only Required for previous assertion: raf.seek(ptr+DATA_OFFSET);
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Determine the min block size for the provided input
+        int maxBits = 64 - Long.numberOfLeadingZeros(minimumSize);
+        long ptr = splitAllocate(maxBits, pbuffer.capacity());
+        if(ptr==-1) {
+            throw new IOException("TODO: Finish method: Allocate new space");
+        }
+        return ptr;
     }
 
     public void deallocate(long id) throws IOException, IllegalStateException {
@@ -164,22 +198,65 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
 
     /**
      * Adds the block at the provided location to the free space maps.
-     * The entry must have non-null next and prev.
      */
     /*private void addFreeSpaceMap(long ptr) throws IOException {
-        addFreeSpaceMap(ptr, getMaxBits(ptr));
+        addFreeSpaceMap(ptr, pbuffer.get(ptr)&0x3f);
     }*/
 
     /**
      * Adds the block at the provided location to the free space maps.
-     * The entry must have non-null next and prev.
      */
-    /*private void addFreeSpaceMap(long ptr, int maxBits) throws IOException {
-        assert !hasNonNullNextPrev(ptr);
-        Set<Long> fsm = freeSpaceMaps.get(maxBits);
+    private void addFreeSpaceMap(long ptr, int maxBits, long capacity) throws IOException {
+        assert isAllocated(ptr);
+        // Group as much as possible within the same power-of-two block
+        boolean writeMaxBits = false;
+        for(int bits = maxBits; bits<63; bits++) {
+            long blockSize = 1L<<bits;
+            long biggerBlockSize = blockSize<<1;
+            long biggerBlockMask = biggerBlockSize-1;
+            long prevPtr = ptr - blockSize;
+            long ptrBiggerBlockMask = ptr&biggerBlockMask;
+            if((prevPtr&biggerBlockMask)==ptrBiggerBlockMask) {
+                // In the same bigger block as the block to the left
+                if(isAllocated(prevPtr)) {
+                    // Block to the left is allocated, stop grouping
+                    break;
+                } else {
+                    ptr = prevPtr;
+                    maxBits = bits+1;
+                    writeMaxBits = true;
+                    // Remove prev from FSM
+                    SortedSet<Long> fsm = freeSpaceMaps.get(bits);
+                    if(fsm!=null) fsm.remove(prevPtr);
+                }
+            } else {
+                // Only group right if the pbuffer has room for the bigger parent
+                if((ptr+biggerBlockSize)>capacity) {
+                    // Stop grouping
+                    break;
+                } else {
+                    long nextPtr = ptr + blockSize;
+                    if((nextPtr&biggerBlockMask)==ptrBiggerBlockMask) {
+                        // In the same bigger block as the block to the right
+                        if(isAllocated(nextPtr)) {
+                            // Block to the right is allocated, stop grouping
+                            break;
+                        } else {
+                            maxBits = bits+1;
+                            writeMaxBits = true;
+                            // Remove next from FSM
+                            SortedSet<Long> fsm = freeSpaceMaps.get(bits);
+                            if(fsm!=null) fsm.remove(nextPtr);
+                        }
+                    }
+                }
+            }
+        }
+        if(writeMaxBits) pbuffer.put(ptr, (byte)maxBits);
+        SortedSet<Long> fsm = freeSpaceMaps.get(maxBits);
         if(fsm==null) freeSpaceMaps.set(maxBits, fsm = new TreeSet<Long>());
         if(!fsm.add(ptr)) throw new AssertionError("Free space map already contains entry: "+ptr);
-    }*/
+    }
 
     /**
      * Allocates the first free space available that can hold the requested amount of
@@ -228,8 +305,16 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         return id;
     }
 
+    protected long expandCapacity(long newCapacity) throws IOException {
+        if((newCapacity&0xfff)!=0) newCapacity = (newCapacity & 0xfffffffffffff000L)+4096L;
+        pbuffer.setCapacity(newCapacity);
+        return newCapacity;
+    }
+
     @Override
-    protected void ensureCapacity(long capacity) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    protected long ensureCapacity(long capacity) throws IOException {
+        long curCapacity = pbuffer.capacity();
+        if(curCapacity<capacity) return expandCapacity(capacity);
+        return curCapacity;
     }
 }

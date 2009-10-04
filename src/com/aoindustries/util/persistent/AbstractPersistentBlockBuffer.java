@@ -134,6 +134,8 @@ abstract public class AbstractPersistentBlockBuffer implements PersistentBlockBu
     /**
      * Ensures the underlying persistent buffer is of adequate capacity.  Grows the
      * underlying storage if needed.
+     *
+     * @return  the resulting capacity, which is >= parameter.
      */
-    abstract protected void ensureCapacity(long capacity) throws IOException;
+    abstract protected long ensureCapacity(long capacity) throws IOException;
 }

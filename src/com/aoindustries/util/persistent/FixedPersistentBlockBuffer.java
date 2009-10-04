@@ -62,8 +62,6 @@ import java.util.NoSuchElementException;
  */
 public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*implements RandomAccessPersistentBlockBuffer*/ {
 
-    private static final boolean USE_KNOWN_FREE_ID_LIST = true;
-
     private final long blockSize;
     private final boolean singleBitmap;
 
@@ -75,7 +73,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
     /**
      * Keeps track of modification counts to try to detect concurrent modifications.
      */
-    private long modCount;
+    private int modCount;
 
     /**
      * Creates a persistent buffer with the provided block size.  There may be
@@ -148,33 +146,27 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         }
     }
 
-    private long lowestFreeId = 0; // One direction scan
-    private final LongList knownFreeIds = USE_KNOWN_FREE_ID_LIST ? new LongArrayList() : null;
+    private long lowestFreeId = 0; // One direction scan used before knownFreeIds is populated
+    private final LongList knownFreeIds = new LongArrayList();
 
-    /**
-     * TODO: Use a more efficient algorithm, possibly a BitSet free space map,
-     * where 1 means free (since compacts on zeros).
-     */
     public long allocate(long minimumSize) throws IOException {
         if(minimumSize>blockSize) throw new IOException("minimumSize>blockSize: "+minimumSize+">"+blockSize);
         // Check known first
-        if(USE_KNOWN_FREE_ID_LIST) {
-            int knownFreeSize = knownFreeIds.size();
-            if(knownFreeSize>0) {
-                long freeId = knownFreeIds.removeLong(knownFreeSize-1);
-                long bitmapBitsAddress = getBitMapBitsAddress(freeId);
-                int bits = pbuffer.get(bitmapBitsAddress)&255;
-                int bit = 1<<(freeId&7);
-                modCount++;
-                pbuffer.put(bitmapBitsAddress, (byte)(bits | bit));
-                return freeId;
-            }
+        int knownFreeSize = knownFreeIds.size();
+        if(knownFreeSize>0) {
+            long freeId = knownFreeIds.removeLong(knownFreeSize-1);
+            long bitmapBitsAddress = getBitMapBitsAddress(freeId);
+            byte bits = pbuffer.get(bitmapBitsAddress);
+            int bit = 1<<(freeId&7);
+            modCount++;
+            pbuffer.put(bitmapBitsAddress, (byte)(bits | bit));
+            return freeId;
         }
         long bitmapBitsAddress = getBitMapBitsAddress(lowestFreeId);
         long capacity = pbuffer.capacity();
         while(bitmapBitsAddress<capacity) {
-            int bits = pbuffer.get(bitmapBitsAddress)&255;
-            if(bits!=0xff) {
+            byte bits = pbuffer.get(bitmapBitsAddress);
+            if(bits!=-1) {
                 // Check as many bits as possible
                 for(int bit = 1<<(lowestFreeId&7); bit!=0x100; bit<<=1) {
                     if((bits&bit)==0) {
@@ -206,18 +198,18 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
      */
     public void deallocate(long id) throws IOException {
         long bitmapBitsAddress = getBitMapBitsAddress(id);
-        int bits = pbuffer.get(bitmapBitsAddress)&255;
+        byte bits = pbuffer.get(bitmapBitsAddress);
         int bit = 1<<(id & 7);
         if((bits&bit)==0) throw new IllegalStateException("Block already deallocated: "+id);
-        if(USE_KNOWN_FREE_ID_LIST) knownFreeIds.add(id);
-        else if(id < lowestFreeId) lowestFreeId = id;
+        knownFreeIds.add(id);
+        // else if(id < lowestFreeId) lowestFreeId = id;
         modCount++;
         pbuffer.put(bitmapBitsAddress, (byte)(bits ^ bit));
     }
 
     public Iterator<Long> iterateBlockIds() {
         return new Iterator<Long>() {
-            private long expectedModCount = modCount;
+            private int expectedModCount = modCount;
             private long lastId = -1;
             private long nextId = 0;
             public boolean hasNext() {
@@ -226,7 +218,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
                     long bitmapBitsAddress = getBitMapBitsAddress(nextId);
                     long capacity = pbuffer.capacity();
                     while(bitmapBitsAddress<capacity) {
-                        int bits = pbuffer.get(bitmapBitsAddress)&255;
+                        byte bits = pbuffer.get(bitmapBitsAddress);
                         if(bits!=0) {
                             // Check as many bits as possible
                             for(int bit = 1<<(nextId&7); bit!=0x100; bit<<=1) {
@@ -250,7 +242,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
                     long bitmapBitsAddress = getBitMapBitsAddress(nextId);
                     long capacity = pbuffer.capacity();
                     while(bitmapBitsAddress<capacity) {
-                        int bits = pbuffer.get(bitmapBitsAddress)&255;
+                        byte bits = pbuffer.get(bitmapBitsAddress);
                         if(bits!=0) {
                             // Check as many bits as possible
                             for(int bit = 1<<(nextId&7); bit!=0x100; bit<<=1) {
@@ -286,7 +278,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         return blockSize;
     }
 
-    protected void expandCapacity(long newCapacity) throws IOException {
+    protected long expandCapacity(long newCapacity) throws IOException {
         /*if(singleBitmap) newCapacity = bitmapBitsAddress+1;
         else {
             long amountToAdd = blockSize*64;
@@ -296,11 +288,14 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         if((newCapacity&0xfff)!=0) newCapacity = (newCapacity & 0xfffffffffffff000L)+4096L;
         //System.out.println("DEBUG: newCapacity="+newCapacity);
         pbuffer.setCapacity(newCapacity);
+        return newCapacity;
     }
 
     @Override
-    protected void ensureCapacity(long capacity) throws IOException {
-        if(pbuffer.capacity()<capacity) expandCapacity(capacity);
+    protected long ensureCapacity(long capacity) throws IOException {
+        long curCapacity = pbuffer.capacity();
+        if(curCapacity<capacity) return expandCapacity(capacity);
+        return curCapacity;
     }
 
     /*public long getBlockCount() throws IOException {

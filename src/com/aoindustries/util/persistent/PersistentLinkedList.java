@@ -214,6 +214,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             assert _tail==END_PTR || hasNonNullNextPrev(_tail);
             long count = 0;
             while(ids.hasNext()) {
+                long id = ids.next();
                 // TODO: Perform crash recovery here
                 count++;
             }
