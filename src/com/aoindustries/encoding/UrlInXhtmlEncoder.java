@@ -23,7 +23,7 @@
 package com.aoindustries.encoding;
 
 import com.aoindustries.io.StringBuilderWriter;
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.util.EncodingUtils;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Locale;
@@ -69,20 +69,21 @@ public class UrlInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void writeSuffix() throws IOException {
-        String url = StringUtility.replace(
-            response.encodeURL(
-                NewEncodingUtils.encodeURL(
-                    buffer.toString()
-                )
-            ),
-            "&amp;",
-            "&"
-        );
-        StringUtility.replace(
-            url,
-            "&",
-            "&amp;",
-            originalOut
-        );
+        //String url = StringUtility.replace(
+        //    response.encodeURL(
+        //        NewEncodingUtils.encodeURL(
+        //            buffer.toString()
+        //        )
+        //    ),
+        //    "&amp;",
+        //    "&"
+        //);
+        originalOut.append(response.encodeURL(EncodingUtils.encodeXmlAttribute(NewEncodingUtils.encodeURL(buffer.toString()))));
+        //StringUtility.replace(
+        //    url,
+        //    "&",
+        //    "&amp;",
+        //    originalOut
+        //);
     }
 }

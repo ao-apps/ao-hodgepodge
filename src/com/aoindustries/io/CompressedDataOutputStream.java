@@ -44,7 +44,7 @@ public class CompressedDataOutputStream extends DataOutputStream {
         }
     }
 
-    public void writeCompressedInt(int i, OutputStream out) throws IOException {
+    public static void writeCompressedInt(int i, OutputStream out) throws IOException {
         int t;
         if(
             (t=i&0xfffffff0)==0
