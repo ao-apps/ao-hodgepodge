@@ -294,11 +294,13 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         return newCapacity;
     }
 
+    /**
+     * This class takes a lazy approach on allocating buffer space.  It will allocate
+     * additional space as needed here, rounding up to the next 4096-byte boundary.
+     */
     @Override
-    protected long ensureCapacity(long capacity) throws IOException {
-        long curCapacity = pbuffer.capacity();
-        if(curCapacity<capacity) return expandCapacity(capacity);
-        return curCapacity;
+    protected void ensureCapacity(long capacity) throws IOException {
+        if(pbuffer.capacity()<capacity) expandCapacity(capacity);
     }
 
     /*public long getBlockCount() throws IOException {

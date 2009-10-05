@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 /**
  * <p>
@@ -67,13 +68,7 @@ import java.util.TreeSet;
  */
 public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer {
 
-    private static boolean isAllocated(byte header) {
-        return (header&0x80)!=0;
-    }
-
-    private static long getBlockSize(byte header) {
-        return 1L<<(header&0x3f);
-    }
+    private static final Logger logger = Logger.getLogger(DynamicPersistentBlockBuffer.class.getName());
 
     /**
      * Tracks free space on a per power-of-two basis.
@@ -83,132 +78,106 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     public DynamicPersistentBlockBuffer(PersistentBuffer pbuffer) throws IOException {
         super(pbuffer);
         for(int c=0;c<64;c++) freeSpaceMaps.add(null);
-        // Read the head and tail to maintain in cache
+        // Build the free space maps and expand to end on an even block size and page size
         long capacity = pbuffer.capacity();
-        long ptr = 0;
-        while(ptr<capacity) {
-            byte header = pbuffer.get(ptr);
-            long blockSize = getBlockSize(header);
-            // Auto-expand if underlying buffer doesn't end on a block boundary
-            long blockEnd = ptr + blockSize;
-            if(blockEnd>capacity) capacity = expandCapacity(blockEnd);
-            if(!isAllocated(header)) addFreeSpaceMap(ptr, header&0x3f, capacity);
-            ptr = blockEnd;
+        long id = 0;
+        while(id<capacity) {
+            byte header = pbuffer.get(id);
+            int blockSizeBits = getBlockSizeBits(header);
+            if(!isBlockAligned(id, blockSizeBits)) throw new IOException("Block not aligned: "+id);
+            // Auto-expand if underlying buffer doesn't end on a block boundary, this may be the result of a partial increase in size
+            long blockEnd = id + getBlockSize(blockSizeBits);
+            if(blockEnd>capacity) {
+                logger.warning("Expanding capacity to match block end");
+                // Round up to the nearest PAGE_SIZE
+                pbuffer.setCapacity(capacity = getNearestPage(blockEnd));
+                // Any extra space is zero-filled, which means unallocated and size 1 (2^0),
+                // which will be grouped by the addFreeSpaceMap algorithm.  Not worried
+                // about the performance of this recovery process
+            }
+            if(!isAllocated(header)) addFreeSpaceMap(id, blockSizeBits, capacity);
+            id = blockEnd;
         }
-        assert ptr==capacity : "ptr!=len: "+ptr+"!="+capacity;
+        assert id==capacity : "id!=capacity: "+id+"!="+capacity;
     }
 
-    /*
-    private boolean isAllocated(long ptr) throws IOException {
-        assert isValidRange(ptr) : "Invalid range: "+ptr;
-        return pbuffer.getLong(ptr+NEXT_OFFSET)!=-1 && pbuffer.getLong(ptr+PREV_OFFSET)!=-1;
-    }*/
+    // <editor-fold desc="Bit Manipulation">
+    /**
+     * Space will always be allocated to align with this page size.
+     */
+    private static final long PAGE_SIZE = 0x1000L; // Must be a power of two.
+    private static final long PAGE_OFFSET_MASK = PAGE_SIZE-1;
+    private static final long PAGE_MASK = -PAGE_SIZE;
 
-    public Iterator<Long> iterateBlockIds() throws IOException {
-        return new Iterator<Long>() {
-            // TODO: Add modCount
-            long nextPtr = 0;
-            public boolean hasNext() {
-                try {
-                    long capacity = pbuffer.capacity();
-                    while(nextPtr<capacity) {
-                        byte header = pbuffer.get(nextPtr);
-                        if(isAllocated(header)) return true;
-                        nextPtr += getBlockSize(header);
-                    }
-                    return false;
-                } catch(IOException err) {
-                    throw new WrappedException(err);
-                }
-            }
-            public Long next() {
-                try {
-                    long capacity = pbuffer.capacity();
-                    while(nextPtr<capacity) {
-                        byte header = pbuffer.get(nextPtr);
-                        long ptr = nextPtr;
-                        nextPtr += getBlockSize(header);
-                        if(isAllocated(header)) return ptr;
-                    }
-                    throw new NoSuchElementException();
-                } catch(IOException err) {
-                    throw new WrappedException(err);
-                }
-            }
-            public void remove() {
-                throw new UnsupportedOperationException("TODO: Not supported yet.");
-            }
-        };
+    private static boolean isAllocated(byte header) {
+        return (header&0x80)!=0;
     }
 
-    private long splitAllocate(int maxBits, long capacity) throws IOException {
-        SortedSet<Long> fsm = freeSpaceMaps.get(maxBits);
-        if(fsm!=null && !fsm.isEmpty()) {
-            // No split needed
-            Long ptr = fsm.first();
-            fsm.remove(ptr);
-            return ptr;
-        } else {
-            // End recursion
-            if(maxBits==63) return -1;
-            long blockSize = 1L << maxBits;
-            if(blockSize>capacity) return -1;
-            // Try split
-            long biggerPtr = splitAllocate(maxBits+1, capacity);
-            // Unsplittable
-            if(biggerPtr==-1) return -1;
-            // Split the bigger one
-            pbuffer.put(biggerPtr, (byte)maxBits);
-            long nextPtr = biggerPtr+blockSize;
-            pbuffer.put(nextPtr, (byte)maxBits);
-            if(fsm==null) freeSpaceMaps.set(maxBits, fsm = new TreeSet<Long>());
-            fsm.add(nextPtr);
-            return biggerPtr;
-        }
+    private static int getBlockSizeBits(byte header) {
+        return header&0x3f;
     }
 
-    public long allocate(long minimumSize) throws IOException {
-        // Determine the min block size for the provided input
-        int maxBits = 64 - Long.numberOfLeadingZeros(minimumSize);
-        long capacity = pbuffer.capacity();
-        long ptr = splitAllocate(maxBits, capacity);
-        if(ptr==-1) {
-            long blockSize = 1L << maxBits;
-            long blockMask = blockSize - 1;
-            // Allocate space at end, aligned with block size
-            long blockStart = capacity;
-            long blockOffset = blockStart & blockMask;
-            if(blockOffset!=0) {
-                // TODO: Faster way, combine into a single setCapacity call with that below
-                long expandBytes = blockSize - blockOffset;
-                long newCapacity = capacity+expandBytes;
-                pbuffer.setCapacity(newCapacity);
-                for(long pos=capacity; pos<newCapacity; pos++) {
-                    addFreeSpaceMap(pos, 0, newCapacity);
-                }
-                capacity = newCapacity;
-            }
-            if(blockSize<4096) {
-                pbuffer.setCapacity(blockStart + 4096);
-                pbuffer.put(blockStart, (byte)(0x80 | maxBits));
-                // TODO: Faster way
-                for(long pos=blockStart+blockSize, end=blockStart+4096; pos<end; pos++) {
-                    addFreeSpaceMap(pos, 0, end);
-                }
-            } else {
-                pbuffer.setCapacity(blockStart+blockSize);
-                pbuffer.put(blockStart, (byte)(0x80 | maxBits));
-            }
-            ptr = blockStart;
-        }
-        return ptr;
+    /**
+     * Gets the block size given the block size bits.
+     */
+    private static long getBlockSize(int blockSizeBits) {
+        return 1L<<blockSizeBits;
     }
 
-    public void deallocate(long id) throws IOException, IllegalStateException {
-        byte header = pbuffer.get(id);
-        if((header&0x80)==0) throw new AssertionError("Block not allocated");
-        pbuffer.put(id, (byte)(header&0x7f));
-        addFreeSpaceMap(id, header&0x3f, pbuffer.capacity());
+    /**
+     * Gets the offset of an id within a page.
+     */
+    private static long getPageOffset(long id) {
+        return id&PAGE_OFFSET_MASK;
+    }
+
+    /**
+     * Gets the nearest page boundary, rounding up if necessary.
+     */
+    private static long getNearestPage(long id) {
+        if(getPageOffset(id)!=0) id = (id & PAGE_MASK)+PAGE_SIZE;
+        return id;
+    }
+    // </editor-fold>
+
+    // <editor-fold desc="Assertions and Data Consistency">
+    /**
+     * Checks that the is a valid blockSizeBits.
+     */
+    private static boolean isValidBlockSizeBits(int blockSizeBits) {
+        return blockSizeBits>=0 && blockSizeBits<=0x3f;
+    }
+
+    /**
+     * Makes sure the id is in the valid range: <code>0 &lt;= id &lt; capacity</code>
+     */
+    private boolean isValidRange(long id) throws IOException {
+        return id>=0 && id<pbuffer.capacity();
+    }
+
+    /**
+     * Each block should always be aligned based on its size.  This means that
+     * all bits for its location less than its size should be zero.
+     */
+    private boolean isBlockAligned(long id, int blockSizeBits) throws IOException {
+        assert isValidRange(id);
+        assert isValidBlockSizeBits(blockSizeBits);
+        return ((getBlockSize(blockSizeBits)-1)&id)==0;
+    }
+
+    /**
+     * Each block should always be aligned based on its size.  This means that
+     * all bits for its location less than its size should be zero.
+     * Makes sure a block is complete: <code>(id + blockSize) &lt;= capacity</code>
+     */
+    private boolean isBlockAlignedAndComplete(long id, int blockSizeBits) throws IOException {
+        assert isValidRange(id);
+        assert isValidBlockSizeBits(blockSizeBits);
+        long blockSize = getBlockSize(blockSizeBits);
+        return
+            ((blockSize-1)&id)==0                   // Aligned
+            && (id+blockSize)<=pbuffer.capacity()   // Complete
+        ;
     }
 
     /**
@@ -218,29 +187,24 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      * garbage.
      */
     private boolean isAllocated(long id) throws IOException {
-        return (pbuffer.get(id) & 128)!=0;
+        assert isValidRange(id);
+        byte header = pbuffer.get(id);
+        assert isBlockAlignedAndComplete(id, getBlockSizeBits(header));
+        return isAllocated(header);
     }
+    // </editor-fold>
 
-    /**
-     * Gets the maximum amount of data that may be stored in the entry.  This
-     * is the underlying power-of-two block size minus one.  May only check
-     * the block size of allocated blocks.
-     */
-    public long getBlockSize(long id) throws IOException {
-        assert isAllocated(id);
-        int maxBits = pbuffer.get(id) & 63;
-        return (1<<maxBits) - 1;
-    }
-
+    // <editor-fold desc="Allocation and Deallocation">
     /**
      * Adds the block at the provided location to the free space maps.
      */
-    private void addFreeSpaceMap(long ptr, int maxBits, long capacity) throws IOException {
+    private void addFreeSpaceMap(long ptr, int blockSizeBits, long capacity) throws IOException {
+        assert blockSizeBits>=0 && blockSizeBits<=0x3f;
         assert !isAllocated(ptr);
         // Group as much as possible within the same power-of-two block
         boolean writeMaxBits = false;
-        for(int bits = maxBits; bits<63; bits++) {
-            long blockSize = 1L<<bits;
+        for(int bits = blockSizeBits; bits<0x3f; bits++) {
+            long blockSize = getBlockSize(bits);
             long biggerBlockSize = blockSize<<1;
             long biggerBlockMask = biggerBlockSize-1;
             long prevPtr = ptr - blockSize;
@@ -252,7 +216,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                     break;
                 } else {
                     ptr = prevPtr;
-                    maxBits = bits+1;
+                    blockSizeBits = bits+1;
                     writeMaxBits = true;
                     // Remove prev from FSM
                     SortedSet<Long> fsm = freeSpaceMaps.get(bits);
@@ -271,7 +235,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                             // Block to the right is allocated, stop grouping
                             break;
                         } else {
-                            maxBits = bits+1;
+                            blockSizeBits = bits+1;
                             writeMaxBits = true;
                             // Remove next from FSM
                             SortedSet<Long> fsm = freeSpaceMaps.get(bits);
@@ -281,26 +245,155 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 }
             }
         }
-        if(writeMaxBits) pbuffer.put(ptr, (byte)maxBits);
-        SortedSet<Long> fsm = freeSpaceMaps.get(maxBits);
-        if(fsm==null) freeSpaceMaps.set(maxBits, fsm = new TreeSet<Long>());
+        if(writeMaxBits) pbuffer.put(ptr, (byte)blockSizeBits);
+        SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
+        if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
         if(!fsm.add(ptr)) throw new AssertionError("Free space map already contains entry: "+ptr);
+    }
+
+    private long splitAllocate(int blockSizeBits, long capacity) throws IOException {
+        assert isValidBlockSizeBits(blockSizeBits);
+        assert capacity>=0;
+        // TODO: Assertions from here
+        SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
+        if(fsm!=null && !fsm.isEmpty()) {
+            // No split needed
+            Long ptr = fsm.first();
+            fsm.remove(ptr);
+            return ptr;
+        } else {
+            // End recursion
+            if(blockSizeBits==0x3f) return -1;
+            long blockSize = getBlockSize(blockSizeBits);
+            if(blockSize>capacity) return -1;
+            // Try split
+            long biggerPtr = splitAllocate(blockSizeBits+1, capacity);
+            // Unsplittable
+            if(biggerPtr==-1) return -1;
+            // Split the bigger one
+            pbuffer.put(biggerPtr, (byte)blockSizeBits);
+            long nextPtr = biggerPtr+blockSize;
+            pbuffer.put(nextPtr, (byte)blockSizeBits);
+            if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
+            fsm.add(nextPtr);
+            return biggerPtr;
+        }
+    }
+
+    public long allocate(long minimumSize) throws IOException {
+        // Determine the min block size for the provided input
+        int blockSizeBits = 64 - Long.numberOfLeadingZeros(minimumSize);
+        long capacity = pbuffer.capacity();
+        long ptr = splitAllocate(blockSizeBits, capacity);
+        if(ptr==-1) {
+            long blockSize = getBlockSize(blockSizeBits);
+            long blockMask = blockSize - 1;
+            // Allocate space at end, aligned with block size
+            long blockStart = capacity;
+            long blockOffset = blockStart & blockMask;
+            if(blockOffset!=0) {
+                // TODO: Faster way, combine into a single setCapacity call with that below
+                long expandBytes = blockSize - blockOffset;
+                long newCapacity = capacity+expandBytes;
+                pbuffer.setCapacity(newCapacity);
+                for(long pos=capacity; pos<newCapacity; pos++) {
+                    addFreeSpaceMap(pos, 0, newCapacity);
+                }
+                capacity = newCapacity;
+            }
+            if(blockSize<PAGE_SIZE) {
+                pbuffer.setCapacity(blockStart + PAGE_SIZE);
+                pbuffer.put(blockStart, (byte)(0x80 | blockSizeBits));
+                // TODO: Faster way
+                for(long pos=blockStart+blockSize, end=blockStart+PAGE_SIZE; pos<end; pos++) {
+                    addFreeSpaceMap(pos, 0, end);
+                }
+            } else {
+                pbuffer.setCapacity(blockStart+blockSize);
+                pbuffer.put(blockStart, (byte)(0x80 | blockSizeBits));
+            }
+            ptr = blockStart;
+        }
+        return ptr;
+    }
+
+    public void deallocate(long id) throws IOException, IllegalStateException {
+        byte header = pbuffer.get(id);
+        int blockSizeBits = getBlockSizeBits(header);
+        assert isBlockAlignedAndComplete(id, blockSizeBits);
+        if(!isAllocated(header)) throw new AssertionError("Block not allocated");
+        pbuffer.put(id, (byte)(header&0x7f));
+        addFreeSpaceMap(id, blockSizeBits, pbuffer.capacity());
+    }
+    // </editor-fold>
+
+    // <editor-fold desc="PersistentBlockBuffer Implementation">
+    public Iterator<Long> iterateBlockIds() throws IOException {
+        return new Iterator<Long>() {
+            // TODO: Add modCount
+            long nextPtr = 0;
+            public boolean hasNext() {
+                try {
+                    long capacity = pbuffer.capacity();
+                    while(nextPtr<capacity) {
+                        byte header = pbuffer.get(nextPtr);
+                        int blockSizeBits = getBlockSizeBits(header);
+                        assert isBlockAlignedAndComplete(nextPtr, blockSizeBits);
+                        if(isAllocated(header)) return true;
+                        nextPtr += getBlockSize(blockSizeBits);
+                    }
+                    return false;
+                } catch(IOException err) {
+                    throw new WrappedException(err);
+                }
+            }
+            public Long next() {
+                try {
+                    long capacity = pbuffer.capacity();
+                    while(nextPtr<capacity) {
+                        byte header = pbuffer.get(nextPtr);
+                        int blockSizeBits = getBlockSizeBits(header);
+                        assert isBlockAlignedAndComplete(nextPtr, blockSizeBits);
+                        long ptr = nextPtr;
+                        nextPtr += getBlockSize(blockSizeBits);
+                        if(isAllocated(header)) return ptr;
+                    }
+                    throw new NoSuchElementException();
+                } catch(IOException err) {
+                    throw new WrappedException(err);
+                }
+            }
+            public void remove() {
+                throw new UnsupportedOperationException("TODO: Not supported yet.");
+            }
+        };
+    }
+
+    /**
+     * Gets the maximum amount of data that may be stored in the entry.  This
+     * is the underlying power-of-two block size minus one.  May only check
+     * the block size of allocated blocks.
+     */
+    public long getBlockSize(long id) throws IOException {
+        assert isValidRange(id);
+        byte header = pbuffer.get(id);
+        int blockSizeBits = getBlockSizeBits(header);
+        assert isBlockAlignedAndComplete(id, blockSizeBits);
+        if(!isAllocated(header)) throw new IOException("Block not allocated: "+id);
+        return getBlockSize(blockSizeBits) - 1;
     }
 
     protected long getBlockAddress(long id) {
         return id;
     }
 
-    protected long expandCapacity(long newCapacity) throws IOException {
-        if((newCapacity&0xfff)!=0) newCapacity = (newCapacity & 0xfffffffffffff000L)+4096L;
-        pbuffer.setCapacity(newCapacity);
-        return newCapacity;
+    /**
+     * The capacity should always be enough because the capacity ensured here is
+     * constrained to a single block, and blocks are always allocated fully.
+     * This merely asserts this fact.
+     */
+    protected void ensureCapacity(long capacity) throws IOException {
+        assert pbuffer.capacity()>=capacity: "pbuffer.capacity()<capacity";
     }
-
-    @Override
-    protected long ensureCapacity(long capacity) throws IOException {
-        long curCapacity = pbuffer.capacity();
-        if(curCapacity<capacity) pbuffer.setCapacity(capacity);
-        return curCapacity;
-    }
+    // </editor-fold>
 }
