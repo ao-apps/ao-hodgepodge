@@ -136,6 +136,8 @@ abstract public class AbstractPersistentBlockBuffer implements PersistentBlockBu
      * underlying storage if needed.
      *
      * @return  the resulting capacity, which is >= parameter.
+     *
+     * TODO: Define this on a per-block basis so dynamic block buffer can expand by 4096 and add new free space to fsm
      */
     abstract protected long ensureCapacity(long capacity) throws IOException;
 }

@@ -22,10 +22,12 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.util.WrappedException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -66,7 +68,7 @@ import java.util.TreeSet;
 public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer {
 
     private static boolean isAllocated(byte header) {
-        return (header&0x800)!=0;
+        return (header&0x80)!=0;
     }
 
     private static long getBlockSize(byte header) {
@@ -103,10 +105,43 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     }*/
 
     public Iterator<Long> iterateBlockIds() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new Iterator<Long>() {
+            // TODO: Add modCount
+            long nextPtr = 0;
+            public boolean hasNext() {
+                try {
+                    long capacity = pbuffer.capacity();
+                    while(nextPtr<capacity) {
+                        byte header = pbuffer.get(nextPtr);
+                        if(isAllocated(header)) return true;
+                        nextPtr += getBlockSize(header);
+                    }
+                    return false;
+                } catch(IOException err) {
+                    throw new WrappedException(err);
+                }
+            }
+            public Long next() {
+                try {
+                    long capacity = pbuffer.capacity();
+                    while(nextPtr<capacity) {
+                        byte header = pbuffer.get(nextPtr);
+                        long ptr = nextPtr;
+                        nextPtr += getBlockSize(header);
+                        if(isAllocated(header)) return ptr;
+                    }
+                    throw new NoSuchElementException();
+                } catch(IOException err) {
+                    throw new WrappedException(err);
+                }
+            }
+            public void remove() {
+                throw new UnsupportedOperationException("TODO: Not supported yet.");
+            }
+        };
     }
 
-    private long splitAllocate(int maxBits, long capacity) {
+    private long splitAllocate(int maxBits, long capacity) throws IOException {
         SortedSet<Long> fsm = freeSpaceMaps.get(maxBits);
         if(fsm!=null && !fsm.isEmpty()) {
             // No split needed
@@ -116,27 +151,64 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         } else {
             // End recursion
             if(maxBits==63) return -1;
+            long blockSize = 1L << maxBits;
+            if(blockSize>capacity) return -1;
             // Try split
             long biggerPtr = splitAllocate(maxBits+1, capacity);
             // Unsplittable
             if(biggerPtr==-1) return -1;
-            // Split this one
-            return -1; // TODO
+            // Split the bigger one
+            pbuffer.put(biggerPtr, (byte)maxBits);
+            long nextPtr = biggerPtr+blockSize;
+            pbuffer.put(nextPtr, (byte)maxBits);
+            if(fsm==null) freeSpaceMaps.set(maxBits, fsm = new TreeSet<Long>());
+            fsm.add(nextPtr);
+            return biggerPtr;
         }
     }
 
     public long allocate(long minimumSize) throws IOException {
         // Determine the min block size for the provided input
         int maxBits = 64 - Long.numberOfLeadingZeros(minimumSize);
-        long ptr = splitAllocate(maxBits, pbuffer.capacity());
+        long capacity = pbuffer.capacity();
+        long ptr = splitAllocate(maxBits, capacity);
         if(ptr==-1) {
-            throw new IOException("TODO: Finish method: Allocate new space");
+            long blockSize = 1L << maxBits;
+            long blockMask = blockSize - 1;
+            // Allocate space at end, aligned with block size
+            long blockStart = capacity;
+            long blockOffset = blockStart & blockMask;
+            if(blockOffset!=0) {
+                // TODO: Faster way, combine into a single setCapacity call with that below
+                long expandBytes = blockSize - blockOffset;
+                long newCapacity = capacity+expandBytes;
+                pbuffer.setCapacity(newCapacity);
+                for(long pos=capacity; pos<newCapacity; pos++) {
+                    addFreeSpaceMap(pos, 0, newCapacity);
+                }
+                capacity = newCapacity;
+            }
+            if(blockSize<4096) {
+                pbuffer.setCapacity(blockStart + 4096);
+                pbuffer.put(blockStart, (byte)(0x80 | maxBits));
+                // TODO: Faster way
+                for(long pos=blockStart+blockSize, end=blockStart+4096; pos<end; pos++) {
+                    addFreeSpaceMap(pos, 0, end);
+                }
+            } else {
+                pbuffer.setCapacity(blockStart+blockSize);
+                pbuffer.put(blockStart, (byte)(0x80 | maxBits));
+            }
+            ptr = blockStart;
         }
         return ptr;
     }
 
     public void deallocate(long id) throws IOException, IllegalStateException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        byte header = pbuffer.get(id);
+        if((header&0x80)==0) throw new AssertionError("Block not allocated");
+        pbuffer.put(id, (byte)(header&0x7f));
+        addFreeSpaceMap(id, header&0x3f, pbuffer.capacity());
     }
 
     /**
@@ -160,54 +232,11 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         return (1<<maxBits) - 1;
     }
 
-    /*public void clear() {
-        try {
-            pbuffer.setCapacity(HEADER_SIZE);
-            for(Set<Long> fsm : freeSpaceMaps) {
-                if(fsm!=null) fsm.clear();
-            }
-        } catch(IOException err) {
-            throw new WrappedException(err);
-        }
-    }*/
-
-    /**
-     * Gets the overall size of an entry given its maxBits.
-     * This includes the pointers and flags.
-     */
-    /*private static long getEntrySize(int maxBits) {
-        assert maxBits>=0 && maxBits<=31;
-        return DATA_OFFSET + (1L << maxBits);
-    }*/
-
-    /**
-     * Deallocates the entry at the provided location.
-     * The entry must have non-null next and prev.
-     */
-    /*private void deallocate(long ptr) throws IOException {
-        deallocate(ptr, getMaxBits(ptr));
-    }*/
-
-    /**
-     * Deallocates the entry at the provided location.
-     * The entry must have non-null next and prev.
-     */
-    /*private void deallocate(long ptr, int maxBits) throws IOException {
-        addFreeSpaceMap(ptr, maxBits);
-    }*/
-
-    /**
-     * Adds the block at the provided location to the free space maps.
-     */
-    /*private void addFreeSpaceMap(long ptr) throws IOException {
-        addFreeSpaceMap(ptr, pbuffer.get(ptr)&0x3f);
-    }*/
-
     /**
      * Adds the block at the provided location to the free space maps.
      */
     private void addFreeSpaceMap(long ptr, int maxBits, long capacity) throws IOException {
-        assert isAllocated(ptr);
+        assert !isAllocated(ptr);
         // Group as much as possible within the same power-of-two block
         boolean writeMaxBits = false;
         for(int bits = maxBits; bits<63; bits++) {
@@ -258,49 +287,6 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         if(!fsm.add(ptr)) throw new AssertionError("Free space map already contains entry: "+ptr);
     }
 
-    /**
-     * Allocates the first free space available that can hold the requested amount of
-     * data.  The amount of data should not include the pointer space.
-     *
-     * Operates in logarithic complexity on the amount of free entries.
-     */
-    /*private long allocateEntry(long next, long prev, long dataSize, byte[] data) throws IOException {
-        assert next==TAIL_PTR || hasNonNullNextPrev(next);
-        assert prev==HEAD_PTR || hasNonNullNextPrev(prev);
-        assert (dataSize==-1 && data==null) || (dataSize>=0 && data!=null);
-        if(_size==Long.MAX_VALUE) throw new IOException("List is full: _size==Long.MAX_VALUE");
-        // Determine the maxBits value
-        int maxBits = 0;
-        while((1L<<maxBits)<dataSize) maxBits++;
-        // Look in the free space maps
-        Set<Long> fsm = freeSpaceMaps.get(maxBits);
-        if(fsm!=null && !fsm.isEmpty()) {
-            Iterator<Long> iter = fsm.iterator();
-            long ptr = iter.next();
-            iter.remove();
-            // Update existing entry
-            PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET-NEXT_OFFSET);
-            PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET-NEXT_OFFSET);
-            PersistentCollections.longToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET-NEXT_OFFSET);
-            pbuffer.put(ptr+NEXT_OFFSET, ioBuffer, 0, 20);
-            if(dataSize>0) pbuffer.put(ptr+DATA_OFFSET, data, 0, dataSize);
-            _size++;
-            return ptr;
-        }
-        // Allocate more space at the end of the file
-        long ptr = pbuffer.capacity();
-        long newLen = ptr + DATA_OFFSET + (1L<<(long)maxBits);
-        pbuffer.setCapacity(newLen);
-        ioBuffer[MAX_BITS_OFFSET] = (byte)maxBits;
-        PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
-        PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
-        PersistentCollections.longToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);
-        pbuffer.put(ptr, ioBuffer, 0, DATA_OFFSET);
-        if(dataSize>0) pbuffer.put(ptr+DATA_OFFSET, data, 0, dataSize);
-        _size++;
-        return ptr;
-    }*/
-
     protected long getBlockAddress(long id) {
         return id;
     }
@@ -314,7 +300,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     @Override
     protected long ensureCapacity(long capacity) throws IOException {
         long curCapacity = pbuffer.capacity();
-        if(curCapacity<capacity) return expandCapacity(capacity);
+        if(curCapacity<capacity) pbuffer.setCapacity(capacity);
         return curCapacity;
     }
 }

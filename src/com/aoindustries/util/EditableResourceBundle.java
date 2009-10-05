@@ -160,6 +160,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
      * @see  #printEditableResourceBundleLookups(Appendable)
      */
     public static void resetRequest(boolean canEditResources, String setValueUrl, String setMediaTypeUrl, boolean modifyAllText) {
+        //System.out.println("DEBUG: EditableResourceBundle: resetRequest: thread.id="+Thread.currentThread().getId()+", canEditResources="+canEditResources+", setValueUrl="+setValueUrl);
         if(canEditResources) {
             if(setValueUrl==null) throw new IllegalArgumentException("setValueUrl is null when canEditResources is true");
             if(setMediaTypeUrl==null) throw new IllegalArgumentException("setMediaTypeUrl is null when canEditResources is true");
@@ -678,9 +679,9 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     + "  var EditableResourceBundleEditorHeight = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorHeight\");\n"
                     + "  if(EditableResourceBundleEditorHeight!=\"\") EditableResourceBundleEditorStyle.height=EditableResourceBundleEditorHeight;\n"
                     + "  var EditableResourceBundleEditorTop = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorTop\");\n"
-                    + "  if(EditableResourceBundleEditorTop!=\"\" && (parseInt(EditableResourceBundleEditorTop)+parseInt(EditableResourceBundleEditorStyle.height))<=window.innerHeight) EditableResourceBundleEditorStyle.top=EditableResourceBundleEditorTop;\n"
+                    + "  if(EditableResourceBundleEditorTop!=\"\" && parseInt(EditableResourceBundleEditorTop)>=0 && (parseInt(EditableResourceBundleEditorTop)+parseInt(EditableResourceBundleEditorStyle.height))<=window.innerHeight) EditableResourceBundleEditorStyle.top=EditableResourceBundleEditorTop;\n"
                     + "  var EditableResourceBundleEditorLeft = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorLeft\");\n"
-                    + "  if(EditableResourceBundleEditorLeft!=\"\" && (parseInt(EditableResourceBundleEditorLeft)+parseInt(EditableResourceBundleEditorStyle.width))<=window.innerWidth) EditableResourceBundleEditorStyle.left=EditableResourceBundleEditorLeft;\n"
+                    + "  if(EditableResourceBundleEditorLeft!=\"\" && parseInt(EditableResourceBundleEditorLeft)>=0 && (parseInt(EditableResourceBundleEditorLeft)+parseInt(EditableResourceBundleEditorStyle.width))<=window.innerWidth) EditableResourceBundleEditorStyle.left=EditableResourceBundleEditorLeft;\n"
                     + "  var EditableResourceBundleEditorVisibility = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorVisibility\");\n"
                     + "  if(EditableResourceBundleEditorVisibility!=\"\") EditableResourceBundleEditorStyle.visibility=EditableResourceBundleEditorVisibility;\n"
                     + "\n"
