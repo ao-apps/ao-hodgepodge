@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 
 /**
@@ -36,43 +35,22 @@ import java.io.Serializable;
  *
  * @author  AO Industries, Inc.
  */
-public class ObjectSerializer<E> implements Serializer<E> {
+public class ObjectSerializer<E> extends BufferedSerializer<E> {
 
     private final Class<E> type;
-
-    private E lastSerialized = null;
-    final private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
     public ObjectSerializer(Class<E> type) {
         if(!Serializable.class.isAssignableFrom(type)) throw new IllegalArgumentException("Class is not Serializable: "+type.getName());
         this.type = type;
     }
 
-    private void serializeToBuffer(E value) throws IOException {
-        if(lastSerialized!=value) {
-            lastSerialized = null;
-            buffer.reset();
-            ObjectOutputStream oout = new ObjectOutputStream(buffer);
-            try {
-                oout.writeObject(value);
-            } finally {
-                oout.close();
-            }
-            lastSerialized = value;
+    protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException {
+        ObjectOutputStream oout = new ObjectOutputStream(buffer);
+        try {
+            oout.writeObject(value);
+        } finally {
+            oout.close();
         }
-    }
-
-    public boolean isFixedSerializedSize() {
-        return false;
-    }
-
-    public long getSerializedSize(E value) throws IOException {
-        serializeToBuffer(value);
-        return buffer.size();
-    }
-
-    public void serialize(E value, OutputStream out) throws IOException {
-        buffer.writeTo(out);
     }
 
     public E deserialize(InputStream in) throws IOException {

@@ -615,16 +615,27 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * This runs in linear time.
      */
     private long getPointerForIndex(int index) throws IOException {
+        assert _size>0;
         if(index<(_size >> 1)) {
             long ptr = getHead();
-            for(int i=0;i<index;i++) ptr = getNext(ptr);
+            assert ptr!=END_PTR;
+            for(int i=0;i<index;i++) {
+                ptr = getNext(ptr);
+                assert ptr!=END_PTR;
+            }
             return ptr;
         } else {
             // Search backwards
-            long ptr = getTail();
-            for(int i=index;i>index;i--) ptr = getPrev(ptr);
-            return ptr;
+            long bptr = getTail();
+            assert bptr!=END_PTR;
+            for(long i=_size-1;i>index;i--) {
+                bptr = getPrev(bptr);
+                assert bptr!=END_PTR;
+            }
+            return bptr;
         }
+        //if(ptr!=bptr) throw new AssertionError("ptr!=bptr: "+ptr+"!="+bptr);
+        //return ptr;
     }
 
     /**

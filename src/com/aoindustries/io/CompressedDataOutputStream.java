@@ -38,10 +38,6 @@ public class CompressedDataOutputStream extends DataOutputStream {
     
     public CompressedDataOutputStream(OutputStream out) {
         super(out);
-        for(int c=0;c<64;c++) {
-            lastStrings[c]="";
-            lastCommonLengths[c]=0;
-        }
     }
 
     public static void writeCompressedInt(int i, OutputStream out) throws IOException {
@@ -89,8 +85,8 @@ public class CompressedDataOutputStream extends DataOutputStream {
         writeCompressedUTF(str, 0);
     }
 
-    private final String[] lastStrings=new String[64];
-    private final int[] lastCommonLengths=new int[64];
+    private String[] lastStrings;
+    private int[] lastCommonLengths;
     
     /**
      * Writes a String to the stream while using prefix compression.
@@ -111,7 +107,9 @@ public class CompressedDataOutputStream extends DataOutputStream {
      */
     public void writeCompressedUTF(String str, int slot) throws IOException {
         if(slot<0 || slot>0x3f) throw new IOException("Slot out of range (0-63): "+slot);
+        if(lastStrings==null) lastStrings=new String[64];
         String last=lastStrings[slot];
+        if(last==null) last="";
         int strLen=str.length();
         int lastLen=last.length();
         int maxCommon=Math.min(strLen, lastLen);
@@ -119,6 +117,7 @@ public class CompressedDataOutputStream extends DataOutputStream {
         for(;common<maxCommon;common++) {
             if(str.charAt(common)!=last.charAt(common)) break;
         }
+        if(lastCommonLengths==null) lastCommonLengths=new int[64];
         int commonDifference=common-lastCommonLengths[slot];
 
         // Write the header byte
