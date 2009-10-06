@@ -66,61 +66,61 @@ abstract public class AbstractPersistentBlockBuffer implements PersistentBlockBu
         long totalSize = offset+len;
         if(totalSize<0) throw new IllegalArgumentException("offset+len>Long.MAX_VALUE: offset="+offset+", len="+len);
         long blockSize = getBlockSize(id);
-        assert blockSize>=0;
+        if(PersistentCollections.ASSERT) assert blockSize>=0;
         return totalSize<=blockSize;
     }
 
     public void get(long id, long offset, byte[] buff, int off, int len) throws IOException {
-        assert isInBounds(id, offset, len);
+        if(PersistentCollections.ASSERT) assert isInBounds(id, offset, len);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+len);
         pbuffer.get(startAddress, buff, off, len);
     }
 
     public int getInt(long id, long offset) throws IOException {
-        assert isInBounds(id, offset, 4);
+        if(PersistentCollections.ASSERT) assert isInBounds(id, offset, 4);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+4);
         return pbuffer.getInt(startAddress);
     }
 
     public long getLong(long id, long offset) throws IOException {
-        assert isInBounds(id, offset, 8);
+        if(PersistentCollections.ASSERT) assert isInBounds(id, offset, 8);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+8);
         return pbuffer.getLong(startAddress);
     }
 
     public InputStream getInputStream(long id, long offset, long length) throws IOException {
-        assert isInBounds(id, offset, length);
+        if(PersistentCollections.ASSERT) assert isInBounds(id, offset, length);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+length);
         return pbuffer.getInputStream(startAddress, length);
     }
 
     public void put(long id, long offset, byte[] buff, int off, int len) throws IOException {
-        assert isInBounds(id, offset, len);
+        if(PersistentCollections.ASSERT) assert isInBounds(id, offset, len);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+len);
         pbuffer.put(startAddress, buff, off, len);
     }
 
     public void putInt(long id, long offset, int value) throws IOException {
-        assert isInBounds(id, offset, 4);
+        if(PersistentCollections.ASSERT) assert isInBounds(id, offset, 4);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+4);
         pbuffer.putInt(startAddress, value);
     }
 
     public void putLong(long id, long offset, long value) throws IOException {
-        assert isInBounds(id, offset, 8);
+        if(PersistentCollections.ASSERT) assert isInBounds(id, offset, 8);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+8);
         pbuffer.putLong(startAddress, value);
     }
 
     public OutputStream getOutputStream(long id, long offset, long length) throws IOException {
-        assert isInBounds(id, offset, length);
+        if(PersistentCollections.ASSERT) assert isInBounds(id, offset, length);
         long startAddress = getBlockAddress(id)+offset;
         ensureCapacity(startAddress+length);
         return pbuffer.getOutputStream(startAddress, length);

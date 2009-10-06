@@ -62,12 +62,6 @@ import java.util.TreeSet;
  */
 public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*implements RandomAccessPersistentBlockBuffer*/ {
 
-    /**
-     * Speed testing from JUnit in NetBeans requires disabling assertions in a more forceful manner.
-     * TODO: Remove this hack once performance testing has been completed.
-     */
-    private static final boolean ASSERT = true;
-
     private final long blockSize;
     private final boolean singleBitmap;
 
@@ -104,7 +98,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
             bitmapSize = 1;
         } else {
             long smallestPowerOfTwo = 1L<<(64-1-numZeros);
-            if(ASSERT) assert smallestPowerOfTwo==Long.highestOneBit(blockSize);
+            if(PersistentCollections.ASSERT) assert smallestPowerOfTwo==Long.highestOneBit(blockSize);
             if(smallestPowerOfTwo!=blockSize) {
                 smallestPowerOfTwo<<=1;
                 numZeros--;

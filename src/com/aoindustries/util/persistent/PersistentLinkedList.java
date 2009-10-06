@@ -210,8 +210,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             if(version!=VERSION) throw new IOException("Unsupported file version: "+version);
             _head = blockBuffer.getLong(metaDataBlockId, HEAD_OFFSET);
             _tail = blockBuffer.getLong(metaDataBlockId, TAIL_OFFSET);
-            assert _head==END_PTR || hasNonNullNextPrev(_head);
-            assert _tail==END_PTR || hasNonNullNextPrev(_tail);
+            if(PersistentCollections.ASSERT) assert _head==END_PTR || hasNonNullNextPrev(_head);
+            if(PersistentCollections.ASSERT) assert _tail==END_PTR || hasNonNullNextPrev(_tail);
             long count = 0;
             while(ids.hasNext()) {
                 long id = ids.next();
@@ -238,7 +238,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Checks if the entry has both next and previous pointers, also asserts isValidRange first.
      */
     private boolean hasNonNullNextPrev(long ptr) throws IOException {
-        assert isValidRange(ptr) : "Invalid range: "+ptr;
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr) : "Invalid range: "+ptr;
         return
             blockBuffer.getLong(ptr, NEXT_OFFSET)!=NULL_PTR
             && blockBuffer.getLong(ptr, PREV_OFFSET)!=NULL_PTR
@@ -258,7 +258,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Sets the head to the provided value.
      */
     private void setHead(long head) throws IOException {
-        assert head==END_PTR || hasNonNullNextPrev(head);
+        if(PersistentCollections.ASSERT) assert head==END_PTR || hasNonNullNextPrev(head);
         blockBuffer.putLong(metaDataBlockId, HEAD_OFFSET, head);
         this._head = head;
     }
@@ -271,7 +271,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Sets the tail to the provided value.
      */
     private void setTail(long tail) throws IOException {
-        assert tail==END_PTR || hasNonNullNextPrev(tail);
+        if(PersistentCollections.ASSERT) assert tail==END_PTR || hasNonNullNextPrev(tail);
         blockBuffer.putLong(metaDataBlockId, TAIL_OFFSET, tail);
         this._tail = tail;
     }
@@ -281,7 +281,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * The entry must have non-null next and prev.
      */
     private long getNext(long ptr) throws IOException {
-        assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
         return blockBuffer.getLong(ptr, NEXT_OFFSET);
     }
 
@@ -290,8 +290,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * The entry must have non-null next and prev.
      */
     private void setNext(long ptr, long next) throws IOException {
-        assert hasNonNullNextPrev(ptr);
-        assert next==END_PTR || hasNonNullNextPrev(next);
+        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert next==END_PTR || hasNonNullNextPrev(next);
         blockBuffer.putLong(ptr, NEXT_OFFSET, next);
     }
 
@@ -300,7 +300,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * The entry must have non-null next and prev.
      */
     private long getPrev(long ptr) throws IOException {
-        assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
         return blockBuffer.getLong(ptr, PREV_OFFSET);
     }
 
@@ -309,8 +309,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * The entry must have non-null next and prev.
      */
     private void setPrev(long ptr, long prev) throws IOException {
-        assert hasNonNullNextPrev(ptr);
-        assert prev==END_PTR || hasNonNullNextPrev(prev);
+        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert prev==END_PTR || hasNonNullNextPrev(prev);
         blockBuffer.putLong(ptr, PREV_OFFSET, prev);
     }
 
@@ -320,7 +320,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * The entry must have non-null next and prev.
      */
     private long getDataSize(long ptr) throws IOException {
-        assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
         return blockBuffer.getLong(ptr, DATA_SIZE_OFFSET);
     }
 
@@ -337,7 +337,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * The entry must have non-null next and prev.
      */
     private E getElement(long ptr) throws IOException {
-        assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
         long dataSize = getDataSize(ptr);
         if(dataSize==DATA_SIZE_NULL) return null;
 
@@ -362,8 +362,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * The entry must have non-null next and prev.
      */
     private void remove(long ptr) throws IOException {
-        assert hasNonNullNextPrev(ptr);
-        assert _size>0;
+        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert _size>0;
         long prev = getPrev(ptr);
         long next = getNext(ptr);
         if(prev==END_PTR) setHead(next);
@@ -391,8 +391,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Operates in constant time.
      */
     private long addEntry(long next, long prev, E element) throws IOException {
-        assert next==END_PTR || hasNonNullNextPrev(next);
-        assert prev==END_PTR || hasNonNullNextPrev(prev);
+        if(PersistentCollections.ASSERT) assert next==END_PTR || hasNonNullNextPrev(next);
+        if(PersistentCollections.ASSERT) assert prev==END_PTR || hasNonNullNextPrev(prev);
         if(_size==Long.MAX_VALUE) throw new IOException("List is full: _size==Long.MAX_VALUE");
 
         // Allocate and write new entry
@@ -436,17 +436,17 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         barrier(false);
         // Update pointers
         if(prev==END_PTR) {
-            assert _head==next;
+            if(PersistentCollections.ASSERT) assert _head==next;
             setHead(newPtr);
         } else {
-            assert getNext(prev)==next;
+            if(PersistentCollections.ASSERT) assert getNext(prev)==next;
             setNext(prev, newPtr);
         }
         if(next==END_PTR) {
-            assert _tail==prev;
+            if(PersistentCollections.ASSERT) assert _tail==prev;
             setTail(newPtr);
         } else {
-            assert getPrev(next)==prev;
+            if(PersistentCollections.ASSERT) assert getPrev(next)==prev;
             setPrev(next, newPtr);
         }
         // Barrier, to make sure links are correct
@@ -460,8 +460,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Adds the first entry to the list.
      */
     private void addFirstEntry(final E element) throws IOException {
-        assert getHead()==END_PTR;
-        assert getTail()==END_PTR;
+        if(PersistentCollections.ASSERT) assert getHead()==END_PTR;
+        if(PersistentCollections.ASSERT) assert getTail()==END_PTR;
         addEntry(END_PTR, END_PTR, element);
     }
 
@@ -469,7 +469,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Adds the provided element before the element at the provided location.
      */
     private void addBefore(final E element, final long ptr) throws IOException {
-        assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
         long prev = getPrev(ptr);
         addEntry(ptr, prev, element);
     }
@@ -478,7 +478,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Adds the provided element after the element at the provided location.
      */
     private void addAfter(final E element, final long ptr) throws IOException {
-        assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
         long next = getNext(ptr);
         addEntry(next, ptr, element);
     }
@@ -615,22 +615,22 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * This runs in linear time.
      */
     private long getPointerForIndex(int index) throws IOException {
-        assert _size>0;
+        if(PersistentCollections.ASSERT) assert _size>0;
         if(index<(_size >> 1)) {
             long ptr = getHead();
-            assert ptr!=END_PTR;
+            if(PersistentCollections.ASSERT) assert ptr!=END_PTR;
             for(int i=0;i<index;i++) {
                 ptr = getNext(ptr);
-                assert ptr!=END_PTR;
+                if(PersistentCollections.ASSERT) assert ptr!=END_PTR;
             }
             return ptr;
         } else {
             // Search backwards
             long bptr = getTail();
-            assert bptr!=END_PTR;
+            if(PersistentCollections.ASSERT) assert bptr!=END_PTR;
             for(long i=_size-1;i>index;i--) {
                 bptr = getPrev(bptr);
-                assert bptr!=END_PTR;
+                if(PersistentCollections.ASSERT) assert bptr!=END_PTR;
             }
             return bptr;
         }

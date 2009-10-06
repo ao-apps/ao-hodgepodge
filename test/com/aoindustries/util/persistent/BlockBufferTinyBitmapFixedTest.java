@@ -64,10 +64,10 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
         }
     }
 
-    public void testAllocateDeallocateTenMillion() throws Exception {
+    public void testAllocateDeallocateOneMillion() throws Exception {
         PersistentBlockBuffer blockBuffer = getBlockBuffer();
         try {
-            final int numAdd = 10000000;
+            final int numAdd = 1000000;
             List<Long> ids = new ArrayList<Long>(numAdd);
             long startNanos = System.nanoTime();
             for(int c=0;c<numAdd;c++) ids.add(blockBuffer.allocate(1));
