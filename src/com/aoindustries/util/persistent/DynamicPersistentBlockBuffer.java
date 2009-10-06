@@ -321,7 +321,8 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     }
 
     private void configureNewAllocation(long start, long end) throws IOException {
-        //System.out.println("DEBUG: start="+start+", end="+end);
+        System.out.println("DEBUG: start="+start+", end="+end+", end/start="+((float)end/(float)start));
+        long iterations = 0;
         while(start<end) {
             //int maxFsmBits = Long.numberOfTrailingZeros(start);
             // TODO
@@ -329,7 +330,9 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             //assert maxFsmBits < blockSizeBits;
             addFreeSpaceMap(start, 0, end, true);
             start++;
+            iterations++;
         }
+        System.out.println("DEBUG: Completed in "+iterations+" iterations");
         assert start==end;
     }
 
@@ -352,50 +355,37 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             assert blockSize>minimumSize; // Must have one byte extra for the header
             long blockMask = blockSize - 1;
             assert blockMask>=0;
-            // Allocate space at end, aligned with block size
+            // Align new block
             long blockStart = capacity;
             long blockOffset = blockStart & blockMask;
-            // TODO: Can this logic and that below be combined into a single method of:
-            // 1) Expand to include enough free space for:
-            //    a) This new block (properly aligned)
-            //    b) Additional space (% of file size)
-            //    c) Page alignment
-            // 2) Use new free space mappings to find space (should always work)
             if(blockOffset!=0) {
                 // Expanding existing allocation to the right to align the current block
                 long expandBytes = blockSize - blockOffset;
                 assert expandBytes>0 && expandBytes<blockSize;
-                long newCapacity = capacity+expandBytes;
-                assert (newCapacity & blockMask)==0;
-                pbuffer.setCapacity(newCapacity);
-                configureNewAllocation(capacity, newCapacity);
-                capacity = newCapacity;
                 blockStart += expandBytes;
-                // If the expansion caused free space that can fulfill this allocation, use it.
-                id = splitAllocate(blockSizeBits, capacity);
-                if(id!=-1) {
-                    System.out.println("DEBUG: Block alignment expansion caused free space that can fulfill this request, using it");
-                    assert isValidRange(id);
-                    assert blockSizeBits==getBlockSizeBits(pbuffer.get(id));
-                    assert isBlockAligned(id, blockSizeBits) : "Block not aligned: "+id;
-                    assert isBlockComplete(id, blockSizeBits) : "Block is incomplete: "+id;
-                    assert !isAllocated(pbuffer.get(id)) : "Block is allocated: "+id;
-                    pbuffer.put(id, (byte)(0x80 | blockSizeBits));
-                }
             }
             assert (blockStart & blockMask)==0;
-            if(id==-1) {
-                if(blockSize<PAGE_SIZE) {
-                    long newCapacity = blockStart + PAGE_SIZE;
-                    pbuffer.setCapacity(newCapacity);
-                    pbuffer.put(blockStart, (byte)(0x80 | blockSizeBits));
-                    configureNewAllocation(blockStart+blockSize, newCapacity);
-                } else {
-                    pbuffer.setCapacity(blockStart+blockSize);
-                    pbuffer.put(blockStart, (byte)(0x80 | blockSizeBits));
-                }
-                id = blockStart;
+            long newCapacity = blockStart + blockSize;
+            // Grow the file by at least 25% its previous size
+            long percentCapacity = capacity + (capacity>>2);
+            if(percentCapacity>newCapacity) newCapacity = percentCapacity;
+            // Align with page
+            long pageOffset = getPageOffset(newCapacity);
+            if(pageOffset!=0) {
+                newCapacity += PAGE_SIZE - pageOffset;
+                assert getPageOffset(newCapacity)==0;
             }
+            pbuffer.setCapacity(newCapacity);
+            configureNewAllocation(capacity, newCapacity);
+            // The expansion must have caused free space that can fulfill this allocation.
+            id = splitAllocate(blockSizeBits, newCapacity);
+            if(id==-1) throw new AssertionError("Free space not available after expansion: capacity="+capacity+", newCapacity="+newCapacity);
+            assert isValidRange(id);
+            assert blockSizeBits==getBlockSizeBits(pbuffer.get(id));
+            assert isBlockAligned(id, blockSizeBits) : "Block not aligned: "+id;
+            assert isBlockComplete(id, blockSizeBits) : "Block is incomplete: "+id;
+            assert !isAllocated(pbuffer.get(id)) : "Block is allocated: "+id;
+            pbuffer.put(id, (byte)(0x80 | blockSizeBits));
         }
         assert isValidRange(id);
         assert blockSizeBits==getBlockSizeBits(pbuffer.get(id));
