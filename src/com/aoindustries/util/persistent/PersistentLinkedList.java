@@ -425,7 +425,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             serializer.serialize(element, bufferOut);
             if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
             byte[] data = bufferOut.getInternalByteArray();
-            newPtr = blockBuffer.allocate(data.length);
+            newPtr = blockBuffer.allocate(DATA_OFFSET+data.length);
             PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
             PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
             PersistentCollections.longToBuffer(data.length, ioBuffer, DATA_SIZE_OFFSET);

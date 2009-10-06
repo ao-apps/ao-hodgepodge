@@ -270,7 +270,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 long startNanos = System.nanoTime();
                 for(int d=0;d<1000;d++) linkedFileList.add(toAdd[d]);
                 long endNanos = System.nanoTime();
-                System.out.println((c+1)+" of 100: Added 1000 random strings in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+                System.out.println((c+1)+" of 100: Added 1000 random integers in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
             }
             // TODO: Calculate the mean and standard deviation, compare for linear
         } finally {

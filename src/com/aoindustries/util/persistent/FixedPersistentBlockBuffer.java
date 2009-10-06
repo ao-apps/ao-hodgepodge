@@ -62,6 +62,12 @@ import java.util.TreeSet;
  */
 public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*implements RandomAccessPersistentBlockBuffer*/ {
 
+    /**
+     * Speed testing from JUnit in NetBeans requires disabling assertions in a more forceful manner.
+     * TODO: Remove this hack once performance testing has been completed.
+     */
+    private static final boolean ASSERT = true;
+
     private final long blockSize;
     private final boolean singleBitmap;
 
@@ -98,7 +104,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
             bitmapSize = 1;
         } else {
             long smallestPowerOfTwo = 1L<<(64-1-numZeros);
-            assert smallestPowerOfTwo==Long.highestOneBit(blockSize);
+            if(ASSERT) assert smallestPowerOfTwo==Long.highestOneBit(blockSize);
             if(smallestPowerOfTwo!=blockSize) {
                 smallestPowerOfTwo<<=1;
                 numZeros--;
@@ -184,12 +190,8 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
             bitmapBitsAddress = getBitMapBitsAddress(lowestFreeId);
         }
         // Grow the underlying storage to make room for the bitmap space.
-        // Partial bitmaps are OK.
-        // To avoid many repetitive re-mmaps, do the following:
-        // 1) Allocate enough room for 64 blocks, but not to exceed 1 MB
-        // 2) Round-up to the nearest 4096 block, always
         modCount++;
-        expandCapacity(bitmapBitsAddress+1);
+        expandCapacity(capacity, bitmapBitsAddress+1);
         pbuffer.put(bitmapBitsAddress, (byte)1);
         return lowestFreeId++;
     }
@@ -279,17 +281,14 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         return blockSize;
     }
 
-    protected long expandCapacity(long newCapacity) throws IOException {
-        /*if(singleBitmap) newCapacity = bitmapBitsAddress+1;
-        else {
-            long amountToAdd = blockSize*64;
-            if(amountToAdd > 1048576) amountToAdd = 1048576;
-            newCapacity = bitmapBitsAddress+amountToAdd;
-        }*/
+    protected void expandCapacity(long oldCapacity, long newCapacity) throws IOException {
+        // Grow the file by at least 25% its previous size
+        long percentCapacity = oldCapacity + (oldCapacity>>2);
+        if(percentCapacity>newCapacity) newCapacity = percentCapacity;
+        // Align with page
         if((newCapacity&0xfff)!=0) newCapacity = (newCapacity & 0xfffffffffffff000L)+4096L;
         //System.out.println("DEBUG: newCapacity="+newCapacity);
         pbuffer.setCapacity(newCapacity);
-        return newCapacity;
     }
 
     /**
@@ -298,7 +297,8 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
      */
     @Override
     protected void ensureCapacity(long capacity) throws IOException {
-        if(pbuffer.capacity()<capacity) expandCapacity(capacity);
+        long curCapacity = pbuffer.capacity();
+        if(curCapacity<capacity) expandCapacity(curCapacity, capacity);
     }
 
     /*public long getBlockCount() throws IOException {
