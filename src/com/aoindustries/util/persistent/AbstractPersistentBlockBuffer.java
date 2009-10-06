@@ -128,8 +128,10 @@ abstract public class AbstractPersistentBlockBuffer implements PersistentBlockBu
 
     /**
      * Gets the address of the block in the underlying persistent buffer.
+     * This should only be called for allocated blocks, implementations should
+     * check this with assertions.
      */
-    abstract protected long getBlockAddress(long id);
+    abstract protected long getBlockAddress(long id) throws IOException;
 
     /**
      * Ensures the underlying persistent buffer is of adequate capacity.  Grows the

@@ -400,14 +400,14 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         long newPtr;
         if(element==null) {
             dataSize = DATA_SIZE_NULL;
-            newPtr = blockBuffer.allocate(0);
+            newPtr = blockBuffer.allocate(DATA_OFFSET);
             PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
             PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
             PersistentCollections.longToBuffer(DATA_SIZE_NULL, ioBuffer, DATA_SIZE_OFFSET);
             blockBuffer.put(newPtr, 0, ioBuffer, 0, DATA_OFFSET);
         } else if(serializer.isFixedSerializedSize()) {
             dataSize = serializer.getSerializedSize(null);
-            newPtr = blockBuffer.allocate(dataSize);
+            newPtr = blockBuffer.allocate(DATA_OFFSET+dataSize);
             PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
             PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
             PersistentCollections.longToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);

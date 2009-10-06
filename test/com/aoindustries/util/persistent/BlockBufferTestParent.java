@@ -55,7 +55,8 @@ abstract public class BlockBufferTestParent extends TestCase {
                 if(((c+1)%10)==0) System.out.println(getClass()+": testAllocateDeallocate: Test loop "+(c+1)+" of 100");
                 // Allocate some blocks, must not return duplicate ids.
                 for(int d=0;d<1000;d++) {
-                    assertTrue(allocatedIds.add(blockBuffer.allocate(getAllocationSize(random))));
+                    long id = blockBuffer.allocate(getAllocationSize(random));
+                    assertTrue("Block id allocated twice: "+id, allocatedIds.add(id));
                 }
 
                 // Iterate the block ids.  Each must be allocated.  All allocated must

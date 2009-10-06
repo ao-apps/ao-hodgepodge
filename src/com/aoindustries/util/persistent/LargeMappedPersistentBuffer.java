@@ -67,7 +67,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
      */
     public LargeMappedPersistentBuffer() throws IOException {
         super(ProtectionLevel.NONE);
-        tempFile = File.createTempFile("RandomAccessFileBuffer", null);
+        tempFile = File.createTempFile("LargeMappedPersistentBuffer", null);
         tempFile.deleteOnExit();
         raf = new RandomAccessFile(tempFile, "rw");
         channel = raf.getChannel();
