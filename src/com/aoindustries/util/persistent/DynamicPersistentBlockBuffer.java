@@ -320,6 +320,19 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         }
     }
 
+    private void configureNewAllocation(long start, long end) throws IOException {
+        //System.out.println("DEBUG: start="+start+", end="+end);
+        while(start<end) {
+            //int maxFsmBits = Long.numberOfTrailingZeros(start);
+            // TODO
+            //System.out.println("DEBUG: maxFsmBits="+maxFsmBits+", blockSizeBits="+blockSizeBits);
+            //assert maxFsmBits < blockSizeBits;
+            addFreeSpaceMap(start, 0, end, true);
+            start++;
+        }
+        assert start==end;
+    }
+
     public long allocate(long minimumSize) throws IOException {
         if(minimumSize<0) throw new IllegalArgumentException("minimumSize<0: "+minimumSize);
         modCount++;
@@ -342,22 +355,26 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             // Allocate space at end, aligned with block size
             long blockStart = capacity;
             long blockOffset = blockStart & blockMask;
+            // TODO: Can this logic and that below be combined into a single method of:
+            // 1) Expand to include enough free space for:
+            //    a) This new block (properly aligned)
+            //    b) Additional space (% of file size)
+            //    c) Page alignment
+            // 2) Use new free space mappings to find space (should always work)
             if(blockOffset!=0) {
-                // TODO: Faster way, combine into a single setCapacity call with that below
+                // Expanding existing allocation to the right to align the current block
                 long expandBytes = blockSize - blockOffset;
                 assert expandBytes>0 && expandBytes<blockSize;
                 long newCapacity = capacity+expandBytes;
                 assert (newCapacity & blockMask)==0;
                 pbuffer.setCapacity(newCapacity);
-                for(long pos=capacity; pos<newCapacity; pos++) {
-                    addFreeSpaceMap(pos, 0, newCapacity, true);
-                }
+                configureNewAllocation(capacity, newCapacity);
                 capacity = newCapacity;
                 blockStart += expandBytes;
                 // If the expansion caused free space that can fulfill this allocation, use it.
                 id = splitAllocate(blockSizeBits, capacity);
                 if(id!=-1) {
-                    System.out.println("Block alignment expansion caused free space that can fulfill this request, using it");
+                    System.out.println("DEBUG: Block alignment expansion caused free space that can fulfill this request, using it");
                     assert isValidRange(id);
                     assert blockSizeBits==getBlockSizeBits(pbuffer.get(id));
                     assert isBlockAligned(id, blockSizeBits) : "Block not aligned: "+id;
@@ -372,10 +389,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                     long newCapacity = blockStart + PAGE_SIZE;
                     pbuffer.setCapacity(newCapacity);
                     pbuffer.put(blockStart, (byte)(0x80 | blockSizeBits));
-                    // TODO: Faster way
-                    for(long pos=blockStart+blockSize; pos<newCapacity; pos++) {
-                        addFreeSpaceMap(pos, 0, newCapacity, true);
-                    }
+                    configureNewAllocation(blockStart+blockSize, newCapacity);
                 } else {
                     pbuffer.setCapacity(blockStart+blockSize);
                     pbuffer.put(blockStart, (byte)(0x80 | blockSizeBits));
