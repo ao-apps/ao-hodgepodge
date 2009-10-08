@@ -155,7 +155,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
             public int read() throws IOException {
                 if(closed) throw new IOException("Stream closed");
                 if(curRemaining<1) throw new BufferUnderflowException();
-                byte value = get(curPosition++);
+                int value = get(curPosition++)&255;
                 curRemaining--;
                 return value;
             }
