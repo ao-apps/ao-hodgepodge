@@ -60,19 +60,23 @@ import java.util.Queue;
  * </p>
  * <p>
  * The first block allocated is a header:
+ * <pre>
  *     Offset   Type  Description
  *      0- 3    ASCII "PLL\n"
  *      4- 7    int   version
- *      8-15    long  position of the head or <code>END_PTR</code> if empty.
- *     16-23    long  position of the tail or <code>END_PTR</code> if empty.
+ *      8-15    long  block id of the head or <code>END_PTR</code> if empty.
+ *     16-23    long  block id of the tail or <code>END_PTR</code> if empty.
+ * </pre>
  * </p>
  * <p>
  * Each entry consists of:
+ * <pre>
  *     Offset   Name        Type     Description
  *       0- 7   next        long     block id of next, <code>END_PTR</code> for last element, or <code>NULL_PTR</code> for <code>null</code>
  *       8-15   prev        long     block id of prev, <code>END_PTR</code> for first element, or <code>NULL_PTR</code> for <code>null</code>
  *      16-23   dataSize    long     the size of the serialized data, <code>-1</code> means null element
  *      24+     data        data     the binary data
+ * </pre>
  * </p>
  *
  * <pre>
@@ -805,7 +809,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Replaces the element at the specified position in this list with the
      * specified element.
      *
-     * TODO: First try to replace at the current position.
+     * TODO: First try to replace at the current position?  Impact on atomicity?
      *
      * @param index index of the element to replace
      * @param element element to be stored at the specified position

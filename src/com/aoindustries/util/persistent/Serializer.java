@@ -27,8 +27,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Converts an object to and from <code>byte[]</code> representations.
- * <code>null</code> values will not be passed-in.
+ * Writes and reads serialized forms of objects to and from <code>OutputStream</code> and <code>InputStreams</code>.
+ * There is no need to handle <code>null</code> values as they will not be passed-in.
  * All <code>Serializers</code> should be considered not thread-safe.
  *
  * @author  AO Industries, Inc.

@@ -183,11 +183,17 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
         return len;
     }
 
+    /**
+     * Gets a single byte from the buffer.
+     */
     @Override
     public byte get(long position) throws IOException {
         return mappedBuffer.get(getIndex(position));
     }
 
+    /**
+     * Puts a single byte in the buffer.
+     */
     @Override
     public void put(long position, byte value) throws IOException {
         mappedBuffer.put(getIndex(position), value);

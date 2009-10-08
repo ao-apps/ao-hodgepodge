@@ -31,15 +31,15 @@ import java.nio.BufferUnderflowException;
 /**
  * <p>
  * A persistent buffer retains its data between uses.  They should not be used by
- * multiple virtual machines or even multiple instances objects within the same
+ * multiple virtual machines or even multiple instances within the same
  * virtual machine.  They are meant for persistence only, not interprocess
  * communication.
  * </p>
  * <p>
- * The ensure the data integrity of higher-level data structures, the barrier method
- * must be used.  The barrier ensures that all writes before the barrier happen before
- * all writes after the barrier.  It also accepts a parameter meaning that it should
- * also force (fsync) all writes before the barrier to physical media.  Write order
+ * To ensure the data integrity of higher-level data structures, the <code>barrier</code> method
+ * must be used.  A barrier ensures that all writes before the barrier happen before
+ * all writes after the barrier.  It also accepts a parameter indicating it should
+ * also <code>force</code> (fsync) all writes before the barrier to physical media.  Write order
  * between <code>barrier</code> calls is not maintained.
  * </p>
  *

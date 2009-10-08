@@ -142,12 +142,18 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         return count;
     }
 
+    /**
+     * Gets a single byte from the buffer.
+     */
     @Override
     public byte get(long position) throws IOException {
         raf.seek(position);
         return raf.readByte();
     }
 
+    /**
+     * Puts a single byte in the buffer.
+     */
     @Override
     public void put(long position, byte value) throws IOException {
         if(position>=capacity()) throw new BufferOverflowException();
