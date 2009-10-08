@@ -36,10 +36,6 @@ public class CompressedDataInputStream extends DataInputStream {
     
     public CompressedDataInputStream(InputStream in) {
         super(in);
-        for(int c=0;c<64;c++) {
-            lastStrings[c]="";
-            lastCommonLengths[c]=0;
-        }
     }
 
     /**
@@ -120,8 +116,8 @@ public class CompressedDataInputStream extends DataInputStream {
         return readCompressedInt(in);
     }
     
-    private final String[] lastStrings=new String[64];
-    private final int[] lastCommonLengths=new int[64];
+    private String[] lastStrings;
+    private int[] lastCommonLengths;
 
     /**
      * @exception  EOFException if the end of file is reached
@@ -132,6 +128,7 @@ public class CompressedDataInputStream extends DataInputStream {
         int slot=b1&0x3f;
 
         // Is there a difference to the common
+        if(lastCommonLengths==null) lastCommonLengths=new int[64];
         if((b1&0x80)!=0) {
             int diff=readCompressedInt();
             if(diff>=0) diff++;
@@ -140,14 +137,20 @@ public class CompressedDataInputStream extends DataInputStream {
 
         // Is there a suffix String
         int common=lastCommonLengths[slot];
+        if(lastStrings==null) lastStrings=new String[64];
         if((b1&0x40)!=0) {
             String suffix=readUTF();
             if(common==0) return lastStrings[slot]=suffix;
-            else return lastStrings[slot]=lastStrings[slot].substring(0, common)+suffix;
+            else {
+                String last = lastStrings[slot];
+                if(last==null) last="";
+                return lastStrings[slot]=last.substring(0, common)+suffix;
+            }
         } else {
             String last=lastStrings[slot];
+            if(last==null) last="";
             if(common==last.length()) return last;
-            else return lastStrings[slot]=lastStrings[slot].substring(0, common);
+            else return lastStrings[slot]=last.substring(0, common);
         }
     }
 
