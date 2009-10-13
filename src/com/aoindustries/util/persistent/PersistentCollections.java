@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
+import org.checkthread.annotations.ThreadSafe;
 
 /**
  * A set of static utility methods to help in the selection, creation, and management
@@ -50,11 +51,13 @@ public class PersistentCollections {
     }
 
     // <editor-fold desc="Protected byte[] manipulation methods">
+    @ThreadSafe
     static void charToBuffer(char ch, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(ch >>> 8);
         ioBuffer[off+1] = (byte)ch;
     }
 
+    @ThreadSafe
     static char bufferToChar(byte[] ioBuffer, int off) {
         return
             (char)(
@@ -64,11 +67,13 @@ public class PersistentCollections {
         ;
     }
 
+    @ThreadSafe
     static void shortToBuffer(short s, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(s >>> 8);
         ioBuffer[off+1] = (byte)s;
     }
 
+    @ThreadSafe
     static short bufferToShort(byte[] ioBuffer, int off) {
         return
             (short)(
@@ -78,6 +83,7 @@ public class PersistentCollections {
         ;
     }
 
+    @ThreadSafe
     static void intToBuffer(int i, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(i >>> 24);
         ioBuffer[off+1] = (byte)(i >>> 16);
@@ -85,6 +91,7 @@ public class PersistentCollections {
         ioBuffer[off+3] = (byte)i;
     }
 
+    @ThreadSafe
     static int bufferToInt(byte[] ioBuffer, int off) {
         return
               ((ioBuffer[off]&255) << 24)
@@ -94,6 +101,7 @@ public class PersistentCollections {
         ;
     }
 
+    @ThreadSafe
     static void longToBuffer(long l, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(l >>> 56);
         ioBuffer[off+1] = (byte)(l >>> 48);
@@ -105,6 +113,7 @@ public class PersistentCollections {
         ioBuffer[off+7] = (byte)l;
     }
 
+    @ThreadSafe
     static long bufferToLong(byte[] ioBuffer, int off) {
         return
               ((ioBuffer[off]&255L) << 56)
@@ -118,11 +127,15 @@ public class PersistentCollections {
         ;
     }
 
+    /**
+     * The value is never modified therefore thread safe.
+     */
     private static final byte[] zeros = new byte[4096];
 
     /**
      * Writes the requested number of zeros to the provided output.
      */
+    @ThreadSafe
     static void fillZeros(DataOutput out, long count) throws IOException {
         if(count<0) throw new IllegalArgumentException("count<0: "+count);
         while(count>4096) {
@@ -135,6 +148,7 @@ public class PersistentCollections {
     /**
      * Writes the requested number of zeros to the provided buffer.
      */
+    @ThreadSafe
     static void fillZeros(ByteBuffer buffer, long count) throws IOException {
         if(count<0) throw new IllegalArgumentException("count<0: "+count);
         while(count>4096) {
@@ -147,6 +161,7 @@ public class PersistentCollections {
     /**
      * Fully reads a buffer.
      */
+    @ThreadSafe
     static void readFully(InputStream in, byte[] buffer, int off, int len) throws IOException {
         while(len>0) {
             int count = in.read(buffer, off, len);
@@ -159,6 +174,7 @@ public class PersistentCollections {
     /**
      * Checks if the subrange of two byte arrays is equal.
      */
+    @ThreadSafe
     static boolean equals(byte[] b1, byte[] b2, int off, int len) {
         for(int end=off+len; off<end; off++) {
             if(b1[off]!=b2[off]) return false;
@@ -181,6 +197,7 @@ public class PersistentCollections {
      * @param maximumCapacity The maximum size of data that may be stored in the
      *                        buffer.  To ensure no limits, use <code>Long.MAX_VALUE</code>.
      */
+    @ThreadSafe
     public static PersistentBuffer getPersistentBuffer(long maximumCapacity) throws IOException {
         // If < 1 GB, use mapped buffer
         if(maximumCapacity<(1L<<30)) {
@@ -216,6 +233,7 @@ public class PersistentCollections {
      *                        the length of the file is used instead.
      *                        To ensure no limits, use <code>Long.MAX_VALUE</code>.
      */
+    @ThreadSafe
     public static PersistentBuffer getPersistentBuffer(RandomAccessFile raf, ProtectionLevel protectionLevel, long maximumCapacity) throws IOException {
         if(maximumCapacity<(1L<<30)) {
             long len = raf.length();
@@ -244,6 +262,7 @@ public class PersistentCollections {
     /**
      * Selects the most efficient <code>Serializer</code> for the provided class.
      */
+    @ThreadSafe
     public static <E> Serializer<E> getSerializer(Class<E> type) {
         if(type==Boolean.class) return (Serializer<E>)new BooleanSerializer();
         if(type==Byte.class) return (Serializer<E>)new ByteSerializer();
@@ -274,6 +293,7 @@ public class PersistentCollections {
      * @param additionalBlockSpace  The maximum additional space needed beyond the space used by the serializer.  This may be used
      *                              for linked list pointers, for example.
      */
+    @ThreadSafe
     public static PersistentBlockBuffer getPersistentBlockBuffer(Serializer<?> serializer, PersistentBuffer pbuffer, long additionalBlockSpace) throws IOException {
         if(additionalBlockSpace<0) throw new IllegalArgumentException("additionalBlockSpace<0: "+additionalBlockSpace);
         if(serializer.isFixedSerializedSize()) {
@@ -308,6 +328,7 @@ public class PersistentCollections {
      *                              for linked list pointers, for example.
      */
     /*
+    @ThreadSafe
     public static RandomAccessPersistentBlockBuffer getRandomAccessPersistentBlockBuffer(Serializer<?> serializer, PersistentBuffer pbuffer, long additionalBlockSpace) throws IOException {
         if(additionalBlockSpace<0) throw new IllegalArgumentException("additionalBlockSpace<0: "+additionalBlockSpace);
         // Use power-of-two fixed size blocks if possible

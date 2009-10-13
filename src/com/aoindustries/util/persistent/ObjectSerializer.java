@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import org.checkthread.annotations.NotThreadSafe;
 
 /**
  * Serializes any <code>Serializable</code> objects.
@@ -44,6 +45,7 @@ public class ObjectSerializer<E> extends BufferedSerializer<E> {
         this.type = type;
     }
 
+    @NotThreadSafe
     protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException {
         ObjectOutputStream oout = new ObjectOutputStream(buffer);
         try {
@@ -53,6 +55,7 @@ public class ObjectSerializer<E> extends BufferedSerializer<E> {
         }
     }
 
+    @NotThreadSafe
     public E deserialize(InputStream in) throws IOException {
         ObjectInputStream oin = new ObjectInputStream(in);
         try {

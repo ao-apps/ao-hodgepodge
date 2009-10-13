@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009  AO Industries, Inc.
+ * Copyright (C) 2008, 2009  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,25 +22,28 @@
  */
 package com.aoindustries.util.persistent;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.RandomAccessFile;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * A persistent set of blocks of arbitrary data that also allows efficient
- * random access.
+ * Tests the <code>RandomFailBuffer</code> in no-fail mode.
  *
  * @author  AO Industries, Inc.
  */
-public interface RandomAccessPersistentBlockBuffer extends PersistentBlockBuffer {
+public class PersistentLinkedListRandomFailBufferNoFailTest extends PersistentLinkedListTestParent {
 
-    /**
-     * Gets the number of allocated blocks.
-     */
-    @NotThreadSafe
-    long getBlockCount() throws IOException;
+    public static Test suite() {
+        TestSuite suite = new TestSuite(PersistentLinkedListRandomFailBufferNoFailTest.class);
+        return suite;
+    }
 
-    /**
-     * Gets the allocated block id at the provided index.
-     */
-    @NotThreadSafe
-    long getBlockId(long index) throws IOException;
+    public PersistentLinkedListRandomFailBufferNoFailTest(String testName) {
+        super(testName);
+    }
+
+    protected PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception {
+        return new RandomFailBuffer(PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), protectionLevel, Long.MAX_VALUE), false);
+    }
 }

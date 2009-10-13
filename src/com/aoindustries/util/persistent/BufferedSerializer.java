@@ -25,6 +25,8 @@ package com.aoindustries.util.persistent;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import org.checkthread.annotations.NotThreadSafe;
+import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Serializes any objects by using a buffer between the <code>getSerializedSize</code>
@@ -42,6 +44,7 @@ abstract public class BufferedSerializer<E> implements Serializer<E> {
     public BufferedSerializer() {
     }
 
+    @NotThreadSafe
     private void serializeToBuffer(E value) throws IOException {
         if(lastSerialized!=value) {
             lastSerialized = null;
@@ -51,19 +54,23 @@ abstract public class BufferedSerializer<E> implements Serializer<E> {
         }
     }
 
+    @ThreadSafe
     final public boolean isFixedSerializedSize() {
         return false;
     }
 
+    @NotThreadSafe
     final public long getSerializedSize(E value) throws IOException {
         serializeToBuffer(value);
         return buffer.size();
     }
 
+    @NotThreadSafe
     final public void serialize(E value, OutputStream out) throws IOException {
         serializeToBuffer(value);
         buffer.writeTo(out);
     }
 
+    @NotThreadSafe
     abstract protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException;
 }

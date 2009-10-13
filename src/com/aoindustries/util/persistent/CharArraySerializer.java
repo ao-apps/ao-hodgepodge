@@ -26,6 +26,8 @@ import com.aoindustries.util.BufferManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import org.checkthread.annotations.NotThreadSafe;
+import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Serializes <code>char[]</code> objects.
@@ -35,14 +37,17 @@ import java.io.OutputStream;
  */
 public class CharArraySerializer implements Serializer<char[]> {
 
+    @ThreadSafe
     public boolean isFixedSerializedSize() {
         return false;
     }
 
+    @NotThreadSafe
     public long getSerializedSize(char[] value) {
         return 4+value.length/2;
     }
 
+    @NotThreadSafe
     public void serialize(char[] chars, OutputStream out) throws IOException {
         byte[] bytes = BufferManager.getBytes();
         try {
@@ -65,6 +70,7 @@ public class CharArraySerializer implements Serializer<char[]> {
         }
     }
 
+    @NotThreadSafe
     public char[] deserialize(InputStream in) throws IOException {
         byte[] bytes = BufferManager.getBytes();
         try {

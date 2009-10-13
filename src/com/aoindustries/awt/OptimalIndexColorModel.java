@@ -47,6 +47,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
             this.color = color;
         }
 
+        @Override
         public boolean equals(Object O) {
             return
                 O!=null
@@ -55,6 +56,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
             ;
         }
         
+        @Override
         public int hashCode() {
             return color;
         }
@@ -69,8 +71,15 @@ public class OptimalIndexColorModel extends IndexColorModel {
             return o1.count-o2.count;
         }
 
+        @Override
         public boolean equals(Object obj) {
             return obj!=null && (obj instanceof ColorCountCountComparator);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            return hash;
         }
     }
 
@@ -132,9 +141,9 @@ public class OptimalIndexColorModel extends IndexColorModel {
 
         for(int c=0;c<numColorsUsed;c++) {
             int color=colorCountList.get(c).color;
-            byte red=r[c]=(byte)((color>>>16)&255);
-            byte green=g[c]=(byte)((color>>>8)&255);
-            byte blue=b[c]=(byte)(color&255);
+            /*byte red=*/ r[c]=(byte)((color>>>16)&255);
+            /*byte green=*/ g[c]=(byte)((color>>>8)&255);
+            /*byte blue=*/ b[c]=(byte)(color&255);
             // TODO: transparency not distinguished properly: if(transparent_index==-1 && red==-1 && green==-1 && blue==-1) transparent_index=c;
 	}
 	return new OptimalIndexColorModel(numColorsUsed, r, g, b, transparent_index);

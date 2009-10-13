@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009  AO Industries, Inc.
+ * Copyright (C) 2008, 2009  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,41 +22,35 @@
  */
 package com.aoindustries.util.persistent;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+import java.io.RandomAccessFile;
+import java.util.Random;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * Serializes <code>Double</code> objects.
- * This class is not thread safe.
- *
  * @author  AO Industries, Inc.
  */
-public class DoubleSerializer implements Serializer<Double> {
+public class BlockBufferRandomFailBufferNoFailTest extends BlockBufferTestParent {
 
-    @ThreadSafe
-    public boolean isFixedSerializedSize() {
-        return true;
+    public static Test suite() {
+        TestSuite suite = new TestSuite(BlockBufferRandomFailBufferNoFailTest.class);
+        return suite;
     }
 
-    @NotThreadSafe
-    public long getSerializedSize(Double value) {
-        return 8;
+    public BlockBufferRandomFailBufferNoFailTest(String testName) {
+        super(testName);
     }
 
-    private final byte[] buffer = new byte[8];
-
-    @NotThreadSafe
-    public void serialize(Double value, OutputStream out) throws IOException {
-        PersistentCollections.longToBuffer(Double.doubleToRawLongBits(value), buffer, 0);
-        out.write(buffer, 0, 8);
+    public PersistentBlockBuffer getBlockBuffer() throws IOException {
+        File tempFile = File.createTempFile("BlockBufferRandomFailBufferNoFailTest", null);
+        tempFile.deleteOnExit();
+        return new DynamicPersistentBlockBuffer(new RandomFailBuffer(PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), ProtectionLevel.NONE, Long.MAX_VALUE), false));
     }
 
-    @NotThreadSafe
-    public Double deserialize(InputStream in) throws IOException {
-        PersistentCollections.readFully(in, buffer, 0, 8);
-        return Double.longBitsToDouble(PersistentCollections.bufferToLong(buffer, 0));
+    @Override
+    public long getAllocationSize(Random random) throws IOException {
+        return random.nextInt(4097);
     }
 }

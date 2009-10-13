@@ -25,6 +25,8 @@ package com.aoindustries.util.persistent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import org.checkthread.annotations.NotThreadSafe;
+import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Serializes <code>Integer</code> objects.
@@ -34,21 +36,25 @@ import java.io.OutputStream;
  */
 public class IntegerSerializer implements Serializer<Integer> {
 
+    @ThreadSafe
     public boolean isFixedSerializedSize() {
         return true;
     }
 
+    @NotThreadSafe
     public long getSerializedSize(Integer value) {
         return 4;
     }
 
     private final byte[] buffer = new byte[4];
 
+    @NotThreadSafe
     public void serialize(Integer value, OutputStream out) throws IOException {
         PersistentCollections.intToBuffer(value, buffer, 0);
         out.write(buffer, 0, 4);
     }
 
+    @NotThreadSafe
     public Integer deserialize(InputStream in) throws IOException {
         PersistentCollections.readFully(in, buffer, 0, 4);
         return PersistentCollections.bufferToInt(buffer, 0);

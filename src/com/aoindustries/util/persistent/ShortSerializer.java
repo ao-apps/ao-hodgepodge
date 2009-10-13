@@ -25,6 +25,8 @@ package com.aoindustries.util.persistent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import org.checkthread.annotations.NotThreadSafe;
+import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Serializes <code>Short</code> objects.
@@ -34,21 +36,25 @@ import java.io.OutputStream;
  */
 public class ShortSerializer implements Serializer<Short> {
 
+    @ThreadSafe
     public boolean isFixedSerializedSize() {
         return true;
     }
 
+    @NotThreadSafe
     public long getSerializedSize(Short value) {
         return 2;
     }
 
     private final byte[] buffer = new byte[2];
 
+    @NotThreadSafe
     public void serialize(Short value, OutputStream out) throws IOException {
         PersistentCollections.shortToBuffer(value, buffer, 0);
         out.write(buffer, 0, 2);
     }
 
+    @NotThreadSafe
     public Short deserialize(InputStream in) throws IOException {
         PersistentCollections.readFully(in, buffer, 0, 2);
         return PersistentCollections.bufferToShort(buffer, 0);

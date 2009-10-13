@@ -126,7 +126,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             // Save and restore, checking matches
             linkedFileList.close();
             PersistentLinkedList<String> newFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.READ_ONLY), String.class);
-            assertEquals(newFileList, linkedList);
+            try {
+                assertEquals(newFileList, linkedList);
+            } finally {
+                newFileList.close();
+            }
         } finally {
             linkedFileList.close();
             linkedFileList = null;
@@ -214,7 +218,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             // Save and restore, checking matches
             linkedFileList.close();
             PersistentLinkedList<Integer> newFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.READ_ONLY), Integer.class);
-            assertEquals(newFileList, linkedList);
+            try {
+                assertEquals(newFileList, linkedList);
+            } finally {
+                newFileList.close();
+            }
         } finally {
             linkedFileList.close();
             linkedFileList = null;

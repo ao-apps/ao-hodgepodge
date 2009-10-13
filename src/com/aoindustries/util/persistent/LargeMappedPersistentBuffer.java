@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.checkthread.annotations.NotThreadSafe;
+import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Uses a set of <code>MappedByteBuffer</code> for persistence.  Each buffer
@@ -120,11 +122,13 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
         fillMappedBuffers();
     }
 
+    @NotThreadSafe
     public boolean isClosed() {
         return closed;
     }
 
     @Override
+    @NotThreadSafe
     public void finalize() {
         try {
             close();
@@ -133,12 +137,14 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
         }
     }
 
+    @NotThreadSafe
     public void close() throws IOException {
         closed = true;
         raf.close();
         if(tempFile!=null && tempFile.exists() && !tempFile.delete()) throw new IOException("Unable to delete temp file: "+tempFile);
     }
 
+    @NotThreadSafe
     public long capacity() throws IOException {
         return raf.length();
     }
@@ -146,6 +152,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     /**
      * Fills the buffers to cover the entire file length.
      */
+    @NotThreadSafe
     private void fillMappedBuffers() throws IOException {
         long len = raf.length();
         long maxBuffNum = len>>>BUFFER_NUM_BIT_SHIFT;
@@ -161,7 +168,8 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    private int getBufferNum(long position) throws IOException {
+    @ThreadSafe
+    private static int getBufferNum(long position) throws IOException {
         if(position<0) throw new IllegalArgumentException("position<0: "+position);
         long buffNum = position>>>BUFFER_NUM_BIT_SHIFT;
         if(buffNum>=Integer.MAX_VALUE) throw new IOException("position too large for LargeMappedPersistentBuffer: "+position);
@@ -171,10 +179,12 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     /**
      * Gets the position as an integer or throws IOException if too big for a mapped buffer.
      */
-    private int getIndex(long position) throws IOException {
+    @ThreadSafe
+    private static int getIndex(long position) throws IOException {
         return (int)(position&BUFFER_INDEX_MASK);
     }
 
+    @NotThreadSafe
     private void fillZeros(long position, long len) throws IOException {
         while(len>0) {
             long bufferStart = position & BUFFER_INDEX_MASK;
@@ -190,6 +200,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
         }
     }
 
+    @NotThreadSafe
     public void setCapacity(long newLength) throws IOException {
         long oldLength = capacity();
         if(oldLength!=newLength) {
@@ -214,6 +225,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
+    @NotThreadSafe
     public void get(long position, byte[] buff, int off, int len) throws IOException {
         if(len>0) {
             int startBufferNum = getBufferNum(position);
@@ -238,6 +250,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
         }
     }
 
+    @NotThreadSafe
     public int getSome(long position, byte[] buff, int off, int len) throws IOException {
         get(position, buff, off, len);
         return len;
@@ -247,6 +260,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
      * Gets a single byte from the buffer.
      */
     @Override
+    @NotThreadSafe
     public byte get(long position) throws IOException {
         return mappedBuffers.get(getBufferNum(position)).get(getIndex(position));
     }
@@ -255,12 +269,14 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
      * Puts a single byte in the buffer.
      */
     @Override
+    @NotThreadSafe
     public void put(long position, byte value) throws IOException {
         int bufferNum = getBufferNum(position);
         mappedBuffers.get(bufferNum).put(getIndex(position), value);
         if(modifiedBuffers!=null) modifiedBuffers.set(bufferNum, true);
     }
 
+    @NotThreadSafe
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         if(len>0) {
             int startBufferNum = getBufferNum(position);
@@ -292,6 +308,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
      * There is not currently a way to provide a barrier without using <code>force</code>.
      * This just uses force for both.
      */
+    @NotThreadSafe
     public void barrier(boolean force) throws IOException {
         if(
             force
@@ -309,11 +326,13 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
+    @NotThreadSafe
     public boolean getBoolean(long position) throws IOException {
         return get(position)!=0;
     }
 
     @Override
+    @NotThreadSafe
     public int getInt(long position) throws IOException {
         int startBufferNum = getBufferNum(position);
         int endBufferNum = getBufferNum(position+3);
@@ -330,6 +349,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
+    @NotThreadSafe
     public long getLong(long position) throws IOException {
         int startBufferNum = getBufferNum(position);
         int endBufferNum = getBufferNum(position+7);
@@ -350,6 +370,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
+    @NotThreadSafe
     public void putInt(long position, int value) throws IOException {
         int startBufferNum = getBufferNum(position);
         int endBufferNum = getBufferNum(position+3);
@@ -365,6 +386,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
+    @NotThreadSafe
     public void putLong(long position, long value) throws IOException {
         int startBufferNum = getBufferNum(position);
         int endBufferNum = getBufferNum(position+7);

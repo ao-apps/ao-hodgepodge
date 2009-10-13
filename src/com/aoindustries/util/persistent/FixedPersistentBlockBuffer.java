@@ -29,6 +29,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.checkthread.annotations.NotThreadSafe;
+import org.checkthread.annotations.ThreadSafe;
 
 /**
  * <p>
@@ -119,6 +121,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
      * Gets the address of the byte that stores the bitmap for the provided id.
      * This is algorithmic and may be beyond the end of the buffer capacity.
      */
+    @ThreadSafe // singleBitmap, bitmapSize, and blockSize are all final
     private long getBitMapBitsAddress(long id) {
         if(singleBitmap) {
             return id>>>3;
@@ -135,6 +138,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
      * Gets the address that stores the beginning of the block with the provided id.
      * This is algorithmic and may be beyond the end of the buffer capacity.
      */
+    @ThreadSafe // singleBitmap, bitmapSize, and blockSize are all final
     protected long getBlockAddress(long id) {
         if(singleBitmap) {
             return bitmapSize + id * blockSize;
@@ -149,6 +153,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
     private long lowestFreeId = 0; // One direction scan used before knownFreeIds is populated
     private final SortedSet<Long> knownFreeIds = new TreeSet<Long>();
 
+    @NotThreadSafe
     public long allocate(long minimumSize) throws IOException {
         if(minimumSize>blockSize) throw new IOException("minimumSize>blockSize: "+minimumSize+">"+blockSize);
         // Check known first
@@ -193,6 +198,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
     /**
      * Deallocates the block for the provided id.
      */
+    @NotThreadSafe
     public void deallocate(long id) throws IOException {
         long bitmapBitsAddress = getBitMapBitsAddress(id);
         byte bits = pbuffer.get(bitmapBitsAddress);
@@ -204,11 +210,13 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         pbuffer.put(bitmapBitsAddress, (byte)(bits ^ bit));
     }
 
+    @NotThreadSafe
     public Iterator<Long> iterateBlockIds() {
         return new Iterator<Long>() {
             private int expectedModCount = modCount;
             private long lastId = -1;
             private long nextId = 0;
+            @NotThreadSafe
             public boolean hasNext() {
                 if(expectedModCount!=modCount) throw new ConcurrentModificationException();
                 try {
@@ -233,6 +241,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
                     throw new WrappedException(err);
                 }
             }
+            @NotThreadSafe
             public Long next() {
                 if(expectedModCount!=modCount) throw new ConcurrentModificationException();
                 try {
@@ -257,6 +266,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
                     throw new WrappedException(err);
                 }
             }
+            @NotThreadSafe
             public void remove() {
                 try {
                     if(expectedModCount!=modCount) throw new ConcurrentModificationException();
@@ -271,10 +281,12 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
         };
     }
 
+    @NotThreadSafe // blockSize is final
     public long getBlockSize(long id) {
         return blockSize;
     }
 
+    @NotThreadSafe
     protected void expandCapacity(long oldCapacity, long newCapacity) throws IOException {
         // Grow the file by at least 25% its previous size
         long percentCapacity = oldCapacity + (oldCapacity>>2);
@@ -290,15 +302,19 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
      * additional space as needed here, rounding up to the next 4096-byte boundary.
      */
     @Override
+    @NotThreadSafe
     protected void ensureCapacity(long capacity) throws IOException {
         long curCapacity = pbuffer.capacity();
         if(curCapacity<capacity) expandCapacity(curCapacity, capacity);
     }
 
-    /*public long getBlockCount() throws IOException {
+    /*
+    @NotThreadSafe
+    public long getBlockCount() throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @NotThreadSafe
     public long getBlockId(long index) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }*/

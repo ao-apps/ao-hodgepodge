@@ -119,11 +119,10 @@ public class FilteredJTable<T extends Row> extends JTable {
         return sorter.convertToInnerIndex(selectedRow);
     }
 
-    private static final JScrollBar tempSB=new JScrollBar(JScrollBar.VERTICAL);
-
     @Override
     public Dimension getPreferredScrollableViewportSize() {
         Dimension D1=getUI().getPreferredSize(this);
+        JScrollBar tempSB=new JScrollBar(JScrollBar.VERTICAL);
         Dimension D2=tempSB.getUI().getPreferredSize(tempSB);
         Dimension D=new Dimension(D1.width+D2.width, D1.height);
         return D;
