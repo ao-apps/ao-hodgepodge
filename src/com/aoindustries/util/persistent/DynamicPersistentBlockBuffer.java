@@ -332,7 +332,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             pbuffer.put(nextId, (byte)blockSizeBits);
             if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
             fsm.add(nextId);
-            barrier(false); // When splitting, the right side must have appropriate size header before left side is updated
+            barrier(false); // Required? When splitting, the right side must have appropriate size header before left side is updated
             pbuffer.put(biggerAvailableId, (byte)blockSizeBits);
             return biggerAvailableId;
         }

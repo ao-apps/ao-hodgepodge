@@ -53,7 +53,7 @@ abstract public class BlockBufferTestParent extends TestCase {
     abstract public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException;
     abstract public long getAllocationSize(Random random) throws IOException;
 
-    public void teTODOstAllocateDeallocate() throws Exception {
+    public void testAllocateDeallocate() throws Exception {
         File tempFile = File.createTempFile("BlockBufferTestParent", null);
         tempFile.deleteOnExit();
         PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));

@@ -62,4 +62,12 @@ public class BlockBufferSingleBitmapFixedTest extends BlockBufferTestParent {
     public void testFailureRecoveryBarrier() {
         // Skip test
     }
+
+    /**
+     * This test is not compatible with non-persistent {@link SparseBuffer}
+     */
+    @Override
+    public void testFailureRecoveryForce() {
+        // Skip test
+    }
 }
