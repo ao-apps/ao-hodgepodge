@@ -43,10 +43,8 @@ public class BlockBufferRandomFailBufferNoFailTest extends BlockBufferTestParent
         super(testName);
     }
 
-    public PersistentBlockBuffer getBlockBuffer() throws IOException {
-        File tempFile = File.createTempFile("BlockBufferRandomFailBufferNoFailTest", null);
-        tempFile.deleteOnExit();
-        return new DynamicPersistentBlockBuffer(new RandomFailBuffer(PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), ProtectionLevel.NONE, Long.MAX_VALUE), false));
+    public PersistentBlockBuffer getBlockBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+        return new DynamicPersistentBlockBuffer(new RandomFailBuffer(PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), protectionLevel, Long.MAX_VALUE), false));
     }
 
     @Override

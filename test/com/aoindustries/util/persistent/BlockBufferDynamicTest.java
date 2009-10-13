@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import junit.framework.Test;
@@ -41,8 +42,8 @@ public class BlockBufferDynamicTest extends BlockBufferTestParent {
         super(testName);
     }
 
-    public PersistentBlockBuffer getBlockBuffer() throws IOException {
-        return new DynamicPersistentBlockBuffer(new MappedPersistentBuffer());
+    public PersistentBlockBuffer getBlockBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+        return new DynamicPersistentBlockBuffer(new MappedPersistentBuffer(tempFile, protectionLevel));
     }
 
     @Override

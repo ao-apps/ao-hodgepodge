@@ -23,10 +23,9 @@
 package com.aoindustries.util.persistent;
 
 import com.aoindustries.sql.SQLUtility;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import junit.framework.Test;
@@ -46,8 +45,8 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
         super(testName);
     }
 
-    public PersistentBlockBuffer getBlockBuffer() throws IOException {
-        return new FixedPersistentBlockBuffer(new MappedPersistentBuffer(), 1);
+    public PersistentBlockBuffer getBlockBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+        return new FixedPersistentBlockBuffer(new MappedPersistentBuffer(tempFile, protectionLevel), 1);
     }
 
     @Override
@@ -56,7 +55,9 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
     }
 
     public void testAllocateOneMillion() throws Exception {
-        PersistentBlockBuffer blockBuffer = getBlockBuffer();
+        File tempFile = File.createTempFile("BlockBufferTinyBitmapFixedTest", null);
+        tempFile.deleteOnExit();
+        PersistentBlockBuffer blockBuffer = getBlockBuffer(tempFile, ProtectionLevel.NONE);
         try {
             for(int c=0;c<1000000;c++) blockBuffer.allocate(1);
         } finally {
@@ -65,7 +66,9 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
     }
 
     public void testAllocateDeallocateOneMillion() throws Exception {
-        PersistentBlockBuffer blockBuffer = getBlockBuffer();
+        File tempFile = File.createTempFile("BlockBufferTinyBitmapFixedTest", null);
+        tempFile.deleteOnExit();
+        PersistentBlockBuffer blockBuffer = getBlockBuffer(tempFile, ProtectionLevel.NONE);
         try {
             final int numAdd = 1000000;
             List<Long> ids = new ArrayList<Long>(numAdd);

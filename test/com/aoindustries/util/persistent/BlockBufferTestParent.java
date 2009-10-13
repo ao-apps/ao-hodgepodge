@@ -22,6 +22,8 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.sql.SQLUtility;
+import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -44,11 +46,13 @@ abstract public class BlockBufferTestParent extends TestCase {
 
     static final Random random = new SecureRandom();
 
-    abstract public PersistentBlockBuffer getBlockBuffer() throws IOException;
+    abstract public PersistentBlockBuffer getBlockBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException;
     abstract public long getAllocationSize(Random random) throws IOException;
 
     public void testAllocateDeallocate() throws Exception {
-        PersistentBlockBuffer blockBuffer = getBlockBuffer();
+        File tempFile = File.createTempFile("BlockBufferTestParent", null);
+        tempFile.deleteOnExit();
+        PersistentBlockBuffer blockBuffer = getBlockBuffer(tempFile, ProtectionLevel.NONE);
         try {
             Set<Long> allocatedIds = new HashSet<Long>();
             for(int c=0;c<100;c++) {
@@ -81,5 +85,29 @@ abstract public class BlockBufferTestParent extends TestCase {
         } finally {
             blockBuffer.close();
         }
+    }
+
+    private void doTestFailureRecovery(ProtectionLevel protectionLevel) throws Exception {
+        File tempFile = File.createTempFile("BlockBufferTestParent", null);
+        tempFile.deleteOnExit();
+        for(int c=0;c<100;c++) {
+            long startNanos = System.nanoTime();
+            PersistentBlockBuffer failingBlockBuffer = getBlockBuffer(tempFile, protectionLevel);
+            try {
+                // TODO
+            } finally {
+                failingBlockBuffer.close();
+            }
+            long endNanos = System.nanoTime();
+            System.out.println(protectionLevel+": "+(c+1)+" of 100: Tested block buffer failure recovery in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+        }
+    }
+
+    public void testFailureRecoveryBarrier() throws Exception {
+        doTestFailureRecovery(ProtectionLevel.BARRIER);
+    }
+
+    public void testFailureRecoveryForce() throws Exception {
+        doTestFailureRecovery(ProtectionLevel.FORCE);
     }
 }

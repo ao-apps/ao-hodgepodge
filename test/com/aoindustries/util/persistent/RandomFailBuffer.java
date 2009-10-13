@@ -153,7 +153,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     public void close() throws IOException {
         flushWriteCache();
         isClosed = true;
-        wrapped.isClosed();
+        wrapped.close();
     }
 
     /**
@@ -200,16 +200,16 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
         if(off<0) throw new IllegalArgumentException("off<0: "+off);
         if(len<0) throw new IllegalArgumentException("len<0: "+len);
         final long end = position+len;
-        assert end<=capacity();
+        if(PersistentCollections.ASSERT) assert end<=capacity();
         randomFail(FailureMethod.getSome);
         int bytesRead = 0;
         while(position<end) {
             long sector = position&(-SECTOR_SIZE);
-            assert (sector&(SECTOR_SIZE-1))==0;
+            if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0;
             int buffEnd = off + (SECTOR_SIZE+(int)(sector-position));
             if(buffEnd>(off+len)) buffEnd = off+len;
             int bytesToRead = buffEnd-off;
-            assert bytesToRead <= len;
+            if(PersistentCollections.ASSERT) assert bytesToRead <= len;
             byte[] cached = writeCache.get(sector);
             int count;
             if(cached!=null) {
@@ -235,11 +235,11 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
         if(len<0) throw new IllegalArgumentException("len<0: "+len);
         long capacity = capacity();
         final long end = position+len;
-        assert end<=capacity;
+        if(PersistentCollections.ASSERT) assert end<=capacity;
         randomFail(FailureMethod.put);
         while(position<end) {
             long sector = position&(-SECTOR_SIZE);
-            assert (sector&(SECTOR_SIZE-1))==0;
+            if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0;
             int buffEnd = off + (SECTOR_SIZE+(int)(sector-position));
             if(buffEnd>(off+len)) buffEnd = off+len;
             int bytesToWrite = buffEnd-off;
