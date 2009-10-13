@@ -153,7 +153,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     public void close() throws IOException {
         flushWriteCache();
         isClosed = true;
-        wrapped.close();
+        wrapped.isClosed();
     }
 
     /**
