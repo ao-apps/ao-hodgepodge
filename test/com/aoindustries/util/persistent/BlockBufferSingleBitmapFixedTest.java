@@ -42,12 +42,24 @@ public class BlockBufferSingleBitmapFixedTest extends BlockBufferTestParent {
         super(testName);
     }
 
-    public PersistentBlockBuffer getBlockBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
-        return new FixedPersistentBlockBuffer(new SparseBuffer(protectionLevel), (1L<<30));
+    public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+        return new SparseBuffer(protectionLevel);
+    }
+
+    public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
+        return new FixedPersistentBlockBuffer(pbuffer, (1L<<30));
     }
 
     @Override
     public long getAllocationSize(Random random) throws IOException {
         return random.nextInt((1<<30)+1);
+    }
+
+    /**
+     * This test is not compatible with non-persistent {@link SparseBuffer}
+     */
+    @Override
+    public void testFailureRecoveryBarrier() {
+        // Skip test
     }
 }

@@ -45,8 +45,12 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
         super(testName);
     }
 
-    public PersistentBlockBuffer getBlockBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
-        return new FixedPersistentBlockBuffer(new MappedPersistentBuffer(tempFile, protectionLevel), 1);
+    public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+        return new MappedPersistentBuffer(tempFile, protectionLevel);
+    }
+
+    public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
+        return new FixedPersistentBlockBuffer(pbuffer, 1);
     }
 
     @Override
@@ -57,7 +61,7 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
     public void testAllocateOneMillion() throws Exception {
         File tempFile = File.createTempFile("BlockBufferTinyBitmapFixedTest", null);
         tempFile.deleteOnExit();
-        PersistentBlockBuffer blockBuffer = getBlockBuffer(tempFile, ProtectionLevel.NONE);
+        PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
         try {
             for(int c=0;c<1000000;c++) blockBuffer.allocate(1);
         } finally {
@@ -68,7 +72,7 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
     public void testAllocateDeallocateOneMillion() throws Exception {
         File tempFile = File.createTempFile("BlockBufferTinyBitmapFixedTest", null);
         tempFile.deleteOnExit();
-        PersistentBlockBuffer blockBuffer = getBlockBuffer(tempFile, ProtectionLevel.NONE);
+        PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
         try {
             final int numAdd = 1000000;
             List<Long> ids = new ArrayList<Long>(numAdd);

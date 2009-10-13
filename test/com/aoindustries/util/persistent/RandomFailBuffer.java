@@ -61,11 +61,11 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
      * The average number of calls between failures.
      */
     private enum FailureMethod {
-        capacity(10000),
-        setCapacity(100),
-        getSome(1000),
-        put(1000),
-        barrier(1000);
+        capacity(50000),
+        setCapacity(50),
+        getSome(5000),
+        put(5000),
+        barrier(5000);
         final private int failInterval;
         FailureMethod(int failInterval) {
             this.failInterval = failInterval;
@@ -110,18 +110,20 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
         if(allowFailures) {
             if(random.nextInt(failureMethod.getFailInterval())==0) {
                 isClosed = true;
-                long capacity = wrapped.capacity();
-                // Write current write cache in a partial state
-                List<Long> sectors = new ArrayList<Long>(writeCache.keySet());
-                Collections.shuffle(sectors, random);
-                int numToWrite = random.nextInt(sectors.size());
-                for(int c=0; c<numToWrite; c++) {
-                    long sector = sectors.get(c);
-                    long sectorEnd = sector+SECTOR_SIZE;
-                    if(sectorEnd>capacity) sectorEnd = capacity;
-                    wrapped.put(sector, writeCache.get(sector), 0, (int)(sectorEnd-sector));
+                if(!writeCache.isEmpty()) {
+                    long capacity = wrapped.capacity();
+                    // Write current write cache in a partial state
+                    List<Long> sectors = new ArrayList<Long>(writeCache.keySet());
+                    Collections.shuffle(sectors, random);
+                    int numToWrite = random.nextInt(sectors.size());
+                    for(int c=0; c<numToWrite; c++) {
+                        long sector = sectors.get(c);
+                        long sectorEnd = sector+SECTOR_SIZE;
+                        if(sectorEnd>capacity) sectorEnd = capacity;
+                        wrapped.put(sector, writeCache.get(sector), 0, (int)(sectorEnd-sector));
+                    }
+                    writeCache.clear();
                 }
-                writeCache.clear();
                 wrapped.barrier(true);
                 wrapped.close();
                 throw new IOException(failureMethod+": Random simulated failure.  The stream will be unusable to simulate power failure or software crash.");

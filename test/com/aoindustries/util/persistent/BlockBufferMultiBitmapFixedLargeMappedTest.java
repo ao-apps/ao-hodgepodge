@@ -42,8 +42,12 @@ public class BlockBufferMultiBitmapFixedLargeMappedTest extends BlockBufferTestP
         super(testName);
     }
 
-    public PersistentBlockBuffer getBlockBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
-        return new FixedPersistentBlockBuffer(new LargeMappedPersistentBuffer(tempFile, protectionLevel), 4096);
+    public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+        return new LargeMappedPersistentBuffer(tempFile, protectionLevel);
+    }
+
+    public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
+        return new FixedPersistentBlockBuffer(pbuffer, 4096);
     }
 
     @Override

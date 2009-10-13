@@ -42,8 +42,12 @@ public class BlockBufferDynamicTest extends BlockBufferTestParent {
         super(testName);
     }
 
-    public PersistentBlockBuffer getBlockBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
-        return new DynamicPersistentBlockBuffer(new MappedPersistentBuffer(tempFile, protectionLevel));
+    public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+        return new MappedPersistentBuffer(tempFile, protectionLevel);
+    }
+
+    public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
+        return new DynamicPersistentBlockBuffer(pbuffer);
     }
 
     @Override

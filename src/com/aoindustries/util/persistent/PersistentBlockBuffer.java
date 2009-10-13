@@ -93,18 +93,39 @@ public interface PersistentBlockBuffer {
     Iterator<Long> iterateBlockIds() throws IOException;
 
     /**
+     * <p>
      * Allocates a new block buffer that is at least as large as the requested space.
      * The id should always be >=0, higher level data structures may use the
      * negative values for other purposes, such as indicating <code>null</code>
      * with <code>-1</code>.
+     * </p>
+     * <p>
+     * In order to ensure the block allocation is completely in persistent storage,
+     * <code>{@link #barrier(boolean) barrier}</code> must be called.  This allows
+     * the contents of the block to be written and combined into a single <code>barrier</code>
+     * call.  If the system fails before <code>barrier</code> is called, the block
+     * may either be allocated or deallocated - it is up to higher-level data
+     * structures to determine which is the case.  In no event, however, will failing
+     * to call <code>barrier</code> after <code>allocate</code> cause corruption
+     * beyond that just described.
+     * </p>
      */
     @NotThreadSafe
     long allocate(long minimumSize) throws IOException;
 
     /**
+     * <p>
      * Deallocates the block with the provided id.  The ids of other blocks
      * will not be altered.  The space may later be reallocated with the same,
      * or possibly different id.  The space may also be reclaimed.
+     * </p>
+     * <p>
+     * <code>{@link #barrier(boolean) barrier}</code> does not need to be called
+     * after a deallocation, but if not called previously deallocated blocks
+     * may reappear after a system failure.  It is up to higher-level data structures
+     * to detect this.  In no event, however, will failing to call <code>barrier</code>
+     * after <code>deallocate</code> cause corruption beyond that just described.
+     * </p>
      *
      * @throws IllegalStateException if the block is not allocated.
      */

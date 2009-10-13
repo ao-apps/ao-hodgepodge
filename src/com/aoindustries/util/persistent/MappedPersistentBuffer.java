@@ -155,7 +155,6 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
                 if(modified) {
                     if((protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)) {
                         mappedBuffer.force();
-                        // channel.force(true);
                     }
                     modified = false;
                 }
@@ -166,7 +165,6 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
                 if(modified) {
                     if((protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)) {
                         mappedBuffer.force();
-                        // channel.force(true);
                     }
                     modified = false;
                 }
@@ -232,7 +230,6 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
                 : (protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)
             ) {
                 mappedBuffer.force();
-                // channel.force(true);
             }
             modified = false;
         }

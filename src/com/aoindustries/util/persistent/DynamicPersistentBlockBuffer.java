@@ -284,7 +284,11 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         if(PersistentCollections.ASSERT) assert isBlockAligned(id, blockSizeBits) : "Block not aligned: "+id;
         if(PersistentCollections.ASSERT) assert isBlockComplete(id, blockSizeBits) : "Block is incomplete: "+id;
         if(PersistentCollections.ASSERT) assert !isAllocated(pbuffer.get(id)) : "Block is allocated: "+id;
-        if(writeMaxBits) pbuffer.put(id, (byte)blockSizeBits);
+        if(writeMaxBits) {
+            assert pbuffer.get(id)!=blockSizeBits;
+            pbuffer.put(id, (byte)blockSizeBits);
+            pbuffer.barrier(false); // TODO: Required???
+        }
         SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
         if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
         if(!fsm.add(id)) throw new AssertionError("Free space map already contains entry: "+id);
@@ -334,6 +338,9 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         }
     }
 
+    /**
+     * Adds newly allocated space to the free space maps.
+     */
     @NotThreadSafe
     private void configureNewAllocation(long start, long capacity) throws IOException {
         //System.out.println("DEBUG: start="+start+", capacity="+capacity+", capacity/start="+((float)capacity/(float)start));
@@ -365,6 +372,9 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         if(PersistentCollections.ASSERT) assert start==capacity;
     }
 
+    /**
+     * This will call <code>barrier</code> as necessary during block splitting.
+     */
     @NotThreadSafe
     public long allocate(long minimumSize) throws IOException {
         if(minimumSize<0) throw new IllegalArgumentException("minimumSize<0: "+minimumSize);
