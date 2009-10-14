@@ -334,13 +334,13 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 if(PersistentCollections.ASSERT) assert !isAllocated(pbuffer.get(id)) : "Block is allocated: "+id;
                 if(PersistentCollections.ASSERT) assert pbuffer.get(id)!=blockSizeBits;
                 pbuffer.put(id, (byte)blockSizeBits);
-                pbuffer.barrier(false); // TODO: Required???
+                //pbuffer.barrier(false); // Not required because if this write fails either side will still be consistent?
             }
         }
         SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
         if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
         if(!fsm.add(id)) throw new AssertionError("Free space map already contains entry: "+id);
-        //System.err.println("DEBUG: Added to fsm: fsm["+blockSizeBits+"].size()="+fsm.size());
+        //System.out.println("DEBUG: Added to fsm: fsm["+blockSizeBits+"].size()="+fsm.size());
     }
 
     /**
@@ -353,6 +353,9 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      */
     @NotThreadSafe
     private long splitAllocate(int blockSizeBits, long capacity) throws IOException {
+        return splitAllocate(blockSizeBits, capacity, 0);
+    }
+    private long splitAllocate(int blockSizeBits, long capacity, int recursionDepth) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidBlockSizeBits(blockSizeBits);
         if(PersistentCollections.ASSERT) assert capacity>=0;
         SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
@@ -373,7 +376,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 long blockSize = getBlockSize(blockSizeBits);
                 if(blockSize>capacity) return -1;
                 // Try split
-                long biggerAvailableId = splitAllocate(blockSizeBits+1, capacity);
+                long biggerAvailableId = splitAllocate(blockSizeBits+1, capacity, recursionDepth+1);
                 // No bigger available
                 if(biggerAvailableId==-1) return -1;
                 if(PersistentCollections.ASSERT) assert isBlockAligned(biggerAvailableId, blockSizeBits+1) : "Block not aligned: "+biggerAvailableId;
@@ -382,15 +385,15 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 long nextId = biggerAvailableId+blockSize;
                 if(PersistentCollections.ASSERT) assert isBlockAligned(nextId, blockSizeBits) : "Block not aligned: "+nextId;
                 if(PersistentCollections.ASSERT) assert isBlockComplete(nextId, blockSizeBits) : "Block is incomplete: "+nextId;
-                // TODO: if(pbuffer.get(nextId)!=blockSizeBits) {
+                if(pbuffer.get(nextId)!=blockSizeBits) {
                     pbuffer.put(nextId, (byte)blockSizeBits);
-                    barrier(false); // Required? When splitting, the right side must have appropriate size header before left side is updated
-                //}
+                    if(recursionDepth==0) barrier(false); // When splitting, the right side must have appropriate size headers before left side is updated
+                }
                 if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
                 fsm.add(nextId);
                 if(PersistentCollections.ASSERT) assert pbuffer.get(biggerAvailableId)!=(byte)blockSizeBits;
                 pbuffer.put(biggerAvailableId, (byte)blockSizeBits);
-                pbuffer.barrier(false); // TODO: necessary
+                // pbuffer.barrier(false); // Not required because writes will be constrained to the returned block, and if the header is not updated it will remain unallocated at its previous size
                 return biggerAvailableId;
             }
         }
@@ -429,7 +432,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             if(bits>0) {
                 if(PersistentCollections.ASSERT) assert pbuffer.get(start)!=(byte)bits;
                 pbuffer.put(start, (byte)bits);
-                pbuffer.barrier(false); // TODO: necessary
+                //pbuffer.barrier(false); // Not necessary because free space will be combined an recovery for TIGHT.  BALANCED will combine when needed, and FAST allocates minimally
             }
             addFreeSpaceMap(start, bits, capacity, freeSpacePolicy==FreeSpacePolicy.TIGHT || freeSpacePolicy==FreeSpacePolicy.BALANCED, true);
             start += 1L<<bits;
@@ -458,11 +461,11 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             if(PersistentCollections.ASSERT) assert !isAllocated(pbuffer.get(id)) : "Block is allocated: "+id;
             if(PersistentCollections.ASSERT) assert pbuffer.get(id)!=(byte)(0x80 | blockSizeBits);
             pbuffer.put(id, (byte)(0x80 | blockSizeBits));
-            pbuffer.barrier(false); // TODO: necessary
+            //pbuffer.barrier(false); // TODO: necessary
         } else {
             if(freeSpacePolicy==FreeSpacePolicy.BALANCED) {
                 // TODO
-                // System.err.println("TODO: implement block combining before allocating new space");
+                // System.out.println("TODO: implement block combining before allocating new space");
             }
             // No block available and no blocks may be combined to fulfill allocation, increase capacity
             long blockSize = getBlockSize(blockSizeBits);
@@ -501,7 +504,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             if(PersistentCollections.ASSERT) assert !isAllocated(pbuffer.get(id)) : "Block is allocated: "+id;
             if(PersistentCollections.ASSERT) assert pbuffer.get(id)!=(byte)(0x80 | blockSizeBits);
             pbuffer.put(id, (byte)(0x80 | blockSizeBits));
-            pbuffer.barrier(false); // TODO: necessary
+            //pbuffer.barrier(false); // TODO: necessary
         }
         // These assertions cause a failure that is unexpected
         if(PersistentCollections.ASSERT) assert isValidRange(id);
@@ -524,7 +527,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         modCount++;
         if(PersistentCollections.ASSERT) assert pbuffer.get(id)!=(byte)(header&0x7f);
         pbuffer.put(id, (byte)(header&0x7f));
-        pbuffer.barrier(false); // TODO: necessary
+        //pbuffer.barrier(false); // TODO: necessary
         addFreeSpaceMap(id, blockSizeBits, pbuffer.capacity(), freeSpacePolicy==FreeSpacePolicy.TIGHT, false);
     }
     // </editor-fold>

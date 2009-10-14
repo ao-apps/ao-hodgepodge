@@ -392,11 +392,11 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         else setPrev(next, prev);
         // Barrier, to make sure always pointing to complete data
         barrier(false);
-        blockBuffer.putLong(ptr, NEXT_OFFSET, NULL_PTR);
-        blockBuffer.putLong(ptr, PREV_OFFSET, NULL_PTR);
+        //blockBuffer.putLong(ptr, NEXT_OFFSET, NULL_PTR);
+        //blockBuffer.putLong(ptr, PREV_OFFSET, NULL_PTR);
         blockBuffer.deallocate(ptr);
         // Barrier, to make sure links are correct
-        barrier(true);
+        //barrier(true);
         _size--;
     }
 
@@ -454,7 +454,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             blockBuffer.put(newPtr, DATA_OFFSET, data, 0, data.length);
         }
         // Barrier, to make sure always pointing to complete data
-        barrier(false);
+        barrier(true);
         // Update pointers
         if(prev==END_PTR) {
             if(PersistentCollections.ASSERT) assert _head==next;
@@ -471,7 +471,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             setPrev(next, newPtr);
         }
         // Barrier, to make sure links are correct
-        barrier(true);
+        barrier(false);
         // Increment size
         _size++;
         return newPtr;
