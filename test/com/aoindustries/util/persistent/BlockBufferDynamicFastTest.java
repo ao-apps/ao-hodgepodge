@@ -31,14 +31,14 @@ import junit.framework.TestSuite;
 /**
  * @author  AO Industries, Inc.
  */
-public class BlockBufferDynamicTest extends BlockBufferTestParent {
+public class BlockBufferDynamicFastTest extends BlockBufferTestParent {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(BlockBufferDynamicTest.class);
+        TestSuite suite = new TestSuite(BlockBufferDynamicFastTest.class);
         return suite;
     }
 
-    public BlockBufferDynamicTest(String testName) {
+    public BlockBufferDynamicFastTest(String testName) {
         super(testName);
     }
 
@@ -47,7 +47,7 @@ public class BlockBufferDynamicTest extends BlockBufferTestParent {
     }
 
     public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
-        return new DynamicPersistentBlockBuffer(pbuffer);
+        return new DynamicPersistentBlockBuffer(pbuffer, DynamicPersistentBlockBuffer.FreeSpacePolicy.FAST);
     }
 
     @Override

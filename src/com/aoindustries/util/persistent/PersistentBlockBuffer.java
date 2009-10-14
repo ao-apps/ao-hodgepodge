@@ -109,6 +109,10 @@ public interface PersistentBlockBuffer {
      * to call <code>barrier</code> after <code>allocate</code> cause corruption
      * beyond that just described.
      * </p>
+     * <p>
+     * This call may fail after the id is allocated and before the id is returned.
+     * This will manifest itself as an extra allocated block after recovery.
+     * </p>
      */
     @NotThreadSafe
     long allocate(long minimumSize) throws IOException;
