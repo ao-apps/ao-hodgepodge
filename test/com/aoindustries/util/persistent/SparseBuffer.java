@@ -132,6 +132,9 @@ public class SparseBuffer extends AbstractPersistentBuffer {
         }
     }
 
+    /**
+     * Does nothing because this is only a volatile test buffer.
+     */
     @ThreadSafe
     public void barrier(boolean force) throws IOException {
     }

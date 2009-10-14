@@ -66,7 +66,8 @@ public interface PersistentBlockBuffer {
      * Ensures that all writes before this barrier occur before all writes after
      * this barrier.  If <code>force</code> is <code>true</code>, will also
      * commit to physical media synchronously before returning.  This request
-     * may be ignored depending on the current protection level.
+     * may be ignored or force downgraded to barrier-only depending on the current
+     * protection level.
      *
      * @see  #getProtectionLevel()
      */

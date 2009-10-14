@@ -183,12 +183,6 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
      */
     @NotThreadSafe
     public void barrier(boolean force) throws IOException {
-        if(
-            force
-            ? (protectionLevel.compareTo(ProtectionLevel.FORCE)>=0)
-            : (protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)
-        ) {
-            channel.force(false);
-        }
+        if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) channel.force(false);
     }
 }

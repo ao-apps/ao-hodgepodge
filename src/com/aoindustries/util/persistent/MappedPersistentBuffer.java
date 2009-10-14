@@ -153,9 +153,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
         if(oldLength!=newLength) {
             if(newLength<oldLength) {
                 if(modified) {
-                    if((protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)) {
-                        mappedBuffer.force();
-                    }
+                    if((protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)) mappedBuffer.force();
                     modified = false;
                 }
                 mappedBuffer = channel.map(protectionLevel==ProtectionLevel.READ_ONLY ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, newLength);
@@ -163,9 +161,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
             raf.setLength(newLength);
             if(newLength>oldLength) {
                 if(modified) {
-                    if((protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)) {
-                        mappedBuffer.force();
-                    }
+                    if((protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)) mappedBuffer.force();
                     modified = false;
                 }
                 mappedBuffer = channel.map(protectionLevel==ProtectionLevel.READ_ONLY ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, newLength);
@@ -224,13 +220,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     @NotThreadSafe
     public void barrier(boolean force) throws IOException {
         if(modified) {
-            if(
-                force
-                ? (protectionLevel.compareTo(ProtectionLevel.FORCE)>=0)
-                : (protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)
-            ) {
-                mappedBuffer.force();
-            }
+            if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) mappedBuffer.force();
             modified = false;
         }
     }

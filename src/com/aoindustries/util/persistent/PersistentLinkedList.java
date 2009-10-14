@@ -370,11 +370,6 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     // </editor-fold>
 
     // <editor-fold desc="Data Structure Management">
-    @NotThreadSafe
-    private void barrier(boolean force) throws IOException {
-        blockBuffer.barrier(force);
-    }
-
     /**
      * Removes the entry at the provided location and restores it to an unallocated state.
      * Operates in constant time.
@@ -391,12 +386,10 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         if(next==END_PTR) setTail(prev);
         else setPrev(next, prev);
         // Barrier, to make sure always pointing to complete data
-        barrier(false);
+        blockBuffer.barrier(true);
         //blockBuffer.putLong(ptr, NEXT_OFFSET, NULL_PTR);
         //blockBuffer.putLong(ptr, PREV_OFFSET, NULL_PTR);
         blockBuffer.deallocate(ptr);
-        // Barrier, to make sure links are correct
-        //barrier(true);
         _size--;
     }
 
@@ -454,7 +447,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             blockBuffer.put(newPtr, DATA_OFFSET, data, 0, data.length);
         }
         // Barrier, to make sure always pointing to complete data
-        barrier(true);
+        blockBuffer.barrier(false);
         // Update pointers
         if(prev==END_PTR) {
             if(PersistentCollections.ASSERT) assert _head==next;
@@ -471,7 +464,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             setPrev(next, newPtr);
         }
         // Barrier, to make sure links are correct
-        barrier(false);
+        blockBuffer.barrier(true);
         // Increment size
         _size++;
         return newPtr;
@@ -802,20 +795,20 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                 metaDataBlockId = ids.next();
                 setHead(END_PTR);
                 setTail(END_PTR);
-                barrier(false);
+                blockBuffer.barrier(false);
                 // Deallocate all except first block
                 while(ids.hasNext()) {
                     ids.next();
                     ids.remove();
                 }
-                barrier(true);
+                blockBuffer.barrier(true);
             } else {
                 metaDataBlockId = blockBuffer.allocate(HEADER_SIZE);
                 blockBuffer.put(metaDataBlockId, 0, MAGIC, 0, MAGIC.length);
                 blockBuffer.putInt(metaDataBlockId, MAGIC.length, VERSION);
                 setHead(END_PTR);
                 setTail(END_PTR);
-                barrier(true);
+                blockBuffer.barrier(true);
             }
             _size = 0;
         } catch(IOException err) {

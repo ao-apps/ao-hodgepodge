@@ -310,11 +310,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
      */
     @NotThreadSafe
     public void barrier(boolean force) throws IOException {
-        if(
-            force
-            ? (protectionLevel.compareTo(ProtectionLevel.FORCE)>=0)
-            : (protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0)
-        ) {
+        if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) {
             for(int c=0, len=mappedBuffers.size(); c<len; c++) {
                 if(modifiedBuffers.get(c)) {
                     mappedBuffers.get(c).force();
