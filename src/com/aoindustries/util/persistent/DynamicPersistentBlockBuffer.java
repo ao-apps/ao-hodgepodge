@@ -78,33 +78,6 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
 
     private static final Logger logger = Logger.getLogger(DynamicPersistentBlockBuffer.class.getName());
 
-    public enum FreeSpacePolicy {
-        /**
-         * This provides the tightest free space management, at the cost of additional
-         * write barriers.  It always combines on <code>{@link #deallocate(long) deallocate}</code>
-         * and splits on <code>{@link #allocate(long) allocate}</code>.
-         */
-        TIGHT,
-
-        /**
-         * This will split and combine blocks only when it would otherwise need to
-         * allocate additional space.  It incurs additional write barriers only when
-         * splitting or combining blocks.
-         */
-        BALANCED,
-
-        /**
-         * This will never incur additional write barriers because it will never
-         * split or combine blocks.  This may leave a lot of unused space,
-         * depending on the distribution of allocated block sizes over time.
-         * This mode may also consume the greatest amount of heap space to track
-         * the additional free space.
-         */
-        FAST
-    }
-
-    private final FreeSpacePolicy freeSpacePolicy;
-
     /**
      * Tracks free space on a per power-of-two basis.
      */
@@ -116,16 +89,10 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     private int modCount;
 
     /**
-     * Creates a buffer with the <code>{@link FreeSpacePolicy#TIGHT TIGHT}</code> free
-     * space policy.
+     * Creates a buffer.
      */
     public DynamicPersistentBlockBuffer(PersistentBuffer pbuffer) throws IOException {
-        this(pbuffer, FreeSpacePolicy.TIGHT);
-    }
-
-    public DynamicPersistentBlockBuffer(PersistentBuffer pbuffer, FreeSpacePolicy freeSpacePolicy) throws IOException {
         super(pbuffer);
-        this.freeSpacePolicy = freeSpacePolicy;
         for(int c=0;c<64;c++) freeSpaceMaps.add(null);
         // Build the free space maps and expand to end on an even block
         long capacity = pbuffer.capacity();
@@ -143,7 +110,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 pbuffer.setCapacity(capacity=blockEnd);
             }
             if(!isAllocated(header)) {
-                addFreeSpaceMap(id, blockSizeBits, capacity, freeSpacePolicy==FreeSpacePolicy.TIGHT, true);
+                addFreeSpaceMap(id, blockSizeBits, capacity, true);
                 //SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
                 //if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
                 //if(!fsm.add(id)) throw new AssertionError("Free space map already contains entry: "+id);
@@ -151,10 +118,6 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             id = blockEnd;
         }
         if(PersistentCollections.ASSERT) assert id==capacity : "id!=capacity: "+id+"!="+capacity;
-    }
-
-    public FreeSpacePolicy getFreeSpacePolicy() {
-        return freeSpacePolicy;
     }
 
     // <editor-fold desc="Bit Manipulation">
@@ -266,76 +229,74 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      *                        the capacity.
      */
     @NotThreadSafe
-    private void addFreeSpaceMap(long id, int blockSizeBits, long capacity, boolean groupEnabled, boolean groupPrevOnly) throws IOException {
+    private void addFreeSpaceMap(long id, int blockSizeBits, long capacity, boolean groupPrevOnly) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(id);
         if(PersistentCollections.ASSERT) assert isValidBlockSizeBits(blockSizeBits);
         if(PersistentCollections.ASSERT) assert blockSizeBits==getBlockSizeBits(pbuffer.get(id));
         if(PersistentCollections.ASSERT) assert capacity>=0;
         if(PersistentCollections.ASSERT) assert !isAllocated(id);
-        if(groupEnabled) {
-            // Group as much as possible within the same power-of-two block
-            boolean blockSizeBitsUpdated = false;
-            while(blockSizeBits<0x3f) {
-                if(PersistentCollections.ASSERT) assert isBlockAligned(id, blockSizeBits) : "Block not aligned: "+id;
-                if(PersistentCollections.ASSERT) assert isBlockComplete(id, blockSizeBits) : "Block is incomplete: "+id;
-                long blockSize = getBlockSize(blockSizeBits);
-                long blockOffsetMask = blockSize-1;
-                // Only allow grouping if id is aligned with the current number of bits
-                if((id&blockOffsetMask)!=0) break;
-                long biggerBlockSize = blockSize<<1;
-                long biggerBlockMask = -biggerBlockSize;
-                long idBiggerBlockMask = id&biggerBlockMask;
-                long prevId = id - blockSize;
-                if(prevId>=0 && (prevId&biggerBlockMask)==idBiggerBlockMask) {
-                    // The block to the left must be the same number of bits and be unallocated
-                    byte prevHeader = pbuffer.get(prevId);
-                    if(isAllocated(prevHeader) || blockSizeBits!=getBlockSizeBits(prevHeader)) {
-                        // Block to the left is allocated or a different size, stop grouping
+        // Group as much as possible within the same power-of-two block
+        boolean blockSizeBitsUpdated = false;
+        while(blockSizeBits<0x3f) {
+            if(PersistentCollections.ASSERT) assert isBlockAligned(id, blockSizeBits) : "Block not aligned: "+id;
+            if(PersistentCollections.ASSERT) assert isBlockComplete(id, blockSizeBits) : "Block is incomplete: "+id;
+            long blockSize = getBlockSize(blockSizeBits);
+            long blockOffsetMask = blockSize-1;
+            // Only allow grouping if id is aligned with the current number of bits
+            if((id&blockOffsetMask)!=0) break;
+            long biggerBlockSize = blockSize<<1;
+            long biggerBlockMask = -biggerBlockSize;
+            long idBiggerBlockMask = id&biggerBlockMask;
+            long prevId = id - blockSize;
+            if(prevId>=0 && (prevId&biggerBlockMask)==idBiggerBlockMask) {
+                // The block to the left must be the same number of bits and be unallocated
+                byte prevHeader = pbuffer.get(prevId);
+                if(isAllocated(prevHeader) || blockSizeBits!=getBlockSizeBits(prevHeader)) {
+                    // Block to the left is allocated or a different size, stop grouping
+                    break;
+                } else {
+                    id = prevId;
+                    // Remove prev from FSM
+                    SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
+                    if(fsm==null) throw new AssertionError("fsm is null for bits="+blockSizeBits);
+                    if(!fsm.remove(prevId)) throw new AssertionError("fsm for bits="+blockSizeBits+" did not contain prevId="+prevId);
+                    blockSizeBits++;
+                    blockSizeBitsUpdated = true;
+                }
+            } else {
+                // Stop if groupPrevOnly or only group right if the pbuffer has room for the bigger parent
+                if(groupPrevOnly || (id+biggerBlockSize)>capacity) {
+                    // Stop grouping
+                    break;
+                } else {
+                    long nextId = id + blockSize;
+                    if(PersistentCollections.ASSERT) assert (nextId&biggerBlockMask)==idBiggerBlockMask;
+                    // The block to the right must be the same number of bits and be unallocated
+                    byte nextHeader = pbuffer.get(nextId);
+                    if(isAllocated(nextHeader) || blockSizeBits!=getBlockSizeBits(nextHeader)) {
+                        // Block to the right is allocated or a different size, stop grouping
                         break;
                     } else {
-                        id = prevId;
-                        // Remove prev from FSM
+                        // Remove next from FSM
                         SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
                         if(fsm==null) throw new AssertionError("fsm is null for bits="+blockSizeBits);
-                        if(!fsm.remove(prevId)) throw new AssertionError("fsm for bits="+blockSizeBits+" did not contain prevId="+prevId);
+                        if(!fsm.remove(nextId)) throw new AssertionError("fsm for bits="+blockSizeBits+" did not contain nextId="+nextId);
                         blockSizeBits++;
                         blockSizeBitsUpdated = true;
                     }
-                } else {
-                    // Stop if groupPrevOnly or only group right if the pbuffer has room for the bigger parent
-                    if(groupPrevOnly || (id+biggerBlockSize)>capacity) {
-                        // Stop grouping
-                        break;
-                    } else {
-                        long nextId = id + blockSize;
-                        if(PersistentCollections.ASSERT) assert (nextId&biggerBlockMask)==idBiggerBlockMask;
-                        // The block to the right must be the same number of bits and be unallocated
-                        byte nextHeader = pbuffer.get(nextId);
-                        if(isAllocated(nextHeader) || blockSizeBits!=getBlockSizeBits(nextHeader)) {
-                            // Block to the right is allocated or a different size, stop grouping
-                            break;
-                        } else {
-                            // Remove next from FSM
-                            SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
-                            if(fsm==null) throw new AssertionError("fsm is null for bits="+blockSizeBits);
-                            if(!fsm.remove(nextId)) throw new AssertionError("fsm for bits="+blockSizeBits+" did not contain nextId="+nextId);
-                            blockSizeBits++;
-                            blockSizeBitsUpdated = true;
-                        }
-                    }
                 }
             }
-            if(blockSizeBitsUpdated) {
-                // Redo the same assertions above because id and blockSizeBits may have changed
-                if(PersistentCollections.ASSERT) assert isValidRange(id);
-                if(PersistentCollections.ASSERT) assert isValidBlockSizeBits(blockSizeBits);
-                if(PersistentCollections.ASSERT) assert isBlockAligned(id, blockSizeBits) : "Block not aligned: "+id;
-                if(PersistentCollections.ASSERT) assert isBlockComplete(id, blockSizeBits) : "Block is incomplete: "+id;
-                if(PersistentCollections.ASSERT) assert !isAllocated(pbuffer.get(id)) : "Block is allocated: "+id;
-                if(PersistentCollections.ASSERT) assert pbuffer.get(id)!=blockSizeBits;
-                pbuffer.put(id, (byte)blockSizeBits);
-                //pbuffer.barrier(false); // Not required because if this write fails either side will still be consistent?
-            }
+        }
+        if(blockSizeBitsUpdated) {
+            // Redo the same assertions above because id and blockSizeBits may have changed
+            if(PersistentCollections.ASSERT) assert isValidRange(id);
+            if(PersistentCollections.ASSERT) assert isValidBlockSizeBits(blockSizeBits);
+            if(PersistentCollections.ASSERT) assert isBlockAligned(id, blockSizeBits) : "Block not aligned: "+id;
+            if(PersistentCollections.ASSERT) assert isBlockComplete(id, blockSizeBits) : "Block is incomplete: "+id;
+            if(PersistentCollections.ASSERT) assert !isAllocated(pbuffer.get(id)) : "Block is allocated: "+id;
+            if(PersistentCollections.ASSERT) assert pbuffer.get(id)!=blockSizeBits;
+            pbuffer.put(id, (byte)blockSizeBits);
+            //pbuffer.barrier(false); // Not required because if this write fails either side will still be consistent?
         }
         SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
         if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
@@ -367,35 +328,30 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             fsm.remove(id);
             return id;
         } else {
-            if(freeSpacePolicy==FreeSpacePolicy.FAST) {
-                // The fast free space mode will not split any blocks
-                return -1;
-            } else {
-                // End recursion
-                if(blockSizeBits==0x3f) return -1;
-                long blockSize = getBlockSize(blockSizeBits);
-                if(blockSize>capacity) return -1;
-                // Try split
-                long biggerAvailableId = splitAllocate(blockSizeBits+1, capacity, recursionDepth+1);
-                // No bigger available
-                if(biggerAvailableId==-1) return -1;
-                if(PersistentCollections.ASSERT) assert isBlockAligned(biggerAvailableId, blockSizeBits+1) : "Block not aligned: "+biggerAvailableId;
-                if(PersistentCollections.ASSERT) assert isBlockComplete(biggerAvailableId, blockSizeBits+1) : "Block is incomplete: "+biggerAvailableId;
-                // Split the bigger one, adding the right half to the free space map
-                long nextId = biggerAvailableId+blockSize;
-                if(PersistentCollections.ASSERT) assert isBlockAligned(nextId, blockSizeBits) : "Block not aligned: "+nextId;
-                if(PersistentCollections.ASSERT) assert isBlockComplete(nextId, blockSizeBits) : "Block is incomplete: "+nextId;
-                if(pbuffer.get(nextId)!=blockSizeBits) {
-                    pbuffer.put(nextId, (byte)blockSizeBits);
-                    if(recursionDepth==0) barrier(false); // When splitting, the right side must have appropriate size headers before left side is updated
-                }
-                if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
-                fsm.add(nextId);
-                if(PersistentCollections.ASSERT) assert pbuffer.get(biggerAvailableId)!=(byte)blockSizeBits;
-                pbuffer.put(biggerAvailableId, (byte)blockSizeBits);
-                // pbuffer.barrier(false); // Not required because writes will be constrained to the returned block, and if the header is not updated it will remain unallocated at its previous size
-                return biggerAvailableId;
+            // End recursion
+            if(blockSizeBits==0x3f) return -1;
+            long blockSize = getBlockSize(blockSizeBits);
+            if(blockSize>capacity) return -1;
+            // Try split
+            long biggerAvailableId = splitAllocate(blockSizeBits+1, capacity, recursionDepth+1);
+            // No bigger available
+            if(biggerAvailableId==-1) return -1;
+            if(PersistentCollections.ASSERT) assert isBlockAligned(biggerAvailableId, blockSizeBits+1) : "Block not aligned: "+biggerAvailableId;
+            if(PersistentCollections.ASSERT) assert isBlockComplete(biggerAvailableId, blockSizeBits+1) : "Block is incomplete: "+biggerAvailableId;
+            // Split the bigger one, adding the right half to the free space map
+            long nextId = biggerAvailableId+blockSize;
+            if(PersistentCollections.ASSERT) assert isBlockAligned(nextId, blockSizeBits) : "Block not aligned: "+nextId;
+            if(PersistentCollections.ASSERT) assert isBlockComplete(nextId, blockSizeBits) : "Block is incomplete: "+nextId;
+            if(pbuffer.get(nextId)!=blockSizeBits) {
+                pbuffer.put(nextId, (byte)blockSizeBits);
+                if(recursionDepth==0) barrier(false); // When splitting, the right side must have appropriate size headers before left side is updated
             }
+            if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
+            fsm.add(nextId);
+            if(PersistentCollections.ASSERT) assert pbuffer.get(biggerAvailableId)!=(byte)blockSizeBits;
+            pbuffer.put(biggerAvailableId, (byte)blockSizeBits);
+            // pbuffer.barrier(false); // Not required because writes will be constrained to the returned block, and if the header is not updated it will remain unallocated at its previous size
+            return biggerAvailableId;
         }
     }
 
@@ -403,17 +359,14 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      * Adds newly allocated space to the free space maps.
      */
     @NotThreadSafe
-    private void configureNewAllocation(long start, long capacity, int blockSizeBits) throws IOException {
+    private void configureNewAllocation(long start, long capacity) throws IOException {
         //System.out.println("DEBUG: start="+start+", capacity="+capacity+", capacity/start="+((float)capacity/(float)start));
         //long iterations = 0;
         // TODO: Do not combine to the first block of size blockSizeBits and return it directly, avoiding call to addFSM and splitAllocate?
-        int maxBits;
-        if(freeSpacePolicy==FreeSpacePolicy.TIGHT || freeSpacePolicy==FreeSpacePolicy.BALANCED) maxBits = 0x3f;
-        else maxBits = blockSizeBits+1;
         while(start<capacity) {
             // Find the largest power of two block that aligns with the start and fits between start and end
             int bits = 1;
-            while(bits<maxBits) {
+            while(bits<0x3f) {
                 if((start&((1L<<bits)-1))!=0) {
                     // Not aligned
                     break;
@@ -426,7 +379,6 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 bits++;
             }
             bits--;
-            if(PersistentCollections.ASSERT) assert freeSpacePolicy==FreeSpacePolicy.TIGHT || freeSpacePolicy==FreeSpacePolicy.BALANCED || bits<=blockSizeBits;
             if(PersistentCollections.ASSERT) assert isBlockAligned(start, bits) : "Block not aligned: "+start;
             if(PersistentCollections.ASSERT) assert isBlockComplete(start, bits) : "Block is incomplete: "+start;
             if(bits>0) {
@@ -434,7 +386,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 pbuffer.put(start, (byte)bits);
                 //pbuffer.barrier(false); // Not necessary because free space will be combined an recovery for TIGHT.  BALANCED will combine when needed, and FAST allocates minimally
             }
-            addFreeSpaceMap(start, bits, capacity, freeSpacePolicy==FreeSpacePolicy.TIGHT || freeSpacePolicy==FreeSpacePolicy.BALANCED, true);
+            addFreeSpaceMap(start, bits, capacity, true);
             start += 1L<<bits;
             //iterations++;
         }
@@ -463,10 +415,6 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             pbuffer.put(id, (byte)(0x80 | blockSizeBits));
             //pbuffer.barrier(false); // TODO: necessary
         } else {
-            if(freeSpacePolicy==FreeSpacePolicy.BALANCED) {
-                // TODO
-                // System.out.println("TODO: implement block combining before allocating new space");
-            }
             // No block available and no blocks may be combined to fulfill allocation, increase capacity
             long blockSize = getBlockSize(blockSizeBits);
             if(PersistentCollections.ASSERT) assert blockSize>minimumSize; // Must have one byte extra for the header
@@ -484,16 +432,14 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             if(PersistentCollections.ASSERT) assert (blockStart & blockMask)==0;
             long newCapacity = blockStart + blockSize;
             // Grow the file by at least 25% its previous size
-            if(freeSpacePolicy==FreeSpacePolicy.TIGHT || freeSpacePolicy==FreeSpacePolicy.BALANCED) { // The fast mode fill too much in advance with the same size objects that will never be grouped/split
-                long percentCapacity = capacity + (capacity>>2);
-                if(percentCapacity>newCapacity) newCapacity = percentCapacity;
-            }
+            long percentCapacity = capacity + (capacity>>2);
+            if(percentCapacity>newCapacity) newCapacity = percentCapacity;
             // Align with page
             newCapacity = getNearestPage(newCapacity);
             if(PersistentCollections.ASSERT) assert getPageOffset(newCapacity)==0;
             // Expand and initialize new space
             pbuffer.setCapacity(newCapacity);
-            configureNewAllocation(capacity, newCapacity, blockSizeBits);
+            configureNewAllocation(capacity, newCapacity);
             // The expansion must have caused free space that can fulfill this allocation.
             id = splitAllocate(blockSizeBits, newCapacity);
             if(id==-1) throw new AssertionError("Free space not available after expansion: capacity="+capacity+", newCapacity="+newCapacity);
@@ -528,7 +474,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         if(PersistentCollections.ASSERT) assert pbuffer.get(id)!=(byte)(header&0x7f);
         pbuffer.put(id, (byte)(header&0x7f));
         //pbuffer.barrier(false); // TODO: necessary
-        addFreeSpaceMap(id, blockSizeBits, pbuffer.capacity(), freeSpacePolicy==FreeSpacePolicy.TIGHT, false);
+        addFreeSpaceMap(id, blockSizeBits, pbuffer.capacity(), false);
     }
     // </editor-fold>
 

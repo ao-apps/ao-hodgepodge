@@ -31,23 +31,23 @@ import junit.framework.TestSuite;
 /**
  * @author  AO Industries, Inc.
  */
-public class BlockBufferDynamicFastTest extends BlockBufferTestParent {
+public class BlockBufferDynamicTwoCopyBarrierTest extends BlockBufferTestParent {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(BlockBufferDynamicFastTest.class);
+        TestSuite suite = new TestSuite(BlockBufferDynamicTwoCopyBarrierTest.class);
         return suite;
     }
 
-    public BlockBufferDynamicFastTest(String testName) {
+    public BlockBufferDynamicTwoCopyBarrierTest(String testName) {
         super(testName);
     }
 
     public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
-        return new MappedPersistentBuffer(tempFile, protectionLevel);
+        return new TwoCopyBarrierBuffer(tempFile, protectionLevel);
     }
 
     public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
-        return new DynamicPersistentBlockBuffer(pbuffer, DynamicPersistentBlockBuffer.FreeSpacePolicy.FAST);
+        return new DynamicPersistentBlockBuffer(pbuffer);
     }
 
     @Override

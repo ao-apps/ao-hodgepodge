@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,7 +49,7 @@ import org.checkthread.annotations.ThreadSafe;
  * and immediately on <code>barrier(true)</code> (if protectionLevel is high enough).
  * </p>
  * <p>
- * TODO: All instances also share a <code>{@link Timer Timer}</code> to perform automatic
+ * All instances also share a <code>{@link Timer Timer}</code> to perform automatic
  * background flushing of caches.  Automatic flushing is single-threaded to favor
  * low load averages over timely flushes.
  * </p>
@@ -99,8 +100,7 @@ import org.checkthread.annotations.ThreadSafe;
  * can cause significant delays when stopping a JVM.
  * </p>
  * <p>
- * TODO: Optimized implementations of get/put?<br />
- * TODO: Should we run on top of RandomAccessBuffer/MappedPersistentBuffer for memory-mapped read performance?
+ * TODO: Should we run on top of RandomAccessBuffer/LargeMappedPersistentBuffer/MappedPersistentBuffer for memory-mapped read performance?
  * </p>
  *
  * @author  AO Industries, Inc.
@@ -114,19 +114,28 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     private static final int DEFAULT_SECTOR_SIZE = 4096;
 
     /**
-     * The default delay (in milliseconds) before committing changes.  This errors
+     * The default delay (in milliseconds) before committing changes in the background.  This errors
      * on the side of safety with a short 5 second timeout.
      */
-    private static final long DEFAULT_COMMIT_DELAY = 5L * 1000L;
+    private static final long DEFAULT_ASYNCHRONOUS_COMMIT_DELAY = 5L * 1000L;
+
+    /**
+     * The default delay (in milliseconds) before committing changes in the foreground.  This
+     * defaults to one minute.
+     */
+    private static final long DEFAULT_SYNCHRONOUS_COMMIT_DELAY = 60L * 1000L;
 
     private static final Logger logger = Logger.getLogger(TwoCopyBarrierBuffer.class.getName());
+
+    private static final Timer asynchronousCommitTimer = new Timer("TwoCopyBarrierBuffer.asynchronousCommitTimer");
 
     private final File file;
     private final File newFile;
     private final File oldFile;
     private final boolean deleteOnClose;
     private final int sectorSize;
-    private final long commitDelay;
+    private final long asynchronousCommitDelay;
+    private final long synchronousCommitDelay;
     private final Object cacheLock = new Object();
 
     // All modifiable fields are protected by cacheLock
@@ -153,64 +162,66 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         oldWriteCache = new TreeMap<Long,byte[]>()
     ;
     private long capacity; // The underlying storage is not extended until commit time.
-    private RandomAccessFile raf; // Reads on non-cached data are read from here (this is the current file)
+    private RandomAccessFile raf; // Reads on non-cached data are read from here (this is the current file) - this is read-only
     private boolean isClosed = false;
     private long firstWriteTime = -1; // The time the first cached entry was written since the last commit
+    private TimerTask asynchronousCommitTimerTask;
 
     /**
      * Creates a read-write buffer backed by temporary files.  The protection level
      * is set to <code>NONE</code>.  The temporary file will be deleted when this
      * buffer is closed or on JVM shutdown.
-     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     * Uses default sectorSize of 4096, asynchronous commit delay of 5 seconds, and synchronous commit delay of 60 seconds.
      * A shutdown hook is not registered.
      */
     public TwoCopyBarrierBuffer() throws IOException {
         super(ProtectionLevel.NONE);
         file = File.createTempFile("TwoCopyBarrierBuffer", null);
         file.deleteOnExit();
-        newFile = new File(file.getCanonicalPath()+".new");
+        newFile = new File(file.getPath()+".new");
         if(newFile.exists()) throw new IOException("File exists: "+newFile);
         newFile.deleteOnExit();
-        oldFile = new File(file.getCanonicalPath()+".old");
+        oldFile = new File(file.getPath()+".old");
         if(oldFile.exists()) throw new IOException("File exists: "+oldFile);
         oldFile.deleteOnExit();
         new FileOutputStream(oldFile).close();
         deleteOnClose = true;
         sectorSize = DEFAULT_SECTOR_SIZE;
-        commitDelay = DEFAULT_COMMIT_DELAY;
-        raf = new RandomAccessFile(file, "rw");
+        asynchronousCommitDelay = DEFAULT_ASYNCHRONOUS_COMMIT_DELAY;
+        synchronousCommitDelay = DEFAULT_SYNCHRONOUS_COMMIT_DELAY;
+        raf = new RandomAccessFile(file, "r");
     }
 
-    /**lastFlushTime
+    /**
      * Creates a read-write buffer with <code>BARRIER</code> protection level.
-     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     * Uses default sectorSize of 4096, asynchronous commit delay of 5 seconds, and synchronous commit delay of 60 seconds.
      */
     public TwoCopyBarrierBuffer(String name) throws IOException {
-        this(new File(name), ProtectionLevel.BARRIER, DEFAULT_SECTOR_SIZE, DEFAULT_COMMIT_DELAY);
+        this(new File(name), ProtectionLevel.BARRIER, DEFAULT_SECTOR_SIZE, DEFAULT_ASYNCHRONOUS_COMMIT_DELAY, DEFAULT_SYNCHRONOUS_COMMIT_DELAY);
     }
 
     /**
      * Creates a buffer.
-     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     * Uses default sectorSize of 4096, asynchronous commit delay of 5 seconds, and synchronous commit delay of 60 seconds.
      */
     public TwoCopyBarrierBuffer(String name, ProtectionLevel protectionLevel) throws IOException {
-        this(new File(name), protectionLevel, DEFAULT_SECTOR_SIZE, DEFAULT_COMMIT_DELAY);
+        this(new File(name), protectionLevel, DEFAULT_SECTOR_SIZE, DEFAULT_ASYNCHRONOUS_COMMIT_DELAY, DEFAULT_SYNCHRONOUS_COMMIT_DELAY);
     }
 
     /**
      * Creates a read-write buffer with <code>BARRIER</code> protection level.
-     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     * Uses default sectorSize of 4096, asynchronous commit delay of 5 seconds, and synchronous commit delay of 60 seconds.
      */
     public TwoCopyBarrierBuffer(File file) throws IOException {
-        this(file, ProtectionLevel.BARRIER, DEFAULT_SECTOR_SIZE, DEFAULT_COMMIT_DELAY);
+        this(file, ProtectionLevel.BARRIER, DEFAULT_SECTOR_SIZE, DEFAULT_ASYNCHRONOUS_COMMIT_DELAY, DEFAULT_SYNCHRONOUS_COMMIT_DELAY);
     }
 
     /**
      * Creates a buffer.
-     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     * Uses default sectorSize of 4096, asynchronous commit delay of 5 seconds, and synchronous commit delay of 60 seconds.
      */
     public TwoCopyBarrierBuffer(File file, ProtectionLevel protectionLevel) throws IOException {
-        this(file, protectionLevel, DEFAULT_SECTOR_SIZE, DEFAULT_COMMIT_DELAY);
+        this(file, protectionLevel, DEFAULT_SECTOR_SIZE, DEFAULT_ASYNCHRONOUS_COMMIT_DELAY, DEFAULT_SYNCHRONOUS_COMMIT_DELAY);
     }
 
     /**
@@ -222,22 +233,27 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
      * @param protectionLevel   The protection level for this buffer.
      * @param sectorSize        The size of the sectors cached and written.  For best results this should
      *                          match the underlying filesystem block size.  Must be a power of two >= 1.
-     * @param commitDelay       The number of milliseconds before a background thread syncs uncommitted data to
-     *                          the underlying storage.
+     * @param asynchronousCommitDelay The number of milliseconds before a background thread syncs uncommitted data to
+     *                                the underlying storage.  A value of <code>Long.MAX_VALUE</code> will avoid any
+     *                                overhead of background thread management.
+     * @param synchronousCommitDelay  The number of milliseconds before a the calling thread syncs uncommitted data to
+     *                                the underlying storage.
      *
      * @throws java.io.IOException
      */
-    public TwoCopyBarrierBuffer(File file, ProtectionLevel protectionLevel, int sectorSize, long commitDelay) throws IOException {
+    public TwoCopyBarrierBuffer(File file, ProtectionLevel protectionLevel, int sectorSize, long asynchronousCommitDelay, long synchronousCommitDelay) throws IOException {
         super(protectionLevel);
         if(Integer.bitCount(sectorSize)!=1) throw new IllegalArgumentException("sectorSize is not a power of two: "+sectorSize);
         if(sectorSize<1) throw new IllegalArgumentException("sectorSize<1: "+sectorSize);
-        if(commitDelay<0) throw new IllegalArgumentException("commitDelay<0: "+commitDelay);
+        if(asynchronousCommitDelay<0) throw new IllegalArgumentException("asynchronousCommitDelay<0: "+asynchronousCommitDelay);
+        if(synchronousCommitDelay<0) throw new IllegalArgumentException("synchronousCommitDelay<0: "+synchronousCommitDelay);
         this.file = file;
-        newFile = new File(file.getCanonicalPath()+".new");
-        oldFile = new File(file.getCanonicalPath()+".old");
+        newFile = new File(file.getPath()+".new");
+        oldFile = new File(file.getPath()+".old");
         deleteOnClose = false;
         this.sectorSize = sectorSize;
-        this.commitDelay = commitDelay;
+        this.asynchronousCommitDelay = asynchronousCommitDelay;
+        this.synchronousCommitDelay = synchronousCommitDelay;
         // Find file(s) and rename if necessary
         // filename and filename.old
         if(file.exists()) {
@@ -271,7 +287,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
             }
         }
         // Populate oldWriteCache by comparing the files
-        raf = new RandomAccessFile(file, protectionLevel==ProtectionLevel.READ_ONLY ? "r" : "rw");
+        raf = new RandomAccessFile(file, "r");
         capacity = raf.length();
         long oldCapacity = oldFile.length();
         InputStream oldIn = new FileInputStream(oldFile);
@@ -286,11 +302,12 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 // Read current bytes
                 raf.readFully(buff, 0, inBytes);
                 if(sectorEnd>oldCapacity) {
-                    // TODO: Can optimize by assuming zeros for bytes beyond the end of the file (save flash writes)
-                    // Old capacity too small, add to oldWriteCache
-                    if(inBytes<sectorSize) Arrays.fill(buff, sectorSize-inBytes, sectorSize, (byte)0);
-                    oldWriteCache.put(sector, buff);
-                    buff = new byte[sectorSize];
+                    // Old capacity too small, add to oldWriteCache if can't assume all zeros
+                    if(sector<oldCapacity || !PersistentCollections.allEquals(buff, 0, inBytes, (byte)0)) {
+                        if(inBytes<sectorSize) Arrays.fill(buff, sectorSize-inBytes, sectorSize, (byte)0);
+                        oldWriteCache.put(sector, buff);
+                        buff = new byte[sectorSize];
+                    }
                 } else {
                     // Read old bytes
                     PersistentCollections.readFully(oldIn, oldBuff, 0, inBytes);
@@ -362,8 +379,8 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
             currentWriteCache = oldWriteCache;
             oldWriteCache = temp;
             if(!newFile.renameTo(file)) throw new IOException("Unable to rename "+newFile+" to "+file);
-            raf = new RandomAccessFile(file, "rw"); // Must be read-write at this point
-            firstWriteTime = -1;
+            raf = new RandomAccessFile(file, "r"); // Read-only during normal operation because using write caches
+            clearFirstWriteTime();
         }
     }
 
@@ -421,6 +438,58 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         }
     }
 
+    /**
+     * Clears the starting time for the write cache.  Also cancels and removes the asynchronous timer, if exists.
+     */
+    @NotThreadSafe
+    private void clearFirstWriteTime() {
+        if(PersistentCollections.ASSERT) assert Thread.holdsLock(cacheLock);
+        firstWriteTime = -1;
+        if(asynchronousCommitTimerTask!=null) {
+            asynchronousCommitTimerTask.cancel();
+            asynchronousCommitTimerTask = null;
+        }
+    }
+
+    /**
+     * Marks the starting time for the write cache.  Also starts the asynchronous timer, if not yet started.
+     */
+    @NotThreadSafe
+    private void markFirstWriteTime() {
+        if(PersistentCollections.ASSERT) assert Thread.holdsLock(cacheLock);
+        // Mark as needing flush
+        if(firstWriteTime==-1) firstWriteTime = System.currentTimeMillis();
+        if(asynchronousCommitDelay!=Long.MAX_VALUE && asynchronousCommitTimerTask==null) {
+            asynchronousCommitTimerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    synchronized(cacheLock) {
+                        if(asynchronousCommitTimerTask==this) { // Ignore if canceled
+                            asynchronousCommitTimerTask = null;
+                            if(firstWriteTime!=-1) { // Nothing to write?
+                                // Only flush after asynchronousCommitDelay milliseconds have passed
+                                long timeSince = System.currentTimeMillis() - firstWriteTime;
+                                if(timeSince<=(-asynchronousCommitDelay) || timeSince>=asynchronousCommitDelay) {
+                                    try {
+                                        flushWriteCache();
+                                    } catch(IOException err) {
+                                        logger.log(Level.SEVERE, null, err);
+                                    }
+                                } else {
+                                    // Resubmit timer task
+                                    markFirstWriteTime();
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            long delay = (firstWriteTime + asynchronousCommitDelay) - System.currentTimeMillis();
+            if(delay<0) delay = 0;
+            asynchronousCommitTimer.schedule(asynchronousCommitTimerTask, delay);
+        }
+    }
+
     @ThreadSafe
     public void setCapacity(long newCapacity) throws IOException {
         synchronized(cacheLock) {
@@ -443,8 +512,32 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                     }
                 }
                 this.capacity = newCapacity;
-                // Mark as needing flush
-                if(firstWriteTime==-1) firstWriteTime = System.currentTimeMillis();
+                markFirstWriteTime();
+            }
+        }
+    }
+
+    @ThreadSafe
+    @Override
+    public byte get(long position) throws IOException {
+        synchronized(cacheLock) {
+            checkClosed();
+            if(position<0) throw new IllegalArgumentException("position<0: "+position);
+            if(PersistentCollections.ASSERT) assert position<capacity;
+            long sector = position&(-sectorSize);
+            if(PersistentCollections.ASSERT) assert (sector&(sectorSize-1))==0 : "Sector not aligned";
+            byte[] cached = oldWriteCache.get(sector);
+            if(cached!=null) {
+                return cached[(int)(position-sector)];
+            } else {
+                long rafLength = raf.length();
+                if(position<rafLength) {
+                    raf.seek(position);
+                    return raf.readByte();
+                } else {
+                    // Extended past end of raf, assume zeros that will be written during commit
+                    return (byte)0;
+                }
             }
         }
     }
@@ -493,6 +586,75 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         }
     }
 
+    @Override
+    @ThreadSafe
+    public void put(long position, byte value) throws IOException {
+        synchronized(cacheLock) {
+            checkClosed();
+            if(position<0) throw new IllegalArgumentException("position<0: "+position);
+            if(PersistentCollections.ASSERT) assert position<capacity;
+            final long sector = position&(-sectorSize);
+            if(PersistentCollections.ASSERT) assert (sector&(sectorSize-1))==0 : "Sector not aligned";
+            byte[] oldCached = oldWriteCache.get(sector);
+            if(oldCached!=null) {
+                if(currentWriteCache.containsKey(sector)) {
+                    // Already in current cache, update always because only dirty sectors are in the current cache.
+                    // Update cache only (do not write-through)
+                    oldCached[(int)(position-sector)] = value;
+                } else {
+                    // Only add to current cache when data changed (save flash writes)
+                    if(oldCached[(int)(position-sector)] != value) {
+                        markFirstWriteTime();
+                        currentWriteCache.put(sector, oldCached); // Shares the byte[] buffer
+                        // Update cache only (do not write-through)
+                        oldCached[(int)(position-sector)] = value;
+                    }
+                }
+            } else {
+                // Read the entire sector from underlying storage, assuming zeros past end of file
+                long rafLength = raf.length();
+                // Only add to caches when data changed (save flash writes)
+                byte curValue;
+                if(position<rafLength) {
+                    raf.seek(position);
+                    curValue = raf.readByte();
+                } else {
+                    // Past end, assume zero
+                    curValue = (byte)0;
+                }
+                if(curValue!=value) {
+                    byte[] readBuff = new byte[sectorSize];
+                    // Scoping block
+                    {
+                        int offset = 0;
+                        int bytesLeft = sectorSize;
+                        while(bytesLeft>0) {
+                            long seek = sector+offset;
+                            if(seek<rafLength) {
+                                raf.seek(seek);
+                                long readEnd = seek+bytesLeft;
+                                if(readEnd>rafLength) readEnd = rafLength;
+                                int readLen = (int)(readEnd - seek);
+                                raf.readFully(readBuff, offset, readLen);
+                                offset+=readLen;
+                                bytesLeft-=readLen;
+                            } else {
+                                // Assume zeros that are already in readBuff
+                                offset+=bytesLeft;
+                                bytesLeft=0;
+                            }
+                        }
+                    }
+                    markFirstWriteTime();
+                    currentWriteCache.put(sector, readBuff); // Shares the byte[] buffer
+                    oldWriteCache.put(sector, readBuff); // Shares the byte[] buffer
+                    // Update cache only (do not write-through)
+                    readBuff[(int)(position-sector)] = value;
+                }
+            }
+        }
+    }
+
     @ThreadSafe
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         synchronized(cacheLock) {
@@ -519,7 +681,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                     } else {
                         // Only add to current cache when data changed (save flash writes)
                         if(!PersistentCollections.equals(buff, off, oldCached, (int)(position-sector), bytesToWrite)) {
-                            if(firstWriteTime==-1) firstWriteTime = System.currentTimeMillis();
+                            markFirstWriteTime();
                             currentWriteCache.put(sector, oldCached); // Shares the byte[] buffer
                             // Update cache only (do not write-through)
                             System.arraycopy(buff, off, oldCached, (int)(position-sector), bytesToWrite);
@@ -554,7 +716,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                     }
                     // Only add to caches when data changed (save flash writes)
                     if(!PersistentCollections.equals(buff, off, readBuff, (int)(position-sector), bytesToWrite)) {
-                        if(firstWriteTime==-1) firstWriteTime = System.currentTimeMillis();
+                        markFirstWriteTime();
                         currentWriteCache.put(sector, readBuff); // Shares the byte[] buffer
                         oldWriteCache.put(sector, readBuff); // Shares the byte[] buffer
                         // Update cache only (do not write-through)
@@ -578,10 +740,10 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 // Flush always when forced
                 flushWriteCache();
             } else {
-                // Only flush after commitDelay milliseconds have passed
+                // Only flush after synchronousCommitDelay milliseconds have passed
                 if(firstWriteTime!=-1) {
                     long timeSince = System.currentTimeMillis() - firstWriteTime;
-                    if(timeSince<=(-commitDelay) || timeSince>=commitDelay) flushWriteCache();
+                    if(timeSince<=(-synchronousCommitDelay) || timeSince>=synchronousCommitDelay) flushWriteCache();
                 }
             }
         }

@@ -259,6 +259,17 @@ public class PersistentCollections {
         }
         return true;
     }
+
+    /**
+     * Checks if all the values in the provided range are equal to <code>value</code>.
+     */
+    @ThreadSafe
+    static boolean allEquals(byte[] b, int off, int len, byte value) {
+        for(int end=off+len; off<end; off++) {
+            if(b[off]!=value) return false;
+        }
+        return true;
+    }
     // </editor-fold>
 
     /**

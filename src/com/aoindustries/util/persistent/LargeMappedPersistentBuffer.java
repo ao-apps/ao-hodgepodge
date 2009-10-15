@@ -185,7 +185,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     @NotThreadSafe
-    private void fillZeros(long position, long len) throws IOException {
+    private void ensureZeros(long position, long len) throws IOException {
         while(len>0) {
             long bufferStart = position & BUFFER_INDEX_MASK;
             long bufferSize = BUFFER_SIZE - bufferStart;
@@ -218,7 +218,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
             fillMappedBuffers();
             if(newLength>oldLength) {
                 // Ensure zero-filled
-                fillZeros(oldLength, newLength-oldLength);
+                ensureZeros(oldLength, newLength-oldLength);
             }
         }
     }

@@ -103,7 +103,7 @@ abstract public class BlockBufferTestParent extends TestCase {
     private static void compareAllocatedIds(SortedSet<Long> allocatedIds, SortedSet<Long> recoveredIds, SortedSet<Long> partialIds) throws Exception {
         for(Long id : recoveredIds) {
             if(!allocatedIds.contains(id)) {
-                System.out.println("DEBUG: Adding "+id+" to allocatedIds");
+                //System.out.println("DEBUG: Adding "+id+" to allocatedIds");
                 allocatedIds.add(id);
             }
             //assertTrue("allocatedIds.contains("+id+")==false", allocatedIds.contains(id));
@@ -114,7 +114,7 @@ abstract public class BlockBufferTestParent extends TestCase {
             boolean recoveryContains = recoveredIds.contains(id);
             boolean partialContains = partialIds.contains(id);
             if(!recoveryContains && partialContains) {
-                System.out.println("DEBUG: Removing "+id+" from allocatedIds");
+                //System.out.println("DEBUG: Removing "+id+" from allocatedIds");
                 ids.remove();
             }
             assertTrue("partialIds.size()="+partialIds.size()+", recoveredIds.contains("+id+")="+recoveryContains+", partialIds.contains("+id+")="+partialContains, recoveryContains || partialContains);
@@ -135,7 +135,7 @@ abstract public class BlockBufferTestParent extends TestCase {
             boolean allocatedContains = allocatedIds.contains(id);
             boolean partialContains = partialIds.contains(id);
             if(!allocatedContains && partialContains) {
-                System.out.println("DEBUG: Adding "+id+" to allocatedIds");
+                //System.out.println("DEBUG: Adding "+id+" to allocatedIds");
                 allocatedIds.add(id);
             }
             assertTrue("partialIds.size()="+partialIds.size()+", allocatedIds.contains("+id+")="+allocatedContains+", partialIds.contains("+id+")="+partialContains, allocatedContains || partialContains);
