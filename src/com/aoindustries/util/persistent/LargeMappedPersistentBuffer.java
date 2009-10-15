@@ -192,8 +192,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
             if(bufferSize > len) bufferSize = len;
             int bufferNum = getBufferNum(position);
             MappedByteBuffer mappedBuffer = mappedBuffers.get(bufferNum);
-            mappedBuffer.position((int)bufferStart);
-            PersistentCollections.fillZeros(mappedBuffer, bufferSize);
+            PersistentCollections.ensureZeros(mappedBuffer, (int)bufferStart, (int)bufferSize);
             if(modifiedBuffers!=null) modifiedBuffers.set(bufferNum, true);
             position += bufferSize;
             len -= bufferSize;

@@ -22,12 +22,13 @@
  */
 package com.aoindustries.util.persistent;
 
-import java.io.DataOutput;
+import com.aoindustries.util.BufferManager;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import org.checkthread.annotations.ThreadSafe;
 
@@ -45,7 +46,7 @@ public class PersistentCollections {
      * Speed testing from JUnit in NetBeans requires disabling assertions in a more forceful manner.
      * TODO: Remove this hack once performance testing has been completed.
      */
-    static final boolean ASSERT = false; // TODO: true
+    static final boolean ASSERT = true;
 
     private PersistentCollections() {
     }
@@ -130,33 +131,99 @@ public class PersistentCollections {
     /**
      * The value is never modified therefore thread safe.
      */
-    private static final byte[] zeros = new byte[4096];
+    private static final byte[] zeros = new byte[BufferManager.BUFFER_SIZE];
 
     /**
      * Writes the requested number of zeros to the provided output.
      */
-    @ThreadSafe
+    /*@ThreadSafe
     static void fillZeros(DataOutput out, long count) throws IOException {
         if(count<0) throw new IllegalArgumentException("count<0: "+count);
-        while(count>4096) {
-            out.write(zeros, 0, 4096);
-            count -= 4096;
+        while(count>BufferManager.BUFFER_SIZE) {
+            out.write(zeros, 0, BufferManager.BUFFER_SIZE);
+            count -= BufferManager.BUFFER_SIZE;
         }
         if(count>0) out.write(zeros, 0, (int)count);
+    }*/
+
+    /**
+     * Writes the requested number of zeros to the provided RandomAccessFile, but
+     * only if they do not already contain zeros.  This is to avoid unnecessary
+     * writes on flash media.
+     */
+    @ThreadSafe
+    static void ensureZeros(RandomAccessFile raf, long position, long count) throws IOException {
+        if(count<0) throw new IllegalArgumentException("count<0: "+count);
+        byte[] buff = BufferManager.getBytes();
+        try {
+            while(count>BufferManager.BUFFER_SIZE) {
+                raf.seek(position);
+                raf.readFully(buff, 0, BufferManager.BUFFER_SIZE);
+                if(!Arrays.equals(buff, zeros)) {
+                    raf.seek(position);
+                    raf.write(zeros, 0, BufferManager.BUFFER_SIZE);
+                }
+                position += BufferManager.BUFFER_SIZE;
+                count -= BufferManager.BUFFER_SIZE;
+            }
+            if(count>0) {
+                raf.seek(position);
+                raf.readFully(buff, 0, (int)count);
+                if(!equals(buff, zeros, 0, (int)count)) {
+                    raf.seek(position);
+                    raf.write(zeros, 0, (int)count);
+                }
+            }
+        } finally {
+            BufferManager.release(buff);
+        }
+    }
+
+    /**
+     * Stores the requested number of zeros to the provided ByteBuffer, but
+     * only if they do not already contain zeros.  This is to avoid unnecessary
+     * writes on flash media.
+     */
+    @ThreadSafe
+    static void ensureZeros(ByteBuffer byteBuffer, int position, int count) throws IOException {
+        if(count<0) throw new IllegalArgumentException("count<0: "+count);
+        byte[] buff = BufferManager.getBytes();
+        try {
+            while(count>BufferManager.BUFFER_SIZE) {
+                byteBuffer.position(position);
+                byteBuffer.get(buff, 0, BufferManager.BUFFER_SIZE);
+                if(!Arrays.equals(buff, zeros)) {
+                    byteBuffer.position(position);
+                    byteBuffer.put(zeros, 0, BufferManager.BUFFER_SIZE);
+                }
+                position += BufferManager.BUFFER_SIZE;
+                count -= BufferManager.BUFFER_SIZE;
+            }
+            if(count>0) {
+                byteBuffer.position(position);
+                byteBuffer.get(buff, 0, count);
+                if(!equals(buff, zeros, 0, count)) {
+                    byteBuffer.position(position);
+                    byteBuffer.put(zeros, 0, count);
+                }
+            }
+        } finally {
+            BufferManager.release(buff);
+        }
     }
 
     /**
      * Writes the requested number of zeros to the provided buffer.
      */
-    @ThreadSafe
+    /*@ThreadSafe
     static void fillZeros(ByteBuffer buffer, long count) throws IOException {
         if(count<0) throw new IllegalArgumentException("count<0: "+count);
-        while(count>4096) {
-            buffer.put(zeros, 0, 4096);
-            count -= 4096;
+        while(count>BufferManager.BUFFER_SIZE) {
+            buffer.put(zeros, 0, BufferManager.BUFFER_SIZE);
+            count -= BufferManager.BUFFER_SIZE;
         }
         if(count>0) buffer.put(zeros, 0, (int)count);
-    }
+    }*/
 
     /**
      * Fully reads a buffer.
@@ -178,6 +245,17 @@ public class PersistentCollections {
     static boolean equals(byte[] b1, byte[] b2, int off, int len) {
         for(int end=off+len; off<end; off++) {
             if(b1[off]!=b2[off]) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the subrange of two byte arrays is equal.
+     */
+    @ThreadSafe
+    static boolean equals(byte[] b1, int off1, byte[] b2, int off2, int len) {
+        for(int end=off1+len; off1<end; off1++, off2++) {
+            if(b1[off1]!=b2[off2]) return false;
         }
         return true;
     }

@@ -31,14 +31,14 @@ import junit.framework.TestSuite;
 /**
  * @author  AO Industries, Inc.
  */
-public class BlockBufferDynamicTightTest extends BlockBufferTestParent {
+public class BlockBufferDynamicTightMappedTest extends BlockBufferTestParent {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(BlockBufferDynamicTightTest.class);
+        TestSuite suite = new TestSuite(BlockBufferDynamicTightMappedTest.class);
         return suite;
     }
 
-    public BlockBufferDynamicTightTest(String testName) {
+    public BlockBufferDynamicTightMappedTest(String testName) {
         super(testName);
     }
 

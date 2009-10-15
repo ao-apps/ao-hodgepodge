@@ -1,0 +1,547 @@
+/*
+ * aocode-public - Reusable Java library of general tools with minimal external dependencies.
+ * Copyright (C) 2008, 2009  AO Industries, Inc.
+ *     support@aoindustries.com
+ *     7262 Bull Pen Cir
+ *     Mobile, AL 36695
+ *
+ * This file is part of aocode-public.
+ *
+ * aocode-public is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aocode-public is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.aoindustries.util.persistent;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.BufferUnderflowException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.Timer;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.checkthread.annotations.NotThreadSafe;
+
+/**
+ * <p>
+ * Java does not support write barriers without a complete <code>force</code> call,
+ * this class works-around this issue by maintaining two copies of the file and
+ * updating the older copy to be the newer copy occasionally on <code>barrier(false)</code>
+ * and immediately on <code>barrier(true)</code> (if protectionLevel is high enough).
+ * </p>
+ * <p>
+ * TODO: All instances also share a <code>{@link Timer Timer}</code> to perform automatic
+ * background flushing of caches.  Automatic flushing is single-threaded to favor
+ * low load averages over timely flushes.
+ * </p>
+ * <p>
+ * This class also acts as a write cache that may batch or delay writes for potentially
+ * long periods of time.  This is useful for media such as flash memory where write
+ * throughput is quite limited and the number of writes on the media is also limited.
+ * </p>
+ * <p>
+ * Since this class is intended for flash-based media, it will not rewrite the
+ * same data to a section of a file.  Even if this means that it has to read the
+ * section of the file, compare the values, and then write only when changed.  This
+ * is an attempt to help the wear leveling technology built into the media by
+ * dispatching a minimum number of writes.
+ * </p>
+ * <p>
+ * An additional benefit may be that reads from cached data are performed directly
+ * from the write cache, although this is not the purpose of this buffer.  Writes that
+ * would not change anything, however, are not cached and would not help as a
+ * read cache.
+ * </p>
+ * <p>
+ * Two copies of the file are maintained.  The most recent version of the file
+ * will normally be named with the regular name, but other versions will exist
+ * with .old or .new appended to the filename.  The exact order of update is:
+ * <ol>
+ *   <li>Rename <code><i>filename</i>.old</code> to <code><i>filename</i>.new</code></li>
+ *   <li>Write new version of all data to <code><i>filename</i>.new</code></li>
+ *   <li>Rename <code><i>filename</i></code> to <code><i>filename</i>.old</code></li>
+ *   <li>Rename <code><i>filename</i>.new</code> to <code><i>filename</i></code></li>
+ * </ol>
+ * The filename states, in order:
+ * <pre>
+ *          Complete      Complete Old  Partial
+ * Normal:  filename      filename.old
+ *          filename                    filename.new
+ *          filename.new  filename.old
+ * Normal:  filename      filename.old
+ *
+ * </pre>
+ * This implementation assumes an atomic file rename for correct recovery.
+ * </p>
+ * <p>
+ * TODO: To reduce the chance of data loss, this registers a JVM shutdown hook to flush
+ * all caches on JVM shutdown.  If it takes a long time to flush the data this
+ * can cause significant delays when stopping a JVM.
+ * </p>
+ * <p>
+ * TODO: Optimized implementations of get/put?<br />
+ * TODO: Should we run on top of RandomAccessBuffer/MappedPersistentBuffer for memory-mapped read performance?
+ * </p>
+ *
+ * @author  AO Industries, Inc.
+ */
+public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
+
+    /**
+     * The default number of bytes per sector.  This should match the block
+     * size of the underlying filesystem for best results.
+     */
+    private static final int DEFAULT_SECTOR_SIZE = 4096;
+
+    /**
+     * The default delay (in milliseconds) before committing changes.  This errors
+     * on the side of safety with a short 5 second timeout.
+     */
+    private static final long DEFAULT_COMMIT_DELAY = 5L * 1000L;
+
+    private static final Logger logger = Logger.getLogger(TwoCopyBarrierBuffer.class.getName());
+
+    private final File file;
+    private final File newFile;
+    private final File oldFile;
+    private final boolean deleteOnClose;
+    private final int sectorSize;
+    private final long commitDelay;
+
+    /**
+     * <p>
+     * Keeps track of the last version of all sectors that have been written.  Each
+     * entry will be <code>sectorSize</code> in length, even if at the end of the
+     * capacity.
+     * </p>
+     * <p>
+     * Each copy of the file has its own write cache, which is flushed separately.
+     * This is done to avoid unnecessary reads while still keeping the files
+     * synchronized.  However, the actual <code>byte[]</code> of cached data
+     * is shared between the two maps.
+     * </p>
+     */
+    private SortedMap<Long,byte[]>
+        // Changes since the current (most up-to-date) file was last updated
+        currentWriteCache = new TreeMap<Long,byte[]>(),
+        // Changes since the old (previous version) file was last updated.  This
+        // is a superset of <code>currentWriteCache</code>.
+        oldWriteCache = new TreeMap<Long,byte[]>()
+    ;
+    private long capacity; // The underlying storage is not extended until commit time.
+    private RandomAccessFile raf; // Reads on non-cached data are read from here (this is the current file)
+    private boolean isClosed = false;
+    private long firstWriteTime = -1; // The time the first cached entry was written since the last commit
+
+    /**
+     * Creates a read-write buffer backed by temporary files.  The protection level
+     * is set to <code>NONE</code>.  The temporary file will be deleted when this
+     * buffer is closed or on JVM shutdown.
+     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     */
+    public TwoCopyBarrierBuffer() throws IOException {
+        super(ProtectionLevel.NONE);
+        file = File.createTempFile("TwoCopyBarrierBuffer", null);
+        file.deleteOnExit();
+        newFile = new File(file.getCanonicalPath()+".new");
+        if(newFile.exists()) throw new IOException("File exists: "+newFile);
+        newFile.deleteOnExit();
+        oldFile = new File(file.getCanonicalPath()+".old");
+        if(oldFile.exists()) throw new IOException("File exists: "+oldFile);
+        oldFile.deleteOnExit();
+        new FileOutputStream(oldFile).close();
+        deleteOnClose = true;
+        sectorSize = DEFAULT_SECTOR_SIZE;
+        commitDelay = DEFAULT_COMMIT_DELAY;
+        raf = new RandomAccessFile(file, "rw");
+    }
+
+    /**lastFlushTime
+     * Creates a read-write buffer with <code>BARRIER</code> protection level.
+     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     */
+    public TwoCopyBarrierBuffer(String name) throws IOException {
+        this(new File(name), ProtectionLevel.BARRIER, DEFAULT_SECTOR_SIZE, DEFAULT_COMMIT_DELAY);
+    }
+
+    /**
+     * Creates a buffer.
+     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     */
+    public TwoCopyBarrierBuffer(String name, ProtectionLevel protectionLevel) throws IOException {
+        this(new File(name), protectionLevel, DEFAULT_SECTOR_SIZE, DEFAULT_COMMIT_DELAY);
+    }
+
+    /**
+     * Creates a read-write buffer with <code>BARRIER</code> protection level.
+     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     */
+    public TwoCopyBarrierBuffer(File file) throws IOException {
+        this(file, ProtectionLevel.BARRIER, DEFAULT_SECTOR_SIZE, DEFAULT_COMMIT_DELAY);
+    }
+
+    /**
+     * Creates a buffer.
+     * Uses default sectorSize of 4096 and commit delay of 5 seconds.
+     */
+    public TwoCopyBarrierBuffer(File file, ProtectionLevel protectionLevel) throws IOException {
+        this(file, protectionLevel, DEFAULT_SECTOR_SIZE, DEFAULT_COMMIT_DELAY);
+    }
+
+    /**
+     * Creates a buffer.  Synchronizes the two copies of the file.  Populates the <code>oldWriteCache</code> with
+     * any data the doesn't match the newer version of the file.  This means that both files are read completely
+     * at start-up in order to provide the most efficient synchronization later.
+     * 
+     * @param file              The base filename, will be appended with ".old" and ".new" while committing changes.
+     * @param protectionLevel   The protection level for this buffer.
+     * @param sectorSize        The size of the sectors cached and written.  For best results this should
+     *                          match the underlying filesystem block size.  Must be a power of two >= 1.
+     * @param commitDelay       The number of milliseconds before a background thread syncs uncommitted data to
+     *                          the underlying storage.
+     *
+     * @throws java.io.IOException
+     */
+    public TwoCopyBarrierBuffer(File file, ProtectionLevel protectionLevel, int sectorSize, long commitDelay) throws IOException {
+        super(protectionLevel);
+        if(Integer.bitCount(sectorSize)!=1) throw new IllegalArgumentException("sectorSize is not a power of two: "+sectorSize);
+        if(sectorSize<1) throw new IllegalArgumentException("sectorSize<1: "+sectorSize);
+        if(commitDelay<0) throw new IllegalArgumentException("commitDelay<0: "+commitDelay);
+        this.file = file;
+        newFile = new File(file.getCanonicalPath()+".new");
+        oldFile = new File(file.getCanonicalPath()+".old");
+        deleteOnClose = false;
+        this.sectorSize = sectorSize;
+        this.commitDelay = commitDelay;
+        // Find file(s) and rename if necessary
+        // filename and filename.old
+        if(file.exists()) {
+            if(newFile.exists()) {
+                if(oldFile.exists()) {
+                    throw new IOException("file, newFile, and oldFile all exist");
+                } else {
+                    if(!newFile.renameTo(oldFile)) throw new IOException("Unable to rename "+newFile+" to "+oldFile);
+                }
+            } else {
+                if(oldFile.exists()) {
+                    // This is the normal state
+                } else {
+                    new FileOutputStream(oldFile).close();
+                }
+            }
+        } else {
+            if(newFile.exists()) {
+                if(oldFile.exists()) {
+                    if(!newFile.renameTo(file)) throw new IOException("Unable to rename "+newFile+" to "+file);
+                } else {
+                    throw new IOException("newFile exists without either file or oldFile");
+                }
+            } else {
+                if(oldFile.exists()) {
+                    throw new IOException("oldFile exists without either file or newFile");
+                } else {
+                    new FileOutputStream(file).close();
+                    new FileOutputStream(oldFile).close();
+                }
+            }
+        }
+        // Populate oldWriteCache by comparing the files
+        raf = new RandomAccessFile(file, protectionLevel==ProtectionLevel.READ_ONLY ? "r" : "rw");
+        capacity = raf.length();
+        long oldCapacity = oldFile.length();
+        InputStream oldIn = new FileInputStream(oldFile);
+        try {
+            byte[] buff = new byte[sectorSize];
+            byte[] oldBuff = new byte[sectorSize];
+            for(long sector=0; sector<capacity; sector+=sectorSize) {
+                long sectorEnd = sector+sectorSize;
+                if(sectorEnd>capacity) sectorEnd = capacity;
+                int inBytes = (int)(sectorEnd - sector);
+                if(PersistentCollections.ASSERT) assert inBytes>0;
+                // Read current bytes
+                raf.readFully(buff, 0, inBytes);
+                if(sectorEnd>oldCapacity) {
+                    // TODO: Can optimize by assuming zeros for bytes beyond the end of the file (save flash writes)
+                    // Old capacity too small, add to oldWriteCache
+                    if(inBytes<sectorSize) Arrays.fill(buff, sectorSize-inBytes, sectorSize, (byte)0);
+                    oldWriteCache.put(sector, buff);
+                    buff = new byte[sectorSize];
+                } else {
+                    // Read old bytes
+                    PersistentCollections.readFully(oldIn, oldBuff, 0, inBytes);
+                    if(!PersistentCollections.equals(buff, oldBuff, 0, inBytes)) {
+                        // Not equal, add to oldWriteCache
+                        if(inBytes<sectorSize) Arrays.fill(buff, sectorSize-inBytes, sectorSize, (byte)0);
+                        oldWriteCache.put(sector, buff);
+                        buff = new byte[sectorSize];
+                    }
+                }
+            }
+        } finally {
+            oldIn.close();
+        }
+    }
+
+    /**
+     * Writes any modified data to the older copy of the file and makes it the new copy.
+     */
+    @NotThreadSafe
+    private void flushWriteCache() throws IOException {
+        if(!currentWriteCache.isEmpty()) {
+            if(protectionLevel==ProtectionLevel.READ_ONLY) throw new IOException("protectionLevel==ProtectionLevel.READ_ONLY");
+            if(!oldFile.renameTo(newFile)) throw new IOException("Unable to rename "+oldFile+" to "+newFile);
+            RandomAccessFile newRaf = new RandomAccessFile(newFile, "rw");
+            try {
+                long oldLength = newRaf.length();
+                if(capacity!=oldLength) {
+                    newRaf.setLength(capacity);
+                    if(capacity>oldLength) {
+                        // Ensure zero-filled
+                        PersistentCollections.ensureZeros(newRaf, oldLength, capacity - oldLength);
+                    }
+                }
+                // Write only those sectors that have been modified
+                for(Map.Entry<Long,byte[]> entry : oldWriteCache.entrySet()) {
+                    long sector = entry.getKey();
+                    if(PersistentCollections.ASSERT) assert sector < capacity;
+                    if(PersistentCollections.ASSERT) assert (sector & (sectorSize-1))==0 : "Sector not aligned";
+                    long sectorEnd = sector + sectorSize;
+                    if(sectorEnd>capacity) sectorEnd = capacity;
+                    newRaf.seek(sector);
+                    newRaf.write(entry.getValue(), 0, (int)(sectorEnd - sector));
+                }
+                if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) newRaf.getChannel().force(false);
+            } finally {
+                newRaf.close();
+            }
+            raf.close();
+            if(!file.renameTo(oldFile)) throw new IOException("Unable to rename "+file+" to "+oldFile);
+            // Swap caches
+            oldWriteCache.clear();
+            SortedMap<Long,byte[]> temp = currentWriteCache;
+            currentWriteCache = oldWriteCache;
+            oldWriteCache = temp;
+            if(!newFile.renameTo(file)) throw new IOException("Unable to rename "+newFile+" to "+file);
+            raf = new RandomAccessFile(file, "rw"); // Must be read-write at this point
+            firstWriteTime = -1;
+        }
+    }
+
+    @Override
+    @NotThreadSafe
+    public void finalize() {
+        try {
+            close();
+        } catch(IOException err) {
+            logger.log(Level.WARNING, null, err);
+        }
+    }
+
+    @NotThreadSafe
+    public boolean isClosed() {
+        return isClosed;
+    }
+
+    @NotThreadSafe
+    public void close() throws IOException {
+        flushWriteCache();
+        isClosed = true;
+        raf.close();
+        if(deleteOnClose) {
+            IOException ioErr = null;
+            if(newFile.exists() && !newFile.delete()) ioErr = new IOException("Unable to delete temp file: "+newFile);
+            if(oldFile.exists() && !oldFile.delete()) ioErr = new IOException("Unable to delete temp file: "+oldFile);
+            if(file.exists() && !file.delete()) ioErr = new IOException("Unable to delete temp file: "+file);
+            if(ioErr!=null) throw ioErr;
+        }
+    }
+
+    /**
+     * Checks if closed and throws IOException if so.
+     */
+    @NotThreadSafe
+    private void checkClosed() throws IOException {
+        if(isClosed) throw new IOException("TwoCopyBarrierBuffer(\""+file.getPath()+"\") is closed");
+    }
+
+    @NotThreadSafe
+    public long capacity() throws IOException {
+        checkClosed();
+        return capacity;
+    }
+
+    @NotThreadSafe
+    public void setCapacity(long newCapacity) throws IOException {
+        checkClosed();
+        if(newCapacity!=capacity) {
+            Iterator<Map.Entry<Long,byte[]>> oldEntries = oldWriteCache.entrySet().iterator();
+            while(oldEntries.hasNext()) {
+                Map.Entry<Long,byte[]> entry = oldEntries.next();
+                Long sector = entry.getKey();
+                if(sector>=newCapacity) {
+                    // Remove any cached writes that start >= newCapacity
+                    oldEntries.remove();
+                    currentWriteCache.remove(sector);
+                } else {
+                    long sectorEnd = sector+sectorSize;
+                    if(newCapacity>=sector && newCapacity<sectorEnd) {
+                        // Also, zero-out any part of the last sector (beyond newCapacity) if it is a cached write
+                        Arrays.fill(entry.getValue(), (int)(newCapacity-sector), sectorSize, (byte)0);
+                    }
+                }
+            }
+            this.capacity = newCapacity;
+            // Mark as needing flush
+            if(firstWriteTime==-1) firstWriteTime = System.currentTimeMillis();
+        }
+    }
+
+    @NotThreadSafe
+    public int getSome(long position, final byte[] buff, int off, int len) throws IOException {
+        checkClosed();
+        if(position<0) throw new IllegalArgumentException("position<0: "+position);
+        if(off<0) throw new IllegalArgumentException("off<0: "+off);
+        if(len<0) throw new IllegalArgumentException("len<0: "+len);
+        final long end = position+len;
+        if(PersistentCollections.ASSERT) assert end<=capacity();
+        int bytesRead = 0;
+        while(position<end) {
+            long sector = position&(-sectorSize);
+            if(PersistentCollections.ASSERT) assert (sector&(sectorSize-1))==0 : "Sector not aligned";
+            int buffEnd = off + (sectorSize+(int)(sector-position));
+            if(buffEnd>(off+len)) buffEnd = off+len;
+            int bytesToRead = buffEnd-off;
+            if(PersistentCollections.ASSERT) assert bytesToRead <= len;
+            byte[] cached = oldWriteCache.get(sector);
+            int count;
+            if(cached!=null) {
+                System.arraycopy(cached, (int)(position-sector), buff, off, bytesToRead);
+                count = bytesToRead;
+            } else {
+                long rafLength = raf.length();
+                if(position<rafLength) {
+                    raf.seek(position);
+                    count = raf.read(buff, off, bytesToRead);
+                    if(count==-1) throw new BufferUnderflowException();
+                } else {
+                    // Extended past end of raf, assume zeros that will be written during commit
+                    Arrays.fill(buff, off, buffEnd, (byte)0);
+                    count = bytesToRead;
+                }
+            }
+            bytesRead += count;
+            if(count<bytesToRead) break;
+            position += count;
+            off += count;
+            len -= count;
+        }
+        return bytesRead;
+    }
+
+    @NotThreadSafe
+    public void put(long position, byte[] buff, int off, int len) throws IOException {
+        checkClosed();
+        if(position<0) throw new IllegalArgumentException("position<0: "+position);
+        if(off<0) throw new IllegalArgumentException("off<0: "+off);
+        if(len<0) throw new IllegalArgumentException("len<0: "+len);
+        long rafLength = -1;
+        final long end = position+len;
+        if(PersistentCollections.ASSERT) assert end<=capacity;
+        byte[] readBuff = null;
+        while(position<end) {
+            final long sector = position&(-sectorSize);
+            if(PersistentCollections.ASSERT) assert (sector&(sectorSize-1))==0 : "Sector not aligned";
+            int buffEnd = off + (sectorSize+(int)(sector-position));
+            if(buffEnd>(off+len)) buffEnd = off+len;
+            int bytesToWrite = buffEnd-off;
+            byte[] oldCached = oldWriteCache.get(sector);
+            if(oldCached!=null) {
+                if(currentWriteCache.containsKey(sector)) {
+                    // Already in current cache, update always because only dirty sectors are in the current cache.
+                    // Update cache only (do not write-through)
+                    System.arraycopy(buff, off, oldCached, (int)(position-sector), bytesToWrite);
+                } else {
+                    // Only add to current cache when data changed (save flash writes)
+                    if(!PersistentCollections.equals(buff, off, oldCached, (int)(position-sector), bytesToWrite)) {
+                        if(firstWriteTime==-1) firstWriteTime = System.currentTimeMillis();
+                        currentWriteCache.put(sector, oldCached); // Shares the byte[] buffer
+                        // Update cache only (do not write-through)
+                        System.arraycopy(buff, off, oldCached, (int)(position-sector), bytesToWrite);
+                    }
+                }
+            } else {
+                // Read the entire sector from underlying storage, assuming zeros past end of file
+                if(rafLength==-1) rafLength = raf.length();
+                boolean isNewBuff = readBuff==null;
+                if(isNewBuff) readBuff = new byte[sectorSize];
+                // Scoping block
+                {
+                    int offset = 0;
+                    int bytesLeft = sectorSize;
+                    while(bytesLeft>0) {
+                        long seek = sector+offset;
+                        if(seek<rafLength) {
+                            raf.seek(seek);
+                            long readEnd = seek+bytesLeft;
+                            if(readEnd>rafLength) readEnd = rafLength;
+                            int readLen = (int)(readEnd - seek);
+                            raf.readFully(readBuff, offset, readLen);
+                            offset+=readLen;
+                            bytesLeft-=readLen;
+                        } else {
+                            // Assume zeros
+                            if(!isNewBuff) Arrays.fill(readBuff, offset, sectorSize, (byte)0);
+                            offset+=bytesLeft;
+                            bytesLeft=0;
+                        }
+                    }
+                }
+                // Only add to caches when data changed (save flash writes)
+                if(!PersistentCollections.equals(buff, off, readBuff, (int)(position-sector), bytesToWrite)) {
+                    if(firstWriteTime==-1) firstWriteTime = System.currentTimeMillis();
+                    currentWriteCache.put(sector, readBuff); // Shares the byte[] buffer
+                    oldWriteCache.put(sector, readBuff); // Shares the byte[] buffer
+                    // Update cache only (do not write-through)
+                    System.arraycopy(buff, off, readBuff, (int)(position-sector), bytesToWrite);
+                    readBuff = null; // Create new array next time needed
+                }
+            }
+            position += bytesToWrite;
+            off += bytesToWrite;
+            len -= bytesToWrite;
+        }
+    }
+
+    @NotThreadSafe
+    public void barrier(boolean force) throws IOException {
+        checkClosed();
+        // Downgrade to barrier-only if not using FORCE protection level
+        if(force && protectionLevel.compareTo(ProtectionLevel.FORCE)>=0) {
+            // Flush always when forced
+            flushWriteCache();
+        } else {
+            // Only flush after commitDelay milliseconds have passed
+            if(firstWriteTime!=-1) {
+                long timeSince = System.currentTimeMillis() - firstWriteTime;
+                if(timeSince<=(-commitDelay) || timeSince>=commitDelay) flushWriteCache();
+            }
+        }
+    }
+}

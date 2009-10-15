@@ -166,8 +166,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
                 }
                 mappedBuffer = channel.map(protectionLevel==ProtectionLevel.READ_ONLY ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, newLength);
                 // Ensure zero-filled
-                mappedBuffer.position(getIndex(oldLength));
-                PersistentCollections.fillZeros(mappedBuffer, newLength - oldLength);
+                PersistentCollections.ensureZeros(mappedBuffer, getIndex(oldLength), (int)(newLength - oldLength));
                 modified = true;
             }
         }

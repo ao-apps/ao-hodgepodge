@@ -193,7 +193,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
             bitmapBitsAddress = getBitMapBitsAddress(lowestFreeId);
         }
         // Grow the underlying storage to make room for the bitmap space.
-        assert (lowestFreeId&7)==0 : "lowestFreeId must be the beginning of a byte";
+        if(PersistentCollections.ASSERT) assert (lowestFreeId&7)==0 : "lowestFreeId must be the beginning of a byte";
         modCount++;
         expandCapacity(capacity, bitmapBitsAddress+1);
         pbuffer.put(bitmapBitsAddress, (byte)1);

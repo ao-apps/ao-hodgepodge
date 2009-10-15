@@ -136,8 +136,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         raf.setLength(newLength);
         if(newLength>oldLength) {
             // Ensure zero-filled
-            raf.seek(oldLength);
-            PersistentCollections.fillZeros(raf, newLength - oldLength);
+            PersistentCollections.ensureZeros(raf, oldLength, newLength - oldLength);
         }
     }
 

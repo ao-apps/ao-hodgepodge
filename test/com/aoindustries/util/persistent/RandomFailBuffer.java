@@ -76,7 +76,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     }
 
     /**
-     * The number of blocks per sector.  This should match the physical media
+     * The number of bytes per sector.  This should match the physical media
      * on which normal buffers will resize.
      */
     private static final int SECTOR_SIZE = 512;
@@ -207,7 +207,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
         int bytesRead = 0;
         while(position<end) {
             long sector = position&(-SECTOR_SIZE);
-            if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0;
+            if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0 : "Sector not aligned";
             int buffEnd = off + (SECTOR_SIZE+(int)(sector-position));
             if(buffEnd>(off+len)) buffEnd = off+len;
             int bytesToRead = buffEnd-off;
@@ -241,7 +241,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
         randomFail(FailureMethod.put);
         while(position<end) {
             long sector = position&(-SECTOR_SIZE);
-            if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0;
+            if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0 : "Sector not aligned";
             int buffEnd = off + (SECTOR_SIZE+(int)(sector-position));
             if(buffEnd>(off+len)) buffEnd = off+len;
             int bytesToWrite = buffEnd-off;

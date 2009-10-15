@@ -53,7 +53,7 @@ abstract public class BlockBufferTestParent extends TestCase {
     abstract public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException;
     abstract public long getAllocationSize(Random random) throws IOException;
 
-    public void teTODOstAllocateDeallocate() throws Exception {
+    public void testAllocateDeallocate() throws Exception {
         File tempFile = File.createTempFile("BlockBufferTestParent", null);
         tempFile.deleteOnExit();
         PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
@@ -89,6 +89,8 @@ abstract public class BlockBufferTestParent extends TestCase {
         } finally {
             blockBuffer.close();
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
         }
     }
 
@@ -238,6 +240,8 @@ abstract public class BlockBufferTestParent extends TestCase {
             }
         } finally {
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
         }
     }
 

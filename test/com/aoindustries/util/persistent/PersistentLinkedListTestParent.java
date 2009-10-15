@@ -135,6 +135,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             linkedFileList.close();
             linkedFileList = null;
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
             linkedList = null;
         }
     }
@@ -227,6 +229,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             linkedFileList.close();
             linkedFileList = null;
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
             linkedList = null;
         }
     }
@@ -262,6 +266,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             linkedFileList.close();
             linkedFileList = null;
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
         }
     }
 
@@ -287,6 +293,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             linkedFileList.close();
             linkedFileList = null;
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
         }
     }
 
@@ -310,6 +318,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             linkedFileList.close();
             linkedFileList = null;
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
         }
     }
 
@@ -334,6 +344,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             linkedFileList.close();
             linkedFileList = null;
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
         }
     }
 
@@ -358,6 +370,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             linkedFileList.close();
             linkedFileList = null;
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
         }
     }
 
@@ -379,6 +393,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             linkedFileList.close();
             linkedFileList = null;
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
         }
     }
 
@@ -400,6 +416,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             linkedFileList.close();
             linkedFileList = null;
             tempFile.delete();
+            new File(tempFile.getPath()+".new").delete();
+            new File(tempFile.getPath()+".old").delete();
         }
     }
 }
