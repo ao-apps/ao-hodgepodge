@@ -55,6 +55,8 @@ import org.checkthread.annotations.NotThreadSafe;
  * This class also acts as a write cache that may batch or delay writes for potentially
  * long periods of time.  This is useful for media such as flash memory where write
  * throughput is quite limited and the number of writes on the media is also limited.
+ * This also turns many random writes into fewer, sequential writes.  This may help
+ * spinning platter-based media.
  * </p>
  * <p>
  * Since this class is intended for flash-based media, it will not rewrite the
