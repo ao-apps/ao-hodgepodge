@@ -40,6 +40,8 @@ import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.checkthread.annotations.NotThreadSafe;
@@ -134,6 +136,16 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     private static final Timer asynchronousCommitTimer = new Timer("TwoCopyBarrierBuffer.asynchronousCommitTimer");
 
     private static final Set<TwoCopyBarrierBuffer> shutdownBuffers = new HashSet<TwoCopyBarrierBuffer>();
+    /**
+     * TODO: Is there a way we can combine the force calls between all buffers?
+     * 1) Use recursion to get lock on all individual buffers - or use newer locks
+     * 2) Write new versions of all files.
+     * 3) Perform a single sync (will this take as long as individual fsync's?)
+     * 4) Rename all files.
+     * Deadlock concerns?  Performance benefits?
+     *
+     * Could the background commit thread take a similar strategy?
+     */
     private static final Thread shutdownHook = new Thread("TwoCopyBarrierBuffer.shutdownHook") {
         @Override
         public void run() {
@@ -143,27 +155,51 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 toClose = new ArrayList<TwoCopyBarrierBuffer>(shutdownBuffers);
                 shutdownBuffers.clear();
             }
-            long startTime = System.currentTimeMillis() - 55000;
-            boolean wrote = false;
-            int size = toClose.size();
-            for(int c=0;c<size;c++) {
-                long currentTime = System.currentTimeMillis();
-                long timeSince = currentTime - startTime;
-                if(timeSince<=-60000 || timeSince>=60000) {
-                    logger.info(size==1 ? "Closing the TwoCopyBarrierBuffer." : "Closing TwoCopyBarrierBuffer "+(c+1)+" of "+size+".");
-                    wrote = true;
-                    startTime = currentTime;
-                }
-                TwoCopyBarrierBuffer buffer = toClose.get(c);
+            if(!shutdownBuffers.isEmpty()) {
+                // These fields are shared by the invoked threads
+                final Object fieldLock = new Object();
+                final int[] counter = {1};
+                final long[] startTime = {System.currentTimeMillis() - 55000};
+                final boolean[] wrote = {false};
+                final int size = toClose.size();
+                // The maximum number of threads will be 100 or 1/20th of the number of buffers, whichever is larger
+                int maxNumThreads = Math.max(100, size/20);
+                int numThreads = Math.min(maxNumThreads, size);
+                ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
                 try {
-                    buffer.close();
-                } catch(ThreadDeath TD) {
-                    throw TD;
-                } catch(Throwable T) {
-                    logger.log(Level.WARNING, null, T);
+                    for(int c=0;c<size;c++) {
+                        final TwoCopyBarrierBuffer buffer = toClose.get(c);
+                        executorService.submit(
+                            new Runnable() {
+                                public void run() {
+                                    synchronized(fieldLock) {
+                                        long currentTime = System.currentTimeMillis();
+                                        long timeSince = currentTime - startTime[0];
+                                        if(timeSince<=-60000 || timeSince>=60000) {
+                                            logger.info(size==1 ? "Closing the TwoCopyBarrierBuffer." : "Closing TwoCopyBarrierBuffer "+counter[0]+" of "+size+".");
+                                            wrote[0] = true;
+                                            startTime[0] = currentTime;
+                                        }
+                                        counter[0]++;
+                                    }
+                                    try {
+                                        buffer.close();
+                                    } catch(ThreadDeath TD) {
+                                        throw TD;
+                                    } catch(Throwable T) {
+                                        logger.log(Level.WARNING, null, T);
+                                    }
+                                }
+                            }
+                        );
+                    }
+                } finally {
+                    executorService.shutdown();
+                }
+                synchronized(fieldLock) {
+                    if(wrote[0]) logger.info(size==1 ? "Finished closing the TwoCopyBarrierBuffer." : "Finished closing all "+size+" TwoCopyBarrierBuffers.");
                 }
             }
-            if(wrote) logger.info(size==1 ? "Finished closing the TwoCopyBarrierBuffer." : "Finished closing all "+size+" TwoCopyBarrierBuffers.");
         }
     };
     static {
