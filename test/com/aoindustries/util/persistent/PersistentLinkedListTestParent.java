@@ -152,7 +152,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests for correctness comparing to standard LinkedList implementation.
      */
-    public void teTODOstCorrectnessString() throws Exception {
+    public void testCorrectnessString() throws Exception {
         doTestCorrectnessString(0);
         doTestCorrectnessString(1);
         for(int c=0; c<10; c++) doTestCorrectnessString(100 + random.nextInt(101));
@@ -246,7 +246,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests for correctness comparing to standard LinkedList implementation.
      */
-    public void teTODOstCorrectnessInteger() throws Exception {
+    public void testCorrectnessInteger() throws Exception {
         doTestCorrectnessInteger(0);
         doTestCorrectnessInteger(1);
         for(int c=0; c<10; c++) doTestCorrectnessInteger(100 + random.nextInt(101));
@@ -255,7 +255,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests the time complexity by adding many elements and making sure the time stays near linear
      */
-    public void teTODOstAddRandomStrings() throws Exception {
+    public void testAddRandomStrings() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
@@ -282,7 +282,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests the time complexity by adding many elements and making sure the time stays near linear
      */
-    public void teTODOstAddRandomIntegers() throws Exception {
+    public void testAddRandomIntegers() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -309,7 +309,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests the time complexity for integers (all null to avoid serialization)
      */
-    public void teTODOstAddNull() throws Exception {
+    public void testAddNull() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -334,7 +334,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test iteration performance.
      */
-    public void teTODOstStringIterationPerformance() throws Exception {
+    public void testStringIterationPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
@@ -360,7 +360,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test iteration performance.
      */
-    public void teTODOstIntegerIterationPerformance() throws Exception {
+    public void testIntegerIterationPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -386,7 +386,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test circular list performance.
      */
-    public void teTODOstStringCircularListPerformance() throws Exception {
+    public void testStringCircularListPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
@@ -409,7 +409,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test circular list performance.
      */
-    public void teTODOstIntegerCircularListPerformance() throws Exception {
+    public void testIntegerCircularListPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
