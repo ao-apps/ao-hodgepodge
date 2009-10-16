@@ -27,6 +27,7 @@ import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 import junit.framework.TestCase;
@@ -43,9 +44,14 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
         super(testName);
     }
 
-    private static String getRandomString(Random random) {
-        int len = random.nextInt(130)-1;
-        if(len==-1) return null;
+    private static String getRandomString(Random random, boolean allowNull) {
+        int len;
+        if(allowNull) {
+            len = random.nextInt(130)-1;
+            if(len==-1) return null;
+        } else {
+            len = random.nextInt(129);
+        }
         StringBuilder SB = new StringBuilder(len);
         for(int d=0;d<len;d++) SB.append((char)random.nextInt(Character.MAX_VALUE+1));
         return SB.toString();
@@ -64,7 +70,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
         try {
             // Populate the list
             for(int c=0;c<numElements;c++) {
-                String s = getRandomString(random);
+                String s = getRandomString(random, true);
                 assertEquals(linkedFileList.add(s), linkedList.add(s));
             }
             // Check size match
@@ -77,7 +83,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 // Update random locations to random values
                 for(int c=0;c<numElements;c++) {
                     int index = random.nextInt(numElements);
-                    String newVal = getRandomString(random);
+                    String newVal = getRandomString(random, true);
                     assertEquals(linkedFileList.set(index, newVal), linkedList.set(index, newVal));
                 }
             }
@@ -100,7 +106,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 int numAdd = random.nextInt(numElements);
                 for(int c=0;c<numAdd;c++) {
                     assertEquals(linkedFileList.size(), linkedList.size());
-                    String newVal = getRandomString(random);
+                    String newVal = getRandomString(random, true);
                     assertEquals(linkedFileList.add(newVal), linkedList.add(newVal));
                 }
             }
@@ -112,7 +118,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 for(int c=0;c<numAdd;c++) {
                     assertEquals(linkedFileList.size(), linkedList.size());
                     int index = random.nextInt(linkedFileList.size());
-                    String newVal = getRandomString(random);
+                    String newVal = getRandomString(random, true);
                     linkedFileList.add(index, newVal);
                     linkedList.add(index, newVal);
                     assertEquals(
@@ -144,7 +150,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests for correctness comparing to standard LinkedList implementation.
      */
-    public void teTODOstCorrectnessString() throws Exception {
+    public void testCorrectnessString() throws Exception {
         doTestCorrectnessString(0);
         doTestCorrectnessString(1);
         for(int c=0; c<10; c++) doTestCorrectnessString(100 + random.nextInt(101));
@@ -238,7 +244,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests for correctness comparing to standard LinkedList implementation.
      */
-    public void teTODOstCorrectnessInteger() throws Exception {
+    public void testCorrectnessInteger() throws Exception {
         doTestCorrectnessInteger(0);
         doTestCorrectnessInteger(1);
         for(int c=0; c<10; c++) doTestCorrectnessInteger(100 + random.nextInt(101));
@@ -247,14 +253,14 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests the time complexity by adding many elements and making sure the time stays near linear
      */
-    public void teTODOstAddRandomStrings() throws Exception {
+    public void testAddRandomStrings() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
         try {
             // Add in groups of 1000, timing the add
             String[] toAdd = new String[1000];
-            for(int d=0;d<1000;d++) toAdd[d] = getRandomString(random);
+            for(int d=0;d<1000;d++) toAdd[d] = getRandomString(random, true);
             for(int c=0;c<100;c++) {
                 long startNanos = System.nanoTime();
                 for(int d=0;d<1000;d++) linkedFileList.add(toAdd[d]);
@@ -274,7 +280,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests the time complexity by adding many elements and making sure the time stays near linear
      */
-    public void teTODOstAddRandomIntegers() throws Exception {
+    public void testAddRandomIntegers() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -301,7 +307,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests the time complexity for integers (all null to avoid serialization)
      */
-    public void teTODOstAddNull() throws Exception {
+    public void testAddNull() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -326,13 +332,13 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test iteration performance.
      */
-    public void teTODOstStringIterationPerformance() throws Exception {
+    public void testStringIterationPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
         try {
             for(int c=0;c<=100;c++) {
-                if(c>0) for(int d=0;d<100;d++) linkedFileList.add(getRandomString(random));
+                if(c>0) for(int d=0;d<100;d++) linkedFileList.add(getRandomString(random, true));
                 long startNanos = System.nanoTime();
                 for(String value : linkedFileList) {
                     // Do nothing
@@ -352,7 +358,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test iteration performance.
      */
-    public void teTODOstIntegerIterationPerformance() throws Exception {
+    public void testIntegerIterationPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -378,13 +384,13 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test circular list performance.
      */
-    public void teTODOstStringCircularListPerformance() throws Exception {
+    public void testStringCircularListPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
         try {
             for(int c=0;c<100000;c++) {
-                String newValue = getRandomString(random);
+                String newValue = getRandomString(random, true);
                 String oldValue = null;
                 if(linkedFileList.size()>=1000) oldValue = linkedFileList.removeLast();
                 linkedFileList.addFirst(newValue);
@@ -401,7 +407,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test circular list performance.
      */
-    public void teTODOstIntegerCircularListPerformance() throws Exception {
+    public void testIntegerCircularListPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -422,23 +428,65 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     }
 
     /**
-     * Ensures that the persistent list is not corrupt after a simulated failure.
+     * Ensures that the fileList is not corrupt after a simulated failure.
      * <ol>
-     *   <li>The persistent list must be the same size as linkedList or one smaller (for incomplete add).</li>
-     *   <li>The persistent list may not have any entry that is not in linkedList.</li>
+     *   <li>The fileList must be the same size as heapList or one smaller (for incomplete add/remove).</li>
      *   <li>
-     *     The persistent list may only be missing one item that is in linkedList,
+     *     The fileList may only be missing one item that is in heapList,
      *     and this is only acceptable when partial is not null and the missing item
-     *     equals partial.  When this is found, linkedList is updated.  At this point
+     *     equals partial.  When this is found, heapList is updated.  At this point
      *     the two lists should precisely match.
      *   </li>
+     *   <li>The fileList may not have any entry that is not in heapList.</li>
      *   <li>The lists must be the same size.</li>
      *   <li>The lists must iterate both forwards and backwards with identical elements.</li>
      * </ol>
      */
-    private static void checkAddRecoveryConsistency(LinkedList<String> linkedList, PersistentLinkedList<String> linkedFileList, String partial) {
-        assertTrue("Size mismatch: linkedList.size()="+linkedList.size()+", linkedFileList.size()="+linkedFileList.size(), linkedList.size()==linkedFileList.size() || (linkedList.size()-1)==linkedFileList.size());
-        // TODO: Implement rest of the checks
+    private static void checkRecoveryConsistency(LinkedList<String> heapList, PersistentLinkedList<String> fileList, String partial) {
+        // The fileList must be the same size as heapList or one smaller (for incomplete add).
+        assertTrue("Size mismatch: heapList.size()="+heapList.size()+", fileList.size()="+fileList.size(), heapList.size()==fileList.size() || (heapList.size()-1)==fileList.size());
+        Iterator<String> heapIter = heapList.iterator();
+        Iterator<String> fileIter = fileList.iterator();
+        boolean removedPartial = false;
+        while(heapIter.hasNext() || fileIter.hasNext()) {
+            // The persistent list may not have any entry that is not in linkedList.
+            String heapValue = heapIter.hasNext() ? heapIter.next() : null;
+            String fileValue = fileIter.hasNext() ? fileIter.next() : null;
+            if(heapValue!=null) {
+                if(!heapValue.equals(fileValue)) {
+                    assertTrue("Must be an exact match when partial is null", partial!=null);
+                    assertTrue("The only value that may be in the heap but not in the fileList is partial", heapValue.equals(partial));
+                    assertFalse("Refusing to remove partial twice", removedPartial);
+                    heapIter.remove();
+                    removedPartial = true;
+                }
+            } else {
+                if(fileValue!=null) {
+                    // The fileList may not have any entry that is not in heapList.
+                    throw new AssertionError("Value found in fileList that is not found in heapList: "+fileValue);
+                } else {
+                    throw new AssertionError("heapValue and fileValue should not both be null");
+                }
+            }
+        }
+        // The lists must be the same size.
+        assertTrue("Post-correction size mismatch: heapList.size()="+heapList.size()+", fileList.size()="+fileList.size(), heapList.size()==fileList.size());
+        // The lists must iterate forwards with identical elements.
+        heapIter = heapList.iterator();
+        fileIter = fileList.iterator();
+        while(heapIter.hasNext()) {
+            assertTrue("Forward iteration mismatch", fileIter.hasNext());
+            assertEquals("Forward iteration mismatch", heapIter.next(), fileIter.next());
+        }
+        assertFalse("Forward iteration mismatch", fileIter.hasNext());
+        // The lists must iterate backwards with identical elements.
+        heapIter = heapList.descendingIterator();
+        fileIter = fileList.descendingIterator();
+        while(heapIter.hasNext()) {
+            assertTrue("Backward iteration mismatch", fileIter.hasNext());
+            assertEquals("Backward iteration mismatch", heapIter.next(), fileIter.next());
+        }
+        assertFalse("Backward iteration mismatch", fileIter.hasNext());
     }
 
     private void doTestFailureRecovery(ProtectionLevel protectionLevel) throws Exception {
@@ -457,7 +505,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                         try {
                             int batchSize = random.nextInt(100)+1;
                             for(int d=0;d<batchSize;d++) {
-                                partial = getRandomString(random);
+                                partial = getRandomString(random, false);
                                 linkedList.add(partial);
                                 linkedFileList.add(partial);
                                 partial = null;
@@ -477,7 +525,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 // Check consistency
                 PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
                 try {
-                    checkAddRecoveryConsistency(linkedList, linkedFileList, partial);
+                    checkRecoveryConsistency(linkedList, linkedFileList, partial);
                 } finally {
                     linkedFileList.close();
                     linkedFileList = null;

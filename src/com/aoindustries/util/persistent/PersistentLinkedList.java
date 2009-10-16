@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.persistent;
 
-import com.aoindustries.io.BetterByteArrayOutputStream;
 import com.aoindustries.util.WrappedException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,11 +29,15 @@ import java.io.OutputStream;
 import java.util.AbstractSequentialList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.checkthread.annotations.NotThreadSafe;
 
 /**
@@ -56,8 +59,7 @@ import org.checkthread.annotations.NotThreadSafe;
  * </p>
  * <p>
  * This class is intended for persistence, not for intra-process or intra-thread
- * shared data.  TODO: For performance, it maintains the most recently used entries in a
- * cache.
+ * shared data.
  * </p>
  * <p>
  * The first block allocated is a header:
@@ -73,8 +75,8 @@ import org.checkthread.annotations.NotThreadSafe;
  * Each entry consists of:
  * <pre>
  *     Offset   Name        Type     Description
- *       0- 7   next        long     block id of next, <code>END_PTR</code> for last element, or <code>NULL_PTR</code> for <code>null</code>
- *       8-15   prev        long     block id of prev, <code>END_PTR</code> for first element, or <code>NULL_PTR</code> for <code>null</code>
+ *       0- 7   next        long     block id of next, <code>END_PTR</code> for last element
+ *       8-15   prev        long     block id of prev, <code>END_PTR</code> for first element
  *      16-23   dataSize    long     the size of the serialized data, <code>-1</code> means null element
  *      24+     data        data     the binary data
  * </pre>
@@ -82,22 +84,18 @@ import org.checkthread.annotations.NotThreadSafe;
  *
  * <pre>
  * TODO: In Java 1.6 support Deque interface instead of just Queue
- * TODO: Check for consistency in the constructor (all prevs and nexts match without loops), can set size there, too.
- * TODO: Add corrupt flag, set of exceptions?  Cause immediate crash recovery?
+ * TODO: Add corrupt flag, set on exceptions?  Cause immediate crash recovery?
  * </pre>
  *
  * @author  AO Industries, Inc.
  */
 public class PersistentLinkedList<E> extends AbstractSequentialList<E> implements List<E>, Queue<E> {
 
+    private static final Logger logger = Logger.getLogger(PersistentLinkedList.class.getName());
+
     private static final byte[] MAGIC={'P', 'L', 'L', '\n'};
 
     private static final int VERSION = 3;
-
-    /**
-     * The value used to represent a <code>null</code> pointer.
-     */
-    private static final long NULL_PTR = -1;
 
     /**
      * The value used to represent an ending pointer.
@@ -170,7 +168,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             PersistentCollections.getPersistentBuffer(Long.MAX_VALUE),
             Math.max(HEADER_SIZE, DATA_OFFSET)
         );
-        clear();
+        checkConsistency(true, true);
     }
 
     /**
@@ -196,7 +194,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 
     /**
      * Constructs a list backed by the provided persistent buffer.
-     * Operates in linear time in order to cache the size.
+     * Operates in linear time in order to cache the size and perform failure recovery.
      */
     public PersistentLinkedList(PersistentBuffer pbuffer, Serializer<E> serializer) throws IOException {
         this.serializer = serializer;
@@ -205,28 +203,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             pbuffer,
             Math.max(HEADER_SIZE, DATA_OFFSET)
         );
-        // Get the meta data block
-        Iterator<Long> ids = blockBuffer.iterateBlockIds();
-        if(ids.hasNext()) {
-            metaDataBlockId = ids.next();
-            blockBuffer.get(metaDataBlockId, 0, ioBuffer, 0, MAGIC.length);
-            if(!PersistentCollections.equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IOException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
-            int version = blockBuffer.getInt(metaDataBlockId, MAGIC.length);
-            if(version!=VERSION) throw new IOException("Unsupported file version: "+version);
-            _head = blockBuffer.getLong(metaDataBlockId, HEAD_OFFSET);
-            _tail = blockBuffer.getLong(metaDataBlockId, TAIL_OFFSET);
-            if(PersistentCollections.ASSERT) assert _head==END_PTR || hasNonNullNextPrev(_head);
-            if(PersistentCollections.ASSERT) assert _tail==END_PTR || hasNonNullNextPrev(_tail);
-            long count = 0;
-            while(ids.hasNext()) {
-                long id = ids.next();
-                // TODO: Perform crash recovery here
-                count++;
-            }
-            _size = count;
-        } else {
-            clear();
-        }
+        checkConsistency(blockBuffer.getProtectionLevel()!=ProtectionLevel.READ_ONLY, true);
     }
     // </editor-fold>
 
@@ -241,15 +218,17 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     }
 
     /**
-     * Checks if the entry has both next and previous pointers, also asserts isValidRange first.
+     * Checks if this link is in a consistent state.
      */
     @NotThreadSafe
-    private boolean hasNonNullNextPrev(long ptr) throws IOException {
-        if(PersistentCollections.ASSERT) assert isValidRange(ptr) : "Invalid range: "+ptr;
-        return
-            blockBuffer.getLong(ptr, NEXT_OFFSET)!=NULL_PTR
-            && blockBuffer.getLong(ptr, PREV_OFFSET)!=NULL_PTR
-        ;
+    private boolean isConsistent() throws IOException {
+        try {
+            checkConsistency(false);
+            return true;
+        } catch(IllegalStateException err) {
+            logger.log(Level.SEVERE, null, err);
+            return false;
+        }
     }
     // </editor-fold>
 
@@ -267,7 +246,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private void setHead(long head) throws IOException {
-        if(PersistentCollections.ASSERT) assert head==END_PTR || hasNonNullNextPrev(head);
+        if(PersistentCollections.ASSERT) assert head==END_PTR || isValidRange(head);
         blockBuffer.putLong(metaDataBlockId, HEAD_OFFSET, head);
         this._head = head;
     }
@@ -282,7 +261,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private void setTail(long tail) throws IOException {
-        if(PersistentCollections.ASSERT) assert tail==END_PTR || hasNonNullNextPrev(tail);
+        if(PersistentCollections.ASSERT) assert tail==END_PTR || isValidRange(tail);
         blockBuffer.putLong(metaDataBlockId, TAIL_OFFSET, tail);
         this._tail = tail;
     }
@@ -293,7 +272,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private long getNext(long ptr) throws IOException {
-        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         return blockBuffer.getLong(ptr, NEXT_OFFSET);
     }
 
@@ -303,8 +282,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private void setNext(long ptr, long next) throws IOException {
-        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
-        if(PersistentCollections.ASSERT) assert next==END_PTR || hasNonNullNextPrev(next);
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr);
+        if(PersistentCollections.ASSERT) assert next==END_PTR || isValidRange(next);
         blockBuffer.putLong(ptr, NEXT_OFFSET, next);
     }
 
@@ -314,7 +293,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private long getPrev(long ptr) throws IOException {
-        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         return blockBuffer.getLong(ptr, PREV_OFFSET);
     }
 
@@ -324,8 +303,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private void setPrev(long ptr, long prev) throws IOException {
-        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
-        if(PersistentCollections.ASSERT) assert prev==END_PTR || hasNonNullNextPrev(prev);
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr);
+        if(PersistentCollections.ASSERT) assert prev==END_PTR || isValidRange(prev);
         blockBuffer.putLong(ptr, PREV_OFFSET, prev);
     }
 
@@ -336,7 +315,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private long getDataSize(long ptr) throws IOException {
-        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         return blockBuffer.getLong(ptr, DATA_SIZE_OFFSET);
     }
 
@@ -355,7 +334,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private E getElement(long ptr) throws IOException {
-        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         long dataSize = getDataSize(ptr);
         if(dataSize==DATA_SIZE_NULL) return null;
 
@@ -377,7 +356,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private void remove(long ptr) throws IOException {
-        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         if(PersistentCollections.ASSERT) assert _size>0;
         long prev = getPrev(ptr);
         long next = getNext(ptr);
@@ -387,14 +366,9 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         else setPrev(next, prev);
         // Barrier, to make sure always pointing to complete data
         blockBuffer.barrier(true);
-        //blockBuffer.putLong(ptr, NEXT_OFFSET, NULL_PTR);
-        //blockBuffer.putLong(ptr, PREV_OFFSET, NULL_PTR);
         blockBuffer.deallocate(ptr);
         _size--;
     }
-
-    // TODO: Use direct streams
-    private BetterByteArrayOutputStream bufferOut;
 
     /**
      * Adds an entry.  Allocates, writes the header and data, barrier, link-in, barrier, _size++
@@ -405,8 +379,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private long addEntry(long next, long prev, E element) throws IOException {
-        if(PersistentCollections.ASSERT) assert next==END_PTR || hasNonNullNextPrev(next);
-        if(PersistentCollections.ASSERT) assert prev==END_PTR || hasNonNullNextPrev(prev);
+        if(PersistentCollections.ASSERT) assert next==END_PTR || isValidRange(next);
+        if(PersistentCollections.ASSERT) assert prev==END_PTR || isValidRange(prev);
         if(_size==Long.MAX_VALUE) throw new IOException("List is full: _size==Long.MAX_VALUE");
 
         // Allocate and write new entry
@@ -419,8 +393,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
             PersistentCollections.longToBuffer(DATA_SIZE_NULL, ioBuffer, DATA_SIZE_OFFSET);
             blockBuffer.put(newPtr, 0, ioBuffer, 0, DATA_OFFSET);
-        } else if(serializer.isFixedSerializedSize()) {
-            dataSize = serializer.getSerializedSize(null);
+        } else {
+            dataSize = serializer.getSerializedSize(element);
             newPtr = blockBuffer.allocate(DATA_OFFSET+dataSize);
             PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
             PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
@@ -432,19 +406,6 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             } finally {
                 out.close();
             }
-        } else {
-            dataSize = serializer.getSerializedSize(element);
-            if(bufferOut==null) bufferOut = new BetterByteArrayOutputStream(dataSize>Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)dataSize);
-            else bufferOut.reset();
-            serializer.serialize(element, bufferOut);
-            if(bufferOut.size()!=dataSize) throw new AssertionError("bufferSize!=dataSize");
-            byte[] data = bufferOut.getInternalByteArray();
-            newPtr = blockBuffer.allocate(DATA_OFFSET+data.length);
-            PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
-            PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
-            PersistentCollections.longToBuffer(data.length, ioBuffer, DATA_SIZE_OFFSET);
-            blockBuffer.put(newPtr, 0, ioBuffer, 0, DATA_OFFSET);
-            blockBuffer.put(newPtr, DATA_OFFSET, data, 0, data.length);
         }
         // Barrier, to make sure always pointing to complete data
         blockBuffer.barrier(false);
@@ -485,7 +446,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private void addBefore(final E element, final long ptr) throws IOException {
-        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         long prev = getPrev(ptr);
         addEntry(ptr, prev, element);
     }
@@ -495,9 +456,227 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private void addAfter(final E element, final long ptr) throws IOException {
-        if(PersistentCollections.ASSERT) assert hasNonNullNextPrev(ptr);
+        if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         long next = getNext(ptr);
         addEntry(next, ptr, element);
+    }
+    // </editor-fold>
+
+    // <editor-fold desc="Data Consistency Check">
+    /**
+     * Performs a check that this linked list is in a consistent state, optionally
+     * correcting problems that may occur during an unclean shutdown.
+     * <ol>
+     *   <li>
+     *     Meta data block is present and complete:
+     *     <ol type="a">
+     *       <li>metaDataBlockId is the correct value</li>
+     *       <li>Magic value is correct</li>
+     *       <li>File version is supported</li>
+     *     </ol>
+     *   </li>
+     *   <li>_head is the correct value</li>
+     *   <li>_tail is the correct value</li>
+     *   <li>if _head==END_PTR then _tail==END_PTR</li>
+     *   <li>if _tail==END_PTR then _head==END_PTR</li>
+     *   <li>Makes sure all pointers point to allocated blocks</li>
+     *   <li>_head==END_PTR || _head->prev==END_PTR</li>
+     *   <li>_tail==END_PTR || _tail->next==END_PTR</li>
+     *   <li>For each node:
+     *     <ol type="a">
+     *       <li>Only seen once (detect loops)</li>
+     *       <li>node.next->prev==node</li>
+     *       <li>node.prev->next==node</li>
+     *     </ol>
+     *   </li>
+     *   <li>No unreferenced allocated blocks</li>
+     *   <li>_size matches the actual size</li>
+     * </ol>
+     *
+     * @param autoCorrect Will correct inconsistencies that arise from an unclean shutdown.
+     *                    Logs any corrections made to <code>logger</code> with level <code>INFO</code>.
+     *
+     * @exception  IOException if IO error occurs during check
+     * @exception  IllegalStateException when in an inconsistent state and, if autoCorrect, is uncorrectable
+     */
+    @NotThreadSafe
+    protected void checkConsistency(boolean autoCorrect) throws IOException, IllegalStateException {
+        checkConsistency(autoCorrect, false);
+    }
+
+    @NotThreadSafe
+    private void checkConsistency(boolean autoCorrect, boolean isInit) throws IOException, IllegalStateException {
+        if(autoCorrect && blockBuffer.getProtectionLevel()==ProtectionLevel.READ_ONLY) throw new IllegalArgumentException("autoCorrect on read-only block buffer is not allowed");
+        // Meta data block is present and complete
+        Iterator<Long> ids = blockBuffer.iterateBlockIds();
+        if(ids.hasNext()) {
+            // metaDataBlockId is the correct value
+            {
+                long correctMetaDataBlockId = ids.next();
+                if(metaDataBlockId!=correctMetaDataBlockId) {
+                    if(!isInit) {
+                        if(!autoCorrect) throw new IllegalStateException("metaDataBlockId!=correctMetaDataBlockId: "+metaDataBlockId+"!="+correctMetaDataBlockId);
+                        logger.info("metaDataBlockId!=correctMetaDataBlockId: "+metaDataBlockId+"!="+correctMetaDataBlockId+" - correcting");
+                    }
+                    metaDataBlockId = correctMetaDataBlockId;
+                }
+            }
+            blockBuffer.get(metaDataBlockId, 0, ioBuffer, 0, MAGIC.length);
+            // Magic value is correct
+            if(!PersistentCollections.equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IllegalStateException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
+            // File version is supported
+            {
+                int version = blockBuffer.getInt(metaDataBlockId, MAGIC.length);
+                if(version!=VERSION) throw new IllegalStateException("Unsupported file version: "+version);
+            }
+
+            // Get the set of all allocated ids (except the meta data id).
+            Map<Long,Boolean> allocatedIds = new HashMap<Long,Boolean>();
+            while(ids.hasNext()) allocatedIds.put(ids.next(), false);
+
+            // _head is the correct value
+            {
+                long correctHead = blockBuffer.getLong(metaDataBlockId, HEAD_OFFSET);
+                if(_head!=correctHead) {
+                    if(!isInit) {
+                        if(!autoCorrect) throw new IllegalStateException("_head!=correctMetaDataBlockId: "+_head+"!="+correctHead);
+                        logger.info("_head!=correctMetaDataBlockId: "+_head+"!="+correctHead+" - correcting");
+                    }
+                    _head = correctHead;
+                }
+            }
+            // Make sure head points to an allocated block.
+            if(_head!=END_PTR && !allocatedIds.containsKey(_head)) throw new IllegalStateException("_head points to unallocated block: "+_head);
+            // _tail is the correct value
+            {
+                long correctTail = blockBuffer.getLong(metaDataBlockId, TAIL_OFFSET);
+                if(_tail!=correctTail) {
+                    if(!isInit) {
+                        if(!autoCorrect) throw new IllegalStateException("_tail!=correctMetaDataBlockId: "+_tail+"!="+correctTail);
+                        logger.info("_tail!=correctMetaDataBlockId: "+_tail+"!="+correctTail+" - correcting");
+                    }
+                    _tail=correctTail;
+                }
+            }
+            // Make sure tail points to an allocated block.
+            if(_tail!=END_PTR && !allocatedIds.containsKey(_tail)) throw new IllegalStateException("_tail points to unallocated block: "+_tail);
+            // if _head==END_PTR then _tail==END_PTR
+            if(_head==END_PTR && _tail!=END_PTR) {
+                if(!autoCorrect) throw new IllegalStateException("_head==END_PTR && _tail!=END_PTR: _tail="+_tail);
+                // Partial delete or add, recover
+                /*if(!isInit)*/ logger.info("_head==END_PTR && _tail!=END_PTR: _tail="+_tail+" - recovering partial add or remove");
+                long prev = getPrev(_tail);
+                if(prev!=END_PTR) throw new IllegalStateException("_tail->prev!=END_PTR: "+prev);
+                long next = getNext(_tail);
+                if(next!=END_PTR) throw new IllegalStateException("_tail->next!=END_PTR: "+next);
+                setHead(_tail);
+            }
+            // if _tail==END_PTR then _head==END_PTR
+            if(_tail==END_PTR && _head!=END_PTR) {
+                if(!autoCorrect) throw new IllegalStateException("_tail==END_PTR && _head!=END_PTR: _head="+_head);
+                // Partial delete or add, recover
+                /*if(!isInit)*/ logger.info("_tail==END_PTR && _head!=END_PTR: _head="+_head+" - recovering partial add or remove");
+                long prev = getPrev(_head);
+                if(prev!=END_PTR) throw new IllegalStateException("_head->prev!=END_PTR: "+prev);
+                long next = getNext(_head);
+                if(next!=END_PTR) throw new IllegalStateException("_head->next!=END_PTR: "+next);
+                setTail(_head);
+            }
+            if(_head!=END_PTR) {
+                // _head->prev==END_PTR
+                long prev = getPrev(_head);
+                if(prev!=END_PTR) {
+                    // TODO: auto correction
+                    throw new IllegalStateException("_head->prev!=END_PTR: "+prev);
+                }
+            }
+            if(_tail!=END_PTR) {
+                // _tail->next==END_PTR
+                long next = getNext(_tail);
+                if(next!=END_PTR) {
+                    // TODO: auto correction
+                    throw new IllegalStateException("_tail->next!=END_PTR: "+next);
+                }
+            }
+            // For each node:
+            long count = 0;
+            long ptr = _head;
+            while(ptr!=END_PTR) {
+                // Points to allocated block
+                Boolean seen = allocatedIds.get(ptr);
+                if(seen==null) throw new IllegalStateException("ptr points to unallocated block: "+ptr);
+                // Only seen once (detect loops)
+                if(seen) throw new IllegalStateException("ptr seen more than once, loop in list: "+ptr);
+                // Mark as seen
+                allocatedIds.put(ptr, Boolean.TRUE);
+
+                long next = getNext(ptr);
+                if(next==END_PTR) {
+                    // tail must point to this node
+                    if(_tail!=ptr) throw new IllegalStateException("ptr.next==END_PTR while _tail!=ptr: ptr="+ptr+", _tail="+_tail);
+                } else {
+                    // make sure ptr.next is allocated
+                    if(!allocatedIds.containsKey(next)) throw new IllegalStateException("ptr.next points to unallocated block: ptr="+ptr+", ptr.next="+next);
+                    // node.next->prev==node
+                    long nextPrev = getPrev(next);
+                    if(nextPrev!=ptr) {
+                        // TODO: Recovery
+                        throw new IllegalStateException("ptr.next->prev!=ptr: ptr="+ptr+", ptr.next="+next+", ptr.next->prev="+nextPrev);
+                    }
+                }
+
+                long prev = getPrev(ptr);
+                if(prev==END_PTR) {
+                    // head must point to this node
+                    if(_head!=ptr) throw new IllegalStateException("ptr.prev==END_PTR while _head!=ptr: ptr="+ptr+", _head="+_head);
+                } else {
+                    // make sure ptr.prev is allocated
+                    if(!allocatedIds.containsKey(prev)) throw new IllegalStateException("ptr.prev points to unallocated block: ptr="+ptr+", ptr.prev="+prev);
+                    // node.prev->next==node
+                    long prevNext = getNext(prev);
+                    if(prevNext!=ptr) {
+                        // TODO: Recovery
+                        throw new IllegalStateException("ptr.prev->next!=ptr: ptr="+ptr+", ptr.prev="+prev+", ptr.prev->next="+prevNext);
+                    }
+                }
+                ptr = next;
+                count++;
+            }
+            // No unreferenced allocated blocks
+            long firstUnreferencedBlockId = -1;
+            long unreferencedCount = 0;
+            for(Map.Entry<Long,Boolean> entry : allocatedIds.entrySet()) {
+                if(!entry.getValue()) {
+                    if(firstUnreferencedBlockId==-1) firstUnreferencedBlockId = entry.getKey();
+                    unreferencedCount++;
+                }
+            }
+            if(unreferencedCount>0) {
+                // Should only need to deallocate one block - higher count may indicate a more serious problem
+                if(unreferencedCount>1) throw new IllegalStateException("More than one block allocated but not referenced: firstUnreferencedBlockId="+firstUnreferencedBlockId+", unreferencedCount="+unreferencedCount);
+                if(!autoCorrect) throw new IllegalStateException("Block allocated but not referenced: "+firstUnreferencedBlockId);
+                /*if(!isInit)*/ logger.info("Block allocated but not referenced: "+firstUnreferencedBlockId+" - deallocating");
+                blockBuffer.deallocate(firstUnreferencedBlockId);
+            }
+            // _size matches the actual size
+            if(_size!=count) {
+                if(!isInit) {
+                    if(!autoCorrect) throw new IllegalStateException("_size!=count: "+_size+"!="+count);
+                    logger.info("_size!=count: "+_size+"!="+count+" - correcting");
+                }
+                _size = count;
+            }
+        } else {
+            if(!autoCorrect) throw new IllegalStateException("Block buffer is empty - no meta data block found.");
+            if(!isInit) logger.info("Block buffer is empty - initializing meta data block.");
+            metaDataBlockId = blockBuffer.allocate(HEADER_SIZE);
+            blockBuffer.put(metaDataBlockId, 0, MAGIC, 0, MAGIC.length);
+            blockBuffer.putInt(metaDataBlockId, MAGIC.length, VERSION);
+            setHead(END_PTR);
+            setTail(END_PTR);
+            blockBuffer.barrier(true);
+            _size = 0;
+        }
     }
     // </editor-fold>
 
@@ -639,7 +818,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * This runs in linear time.
      */
     @NotThreadSafe
-    private long getPointerForIndex(int index) throws IOException {
+    private long getPointerForIndex(long index) throws IOException {
         if(PersistentCollections.ASSERT) assert _size>0;
         if(index<(_size >> 1)) {
             long ptr = getHead();
@@ -791,26 +970,19 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         try {
             modCount++;
             Iterator<Long> ids = blockBuffer.iterateBlockIds();
-            if(ids.hasNext()) {
-                metaDataBlockId = ids.next();
-                setHead(END_PTR);
-                setTail(END_PTR);
-                blockBuffer.barrier(false);
-                // Deallocate all except first block
-                while(ids.hasNext()) {
-                    ids.next();
-                    ids.remove();
-                }
-                blockBuffer.barrier(true);
-            } else {
-                metaDataBlockId = blockBuffer.allocate(HEADER_SIZE);
-                blockBuffer.put(metaDataBlockId, 0, MAGIC, 0, MAGIC.length);
-                blockBuffer.putInt(metaDataBlockId, MAGIC.length, VERSION);
-                setHead(END_PTR);
-                setTail(END_PTR);
-                blockBuffer.barrier(true);
-            }
+            if(!ids.hasNext()) throw new AssertionError("Block buffer is empty - no meta data block found.");
+            long firstId = ids.next();
+            if(metaDataBlockId!=firstId) throw new AssertionError("metaDataBlockId!=firstId: "+metaDataBlockId+"!="+firstId);
+            setHead(END_PTR);
+            setTail(END_PTR);
             _size = 0;
+            blockBuffer.barrier(false);
+            // Deallocate all except first block
+            while(ids.hasNext()) {
+                ids.next();
+                ids.remove();
+            }
+            blockBuffer.barrier(true);
         } catch(IOException err) {
             throw new WrappedException(err);
         }
@@ -1246,21 +1418,16 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         private int expectedModCount = modCount;
 
         ListItr(long index) {
-            if (index < 0 || index > _size)
-            throw new IndexOutOfBoundsException("Index: "+index+
-                                ", Size: "+_size);
+            if (index < 0 || index > _size) throw new IndexOutOfBoundsException("Index: "+index+", Size: "+_size);
             try {
-                if (index < (_size >> 1)) {
-                    nextPtr = getHead();
-                    for (nextIndex=0; nextIndex<index; nextIndex++) nextPtr = getNext(nextPtr);
+                if(index==_size) {
+                    // Points one past the end
+                    nextPtr = END_PTR;
+                    nextIndex = _size;
                 } else {
-                    nextPtr = getTail();
-                    if(nextPtr==END_PTR) {
-                        // List empty
-                        nextIndex = 0;
-                    } else {
-                        for (nextIndex=_size-1; nextIndex>index; nextIndex--) nextPtr = getPrev(nextPtr);
-                    }
+                    // Points within the list
+                    nextPtr = getPointerForIndex(index);
+                    nextIndex = index;
                 }
             } catch(IOException err) {
                 throw new WrappedException(err);
@@ -1274,14 +1441,13 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 
         @NotThreadSafe
         public E next() {
-                checkForComodification();
-            if (nextIndex == _size)
-            throw new NoSuchElementException();
-
+            checkForComodification();
+            if (nextIndex == _size) throw new NoSuchElementException();
             try {
                 lastReturned = nextPtr;
                 nextPtr = getNext(nextPtr);
                 nextIndex++;
+                assert (nextPtr==END_PTR && nextIndex==_size) || (nextPtr!=END_PTR && nextIndex<_size);
                 return getElement(lastReturned);
             } catch(IOException err) {
                 throw new WrappedException(err);
@@ -1295,13 +1461,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 
         @NotThreadSafe
         public E previous() {
-            if (nextIndex == 0)
-            throw new NoSuchElementException();
-
+            checkForComodification();
+            if (nextIndex == 0) throw new NoSuchElementException();
             try {
-                lastReturned = nextPtr = getPrev(nextPtr);
+                lastReturned = nextPtr = nextPtr==END_PTR ? getTail() : getPrev(nextPtr);
                 nextIndex--;
-                checkForComodification();
+                assert (nextPtr==END_PTR && nextIndex==_size) || (nextPtr!=END_PTR && nextIndex<_size);
                 return getElement(lastReturned);
             } catch(IOException err) {
                 throw new WrappedException(err);
@@ -1311,6 +1476,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         @NotThreadSafe
         public int nextIndex() {
             if(nextIndex>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from nextIndex: "+nextIndex);
+            assert nextIndex>=0;
             return (int)nextIndex;
         }
 
@@ -1318,6 +1484,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         public int previousIndex() {
             long prevIndex = nextIndex-1;
             if(prevIndex>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from previousIndex: "+prevIndex);
+            assert prevIndex>=0;
             return (int)prevIndex;
         }
 
@@ -1335,6 +1502,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                 else nextIndex--;
                 lastReturned = END_PTR;
                 expectedModCount++;
+                assert (nextPtr==END_PTR && nextIndex==_size) || (nextPtr!=END_PTR && nextIndex<_size);
             } catch(IOException err) {
                 throw new WrappedException(err);
             }
@@ -1346,6 +1514,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             throw new IllegalStateException();
             checkForComodification();
             setElement(lastReturned, e);
+            expectedModCount++;
         }
 
         @NotThreadSafe
@@ -1440,6 +1609,9 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     public void close() throws IOException {
-        blockBuffer.close();
+        if(!blockBuffer.isClosed()) {
+            // if(PersistentCollections.ASSERT) assert isConsistent();
+            blockBuffer.close();
+        }
     }
 }
