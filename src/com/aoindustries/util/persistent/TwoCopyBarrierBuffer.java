@@ -143,7 +143,18 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 toClose = new ArrayList<TwoCopyBarrierBuffer>(shutdownBuffers);
                 shutdownBuffers.clear();
             }
-            for(TwoCopyBarrierBuffer buffer : toClose) {
+            long startTime = System.currentTimeMillis() - 55000;
+            boolean wrote = false;
+            int size = toClose.size();
+            for(int c=0;c<size;c++) {
+                long currentTime = System.currentTimeMillis();
+                long timeSince = currentTime - startTime;
+                if(timeSince<=-60000 || timeSince>=60000) {
+                    logger.info(size==1 ? "Closing the TwoCopyBarrierBuffer." : "Closing TwoCopyBarrierBuffer "+(c+1)+" of "+size+".");
+                    wrote = true;
+                    startTime = currentTime;
+                }
+                TwoCopyBarrierBuffer buffer = toClose.get(c);
                 try {
                     buffer.close();
                 } catch(ThreadDeath TD) {
@@ -152,6 +163,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                     logger.log(Level.WARNING, null, T);
                 }
             }
+            if(wrote) logger.info(size==1 ? "Finished closing the TwoCopyBarrierBuffer." : "Finished closing all "+size+" TwoCopyBarrierBuffers.");
         }
     };
     static {
