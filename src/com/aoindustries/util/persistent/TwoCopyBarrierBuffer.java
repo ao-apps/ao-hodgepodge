@@ -405,9 +405,11 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 
     /**
      * Writes any modified data to the older copy of the file and makes it the new copy.
+     *
+     * @param isClosing  when <code>true</code>, will not reopen raf.
      */
     @NotThreadSafe
-    private void flushWriteCache() throws IOException {
+    private void flushWriteCache(boolean isClosing) throws IOException {
         if(PersistentCollections.ASSERT) assert Thread.holdsLock(cacheLock);
         if(!currentWriteCache.isEmpty()) {
             if(protectionLevel==ProtectionLevel.READ_ONLY) throw new IOException("protectionLevel==ProtectionLevel.READ_ONLY");
@@ -444,8 +446,10 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
             currentWriteCache = oldWriteCache;
             oldWriteCache = temp;
             if(!newFile.renameTo(file)) throw new IOException("Unable to rename "+newFile+" to "+file);
-            raf = new RandomAccessFile(file, "r"); // Read-only during normal operation because using write caches
+            if(!isClosing) raf = new RandomAccessFile(file, "r"); // Read-only during normal operation because using write caches
             clearFirstWriteTime();
+        } else {
+            if(isClosing) raf.close();
         }
     }
 
@@ -472,9 +476,9 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
             shutdownBuffers.remove(this);
         }
         synchronized(cacheLock) {
-            flushWriteCache();
+            flushWriteCache(true);
             isClosed = true;
-            raf.close();
+            //raf.close(); // Now closed by flushWriteCache
             if(deleteOnClose) {
                 IOException ioErr = null;
                 if(newFile.exists() && !newFile.delete()) ioErr = new IOException("Unable to delete temp file: "+newFile);
@@ -535,7 +539,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                                 long timeSince = System.currentTimeMillis() - firstWriteTime;
                                 if(timeSince<=(-asynchronousCommitDelay) || timeSince>=asynchronousCommitDelay) {
                                     try {
-                                        flushWriteCache();
+                                        flushWriteCache(false);
                                     } catch(IOException err) {
                                         logger.log(Level.SEVERE, null, err);
                                     }
@@ -802,12 +806,12 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
             // Downgrade to barrier-only if not using FORCE protection level
             if(force && protectionLevel.compareTo(ProtectionLevel.FORCE)>=0) {
                 // Flush always when forced
-                flushWriteCache();
+                flushWriteCache(false);
             } else {
                 // Only flush after synchronousCommitDelay milliseconds have passed
                 if(firstWriteTime!=-1) {
                     long timeSince = System.currentTimeMillis() - firstWriteTime;
-                    if(timeSince<=(-synchronousCommitDelay) || timeSince>=synchronousCommitDelay) flushWriteCache();
+                    if(timeSince<=(-synchronousCommitDelay) || timeSince>=synchronousCommitDelay) flushWriteCache(false);
                 }
             }
         }
