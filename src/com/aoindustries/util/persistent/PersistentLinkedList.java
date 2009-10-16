@@ -360,13 +360,29 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         if(PersistentCollections.ASSERT) assert _size>0;
         long prev = getPrev(ptr);
         long next = getNext(ptr);
-        if(prev==END_PTR) setHead(next);
-        else setNext(prev, next);
-        if(next==END_PTR) setTail(prev);
-        else setPrev(next, prev);
+        if(prev==END_PTR) {
+            if(PersistentCollections.ASSERT) assert getHead()==ptr;
+            setHead(next);
+        } else {
+            if(PersistentCollections.ASSERT) assert getNext(prev)==ptr;
+            setNext(prev, next);
+        }
+        if(next==END_PTR) {
+            if(PersistentCollections.ASSERT) assert getTail()==ptr;
+            setTail(prev);
+        } else {
+            if(PersistentCollections.ASSERT) assert getPrev(next)==ptr;
+            setPrev(next, prev);
+        }
         // Barrier, to make sure always pointing to complete data
-        blockBuffer.barrier(true);
+        blockBuffer.barrier(false);
         blockBuffer.deallocate(ptr);
+        // Barrier to make sure removes one at a time.  This way the consistency
+        // checker can assume only one possible unreferenced allocated block.  More
+        // than that indicates a problem.  This helps avoid accidentally deallocating
+        // a large part of the data during crash recovery of unrecoverably corrupted
+        // data.
+        blockBuffer.barrier(true);
         _size--;
     }
 
@@ -379,6 +395,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      */
     @NotThreadSafe
     private long addEntry(long next, long prev, E element) throws IOException {
+        //System.err.println("DEBUG: addEntry: element="+element);
         if(PersistentCollections.ASSERT) assert next==END_PTR || isValidRange(next);
         if(PersistentCollections.ASSERT) assert prev==END_PTR || isValidRange(prev);
         if(_size==Long.MAX_VALUE) throw new IOException("List is full: _size==Long.MAX_VALUE");
@@ -411,14 +428,14 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         blockBuffer.barrier(false);
         // Update pointers
         if(prev==END_PTR) {
-            if(PersistentCollections.ASSERT) assert _head==next;
+            if(PersistentCollections.ASSERT) assert getHead()==next;
             setHead(newPtr);
         } else {
             if(PersistentCollections.ASSERT) assert getNext(prev)==next;
             setNext(prev, newPtr);
         }
         if(next==END_PTR) {
-            if(PersistentCollections.ASSERT) assert _tail==prev;
+            if(PersistentCollections.ASSERT) assert getTail()==prev;
             setTail(newPtr);
         } else {
             if(PersistentCollections.ASSERT) assert getPrev(next)==prev;
@@ -447,8 +464,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     @NotThreadSafe
     private void addBefore(final E element, final long ptr) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
-        long prev = getPrev(ptr);
-        addEntry(ptr, prev, element);
+        addEntry(ptr, getPrev(ptr), element);
     }
 
     /**
@@ -457,8 +473,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     @NotThreadSafe
     private void addAfter(final E element, final long ptr) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
-        long next = getNext(ptr);
-        addEntry(next, ptr, element);
+        addEntry(getNext(ptr), ptr, element);
     }
     // </editor-fold>
 
@@ -485,12 +500,20 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *   <li>For each node:
      *     <ol type="a">
      *       <li>Only seen once (detect loops)</li>
-     *       <li>node.next->prev==node</li>
      *       <li>node.prev->next==node</li>
+     *       <li>node.next->prev==node</li>
      *     </ol>
      *   </li>
      *   <li>No unreferenced allocated blocks</li>
      *   <li>_size matches the actual size</li>
+     * </ol>
+     *
+     * Assumptions used in this implementation:
+     * <ol>
+     *   <li>Blocks that are allocated but not referenced may contain incomplete data.</li>
+     *   <li>A block with any reference to it is both allocated and has complete data.</li>
+     *   <li>A block with any reference to it will be recovered or an exception will be thrown if unrecoverable.</li>
+     *   <li>Only one block may be allocated and not referenced due to barrier after each allocate or deallocate.</li>
      * </ol>
      *
      * @param autoCorrect Will correct inconsistencies that arise from an unclean shutdown.
@@ -502,6 +525,31 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     @NotThreadSafe
     protected void checkConsistency(boolean autoCorrect) throws IOException, IllegalStateException {
         checkConsistency(autoCorrect, false);
+    }
+
+    @NotThreadSafe
+    private void dumpPointer(long ptr) throws IOException {
+        System.err.println("_head="+_head);
+        if(_head!=END_PTR) System.err.println("  _head->next="+getNext(_head));
+        if(_head!=END_PTR) System.err.println("  _head->prev="+getPrev(_head));
+        System.err.println("ptr="+ptr);
+        if(ptr!=END_PTR) {
+            long next = getNext(ptr);
+            System.err.println("  ptr.next="+next);
+            if(next!=END_PTR) {
+                System.err.println("    ptr->next.next="+getNext(next));
+                System.err.println("    ptr->next.prev="+getPrev(next));
+            }
+            long prev = getPrev(ptr);
+            System.err.println("  ptr.prev="+prev);
+            if(prev!=END_PTR) {
+                System.err.println("    ptr->prev.next="+getNext(prev));
+                System.err.println("    ptr->prev.prev="+getPrev(prev));
+            }
+        }
+        System.err.println("_tail="+_tail);
+        if(_tail!=END_PTR) System.err.println("  _tail->next="+getNext(_tail));
+        if(_tail!=END_PTR) System.err.println("  _tail->prev="+getPrev(_tail));
     }
 
     @NotThreadSafe
@@ -539,7 +587,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                 long correctHead = blockBuffer.getLong(metaDataBlockId, HEAD_OFFSET);
                 if(_head!=correctHead) {
                     if(!isInit) {
-                        if(!autoCorrect) throw new IllegalStateException("_head!=correctMetaDataBlockId: "+_head+"!="+correctHead);
+                        if(!autoCorrect) throw new IllegalStateException("_head!=correctHead: "+_head+"!="+correctHead);
                         logger.info("_head!=correctMetaDataBlockId: "+_head+"!="+correctHead+" - correcting");
                     }
                     _head = correctHead;
@@ -552,7 +600,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                 long correctTail = blockBuffer.getLong(metaDataBlockId, TAIL_OFFSET);
                 if(_tail!=correctTail) {
                     if(!isInit) {
-                        if(!autoCorrect) throw new IllegalStateException("_tail!=correctMetaDataBlockId: "+_tail+"!="+correctTail);
+                        if(!autoCorrect) throw new IllegalStateException("_tail!=correctTail: "+_tail+"!="+correctTail);
                         logger.info("_tail!=correctMetaDataBlockId: "+_tail+"!="+correctTail+" - correcting");
                     }
                     _tail=correctTail;
@@ -586,16 +634,30 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                 // _head->prev==END_PTR
                 long prev = getPrev(_head);
                 if(prev!=END_PTR) {
-                    // TODO: auto correction
-                    throw new IllegalStateException("_head->prev!=END_PTR: "+prev);
+                    if(!autoCorrect) throw new IllegalStateException("_head->prev!=END_PTR: _head="+_head+", _head->prev="+prev);
+                    if(!allocatedIds.containsKey(prev)) throw new IllegalStateException("_head->prev points to unallocated block: _head="+_head+", _head->prev="+prev);
+                    /*if(!isInit)*/ logger.info("_head->prev!=END_PTR: "+prev+" - recovering partial add or remove");
+                    // Recoverable if _head->prev.prev==END_PTR and _head->prev.next=_head
+                    long prevPrev = getPrev(prev);
+                    if(prevPrev!=END_PTR) throw new IllegalStateException("_head->prev!=END_PTR: _head="+_head+", _head->prev="+prev+" - unrecoverable because _head->prev.prev!=END_PTR: "+prevPrev);
+                    long prevNext = getNext(prev);
+                    if(prevNext!=_head) throw new IllegalStateException("_head->prev!=END_PTR: _head="+_head+", _head->prev="+prev+" - unrecoverable because _head->prev.next!=_head: "+prevNext);
+                    setHead(prev);
                 }
             }
             if(_tail!=END_PTR) {
                 // _tail->next==END_PTR
                 long next = getNext(_tail);
                 if(next!=END_PTR) {
-                    // TODO: auto correction
-                    throw new IllegalStateException("_tail->next!=END_PTR: "+next);
+                    if(!autoCorrect) throw new IllegalStateException("_tail->next!=END_PTR: _tail="+_tail+", _tail->next="+next);
+                    if(!allocatedIds.containsKey(next)) throw new IllegalStateException("_tail->next points to unallocated block: _tail="+_tail+", _tail->next="+next);
+                    /*if(!isInit)*/ logger.info("_tail->next!=END_PTR: "+next+" - recovering partial add or remove");
+                    // Recoverable if _tail->next.next==END_PTR and _tail->next.prev=_tail
+                    long nextNext = getNext(next);
+                    if(nextNext!=END_PTR) throw new IllegalStateException("_tail->next!=END_PTR: _tail="+_tail+", _tail->next="+next+" - unrecoverable because _tail->next.next!=END_PTR: "+nextNext);
+                    long nextPrev = getPrev(next);
+                    if(nextPrev!=_tail) throw new IllegalStateException("_tail->next!=END_PTR: _tail="+_tail+", _tail->next="+next+" - unrecoverable because _tail->next.prev!=_tail: "+nextPrev);
+                    setTail(next);
                 }
             }
             // For each node:
@@ -610,35 +672,53 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
                 // Mark as seen
                 allocatedIds.put(ptr, Boolean.TRUE);
 
-                long next = getNext(ptr);
-                if(next==END_PTR) {
-                    // tail must point to this node
-                    if(_tail!=ptr) throw new IllegalStateException("ptr.next==END_PTR while _tail!=ptr: ptr="+ptr+", _tail="+_tail);
-                } else {
-                    // make sure ptr.next is allocated
-                    if(!allocatedIds.containsKey(next)) throw new IllegalStateException("ptr.next points to unallocated block: ptr="+ptr+", ptr.next="+next);
-                    // node.next->prev==node
-                    long nextPrev = getPrev(next);
-                    if(nextPrev!=ptr) {
-                        // TODO: Recovery
-                        throw new IllegalStateException("ptr.next->prev!=ptr: ptr="+ptr+", ptr.next="+next+", ptr.next->prev="+nextPrev);
-                    }
-                }
-
+                // Since checking from head to tail, make sure prev is correct before checking next
                 long prev = getPrev(ptr);
                 if(prev==END_PTR) {
                     // head must point to this node
-                    if(_head!=ptr) throw new IllegalStateException("ptr.prev==END_PTR while _head!=ptr: ptr="+ptr+", _head="+_head);
+                    if(_head!=ptr) {
+                        // TODO: Recovery?  Can this happen given our previous checks?
+                        dumpPointer(ptr);
+                        throw new IllegalStateException("ptr.prev==END_PTR while _head!=ptr: ptr="+ptr+", _head="+_head);
+                    }
                 } else {
                     // make sure ptr.prev is allocated
                     if(!allocatedIds.containsKey(prev)) throw new IllegalStateException("ptr.prev points to unallocated block: ptr="+ptr+", ptr.prev="+prev);
                     // node.prev->next==node
                     long prevNext = getNext(prev);
                     if(prevNext!=ptr) {
-                        // TODO: Recovery
+                        // TODO: Recovery?  Can this happen given our previous checks?
+                        dumpPointer(ptr);
                         throw new IllegalStateException("ptr.prev->next!=ptr: ptr="+ptr+", ptr.prev="+prev+", ptr.prev->next="+prevNext);
                     }
                 }
+
+                long next = getNext(ptr);
+                if(next==END_PTR) {
+                    // tail must point to this node
+                    if(_tail!=ptr) {
+                        if(!autoCorrect) throw new IllegalStateException("ptr.next==END_PTR while _tail!=ptr: ptr="+ptr+", _tail="+_tail);
+                        /*if(!isInit)*/ logger.info("ptr.next==END_PTR while _tail!=ptr: ptr="+ptr+", _tail="+_tail+" - recovering partial add or remove");
+                        if(_tail==END_PTR) throw new IllegalStateException("ptr.next==END_PTR while _tail!=ptr: ptr="+ptr+", _tail="+_tail+" - unrecoverable because _tail==END_PTR");
+                        long tailPrev = getPrev(_tail);
+                        if(tailPrev!=ptr) throw new IllegalStateException("ptr.next==END_PTR while _tail!=ptr: ptr="+ptr+", _tail="+_tail+" - unrecoverable because _tail->prev!=ptr: "+tailPrev);
+                        long tailNext = getNext(_tail);
+                        if(tailNext!=END_PTR) throw new IllegalStateException("ptr.next==END_PTR while _tail!=ptr: ptr="+ptr+", _tail="+_tail+" - unrecoverable because _tail->next!=END_PTR: "+tailNext);
+                        setNext(ptr, next=_tail);
+                    }
+                } else {
+                    // make sure ptr.next is allocated
+                    if(!allocatedIds.containsKey(next)) throw new IllegalStateException("ptr.next points to unallocated block: ptr="+ptr+", ptr.next="+next);
+                    // node.next->prev==node
+                    long nextPrev = getPrev(next);
+                    if(nextPrev!=ptr) {
+                        if(!autoCorrect) throw new IllegalStateException("ptr.next->prev!=ptr: ptr="+ptr+", ptr.prev="+prev+", ptr.next="+next+", ptr.next->prev="+nextPrev);
+                        /*if(!isInit)*/ logger.info("ptr.next->prev!=ptr: ptr="+ptr+", ptr.prev="+prev+", ptr.next="+next+", ptr.next->prev="+nextPrev+" - recovering partial add or remove");
+                        if(nextPrev!=prev) throw new IllegalStateException("ptr.next->prev!=ptr: ptr="+ptr+", ptr.prev="+prev+", ptr.next="+next+", ptr.next->prev="+nextPrev+" - unrecoverable because ptr.next->prev!=ptr.prev");
+                        setPrev(next, ptr);
+                    }
+                }
+
                 ptr = next;
                 count++;
             }

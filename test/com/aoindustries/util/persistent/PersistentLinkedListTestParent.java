@@ -23,6 +23,8 @@
 package com.aoindustries.util.persistent;
 
 import com.aoindustries.sql.SQLUtility;
+import com.aoindustries.util.Sequence;
+import com.aoindustries.util.UnsynchronizedSequence;
 import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.IOException;
@@ -150,7 +152,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests for correctness comparing to standard LinkedList implementation.
      */
-    public void testCorrectnessString() throws Exception {
+    public void teTODOstCorrectnessString() throws Exception {
         doTestCorrectnessString(0);
         doTestCorrectnessString(1);
         for(int c=0; c<10; c++) doTestCorrectnessString(100 + random.nextInt(101));
@@ -244,7 +246,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests for correctness comparing to standard LinkedList implementation.
      */
-    public void testCorrectnessInteger() throws Exception {
+    public void teTODOstCorrectnessInteger() throws Exception {
         doTestCorrectnessInteger(0);
         doTestCorrectnessInteger(1);
         for(int c=0; c<10; c++) doTestCorrectnessInteger(100 + random.nextInt(101));
@@ -253,7 +255,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests the time complexity by adding many elements and making sure the time stays near linear
      */
-    public void testAddRandomStrings() throws Exception {
+    public void teTODOstAddRandomStrings() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
@@ -267,7 +269,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 long endNanos = System.nanoTime();
                 System.out.println((c+1)+" of 100: Added 1000 random strings in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
             }
-            // TODO: Calculate the mean and standard deviation, compare for linear
+            // Calculate the mean and standard deviation, compare for linear
         } finally {
             linkedFileList.close();
             linkedFileList = null;
@@ -280,7 +282,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests the time complexity by adding many elements and making sure the time stays near linear
      */
-    public void testAddRandomIntegers() throws Exception {
+    public void teTODOstAddRandomIntegers() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -294,7 +296,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 long endNanos = System.nanoTime();
                 System.out.println((c+1)+" of 100: Added 1000 random integers in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
             }
-            // TODO: Calculate the mean and standard deviation, compare for linear
+            // Calculate the mean and standard deviation, compare for linear
         } finally {
             linkedFileList.close();
             linkedFileList = null;
@@ -307,7 +309,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Tests the time complexity for integers (all null to avoid serialization)
      */
-    public void testAddNull() throws Exception {
+    public void teTODOstAddNull() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -319,7 +321,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 long endNanos = System.nanoTime();
                 System.out.println((c+1)+" of 100: Added 1000 null Integer in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
             }
-            // TODO: Calculate the mean and standard deviation, compare for linear
+            // Calculate the mean and standard deviation, compare for linear
         } finally {
             linkedFileList.close();
             linkedFileList = null;
@@ -332,7 +334,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test iteration performance.
      */
-    public void testStringIterationPerformance() throws Exception {
+    public void teTODOstStringIterationPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
@@ -358,7 +360,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test iteration performance.
      */
-    public void testIntegerIterationPerformance() throws Exception {
+    public void teTODOstIntegerIterationPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -384,7 +386,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test circular list performance.
      */
-    public void testStringCircularListPerformance() throws Exception {
+    public void teTODOstStringCircularListPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
@@ -407,7 +409,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     /**
      * Test circular list performance.
      */
-    public void testIntegerCircularListPerformance() throws Exception {
+    public void teTODOstIntegerCircularListPerformance() throws Exception {
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
@@ -453,11 +455,15 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
             String heapValue = heapIter.hasNext() ? heapIter.next() : null;
             String fileValue = fileIter.hasNext() ? fileIter.next() : null;
             if(heapValue!=null) {
+                //System.err.println("DEBUG: heapValue="+heapValue+", fileValue="+fileValue);
                 if(!heapValue.equals(fileValue)) {
                     assertTrue("Must be an exact match when partial is null", partial!=null);
-                    assertTrue("The only value that may be in the heap but not in the fileList is partial", heapValue.equals(partial));
+                    if(fileValue!=null) assertTrue("Value found in fileList that is not found in heapList: "+fileValue, heapList.contains(fileValue));
+                    assertTrue("The only value that may be in the heap but not in the fileList is partial: partial="+partial+", fileValue="+fileValue, heapValue.equals(partial));
                     assertFalse("Refusing to remove partial twice", removedPartial);
                     heapIter.remove();
+                    heapValue = heapIter.hasNext() ? heapIter.next() : null;
+                    assertEquals(heapValue, fileValue);
                     removedPartial = true;
                 }
             } else {
@@ -490,24 +496,26 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
     }
 
     private void doTestFailureRecovery(ProtectionLevel protectionLevel) throws Exception {
+        boolean allowFailure = true;
+        Sequence sequence = new UnsynchronizedSequence();
         File tempFile = File.createTempFile("PersistentLinkedListTest", null);
         tempFile.deleteOnExit();
         try {
-            LinkedList<String> linkedList = new LinkedList<String>();
+            LinkedList<String> heapList = new LinkedList<String>();
             final int iterations = 100;
             for(int c=0;c<iterations;c++) {
-                String partial = null;
-                // addFirst
                 long startNanos = System.nanoTime();
+                // addFirst
+                String partial = null;
                 try {
                     try {
-                        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), true), String.class);
+                        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
                         try {
                             int batchSize = random.nextInt(100)+1;
                             for(int d=0;d<batchSize;d++) {
-                                partial = getRandomString(random, false);
-                                linkedList.add(partial);
-                                linkedFileList.add(partial);
+                                partial = Long.toString(sequence.getNextSequenceValue());
+                                heapList.addFirst(partial);
+                                linkedFileList.addFirst(partial);
                                 partial = null;
                             }
                         } finally {
@@ -523,19 +531,123 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                     System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": addFirst: Caught failure: "+err.toString());
                 }
                 // Check consistency
-                PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
-                try {
-                    checkRecoveryConsistency(linkedList, linkedFileList, partial);
-                } finally {
-                    linkedFileList.close();
-                    linkedFileList = null;
+                {
+                    PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
+                    try {
+                        checkRecoveryConsistency(heapList, linkedFileList, partial);
+                    } finally {
+                        linkedFileList.close();
+                        linkedFileList = null;
+                    }
                 }
-                // TODO: removeLast
-                // TODO: Check consistency
-                // TODO: add random
-                // TODO: Check consistency
-                // TODO: remove random
-                // TODO: Check consistency
+                // removeLast
+                partial = null;
+                try {
+                    try {
+                        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
+                        try {
+                            int batchSize = random.nextInt(95)+1;
+                            if(batchSize>linkedFileList.size()) batchSize = linkedFileList.size();
+                            for(int d=0;d<batchSize;d++) {
+                                partial = heapList.getLast();
+                                assertEquals(linkedFileList.getLast(), partial);
+                                assertEquals(linkedFileList.removeLast(), heapList.removeLast());
+                                partial = null;
+                            }
+                        } finally {
+                            linkedFileList.close();
+                            linkedFileList = null;
+                        }
+                    } catch(WrappedException err) {
+                        Throwable cause = err.getCause();
+                        if(cause!=null && (cause instanceof IOException)) throw (IOException)cause;
+                        throw err;
+                    }
+                } catch(IOException err) {
+                    System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": removeLast: Caught failure: "+err.toString());
+                }
+                // Check consistency
+                {
+                    PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
+                    try {
+                        checkRecoveryConsistency(heapList, linkedFileList, partial);
+                    } finally {
+                        linkedFileList.close();
+                        linkedFileList = null;
+                    }
+                }
+                // addLast
+                partial = null;
+                try {
+                    try {
+                        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
+                        try {
+                            int batchSize = random.nextInt(100)+1;
+                            for(int d=0;d<batchSize;d++) {
+                                partial = Long.toString(sequence.getNextSequenceValue());
+                                heapList.addLast(partial);
+                                linkedFileList.addLast(partial);
+                                partial = null;
+                            }
+                        } finally {
+                            linkedFileList.close();
+                            linkedFileList = null;
+                        }
+                    } catch(WrappedException err) {
+                        Throwable cause = err.getCause();
+                        if(cause!=null && (cause instanceof IOException)) throw (IOException)cause;
+                        throw err;
+                    }
+                } catch(IOException err) {
+                    System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": addLast: Caught failure: "+err.toString());
+                }
+                // Check consistency
+                {
+                    PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
+                    try {
+                        checkRecoveryConsistency(heapList, linkedFileList, partial);
+                    } finally {
+                        linkedFileList.close();
+                        linkedFileList = null;
+                    }
+                }
+                // removeFirst
+                partial = null;
+                try {
+                    try {
+                        PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
+                        try {
+                            int batchSize = random.nextInt(95)+1;
+                            if(batchSize>linkedFileList.size()) batchSize = linkedFileList.size();
+                            for(int d=0;d<batchSize;d++) {
+                                partial = linkedFileList.getFirst();
+                                assertEquals(linkedFileList.removeFirst(), heapList.removeFirst());
+                                partial = null;
+                            }
+                        } finally {
+                            linkedFileList.close();
+                            linkedFileList = null;
+                        }
+                    } catch(WrappedException err) {
+                        Throwable cause = err.getCause();
+                        if(cause!=null && (cause instanceof IOException)) throw (IOException)cause;
+                        throw err;
+                    }
+                } catch(IOException err) {
+                    System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": removeFirst: Caught failure: "+err.toString());
+                }
+                // Check consistency
+                {
+                    PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
+                    try {
+                        checkRecoveryConsistency(heapList, linkedFileList, partial);
+                    } finally {
+                        linkedFileList.close();
+                        linkedFileList = null;
+                    }
+                }
+                // TODO: add random index
+                // TODO: remove random index
                 long endNanos = System.nanoTime();
                 if((c%10)==9) System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": Tested block buffer failure recovery in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
             }

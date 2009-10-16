@@ -29,9 +29,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -129,6 +133,31 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 
     private static final Timer asynchronousCommitTimer = new Timer("TwoCopyBarrierBuffer.asynchronousCommitTimer");
 
+    private static final Set<TwoCopyBarrierBuffer> shutdownBuffers = new HashSet<TwoCopyBarrierBuffer>();
+    private static final Thread shutdownHook = new Thread("TwoCopyBarrierBuffer.shutdownHook") {
+        @Override
+        public void run() {
+            // Get a snapshot of all buffers
+            List<TwoCopyBarrierBuffer> toClose;
+            synchronized(shutdownBuffers) {
+                toClose = new ArrayList<TwoCopyBarrierBuffer>(shutdownBuffers);
+                shutdownBuffers.clear();
+            }
+            for(TwoCopyBarrierBuffer buffer : toClose) {
+                try {
+                    buffer.close();
+                } catch(ThreadDeath TD) {
+                    throw TD;
+                } catch(Throwable T) {
+                    logger.log(Level.WARNING, null, T);
+                }
+            }
+        }
+    };
+    static {
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+    }
+
     private final File file;
     private final File newFile;
     private final File oldFile;
@@ -139,7 +168,6 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     private final Object cacheLock = new Object();
 
     // All modifiable fields are protected by cacheLock
-    private Thread shutdownHook;
 
     /**
      * <p>
@@ -322,20 +350,9 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         } finally {
             oldIn.close();
         }
-        shutdownHook = new Thread("TwoCopyBarrierBuffer(\""+file.getPath()+"\").shutdownHook") {
-            @Override
-            public void run() {
-                synchronized(cacheLock) {
-                    shutdownHook = null;
-                    try {
-                        close();
-                    } catch(IOException err) {
-                        logger.log(Level.WARNING, null, err);
-                    }
-                }
-            }
-        };
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
+        synchronized(shutdownBuffers) {
+            shutdownBuffers.add(this);
+        }
     }
 
     /**
@@ -403,11 +420,10 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 
     @ThreadSafe
     public void close() throws IOException {
+        synchronized(shutdownBuffers) {
+            shutdownBuffers.remove(this);
+        }
         synchronized(cacheLock) {
-            if(shutdownHook!=null) {
-                Runtime.getRuntime().removeShutdownHook(shutdownHook);
-                shutdownHook = null;
-            }
             flushWriteCache();
             isClosed = true;
             raf.close();

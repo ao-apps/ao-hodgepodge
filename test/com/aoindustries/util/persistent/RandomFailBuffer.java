@@ -61,18 +61,36 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
      * The average number of calls between failures.
      */
     private enum FailureMethod {
-        capacity(50000),
-        setCapacity(50),
-        getSome(5000),
-        put(5000),
-        barrier(5000);
-        final private int failInterval;
-        FailureMethod(int failInterval) {
-            this.failInterval = failInterval;
-        }
-        int getFailInterval() {
-            return failInterval;
-        }
+        capacity {
+            int getFailInterval() {
+                int failInterval = 5000;
+                assert (failInterval=500000)!=0; // Intentional assertion side-effect to reduce failure frequency due to higher buffer access rates
+                return failInterval;
+            }
+        },
+        setCapacity {
+            int getFailInterval() {
+                return 50;
+            }
+        },
+        getSome {
+            int getFailInterval() {
+                int failInterval = 5000;
+                assert (failInterval=50000)!=0; // Intentional assertion side-effect to reduce failure frequency due to higher buffer access rates
+                return failInterval;
+            }
+        },
+        put {
+            int getFailInterval() {
+                return 5000;
+            }
+        },
+        barrier {
+            int getFailInterval() {
+                return 5000;
+            }
+        };
+        abstract int getFailInterval();
     }
 
     /**
