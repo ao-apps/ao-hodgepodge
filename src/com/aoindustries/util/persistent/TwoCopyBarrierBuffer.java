@@ -42,6 +42,7 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.checkthread.annotations.NotThreadSafe;
@@ -195,6 +196,15 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                     }
                 } finally {
                     executorService.shutdown();
+                    boolean terminated = false;
+                    while(!terminated) {
+                        try {
+                            terminated = executorService.awaitTermination(3600, TimeUnit.SECONDS);
+                        } catch(InterruptedException err) {
+                            logger.log(Level.WARNING, null, err);
+                        }
+                        if(!terminated) logger.info(size==1 ? "Waiting for the TwoCopyBarrierBuffer to close." : "Waiting for all "+size+" TwoCopyBarrierBuffers to close.");
+                    }
                 }
                 synchronized(fieldLock) {
                     if(wrote[0]) logger.info(size==1 ? "Finished closing the TwoCopyBarrierBuffer." : "Finished closing all "+size+" TwoCopyBarrierBuffers.");
