@@ -137,6 +137,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     private static final Timer asynchronousCommitTimer = new Timer("TwoCopyBarrierBuffer.asynchronousCommitTimer");
 
     private static final Set<TwoCopyBarrierBuffer> shutdownBuffers = new HashSet<TwoCopyBarrierBuffer>();
+
     /**
      * TODO: Is there a way we can combine the force calls between all buffers?
      * 1) Use recursion to get lock on all individual buffers - or use newer locks
@@ -156,7 +157,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 toClose = new ArrayList<TwoCopyBarrierBuffer>(shutdownBuffers);
                 shutdownBuffers.clear();
             }
-            if(!shutdownBuffers.isEmpty()) {
+            if(!toClose.isEmpty()) {
                 // These fields are shared by the invoked threads
                 final Object fieldLock = new Object();
                 final int[] counter = {1};
@@ -166,6 +167,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 // The maximum number of threads will be 100 or 1/20th of the number of buffers, whichever is larger
                 int maxNumThreads = Math.max(100, size/20);
                 int numThreads = Math.min(maxNumThreads, size);
+                // TODO: This concurrency really didn't help much :(
                 ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
                 try {
                     for(int c=0;c<size;c++) {
