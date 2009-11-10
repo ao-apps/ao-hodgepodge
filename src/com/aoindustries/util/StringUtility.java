@@ -69,7 +69,7 @@ public final class StringUtility {
     }
 
     /**
-     * Constructs a comma seperated list from a <code>String[]</code>.
+     * Constructs a comma separated list from a <code>String[]</code>.
      */
     public static String buildEmailList(String[] list) {
         StringBuilder SB=new StringBuilder();
@@ -82,7 +82,7 @@ public final class StringUtility {
     }
 
     /**
-     * Constructs a comma seperated list from a <code>String[]</code>.
+     * Constructs a comma separated list from a <code>String[]</code>.
      */
     public static String buildList(String[] list) {
         StringBuilder SB=new StringBuilder();
@@ -95,7 +95,7 @@ public final class StringUtility {
     }
 
     /**
-     * Constructs a comma seperated list from an <code>Object[]</code>.
+     * Constructs a comma separated list from an <code>Object[]</code>.
      */
     public static String buildList(Object[] list) {
         StringBuilder SB=new StringBuilder();
@@ -107,6 +107,9 @@ public final class StringUtility {
         return SB.toString();
     }
 
+    /**
+     * Constructs a comma separated list from a <code>List</code>.
+     */
     public static String buildList(List<?> V) {
         StringBuilder SB=new StringBuilder();
         int len=V.size();
