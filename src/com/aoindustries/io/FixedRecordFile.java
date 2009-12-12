@@ -22,13 +22,12 @@
  */
 package com.aoindustries.io;
 
-/*
- * Copyright 2003-2009 by AO Industries, Inc.,
- * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
- * All rights reserved.
- */
-import com.aoindustries.util.*;
-import java.io.*;
+import com.aoindustries.util.BufferManager;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * A way to more easily manipulate files with fixed-record-size rows.
@@ -152,7 +151,7 @@ public class FixedRecordFile extends RandomAccessFile {
         int recordLength=from.recordLength;
         if(recordLength!=to.recordLength) throw new IllegalArgumentException("Files do not have the same record length: from.recordLength="+recordLength+", to.recordLength="+to.recordLength);
 
-        copyBytes(from, (long)fromIndex*recordLength, to, (long)toIndex*recordLength, (long)numRecords*recordLength);
+        copyBytes(from, fromIndex*(long)recordLength, to, toIndex*(long)recordLength, numRecords*(long)recordLength);
     }
 
     public void removeAllRecords() throws IOException {

@@ -28,10 +28,6 @@ package com.aoindustries.apache.catalina.jdbc4_1_31;
  * For this reason we make this code available to everybody in the aocode-public
  * package.  Ultimately, we would like to submit this code to Apache for inclusion
  * in their Tomcat distribution.
- *
- * By AO Industries, Inc.,
- * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
- * All rights reserved.
  */
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
