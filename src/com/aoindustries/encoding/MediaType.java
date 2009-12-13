@@ -136,6 +136,6 @@ public enum MediaType {
         for(MediaType value : values) {
             if(value.isUsedFor(contentType)) return value;
         }
-        throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaType.getMediaType.unknownType", fullContentType));
+        throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaType.getMediaType.unknownType", fullContentType));
     }
 }

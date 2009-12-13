@@ -52,7 +52,7 @@ public class XhtmlPreValidator extends MediaValidator {
             // Also don't allow any XML tags
             && c!='<'
             && c!='>'
-        ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "XhtmlPreMediaValidator.invalidCharacter", Integer.toHexString(c)));
+        ) throw new IOException(ApplicationResources.accessor.getMessage(userLocale, "XhtmlPreMediaValidator.invalidCharacter", Integer.toHexString(c)));
     }
 
     /**

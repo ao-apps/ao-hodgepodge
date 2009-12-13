@@ -59,7 +59,7 @@ abstract public class MediaValidator extends FilterWriter implements ValidMediaF
             case XHTML_PRE:
                 return new XhtmlPreValidator(out, userLocale);
             default:
-                throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaValidator.unableToFindValidator", contentType.getMediaType()));
+                throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaValidator.unableToFindValidator", contentType.getMediaType()));
         }
     }
 

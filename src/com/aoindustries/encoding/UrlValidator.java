@@ -60,7 +60,7 @@ public class UrlValidator extends MediaValidator {
                 && c!='='
                 && c!='&'
                 && c!='#'
-            ) throw new IOException(ApplicationResourcesAccessor.getMessage(userLocale, "UrlMediaValidator.invalidCharacter", Integer.toHexString(c)));
+            ) throw new IOException(ApplicationResources.accessor.getMessage(userLocale, "UrlMediaValidator.invalidCharacter", Integer.toHexString(c)));
             return true;
         } else {
             return c=='?';

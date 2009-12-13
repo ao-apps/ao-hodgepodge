@@ -64,7 +64,7 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
                     case XHTML : encoder = new JavaScriptInXhtmlEncoder(out); break;
                     case XHTML_ATTRIBUTE : encoder = new JavaScriptInXhtmlAttributeEncoder(out); break;
                     case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out, userLocale); break; // Just treat as text
-                    default: throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case TEXT:
@@ -72,7 +72,7 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
                     case JAVASCRIPT: encoder = new TextInJavaScriptEncoder(out); break;
                     case XHTML: encoder = new TextInXhtmlEncoder(out, userLocale); break;
                     case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out, userLocale); break;
-                    default: throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case URL:
@@ -80,23 +80,23 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
                     case JAVASCRIPT: encoder = new UrlInJavaScriptEncoder(out, userLocale, response); break;
                     case TEXT: encoder = new UrlInTextEncoder(out, userLocale); break;
                     case XHTML: encoder = new UrlInXhtmlEncoder(out, userLocale, response); break;
-                    default: throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case XHTML:
                 switch(containerType) {
                     case TEXT: encoder = null; break; // No conversion necessary
-                    default: throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case XHTML_PRE:
                 switch(containerType) {
                     case TEXT: encoder = null; break; // No conversion necessary
                     case XHTML: encoder = new XhtmlPreInXhtmlEncoder(out, userLocale); break;
-                    default: throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
-            default: throw new MediaException(ApplicationResourcesAccessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+            default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
         }
         if(encoder!=null) {
             // Make sure types match - bug catching

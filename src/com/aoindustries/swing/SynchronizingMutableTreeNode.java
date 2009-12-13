@@ -66,7 +66,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
      * be called from the Swing event dispatch thread.
      */
     public void synchronize(DefaultTreeModel treeModel, Tree<E> tree) throws IOException, SQLException {
-        assert SwingUtilities.isEventDispatchThread() : ApplicationResourcesAccessor.getMessage(Locale.getDefault(), "assert.notRunningInSwingEventThread");
+        assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage(Locale.getDefault(), "assert.notRunningInSwingEventThread");
         synchronize(treeModel, tree.getRootNodes());
     }
 
@@ -80,7 +80,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
      */
     @SuppressWarnings({"unchecked"})
     public void synchronize(DefaultTreeModel treeModel, List<Node<E>> children) throws IOException, SQLException {
-        assert SwingUtilities.isEventDispatchThread() : ApplicationResourcesAccessor.getMessage(Locale.getDefault(), "assert.notRunningInSwingEventThread");
+        assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage(Locale.getDefault(), "assert.notRunningInSwingEventThread");
         if(children==null) {
             // No children allowed
             while(getChildCount()>0) treeModel.removeNodeFromParent((MutableTreeNode)getChildAt(getChildCount()-1));

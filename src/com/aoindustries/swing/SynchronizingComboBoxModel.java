@@ -58,7 +58,7 @@ public class SynchronizingComboBoxModel extends DefaultComboBoxModel {
      * Swing event dispatch thread.
      */
     public void synchronize(List<?> list) {
-        assert SwingUtilities.isEventDispatchThread() : ApplicationResourcesAccessor.getMessage(Locale.getDefault(), "assert.notRunningInSwingEventThread");
+        assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage(Locale.getDefault(), "assert.notRunningInSwingEventThread");
 
         // Make sure the first element exists and matches
         int modelOffset;

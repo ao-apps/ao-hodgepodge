@@ -20,30 +20,41 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.swing;
+package com.aoindustries.encoding;
 
+import com.aoindustries.util.ApplicationResourcesAccessor;
+import com.aoindustries.util.EditableResourceBundle;
+import com.aoindustries.util.EditableResourceBundleSet;
+import java.io.File;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
  * Provides a simplified interface for obtaining localized values from the ApplicationResources.properties files.
+ * Is also an editable resource bundle.
  *
  * @author  AO Industries, Inc.
  */
-final class ApplicationResourcesAccessor {
+public final class ApplicationResources extends EditableResourceBundle {
+
+    static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
+        ApplicationResources.class.getName(),
+        Arrays.asList(
+            new Locale(""), // Locale.ROOT in Java 1.6
+            Locale.JAPANESE
+        )
+    );
 
     /**
-     * Make no instances.
+     * Do not use directly.
      */
-    private ApplicationResourcesAccessor() {
+    public ApplicationResources() {
+        super(
+            new File(System.getProperty("user.home")+"/common/ao/cvswork/aocode-public/src/com/aoindustries/encoding/ApplicationResources.properties"),
+            new Locale(""),
+            bundleSet
+        );
     }
 
-    private static final com.aoindustries.util.ApplicationResourcesAccessor accessor = new com.aoindustries.util.ApplicationResourcesAccessor("com.aoindustries.swing.ApplicationResources");
-
-    public static String getMessage(Locale locale, String key) {
-        return accessor.getMessage(locale, key);
-    }
-    
-    public static String getMessage(Locale locale, String key, Object... args) {
-        return accessor.getMessage(locale, key, args);
-    }
+    static final ApplicationResourcesAccessor accessor = new ApplicationResourcesAccessor(bundleSet.getBaseName());
 }
