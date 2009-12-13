@@ -22,6 +22,9 @@
  */
 package com.aoindustries.util;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -46,14 +49,41 @@ public enum Country implements LocalizedToString {
     AR(1974),
     AS(1974),
     AT(1974),
-    AU(1974),
+    AU(
+        1974,
+        new String[] {
+            "Capital Territory",
+            "New South Wales",
+            "Northern Territory",
+            "Queensland",
+            "South Australia",
+            "Tasmania",
+            "Victoria",
+            "Western Australia"
+        }
+    ),
     AW(1986),
     AX(2004),
     AZ(1992),
     BA(1992),
     BB(1974),
     BD(1974),
-    BE(1974),
+    BE(
+        1974,
+        new String[] {
+            "Antwerpen",
+            "Brabant Wallon",
+            "Brussels",
+            "Hainaut",
+            "Liege",
+            "Limburg",
+            "Luxembourg",
+            "Namur",
+            "Oost-Vlaanderen",
+            "Vlaams Brabant",
+            "West-Vlaanderen"
+        }
+    ),
     BF(1984),
     BG(1974),
     BH(1974),
@@ -63,14 +93,62 @@ public enum Country implements LocalizedToString {
     BM(1974),
     BN(1974),
     BO(1974),
-    BR(1974),
+    BR(
+        1974,
+        new String[] {
+            "Acre",
+            "Alagoas",
+            "Amapa",
+            "Amazonas",
+            "Bahia",
+            "Ceara",
+            "Distrito Federal",
+            "Espirito Santo",
+            "Goias",
+            "Maranhao",
+            "Mato Grosso",
+            "Mato Grosso do Sul",
+            "Minas Gerais",
+            "Para",
+            "Paraiba",
+            "Parana",
+            "Pernambuco",
+            "Piaui",
+            "Rio de Janeiro",
+            "Rio Grande do Norte",
+            "Rio Grande do Sul",
+            "Rondonia",
+            "Roraima",
+            "Santa Catarina",
+            "Sao Paulo",
+            "Sergipe",
+            "Tocantins"
+        }
+    ),
     BS(1974),
     BT(1974),
     BV(1974),
     BW(1974),
     BY(1974),
     BZ(1974),
-    CA(1974),
+    CA(
+        1974,
+        new String[] {
+            "Alberta",
+            "British Columbia",
+            "Manitoba",
+            "New Brunswick",
+            "Newfoundland",
+            "Northwest Territories",
+            "Nova Scotia",
+            "Nunavut",
+            "Ontario",
+            "Prince Edward Island",
+            "Quebec",
+            "Saskatchewan",
+            "Yukon Territory"
+        }
+    ),
     CC(1974),
     CD(1997),
     CF(1974),
@@ -136,7 +214,46 @@ public enum Country implements LocalizedToString {
     IE(1974),
     IL(1974),
     IM(2006),
-    IN(1974),
+    IN(
+        1974,
+        new String[] {
+            "Andaman and Nicobar Islands",
+            "Andhra Pradesh",
+            "Arunachal Pradesh",
+            "Assam",
+            "Bihar",
+            "Chandigarh",
+            "Chhattisgarh",
+            "Dadra and Nagar Haveli",
+            "Daman and Diu",
+            "Delhi",
+            "Goa",
+            "Gujarat",
+            "Haryana",
+            "Himachal Pradesh",
+            "Jammu and Kashmir",
+            "Jharkhand",
+            "Karnataka",
+            "Kerala",
+            "Lakshadweep",
+            "Madhya Pradesh",
+            "Maharashtra",
+            "Manipur",
+            "Meghalaya",
+            "Mizoram",
+            "Nagaland",
+            "Orissa",
+            "Puducherry",
+            "Punjab",
+            "Rajasthan",
+            "Sikkim",
+            "Tamil Nadu",
+            "Tripura",
+            "Uttar Pradesh",
+            "Uttarakhand",
+            "West Bengal"
+        }
+    ),
     IO(1974),
     IQ(1974),
     IR(1974),
@@ -145,7 +262,58 @@ public enum Country implements LocalizedToString {
     JE(2006),
     JM(1974),
     JO(1974),
-    JP(1974),
+    JP(
+        1974,
+        new String[] {
+            "Aichi",
+            "Akita",
+            "Aomori",
+            "Chiba",
+            "Ehime",
+            "Fukui",
+            "Fukuoka",
+            "Fukushima",
+            "Gifu",
+            "Gumma",
+            "Hiroshima",
+            "Hokkaido",
+            "Hyogo",
+            "Ibaraki",
+            "Ishikawa",
+            "Iwate",
+            "Kagawa",
+            "Kagoshima",
+            "Kanagawa",
+            "Kouchi",
+            "Kumamoto",
+            "Kyoto",
+            "Mie",
+            "Miyagi",
+            "Miyazaki",
+            "Nagano",
+            "Nagasaki",
+            "Nara",
+            "Niigata",
+            "Oita",
+            "Okayama",
+            "Okinawa",
+            "Osaka",
+            "Saga",
+            "Saitama",
+            "Shiga",
+            "Shimane",
+            "Shizuoka",
+            "Tochigi",
+            "Tokushima",
+            "Tokyo",
+            "Tottori",
+            "Toyama",
+            "Wakayama",
+            "Yamagata",
+            "Yamaguchi",
+            "Yamanashi"
+        }
+    ),
     KE(1974),
     KG(1992),
     KH(1974),
@@ -188,7 +356,43 @@ public enum Country implements LocalizedToString {
     MU(1974),
     MV(1974),
     MW(1974),
-    MX(1974),
+    MX(
+        1974,
+        new String[] {
+            "Aguascalientes",
+            "Baja California",
+            "Baja California Sur",
+            "Campeche",
+            "Chiapas",
+            "Chihuahua",
+            "Coahuila",
+            "Colima",
+            "Distrito Federal",
+            "Durango",
+            "Guanajuato",
+            "Guerrero",
+            "Hidalgo",
+            "Jalisco",
+            "Mexico",
+            "Michoacan",
+            "Morelos",
+            "Nayarit",
+            "Nuevo Leon",
+            "Oaxaca",
+            "Puebla",
+            "Queretaro",
+            "Quintana Roo",
+            "San Luis Potosi",
+            "Sinaloa",
+            "Sonora",
+            "Tabasco",
+            "Tamaulipas",
+            "Tlaxcala",
+            "Veracruz",
+            "Yucatan",
+            "Zacatecas"
+        }
+    ),
     MY(1974),
     MZ(1974),
     NA(1974),
@@ -262,7 +466,73 @@ public enum Country implements LocalizedToString {
     UA(1974),
     UG(1974),
     UM(1986),
-    US(1974),
+    US(
+        1974,
+        new String[] {
+            "Alabama",
+            "Alaska",
+            "American Samoa",
+            "Arizona",
+            "Arkansas",
+            "Armed Forces America",
+            "Armed Forces Other Areas",
+            "Armed Forces Pacific",
+            "California",
+            "Colorado",
+            "Connecticut",
+            "Delaware",
+            "District of Columbia",
+            "Federated States of Micronesia",
+            "Florida",
+            "Georgia",
+            "Guam",
+            "Hawaii",
+            "Idaho",
+            "Illinois",
+            "Indiana",
+            "Iowa",
+            "Kansas",
+            "Kentucky",
+            "Louisiana",
+            "Maine",
+            "Marshall Islands",
+            "Maryland",
+            "Massachusetts",
+            "Michigan",
+            "Minnesota",
+            "Mississippi",
+            "Missouri",
+            "Montana",
+            "Nebraska",
+            "Nevada",
+            "New Hampshire",
+            "New Jersey",
+            "New Mexico",
+            "New York",
+            "North Carolina",
+            "North Dakota",
+            "Northern Mariana Islands",
+            "Ohio",
+            "Oklahoma",
+            "Oregon",
+            "Palau",
+            "Pennsylvania",
+            "Puerto Rico",
+            "Rhode Island",
+            "South Carolina",
+            "South Dakota",
+            "Tennessee",
+            "Texas",
+            "Virgin Islands",
+            "Utah",
+            "Vermont",
+            "Virginia",
+            "Washington",
+            "West Virginia",
+            "Wisconsin",
+            "Wyoming"
+        }
+    ),
     UY(1974),
     UZ(1992),
     VA(1974),
@@ -281,9 +551,16 @@ public enum Country implements LocalizedToString {
     ZW(1980);
 
     private final int since;
+    private List<String> states;
 
     private Country(int since) {
         this.since = since;
+        this.states = null;
+    }
+
+    private Country(int since, String[] states) {
+        this.since = since;
+        this.states = Collections.unmodifiableList(Arrays.asList(states));
     }
 
     /**
@@ -306,5 +583,12 @@ public enum Country implements LocalizedToString {
      */
     public String toString(Locale userLocale) {
         return ApplicationResources.accessor.getMessage(userLocale, "Country."+name()+".toString");
+    }
+
+    /**
+     * Gets the unmodifiable list of states or <code>null</code> if unknown.
+     */
+    public List<String> getStates() {
+        return states;
     }
 }
