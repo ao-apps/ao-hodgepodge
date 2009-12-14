@@ -20,9 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.i18n;
+package com.aoindustries.util.i18n;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 
 /**
  * Stores a monetary value as a combination of currency and amount.  It supports
@@ -41,7 +42,8 @@ public class Money {
      * @throws NumberFormatException if value scale is not correct for the currency.
      */
     public Money(Currency currency, BigDecimal value) throws NumberFormatException {
-        if(currency.getScale()!=value.scale()) throw new NumberFormatException("currency.scale!=value.scale: "+currency.getScale()+"!="+value.scale());
+        int scale = currency.getDefaultFractionDigits();
+        if(scale!=-1 && scale!=value.scale()) throw new NumberFormatException("currency.scale!=value.scale: "+scale+"!="+value.scale());
         this.currency = currency;
         this.value = value;
     }
@@ -60,7 +62,7 @@ public class Money {
      */
     @Override
     public String toString() {
-        return currency.name()+value.toPlainString();
+        return currency.getCurrencyCode()+value.toPlainString();
     }
 
     public Money add(Money augend) throws ArithmeticException {

@@ -22,7 +22,7 @@
  */
 package com.aoindustries.encoding;
 
-import com.aoindustries.i18n.EditableResourceBundle;
+import com.aoindustries.util.i18n.EditableResourceBundle;
 import java.io.File;
 import java.util.Locale;
 

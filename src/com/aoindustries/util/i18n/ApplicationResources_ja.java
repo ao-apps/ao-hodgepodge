@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.i18n;
+package com.aoindustries.util.i18n;
 
 import java.io.File;
 import java.util.Locale;
@@ -38,7 +38,7 @@ public final class ApplicationResources_ja extends EditableResourceBundle {
      */
     public ApplicationResources_ja() {
         super(
-            new File(System.getProperty("user.home")+"/common/ao/cvswork/aocode-public/src/com/aoindustries/i18n/ApplicationResources_ja.properties"),
+            new File(System.getProperty("user.home")+"/common/ao/cvswork/aocode-public/src/com/aoindustries/util/i18n/ApplicationResources_ja.properties"),
             Locale.JAPANESE,
             ApplicationResources.bundleSet
         );

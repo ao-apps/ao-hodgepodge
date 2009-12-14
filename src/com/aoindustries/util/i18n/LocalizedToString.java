@@ -20,35 +20,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.i18n;
+package com.aoindustries.util.i18n;
 
-import java.util.Comparator;
 import java.util.Locale;
 
 /**
- * Sorts locales by language, country, then variant.
+ * Any object that provides a <code>Locale</code>-specific <code>toString</code>
+ * method may indicate so by implementing this interface.  When providing the
+ * localized <code>toString</code>, please override <code>toString()</code> as
+ * follows:
+ * <pre>
+ * public String toString() {
+ *     return toString(Locale.getDefault());
+ * }
+ * </pre>
  *
  * @author  AO Industries, Inc.
  */
-public class LocaleComparator implements Comparator<Locale> {
+public interface LocalizedToString {
 
-    private static final LocaleComparator instance = new LocaleComparator();
-
-    /**
-     * Singleton that may be shared.
-     */
-    public static LocaleComparator getInstance() {
-        return instance;
-    }
-
-    private LocaleComparator() {
-    }
-
-    public int compare(Locale l1, Locale l2) {
-        int diff = l1.getLanguage().compareToIgnoreCase(l2.getLanguage());
-        if(diff!=0) return diff;
-        diff = l1.getCountry().compareToIgnoreCase(l2.getCountry());
-        if(diff!=0) return diff;
-        return l1.getVariant().compareToIgnoreCase(l2.getVariant());
-    }
+    String toString(Locale userLocale);
 }

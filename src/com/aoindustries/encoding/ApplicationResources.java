@@ -22,9 +22,9 @@
  */
 package com.aoindustries.encoding;
 
-import com.aoindustries.i18n.ApplicationResourcesAccessor;
-import com.aoindustries.i18n.EditableResourceBundle;
-import com.aoindustries.i18n.EditableResourceBundleSet;
+import com.aoindustries.util.i18n.ApplicationResourcesAccessor;
+import com.aoindustries.util.i18n.EditableResourceBundle;
+import com.aoindustries.util.i18n.EditableResourceBundleSet;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Locale;

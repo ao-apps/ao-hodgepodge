@@ -20,38 +20,35 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.i18n;
+package com.aoindustries.util.i18n;
 
-import java.io.File;
-import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Locale;
 
 /**
- * Provides a simplified interface for obtaining localized values from the ApplicationResources.properties files.
- * Is also an editable resource bundle.
+ * Sorts locales by language, country, then variant.
  *
  * @author  AO Industries, Inc.
  */
-public final class ApplicationResources extends EditableResourceBundle {
+public class LocaleComparator implements Comparator<Locale> {
 
-    static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
-        ApplicationResources.class.getName(),
-        Arrays.asList(
-            new Locale(""), // Locale.ROOT in Java 1.6
-            Locale.JAPANESE
-        )
-    );
+    private static final LocaleComparator instance = new LocaleComparator();
 
     /**
-     * Do not use directly.
+     * Singleton that may be shared.
      */
-    public ApplicationResources() {
-        super(
-            new File(System.getProperty("user.home")+"/common/ao/cvswork/aocode-public/src/com/aoindustries/i18n/ApplicationResources.properties"),
-            new Locale(""),
-            bundleSet
-        );
+    public static LocaleComparator getInstance() {
+        return instance;
     }
 
-    static final ApplicationResourcesAccessor accessor = new ApplicationResourcesAccessor(bundleSet.getBaseName());
+    private LocaleComparator() {
+    }
+
+    public int compare(Locale l1, Locale l2) {
+        int diff = l1.getLanguage().compareToIgnoreCase(l2.getLanguage());
+        if(diff!=0) return diff;
+        diff = l1.getCountry().compareToIgnoreCase(l2.getCountry());
+        if(diff!=0) return diff;
+        return l1.getVariant().compareToIgnoreCase(l2.getVariant());
+    }
 }
