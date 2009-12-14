@@ -20,10 +20,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.util;
+package com.aoindustries.i18n;
 
 import com.aoindustries.encoding.MediaType;
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
+import com.aoindustries.util.EncodingUtils;
+import com.aoindustries.util.Sequence;
+import com.aoindustries.util.UnsynchronizedSequence;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

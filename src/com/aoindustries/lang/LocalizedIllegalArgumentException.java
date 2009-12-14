@@ -22,7 +22,7 @@
  */
 package com.aoindustries.lang;
 
-import com.aoindustries.util.ApplicationResourcesAccessor;
+import com.aoindustries.i18n.ApplicationResourcesAccessor;
 import java.util.Locale;
 
 /**

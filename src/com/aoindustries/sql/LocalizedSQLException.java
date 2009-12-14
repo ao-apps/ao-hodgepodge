@@ -22,7 +22,7 @@
  */
 package com.aoindustries.sql;
 
-import com.aoindustries.util.ApplicationResourcesAccessor;
+import com.aoindustries.i18n.ApplicationResourcesAccessor;
 import java.sql.SQLException;
 import java.util.Locale;
 

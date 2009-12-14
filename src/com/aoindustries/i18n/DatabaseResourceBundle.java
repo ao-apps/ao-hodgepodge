@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.util;
+package com.aoindustries.i18n;
 
 import com.aoindustries.sql.Database;
 

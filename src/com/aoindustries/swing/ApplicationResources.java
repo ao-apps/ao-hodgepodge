@@ -22,9 +22,9 @@
  */
 package com.aoindustries.swing;
 
-import com.aoindustries.util.ApplicationResourcesAccessor;
-import com.aoindustries.util.EditableResourceBundle;
-import com.aoindustries.util.EditableResourceBundleSet;
+import com.aoindustries.i18n.ApplicationResourcesAccessor;
+import com.aoindustries.i18n.EditableResourceBundle;
+import com.aoindustries.i18n.EditableResourceBundleSet;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Locale;
