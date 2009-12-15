@@ -69,4 +69,11 @@ public class Money {
         if(currency!=augend.currency) throw new ArithmeticException("currency!=augend.currency: "+currency+"!="+augend.currency);
         return new Money(currency, value.add(augend.value));
     }
+
+    /**
+     * Multiplies without rounding.
+     */
+    public Money multiply(BigDecimal multiplicand) throws ArithmeticException {
+        return new Money(currency, value.multiply(multiplicand).setScale(currency.getDefaultFractionDigits()));
+    }
 }
