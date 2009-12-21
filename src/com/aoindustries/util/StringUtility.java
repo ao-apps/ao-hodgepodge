@@ -1331,8 +1331,8 @@ public final class StringUtility {
     }
 
     /**
-     * Compares to strings in a case insensitive manner.  However, if they are considered equals in a case
-     * insensitive manner, the case sensitive comparison is done.
+     * Compares two strings in a case insensitive manner.  However, if they are considered equals in the
+     * case-insensitive manner, the case sensitive comparison is done.
      */
     public static int compareToIgnoreCaseCarefulEquals(String S1, String S2) {
         int diff=S1.compareToIgnoreCase(S2);

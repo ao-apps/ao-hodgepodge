@@ -41,8 +41,6 @@ import java.util.logging.Logger;
  */
 final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
 
-    private static final boolean DEBUG_TIMING = false;
-
     private String driver;
     private String url;
     private String user;
@@ -95,27 +93,10 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         Connection conn=null;
         try {
             while(conn==null) {
-                long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
                 conn=super.getConnection(maxConnections);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: AOConnectionPool: getConnection: super.getConnection in "+(endTime-startTime)+" ms");
-                }
                 try {
-                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                     boolean isReadOnly = conn.isReadOnly();
-                    if(DEBUG_TIMING) {
-                        long endTime = System.currentTimeMillis();
-                        System.err.println("DEBUG: AOConnectionPool: getConnection: isReadOnly in "+(endTime-startTime)+" ms");
-                    }
-                    if(isReadOnly!=readOnly) {
-                        if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                        conn.setReadOnly(readOnly);
-                        if(DEBUG_TIMING) {
-                            long endTime = System.currentTimeMillis();
-                            System.err.println("DEBUG: AOConnectionPool: getConnection: setReadOnly("+readOnly+") in "+(endTime-startTime)+" ms");
-                        }
-                    }
+                    if(isReadOnly!=readOnly) conn.setReadOnly(readOnly);
                 } catch(SQLException err) {
                     String message=err.getMessage();
                     // TODO: InterBase has a problem with setReadOnly(true), this is a workaround
@@ -126,20 +107,8 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
                     } else throw err;
                 }
             }
-            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
             int currentIsolationLevel = conn.getTransactionIsolation();
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: AOConnectionPool: getConnection: getTransactionIsolation in "+(endTime-startTime)+" ms");
-            }
-            if(currentIsolationLevel!=isolationLevel) {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                conn.setTransactionIsolation(isolationLevel);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: AOConnectionPool: getConnection: setTransactionIsolation("+isolationLevel+") in "+(endTime-startTime)+" ms");
-                }
-            }
+            if(currentIsolationLevel!=isolationLevel) conn.setTransactionIsolation(isolationLevel);
             return conn;
         } catch(SQLException err) {
             if(conn!=null) {
@@ -250,35 +219,20 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         // Autocommit will always be turned on, regardless what a previous transaction might have done
         if(conn.getAutoCommit()==false) {
             if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
             conn.setAutoCommit(true);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: AOConnectionPool: resetConnection: setAutoCommit(true) in "+(endTime-startTime)+" ms");
-            }
         }
 
         // Restore to default transaction level
         if(conn.getTransactionIsolation()!=Connection.TRANSACTION_READ_COMMITTED) {
             if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
             conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: AOConnectionPool: resetConnection: setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED) in "+(endTime-startTime)+" ms");
-            }
         }
 
         // Restore the connection to a read-only state
         if(!conn.isReadOnly()) {
             if(Thread.interrupted()) throw new SQLException("Thread interrupted");
             try {
-                long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
                 conn.setReadOnly(true);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: AOConnectionPool: resetConnection: setReadOnly(true) in "+(endTime-startTime)+" ms");
-                }
             } catch(SQLException err) {
                 String message=err.getMessage();
                 // TODO: InterBase has a problem with setReadOnly(true), this is a workaround

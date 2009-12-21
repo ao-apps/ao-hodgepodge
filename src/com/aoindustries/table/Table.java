@@ -22,16 +22,15 @@
  */
 package com.aoindustries.table;
 
-import java.io.IOException;
-import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * An abstract structure for tables.
  *
  * @author  AO Industries, Inc.
-*/
-public interface Table<T extends Row> {
+ */
+public interface Table<R extends Row> extends Iterable<R> {
 
     /**
      * Registers a <code>TableListener</code> to be notified when
@@ -40,7 +39,7 @@ public interface Table<T extends Row> {
      *
      * @see  #addTableListener(TableListener,long)
      */
-    void addTableListener(TableListener listener);
+    void addTableListener(TableListener<? super R> listener);
 
     /**
      * Registers a <code>TableListener</code> to be notified when
@@ -54,15 +53,26 @@ public interface Table<T extends Row> {
      * run immediately, because it causes serial processing of the event
      * and may potentially slow down the responsiveness of the server.
      */
-    void addTableListener(TableListener listener, long batchTime);
+    void addTableListener(TableListener<? super R> listener, long batchTime);
 
     /**
      * Removes a <code>TableListener</code> from the list of
      * objects being notified when the data is updated.
      */
-    void removeTableListener(TableListener listener);
+    void removeTableListener(TableListener<? super R> listener);
 
-    List<T> getRows() throws IOException, SQLException;
-    
-    String getTableName() throws IOException, SQLException;
+    /**
+     * Gets the name of this table.
+     */
+    String getTableName();
+
+    /**
+     * Gets the unmodifiable list of column names.
+     */
+    List<String> getColumnNames();
+
+    /**
+     * Gets the unmodifiable set of all rows.
+     */
+    Iterator<R> iterator();
 }

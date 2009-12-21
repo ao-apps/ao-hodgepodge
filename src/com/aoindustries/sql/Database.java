@@ -31,6 +31,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 
@@ -44,8 +45,6 @@ import javax.sql.DataSource;
  * @author  AO Industries, Inc.
  */
 public class Database extends AbstractDatabaseAccess {
-
-    private static final boolean DEBUG_TIMING = false;
 
     /**
      * Only one connection pool is made to the database.
@@ -308,48 +307,6 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
-        long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
-        DatabaseConnection conn=createDatabaseConnection();
-        if(DEBUG_TIMING) {
-            long endTime = System.currentTimeMillis();
-            System.err.println("DEBUG: Database: executeObjectListQuery: createDatabaseConnection in "+(endTime-startTime)+" ms");
-        }
-        try {
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-            List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, clazz, sql, params);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: Database: executeObjectListQuery: executeObjectListQuery in "+(endTime-startTime)+" ms");
-            }
-            if(!readOnly) {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                conn.commit();
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: Database: executeObjectListQuery: commit in "+(endTime-startTime)+" ms");
-                }
-            }
-            return value;
-        } catch(RuntimeException err) {
-            conn.rollback();
-            throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
-        } catch(SQLException err) {
-            conn.rollbackAndClose();
-            throw err;
-        } finally {
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-            conn.releaseConnection();
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: Database: executeObjectListQuery: releaseConnection in "+(endTime-startTime)+" ms");
-            }
-        }
-    }
-
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -370,28 +327,11 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
-        long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
-        if(DEBUG_TIMING) {
-            long endTime = System.currentTimeMillis();
-            System.err.println("DEBUG: Database: executeObjectListQuery: createDatabaseConnection in "+(endTime-startTime)+" ms");
-        }
         try {
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-            List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, objectFactory, sql, params);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: Database: executeObjectListQuery: executeObjectListQuery in "+(endTime-startTime)+" ms");
-            }
-            if(!readOnly) {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                conn.commit();
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: Database: executeObjectListQuery: commit in "+(endTime-startTime)+" ms");
-                }
-            }
+            List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, clazz, sql, params);
+            if(!readOnly) conn.commit();
             return value;
         } catch(RuntimeException err) {
             conn.rollback();
@@ -403,37 +343,16 @@ public class Database extends AbstractDatabaseAccess {
             conn.rollbackAndClose();
             throw err;
         } finally {
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
             conn.releaseConnection();
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: Database: executeObjectListQuery: releaseConnection in "+(endTime-startTime)+" ms");
-            }
         }
     }
 
-    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {
-        long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
-        if(DEBUG_TIMING) {
-            long endTime = System.currentTimeMillis();
-            System.err.println("DEBUG: Database: executeQuery: createDatabaseConnection in "+(endTime-startTime)+" ms");
-        }
         try {
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-            conn.executeQuery(isolationLevel, readOnly, resultSetHandler, sql, params);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: Database: executeQuery: executeQuery in "+(endTime-startTime)+" ms");
-            }
-            if(!readOnly) {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                conn.commit();
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: Database: executeQuery: commit in "+(endTime-startTime)+" ms");
-                }
-            }
+            List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, objectFactory, sql, params);
+            if(!readOnly) conn.commit();
+            return value;
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
@@ -444,12 +363,66 @@ public class Database extends AbstractDatabaseAccess {
             conn.rollbackAndClose();
             throw err;
         } finally {
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
             conn.releaseConnection();
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: Database: executeQuery: releaseConnection in "+(endTime-startTime)+" ms");
-            }
+        }
+    }
+
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+        DatabaseConnection conn=createDatabaseConnection();
+        try {
+            Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, clazz, sql, params);
+            if(!readOnly) conn.commit();
+            return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
+        } catch(IOException err) {
+            conn.rollback();
+            throw err;
+        } catch(SQLException err) {
+            conn.rollbackAndClose();
+            throw err;
+        } finally {
+            conn.releaseConnection();
+        }
+    }
+
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        DatabaseConnection conn=createDatabaseConnection();
+        try {
+            Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, objectFactory, sql, params);
+            if(!readOnly) conn.commit();
+            return value;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
+        } catch(IOException err) {
+            conn.rollback();
+            throw err;
+        } catch(SQLException err) {
+            conn.rollbackAndClose();
+            throw err;
+        } finally {
+            conn.releaseConnection();
+        }
+    }
+
+    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {
+        DatabaseConnection conn=createDatabaseConnection();
+        try {
+            conn.executeQuery(isolationLevel, readOnly, resultSetHandler, sql, params);
+            if(!readOnly) conn.commit();
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
+        } catch(IOException err) {
+            conn.rollback();
+            throw err;
+        } catch(SQLException err) {
+            conn.rollbackAndClose();
+            throw err;
+        } finally {
+            conn.releaseConnection();
         }
     }
 

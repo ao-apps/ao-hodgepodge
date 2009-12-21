@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Wraps and simplifies access to a JDBC database.
@@ -235,21 +236,6 @@ public interface DatabaseAccess {
     <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException;
 
     /**
-     * Read-only query the database with a <code>List&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
-     * <ul>
-     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
-     *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
-     * </ul>
-     */
-    <T> List<T> executeObjectListQuery(Class<T> clazz, String sql, Object ... params) throws IOException, SQLException;
-
-    /**
-     * Query the database with a <code>List&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
-     */
-    <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException;
-
-    /**
      * Read-only query the database with a <code>&lt;T&gt;</code> return type, objects are created with the provided factory.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
@@ -265,6 +251,21 @@ public interface DatabaseAccess {
     <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException;
 
     /**
+     * Read-only query the database with a <code>List&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    <T> List<T> executeObjectListQuery(Class<T> clazz, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Query the database with a <code>List&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
+     */
+    <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
      * Read-only query the database with a <code>List&lt;T&gt;</code> return type, objects are created with the provided factory.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
@@ -278,6 +279,36 @@ public interface DatabaseAccess {
      * Query the database with a <code>List&lt;T&gt;</code> return type, objects are created with the provided factory.
      */
     <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Read-only query the database with a <code>Set&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    <T> Set<T> executeObjectSetQuery(Class<T> clazz, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Query the database with a <code>Set&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
+     */
+    <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Read-only query the database with a <code>Set&lt;T&gt;</code> return type, objects are created with the provided factory.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    <T> Set<T> executeObjectSetQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException;
+
+    /**
+     * Query the database with a <code>Set&lt;T&gt;</code> return type, objects are created with the provided factory.
+     */
+    <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException;
 
     /**
      * Read-only query the database, calling the <code>ResultSetHandler</code> for each row retrieved.

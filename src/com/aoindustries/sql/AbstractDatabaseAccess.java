@@ -31,6 +31,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Wraps and simplifies access to a JDBC database.
@@ -75,16 +76,24 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeObjectQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, clazz, sql, params);
     }
 
-    public <T> List<T> executeObjectListQuery(Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
-        return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, clazz, sql, params);
-    }
-
     public <T> T executeObjectQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
         return executeObjectQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, objectFactory, sql, params);
     }
 
+    public <T> List<T> executeObjectListQuery(Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+        return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, clazz, sql, params);
+    }
+
     public <T> List<T> executeObjectListQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
         return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, objectFactory, sql, params);
+    }
+
+    public <T> Set<T> executeObjectSetQuery(Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, clazz, sql, params);
+    }
+
+    public <T> Set<T> executeObjectSetQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, objectFactory, sql, params);
     }
 
     public void executeQuery(ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {

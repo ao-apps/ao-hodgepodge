@@ -27,6 +27,8 @@ import com.aoindustries.table.Row;
 import com.aoindustries.table.Table;
 import com.aoindustries.table.Type;
 import java.awt.Dimension;
+import java.util.Collections;
+import java.util.List;
 import javax.swing.JScrollBar;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -51,7 +53,7 @@ public class FilteredJTable<T extends Row> extends JTable {
         Type[] columnTypes,
         MethodCall[] getValueMethods,
         MethodCall[] setValueMethods,
-        Table[] invalidateTables
+        List<Table<T>> invalidateTables
     ) {
         FilteredTableModel tableModel=new FilteredTableModel<T>(
             table,
@@ -89,7 +91,7 @@ public class FilteredJTable<T extends Row> extends JTable {
             columnTypes,
             getValueMethods,
             setValueMethods,
-            new Table[] {table}
+            Collections.singletonList(table)
         );
     }
 

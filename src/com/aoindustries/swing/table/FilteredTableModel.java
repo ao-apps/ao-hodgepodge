@@ -22,27 +22,33 @@
  */
 package com.aoindustries.swing.table;
 
-import com.aoindustries.reflect.*;
-import com.aoindustries.table.*;
-import com.aoindustries.util.*;
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
+import com.aoindustries.reflect.MethodCall;
+import com.aoindustries.table.Row;
+import com.aoindustries.table.Table;
+import com.aoindustries.table.TableListener;
+import com.aoindustries.table.Type;
+import com.aoindustries.util.DataFilter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import javax.swing.SwingUtilities;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.table.AbstractTableModel;
 
 /**
  * @author  AO Industries, Inc.
  */
-public class FilteredTableModel<T extends Row> extends AbstractTableModel implements AncestorListener, TableListener {
+public class FilteredTableModel<T extends Row> extends AbstractTableModel implements AncestorListener, TableListener<T> {
+
+    private static final long serialVersionUID = 1L;
 
     private final Table<T> table;
     private final String[] columnHeaders;
     private final Type[] columnTypes;
     private final MethodCall[] getValueMethods;
     private final MethodCall[] setValueMethods;
-    private final Table[] invalidateTables;
+    private final List<Table<T>> invalidateTables;
 
     private final String[] filters;
     private final DataFilter[] dataFilters;
@@ -55,7 +61,7 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
         Type[] columnTypes,
         MethodCall[] getValueMethods,
         MethodCall[] setValueMethods,
-        Table[] invalidateTables
+        List<Table<T>> invalidateTables
     ) {
         this.table=table;
         this.columnHeaders=columnHeaders;
@@ -73,7 +79,7 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
         dataFilters=new DataFilter[cols];
     }
 
-    public synchronized List<T> getFilteredRows() throws IOException, SQLException {
+    public synchronized List<T> getFilteredRows() {
         boolean isFiltered=false;
         for(int c=0;c<filters.length;c++) {
             if(filters[c]!=null) {
@@ -81,9 +87,13 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
                 break;
             }
         }
-        List<T> objs=table.getRows();
-        if(!isFiltered) return objs;
-        
+        Iterator<T> iter=table.iterator();
+        if(!isFiltered) {
+            List<T> objs = new ArrayList<T>();
+            while(iter.hasNext()) objs.add(iter.next());
+            return objs;
+        }
+
         if(filteredCache!=null) return filteredCache;
         
         for(int c=0;c<dataFilters.length;c++) {
@@ -91,9 +101,8 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
         }
 
         List<T> matches=new ArrayList<T>();
-        int len=objs.size();
-        for(int c=0;c<len;c++) {
-            T row=objs.get(c);
+        while(iter.hasNext()) {
+            T row=iter.next();
             boolean isMatch=true;
             for(int d=0;d<dataFilters.length;d++) {
                 DataFilter filter=dataFilters[d];
@@ -118,19 +127,15 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
     }
 
     public int getRowCount() {
-        try {
-            return getFilteredRows().size()+1;
-        } catch(IOException err) {
-            throw new WrappedException(err);
-        } catch(SQLException err) {
-            throw new WrappedException(err);
-        }
+        return getFilteredRows().size()+1;
     }
 
+    @Override
     public String getColumnName(int col) {
         return columnHeaders[col];
     }
 
+    @Override
     public Class getColumnClass(int col) {
         return columnTypes[col].getTypeClass();
     }
@@ -139,6 +144,7 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
         return columnTypes[col];
     }
 
+    @Override
     public boolean isCellEditable(int row, int col) {
         if(row==0) return true;
         return setValueMethods!=null && setValueMethods[col]!=null;
@@ -151,15 +157,9 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
         if(row==0) {
             return filters[col];
         } else {
-            try {
-                row--;
-                List rows=getFilteredRows();
-                return columnTypes[col].getDisplay(getRowValue((Row)rows.get(row), col));
-            } catch(IOException err) {
-                throw new WrappedException(err);
-            } catch(SQLException err) {
-                throw new WrappedException(err);
-            }
+            row--;
+            List rows=getFilteredRows();
+            return columnTypes[col].getDisplay(getRowValue((Row)rows.get(row), col));
         }
     }
 
@@ -169,15 +169,9 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
     public Object getObjectAt(int row, int col) {
         if(row==0) return filters[col];
         else {
-            try {
-                row--;
-                List rows=getFilteredRows();
-                return getRowValue((Row)rows.get(row), col);
-            } catch(IOException err) {
-                throw new WrappedException(err);
-            } catch(SQLException err) {
-                throw new WrappedException(err);
-            }
+            row--;
+            List rows=getFilteredRows();
+            return getRowValue((Row)rows.get(row), col);
         }
     }
 
@@ -194,25 +188,19 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
             fireTableDataChanged();
         } else {
             row--;
-            try {
-                if(setValueMethods==null) throw new RuntimeException("setValueAt(Object,int,int) should not have been called because setValueMethods is null");
-                MethodCall setMethod=setValueMethods[col];
-                if(setMethod==null) throw new RuntimeException("setValueAt(Object,int,int) should not have been called for column "+col+" because setValueMethods["+col+"] is null");
+            if(setValueMethods==null) throw new RuntimeException("setValueAt(Object,int,int) should not have been called because setValueMethods is null");
+            MethodCall setMethod=setValueMethods[col];
+            if(setMethod==null) throw new RuntimeException("setValueAt(Object,int,int) should not have been called for column "+col+" because setValueMethods["+col+"] is null");
 
-                Row R=(Row)getFilteredRows().get(row);
-                setMethod.invokeOn(R, new Object[] {value});
-            } catch(IOException err) {
-                throw new WrappedException(err);
-            } catch(SQLException err) {
-                throw new WrappedException(err);
-            }
+            Row R=(Row)getFilteredRows().get(row);
+            setMethod.invokeOn(R, new Object[] {value});
         }
     }
 
     public void ancestorAdded(AncestorEvent e) {
         if(invalidateTables!=null) {
-            for(int c=0;c<invalidateTables.length;c++) {
-                invalidateTables[c].addTableListener(this, 0);
+            for(int c=0;c<invalidateTables.size();c++) {
+                invalidateTables.get(c).addTableListener(this, 0);
             }
             tableUpdated(null);
         }
@@ -223,13 +211,13 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
 
     public void ancestorRemoved(AncestorEvent e) {
         if(invalidateTables!=null) {
-            for(int c=0;c<invalidateTables.length;c++) {
-                invalidateTables[c].removeTableListener(this);
+            for(int c=0;c<invalidateTables.size();c++) {
+                invalidateTables.get(c).removeTableListener(this);
             }
         }
     }
 
-    final public void tableUpdated(Table table) {
+    final public void tableUpdated(Table<T> table) {
         SwingUtilities.invokeLater(
             new Runnable() {
                 public void run() {

@@ -26,12 +26,11 @@ package com.aoindustries.table;
  * An abstract structure for rows in a table.
  *
  * @author  AO Industries, Inc.
-*/
+ */
 public interface Row {
 
     /**
-     * Gets the data contained within one column index in this row.
+     * Gets the data contained within one column in this row.
      */
-    Object getColumn(int columnIndex);
-
+    Object getColumn(String columnName);
 }

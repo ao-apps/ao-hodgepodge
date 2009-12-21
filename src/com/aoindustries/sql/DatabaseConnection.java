@@ -44,7 +44,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -55,8 +57,6 @@ import java.util.logging.Level;
  * @author  AO Industries, Inc.
  */
 public class DatabaseConnection extends AbstractDatabaseAccess {
-
-    private static final boolean DEBUG_TIMING = false;
 
     private final Database database;
 
@@ -77,76 +77,25 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws IOException, SQLException {
         Connection c=_conn;
         if(c==null) {
-            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
             c=database.getConnection(isolationLevel, readOnly, maxConnections);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: getConnection: database.getConnection in "+(endTime-startTime)+" ms");
-            }
-            if(!readOnly || isolationLevel>=Connection.TRANSACTION_REPEATABLE_READ) {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                c.setAutoCommit(false);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: getConnection: setAutoCommit(false) in "+(endTime-startTime)+" ms");
-                }
-            }
+            if(!readOnly || isolationLevel>=Connection.TRANSACTION_REPEATABLE_READ) c.setAutoCommit(false);
             _conn=c;
         } else if(c.getTransactionIsolation()<isolationLevel) {
             if(!c.getAutoCommit()) {
                 c.commit();
-                long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
                 c.setAutoCommit(true);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: getConnection: setAutoCommit(true) in "+(endTime-startTime)+" ms");
-                }
             }
-            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
             c.setTransactionIsolation(isolationLevel);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: getConnection: setTransactionIsolation("+isolationLevel+") in "+(endTime-startTime)+" ms");
-            }
-            if(!readOnly && c.isReadOnly()) {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                c.setReadOnly(false);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: getConnection: setReadOnly(false) in "+(endTime-startTime)+" ms");
-                }
-            }
-            if(!readOnly || isolationLevel>=Connection.TRANSACTION_REPEATABLE_READ) {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                c.setAutoCommit(false);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: getConnection: setAutoCommit(false) in "+(endTime-startTime)+" ms");
-                }
-            }
+            if(!readOnly && c.isReadOnly()) c.setReadOnly(false);
+            if(!readOnly || isolationLevel>=Connection.TRANSACTION_REPEATABLE_READ) c.setAutoCommit(false);
         } else if(!readOnly && c.isReadOnly()) {
             if(!c.getAutoCommit()) {
                 c.commit();
                 // TODO: May be able to get rid of the commit - setAutoCommit should commit according to the documentation
-                long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
                 c.setAutoCommit(true);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: getConnection: setAutoCommit(true) in "+(endTime-startTime)+" ms");
-                }
             }
-            long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
             c.setReadOnly(false);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: getConnection: setReadOnly(false) in "+(endTime-startTime)+" ms");
-            }
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
             c.setAutoCommit(false);
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: getConnection: setAutoCommit(false) in "+(endTime-startTime)+" ms");
-            }
         }
         return c;
     }
@@ -388,36 +337,13 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
-        long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
         Connection conn = getConnection(isolationLevel, readOnly);
-        if(DEBUG_TIMING) {
-            long endTime = System.currentTimeMillis();
-            System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: getConnection in "+(endTime-startTime)+" ms");
-        }
 
-        if(DEBUG_TIMING) startTime = System.currentTimeMillis();
         PreparedStatement pstmt = conn.prepareStatement(sql);
-        if(DEBUG_TIMING) {
-            long endTime = System.currentTimeMillis();
-            System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: prepareStatement in "+(endTime-startTime)+" ms");
-        }
         try {
             try {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                 setParams(pstmt, params);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: setParams in "+(endTime-startTime)+" ms");
-                }
-
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                 ResultSet results=pstmt.executeQuery();
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: executeQuery in "+(endTime-startTime)+" ms");
-                }
-
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                 try {
                     if(results.next()) {
                         Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
@@ -428,17 +354,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(rowRequired) throw new SQLException("No row returned.");
                     return null;
                 } finally {
-                    if(DEBUG_TIMING) {
-                        long endTime = System.currentTimeMillis();
-                        System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: got all results in "+(endTime-startTime)+" ms");
-                    }
-
-                    if(DEBUG_TIMING) startTime = System.currentTimeMillis();
                     results.close();
-                    if(DEBUG_TIMING) {
-                        long endTime = System.currentTimeMillis();
-                        System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: results.close() in "+(endTime-startTime)+" ms");
-                    }
                 }
             } catch(NoSuchMethodException err) {
                 SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
@@ -460,83 +376,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
             pstmt.close();
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: executeObjectQuery: pstmt.close() in "+(endTime-startTime)+" ms");
-            }
-        }
-    }
-
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
-        long startTime = DEBUG_TIMING ? System.currentTimeMillis() : 0;
-        Connection conn = getConnection(isolationLevel, readOnly);
-        if(DEBUG_TIMING) {
-            long endTime = System.currentTimeMillis();
-            System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: getConnection in "+(endTime-startTime)+" ms");
-        }
-        if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        if(DEBUG_TIMING) {
-            long endTime = System.currentTimeMillis();
-            System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: prepareStatement in "+(endTime-startTime)+" ms");
-        }
-        try {
-            try {
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                setParams(pstmt, params);
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: setParams in "+(endTime-startTime)+" ms");
-                }
-
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                ResultSet results=pstmt.executeQuery();
-                if(DEBUG_TIMING) {
-                    long endTime = System.currentTimeMillis();
-                    System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: executeQuery in "+(endTime-startTime)+" ms");
-                }
-
-                if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-                try {
-                    Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
-                    List<T> list=new ArrayList<T>();
-                    while(results.next()) list.add(constructor.newInstance(results));
-                    return list;
-                } finally {
-                    results.close();
-                    if(DEBUG_TIMING) {
-                        long endTime = System.currentTimeMillis();
-                        System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: get results in "+(endTime-startTime)+" ms");
-                    }
-                }
-            } catch(NoSuchMethodException err) {
-                SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(InstantiationException err) {
-                SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(IllegalAccessException err) {
-                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(InvocationTargetException err) {
-                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            }
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            if(DEBUG_TIMING) startTime = System.currentTimeMillis();
-            pstmt.close();
-            if(DEBUG_TIMING) {
-                long endTime = System.currentTimeMillis();
-                System.err.println("DEBUG: DatabaseConnection: executeObjectListQuery: pstmt.close() in "+(endTime-startTime)+" ms");
-            }
         }
     }
 
@@ -566,6 +406,45 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+        Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            try {
+                setParams(pstmt, params);
+                ResultSet results=pstmt.executeQuery();
+                try {
+                    Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
+                    List<T> list=new ArrayList<T>();
+                    while(results.next()) list.add(constructor.newInstance(results));
+                    return list;
+                } finally {
+                    results.close();
+                }
+            } catch(NoSuchMethodException err) {
+                SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(InstantiationException err) {
+                SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(IllegalAccessException err) {
+                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(InvocationTargetException err) {
+                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            }
+        } catch(SQLException err) {
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
+        }
+    }
+
     public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -577,6 +456,66 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                 List<T> list=new ArrayList<T>();
                 while(results.next()) list.add(objectFactory.createObject(results));
                 return list;
+            } finally {
+                results.close();
+            }
+        } catch(SQLException err) {
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
+        }
+    }
+
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+        Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            try {
+                setParams(pstmt, params);
+                ResultSet results=pstmt.executeQuery();
+                try {
+                    Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
+                    Set<T> set=new HashSet<T>();
+                    while(results.next()) set.add(constructor.newInstance(results));
+                    return set;
+                } finally {
+                    results.close();
+                }
+            } catch(NoSuchMethodException err) {
+                SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(InstantiationException err) {
+                SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(IllegalAccessException err) {
+                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            } catch(InvocationTargetException err) {
+                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
+                sqlErr.initCause(err);
+                throw sqlErr;
+            }
+        } catch(SQLException err) {
+            throw new WrappedSQLException(err, pstmt);
+        } finally {
+            pstmt.close();
+        }
+    }
+
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+        Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            setParams(pstmt, params);
+
+            ResultSet results=pstmt.executeQuery();
+            try {
+                Set<T> set=new HashSet<T>();
+                while(results.next()) set.add(objectFactory.createObject(results));
+                return set;
             } finally {
                 results.close();
             }

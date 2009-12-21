@@ -22,12 +22,14 @@
  */
 package com.aoindustries.security;
 
-import java.security.*;
+import java.security.GeneralSecurityException;
 
 /**
  * @author  AO Industries, Inc.
  */
 public class LoginException extends GeneralSecurityException {
+
+    private static final long serialVersionUID = 1L;
 
     public LoginException() {
         super();
