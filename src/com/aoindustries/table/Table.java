@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public interface Table<R extends Row> extends Iterable<R> {
+public interface Table<R extends Row> {
 
     /**
      * Registers a <code>TableListener</code> to be notified when
@@ -74,5 +74,5 @@ public interface Table<R extends Row> extends Iterable<R> {
     /**
      * Gets the unmodifiable set of all rows.
      */
-    Iterator<R> iterator();
+    Iterator<R> getRows();
 }

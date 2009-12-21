@@ -87,7 +87,7 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
                 break;
             }
         }
-        Iterator<T> iter=table.iterator();
+        Iterator<T> iter=table.getRows();
         if(!isFiltered) {
             List<T> objs = new ArrayList<T>();
             while(iter.hasNext()) objs.add(iter.next());
