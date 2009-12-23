@@ -27,6 +27,8 @@ package com.aoindustries.security;
  */
 public class AccountDisabledException extends LoginException {
 
+    private static final long serialVersionUID = 1L;
+
     public AccountDisabledException() {
         super();
     }

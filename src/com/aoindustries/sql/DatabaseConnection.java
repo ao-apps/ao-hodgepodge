@@ -476,7 +476,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                 try {
                     Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
                     Set<T> set=new HashSet<T>();
-                    while(results.next()) set.add(constructor.newInstance(results));
+                    while(results.next()) {
+                        T newObj = constructor.newInstance(results);
+                        if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+newObj);
+                    }
                     return set;
                 } finally {
                     results.close();
@@ -514,7 +517,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             ResultSet results=pstmt.executeQuery();
             try {
                 Set<T> set=new HashSet<T>();
-                while(results.next()) set.add(objectFactory.createObject(results));
+                while(results.next()) {
+                    T newObj = objectFactory.createObject(results);
+                    if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+newObj);
+                }
                 return set;
             } finally {
                 results.close();

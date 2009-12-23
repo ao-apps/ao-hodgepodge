@@ -22,6 +22,9 @@
  */
 package com.aoindustries.util.i18n;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Currency;
 
@@ -33,7 +36,9 @@ import java.util.Currency;
  *
  * @author  AO Industries, Inc.
  */
-public class Money {
+final public class Money implements Serializable, Comparable<Money> {
+
+    private static final long serialVersionUID = 1L;
 
     private final Currency currency;
     private final BigDecimal value;
@@ -42,10 +47,52 @@ public class Money {
      * @throws NumberFormatException if value scale is not correct for the currency.
      */
     public Money(Currency currency, BigDecimal value) throws NumberFormatException {
-        int scale = currency.getDefaultFractionDigits();
-        if(scale!=-1 && scale!=value.scale()) throw new NumberFormatException("currency.scale!=value.scale: "+scale+"!="+value.scale());
         this.currency = currency;
         this.value = value;
+        validate();
+    }
+
+    /**
+     * Perform same validation as constructor on readObject.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        try {
+            validate();
+        } catch(NumberFormatException err) {
+            IOException ioErr = new IOException();
+            ioErr.initCause(err);
+            throw ioErr;
+        }
+    }
+
+    private void validate() throws NumberFormatException {
+        int scale = currency.getDefaultFractionDigits();
+        if(scale!=-1 && scale!=value.scale()) throw new NumberFormatException("currency.scale!=value.scale: "+scale+"!="+value.scale());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o==null || !(o instanceof Money)) return false;
+        Money other = (Money)o;
+        return
+            value.equals(other.value)
+            && (
+                currency==other.currency
+                || currency.getCurrencyCode().equals(other.currency.getCurrencyCode())
+            )
+        ;
+    }
+
+    @Override
+    public int hashCode() {
+        return currency.getCurrencyCode().hashCode()*31 + value.hashCode();
+    }
+
+    public int compareTo(Money other) {
+        int diff = currency.getCurrencyCode().compareTo(other.currency.getCurrencyCode());
+        if(diff!=0) return diff;
+        return value.compareTo(other.value);
     }
 
     public Currency getCurrency() {

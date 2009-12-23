@@ -69,7 +69,7 @@ public interface Table<R extends Row> {
     /**
      * Gets the unmodifiable list of column names.
      */
-    List<String> getColumnNames();
+    List<Column> getColumns();
 
     /**
      * Gets the unmodifiable set of all rows.
