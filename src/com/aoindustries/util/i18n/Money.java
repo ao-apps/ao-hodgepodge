@@ -23,7 +23,9 @@
 package com.aoindustries.util.i18n;
 
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
+import java.io.ObjectInputValidation;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -36,7 +38,7 @@ import java.util.Currency;
  *
  * @author  AO Industries, Inc.
  */
-final public class Money implements Serializable, Comparable<Money> {
+final public class Money implements Serializable, ObjectInputValidation, Comparable<Money> {
 
     private static final long serialVersionUID = 1L;
 
@@ -52,23 +54,27 @@ final public class Money implements Serializable, Comparable<Money> {
         validate();
     }
 
+    private void validate() throws NumberFormatException {
+        int scale = currency.getDefaultFractionDigits();
+        if(scale!=-1 && scale!=value.scale()) throw new NumberFormatException("currency.scale!=value.scale: "+scale+"!="+value.scale());
+    }
+
     /**
      * Perform same validation as constructor on readObject.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.registerValidation(this, 0);
         ois.defaultReadObject();
+    }
+
+    public void validateObject() throws InvalidObjectException {
         try {
             validate();
         } catch(NumberFormatException err) {
-            IOException ioErr = new IOException();
-            ioErr.initCause(err);
-            throw ioErr;
+            InvalidObjectException newErr = new InvalidObjectException(err.getMessage());
+            newErr.initCause(err);
+            throw newErr;
         }
-    }
-
-    private void validate() throws NumberFormatException {
-        int scale = currency.getDefaultFractionDigits();
-        if(scale!=-1 && scale!=value.scale()) throw new NumberFormatException("currency.scale!=value.scale: "+scale+"!="+value.scale());
     }
 
     @Override
