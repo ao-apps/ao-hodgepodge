@@ -69,10 +69,10 @@ public interface Table<R extends Row> {
     /**
      * Gets the unmodifiable list of column names.
      */
-    List<Column> getColumns();
+    List<? extends Column> getColumns();
 
     /**
      * Gets the unmodifiable set of all rows.
      */
-    Iterator<R> getRows();
+    Iterator<? extends R> getRows();
 }

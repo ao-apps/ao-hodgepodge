@@ -81,6 +81,9 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                         } else if(paramType==Integer.TYPE) {
                             int value = result.getInt(c);
                             params[i] = result.wasNull() ? -1 : value;
+                        } else if(paramType==Short.TYPE) {
+                            short value = result.getShort(c);
+                            params[i] = result.wasNull() ? -1 : value;
                         } else if(paramType==Boolean.TYPE) {
                             boolean b = result.getBoolean(c);
                             if(result.wasNull()) throw new NullPointerException("null boolean");
@@ -102,6 +105,9 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                             params[i] = result.wasNull() ? null : value;
                         } else if(paramType==Float.class) {
                             float value = result.getFloat(c);
+                            params[i] = result.wasNull() ? null : value;
+                        } else if(paramType==Short.class) {
+                            short value = result.getShort(c);
                             params[i] = result.wasNull() ? null : value;
                         } else {
                             System.err.println("AutoObjectFactory: Unexpected class: "+paramType.getName());

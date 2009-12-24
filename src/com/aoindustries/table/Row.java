@@ -31,6 +31,8 @@ public interface Row {
 
     /**
      * Gets the data contained within one column in this row.
+     *
+     * @param columnIndex the zero-based column index
      */
-    Object getColumn(String columnName);
+    Object getColumn(int columnIndex);
 }
