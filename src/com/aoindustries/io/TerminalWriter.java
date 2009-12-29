@@ -22,7 +22,9 @@
  */
 package com.aoindustries.io;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 /**
  * A writer that controls advanced features of
@@ -33,27 +35,29 @@ import java.io.*;
  */
 public class TerminalWriter extends PrintWriter {
 
-    private static final byte ESC=(byte)0x1b;
+    private static final char ESC=0x1b;
 
-    private static final byte[]
-        CLEAR_SCREEN=new byte[] {ESC, (byte)'[', (byte)'H', ESC, (byte)'[', (byte)'J'},
-        BOLD_ON=new byte[] {ESC, (byte)'[', (byte)'1', (byte)'m'},
-        ATTRIBUTES_OFF=new byte[] {ESC, (byte)'[', (byte)'m'}
+    private static final char[]
+        CLEAR_SCREEN=new char[] {ESC, '[', 'H', ESC, '[', 'J'},
+        BOLD_ON=new char[] {ESC, '[', '1', 'm'},
+        ATTRIBUTES_OFF=new char[] {ESC, '[', 'm'}
+        //ECHO_OFF=new char[] {ESC, '[', '1', '2', 'h'},
+        //ECHO_ON=new char[] {ESC, '[', '1', '2', 'l'}
     ;
 
     private static final boolean supported=System.getProperty("os.name").toLowerCase().indexOf("linux")>=0;
-    private boolean enabled=true;
-
-    private final OutputStream out;
-
-    public TerminalWriter(OutputStream out) {
-	super(out);
-        this.out=out;
+    public static boolean isSupported() {
+        return supported;
     }
 
-    public TerminalWriter(OutputStream out, boolean autoFlush) {
-	super(out, autoFlush);
-        this.out=out;
+    private boolean enabled=true;
+
+    public TerminalWriter(Writer out) {
+    	super(out);
+    }
+
+    public TerminalWriter(Writer out, boolean autoFlush) {
+    	super(out, autoFlush);
     }
 
     public void attributesOff() throws IOException {
@@ -72,6 +76,23 @@ public class TerminalWriter extends PrintWriter {
         }
     }
 
+    /*
+    public void echoOff() throws IOException {
+        if(supported && enabled) {
+            flush();
+            out.write(ECHO_OFF);
+            out.flush();
+        }
+    }
+
+    public void echoOn() throws IOException {
+        if(supported && enabled) {
+            flush();
+            out.write(ECHO_ON);
+            out.flush();
+        }
+    }*/
+
     public void clearScreen() throws IOException {
         if(supported && enabled) {
             flush();
@@ -82,10 +103,6 @@ public class TerminalWriter extends PrintWriter {
 
     public boolean isEnabled() {
         return enabled;
-    }
-
-    public static boolean isSupported() {
-        return supported;
     }
 
     public void setEnabled(boolean enabled) {

@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public interface Table<R extends Row> {
+public interface Table<C extends Column, R extends Row> {
 
     /**
      * Registers a <code>TableListener</code> to be notified when
@@ -39,7 +39,7 @@ public interface Table<R extends Row> {
      *
      * @see  #addTableListener(TableListener,long)
      */
-    void addTableListener(TableListener<? super R> listener);
+    void addTableListener(TableListener<? super C, ? super R> listener);
 
     /**
      * Registers a <code>TableListener</code> to be notified when
@@ -53,13 +53,13 @@ public interface Table<R extends Row> {
      * run immediately, because it causes serial processing of the event
      * and may potentially slow down the responsiveness of the server.
      */
-    void addTableListener(TableListener<? super R> listener, long batchTime);
+    void addTableListener(TableListener<? super C, ? super R> listener, long batchTime);
 
     /**
      * Removes a <code>TableListener</code> from the list of
      * objects being notified when the data is updated.
      */
-    void removeTableListener(TableListener<? super R> listener);
+    void removeTableListener(TableListener<? super C, ? super R> listener);
 
     /**
      * Gets the name of this table.
@@ -69,7 +69,7 @@ public interface Table<R extends Row> {
     /**
      * Gets the unmodifiable list of column names.
      */
-    List<? extends Column> getColumns();
+    List<? extends C> getColumns();
 
     /**
      * Gets the unmodifiable set of all rows.

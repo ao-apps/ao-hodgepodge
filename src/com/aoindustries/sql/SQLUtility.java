@@ -25,7 +25,6 @@ package com.aoindustries.sql;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.StringUtility;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -42,6 +41,8 @@ public class SQLUtility {
 
     private SQLUtility() {
     }
+
+    private static final String eol = System.getProperty("line.separator");
 
     /**
      * Escapes SQL so that it can be used safely in queries.
@@ -542,7 +543,7 @@ public class SQLUtility {
         out.append("</table>\n");
     }
 
-    public static void printTable(Object[] titles, Object[] values, PrintWriter out, boolean isInteractive, boolean[] alignRights) {
+    public static void printTable(Object[] titles, Object[] values, Appendable out, boolean isInteractive, boolean[] alignRights) throws IOException {
         if(isInteractive) {
             // Find the widest for each column, taking the line wraps into account and skipping the '\r' characters
             int columns=titles.length;
@@ -578,23 +579,23 @@ public class SQLUtility {
                 int titleLen=title.length();
                 int width=widest[c];
                 int before=(width-titleLen)/2;
-                for(int d=0;d<=before;d++) out.print(' ');
-                out.print(title);
+                for(int d=0;d<=before;d++) out.append(' ');
+                out.append(title);
                 if(c<(columns-1)) {
                     int after=width-titleLen-before;
-                    for(int d=0;d<=after;d++) out.print(' ');
-                    out.print('|');
+                    for(int d=0;d<=after;d++) out.append(' ');
+                    out.append('|');
                 }
             }
-            out.println();
+            out.append(eol);
 
             // Print the spacer lines
             for(int c=0;c<columns;c++) {
                 int width=widest[c];
-                for(int d=-2;d<width;d++) out.print('-');
-                if(c<(columns-1)) out.print('+');
+                for(int d=-2;d<width;d++) out.append('-');
+                if(c<(columns-1)) out.append('+');
             }
-            out.println();
+            out.append(eol);
 
             // Print the values
             int[] lineCounts=new int[columns];
@@ -650,12 +651,12 @@ public class SQLUtility {
                                 else {
                                     if(rightAlign) {
                                         int before=width-valLen+1;
-                                        for(int e=0;e<before;e++) out.print(' ');
-                                        out.print(val);
+                                        for(int e=0;e<before;e++) out.append(' ');
+                                        out.append(val);
                                         printed=before+valLen;
                                     } else {
-                                        out.print(' ');
-                                        out.print(val);
+                                        out.append(' ');
+                                        out.append(val);
                                         printed=valLen+1;
                                     }
                                 }
@@ -663,18 +664,19 @@ public class SQLUtility {
                         }
                         if(d<(columns-1)) {
                             int after=width+2-printed;
-                            for(int e=0;e<after;e++) out.print(' ');
-                            out.print(line<lineCounts[d+1]?'|':' ');
+                            for(int e=0;e<after;e++) out.append(' ');
+                            out.append(line<lineCounts[d+1]?'|':' ');
                         }
                     }
-                    out.println();
+                    out.append(eol);
                 }
                 valuePos+=columns;
             }
-            out.print("(");
-            out.print(rows);
-            out.println(rows==1?" row)":" rows)");
-            out.println();
+            out.append("(");
+            out.append(Integer.toString(rows));
+            out.append(rows==1?" row)":" rows)");
+            out.append(eol);
+            out.append(eol);
         } else {
             // This output simply prints stuff in a way that can be read back in, using single quotes
             // Find the widest for each column
@@ -701,22 +703,22 @@ public class SQLUtility {
                     }
 
                     if(needsQuotes) {
-                        out.print('\'');
+                        out.append('\'');
                         for(int e=0;e<vlen;e++) {
                             char ch=S.charAt(e);
-                            if(ch=='\'') out.print('\\');
-                            out.print(ch);
+                            if(ch=='\'') out.append('\\');
+                            out.append(ch);
                         }
-                        out.print('\'');
-                    } else out.print(S);
-                    if(d<(columns-1)) out.print(' ');
+                        out.append('\'');
+                    } else out.append(S);
+                    if(d<(columns-1)) out.append(' ');
                 }
-                out.println();
+                out.append(eol);
             }
         }
     }
 
-    public static void printTable(Object[] titles, Collection<Object> values, PrintWriter out, boolean isInteractive, boolean[] alignRights) {
+    public static void printTable(Object[] titles, Collection<Object> values, Appendable out, boolean isInteractive, boolean[] alignRights) throws IOException {
         int size=values.size();
         Object[] oa=new Object[size];
         values.toArray(oa);

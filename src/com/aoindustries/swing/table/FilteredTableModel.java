@@ -23,6 +23,7 @@
 package com.aoindustries.swing.table;
 
 import com.aoindustries.reflect.MethodCall;
+import com.aoindustries.table.Column;
 import com.aoindustries.table.Row;
 import com.aoindustries.table.Table;
 import com.aoindustries.table.TableListener;
@@ -39,16 +40,16 @@ import javax.swing.table.AbstractTableModel;
 /**
  * @author  AO Industries, Inc.
  */
-public class FilteredTableModel<T extends Row> extends AbstractTableModel implements AncestorListener, TableListener<T> {
+public class FilteredTableModel<C extends Column, T extends Row> extends AbstractTableModel implements AncestorListener, TableListener<C,T> {
 
     private static final long serialVersionUID = 1L;
 
-    private final Table<T> table;
+    private final Table<C,T> table;
     private final String[] columnHeaders;
     private final Type[] columnTypes;
     private final MethodCall[] getValueMethods;
     private final MethodCall[] setValueMethods;
-    private final List<Table<T>> invalidateTables;
+    private final List<Table<C,T>> invalidateTables;
 
     private final String[] filters;
     private final DataFilter[] dataFilters;
@@ -56,12 +57,12 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
     private List<T> filteredCache;
 
     public FilteredTableModel(
-        Table<T> table,
+        Table<C,T> table,
         String[] columnHeaders,
         Type[] columnTypes,
         MethodCall[] getValueMethods,
         MethodCall[] setValueMethods,
-        List<Table<T>> invalidateTables
+        List<Table<C,T>> invalidateTables
     ) {
         this.table=table;
         this.columnHeaders=columnHeaders;
@@ -217,7 +218,7 @@ public class FilteredTableModel<T extends Row> extends AbstractTableModel implem
         }
     }
 
-    final public void tableUpdated(Table<T> table) {
+    final public void tableUpdated(Table<C,T> table) {
         SwingUtilities.invokeLater(
             new Runnable() {
                 public void run() {

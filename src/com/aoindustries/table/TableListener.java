@@ -31,10 +31,10 @@ package com.aoindustries.table;
  *
  * @author  AO Industries, Inc.
  */
-public interface TableListener<R extends Row> {
+public interface TableListener<C extends Column, R extends Row> {
 
     /**
      * Invoked when a <code>Table</code> is updated.
      */
-    void tableUpdated(Table<R> table);
+    void tableUpdated(Table<C,R> table);
 }

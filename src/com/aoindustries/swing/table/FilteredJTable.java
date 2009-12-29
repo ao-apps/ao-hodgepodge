@@ -23,6 +23,7 @@
 package com.aoindustries.swing.table;
 
 import com.aoindustries.reflect.MethodCall;
+import com.aoindustries.table.Column;
 import com.aoindustries.table.Row;
 import com.aoindustries.table.Table;
 import com.aoindustries.table.Type;
@@ -43,19 +44,19 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author  AO Industries, Inc.
  */
-public class FilteredJTable<T extends Row> extends JTable {
+public class FilteredJTable<C extends Column, T extends Row> extends JTable {
 
     private static final long serialVersionUID = 1L;
 
     public FilteredJTable(
-        Table<T> table,
+        Table<C,T> table,
         String[] columnHeaders,
         Type[] columnTypes,
         MethodCall[] getValueMethods,
         MethodCall[] setValueMethods,
-        List<Table<T>> invalidateTables
+        List<Table<C,T>> invalidateTables
     ) {
-        FilteredTableModel tableModel=new FilteredTableModel<T>(
+        FilteredTableModel tableModel=new FilteredTableModel<C,T>(
             table,
             columnHeaders,
             columnTypes,
@@ -79,7 +80,7 @@ public class FilteredJTable<T extends Row> extends JTable {
     }
 
     public FilteredJTable(
-        Table<T> table,
+        Table<C,T> table,
         String[] columnHeaders,
         Type[] columnTypes,
         MethodCall[] getValueMethods,
