@@ -24,18 +24,26 @@ package com.aoindustries.sql;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.Date;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Creates instances of objects by using reflection and passing-in the parameters in the same
- * order as the matching constructor.
+ * order as the matching constructor.  For unknown classes, will try to find any
+ * <code>valueOf(String)</code> method to create the object instance.
  *
  * @author  AO Industries, Inc.
  */
 public class AutoObjectFactory<T> implements ObjectFactory<T> {
+
+    private static final Logger logger = Logger.getLogger(AutoObjectFactory.class.getName());
 
     private final Class<T> clazz;
     private final Object[] prefixParams;
@@ -53,7 +61,8 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
      */
     public T createObject(ResultSet result) throws SQLException {
         try {
-            int numColumns = result.getMetaData().getColumnCount();
+            ResultSetMetaData metaData = result.getMetaData();
+            int numColumns = metaData.getColumnCount();
             int numParams = prefixParams.length + numColumns;
             Object[] params = new Object[numParams];
 
@@ -73,24 +82,27 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                     for(int c=1; c<=numColumns; c++) {
                         int i = prefixParams.length + c-1;
                         Class<?> paramType = paramTypes[i];
-                        // String
+                        // String first because it is commonly used
                         if(paramType==String.class) {
                             params[i] = result.getString(c);
 
                         // Primitives
                         } else if(paramType==Integer.TYPE) {
                             int value = result.getInt(c);
-                            params[i] = result.wasNull() ? -1 : value;
+                            if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null int");
+                            params[i] = value;
                         } else if(paramType==Short.TYPE) {
                             short value = result.getShort(c);
-                            params[i] = result.wasNull() ? -1 : value;
+                            if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null short");
+                            params[i] = value;
                         } else if(paramType==Boolean.TYPE) {
                             boolean b = result.getBoolean(c);
-                            if(result.wasNull()) throw new NullPointerException("null boolean");
+                            if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null boolean");
                             params[i] = b;
                         } else if(paramType==Float.TYPE) {
                             float value = result.getFloat(c);
-                            params[i] = result.wasNull() ? Float.NaN : value;
+                            if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null float");
+                            params[i] = value;
 
                         // Other types
                         } else if(paramType==Date.class) {
@@ -110,8 +122,21 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                             short value = result.getShort(c);
                             params[i] = result.wasNull() ? null : value;
                         } else {
-                            System.err.println("AutoObjectFactory: Unexpected class: "+paramType.getName());
-                            continue CONSTRUCTORS;
+                            // Try to find valueOf(String) for unknown types
+                            try {
+                                Method valueOfMethod = paramType.getMethod("valueOf", String.class);
+                                int mod = valueOfMethod.getModifiers();
+                                if(Modifier.isStatic(mod) && Modifier.isPublic(mod)) {
+                                    String value = result.getString(c);
+                                    params[i] = result.wasNull() ? null : valueOfMethod.invoke(null, value);
+                                } else {
+                                    if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: valueOf is not public static: "+paramType.getName());
+                                    continue CONSTRUCTORS;
+                                }
+                            } catch(NoSuchMethodException err) {
+                                if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: Unexpected class: "+paramType.getName());
+                                continue CONSTRUCTORS;
+                            }
                         }
                         //System.err.println(paramType.getName()+" ? "+(params[i]==null ? "null" : params[i].getClass()));
                     }

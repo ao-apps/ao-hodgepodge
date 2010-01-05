@@ -79,6 +79,7 @@ final public class Money implements Serializable, ObjectInputValidation, Compara
 
     @Override
     public boolean equals(Object o) {
+        if(this==o) return true;
         if(o==null || !(o instanceof Money)) return false;
         Money other = (Money)o;
         return

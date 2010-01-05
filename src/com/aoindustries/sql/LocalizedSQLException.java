@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2010  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,10 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.util.Arrays;
 import com.aoindustries.util.i18n.ApplicationResourcesAccessor;
+import com.aoindustries.util.i18n.LocalizedMessage;
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.Locale;
 
@@ -31,36 +34,48 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-public class LocalizedSQLException extends SQLException {
+public class LocalizedSQLException extends SQLException implements LocalizedMessage {
 
     private static final long serialVersionUID = 1L;
 
-    final private String localizedMessage;
+    private final ApplicationResourcesAccessor accessor;
+    private final String key;
+    private final Serializable[] args;
 
-    public LocalizedSQLException(ApplicationResourcesAccessor accessor, Locale userLocale, String key) {
+    public LocalizedSQLException(ApplicationResourcesAccessor accessor, String key) {
         super(accessor.getMessage(Locale.getDefault(), key));
-        this.localizedMessage = accessor.getMessage(userLocale, key);
+        this.accessor = accessor;
+        this.key = key;
+        this.args = Arrays.EMPTY_SERIALIZABLE_ARRAY;
     }
 
-    public LocalizedSQLException(ApplicationResourcesAccessor accessor, Locale userLocale, String key, Object... args) {
-        super(accessor.getMessage(Locale.getDefault(), key, args));
-        this.localizedMessage = accessor.getMessage(userLocale, key, args);
+    public LocalizedSQLException(ApplicationResourcesAccessor accessor, String key, Serializable... args) {
+        super(accessor.getMessage(Locale.getDefault(), key, (Object[])args));
+        this.accessor = accessor;
+        this.key = key;
+        this.args = args;
     }
 
-    public LocalizedSQLException(Throwable cause, ApplicationResourcesAccessor accessor, Locale userLocale, String key) {
-        super(accessor.getMessage(Locale.getDefault(), key));
-        initCause(cause);
-        this.localizedMessage = accessor.getMessage(userLocale, key);
+    public LocalizedSQLException(Throwable cause, ApplicationResourcesAccessor accessor, String key) {
+        super(accessor.getMessage(Locale.getDefault(), key), cause);
+        this.accessor = accessor;
+        this.key = key;
+        this.args = Arrays.EMPTY_SERIALIZABLE_ARRAY;
     }
 
-    public LocalizedSQLException(Throwable cause, ApplicationResourcesAccessor accessor, Locale userLocale, String key, Object... args) {
-        super(accessor.getMessage(Locale.getDefault(), key, args));
-        initCause(cause);
-        this.localizedMessage = accessor.getMessage(userLocale, key, args);
+    public LocalizedSQLException(Throwable cause, ApplicationResourcesAccessor accessor, String key, Serializable... args) {
+        super(accessor.getMessage(Locale.getDefault(), key, (Object[])args), cause);
+        this.accessor = accessor;
+        this.key = key;
+        this.args = args;
     }
 
     @Override
     public String getLocalizedMessage() {
-        return localizedMessage;
+        return getLocalizedMessage(Locale.getDefault());
+    }
+
+    public String getLocalizedMessage(Locale userLocale) {
+        return accessor.getMessage(userLocale, key, (Object[])args);
     }
 }

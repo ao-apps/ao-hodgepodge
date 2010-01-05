@@ -23,6 +23,11 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.util.StringUtility;
+import com.aoindustries.util.WrappedException;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -31,11 +36,15 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * Provides a simplified interface for obtaining localized values from a <code>ResourceBundle</code>.
- * It is designed to be similar to the use of the related Struts classes.
+ * It is designed to be similar to the use of the related Struts classes.  Also uses
+ * the parameter <code>toString(Locale)</code> when available, even if not marked with the
+ * <code>LocalizedToString</code> interface.
  *
  * @author  AO Industries, Inc.
  */
-public class ApplicationResourcesAccessor {
+public class ApplicationResourcesAccessor implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * The maximum number of arguments allowed 
@@ -57,10 +66,91 @@ public class ApplicationResourcesAccessor {
         }
     }
 
+    private static final Class[] toStringParamTypes = new Class[] {Locale.class};
+
+    /**
+     * Gets the best <code>toString</code> for the provided object in the provided locale.
+     * <ol>
+     *   <li>If is <code>null</code>, returns <code>"null"</code></li>
+     *   <li>If instance of <code>LocalizedToString</code>, casts and calls directly</li>
+     *   <li>Calls <code>toString(Locale)</code> through reflection</li>
+     *   <li>Uses standard <code>toString()</code></li>
+     * </ol>
+     */
+    public static String getToString(Locale locale, Object object) {
+        if(object==null) return "null";
+        if(object instanceof LocalizedToString) return ((LocalizedToString)object).toString(locale);
+        try {
+            Method method = object.getClass().getMethod("toString", toStringParamTypes);
+            int mod = method.getModifiers();
+            if(
+                Modifier.isPublic(mod)
+                && !Modifier.isStatic(mod)
+                && method.getReturnType()==String.class
+            ) return (String)method.invoke(object, locale);
+        } catch(NoSuchMethodException err) {
+            // Fall-through to default toString
+        } catch(IllegalAccessException err) {
+            throw new WrappedException(err);
+        } catch(InvocationTargetException err) {
+            throw new WrappedException(err);
+        }
+        return object.toString();
+    }
+
+    private static String multiReplace(Locale locale, String message, Object... args) {
+        int messageLen = message.length();
+        int argsLen = args.length;
+        if(messageLen<3 || argsLen==0) return message;
+        if(argsLen>MAX_ARGUMENTS) throw new IllegalArgumentException("Maximum of "+MAX_ARGUMENTS+" arguments supported");
+
+        StringBuilder messageSB = new StringBuilder(messageLen+argsLen*20);
+        int lastPos = 0;
+        while(lastPos<messageLen) {
+            int nextArg = -1;
+            int nextArgPos = -1;
+            int nextArgHolderLen = -1;
+            for(int c=0;c<argsLen;c++) {
+                String argHolder = argsHolderCache[c];
+                int argPos = nextArgPos==-1 ? message.indexOf(argHolder, lastPos) : StringUtility.indexOf(message, argHolder, lastPos, nextArgPos);
+                if(argPos!=-1) {
+                    nextArg = c;
+                    nextArgPos = argPos;
+                    nextArgHolderLen = argHolder.length();
+                }
+            }
+            if(nextArg==-1) {
+                // None found
+                messageSB.append(message, lastPos, messageLen);
+                lastPos = messageLen;
+            } else {
+                messageSB.append(message, lastPos, nextArgPos).append(getToString(locale, args[nextArg]));
+                lastPos = nextArgPos + nextArgHolderLen;
+            }
+        }
+        return messageSB.toString();
+    }
+
+    private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<String,ApplicationResourcesAccessor>();
+
+    public static ApplicationResourcesAccessor getInstance(String resourceName) {
+        ApplicationResourcesAccessor existing = accessors.get(resourceName);
+        if(existing==null) {
+            ApplicationResourcesAccessor newAccessor = new ApplicationResourcesAccessor(resourceName);
+            existing = accessors.putIfAbsent(resourceName, newAccessor);
+            if(existing==null) existing = newAccessor;
+        }
+        return existing;
+    }
+
     final private String resourceName;
 
-    public ApplicationResourcesAccessor(String resourceName) {
+    private ApplicationResourcesAccessor(String resourceName) {
         this.resourceName = resourceName;
+    }
+
+    private Object readResolve() {
+        return getInstance(resourceName);
     }
 
     public String getMessage(Locale locale, String key) {
@@ -94,79 +184,21 @@ public class ApplicationResourcesAccessor {
      */
     public String getMessage(String missingDefault, Locale locale, String key, Object... args) {
         String message = getString(missingDefault, locale, key);
-        return multiReplace(message, args);
-    }
-    
-    private static String multiReplace(String message, Object... args) {
-        int messageLen = message.length();
-        int argsLen = args.length;
-        if(messageLen<3 || argsLen==0) return message;
-        if(argsLen>MAX_ARGUMENTS) throw new IllegalArgumentException("Maximum of "+MAX_ARGUMENTS+" arguments supported");
-
-        StringBuilder messageSB = new StringBuilder(messageLen+argsLen*20);
-        int lastPos = 0;
-        while(lastPos<messageLen) {
-            int nextArg = -1;
-            int nextArgPos = -1;
-            int nextArgHolderLen = -1;
-            for(int c=0;c<argsLen;c++) {
-                String argHolder = argsHolderCache[c];
-                int argPos = nextArgPos==-1 ? message.indexOf(argHolder, lastPos) : StringUtility.indexOf(message, argHolder, lastPos, nextArgPos);
-                if(argPos!=-1) {
-                    nextArg = c;
-                    nextArgPos = argPos;
-                    nextArgHolderLen = argHolder.length();
-                }
-            }
-            if(nextArg==-1) {
-                // None found
-                messageSB.append(message, lastPos, messageLen);
-                lastPos = messageLen;
-            } else {
-                messageSB.append(message, lastPos, nextArgPos).append(args[nextArg]);
-                lastPos = nextArgPos + nextArgHolderLen;
-            }
-        }
-        return messageSB.toString();
+        return multiReplace(locale, message, args);
     }
 
-    /**
-     * Disabled because causes duplicate XHTML element ids from EditableResourceBundle.
-     * 
-     * @see EditableResourceBundle
-     */
-    private static final boolean CACHE_ENABLED = false;
-
-    /**
-     * Cache for resource lookups.
-     */
-    private final ConcurrentMap<Locale,ConcurrentMap<String,String>> concurrentCache = CACHE_ENABLED ? new ConcurrentHashMap<Locale,ConcurrentMap<String,String>>() : null;
-
-    /**
-     * Looks for a match, caches successful results.
-     */
     private String getString(String missingDefault, Locale locale, String key) {
-        // Find the locale-specific cache
-        ConcurrentMap<String,String> concurrentLocaleMap = CACHE_ENABLED ? concurrentCache.get(locale) : null;
-        if(CACHE_ENABLED && concurrentLocaleMap==null) concurrentCache.putIfAbsent(locale, concurrentLocaleMap = new ConcurrentHashMap<String,String>());
+        String string = null;
+        try {
+            ResourceBundle applicationResources = ResourceBundle.getBundle(resourceName, locale);
+            string = applicationResources.getString(key);
+        } catch(MissingResourceException err) {
+            // string remains null
+        }
 
-        // Look in the cache
-        String string = CACHE_ENABLED ? concurrentLocaleMap.get(key) : null;
         if(string==null) {
-            try {
-                ResourceBundle applicationResources = ResourceBundle.getBundle(resourceName, locale);
-                string = applicationResources.getString(key);
-            } catch(MissingResourceException err) {
-                // string remains null
-            }
-
-            if(string==null) {
-                // Use provided missingDefault then default to struts-style ??? formatting
-                string = missingDefault!=null ? missingDefault : ("???"+locale.toString()+"."+key+"???");
-            } else {
-                // Add to cache to avoid subsequent lookups to ResourceBundle
-                if(CACHE_ENABLED) concurrentLocaleMap.putIfAbsent(key, string);
-            }
+            // Use provided missingDefault then default to struts-style ??? formatting
+            string = missingDefault!=null ? missingDefault : ("???"+locale.toString()+"."+key+"???");
         }
         return string;
     }

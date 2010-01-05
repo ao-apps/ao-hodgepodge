@@ -30,11 +30,11 @@ package com.aoindustries.table;
 public class Column implements Comparable<Column> {
 
     private final String columnName;
-    private final boolean unique;
+    private final IndexType indexType;
 
-    public Column(String columnName, boolean unique) {
+    public Column(String columnName, IndexType indexType) {
         this.columnName = columnName;
-        this.unique = unique;
+        this.indexType = indexType;
     }
 
     @Override
@@ -44,13 +44,13 @@ public class Column implements Comparable<Column> {
         Column other = (Column)O;
         return
             columnName.equals(other.columnName)
-            && unique==other.unique
+            && indexType==other.indexType
         ;
     }
 
     @Override
     public int hashCode() {
-        return columnName.hashCode()<<1 | (unique ? 1 : 0);
+        return columnName.hashCode()*31 + indexType.hashCode();
     }
 
     public int compareTo(Column o) {
@@ -58,12 +58,12 @@ public class Column implements Comparable<Column> {
         if(diff!=0) return diff;
         diff = columnName.compareTo(o.columnName);
         if(diff!=0) return diff;
-        return (o.unique == unique ? 0 : (unique ? 1 : -1));
+        return indexType.compareTo(o.indexType);
     }
 
     @Override
     public String toString() {
-        if(unique) return columnName+" (unique)";
+        if(indexType!=IndexType.NONE) return columnName+" ("+indexType+')';
         return columnName;
     }
     
@@ -71,7 +71,7 @@ public class Column implements Comparable<Column> {
         return columnName;
     }
 
-    public boolean isUnique() {
-        return unique;
+    public IndexType getIndexType() {
+        return indexType;
     }
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009  AO Industries, Inc.
+ * Copyright (C) 2010  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,36 +22,30 @@
  */
 package com.aoindustries.util.i18n;
 
-import java.io.File;
-import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Provides a simplified interface for obtaining localized values from the ApplicationResources.properties files.
- * Is also an editable resource bundle.
+ * Any object that provides a <code>Locale</code>-specific <code>getLocalizedMessage</code>
+ * method may indicate so by implementing this interface.  When providing the
+ * localized <code>getLocalizedMessage</code>, please override <code>getLocalizedMessage()</code> as
+ * follows:
+ * <pre>
+ * public String getLocalizedMessage() {
+ *     return getLocalizedMessage(Locale.getDefault());
+ * }
+ * </pre>
  *
  * @author  AO Industries, Inc.
  */
-public final class ApplicationResources extends EditableResourceBundle {
-
-    static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
-        ApplicationResources.class.getName(),
-        Arrays.asList(
-            new Locale(""), // Locale.ROOT in Java 1.6
-            Locale.JAPANESE
-        )
-    );
+public interface LocalizedMessage {
 
     /**
-     * Do not use directly.
+     * Gets the message in the system default locale.
      */
-    public ApplicationResources() {
-        super(
-            new File(System.getProperty("user.home")+"/common/ao/cvswork/aocode-public/src/com/aoindustries/util/i18n/ApplicationResources.properties"),
-            new Locale(""),
-            bundleSet
-        );
-    }
+    String getLocalizedMessage();
 
-    static final ApplicationResourcesAccessor accessor = ApplicationResourcesAccessor.getInstance(bundleSet.getBaseName());
+    /**
+     * Gets the message in the provided locale.
+     */
+    String getLocalizedMessage(Locale userLocale);
 }
