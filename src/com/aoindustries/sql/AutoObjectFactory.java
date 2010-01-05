@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 /**
  * Creates instances of objects by using reflection and passing-in the parameters in the same
  * order as the matching constructor.  For unknown classes, will try to find any
- * <code>valueOf(String)</code> method to create the object instance.
+ * <code>valueOf(int)</code> or <code>valueOf(String)</code> methods to create the object instance.
  *
  * @author  AO Industries, Inc.
  */
@@ -79,6 +79,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                         //System.err.println(paramType.getName()+" ? "+(params[i]==null ? "null" : params[i].getClass()));
                     }
                     // All remaining columns must be assignable from JDBC
+                COLUMNS :
                     for(int c=1; c<=numColumns; c++) {
                         int i = prefixParams.length + c-1;
                         Class<?> paramType = paramTypes[i];
@@ -122,6 +123,20 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                             short value = result.getShort(c);
                             params[i] = result.wasNull() ? null : value;
                         } else {
+                            // Try to find valueOf(int) for unknown types
+                            try {
+                                Method valueOfMethod = paramType.getMethod("valueOf", Integer.TYPE);
+                                int mod = valueOfMethod.getModifiers();
+                                if(Modifier.isStatic(mod) && Modifier.isPublic(mod)) {
+                                    int value = result.getInt(c);
+                                    if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null int");
+                                    params[i] = valueOfMethod.invoke(null, value);
+                                    continue COLUMNS;
+                                }
+                                if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: valueOf(int) is not public static: "+paramType.getName());
+                            } catch(NoSuchMethodException err) {
+                                // Fall-through to valueOf(String)
+                            }
                             // Try to find valueOf(String) for unknown types
                             try {
                                 Method valueOfMethod = paramType.getMethod("valueOf", String.class);
@@ -129,14 +144,14 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                                 if(Modifier.isStatic(mod) && Modifier.isPublic(mod)) {
                                     String value = result.getString(c);
                                     params[i] = result.wasNull() ? null : valueOfMethod.invoke(null, value);
-                                } else {
-                                    if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: valueOf is not public static: "+paramType.getName());
-                                    continue CONSTRUCTORS;
+                                    continue COLUMNS;
                                 }
+                                if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: valueOf(String) is not public static: "+paramType.getName());
                             } catch(NoSuchMethodException err) {
-                                if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: Unexpected class: "+paramType.getName());
-                                continue CONSTRUCTORS;
+                                // Fall-through to failure
                             }
+                            if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: Unexpected class: "+paramType.getName());
+                            continue CONSTRUCTORS;
                         }
                         //System.err.println(paramType.getName()+" ? "+(params[i]==null ? "null" : params[i].getClass()));
                     }
