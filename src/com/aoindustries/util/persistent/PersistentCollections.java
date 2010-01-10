@@ -53,13 +53,13 @@ public class PersistentCollections {
 
     // <editor-fold desc="Protected byte[] manipulation methods">
     @ThreadSafe
-    static void charToBuffer(char ch, byte[] ioBuffer, int off) {
+    public static void charToBuffer(char ch, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(ch >>> 8);
         ioBuffer[off+1] = (byte)ch;
     }
 
     @ThreadSafe
-    static char bufferToChar(byte[] ioBuffer, int off) {
+    public static char bufferToChar(byte[] ioBuffer, int off) {
         return
             (char)(
                 ((ioBuffer[off+0]&255) << 8)
@@ -69,13 +69,13 @@ public class PersistentCollections {
     }
 
     @ThreadSafe
-    static void shortToBuffer(short s, byte[] ioBuffer, int off) {
+    public static void shortToBuffer(short s, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(s >>> 8);
         ioBuffer[off+1] = (byte)s;
     }
 
     @ThreadSafe
-    static short bufferToShort(byte[] ioBuffer, int off) {
+    public static short bufferToShort(byte[] ioBuffer, int off) {
         return
             (short)(
                 ((ioBuffer[off+0]&255) << 8)
@@ -85,7 +85,7 @@ public class PersistentCollections {
     }
 
     @ThreadSafe
-    static void intToBuffer(int i, byte[] ioBuffer, int off) {
+    public static void intToBuffer(int i, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(i >>> 24);
         ioBuffer[off+1] = (byte)(i >>> 16);
         ioBuffer[off+2] = (byte)(i >>> 8);
@@ -93,7 +93,7 @@ public class PersistentCollections {
     }
 
     @ThreadSafe
-    static int bufferToInt(byte[] ioBuffer, int off) {
+    public static int bufferToInt(byte[] ioBuffer, int off) {
         return
               ((ioBuffer[off]&255) << 24)
             + ((ioBuffer[off+1]&255) << 16)
@@ -103,7 +103,7 @@ public class PersistentCollections {
     }
 
     @ThreadSafe
-    static void longToBuffer(long l, byte[] ioBuffer, int off) {
+    public static void longToBuffer(long l, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(l >>> 56);
         ioBuffer[off+1] = (byte)(l >>> 48);
         ioBuffer[off+2] = (byte)(l >>> 40);
@@ -115,7 +115,7 @@ public class PersistentCollections {
     }
 
     @ThreadSafe
-    static long bufferToLong(byte[] ioBuffer, int off) {
+    public static long bufferToLong(byte[] ioBuffer, int off) {
         return
               ((ioBuffer[off]&255L) << 56)
             + ((ioBuffer[off+1]&255L) << 48)
@@ -152,7 +152,7 @@ public class PersistentCollections {
      * writes on flash media.
      */
     @ThreadSafe
-    static void ensureZeros(RandomAccessFile raf, long position, long count) throws IOException {
+    public static void ensureZeros(RandomAccessFile raf, long position, long count) throws IOException {
         if(count<0) throw new IllegalArgumentException("count<0: "+count);
         byte[] buff = BufferManager.getBytes();
         try {
@@ -169,7 +169,7 @@ public class PersistentCollections {
             if(count>0) {
                 raf.seek(position);
                 raf.readFully(buff, 0, (int)count);
-                if(!equals(buff, zeros, 0, (int)count)) {
+                if(!com.aoindustries.util.Arrays.equals(buff, zeros, 0, (int)count)) {
                     raf.seek(position);
                     raf.write(zeros, 0, (int)count);
                 }
@@ -185,7 +185,7 @@ public class PersistentCollections {
      * writes on flash media.
      */
     @ThreadSafe
-    static void ensureZeros(ByteBuffer byteBuffer, int position, int count) throws IOException {
+    public static void ensureZeros(ByteBuffer byteBuffer, int position, int count) throws IOException {
         if(count<0) throw new IllegalArgumentException("count<0: "+count);
         byte[] buff = BufferManager.getBytes();
         try {
@@ -202,7 +202,7 @@ public class PersistentCollections {
             if(count>0) {
                 byteBuffer.position(position);
                 byteBuffer.get(buff, 0, count);
-                if(!equals(buff, zeros, 0, count)) {
+                if(!com.aoindustries.util.Arrays.equals(buff, zeros, 0, count)) {
                     byteBuffer.position(position);
                     byteBuffer.put(zeros, 0, count);
                 }
@@ -229,46 +229,13 @@ public class PersistentCollections {
      * Fully reads a buffer.
      */
     @ThreadSafe
-    static void readFully(InputStream in, byte[] buffer, int off, int len) throws IOException {
+    public static void readFully(InputStream in, byte[] buffer, int off, int len) throws IOException {
         while(len>0) {
             int count = in.read(buffer, off, len);
             if(count==-1) throw new EOFException();
             off += count;
             len -= count;
         }
-    }
-
-    /**
-     * Checks if the subrange of two byte arrays is equal.
-     */
-    @ThreadSafe
-    static boolean equals(byte[] b1, byte[] b2, int off, int len) {
-        for(int end=off+len; off<end; off++) {
-            if(b1[off]!=b2[off]) return false;
-        }
-        return true;
-    }
-
-    /**
-     * Checks if the subrange of two byte arrays is equal.
-     */
-    @ThreadSafe
-    static boolean equals(byte[] b1, int off1, byte[] b2, int off2, int len) {
-        for(int end=off1+len; off1<end; off1++, off2++) {
-            if(b1[off1]!=b2[off2]) return false;
-        }
-        return true;
-    }
-
-    /**
-     * Checks if all the values in the provided range are equal to <code>value</code>.
-     */
-    @ThreadSafe
-    static boolean allEquals(byte[] b, int off, int len, byte value) {
-        for(int end=off+len; off<end; off++) {
-            if(b[off]!=value) return false;
-        }
-        return true;
     }
     // </editor-fold>
 

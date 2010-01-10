@@ -218,7 +218,7 @@ public class FilteredTableModel<C extends Column, T extends Row> extends Abstrac
         }
     }
 
-    final public void tableUpdated(Table<C,T> table) {
+    final public void tableUpdated(Table<? extends C, ? extends T> table) {
         SwingUtilities.invokeLater(
             new Runnable() {
                 public void run() {

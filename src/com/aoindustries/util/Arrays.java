@@ -23,6 +23,7 @@
 package com.aoindustries.util;
 
 import java.io.Serializable;
+import org.checkthread.annotations.ThreadSafe;
 
 /**
  * General-purpose array utilities and constants.
@@ -35,4 +36,37 @@ public class Arrays {
     }
 
     public static final Serializable[] EMPTY_SERIALIZABLE_ARRAY = {};
+
+    /**
+     * Checks if the subrange of two byte arrays is equal.
+     */
+    @ThreadSafe
+    public static boolean equals(byte[] b1, byte[] b2, int off, int len) {
+        for(int end=off+len; off<end; off++) {
+            if(b1[off]!=b2[off]) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the subrange of two byte arrays is equal.
+     */
+    @ThreadSafe
+    public static boolean equals(byte[] b1, int off1, byte[] b2, int off2, int len) {
+        for(int end=off1+len; off1<end; off1++, off2++) {
+            if(b1[off1]!=b2[off2]) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if all the values in the provided range are equal to <code>value</code>.
+     */
+    @ThreadSafe
+    public static boolean allEquals(byte[] b, int off, int len, byte value) {
+        for(int end=off+len; off<end; off++) {
+            if(b[off]!=value) return false;
+        }
+        return true;
+    }
 }

@@ -35,4 +35,11 @@ public interface Row {
      * @param columnIndex the zero-based column index
      */
     Object getColumn(int columnIndex);
+
+    /**
+     * Gets the data contained within one column in this row.
+     *
+     * @param name the unique name of the column
+     */
+    Object getColumn(String name);
 }

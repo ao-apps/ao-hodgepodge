@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010  AO Industries, Inc.
+ * Copyright (C) 2009, 2010  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,8 +31,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Creates instances of objects by using reflection and passing-in the parameters in the same
@@ -43,7 +45,66 @@ import java.util.logging.Logger;
  */
 public class AutoObjectFactory<T> implements ObjectFactory<T> {
 
-    private static final Logger logger = Logger.getLogger(AutoObjectFactory.class.getName());
+    static final String EOL = System.getProperty("line.separator");
+
+    /**
+     * Concurrent map can't store nulls, uses this in place of null values when lookup fails.
+     */
+    private static final Method notExists;
+    static {
+        try {
+            notExists = AutoObjectFactory.class.getMethod("getValueOfStringMethod", Class.class);
+        } catch(NoSuchMethodException err) {
+            throw new RuntimeException(err);
+        }
+    }
+
+    private static final ConcurrentMap<Class<?>,Method> valueOfIntMethods = new ConcurrentHashMap<Class<?>,Method>();
+
+    /**
+     * Gets the <code>valueOf(int)</code> for the provided class or <code>null</code> if doesn't
+     * exist or is non-static or non-public.
+     */
+    public static Method getValueOfIntMethod(Class<?> clazz) {
+        Method existing = valueOfIntMethods.get(clazz);
+        if(existing==null) {
+            Method newMethod;
+            try {
+                newMethod = clazz.getMethod("valueOf", Integer.TYPE);
+                int mod = newMethod.getModifiers();
+                if(!Modifier.isStatic(mod) || !Modifier.isPublic(mod)) newMethod = notExists;
+            } catch(NoSuchMethodException err) {
+                newMethod = notExists;
+            }
+            existing = valueOfIntMethods.put(clazz, newMethod);
+            if(existing==null) existing = newMethod;
+        }
+        return existing==notExists ? null : existing;
+    }
+
+    private static final ConcurrentMap<Class<?>,Method> valueOfStringMethods = new ConcurrentHashMap<Class<?>,Method>();
+
+    /**
+     * Gets the <code>valueOf(String)</code> for the provided class or <code>null</code> if doesn't
+     * exist or is non-static or non-public.
+     */
+    public static Method getValueOfStringMethod(Class<?> clazz) {
+        //System.err.println("clazz="+clazz);
+        Method existing = valueOfStringMethods.get(clazz);
+        if(existing==null) {
+            Method newMethod;
+            try {
+                newMethod = clazz.getMethod("valueOf", String.class);
+                int mod = newMethod.getModifiers();
+                if(!Modifier.isStatic(mod) || !Modifier.isPublic(mod)) newMethod = notExists;
+            } catch(NoSuchMethodException err) {
+                newMethod = notExists;
+            }
+            existing = valueOfStringMethods.put(clazz, newMethod);
+            if(existing==null) existing = newMethod;
+        }
+        return existing==notExists ? null : existing;
+    }
 
     private final Class<T> clazz;
     private final Object[] prefixParams;
@@ -67,6 +128,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
             Object[] params = new Object[numParams];
 
             // Find the candidate constructor
+            List<String> warnings = null;
             Constructor<?>[] constructors = clazz.getConstructors();
         CONSTRUCTORS :
             for(Constructor<?> constructor : constructors) {
@@ -79,7 +141,6 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                         //System.err.println(paramType.getName()+" ? "+(params[i]==null ? "null" : params[i].getClass()));
                     }
                     // All remaining columns must be assignable from JDBC
-                COLUMNS :
                     for(int c=1; c<=numColumns; c++) {
                         int i = prefixParams.length + c-1;
                         Class<?> paramType = paramTypes[i];
@@ -124,34 +185,23 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                             params[i] = result.wasNull() ? null : value;
                         } else {
                             // Try to find valueOf(int) for unknown types
-                            try {
-                                Method valueOfMethod = paramType.getMethod("valueOf", Integer.TYPE);
-                                int mod = valueOfMethod.getModifiers();
-                                if(Modifier.isStatic(mod) && Modifier.isPublic(mod)) {
-                                    int value = result.getInt(c);
-                                    if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null int");
-                                    params[i] = valueOfMethod.invoke(null, value);
-                                    continue COLUMNS;
-                                }
-                                if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: valueOf(int) is not public static: "+paramType.getName());
-                            } catch(NoSuchMethodException err) {
-                                // Fall-through to valueOf(String)
-                            }
-                            // Try to find valueOf(String) for unknown types
-                            try {
-                                Method valueOfMethod = paramType.getMethod("valueOf", String.class);
-                                int mod = valueOfMethod.getModifiers();
-                                if(Modifier.isStatic(mod) && Modifier.isPublic(mod)) {
+                            Method valueOfIntMethod = getValueOfIntMethod(paramType);
+                            if(valueOfIntMethod!=null) {
+                                int value = result.getInt(c);
+                                if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null int");
+                                params[i] = valueOfIntMethod.invoke(null, value);
+                            } else {
+                                // Try to find valueOf(String) for unknown types
+                                Method valueOfStringMethod = getValueOfStringMethod(paramType);
+                                if(valueOfStringMethod!=null) {
                                     String value = result.getString(c);
-                                    params[i] = result.wasNull() ? null : valueOfMethod.invoke(null, value);
-                                    continue COLUMNS;
+                                    params[i] = result.wasNull() ? null : valueOfStringMethod.invoke(null, value);
+                                } else {
+                                    if(warnings==null) warnings = new ArrayList<String>();
+                                    warnings.add("Unexpected parameter class: "+paramType.getName());
+                                    continue CONSTRUCTORS;
                                 }
-                                if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: valueOf(String) is not public static: "+paramType.getName());
-                            } catch(NoSuchMethodException err) {
-                                // Fall-through to failure
                             }
-                            if(logger.isLoggable(Level.WARNING)) logger.warning("AutoObjectFactory: Unexpected class: "+paramType.getName());
-                            continue CONSTRUCTORS;
                         }
                         //System.err.println(paramType.getName()+" ? "+(params[i]==null ? "null" : params[i].getClass()));
                     }
@@ -160,7 +210,9 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                     return clazz.cast(newInstance);
                 }
             }
-            throw new SQLException("Unable to find matching constructor");
+            StringBuilder message = new StringBuilder("Unable to find matching constructor");
+            if(warnings!=null) for(String warning : warnings) message.append(EOL).append(warning);
+            throw new SQLException(message.toString());
         } catch(InstantiationException err) {
             throw new SQLException(err);
         } catch(IllegalAccessException err) {

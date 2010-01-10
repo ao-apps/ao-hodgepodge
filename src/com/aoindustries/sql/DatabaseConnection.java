@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -39,7 +39,9 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
+import java.sql.SQLData;
 import java.sql.SQLException;
+import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -121,7 +123,17 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         else if(param instanceof Time) pstmt.setTime(pos, (Time)param);
         else if(param instanceof Timestamp) pstmt.setTimestamp(pos, (Timestamp)param);
         else if(param instanceof URL) pstmt.setURL(pos, (URL)param);
-        else pstmt.setObject(pos, param);
+        else if(
+            // Note: Several more added in Java 1.6
+            (param instanceof SQLData)
+            || (param instanceof Struct)
+        ) pstmt.setObject(pos, param);
+        else {
+            // Defaults to string with object.toString only when the class has a valueOf(String) method that will reconstitute it in AutoObjectFactory
+            Class<?> clazz = param.getClass();
+            if(AutoObjectFactory.getValueOfStringMethod(clazz)!=null) pstmt.setString(pos, param.toString());
+            else throw new SQLException("Unexpected parameter class: "+clazz.getName());
+        }
     }
 
     public static void setParams(PreparedStatement pstmt, Object ... params) throws SQLException {

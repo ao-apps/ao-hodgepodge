@@ -36,5 +36,5 @@ public interface TableListener<C extends Column, R extends Row> {
     /**
      * Invoked when a <code>Table</code> is updated.
      */
-    void tableUpdated(Table<C,R> table);
+    void tableUpdated(Table<? extends C,? extends R> table);
 }

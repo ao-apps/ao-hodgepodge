@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.util.Arrays;
 import com.aoindustries.util.WrappedException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -557,7 +558,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             }
             blockBuffer.get(metaDataBlockId, 0, ioBuffer, 0, MAGIC.length);
             // Magic value is correct
-            if(!PersistentCollections.equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IllegalStateException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
+            if(!Arrays.equals(ioBuffer, MAGIC, 0, MAGIC.length)) throw new IllegalStateException("File does not appear to be a PersistentLinkedList (MAGIC mismatch)");
             // File version is supported
             {
                 int version = blockBuffer.getInt(metaDataBlockId, MAGIC.length);
