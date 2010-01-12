@@ -165,6 +165,10 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                             float value = result.getFloat(c);
                             if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null float");
                             params[i] = value;
+                        } else if(paramType==Long.TYPE) {
+                            long value = result.getLong(c);
+                            if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null long");
+                            params[i] = value;
 
                         // Other types
                         } else if(paramType==Date.class) {
@@ -182,6 +186,9 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                             params[i] = result.wasNull() ? null : value;
                         } else if(paramType==Short.class) {
                             short value = result.getShort(c);
+                            params[i] = result.wasNull() ? null : value;
+                        } else if(paramType==Long.class) {
+                            long value = result.getLong(c);
                             params[i] = result.wasNull() ? null : value;
                         } else {
                             // Try to find valueOf(int) for unknown types

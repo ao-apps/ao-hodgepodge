@@ -32,6 +32,8 @@ import java.sql.SQLException;
  */
 public class WrappedSQLException extends SQLException {
 
+    private static final long serialVersionUID = 1L;
+
     final private String sqlString;
 
     public WrappedSQLException(
@@ -45,7 +47,7 @@ public class WrappedSQLException extends SQLException {
         SQLException initCause,
         String sqlString
     ) {
-        super(initCause.getMessage(), initCause.getSQLState(), initCause.getErrorCode());
+        super(initCause.getMessage()+"\nSQL Query:\n"+sqlString, initCause.getSQLState(), initCause.getErrorCode());
         initCause(initCause);
         this.sqlString=sqlString;
     }
