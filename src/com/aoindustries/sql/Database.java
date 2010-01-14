@@ -546,6 +546,31 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    /**
+     * Executes an arbitrary transaction, providing automatic commit, rollback, and connection management.
+     * Rolls-back the transaction on RuntimeException or IOException.  Rolls-back and closes the connection
+     * on SQLException.
+     */
+    public <V> V executeTransaction(DatabaseCallable<V> callable) throws IOException, SQLException {
+        DatabaseConnection conn=createDatabaseConnection();
+        try {
+            V result = callable.call(conn);
+            conn.commit();
+            return result;
+        } catch(RuntimeException err) {
+            conn.rollback();
+            throw err;
+        } catch(IOException err) {
+            conn.rollback();
+            throw err;
+        } catch(SQLException err) {
+            conn.rollbackAndClose();
+            throw err;
+        } finally {
+            conn.releaseConnection();
+        }
+    }
+
     @Override
     public String toString() {
         return "Database("+(pool!=null ? pool.toString() : dataSource.toString())+")";
