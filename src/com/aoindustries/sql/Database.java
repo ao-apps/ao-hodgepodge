@@ -546,28 +546,61 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    private final ThreadLocal<DatabaseConnection> transactionConnection = new ThreadLocal<DatabaseConnection>();
+
     /**
+     * <p>
      * Executes an arbitrary transaction, providing automatic commit, rollback, and connection management.
      * Rolls-back the transaction on RuntimeException or IOException.  Rolls-back and closes the connection
      * on SQLException.
+     * </p>
+     * <p>
+     * The connection allocated is stored as a ThreadLocal and will be automatically reused if
+     * another transaction is performed within this transaction.  Any nested transaction will automatically
+     * become part of the enclosing transaction.  For safety, a nested transaction will still rollback the
+     * entire transaction on any exception.
+     * </p>
      */
     public <V> V executeTransaction(DatabaseCallable<V> callable) throws IOException, SQLException {
-        DatabaseConnection conn=createDatabaseConnection();
-        try {
-            V result = callable.call(conn);
-            conn.commit();
-            return result;
-        } catch(RuntimeException err) {
-            conn.rollback();
-            throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
-        } catch(SQLException err) {
-            conn.rollbackAndClose();
-            throw err;
-        } finally {
-            conn.releaseConnection();
+        DatabaseConnection conn = transactionConnection.get();
+        if(conn!=null) {
+            // Reuse existing connection
+            try {
+                return callable.call(conn);
+            } catch(RuntimeException err) {
+                conn.rollback();
+                throw err;
+            } catch(IOException err) {
+                conn.rollback();
+                throw err;
+            } catch(SQLException err) {
+                conn.rollbackAndClose();
+                throw err;
+            }
+        } else {
+            // Create new connection
+            conn=createDatabaseConnection();
+            try {
+                transactionConnection.set(conn);
+                try {
+                    V result = callable.call(conn);
+                    conn.commit();
+                    return result;
+                } finally {
+                    transactionConnection.remove();
+                }
+            } catch(RuntimeException err) {
+                conn.rollback();
+                throw err;
+            } catch(IOException err) {
+                conn.rollback();
+                throw err;
+            } catch(SQLException err) {
+                conn.rollbackAndClose();
+                throw err;
+            } finally {
+                conn.releaseConnection();
+            }
         }
     }
 
