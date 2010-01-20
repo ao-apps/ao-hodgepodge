@@ -75,6 +75,7 @@ public class RMIClientSocketFactorySSL implements RMIClientSocketFactory, Serial
         if(localAddress!=null) regSocket.bind(new InetSocketAddress(localAddress, 0));
         regSocket.connect(new InetSocketAddress(host, port), 30000);
         regSocket.setKeepAlive(true);
+        regSocket.setTcpNoDelay(true);
         return sslFact.createSocket(regSocket, host, port, true);
     }
 }

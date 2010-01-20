@@ -71,6 +71,7 @@ public class RMIClientSocketFactoryTCP implements RMIClientSocketFactory, Serial
     public Socket createSocket(String host, int port) throws IOException {
         Socket socket=new Socket();
         socket.setKeepAlive(true);
+        socket.setTcpNoDelay(true);
         if(localAddress!=null) socket.bind(new InetSocketAddress(localAddress, 0));
         socket.connect(new InetSocketAddress(host, port), 30000);
         return socket;
