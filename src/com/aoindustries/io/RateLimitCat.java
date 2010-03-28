@@ -24,12 +24,16 @@ package com.aoindustries.io;
 
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.BufferManager;
+import com.aoindustries.util.GetOpt;
 import com.aoindustries.util.StringUtility;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Concatenates files similar to the Unix cat command, but with a limited throughput.
@@ -44,19 +48,28 @@ final public class RateLimitCat {
     }
 
     private static void usage() {
-        System.err.println("Usage: "+RateLimitCat.class.getName()+" bits_per_second [--progress] [--] [FILE]...");
+        System.err.println("Usage: "+RateLimitCat.class.getName()+" [--blocksize=BLOCK_SIZE[unit]] [--bwlimit=BANDWIDTH_LIMIT[unit]] [--limit=MAXIMUM_BYTES[unit]] [--output=OUTPUT_FILE] [--progress[={true|false}]] [--] [FILE]...");
         System.err.println();
         System.err.println("\tWhen FILE is not provided, reads from standard input.");
         System.err.println("\tWhen FILE is -, will read from standard input.");
         System.err.println("\tWhen -- is first found, all subsequent arguments will be treated as filenames, including any - and --.");
         System.err.println();
-        System.err.println("\t--progress  Displays the progress of the files once every 60 seconds.");
-        System.err.println();
-        System.err.println("\tWrites to standard output.");
+        System.err.println("\t--blocksize  Reads and writes at most BLOCK_SIZE bytes at a time.  Allows an optional unit.");
+        System.err.println("\t             If not provided, defaults to "+BufferManager.BUFFER_SIZE+" bytes.  Unit supports IEC_60027");
+        System.err.println("\t             prefixes on the unit byte, such as kbyte for 1000 bytes or Kibyte for 1024 bytes.");
+        System.err.println("\t--bwlimit    The maximum bandwidth for reads and writes.  Allows an optional unit.");
+        System.err.println("\t             If not provided, defaults to bits per second.  Unit supports IEC_60027");
+        System.err.println("\t             prefixes on the units bit or byte, such as kbyte for 1000 bytes per second");
+        System.err.println("\t             or Kibit for 1024 bits per second.");
+        System.err.println("\t--limit      Reads and writes at most MAXIMUM_BYTES bytes.  Allows an optional unit.");
+        System.err.println("\t             If not provided, defaults to bytes.  Unit supports IEC_60027 prefixes");
+        System.err.println("\t             on the unit byte, such as kbyte for 1000 bytes or Kibyte for 1024 bytes.");
+        System.err.println("\t--output     Writes the output to OUTPUT_FILE instead of standard output.");
+        System.err.println("\t--progress   Displays the progress of the files once every 60 seconds.");
         System.err.flush();
     }
 
-    private static void report(String filename, long byteCount, long timespan) {
+    private static void report(String filename, long byteCount, long timespan, long[] bytesRemaining) {
         System.err.print(filename);
         System.err.print(": ");
         System.err.print(byteCount);
@@ -66,136 +79,150 @@ final public class RateLimitCat {
         System.err.print(SQLUtility.getMilliDecimal(timespan));
         System.err.print(" seconds (");
         System.err.print(StringUtility.getTimeLengthString(timespan));
-        System.err.println(')');
+        System.err.print(')');
+        if(bytesRemaining!=null && bytesRemaining[0]>0) {
+            System.err.print(", ");
+            System.err.print(bytesRemaining[0]);
+            System.err.print(" bytes (");
+            System.err.print(StringUtility.getApproximateSize(bytesRemaining[0]));
+            System.err.print(") remaining");
+        }
+        System.err.println();
         System.err.flush();
     }
 
-    private static void transfer(String filename, InputStream in, OutputStream out, byte[] buff, boolean showProgress) throws IOException {
+    private static void transfer(String filename, InputStream in, OutputStream out, byte[] buff, boolean progress, long[] bytesRemaining) throws IOException {
         long startTime = System.currentTimeMillis();
         long lastReportByteCount = -1;
         long lastReportTime = startTime;
         long byteCount = 0;
         try {
-            int ret;
-            while((ret=in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-                out.write(buff, 0, ret);
-                byteCount += ret;
-                if(showProgress && lastReportByteCount!=byteCount) {
+            while(true) {
+                int blockSize = buff.length;
+                if(bytesRemaining!=null) {
+                    if(bytesRemaining[0]<=0) break;
+                    if(bytesRemaining[0]<blockSize) blockSize = (int)bytesRemaining[0];
+                }
+                int bytesRead=in.read(buff, 0, blockSize);
+                if(bytesRead==-1) break; // End of file
+                out.write(buff, 0, bytesRead);
+                byteCount += bytesRead;
+                if(bytesRemaining!=null) bytesRemaining[0] -= bytesRead;
+                if(progress && lastReportByteCount!=byteCount) {
                     long currentTime = System.currentTimeMillis();
                     long timeSinceReport = currentTime - lastReportTime;
                     if(timeSinceReport<0) {
                         // System time reset
                         lastReportTime = currentTime;
                     } else if(timeSinceReport>=60000) {
-                        report(filename, byteCount, currentTime - startTime);
+                        report(filename, byteCount, currentTime - startTime, bytesRemaining);
                         lastReportByteCount = byteCount;
                         lastReportTime = currentTime;
                     }
                 }
             }
         } finally {
-            if(showProgress && lastReportByteCount!=byteCount) report(filename, byteCount, System.currentTimeMillis() - startTime);
+            if(progress && lastReportByteCount!=byteCount) report(filename, byteCount, System.currentTimeMillis() - startTime, bytesRemaining);
         }
     }
 
     public static void main(String[] args) {
-        int retval;
-        if(args.length==0) {
-            usage();
-            retval = 1;
-        } else {
-            try {
-                final int bitsPerSecond = Integer.parseInt(args[0]);
-                if(bitsPerSecond<=0) {
-                    System.err.println("Invalid bits_per_second: "+bitsPerSecond);
-                    System.err.println();
-                    usage();
-                    retval = 3;
-                } else {
-                    boolean showProgress = false;
-                    boolean hasError = false;
-                    boolean allowStdin = true;
-                    int fileCount = 0;
-                    for(int c=1; c<args.length; c++) {
-                        String arg = args[c];
-                        if(allowStdin && "--".equals(arg)) allowStdin = false;
-                        else if(allowStdin && "-".equals(arg)) fileCount++;
-                        else if(allowStdin && "--progress".equals(arg)) {
-                            showProgress = true;
-                        } else {
-                            File file = new File(arg);
-                            if(!file.exists()) {
-                                System.err.println("File not found: "+arg);
-                                hasError = true;
-                            } else if(file.isDirectory()) {
-                                System.err.println("Directories not supported: "+arg);
-                                hasError = true;
-                            } else if(!file.canRead()) {
-                                System.err.println("Unable to read file: "+arg);
-                                hasError = true;
-                            } else {
-                                fileCount++;
-                            }
-                        }
-                    }
-                    if(hasError) {
-                        System.err.flush();
-                        retval = 4;
+        int retval = 0;
+        try {
+            // Parse the arguments - set retval!=0 on error
+            ByteCount blocksizeParam = GetOpt.getOpt(args, "blocksize", ByteCount.class);
+            final int blockSize;
+            if(blocksizeParam==null) blockSize = BufferManager.BUFFER_SIZE;
+            else {
+                long longBlockSize = blocksizeParam.getByteCount();
+                if(longBlockSize>Integer.MAX_VALUE) throw new IllegalArgumentException("blocksize>Integer.MAX_VALUE: "+blocksizeParam);
+                if(longBlockSize<1) throw new IllegalArgumentException("blocksize<1: "+blocksizeParam);
+                blockSize = (int)longBlockSize;
+            }
+            final BitRate bwlimit = GetOpt.getOpt(args, "bwlimit", BitRate.class);
+            if(bwlimit!=null && bwlimit.getBitRate()<1) throw new IllegalArgumentException("bwlimit<1: "+bwlimit);
+            ByteCount limit = GetOpt.getOpt(args, "limit", ByteCount.class);
+            long[] bytesRemaining;
+            if(limit==null) bytesRemaining = null;
+            else {
+                long temp = limit.getByteCount();
+                if(temp<0) throw new IllegalArgumentException("limit<0: "+limit);
+                bytesRemaining = new long[] {temp};
+            }
+            File output = GetOpt.getOpt(args, "output", File.class); // null for standard output
+            Boolean progressParam = GetOpt.getOpt(args, "progress", Boolean.TYPE);
+            boolean progress = progressParam!=null ? progressParam.booleanValue() : false;
+            List<String> sourcePaths = GetOpt.getArguments(args);
+            List<File> sourceFiles = new ArrayList<File>(sourcePaths.size()+1);
+            boolean allowStdin = true;
+            boolean hasError = false;
+            for(String sourcePath : sourcePaths) {
+                if(allowStdin && "--".equals(sourcePath)) allowStdin = false;
+                else if(allowStdin && "-".equals(sourcePath)) sourceFiles.add(null);
+                else {
+                    File sourceFile = new File(sourcePath);
+                    if(!sourceFile.exists()) {
+                        System.err.println("File not found: "+sourcePath);
+                        hasError = true;
+                    } else if(sourceFile.isDirectory()) {
+                        System.err.println("Directories not supported: "+sourcePath);
+                        hasError = true;
+                    } else if(!sourceFile.canRead()) {
+                        System.err.println("Unable to read file: "+sourcePath);
+                        hasError = true;
                     } else {
-                        try {
-                            OutputStream out = new BitRateOutputStream(
-                                new PrintStreamOutputStream(System.out),
-                                new BitRateProvider() {
-                                    public int getBitRate() throws IOException {
-                                        return bitsPerSecond;
-                                    }
-                                    public int getBlockSize() {
-                                        return BufferManager.BUFFER_SIZE;
-                                    }
-                                }
-                            );
-                            try {
-                                byte[] buff = BufferManager.getBytes();
-                                if(fileCount==0) {
-                                    transfer("-", System.in, out, buff, showProgress);
-                                } else {
-                                    allowStdin = true;
-                                    for(int c=1; c<args.length; c++) {
-                                        String arg = args[c];
-                                        if(allowStdin && "--".equals(arg)) {
-                                            allowStdin = false;
-                                        } else if(allowStdin && "--progress".equals(arg)) {
-                                            // Skipped option
-                                        } else if(allowStdin && "-".equals(arg)) {
-                                            transfer("-", System.in, out, buff, showProgress);
-                                        } else {
-                                            FileInputStream in = new FileInputStream(new File(arg));
-                                            try {
-                                                transfer(arg, in, out, buff, showProgress);
-                                            } finally {
-                                                in.close();
-                                            }
-                                        }
-                                    }
-                                }
-                            } finally {
-                                out.flush();
-                                out.close();
-                            }
-                            retval = 0;
-                        } catch(IOException err) {
-                            System.err.println("IO Exception: "+err.toString());
-                            System.err.flush();
-                            retval = 5;
-                        }
+                        sourceFiles.add(sourceFile);
                     }
                 }
-            } catch(NumberFormatException err) {
-                System.err.println("Unable to parse bits_per_second: "+err.toString());
-                System.err.println();
-                usage();
-                retval = 2;
             }
+            if(hasError) {
+                System.err.flush();
+                retval = 2;
+            } else {
+                if(sourceFiles.isEmpty()) sourceFiles.add(null); // Use System.in when no files specified
+                try {
+                    OutputStream out = output==null ? new PrintStreamOutputStream(System.out) : new FileOutputStream(output);
+                    try {
+                        if(bwlimit!=null) out = new BitRateOutputStream(
+                            out,
+                            new BitRateProvider() {
+                                public long getBitRate() {
+                                    return bwlimit.getBitRate();
+                                }
+                                public int getBlockSize() {
+                                    return blockSize;
+                                }
+                            }
+                        );
+                        byte[] buff = new byte[blockSize];
+                        for(File sourceFile : sourceFiles) {
+                            if(bytesRemaining!=null && bytesRemaining[0]<=0) break;
+                            if(sourceFile==null) {
+                                transfer("-", System.in, out, buff, progress, bytesRemaining);
+                            } else {
+                                InputStream in = new FileInputStream(sourceFile);
+                                try {
+                                    transfer(sourceFile.getPath(), in, out, buff, progress, bytesRemaining);
+                                } finally {
+                                    in.close();
+                                }
+                            }
+                        }
+                    } finally {
+                        out.flush();
+                        out.close();
+                    }
+                } catch(IOException err) {
+                    System.err.println("IO Exception: "+err.toString());
+                    System.err.flush();
+                    retval = 3;
+                }
+            }
+        } catch(IllegalArgumentException err) {
+            System.err.println("Illegal Argument: "+err.toString());
+            System.err.flush();
+            usage();
+            retval = 1;
         }
         System.exit(retval);
     }

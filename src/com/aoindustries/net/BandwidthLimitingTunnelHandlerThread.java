@@ -49,14 +49,14 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
     private static final long VERBOSE_REPORT_INTERVAL = (long)10*1000;
 
     private boolean verbose;
-    private int bandwidth;
+    private long bandwidth;
     private Socket listenSocket;
     private Socket connectSocket;
     private Thread thread;
 
     public BandwidthLimitingTunnelHandlerThread(
         boolean verbose,
-        int bandwidth,
+        long bandwidth,
         Socket listenSocket,
         Socket connectSocket
     ) {
@@ -124,7 +124,7 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
         return BufferManager.BUFFER_SIZE;
     }
     
-    public int getBitRate() {
+    public long getBitRate() {
         return bandwidth;
     }
 

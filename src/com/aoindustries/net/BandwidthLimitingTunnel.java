@@ -43,8 +43,8 @@ public class BandwidthLimitingTunnel implements Runnable {
     private int listen_port;
     private String connect_address;
     private int connect_port;
-    private int upstream_bandwidth;
-    private int downstream_bandwidth;
+    private long upstream_bandwidth;
+    private long downstream_bandwidth;
     private Thread thread;
 
     public BandwidthLimitingTunnel(
@@ -53,8 +53,8 @@ public class BandwidthLimitingTunnel implements Runnable {
         int listen_port,
         String connect_address,
         int connect_port,
-        int upstream_bandwidth,
-        int downstream_bandwidth
+        long upstream_bandwidth,
+        long downstream_bandwidth
     ) {
         this.verbose = verbose;
         this.listen_address = listen_address;
@@ -92,9 +92,9 @@ public class BandwidthLimitingTunnel implements Runnable {
             String connect_address=args[pos++];
             int connect_port=Integer.parseInt(args[pos++]);
             String S = args[pos++];
-            int upstream_bandwidth=S.length()==0 ? BitRateProvider.UNLIMITED_BANDWIDTH : Integer.parseInt(S);
+            long upstream_bandwidth=S.length()==0 ? BitRateProvider.UNLIMITED_BANDWIDTH : Long.parseLong(S);
             S = args[pos++];
-            int downstream_bandwidth=S.length()==0 ? BitRateProvider.UNLIMITED_BANDWIDTH : Integer.parseInt(S);
+            long downstream_bandwidth=S.length()==0 ? BitRateProvider.UNLIMITED_BANDWIDTH : Long.parseLong(S);
             new BandwidthLimitingTunnel(verbose, listen_address, listen_port, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth);
         } else {
             printUsage();

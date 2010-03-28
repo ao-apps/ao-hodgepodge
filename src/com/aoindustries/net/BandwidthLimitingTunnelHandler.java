@@ -38,16 +38,16 @@ public class BandwidthLimitingTunnelHandler {
     private boolean verbose;
     private String connect_address;
     private int connect_port;
-    private int upstream_bandwidth;
-    private int downstream_bandwidth;
+    private long upstream_bandwidth;
+    private long downstream_bandwidth;
     private Socket socket;
 
     public BandwidthLimitingTunnelHandler(
         boolean verbose,
         String connect_address,
         int connect_port,
-        int upstream_bandwidth,
-        int downstream_bandwidth,
+        long upstream_bandwidth,
+        long downstream_bandwidth,
         Socket socket
     ) throws IOException {
         this.verbose = verbose;

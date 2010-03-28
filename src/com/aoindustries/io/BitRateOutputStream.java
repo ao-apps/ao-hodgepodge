@@ -22,7 +22,10 @@
  */
 package com.aoindustries.io;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
 
 /**
  * A <code>BitRateOutputStream</code> regulates an
@@ -41,7 +44,7 @@ public class BitRateOutputStream extends FilterOutputStream {
 
     private long blockStart=-1;
     private long catchupTime;
-    private int byteCount;
+    private long byteCount;
 
     public BitRateOutputStream(OutputStream out, BitRateProvider provider) {
         super(out);
@@ -94,10 +97,10 @@ public class BitRateOutputStream extends FilterOutputStream {
     
     private void sleep() throws IOException {
         if(byteCount>0) {
-            int bps=provider.getBitRate();
+            long bps=provider.getBitRate();
             if(bps>0) {
                 // Figure out the number of millis to sleep
-                long blockTime=(byteCount*8*1000)/bps;
+                long blockTime=(byteCount*8L*1000L)/bps;
                 long sleepyTime=blockTime-(System.currentTimeMillis()-blockStart);
 
                 if(sleepyTime>0) {
