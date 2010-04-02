@@ -26,7 +26,6 @@ import com.aoindustries.util.IntArrayList;
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.LongArrayList;
 import com.aoindustries.util.LongList;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -72,11 +71,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         return database;
     }
 
-    public Connection getConnection(int isolationLevel, boolean readOnly) throws IOException, SQLException {
+    public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {
         return getConnection(isolationLevel, readOnly, 1);
     }
 
-    public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws IOException, SQLException {
+    public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
         Connection c=_conn;
         if(c==null) {
             c=database.getConnection(isolationLevel, readOnly, maxConnections);
@@ -141,7 +140,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         for(Object param : params) setParam(pstmt, pos++, param);
     }
 
-    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -167,11 +166,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     /**
      * @deprecated  Please provide the rowRequired flag.
      */
-    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         return executeBooleanQuery(isolationLevel, readOnly, true, sql, params);
     }
 
-    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -194,7 +193,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -220,11 +219,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     /**
      * @deprecated  Please provide the rowRequired flag.
      */
-    public Date executeDateQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public Date executeDateQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         return executeDateQuery(isolationLevel, readOnly, false, sql, params);
     }
 
-    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -247,7 +246,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -269,11 +268,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     /**
      * @deprecated  Please provide the rowRequired flag.
      */
-    public int executeIntQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public int executeIntQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         return executeIntQuery(isolationLevel, readOnly, true, sql, params);
     }
 
-    public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -299,7 +298,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     /**
      * TODO: Should we use cursors for this?
      */
-    public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -321,11 +320,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     /**
      * @deprecated  Please provide the rowRequired flag.
      */
-    public long executeLongQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public long executeLongQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         return executeLongQuery(isolationLevel, readOnly, true, sql, params);
     }
 
-    public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -348,7 +347,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
 
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -392,7 +391,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
 
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -418,7 +417,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
@@ -457,7 +456,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
@@ -478,7 +477,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
@@ -520,7 +519,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
@@ -544,7 +543,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {
+    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
@@ -563,7 +562,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -585,11 +584,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     /**
      * @deprecated  Please provide the rowRequired flag.
      */
-    public short executeShortQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public short executeShortQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         return executeShortQuery(isolationLevel, readOnly, true, sql, params);
     }
 
-    public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -615,11 +614,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     /**
      * @deprecated  Please provide the rowRequired flag.
      */
-    public String executeStringQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public String executeStringQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         return executeStringQuery(isolationLevel, readOnly, false, sql, params);
     }
 
-    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -642,7 +641,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -664,11 +663,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     /**
      * @deprecated  Please provide the rowRequired flag.
      */
-    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         return executeTimestampQuery(isolationLevel, readOnly, false, sql, params);
     }
 
-    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -691,7 +690,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public int executeUpdate(String sql, Object ... params) throws IOException, SQLException {
+    public int executeUpdate(String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(Connection.TRANSACTION_READ_COMMITTED, false).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -703,17 +702,17 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public void commit() throws IOException, SQLException {
+    public void commit() throws SQLException {
         Connection c=_conn;
         if(c!=null) c.commit();
     }
 
-    public boolean isClosed() throws IOException, SQLException {
+    public boolean isClosed() throws SQLException {
         Connection c=_conn;
         return c==null || c.isClosed();
     }
 
-    public void releaseConnection() throws IOException, SQLException {
+    public void releaseConnection() throws SQLException {
         Connection c=_conn;
         if(c!=null) {
             _conn=null;

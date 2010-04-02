@@ -44,17 +44,19 @@ public class TrimFilter implements Filter {
 
     private static final String REQUEST_ATTRIBUTE_KEY = TrimFilter.class.getName()+".filter_applied";
 
+    private boolean enabled;
+
     public void init(FilterConfig config) {
+        String enabledParam = config.getServletContext().getInitParameter("com.aoindustries.servlet.filter.TrimFilter.enabled");
+        if(enabledParam==null || (enabledParam=enabledParam.trim()).length()==0) enabledParam = "true";
+        enabled = Boolean.parseBoolean(enabledParam);
     }
 
-    public void destroy() {
-    }
-
-    public void doFilter(ServletRequest request, ServletResponse response,
-                         FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         // Makes sure only one trim filter is applied per request
         if(
-            request.getAttribute(REQUEST_ATTRIBUTE_KEY)==null
+            enabled
+            && request.getAttribute(REQUEST_ATTRIBUTE_KEY)==null
             && (response instanceof HttpServletResponse)
         ) {
             request.setAttribute(REQUEST_ATTRIBUTE_KEY, Boolean.TRUE);
@@ -66,5 +68,9 @@ public class TrimFilter implements Filter {
         } else {
             chain.doFilter(request, response);
         }
+    }
+
+    public void destroy() {
+        enabled = false;
     }
 }

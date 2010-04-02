@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,7 +24,6 @@ package com.aoindustries.sql;
 
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.LongList;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
@@ -40,83 +39,83 @@ import java.util.Set;
  */
 abstract public class AbstractDatabaseAccess implements DatabaseAccess {
 
-    public BigDecimal executeBigDecimalQuery(String sql, Object ... params) throws IOException, SQLException {
+    public BigDecimal executeBigDecimalQuery(String sql, Object ... params) throws SQLException {
         return executeBigDecimalQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public boolean executeBooleanQuery(String sql, Object ... params) throws IOException, SQLException {
+    public boolean executeBooleanQuery(String sql, Object ... params) throws SQLException {
         return executeBooleanQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
     
-    public byte[] executeByteArrayQuery(String sql, Object ... params) throws IOException, SQLException {
+    public byte[] executeByteArrayQuery(String sql, Object ... params) throws SQLException {
         return executeByteArrayQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public Date executeDateQuery(String sql, Object ... params) throws IOException, SQLException {
+    public Date executeDateQuery(String sql, Object ... params) throws SQLException {
         return executeDateQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public IntList executeIntListQuery(String sql, Object ... params) throws IOException, SQLException {
+    public IntList executeIntListQuery(String sql, Object ... params) throws SQLException {
         return executeIntListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }
 
-    public int executeIntQuery(String sql, Object ... params) throws IOException, SQLException {
+    public int executeIntQuery(String sql, Object ... params) throws SQLException {
         return executeIntQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public LongList executeLongListQuery(String sql, Object ... params) throws IOException, SQLException {
+    public LongList executeLongListQuery(String sql, Object ... params) throws SQLException {
         return executeLongListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }
 
-    public long executeLongQuery(String sql, Object ... params) throws IOException, SQLException {
+    public long executeLongQuery(String sql, Object ... params) throws SQLException {
         return executeLongQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public <T> T executeObjectQuery(Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+    public <T> T executeObjectQuery(Class<T> clazz, String sql, Object ... params) throws SQLException {
         return executeObjectQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, clazz, sql, params);
     }
 
-    public <T> T executeObjectQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+    public <T> T executeObjectQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         return executeObjectQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, objectFactory, sql, params);
     }
 
-    public <T> List<T> executeObjectListQuery(Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+    public <T> List<T> executeObjectListQuery(Class<T> clazz, String sql, Object ... params) throws SQLException {
         return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, clazz, sql, params);
     }
 
-    public <T> List<T> executeObjectListQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+    public <T> List<T> executeObjectListQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, objectFactory, sql, params);
     }
 
-    public <T> Set<T> executeObjectSetQuery(Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+    public <T> Set<T> executeObjectSetQuery(Class<T> clazz, String sql, Object ... params) throws SQLException {
         return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, clazz, sql, params);
     }
 
-    public <T> Set<T> executeObjectSetQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+    public <T> Set<T> executeObjectSetQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, objectFactory, sql, params);
     }
 
-    public void executeQuery(ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {
+    public void executeQuery(ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException {
         executeQuery(Connection.TRANSACTION_READ_COMMITTED, true, resultSetHandler, sql, params);
     }
 
-    public List<Short> executeShortListQuery(String sql, Object ... params) throws IOException, SQLException {
+    public List<Short> executeShortListQuery(String sql, Object ... params) throws SQLException {
         return executeShortListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }
 
-    public short executeShortQuery(String sql, Object ... params) throws IOException, SQLException {
+    public short executeShortQuery(String sql, Object ... params) throws SQLException {
         return executeShortQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public String executeStringQuery(String sql, Object ... params) throws IOException, SQLException {
+    public String executeStringQuery(String sql, Object ... params) throws SQLException {
         return executeStringQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public List<String> executeStringListQuery(String sql, Object ... params) throws IOException, SQLException {
+    public List<String> executeStringListQuery(String sql, Object ... params) throws SQLException {
         return executeStringListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }
 
-    public Timestamp executeTimestampQuery(String sql, Object ... params) throws IOException, SQLException {
+    public Timestamp executeTimestampQuery(String sql, Object ... params) throws SQLException {
         return executeTimestampQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 }

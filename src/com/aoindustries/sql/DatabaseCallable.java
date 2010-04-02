@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 /**
@@ -34,5 +33,5 @@ import java.sql.SQLException;
  */
 public interface DatabaseCallable<V> {
 
-    V call(DatabaseConnection db) throws IOException, SQLException;
+    V call(DatabaseConnection db) throws SQLException;
 }

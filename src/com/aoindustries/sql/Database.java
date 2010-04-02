@@ -24,7 +24,6 @@ package com.aoindustries.sql;
 
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.LongList;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
@@ -127,7 +126,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             BigDecimal value=conn.executeBigDecimalQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -136,9 +135,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -147,7 +143,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             boolean value=conn.executeBooleanQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -156,9 +152,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -167,7 +160,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             byte[] value=conn.executeByteArrayQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -176,9 +169,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -187,7 +177,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             Date value=conn.executeDateQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -196,9 +186,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -207,7 +194,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             IntList value=conn.executeIntListQuery(isolationLevel, readOnly, sql, params);
@@ -216,9 +203,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -227,7 +211,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             int value=conn.executeIntQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -236,9 +220,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -247,7 +228,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             LongList value=conn.executeLongListQuery(isolationLevel, readOnly, sql, params);
@@ -256,9 +237,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -267,7 +245,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             long value=conn.executeLongQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -276,9 +254,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -287,7 +262,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, clazz, sql, params);
@@ -296,9 +271,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -307,7 +279,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, objectFactory, sql, params);
@@ -316,9 +288,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -327,7 +296,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, clazz, sql, params);
@@ -336,9 +305,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -347,7 +313,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, objectFactory, sql, params);
@@ -356,9 +322,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -367,7 +330,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws IOException, SQLException {
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, clazz, sql, params);
@@ -376,9 +339,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -387,7 +347,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws IOException, SQLException {
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, objectFactory, sql, params);
@@ -396,9 +356,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -407,7 +364,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws IOException, SQLException {
+    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             conn.executeQuery(isolationLevel, readOnly, resultSetHandler, sql, params);
@@ -415,9 +372,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -426,7 +380,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             List<Short> value=conn.executeShortListQuery(isolationLevel, readOnly, sql, params);
@@ -435,9 +389,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -446,7 +397,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             short value=conn.executeShortQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -455,9 +406,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -466,7 +414,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             String value=conn.executeStringQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -475,9 +423,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -486,7 +431,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws IOException, SQLException {
+    public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             List<String> value=conn.executeStringListQuery(isolationLevel, readOnly, sql, params);
@@ -495,9 +440,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -506,7 +448,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws IOException, SQLException {
+    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             Timestamp value=conn.executeTimestampQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -515,9 +457,6 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
-        } catch(IOException err) {
-            conn.rollback();
-            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -526,16 +465,13 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public int executeUpdate(String sql, Object ... params) throws IOException, SQLException {
+    public int executeUpdate(String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             int updateCount = conn.executeUpdate(sql, params);
             conn.commit();
             return updateCount;
         } catch(RuntimeException err) {
-            conn.rollback();
-            throw err;
-        } catch(IOException err) {
             conn.rollback();
             throw err;
         } catch(SQLException err) {
@@ -551,7 +487,7 @@ public class Database extends AbstractDatabaseAccess {
     /**
      * <p>
      * Executes an arbitrary transaction, providing automatic commit, rollback, and connection management.
-     * Rolls-back the transaction on RuntimeException or IOException.  Rolls-back and closes the connection
+     * Rolls-back the transaction on RuntimeException.  Rolls-back and closes the connection
      * on SQLException.
      * </p>
      * <p>
@@ -561,16 +497,13 @@ public class Database extends AbstractDatabaseAccess {
      * entire transaction on any exception.
      * </p>
      */
-    public <V> V executeTransaction(DatabaseCallable<V> callable) throws IOException, SQLException {
+    public <V> V executeTransaction(DatabaseCallable<V> callable) throws SQLException {
         DatabaseConnection conn = transactionConnection.get();
         if(conn!=null) {
             // Reuse existing connection
             try {
                 return callable.call(conn);
             } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(IOException err) {
                 conn.rollback();
                 throw err;
             } catch(SQLException err) {
@@ -590,9 +523,6 @@ public class Database extends AbstractDatabaseAccess {
                     transactionConnection.remove();
                 }
             } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(IOException err) {
                 conn.rollback();
                 throw err;
             } catch(SQLException err) {
