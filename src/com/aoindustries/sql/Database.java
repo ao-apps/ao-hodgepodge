@@ -126,7 +126,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             BigDecimal value=conn.executeBigDecimalQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -143,7 +143,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             boolean value=conn.executeBooleanQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -160,7 +160,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             byte[] value=conn.executeByteArrayQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -177,7 +177,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             Date value=conn.executeDateQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -211,7 +211,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             int value=conn.executeIntQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -245,7 +245,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             long value=conn.executeLongQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -262,7 +262,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws SQLException {
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, clazz, sql, params);
@@ -279,7 +279,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, objectFactory, sql, params);
@@ -397,7 +397,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             short value=conn.executeShortQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -414,7 +414,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             String value=conn.executeStringQuery(isolationLevel, readOnly, rowRequired, sql, params);
@@ -448,7 +448,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
             Timestamp value=conn.executeTimestampQuery(isolationLevel, readOnly, rowRequired, sql, params);

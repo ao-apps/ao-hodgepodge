@@ -140,7 +140,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         for(Object param : params) setParam(pstmt, pos++, param);
     }
 
-    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -151,7 +151,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return b;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return null;
             } finally {
                 results.close();
@@ -163,14 +163,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    /**
-     * @deprecated  Please provide the rowRequired flag.
-     */
-    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        return executeBooleanQuery(isolationLevel, readOnly, true, sql, params);
-    }
-
-    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -181,7 +174,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return b;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return false;
             } finally {
                 results.close();
@@ -193,7 +186,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -204,7 +197,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return b;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return null;
             } finally {
                 results.close();
@@ -216,14 +209,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    /**
-     * @deprecated  Please provide the rowRequired flag.
-     */
-    public Date executeDateQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        return executeDateQuery(isolationLevel, readOnly, false, sql, params);
-    }
-
-    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -234,7 +220,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return D;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return null;
             } finally {
                 results.close();
@@ -265,14 +251,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    /**
-     * @deprecated  Please provide the rowRequired flag.
-     */
-    public int executeIntQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        return executeIntQuery(isolationLevel, readOnly, true, sql, params);
-    }
-
-    public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -283,7 +262,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return i;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return 0;
             } finally {
                 results.close();
@@ -317,14 +296,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    /**
-     * @deprecated  Please provide the rowRequired flag.
-     */
-    public long executeLongQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        return executeLongQuery(isolationLevel, readOnly, true, sql, params);
-    }
-
-    public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -335,7 +307,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return l;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return 0;
             } finally {
                 results.close();
@@ -347,7 +319,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws SQLException {
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
 
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -362,7 +334,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                         if(results.next()) throw new SQLException("More than one row returned.");
                         return object;
                     }
-                    if(rowRequired) throw new SQLException("No row returned.");
+                    if(rowRequired) throw new NoRowException();
                     return null;
                 } finally {
                     results.close();
@@ -391,7 +363,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
 
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -405,7 +377,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return object;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return null;
             } finally {
                 results.close();
@@ -581,14 +553,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    /**
-     * @deprecated  Please provide the rowRequired flag.
-     */
-    public short executeShortQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        return executeShortQuery(isolationLevel, readOnly, true, sql, params);
-    }
-
-    public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -599,7 +564,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return s;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return 0;
             } finally {
                 results.close();
@@ -611,14 +576,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    /**
-     * @deprecated  Please provide the rowRequired flag.
-     */
-    public String executeStringQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        return executeStringQuery(isolationLevel, readOnly, false, sql, params);
-    }
-
-    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -629,7 +587,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return S;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return null;
             } finally {
                 results.close();
@@ -660,14 +618,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    /**
-     * @deprecated  Please provide the rowRequired flag.
-     */
-    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        return executeTimestampQuery(isolationLevel, readOnly, false, sql, params);
-    }
-
-    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException {
+    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
             setParams(pstmt, params);
@@ -678,7 +629,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) throw new SQLException("More than one row returned.");
                     return T;
                 }
-                if(rowRequired) throw new SQLException("No row returned.");
+                if(rowRequired) throw new NoRowException();
                 return null;
             } finally {
                 results.close();

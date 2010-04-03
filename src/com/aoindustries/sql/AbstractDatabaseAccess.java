@@ -39,19 +39,19 @@ import java.util.Set;
  */
 abstract public class AbstractDatabaseAccess implements DatabaseAccess {
 
-    public BigDecimal executeBigDecimalQuery(String sql, Object ... params) throws SQLException {
+    public BigDecimal executeBigDecimalQuery(String sql, Object ... params) throws NoRowException, SQLException {
         return executeBigDecimalQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public boolean executeBooleanQuery(String sql, Object ... params) throws SQLException {
+    public boolean executeBooleanQuery(String sql, Object ... params) throws NoRowException, SQLException {
         return executeBooleanQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
     
-    public byte[] executeByteArrayQuery(String sql, Object ... params) throws SQLException {
+    public byte[] executeByteArrayQuery(String sql, Object ... params) throws NoRowException, SQLException {
         return executeByteArrayQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public Date executeDateQuery(String sql, Object ... params) throws SQLException {
+    public Date executeDateQuery(String sql, Object ... params) throws NoRowException, SQLException {
         return executeDateQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
@@ -59,7 +59,7 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeIntListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }
 
-    public int executeIntQuery(String sql, Object ... params) throws SQLException {
+    public int executeIntQuery(String sql, Object ... params) throws NoRowException, SQLException {
         return executeIntQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
@@ -67,15 +67,15 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeLongListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }
 
-    public long executeLongQuery(String sql, Object ... params) throws SQLException {
+    public long executeLongQuery(String sql, Object ... params) throws NoRowException, SQLException {
         return executeLongQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public <T> T executeObjectQuery(Class<T> clazz, String sql, Object ... params) throws SQLException {
+    public <T> T executeObjectQuery(Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException {
         return executeObjectQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, clazz, sql, params);
     }
 
-    public <T> T executeObjectQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+    public <T> T executeObjectQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException {
         return executeObjectQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, objectFactory, sql, params);
     }
 
@@ -103,11 +103,11 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeShortListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }
 
-    public short executeShortQuery(String sql, Object ... params) throws SQLException {
+    public short executeShortQuery(String sql, Object ... params) throws NoRowException, SQLException {
         return executeShortQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
-    public String executeStringQuery(String sql, Object ... params) throws SQLException {
+    public String executeStringQuery(String sql, Object ... params) throws NoRowException, SQLException {
         return executeStringQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 
@@ -115,7 +115,7 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeStringListQuery(Connection.TRANSACTION_READ_COMMITTED, true, sql, params);
     }
 
-    public Timestamp executeTimestampQuery(String sql, Object ... params) throws SQLException {
+    public Timestamp executeTimestampQuery(String sql, Object ... params) throws NoRowException, SQLException {
         return executeTimestampQuery(Connection.TRANSACTION_READ_COMMITTED, true, true, sql, params);
     }
 }

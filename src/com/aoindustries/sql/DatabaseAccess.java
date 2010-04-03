@@ -107,12 +107,12 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    BigDecimal executeBigDecimalQuery(String sql, Object ... params) throws SQLException;
+    BigDecimal executeBigDecimalQuery(String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>BigDecimal</code> return type.
      */
-    BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException;
+    BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Read-only query the database with a <code>boolean</code> return type.
@@ -122,12 +122,12 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    boolean executeBooleanQuery(String sql, Object ... params) throws SQLException;
+    boolean executeBooleanQuery(String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>boolean</code> return type.
      */
-    boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException;
+    boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException;
     
     /**
      * Read-only query the database with a <code>byte[]</code> return type.
@@ -137,12 +137,12 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    byte[] executeByteArrayQuery(String sql, Object ... params) throws SQLException;
+    byte[] executeByteArrayQuery(String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>byte[]</code> return type.
      */
-    byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException;
+    byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Read-only query the database with a <code>java.sql.Date</code> return type.
@@ -152,19 +152,18 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    Date executeDateQuery(String sql, Object ... params) throws SQLException;
+    Date executeDateQuery(String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>java.sql.Date</code> return type.
      */
-    Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException;
+    Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Read-only query the database with an <code>IntList</code> return type.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
     IntList executeIntListQuery(String sql, Object ... params) throws SQLException;
@@ -182,19 +181,18 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    int executeIntQuery(String sql, Object ... params) throws SQLException;
+    int executeIntQuery(String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with an <code>int</code> return type.
      */
-    int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException;
+    int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Read-only query the database with a <code>LongList</code> return type.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
     LongList executeLongListQuery(String sql, Object ... params) throws SQLException;
@@ -212,12 +210,12 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    long executeLongQuery(String sql, Object ... params) throws SQLException;
+    long executeLongQuery(String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>long</code> return type.
      */
-    long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException;
+    long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Read-only query the database with a <code>&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
@@ -227,12 +225,12 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    <T> T executeObjectQuery(Class<T> clazz, String sql, Object ... params) throws SQLException;
+    <T> T executeObjectQuery(Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
      */
-    <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws SQLException;
+    <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Read-only query the database with a <code>&lt;T&gt;</code> return type, objects are created with the provided factory.
@@ -242,19 +240,18 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    <T> T executeObjectQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
+    <T> T executeObjectQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>&lt;T&gt;</code> return type, objects are created with the provided factory.
      */
-    <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
+    <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Read-only query the database with a <code>List&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
     <T> List<T> executeObjectListQuery(Class<T> clazz, String sql, Object ... params) throws SQLException;
@@ -269,7 +266,6 @@ public interface DatabaseAccess {
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
     <T> List<T> executeObjectListQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
@@ -284,7 +280,6 @@ public interface DatabaseAccess {
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
     <T> Set<T> executeObjectSetQuery(Class<T> clazz, String sql, Object ... params) throws SQLException;
@@ -299,7 +294,6 @@ public interface DatabaseAccess {
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
     <T> Set<T> executeObjectSetQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
@@ -314,7 +308,6 @@ public interface DatabaseAccess {
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
     void executeQuery(ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException;
@@ -329,7 +322,6 @@ public interface DatabaseAccess {
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
     List<Short> executeShortListQuery(String sql, Object ... params) throws SQLException;
@@ -347,12 +339,12 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    short executeShortQuery(String sql, Object ... params) throws SQLException;
+    short executeShortQuery(String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>short</code> return type.
      */
-    short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException;
+    short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Read-only query the database with a <code>String</code> return type.
@@ -362,19 +354,18 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    String executeStringQuery(String sql, Object ... params) throws SQLException;
+    String executeStringQuery(String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>String</code> return type.
      */
-    String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException;
+    String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Read-only query the database with a <code>List&lt;String&gt;</code> return type.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
-     *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
     List<String> executeStringListQuery(String sql, Object ... params) throws SQLException;
@@ -392,12 +383,12 @@ public interface DatabaseAccess {
      *   <li>rowRequired = <code>true</code></li>
      * </ul>
      */
-    Timestamp executeTimestampQuery(String sql, Object ... params) throws SQLException;
+    Timestamp executeTimestampQuery(String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Query the database with a <code>Timestamp</code> return type.
      */
-    Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws SQLException;
+    Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
      * Performs an update on the database and returns the number of rows affected.
