@@ -156,6 +156,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -179,6 +181,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -202,6 +206,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -225,6 +231,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -267,6 +275,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -312,6 +322,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -356,6 +368,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                 sqlErr.initCause(err);
                 throw sqlErr;
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -382,6 +396,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -569,6 +585,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -592,6 +610,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {
@@ -634,6 +654,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             } finally {
                 results.close();
             }
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
         } finally {

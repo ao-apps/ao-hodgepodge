@@ -135,6 +135,8 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -151,6 +153,8 @@ public class Database extends AbstractDatabaseAccess {
             return value;
         } catch(RuntimeException err) {
             conn.rollback();
+            throw err;
+        } catch(NoRowException err) {
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -169,6 +173,8 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -185,6 +191,8 @@ public class Database extends AbstractDatabaseAccess {
             return value;
         } catch(RuntimeException err) {
             conn.rollback();
+            throw err;
+        } catch(NoRowException err) {
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -220,6 +228,8 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -254,6 +264,8 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -271,6 +283,8 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -287,6 +301,8 @@ public class Database extends AbstractDatabaseAccess {
             return value;
         } catch(RuntimeException err) {
             conn.rollback();
+            throw err;
+        } catch(NoRowException err) {
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -406,6 +422,8 @@ public class Database extends AbstractDatabaseAccess {
         } catch(RuntimeException err) {
             conn.rollback();
             throw err;
+        } catch(NoRowException err) {
+            throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
             throw err;
@@ -422,6 +440,8 @@ public class Database extends AbstractDatabaseAccess {
             return value;
         } catch(RuntimeException err) {
             conn.rollback();
+            throw err;
+        } catch(NoRowException err) {
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
@@ -456,6 +476,8 @@ public class Database extends AbstractDatabaseAccess {
             return value;
         } catch(RuntimeException err) {
             conn.rollback();
+            throw err;
+        } catch(NoRowException err) {
             throw err;
         } catch(SQLException err) {
             conn.rollbackAndClose();
