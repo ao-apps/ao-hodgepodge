@@ -31,11 +31,19 @@ public class WrappedException extends RuntimeException {
 
     private final Object[] extraInfo;
 
+    /**
+     * @deprecated Please provide cause.
+     */
+    @Deprecated
     public WrappedException() {
         super();
         this.extraInfo=null;
     }
 
+    /**
+     * @deprecated Please provide cause.
+     */
+    @Deprecated
     public WrappedException(String message) {
         super(message);
         this.extraInfo=null;
