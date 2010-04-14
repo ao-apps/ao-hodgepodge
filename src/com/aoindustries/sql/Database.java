@@ -507,10 +507,25 @@ public class Database extends AbstractDatabaseAccess {
     private final ThreadLocal<DatabaseConnection> transactionConnection = new ThreadLocal<DatabaseConnection>();
 
     /**
+     * @see  #executeTransaction(com.aoindustries.sql.DatabaseCallable)
+     */
+    public void executeTransaction(final DatabaseRunnable runnable) throws SQLException {
+        executeTransaction(
+            new DatabaseCallable<Void>() {
+                public Void call(DatabaseConnection db) throws SQLException {
+                    runnable.run(db);
+                    return null;
+                }
+            }
+        );
+    }
+
+    /**
      * <p>
      * Executes an arbitrary transaction, providing automatic commit, rollback, and connection management.
-     * Rolls-back the transaction on RuntimeException.  Rolls-back and closes the connection
-     * on SQLException.
+     * Rolls-back the transaction on RuntimeException.
+     * Rolls-back the transaction on NoRowException on the outer-most transaction only.
+     * Rolls-back and closes the connection on all SQLException except NoRowException.
      * </p>
      * <p>
      * The connection allocated is stored as a ThreadLocal and will be automatically reused if
@@ -527,6 +542,8 @@ public class Database extends AbstractDatabaseAccess {
                 return callable.call(conn);
             } catch(RuntimeException err) {
                 conn.rollback();
+                throw err;
+            } catch(NoRowException err) {
                 throw err;
             } catch(SQLException err) {
                 conn.rollbackAndClose();
@@ -545,6 +562,9 @@ public class Database extends AbstractDatabaseAccess {
                     transactionConnection.remove();
                 }
             } catch(RuntimeException err) {
+                conn.rollback();
+                throw err;
+            } catch(NoRowException err) {
                 conn.rollback();
                 throw err;
             } catch(SQLException err) {
