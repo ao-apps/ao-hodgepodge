@@ -331,7 +331,7 @@ public class ParallelUnpack {
                                     uf.deleteRecursive();
                                     uf.mkdir().chown(uid, gid).setMode(mode);
                                 } else {
-                                    if(stat.getUID()!=uid || stat.getGID()!=gid) uf.chown(uid, gid);
+                                    if(stat.getUid()!=uid || stat.getGid()!=gid) uf.chown(uid, gid);
                                     if(stat.getMode()!=mode) uf.setMode(mode);
                                 }
                             } else {

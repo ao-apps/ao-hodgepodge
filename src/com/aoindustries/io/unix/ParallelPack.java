@@ -299,8 +299,8 @@ public class ParallelPack {
                             if(numLinks==1) {
                                 // No hard links
                                 compressedOut.writeLong(0);
-                                compressedOut.writeInt(stat.getUID());
-                                compressedOut.writeInt(stat.getGID());
+                                compressedOut.writeInt(stat.getUid());
+                                compressedOut.writeInt(stat.getGid());
                                 compressedOut.writeLong(stat.getMode());
                                 compressedOut.writeLong(stat.getModifyTime());
                                 writeFile(uf, compressedOut, buffer);
@@ -324,8 +324,8 @@ public class ParallelPack {
                                     // New file, send file data
                                     long linkId = nextLinkId++;
                                     compressedOut.writeLong(linkId);
-                                    compressedOut.writeInt(stat.getUID());
-                                    compressedOut.writeInt(stat.getGID());
+                                    compressedOut.writeInt(stat.getUid());
+                                    compressedOut.writeInt(stat.getGid());
                                     compressedOut.writeLong(stat.getMode());
                                     compressedOut.writeLong(stat.getModifyTime());
                                     compressedOut.writeInt(numLinks);
@@ -336,35 +336,35 @@ public class ParallelPack {
                         } else if(stat.isDirectory()) {
                             compressedOut.writeByte(PackProtocol.DIRECTORY);
                             compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUID());
-                            compressedOut.writeInt(stat.getGID());
+                            compressedOut.writeInt(stat.getUid());
+                            compressedOut.writeInt(stat.getGid());
                             compressedOut.writeLong(stat.getMode());
                             compressedOut.writeLong(stat.getModifyTime());
                         } else if(stat.isSymLink()) {
                             compressedOut.writeByte(PackProtocol.SYMLINK);
                             compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUID());
-                            compressedOut.writeInt(stat.getGID());
+                            compressedOut.writeInt(stat.getUid());
+                            compressedOut.writeInt(stat.getGid());
                             compressedOut.writeCompressedUTF(uf.readLink(), 63);
                         } else if(stat.isBlockDevice()) {
                             compressedOut.writeByte(PackProtocol.BLOCK_DEVICE);
                             compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUID());
-                            compressedOut.writeInt(stat.getGID());
+                            compressedOut.writeInt(stat.getUid());
+                            compressedOut.writeInt(stat.getGid());
                             compressedOut.writeLong(stat.getMode());
                             compressedOut.writeLong(stat.getDeviceIdentifier());
                         } else if(stat.isCharacterDevice()) {
                             compressedOut.writeByte(PackProtocol.CHARACTER_DEVICE);
                             compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUID());
-                            compressedOut.writeInt(stat.getGID());
+                            compressedOut.writeInt(stat.getUid());
+                            compressedOut.writeInt(stat.getGid());
                             compressedOut.writeLong(stat.getMode());
                             compressedOut.writeLong(stat.getDeviceIdentifier());
-                        } else if(stat.isFIFO()) {
+                        } else if(stat.isFifo()) {
                             compressedOut.writeByte(PackProtocol.FIFO);
                             compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUID());
-                            compressedOut.writeInt(stat.getGID());
+                            compressedOut.writeInt(stat.getUid());
+                            compressedOut.writeInt(stat.getGid());
                             compressedOut.writeLong(stat.getMode());
                         } else if(stat.isSocket()) {
                             throw new IOException("Unable to pack socket: "+uf.getPath());

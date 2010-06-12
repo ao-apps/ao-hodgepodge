@@ -186,7 +186,7 @@ final public class RateLimitCat {
                         if(bwlimit!=null) out = new BitRateOutputStream(
                             out,
                             new BitRateProvider() {
-                                public long getBitRate() {
+                                public Long getBitRate() {
                                     return bwlimit.getBitRate();
                                 }
                                 public int getBlockSize() {

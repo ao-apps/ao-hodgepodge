@@ -90,8 +90,8 @@ public class BitRateInputStream extends FilterInputStream {
     
     private void sleep() throws IOException {
         if(byteCount>0) {
-            long bps=provider.getBitRate();
-            if(bps>0) {
+            Long bps=provider.getBitRate();
+            if(bps!=null && bps>0) {
                 // Figure out the number of millis to sleep
                 long blockTime=(byteCount*8L*1000L)/bps;
                 long sleepyTime=blockTime-(System.currentTimeMillis()-blockStart);

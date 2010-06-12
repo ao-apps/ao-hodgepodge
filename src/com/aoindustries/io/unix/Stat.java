@@ -188,7 +188,7 @@ final public class Stat {
     /**
      * Gets the user ID of the file.
      */
-    public int getUID() throws FileNotFoundException {
+    public int getUid() throws FileNotFoundException {
         checkInitted();
         if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return uid;
@@ -197,7 +197,7 @@ final public class Stat {
     /**
      * Gets the group ID for this file.
      */
-    public int getGID() throws FileNotFoundException {
+    public int getGid() throws FileNotFoundException {
         checkInitted();
         if(!exists) throw new FileNotFoundException(unixFile.getPath());
         return gid;
@@ -296,10 +296,10 @@ final public class Stat {
     /**
      * Determines if this file represents a FIFO.
      */
-    public boolean isFIFO() throws FileNotFoundException {
+    public boolean isFifo() throws FileNotFoundException {
         checkInitted();
         if(!exists) throw new FileNotFoundException(unixFile.getPath());
-        return UnixFile.isFIFO(mode);
+        return UnixFile.isFifo(mode);
     }
 
     /**

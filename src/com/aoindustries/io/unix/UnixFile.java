@@ -450,19 +450,19 @@ public class UnixFile {
         if(!overwrite && oExists) throw new IOException("File already exists: "+otherUF);
         if(isBlockDevice(mode) || isCharacterDevice(mode)) {
             if(oExists) otherUF.delete();
-            otherUF.mknod(mode, stat.getDeviceIdentifier()).chown(stat.getUID(), stat.getGID());
+            otherUF.mknod(mode, stat.getDeviceIdentifier()).chown(stat.getUid(), stat.getGid());
         } else if(isDirectory(mode)) {
             if(!oExists) otherUF.mkdir();
-            otherUF.setMode(mode).chown(stat.getUID(), stat.getGID());
-        } else if(isFIFO(mode)) {
+            otherUF.setMode(mode).chown(stat.getUid(), stat.getGid());
+        } else if(isFifo(mode)) {
             if(oExists) otherUF.delete();
-            otherUF.mkfifo(mode).chown(stat.getUID(), stat.getGID());
+            otherUF.mkfifo(mode).chown(stat.getUid(), stat.getGid());
         } else if(isRegularFile(mode)) {
             InputStream in=new FileInputStream(getFile());
             try {
                 OutputStream out=new FileOutputStream(otherUF.getFile());
                 try {
-                    otherUF.setMode(mode).chown(stat.getUID(), stat.getGID());
+                    otherUF.setMode(mode).chown(stat.getUid(), stat.getGid());
                     byte[] buff=BufferManager.getBytes();
                     try {
                         int ret;
@@ -479,7 +479,7 @@ public class UnixFile {
         } else if(isSocket(mode)) throw new IOException("Unable to copy socket: "+path);
         else if(isSymLink(mode)) {
             // This takes the byte[] from readLink directory to symLink to avoid conversions from byte[]->String->byte[]
-            otherUF.symLink(readLink()).chown(stat.getUID(), stat.getGID());
+            otherUF.symLink(readLink()).chown(stat.getUid(), stat.getGid());
         } else throw new RuntimeException("Unknown mode type: "+Long.toOctalString(mode));
     }
 
@@ -603,8 +603,8 @@ public class UnixFile {
             parent.getStat(parentStat);
             long statMode = parentStat.getRawMode();
             if(isSymLink(statMode)) throw new IOException("Symbolic link found in path: "+parent.path);
-            int uid=parentStat.getUID();
-            int gid=parentStat.getGID();
+            int uid=parentStat.getUid();
+            int gid=parentStat.getGid();
             if(
                 uid>=MINIMUM_USER_UID
                 || gid>=MINIMUM_USER_GID
@@ -661,7 +661,7 @@ public class UnixFile {
             // Race condition does not exist because the parents have been secured already
             if(!isSymLink(mode) && isDirectory(mode)) {
                 // Secure the current directory before the recursive calls
-                if(stat.getUID()!=ROOT_UID || stat.getGID()!=ROOT_GID) file.chown(ROOT_UID, ROOT_GID);
+                if(stat.getUid()!=ROOT_UID || stat.getGid()!=ROOT_GID) file.chown(ROOT_UID, ROOT_GID);
                 if(stat.getMode()!=0700) file.setMode(0700);
                 String[] list = file.list();
                 if (list != null) {
@@ -821,7 +821,7 @@ public class UnixFile {
     final public int getGID() throws IOException {
         Stat stat = getStat();
         if(!stat.exists()) throw new FileNotFoundException(path);
-        return stat.getGID();
+        return stat.getGid();
     }
 
     /**
@@ -868,7 +868,7 @@ public class UnixFile {
      */
     public static String getModeString(long mode) {
         StringBuilder SB=new StringBuilder(10);
-        if(isFIFO(mode)) SB.append('p');
+        if(isFifo(mode)) SB.append('p');
         else if(isCharacterDevice(mode)) SB.append('c');
         else if(isDirectory(mode)) SB.append('d');
         else if(isBlockDevice(mode)) SB.append('b');
@@ -1069,7 +1069,7 @@ public class UnixFile {
     public final int getUID() throws IOException {
         Stat stat = getStat();
         if(!stat.exists()) throw new FileNotFoundException(path);
-        return stat.getUID();
+        return stat.getUid();
     }
 
     /**
@@ -1135,7 +1135,7 @@ public class UnixFile {
     /**
      * Determines if a specific mode represents a FIFO.
      */
-    public static boolean isFIFO(long mode) {
+    public static boolean isFifo(long mode) {
         return (mode & TYPE_MASK) == IS_FIFO;
     }
 
@@ -1144,12 +1144,12 @@ public class UnixFile {
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
      *
-     * @deprecated  Please use getStat(Stat).isFIFO()
+     * @deprecated  Please use getStat(Stat).isFifo()
      */
-    final public boolean isFIFO() throws IOException {
+    final public boolean isFifo() throws IOException {
         Stat stat = getStat();
         if(!stat.exists()) throw new FileNotFoundException(path);
-        return stat.isFIFO();
+        return stat.isFifo();
     }
 
     /**
@@ -1342,7 +1342,7 @@ public class UnixFile {
     final public UnixFile setGID(int gid) throws IOException {
         checkWrite();
         // getStat does loadLibrary already: loadLibrary();
-        int uid = getStat().getUID();
+        int uid = getStat().getUid();
         chown0(path, uid, gid);
         return this;
     }
@@ -1386,7 +1386,7 @@ public class UnixFile {
     final public UnixFile setUID(int uid) throws IOException {
         checkWrite();
         // getStat does loadLibrary already: loadLibrary();
-        int gid = getStat().getGID();
+        int gid = getStat().getGid();
         chown0(path, uid, gid);
         return this;
     }

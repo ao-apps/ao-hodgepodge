@@ -49,14 +49,14 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
     private static final long VERBOSE_REPORT_INTERVAL = (long)10*1000;
 
     private boolean verbose;
-    private long bandwidth;
+    private Long bandwidth;
     private Socket listenSocket;
     private Socket connectSocket;
     private Thread thread;
 
     public BandwidthLimitingTunnelHandlerThread(
         boolean verbose,
-        long bandwidth,
+        Long bandwidth,
         Socket listenSocket,
         Socket connectSocket
     ) {
@@ -74,7 +74,7 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
             byte[] buff = BufferManager.getBytes();
             try {
                 OutputStream out = getOutputStream(listenSocket, connectSocket);
-                if(bandwidth != UNLIMITED_BANDWIDTH) out = new BitRateOutputStream(out, this);
+                if(bandwidth != null) out = new BitRateOutputStream(out, this);
                 try {
                     InputStream in = getInputStream(listenSocket, connectSocket);
                     try {
@@ -124,7 +124,7 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
         return BufferManager.BUFFER_SIZE;
     }
     
-    public long getBitRate() {
+    public Long getBitRate() {
         return bandwidth;
     }
 

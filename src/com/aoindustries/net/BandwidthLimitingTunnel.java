@@ -22,7 +22,6 @@
  */
 package com.aoindustries.net;
 
-import com.aoindustries.io.BitRateProvider;
 import com.aoindustries.util.ErrorPrinter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -43,8 +42,8 @@ public class BandwidthLimitingTunnel implements Runnable {
     private int listen_port;
     private String connect_address;
     private int connect_port;
-    private long upstream_bandwidth;
-    private long downstream_bandwidth;
+    private Long upstream_bandwidth;
+    private Long downstream_bandwidth;
     private Thread thread;
 
     public BandwidthLimitingTunnel(
@@ -53,8 +52,8 @@ public class BandwidthLimitingTunnel implements Runnable {
         int listen_port,
         String connect_address,
         int connect_port,
-        long upstream_bandwidth,
-        long downstream_bandwidth
+        Long upstream_bandwidth,
+        Long downstream_bandwidth
     ) {
         this.verbose = verbose;
         this.listen_address = listen_address;
@@ -92,9 +91,9 @@ public class BandwidthLimitingTunnel implements Runnable {
             String connect_address=args[pos++];
             int connect_port=Integer.parseInt(args[pos++]);
             String S = args[pos++];
-            long upstream_bandwidth=S.length()==0 ? BitRateProvider.UNLIMITED_BANDWIDTH : Long.parseLong(S);
+            Long upstream_bandwidth=S.length()==0 ? null : Long.parseLong(S);
             S = args[pos++];
-            long downstream_bandwidth=S.length()==0 ? BitRateProvider.UNLIMITED_BANDWIDTH : Long.parseLong(S);
+            Long downstream_bandwidth=S.length()==0 ? null : Long.parseLong(S);
             new BandwidthLimitingTunnel(verbose, listen_address, listen_port, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth);
         } else {
             printUsage();
