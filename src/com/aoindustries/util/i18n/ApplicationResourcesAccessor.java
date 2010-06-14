@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2010  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -116,19 +116,9 @@ public class ApplicationResourcesAccessor implements Serializable {
     }
 
     /**
-     * Gets the message in the current thread's locale.
-     *
-     * @see ThreadLocale
-     */
-    public String getMessage(String key) {
-        return getMessage(null, key);
-    }
-
-    /**
      * <p>
-     * Gets the message.  If the messages is missing will use the missingDefault
-     * value.  If missingDefault is null, will generate a struts-like value
-     * including the locale and key.
+     * Gets the message.  If missing, will generate a struts-like value including
+     * the locale and key.
      * </p>
      * <p>
      * This should be used very sparingly.  It is intended for situations where
@@ -141,17 +131,8 @@ public class ApplicationResourcesAccessor implements Serializable {
      *
      * @see ThreadLocale
      */
-    public String getMessage(String missingDefault, String key) {
-        return getString(missingDefault, key);
-    }
-
-    /**
-     * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
-     * Gets the message in the current thread's locale.
-     * @see ThreadLocale
-     */
-    public String getMessage(String key, Object... args) {
-        return getMessage(null, key, args);
+    public String getMessage(String key) {
+        return getString(key);
     }
 
     /**
@@ -161,12 +142,12 @@ public class ApplicationResourcesAccessor implements Serializable {
      * @see ThreadLocale
      * @see  #getMessage(String,Locale,String)
      */
-    public String getMessage(String missingDefault, String key, Object... args) {
-        String message = getString(missingDefault, key);
+    public String getMessage(String key, Object... args) {
+        String message = getString(key);
         return multiReplace(message, args);
     }
 
-    private String getString(String missingDefault, String key) {
+    private String getString(String key) {
         Locale locale = ThreadLocale.get();
         String string = null;
         try {
@@ -175,11 +156,7 @@ public class ApplicationResourcesAccessor implements Serializable {
         } catch(MissingResourceException err) {
             // string remains null
         }
-
-        if(string==null) {
-            // Use provided missingDefault then default to struts-style ??? formatting
-            string = missingDefault!=null ? missingDefault : ("???"+locale.toString()+"."+key+"???");
-        }
+        if(string==null) string = "???"+locale.toString()+"."+key+"???";
         return string;
     }
 
