@@ -44,6 +44,7 @@ public class LocaleComparator implements Comparator<Locale> {
     private LocaleComparator() {
     }
 
+    @Override
     public int compare(Locale l1, Locale l2) {
         int diff = l1.getLanguage().compareToIgnoreCase(l2.getLanguage());
         if(diff!=0) return diff;

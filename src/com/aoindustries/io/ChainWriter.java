@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.URLEncoder;
 import java.util.Locale;
 
 /**
@@ -403,16 +402,19 @@ final public class ChainWriter implements Appendable {
         return this;
     }
 
+    @Override
     public ChainWriter append(CharSequence csq) {
         out.append(csq);
         return this;
     }
 
+    @Override
     public ChainWriter append(CharSequence csq, int start, int end) {
         out.append(csq, start, end);
         return this;
     }
 
+    @Override
     public ChainWriter append(char c) {
         out.append(c);
         return this;
@@ -445,7 +447,7 @@ final public class ChainWriter implements Appendable {
      * @param S the string to be escaped
      */
     public ChainWriter encodeXhtml(String S) throws IOException {
-        TextInXhtmlEncoder.encodeTextInXhtml(Locale.getDefault(), S, out);
+        TextInXhtmlEncoder.encodeTextInXhtml(S, out);
         return this;
     }
 

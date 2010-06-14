@@ -24,7 +24,6 @@ package com.aoindustries.encoding;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Locale;
 
 /**
  * Writes XHTML preformatted text into (X)HTML by adding a pre tag wrapper.
@@ -34,13 +33,11 @@ import java.util.Locale;
  */
 public class XhtmlPreInXhtmlEncoder extends MediaEncoder {
 
-    private final Locale userLocale;
-
-    protected XhtmlPreInXhtmlEncoder(Writer out, Locale userLocale) {
+    protected XhtmlPreInXhtmlEncoder(Writer out) {
         super(out);
-        this.userLocale = userLocale;
     }
 
+    @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.XHTML_PRE
@@ -50,6 +47,7 @@ public class XhtmlPreInXhtmlEncoder extends MediaEncoder {
         ;
     }
 
+    @Override
     public MediaType getValidMediaOutputType() {
         return MediaType.XHTML;
     }
@@ -61,40 +59,40 @@ public class XhtmlPreInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void write(int c) throws IOException {
-        XhtmlPreValidator.checkCharacter(userLocale, c);
+        XhtmlPreValidator.checkCharacter(c);
         out.write(c);
     }
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        XhtmlPreValidator.checkCharacters(userLocale, cbuf, off, len);
+        XhtmlPreValidator.checkCharacters(cbuf, off, len);
         out.write(cbuf, off, len);
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
         if(str==null) throw new IllegalArgumentException("str is null");
-        XhtmlPreValidator.checkCharacters(userLocale, str, off, off + len);
+        XhtmlPreValidator.checkCharacters(str, off, off + len);
         out.write(str, off, len);
     }
 
     @Override
     public XhtmlPreInXhtmlEncoder append(CharSequence csq) throws IOException {
-        XhtmlPreValidator.checkCharacters(userLocale, csq, 0, csq.length());
+        XhtmlPreValidator.checkCharacters(csq, 0, csq.length());
         out.append(csq);
         return this;
     }
 
     @Override
     public XhtmlPreInXhtmlEncoder append(CharSequence csq, int start, int end) throws IOException {
-        XhtmlPreValidator.checkCharacters(userLocale, csq, start, end);
+        XhtmlPreValidator.checkCharacters(csq, start, end);
         out.append(csq, start, end);
         return this;
     }
 
     @Override
     public XhtmlPreInXhtmlEncoder append(char c) throws IOException {
-        XhtmlPreValidator.checkCharacter(userLocale, c);
+        XhtmlPreValidator.checkCharacter(c);
         out.append(c);
         return this;
     }

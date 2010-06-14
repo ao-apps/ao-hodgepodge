@@ -26,7 +26,6 @@ import com.aoindustries.io.StringBuilderWriter;
 import com.aoindustries.util.EncodingUtils;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -38,7 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 public class UrlInXhtmlEncoder extends MediaEncoder {
 
     private final Writer originalOut;
-    private final Locale userLocale;
     private final HttpServletResponse response;
 
     /**
@@ -46,15 +44,15 @@ public class UrlInXhtmlEncoder extends MediaEncoder {
      */
     private final StringBuilderWriter buffer = new StringBuilderWriter(128);
 
-    protected UrlInXhtmlEncoder(Writer out, Locale userLocale, HttpServletResponse response) {
+    protected UrlInXhtmlEncoder(Writer out, HttpServletResponse response) {
         super(out);
         this.originalOut = out;
-        this.userLocale = userLocale;
         this.response = response;
         // Replace out to write to a validated buffer instead
-        this.out = new UrlValidator(buffer, userLocale);
+        this.out = new UrlValidator(buffer);
     }
 
+    @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.URL
@@ -63,6 +61,7 @@ public class UrlInXhtmlEncoder extends MediaEncoder {
         ;
     }
 
+    @Override
     public MediaType getValidMediaOutputType() {
         return MediaType.XHTML;
     }

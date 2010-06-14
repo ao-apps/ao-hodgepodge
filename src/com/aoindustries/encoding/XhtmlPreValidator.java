@@ -24,7 +24,6 @@ package com.aoindustries.encoding;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Locale;
 
 /**
  * Makes sure that all data going through this writer has the correct characters
@@ -41,7 +40,7 @@ public class XhtmlPreValidator extends MediaValidator {
      *
      * {@link http://www.w3.org/TR/REC-xml/#charsets}
      */
-    public static void checkCharacter(Locale userLocale, int c) throws IOException {
+    public static void checkCharacter(int c) throws IOException {
         if(
             c!=0x9
             && c!=0xA
@@ -52,31 +51,29 @@ public class XhtmlPreValidator extends MediaValidator {
             // Also don't allow any XML tags
             && c!='<'
             && c!='>'
-        ) throw new IOException(ApplicationResources.accessor.getMessage(userLocale, "XhtmlPreMediaValidator.invalidCharacter", Integer.toHexString(c)));
+        ) throw new IOException(ApplicationResources.accessor.getMessage("XhtmlPreMediaValidator.invalidCharacter", Integer.toHexString(c)));
     }
 
     /**
      * Checks a set of characters, throws IOException if invalid
      */
-    public static void checkCharacters(Locale userLocale, char[] cbuf, int off, int len) throws IOException {
+    public static void checkCharacters(char[] cbuf, int off, int len) throws IOException {
         int end = off + len;
-        while(off<end) checkCharacter(userLocale, cbuf[off++]);
+        while(off<end) checkCharacter(cbuf[off++]);
     }
 
     /**
      * Checks a set of characters, throws IOException if invalid
      */
-    public static void checkCharacters(Locale userLocale, CharSequence str, int off, int end) throws IOException {
-        while(off<end) checkCharacter(userLocale, str.charAt(off++));
+    public static void checkCharacters(CharSequence str, int off, int end) throws IOException {
+        while(off<end) checkCharacter(str.charAt(off++));
     }
 
-    private final Locale userLocale;
-
-    protected XhtmlPreValidator(Writer out, Locale userLocale) {
+    protected XhtmlPreValidator(Writer out) {
         super(out);
-        this.userLocale = userLocale;
     }
 
+    @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.XHTML_PRE
@@ -86,46 +83,47 @@ public class XhtmlPreValidator extends MediaValidator {
         ;
     }
 
+    @Override
     public MediaType getValidMediaOutputType() {
         return MediaType.XHTML_PRE;
     }
 
     @Override
     public void write(int c) throws IOException {
-        checkCharacter(userLocale, c);
+        checkCharacter(c);
         out.write(c);
     }
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        checkCharacters(userLocale, cbuf, off, len);
+        checkCharacters(cbuf, off, len);
         out.write(cbuf, off, len);
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
         if(str==null) throw new IllegalArgumentException("str is null");
-        checkCharacters(userLocale, str, off, off + len);
+        checkCharacters(str, off, off + len);
         out.write(str, off, len);
     }
 
     @Override
     public XhtmlPreValidator append(CharSequence csq) throws IOException {
-        checkCharacters(userLocale, csq, 0, csq.length());
+        checkCharacters(csq, 0, csq.length());
         out.append(csq);
         return this;
     }
 
     @Override
     public XhtmlPreValidator append(CharSequence csq, int start, int end) throws IOException {
-        checkCharacters(userLocale, csq, start, end);
+        checkCharacters(csq, start, end);
         out.append(csq, start, end);
         return this;
     }
 
     @Override
     public XhtmlPreValidator append(char c) throws IOException {
-        checkCharacter(userLocale, c);
+        checkCharacter(c);
         out.append(c);
         return this;
     }

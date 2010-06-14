@@ -194,6 +194,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
             Collections.sort(
                 lookupKeys,
                 new Comparator<LookupKey>() {
+                    @Override
                     public int compare(LookupKey key1, LookupKey key2) {
                         return Long.valueOf(lookups.get(key1).id).compareTo(Long.valueOf(lookups.get(key2).id));
                     }
@@ -772,6 +773,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
     /**
      * The natural sorting is based on classname.
      */
+    @Override
     public int compareTo(EditableResourceBundle o) {
         return getClass().getName().compareTo(o.getClass().getName());
     }

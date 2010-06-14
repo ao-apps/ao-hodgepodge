@@ -23,7 +23,6 @@
 package com.aoindustries.swing;
 
 import java.util.List;
-import java.util.Locale;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
 
@@ -40,6 +39,8 @@ import javax.swing.SwingUtilities;
  * @author  AO Industries, Inc.
  */
 public class SynchronizingComboBoxModel extends DefaultComboBoxModel {
+
+    private static final long serialVersionUID = 1L;
 
     private final Object constantFirstRow;
 
@@ -58,7 +59,7 @@ public class SynchronizingComboBoxModel extends DefaultComboBoxModel {
      * Swing event dispatch thread.
      */
     public void synchronize(List<?> list) {
-        assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage(Locale.getDefault(), "assert.notRunningInSwingEventThread");
+        assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage("assert.notRunningInSwingEventThread");
 
         // Make sure the first element exists and matches
         int modelOffset;

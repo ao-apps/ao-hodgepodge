@@ -25,7 +25,6 @@ package com.aoindustries.util.i18n;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * ISO 3166-1 alpha-2 country codes.
@@ -34,7 +33,7 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-public enum Country implements LocalizedToString {
+public enum Country {
 
     AD(1974),
     AE(1974),
@@ -570,19 +569,9 @@ public enum Country implements LocalizedToString {
         return since;
     }
 
-    /**
-     * Gets the display value in the default locale.
-     */
     @Override
     public String toString() {
-        return toString(Locale.getDefault());
-    }
-
-    /**
-     * Gets the display value in the provided locale.
-     */
-    public String toString(Locale userLocale) {
-        return ApplicationResources.accessor.getMessage(userLocale, "Country."+name()+".toString");
+        return ApplicationResources.accessor.getMessage("Country."+name()+".toString");
     }
 
     /**

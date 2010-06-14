@@ -23,7 +23,6 @@
 package com.aoindustries.encoding;
 
 import java.io.Writer;
-import java.util.Locale;
 
 /**
  * Same encoding as <code>TextInXhtmlEncoder</code>, but with an output type
@@ -33,8 +32,8 @@ import java.util.Locale;
  */
 public class TextInXhtmlPreEncoder extends TextInXhtmlEncoder {
 
-    protected TextInXhtmlPreEncoder(Writer out, Locale userLocale) {
-        super(out, userLocale);
+    protected TextInXhtmlPreEncoder(Writer out) {
+        super(out);
     }
 
     @Override

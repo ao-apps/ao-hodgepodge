@@ -115,7 +115,7 @@ abstract public class ModifiableResourceBundle extends ResourceBundle {
      */
     public final void setMediaType(String key, MediaType mediaType, Boolean isBlockElement) {
         if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
-        if(!getLocale().equals(new Locale(""))) throw new AssertionError("ResourceBundle is not for the base locale: "+this);
+        if(!getLocale().equals(Locale.ROOT)) throw new AssertionError("ResourceBundle is not for the base locale: "+this);
         if(mediaType==MediaType.XHTML) {
             if(isBlockElement==null) throw new IllegalArgumentException("isBlockElement is null when mediaType is "+mediaType);
         } else {

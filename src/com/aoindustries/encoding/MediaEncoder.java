@@ -25,7 +25,6 @@ package com.aoindustries.encoding;
 import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -53,7 +52,7 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
      * @exception MediaException when unable to encode the content into the container
      *                            either because it is impossible or not yet implemented.
      */
-    public static MediaEncoder getMediaEncoder(Locale userLocale, HttpServletResponse response, MediaType contentType, MediaType containerType, Writer out) throws MediaException {
+    public static MediaEncoder getMediaEncoder(HttpServletResponse response, MediaType contentType, MediaType containerType, Writer out) throws MediaException {
         // If the types match then no conversion is necessary
         if(contentType==containerType) return null;
         final MediaEncoder encoder;
@@ -63,40 +62,40 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
                     case TEXT: encoder = null; break; // No conversion necessary
                     case XHTML : encoder = new JavaScriptInXhtmlEncoder(out); break;
                     case XHTML_ATTRIBUTE : encoder = new JavaScriptInXhtmlAttributeEncoder(out); break;
-                    case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out, userLocale); break; // Just treat as text
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out); break; // Just treat as text
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case TEXT:
                 switch(containerType) {
                     case JAVASCRIPT: encoder = new TextInJavaScriptEncoder(out); break;
-                    case XHTML: encoder = new TextInXhtmlEncoder(out, userLocale); break;
-                    case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out, userLocale); break;
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    case XHTML: encoder = new TextInXhtmlEncoder(out); break;
+                    case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out); break;
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case URL:
                 switch(containerType) {
-                    case JAVASCRIPT: encoder = new UrlInJavaScriptEncoder(out, userLocale, response); break;
-                    case TEXT: encoder = new UrlInTextEncoder(out, userLocale); break;
-                    case XHTML: encoder = new UrlInXhtmlEncoder(out, userLocale, response); break;
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    case JAVASCRIPT: encoder = new UrlInJavaScriptEncoder(out, response); break;
+                    case TEXT: encoder = new UrlInTextEncoder(out); break;
+                    case XHTML: encoder = new UrlInXhtmlEncoder(out, response); break;
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case XHTML:
                 switch(containerType) {
                     case TEXT: encoder = null; break; // No conversion necessary
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case XHTML_PRE:
                 switch(containerType) {
                     case TEXT: encoder = null; break; // No conversion necessary
-                    case XHTML: encoder = new XhtmlPreInXhtmlEncoder(out, userLocale); break;
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    case XHTML: encoder = new XhtmlPreInXhtmlEncoder(out); break;
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
-            default: throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+            default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
         }
         if(encoder!=null) {
             // Make sure types match - bug catching

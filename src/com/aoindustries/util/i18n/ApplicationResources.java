@@ -37,7 +37,7 @@ public final class ApplicationResources extends EditableResourceBundle {
     static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
         ApplicationResources.class.getName(),
         Arrays.asList(
-            new Locale(""), // Locale.ROOT in Java 1.6
+            Locale.ROOT,
             Locale.JAPANESE
         )
     );
@@ -48,7 +48,7 @@ public final class ApplicationResources extends EditableResourceBundle {
     public ApplicationResources() {
         super(
             new File(System.getProperty("user.home")+"/common/ao/cvswork/aocode-public/src/com/aoindustries/util/i18n/ApplicationResources.properties"),
-            new Locale(""),
+            Locale.ROOT,
             bundleSet
         );
     }

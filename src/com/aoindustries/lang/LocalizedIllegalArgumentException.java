@@ -24,78 +24,51 @@ package com.aoindustries.lang;
 
 import com.aoindustries.util.Arrays;
 import com.aoindustries.util.i18n.ApplicationResourcesAccessor;
-import com.aoindustries.util.i18n.LocalizedMessage;
 import java.io.Serializable;
-import java.util.Locale;
 
 /**
- * Extends <code>IllegalArgumentException</code> to provide exceptions with both JVM default locale and user locale error messages.
+ * Extends <code>IllegalArgumentException</code> to provide exceptions in user locale error messages.
  *
  * @author  AO Industries, Inc.
  */
-public class LocalizedIllegalArgumentException extends IllegalArgumentException implements LocalizedMessage {
+public class LocalizedIllegalArgumentException extends IllegalArgumentException {
 
     private static final long serialVersionUID = 1L;
 
     private final ApplicationResourcesAccessor accessor;
-    private final Locale defaultLocale;
     private final String key;
     private final Serializable[] args;
 
     public LocalizedIllegalArgumentException(ApplicationResourcesAccessor accessor, String key) {
-        this(accessor, Locale.getDefault(), key);
-    }
-
-    public LocalizedIllegalArgumentException(ApplicationResourcesAccessor accessor, Locale defaultLocale, String key) {
-        super(accessor.getMessage(Locale.getDefault(), key));
+        super(accessor.getMessage(key));
         this.accessor = accessor;
-        this.defaultLocale = defaultLocale;
         this.key = key;
         this.args = Arrays.EMPTY_SERIALIZABLE_ARRAY;
     }
 
     public LocalizedIllegalArgumentException(ApplicationResourcesAccessor accessor, String key, Serializable... args) {
-        this(accessor, Locale.getDefault(), key, args);
-    }
-
-    public LocalizedIllegalArgumentException(ApplicationResourcesAccessor accessor, Locale defaultLocale, String key, Serializable... args) {
-        super(accessor.getMessage(Locale.getDefault(), key, (Object[])args));
+        super(accessor.getMessage(key, (Object[])args));
         this.accessor = accessor;
-        this.defaultLocale = defaultLocale;
         this.key = key;
         this.args = args;
     }
 
     public LocalizedIllegalArgumentException(Throwable cause, ApplicationResourcesAccessor accessor, String key) {
-        this(cause, accessor, Locale.getDefault(), key);
-    }
-
-    public LocalizedIllegalArgumentException(Throwable cause, ApplicationResourcesAccessor accessor, Locale defaultLocale, String key) {
-        super(accessor.getMessage(Locale.getDefault(), key), cause);
+        super(accessor.getMessage(key), cause);
         this.accessor = accessor;
-        this.defaultLocale = defaultLocale;
         this.key = key;
         this.args = Arrays.EMPTY_SERIALIZABLE_ARRAY;
     }
 
     public LocalizedIllegalArgumentException(Throwable cause, ApplicationResourcesAccessor accessor, String key, Serializable... args) {
-        this(cause, accessor, Locale.getDefault(), key, args);
-    }
-
-    public LocalizedIllegalArgumentException(Throwable cause, ApplicationResourcesAccessor accessor, Locale defaultLocale, String key, Serializable... args) {
-        super(accessor.getMessage(Locale.getDefault(), key, (Object[])args), cause);
+        super(accessor.getMessage(key, (Object[])args), cause);
         this.accessor = accessor;
-        this.defaultLocale = defaultLocale;
         this.key = key;
         this.args = args;
     }
 
     @Override
     public String getLocalizedMessage() {
-        return getLocalizedMessage(defaultLocale);
-    }
-
-    public String getLocalizedMessage(Locale userLocale) {
-        return accessor.getMessage(userLocale, key, (Object[])args);
+        return accessor.getMessage(key, (Object[])args);
     }
 }

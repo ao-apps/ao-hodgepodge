@@ -23,11 +23,7 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.util.StringUtility;
-import com.aoindustries.util.WrappedException;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -36,9 +32,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * Provides a simplified interface for obtaining localized values from a <code>ResourceBundle</code>.
- * It is designed to be similar to the use of the related Struts classes.  Also uses
- * the parameter <code>toString(Locale)</code> when available, even if not marked with the
- * <code>LocalizedToString</code> interface.
+ * It is designed to be similar to the use of the related Struts classes.
  *
  * @author  AO Industries, Inc.
  */
@@ -66,39 +60,7 @@ public class ApplicationResourcesAccessor implements Serializable {
         }
     }
 
-    private static final Class[] toStringParamTypes = new Class[] {Locale.class};
-
-    /**
-     * Gets the best <code>toString</code> for the provided object in the provided locale.
-     * <ol>
-     *   <li>If is <code>null</code>, returns <code>"null"</code></li>
-     *   <li>If instance of <code>LocalizedToString</code>, casts and calls directly</li>
-     *   <li>Calls <code>toString(Locale)</code> through reflection</li>
-     *   <li>Uses standard <code>toString()</code></li>
-     * </ol>
-     */
-    public static String getToString(Locale locale, Object object) {
-        if(object==null) return "null";
-        if(object instanceof LocalizedToString) return ((LocalizedToString)object).toString(locale);
-        try {
-            Method method = object.getClass().getMethod("toString", toStringParamTypes);
-            int mod = method.getModifiers();
-            if(
-                Modifier.isPublic(mod)
-                && !Modifier.isStatic(mod)
-                && method.getReturnType()==String.class
-            ) return (String)method.invoke(object, locale);
-        } catch(NoSuchMethodException err) {
-            // Fall-through to default toString
-        } catch(IllegalAccessException err) {
-            throw new WrappedException(err);
-        } catch(InvocationTargetException err) {
-            throw new WrappedException(err);
-        }
-        return object.toString();
-    }
-
-    private static String multiReplace(Locale locale, String message, Object... args) {
+    private static String multiReplace(String message, Object... args) {
         int messageLen = message.length();
         int argsLen = args.length;
         if(messageLen<3 || argsLen==0) return message;
@@ -124,7 +86,7 @@ public class ApplicationResourcesAccessor implements Serializable {
                 messageSB.append(message, lastPos, messageLen);
                 lastPos = messageLen;
             } else {
-                messageSB.append(message, lastPos, nextArgPos).append(getToString(locale, args[nextArg]));
+                messageSB.append(message, lastPos, nextArgPos).append(args[nextArg]);
                 lastPos = nextArgPos + nextArgHolderLen;
             }
         }
@@ -153,41 +115,59 @@ public class ApplicationResourcesAccessor implements Serializable {
         return getInstance(resourceName);
     }
 
-    public String getMessage(Locale locale, String key) {
-        return getMessage(null, locale, key);
+    /**
+     * Gets the message in the current thread's locale.
+     *
+     * @see ThreadLocale
+     */
+    public String getMessage(String key) {
+        return getMessage(null, key);
     }
 
     /**
+     * <p>
      * Gets the message.  If the messages is missing will use the missingDefault
      * value.  If missingDefault is null, will generate a struts-like value
      * including the locale and key.
-     *
+     * </p>
+     * <p>
      * This should be used very sparingly.  It is intended for situations where
      * the associated properties file may be unavailable in specific
      * circumstances, such as a TagExtraInfo implementation in NetBeans 6.5.
-     */
-    public String getMessage(String missingDefault, Locale locale, String key) {
-        return getString(missingDefault, locale, key);
-    }
-
-    /**
-     * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
-     */
-    public String getMessage(Locale locale, String key, Object... args) {
-        return getMessage(null, locale, key, args);
-    }
-
-    /**
-     * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
+     * </p>
+     * <p>
+     * Gets the message in the current thread's locale.
+     * </p>
      *
+     * @see ThreadLocale
+     */
+    public String getMessage(String missingDefault, String key) {
+        return getString(missingDefault, key);
+    }
+
+    /**
+     * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
+     * Gets the message in the current thread's locale.
+     * @see ThreadLocale
+     */
+    public String getMessage(String key, Object... args) {
+        return getMessage(null, key, args);
+    }
+
+    /**
+     * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
+     * Gets the message in the current thread's locale.
+     *
+     * @see ThreadLocale
      * @see  #getMessage(String,Locale,String)
      */
-    public String getMessage(String missingDefault, Locale locale, String key, Object... args) {
-        String message = getString(missingDefault, locale, key);
-        return multiReplace(locale, message, args);
+    public String getMessage(String missingDefault, String key, Object... args) {
+        String message = getString(missingDefault, key);
+        return multiReplace(message, args);
     }
 
-    private String getString(String missingDefault, Locale locale, String key) {
+    private String getString(String missingDefault, String key) {
+        Locale locale = ThreadLocale.get();
         String string = null;
         try {
             ResourceBundle applicationResources = ResourceBundle.getBundle(resourceName, locale);

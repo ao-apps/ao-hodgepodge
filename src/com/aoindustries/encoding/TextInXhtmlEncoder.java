@@ -24,7 +24,6 @@ package com.aoindustries.encoding;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Locale;
 
 /**
  * Encodes arbitrary data into XHTML.  Minimal conversion is performed, just
@@ -44,9 +43,9 @@ public class TextInXhtmlEncoder extends MediaEncoder {
      * Encodes a single character and returns its String representation
      * or null if no modification is necessary.
      *
-     * @see XhtmlMediaValidator#checkCharacter(java.util.Locale, int)
+     * @see XhtmlMediaValidator#checkCharacter(int)
      */
-    private static String getEscapedCharacter(Locale userLocale, int c, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
+    private static String getEscapedCharacter(int c, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
         boolean oldPreviousWasSpace;
         if(encodingState==null) {
             if(makeNbsp) throw new IllegalArgumentException("encodingState is null while makeNbsp is true");
@@ -69,29 +68,29 @@ public class TextInXhtmlEncoder extends MediaEncoder {
                 if(makeNbsp && oldPreviousWasSpace) return "&#160;";
                 return null;
             default:
-                XhtmlValidator.checkCharacter(userLocale, c);
+                XhtmlValidator.checkCharacter(c);
                 return null;
         }
     }
 
-    public static void encodeTextInXhtml(Locale userLocale, CharSequence S, Appendable out) throws IOException {
-        encodeTextInXhtml(userLocale, S, out, false, false, null);
+    public static void encodeTextInXhtml(CharSequence S, Appendable out) throws IOException {
+        encodeTextInXhtml(S, out, false, false, null);
     }
 
-    public static void encodeTextInXhtml(Locale userLocale, CharSequence S, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
+    public static void encodeTextInXhtml(CharSequence S, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
         if(S==null) S = "null";
-        encodeTextInXhtml(userLocale, S, 0, S.length(), out, makeBr, makeNbsp, encodingState);
+        encodeTextInXhtml(S, 0, S.length(), out, makeBr, makeNbsp, encodingState);
     }
 
-    public static void encodeTextInXhtml(Locale userLocale, CharSequence S, int start, int end, Appendable out) throws IOException {
-        encodeTextInXhtml(userLocale, S, start, end, out, false, false, null);
+    public static void encodeTextInXhtml(CharSequence S, int start, int end, Appendable out) throws IOException {
+        encodeTextInXhtml(S, start, end, out, false, false, null);
     }
 
-    public static void encodeTextInXhtml(Locale userLocale, CharSequence S, int start, int end, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
+    public static void encodeTextInXhtml(CharSequence S, int start, int end, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
         if(S==null) S = "null";
         int toPrint = 0;
         for (int c = start; c < end; c++) {
-            String escaped = getEscapedCharacter(userLocale, S.charAt(c), makeBr, makeNbsp, encodingState);
+            String escaped = getEscapedCharacter(S.charAt(c), makeBr, makeNbsp, encodingState);
             if(escaped!=null) {
                 if(toPrint>0) {
                     out.append(S, c-toPrint, c);
@@ -105,15 +104,15 @@ public class TextInXhtmlEncoder extends MediaEncoder {
         if(toPrint>0) out.append(S, end-toPrint, end);
     }
 
-    public static void encodeTextInXhtml(Locale userLocale, char[] cbuf, int start, int len, Writer out) throws IOException {
-        encodeTextInXhtml(userLocale, cbuf, start, len, out, false, false, null);
+    public static void encodeTextInXhtml(char[] cbuf, int start, int len, Writer out) throws IOException {
+        encodeTextInXhtml(cbuf, start, len, out, false, false, null);
     }
 
-    public static void encodeTextInXhtml(Locale userLocale, char[] cbuf, int start, int len, Writer out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
+    public static void encodeTextInXhtml(char[] cbuf, int start, int len, Writer out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
         int end = start+len;
         int toPrint = 0;
         for (int c = start; c < end; c++) {
-            String escaped = getEscapedCharacter(userLocale, cbuf[c], makeBr, makeNbsp, encodingState);
+            String escaped = getEscapedCharacter(cbuf[c], makeBr, makeNbsp, encodingState);
             if(escaped!=null) {
                 if(toPrint>0) {
                     out.write(cbuf, c-toPrint, toPrint);
@@ -127,27 +126,26 @@ public class TextInXhtmlEncoder extends MediaEncoder {
         if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
     }
 
-    public static void encodeTextInXhtml(Locale userLocale, char ch, Appendable out) throws IOException {
-        encodeTextInXhtml(userLocale, ch, out, false, false, null);
+    public static void encodeTextInXhtml(char ch, Appendable out) throws IOException {
+        encodeTextInXhtml(ch, out, false, false, null);
     }
 
-    public static void encodeTextInXhtml(Locale userLocale, char ch, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
-        String escaped = getEscapedCharacter(userLocale, ch, makeBr, makeNbsp, encodingState);
+    public static void encodeTextInXhtml(char ch, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
+        String escaped = getEscapedCharacter(ch, makeBr, makeNbsp, encodingState);
         if(escaped!=null) out.append(escaped);
         else out.append(ch);
     }
     // </editor-fold>
 
-    private final Locale userLocale;
     private boolean makeBr = false;
     private boolean makeNbsp = false;
     private final EncodingState encodingState = new EncodingState();
 
-    protected TextInXhtmlEncoder(Writer out, Locale userLocale) {
+    protected TextInXhtmlEncoder(Writer out) {
         super(out);
-        this.userLocale = userLocale;
     }
 
+    @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.TEXT
@@ -155,6 +153,7 @@ public class TextInXhtmlEncoder extends MediaEncoder {
         ;
     }
 
+    @Override
     public MediaType getValidMediaOutputType() {
         return MediaType.XHTML;
     }
@@ -193,37 +192,37 @@ public class TextInXhtmlEncoder extends MediaEncoder {
      */
     @Override
     public void write(int c) throws IOException {
-        String escaped = getEscapedCharacter(userLocale, c, makeBr, makeNbsp, encodingState);
+        String escaped = getEscapedCharacter(c, makeBr, makeNbsp, encodingState);
         if(escaped!=null) out.write(escaped);
         else out.write(c);
     }
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        encodeTextInXhtml(userLocale, cbuf, off, len, out, makeBr, makeNbsp, encodingState);
+        encodeTextInXhtml(cbuf, off, len, out, makeBr, makeNbsp, encodingState);
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
         if(str==null) throw new IllegalArgumentException("str is null");
-        encodeTextInXhtml(userLocale, str, off, off+len, out, makeBr, makeNbsp, encodingState);
+        encodeTextInXhtml(str, off, off+len, out, makeBr, makeNbsp, encodingState);
     }
 
     @Override
     public TextInXhtmlEncoder append(CharSequence csq) throws IOException {
-        encodeTextInXhtml(userLocale, csq, out, makeBr, makeNbsp, encodingState);
+        encodeTextInXhtml(csq, out, makeBr, makeNbsp, encodingState);
         return this;
     }
 
     @Override
     public TextInXhtmlEncoder append(CharSequence csq, int start, int end) throws IOException {
-        encodeTextInXhtml(userLocale, csq, start, end, out, makeBr, makeNbsp, encodingState);
+        encodeTextInXhtml(csq, start, end, out, makeBr, makeNbsp, encodingState);
         return this;
     }
 
     @Override
     public TextInXhtmlEncoder append(char c) throws IOException {
-        encodeTextInXhtml(userLocale, c, out, makeBr, makeNbsp, encodingState);
+        encodeTextInXhtml(c, out, makeBr, makeNbsp, encodingState);
         return this;
     }
 }

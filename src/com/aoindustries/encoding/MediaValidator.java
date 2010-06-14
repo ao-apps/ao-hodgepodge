@@ -25,7 +25,6 @@ package com.aoindustries.encoding;
 import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Locale;
 
 /**
  * Verify that the data passing through this filter is valid for the provided media type.
@@ -40,7 +39,7 @@ abstract public class MediaValidator extends FilterWriter implements ValidMediaF
      *
      * @exception MediaException when unable to find an appropriate validator.
      */
-    public static MediaValidator getMediaValidator(Locale userLocale, MediaType contentType, Writer out) throws MediaException {
+    public static MediaValidator getMediaValidator(MediaType contentType, Writer out) throws MediaException {
         // If the existing out is already validating for this type, use it
         if(out instanceof MediaValidator) {
             MediaValidator inputValidator = (MediaValidator)out;
@@ -53,13 +52,13 @@ abstract public class MediaValidator extends FilterWriter implements ValidMediaF
             case TEXT:
                 return new TextValidator(out);
             case URL:
-                return new UrlValidator(out, userLocale);
+                return new UrlValidator(out);
             case XHTML:
-                return new XhtmlValidator(out, userLocale);
+                return new XhtmlValidator(out);
             case XHTML_PRE:
-                return new XhtmlPreValidator(out, userLocale);
+                return new XhtmlPreValidator(out);
             default:
-                throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaValidator.unableToFindValidator", contentType.getMediaType()));
+                throw new MediaException(ApplicationResources.accessor.getMessage("MediaValidator.unableToFindValidator", contentType.getMediaType()));
         }
     }
 

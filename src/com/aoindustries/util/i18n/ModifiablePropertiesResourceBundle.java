@@ -168,7 +168,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             String value = (String)entry.getValue();
             if(key.endsWith(MEDIATYPE_SUFFIX)) {
                 try {
-                    mediaTypeMap.put(key.substring(0, key.length()-MEDIATYPE_SUFFIX.length()), MediaType.getMediaType(Locale.getDefault(), value));
+                    mediaTypeMap.put(key.substring(0, key.length()-MEDIATYPE_SUFFIX.length()), MediaType.getMediaType(value));
                 } catch(MediaException err) {
                     throw new RuntimeException(err);
                 }
@@ -184,11 +184,13 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         }
     }
 
+    @Override
     protected Object handleGetObject(String key) {
         if(key==null) throw new NullPointerException();
         return valueMap.get(key);
     }
 
+    @Override
     public Enumeration<String> getKeys() {
         ResourceBundle myParent= this.parent;
         return new ResourceBundleEnumeration(valueMap.keySet(), (myParent != null) ? myParent.getKeys() : null);
@@ -199,6 +201,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         return valueMap.keySet();
     }
 
+    @Override
     public boolean isModifiable() {
         return isModifiable;
     }
@@ -245,6 +248,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         }
     }
 
+    @Override
     protected void handleSetObject(String key, Object value, boolean modified) {
         checkKey(key);
         // Updates are serialized
@@ -261,11 +265,13 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         }
     }
 
+    @Override
     protected MediaType handleGetMediaType(String key) {
         if(key==null) throw new NullPointerException();
         return mediaTypeMap.get(key);
     }
 
+    @Override
     protected Boolean handleIsBlockElement(String key) {
         if(key==null) throw new NullPointerException();
         return isBlockElementMap.get(key);
@@ -292,6 +298,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         return modifiedMap.get(key);
     }
 
+    @Override
     protected void handleSetMediaType(String key, MediaType mediaType, Boolean isBlockDevice) {
         checkKey(key);
         // Updates are serialized

@@ -24,7 +24,6 @@ package com.aoindustries.encoding;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Locale;
 
 /**
  * Writes a URL into TEXT and validates its input as a URL.  The URL is
@@ -34,13 +33,11 @@ import java.util.Locale;
  */
 public class UrlInTextEncoder extends MediaEncoder {
 
-    private final Locale userLocale;
-
-    protected UrlInTextEncoder(Writer out, Locale userLocale) {
+    protected UrlInTextEncoder(Writer out) {
         super(out);
-        this.userLocale = userLocale;
     }
 
+    @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.URL
@@ -51,46 +48,47 @@ public class UrlInTextEncoder extends MediaEncoder {
 
     private boolean foundQuestionMark = false;
 
+    @Override
     public MediaType getValidMediaOutputType() {
         return MediaType.TEXT;
     }
 
     @Override
     public void write(int c) throws IOException {
-        foundQuestionMark = UrlValidator.checkCharacter(userLocale, c, foundQuestionMark);
+        foundQuestionMark = UrlValidator.checkCharacter(c, foundQuestionMark);
         out.write(c);
     }
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        foundQuestionMark = UrlValidator.checkCharacters(userLocale, cbuf, off, len, foundQuestionMark);
+        foundQuestionMark = UrlValidator.checkCharacters(cbuf, off, len, foundQuestionMark);
         out.write(cbuf, off, len);
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
         if(str==null) throw new IllegalArgumentException("str is null");
-        foundQuestionMark = UrlValidator.checkCharacters(userLocale, str, off, off + len, foundQuestionMark);
+        foundQuestionMark = UrlValidator.checkCharacters(str, off, off + len, foundQuestionMark);
         out.write(str, off, len);
     }
 
     @Override
     public UrlInTextEncoder append(CharSequence csq) throws IOException {
-        foundQuestionMark = UrlValidator.checkCharacters(userLocale, csq, 0, csq.length(), foundQuestionMark);
+        foundQuestionMark = UrlValidator.checkCharacters(csq, 0, csq.length(), foundQuestionMark);
         out.append(csq);
         return this;
     }
 
     @Override
     public UrlInTextEncoder append(CharSequence csq, int start, int end) throws IOException {
-        foundQuestionMark = UrlValidator.checkCharacters(userLocale, csq, start, end, foundQuestionMark);
+        foundQuestionMark = UrlValidator.checkCharacters(csq, start, end, foundQuestionMark);
         out.append(csq, start, end);
         return this;
     }
 
     @Override
     public UrlInTextEncoder append(char c) throws IOException {
-        foundQuestionMark = UrlValidator.checkCharacter(userLocale, c, foundQuestionMark);
+        foundQuestionMark = UrlValidator.checkCharacter(c, foundQuestionMark);
         out.append(c);
         return this;
     }

@@ -24,79 +24,52 @@ package com.aoindustries.io;
 
 import com.aoindustries.util.Arrays;
 import com.aoindustries.util.i18n.ApplicationResourcesAccessor;
-import com.aoindustries.util.i18n.LocalizedMessage;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Locale;
 
 /**
- * Extends <code>IOException</code> to provide exceptions with both JVM default locale and user locale error messages.
+ * Extends <code>IOException</code> to provide exceptions with user locale error messages.
  *
  * @author  AO Industries, Inc.
  */
-public class LocalizedIOException extends IOException implements LocalizedMessage {
+public class LocalizedIOException extends IOException {
 
     private static final long serialVersionUID = 1L;
 
     private final ApplicationResourcesAccessor accessor;
-    private final Locale defaultLocale;
     private final String key;
     private final Serializable[] args;
 
     public LocalizedIOException(ApplicationResourcesAccessor accessor, String key) {
-        this(accessor, Locale.getDefault(), key);
-    }
-
-    public LocalizedIOException(ApplicationResourcesAccessor accessor, Locale defaultLocale, String key) {
-        super(accessor.getMessage(Locale.getDefault(), key));
+        super(accessor.getMessage(key));
         this.accessor = accessor;
-        this.defaultLocale = defaultLocale;
         this.key = key;
         this.args = Arrays.EMPTY_SERIALIZABLE_ARRAY;
     }
 
     public LocalizedIOException(ApplicationResourcesAccessor accessor, String key, Serializable... args) {
-        this(accessor, Locale.getDefault(), key, args);
-    }
-
-    public LocalizedIOException(ApplicationResourcesAccessor accessor, Locale defaultLocale, String key, Serializable... args) {
-        super(accessor.getMessage(Locale.getDefault(), key, (Object[])args));
+        super(accessor.getMessage(key, (Object[])args));
         this.accessor = accessor;
-        this.defaultLocale = defaultLocale;
         this.key = key;
         this.args = args;
     }
 
     public LocalizedIOException(Throwable cause, ApplicationResourcesAccessor accessor, String key) {
-        this(cause, accessor, Locale.getDefault(), key);
-    }
-
-    public LocalizedIOException(Throwable cause, ApplicationResourcesAccessor accessor, Locale defaultLocale, String key) {
-        super(accessor.getMessage(Locale.getDefault(), key), cause);
+        super(accessor.getMessage(key), cause);
         this.accessor = accessor;
-        this.defaultLocale = defaultLocale;
         this.key = key;
         this.args = Arrays.EMPTY_SERIALIZABLE_ARRAY;
     }
 
     public LocalizedIOException(Throwable cause, ApplicationResourcesAccessor accessor, String key, Serializable... args) {
-        this(cause, accessor, Locale.getDefault(), key, args);
-    }
-
-    public LocalizedIOException(Throwable cause, ApplicationResourcesAccessor accessor, Locale defaultLocale, String key, Serializable... args) {
-        super(accessor.getMessage(Locale.getDefault(), key, (Object[])args), cause);
+        super(accessor.getMessage(key, (Object[])args), cause);
         this.accessor = accessor;
-        this.defaultLocale = defaultLocale;
         this.key = key;
         this.args = args;
     }
 
     @Override
     public String getLocalizedMessage() {
-        return getLocalizedMessage(defaultLocale);
-    }
-
-    public String getLocalizedMessage(Locale userLocale) {
-        return accessor.getMessage(userLocale, key, (Object[])args);
+        return accessor.getMessage(key, (Object[])args);
     }
 }

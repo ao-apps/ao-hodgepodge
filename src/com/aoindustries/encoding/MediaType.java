@@ -22,8 +22,6 @@
  */
 package com.aoindustries.encoding;
 
-import java.util.Locale;
-
 /**
  * Supported content types.
  *
@@ -44,6 +42,7 @@ public enum MediaType {
      * An XHTML 1.0 document (<code>application/xhtml+xml</code>).
      */
     XHTML("application/xhtml+xml") {
+        @Override
         boolean isUsedFor(String contentType) {
             return
                 "application/xhtml+xml".equalsIgnoreCase(contentType)
@@ -58,6 +57,7 @@ public enum MediaType {
      * should not be this type.
      */
     XHTML_ATTRIBUTE("application/xhtml+xml+attribute") {
+        @Override
         boolean isUsedFor(String contentType) {
             return "application/xhtml+xml+attribute".equalsIgnoreCase(contentType);
         }
@@ -70,6 +70,7 @@ public enum MediaType {
      * final output should not be this type.
      */
     XHTML_PRE("application/xhtml+xml+pre") {
+        @Override
         boolean isUsedFor(String contentType) {
             return "application/xhtml+xml+pre".equalsIgnoreCase(contentType);
         }
@@ -84,6 +85,7 @@ public enum MediaType {
      * A JavaScript script (<code>text/javascript</code>).
      */
     JAVASCRIPT("text/javascript") {
+        @Override
         boolean isUsedFor(String contentType) {
             return "text/javascript".equalsIgnoreCase(contentType);
         }
@@ -96,6 +98,7 @@ public enum MediaType {
      * @see #DATA
      */
     TEXT("text/plain") {
+        @Override
         boolean isUsedFor(String contentType) {
             return "text/plain".equalsIgnoreCase(contentType);
         }
@@ -105,6 +108,7 @@ public enum MediaType {
      * A URL-encoded, &amp; (not &amp;amp;) separated URL.
      */
     URL("text/url") {
+        @Override
         boolean isUsedFor(String contentType) {
             return "text/url".equalsIgnoreCase(contentType);
         }
@@ -130,12 +134,12 @@ public enum MediaType {
     /**
      * Gets the media type for the provided textual content type.
      */
-    public static MediaType getMediaType(final Locale userLocale, final String fullContentType) throws MediaException {
+    public static MediaType getMediaType(final String fullContentType) throws MediaException {
         int semiPos = fullContentType.indexOf(';');
         String contentType = ((semiPos==-1) ? fullContentType : fullContentType.substring(0, semiPos)).trim();
         for(MediaType value : values) {
             if(value.isUsedFor(contentType)) return value;
         }
-        throw new MediaException(ApplicationResources.accessor.getMessage(userLocale, "MediaType.getMediaType.unknownType", fullContentType));
+        throw new MediaException(ApplicationResources.accessor.getMessage("MediaType.getMediaType.unknownType", fullContentType));
     }
 }

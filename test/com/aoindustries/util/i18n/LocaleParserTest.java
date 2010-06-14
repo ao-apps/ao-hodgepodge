@@ -29,8 +29,6 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Tests the filesystem iterator.
- *
  * @author  AO Industries, Inc.
  */
 public class LocaleParserTest extends TestCase {
