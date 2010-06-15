@@ -28,6 +28,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectInputValidation;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Currency;
 
 /**
@@ -67,6 +68,7 @@ final public class Money implements Serializable, ObjectInputValidation, Compara
         ois.defaultReadObject();
     }
 
+    @Override
     public void validateObject() throws InvalidObjectException {
         try {
             validate();
@@ -96,6 +98,7 @@ final public class Money implements Serializable, ObjectInputValidation, Compara
         return currency.getCurrencyCode().hashCode()*31 + value.hashCode();
     }
 
+    @Override
     public int compareTo(Money other) {
         int diff = currency.getCurrencyCode().compareTo(other.currency.getCurrencyCode());
         if(diff!=0) return diff;
@@ -111,12 +114,12 @@ final public class Money implements Serializable, ObjectInputValidation, Compara
     }
 
     /**
-     * Displays the monetary value as currency followed by value, such as EUR100.00
-     * or USD-100.50
+     * Displays the monetary value as currency symbol (in Locale-specific display) followed by value, such as $100.00
+     * or $-100.50.
      */
     @Override
     public String toString() {
-        return currency.getCurrencyCode()+value.toPlainString();
+        return currency.getSymbol(ThreadLocale.get())+value.toPlainString();
     }
 
     public Money add(Money augend) throws ArithmeticException {
@@ -128,6 +131,13 @@ final public class Money implements Serializable, ObjectInputValidation, Compara
      * Multiplies without rounding.
      */
     public Money multiply(BigDecimal multiplicand) throws ArithmeticException {
-        return new Money(currency, value.multiply(multiplicand).setScale(currency.getDefaultFractionDigits()));
+        return multiply(multiplicand, RoundingMode.UNNECESSARY);
+    }
+
+    /**
+     * Multiplies with rounding.
+     */
+    public Money multiply(BigDecimal multiplicand, RoundingMode roundingMode) throws ArithmeticException {
+        return new Money(currency, value.multiply(multiplicand).setScale(currency.getDefaultFractionDigits(), roundingMode));
     }
 }

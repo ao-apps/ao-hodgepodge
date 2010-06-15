@@ -120,6 +120,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
      * The constructor must exactly match the number of prefixParams plus the
      * result set.
      */
+    @Override
     public T createObject(ResultSet result) throws SQLException {
         try {
             ResultSetMetaData metaData = result.getMetaData();
