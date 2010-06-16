@@ -140,6 +140,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         for(Object param : params) setParam(pstmt, pos++, param);
     }
 
+    @Override
     public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -165,6 +166,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -190,6 +192,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -215,6 +218,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -240,6 +244,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -259,6 +264,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -287,6 +293,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     /**
      * TODO: Should we use cursors for this?
      */
+    @Override
     public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -306,6 +313,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -331,6 +339,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
 
@@ -377,6 +386,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
 
@@ -405,6 +415,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -444,6 +455,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -465,6 +477,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -507,6 +520,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -531,6 +545,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -550,6 +565,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -569,6 +585,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -594,6 +611,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -619,6 +637,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -638,6 +657,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
         try {
@@ -663,6 +683,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public int executeUpdate(String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(Connection.TRANSACTION_READ_COMMITTED, false).prepareStatement(sql);
         try {

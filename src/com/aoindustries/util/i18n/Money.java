@@ -98,9 +98,14 @@ final public class Money implements Serializable, ObjectInputValidation, Compara
         return currency.getCurrencyCode().hashCode()*31 + value.hashCode();
     }
 
+    /**
+     * Sorts by currency code and then value.
+     *
+     * @see  CurrencyComparator
+     */
     @Override
     public int compareTo(Money other) {
-        int diff = currency.getCurrencyCode().compareTo(other.currency.getCurrencyCode());
+        int diff = CurrencyComparator.getInstance().compare(currency, other.currency);
         if(diff!=0) return diff;
         return value.compareTo(other.value);
     }

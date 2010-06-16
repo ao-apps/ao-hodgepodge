@@ -23,13 +23,11 @@
 package com.aoindustries.util.i18n;
 
 import java.io.Serializable;
-import java.text.Collator;
 import java.util.Comparator;
 import java.util.Currency;
-import java.util.Locale;
 
 /**
- * Compares currencies and orders them by their currency code using English collator.
+ * Compares currencies and orders them by their currency code.
  *
  * @author  AO Industries, Inc.
  */
@@ -38,8 +36,6 @@ public class CurrencyComparator implements Comparator<Currency>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final CurrencyComparator singleton = new CurrencyComparator();
-
-    private static final Collator collator = Collator.getInstance(Locale.ENGLISH);
 
     public static CurrencyComparator getInstance() {
         return singleton;
@@ -54,6 +50,6 @@ public class CurrencyComparator implements Comparator<Currency>, Serializable {
 
     @Override
     public int compare(Currency o1, Currency o2) {
-        return collator.compare(o1.getCurrencyCode(), o2.getCurrencyCode());
+        return o1.getCurrencyCode().compareTo(o2.getCurrencyCode());
     }
 }
