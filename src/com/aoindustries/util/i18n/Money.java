@@ -47,11 +47,19 @@ final public class Money implements Serializable, ObjectInputValidation, Compara
     private final BigDecimal value;
 
     /**
-     * @throws NumberFormatException if value scale is not correct for the currency.
+     * Will change the scale of the value to match the currency, but will not round.
+     * @throws NumberFormatException if unable to scale the value.
      */
     public Money(Currency currency, BigDecimal value) throws NumberFormatException {
         this.currency = currency;
-        this.value = value;
+        try {
+            int scale = currency.getDefaultFractionDigits();
+            this.value = scale==-1 || scale==value.scale() ? value : value.setScale(scale);
+        } catch(ArithmeticException err) {
+            NumberFormatException newErr = new NumberFormatException(err.getMessage());
+            newErr.initCause(err);
+            throw newErr;
+        }
         validate();
     }
 
@@ -144,5 +152,12 @@ final public class Money implements Serializable, ObjectInputValidation, Compara
      */
     public Money multiply(BigDecimal multiplicand, RoundingMode roundingMode) throws ArithmeticException {
         return new Money(currency, value.multiply(multiplicand).setScale(currency.getDefaultFractionDigits(), roundingMode));
+    }
+
+    /**
+     * Returns a monetary amount that is the negative of this amount.
+     */
+    public Money negate() {
+        return new Money(currency, value.negate());
     }
 }

@@ -91,8 +91,8 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             if(!readOnly || isolationLevel>=Connection.TRANSACTION_REPEATABLE_READ) c.setAutoCommit(false);
         } else if(!readOnly && c.isReadOnly()) {
             if(!c.getAutoCommit()) {
-                c.commit();
-                // TODO: May be able to get rid of the commit - setAutoCommit should commit according to the documentation
+                // May be able to get rid of the commit - setAutoCommit should commit according to the documentation
+                // c.commit();
                 c.setAutoCommit(true);
             }
             c.setReadOnly(false);
@@ -290,9 +290,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    /**
-     * TODO: Should we use cursors for this?
-     */
     @Override
     public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);

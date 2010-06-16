@@ -46,7 +46,7 @@ public class PersistentCollections {
      * Speed testing from JUnit in NetBeans requires disabling assertions in a more forceful manner.
      * TODO: Remove this hack once performance testing has been completed.
      */
-    static final boolean ASSERT = true;
+    static final boolean ASSERT = false;
 
     private PersistentCollections() {
     }

@@ -64,7 +64,7 @@ import com.aoindustries.sql.Database;
  * );
  * &lt;/pre&gt;
  *
- * TODO: We are sticking with property-backed resource bundles, finish this class when first needed.
+ * Note: We are sticking with property-backed resource bundles, finish this class when first needed.
  *
  * @author  AO Industries, Inc.
  */

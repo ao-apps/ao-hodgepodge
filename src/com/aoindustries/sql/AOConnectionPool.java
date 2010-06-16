@@ -54,6 +54,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         this.password = password;
     }
 
+    @Override
     protected void close(Connection conn) throws SQLException {
         conn.close();
     }
@@ -94,18 +95,8 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         try {
             while(conn==null) {
                 conn=super.getConnection(maxConnections);
-                try {
-                    boolean isReadOnly = conn.isReadOnly();
-                    if(isReadOnly!=readOnly) conn.setReadOnly(readOnly);
-                } catch(SQLException err) {
-                    String message=err.getMessage();
-                    // TODO: InterBase has a problem with setReadOnly(true), this is a workaround
-                    if(message!=null && message.indexOf("[interclient] Invalid operation when transaction is in progress.")!=-1) {
-                        conn.close();
-                        releaseConnection(conn);
-                        conn=null;
-                    } else throw err;
-                }
+                boolean isReadOnly = conn.isReadOnly();
+                if(isReadOnly!=readOnly) conn.setReadOnly(readOnly);
             }
             int currentIsolationLevel = conn.getTransactionIsolation();
             if(currentIsolationLevel!=isolationLevel) conn.setTransactionIsolation(isolationLevel);
@@ -145,6 +136,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         }
     }
 
+    @Override
     protected Connection getConnectionObject() throws SQLException {
         try {
             if(Thread.interrupted()) throw new SQLException("Thread interrupted");
@@ -184,10 +176,12 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         }
     }
 
+    @Override
     protected boolean isClosed(Connection conn) throws SQLException {
         return conn.isClosed();
     }
 
+    @Override
     protected void printConnectionStats(Appendable out) throws IOException {
         out.append("  <tr><th colspan='2'><span style='font-size:large;'>JDBC Driver</span></th></tr>\n"
                 + "  <tr><td>Driver:</td><td>");
@@ -207,6 +201,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         out.append("</td></tr>\n");
     }
 
+    @Override
     protected void resetConnection(Connection conn) throws SQLException {
         if(Thread.interrupted()) throw new SQLException("Thread interrupted");
         // Dump all warnings to System.err and clear warnings
@@ -231,24 +226,18 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         // Restore the connection to a read-only state
         if(!conn.isReadOnly()) {
             if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-            try {
-                conn.setReadOnly(true);
-            } catch(SQLException err) {
-                String message=err.getMessage();
-                // TODO: InterBase has a problem with setReadOnly(true), this is a workaround
-                if(message!=null && message.indexOf("[interclient] Invalid operation when transaction is in progress.")!=-1) {
-                    conn.close();
-                } else throw err;
-            }
+            conn.setReadOnly(true);
         }
     }
 
+    @Override
     protected SQLException newException(String message, Throwable cause) {
         SQLException err=new SQLException(message);
         if(cause!=null) err.initCause(cause);
         return err;
     }
 
+    @Override
     protected SQLException newInterruptedException(String message, Throwable cause) {
         return newException(message, cause);
     }

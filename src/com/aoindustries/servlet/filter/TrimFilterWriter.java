@@ -339,17 +339,13 @@ public class TrimFilterWriter extends PrintWriter {
 
     @Override
     public PrintWriter format(String format, Object ... args) {
-        throw new RuntimeException("TODO: Method not implemented");
-        //System.err.println("DEBUG: TrimFilterWriter: format(String format, Object ... args): TODO: Not implemented");
-        //wrapped.format(format, args);
-        //return this;
+        wrapped.format(format, args);
+        return this;
     }
 
     @Override
     public PrintWriter format(Locale l, String format, Object ... args) {
-        throw new RuntimeException("TODO: Method not implemented");
-        //System.err.println("DEBUG: TrimFilterWriter: format(Locale l, String format, Object ... args): TODO: Not implemented");
-        //wrapped.format(l, format, args);
-        //return this;
+        wrapped.format(l, format, args);
+        return this;
     }
 }
