@@ -147,6 +147,7 @@ public class ParallelDelete {
         // a couple of years ago.
         final Map<String,List<FilesystemIterator>> nextFiles = new TreeMap<String,List<FilesystemIterator>>(
             new Comparator<String>() {
+                @Override
                 public int compare(String S1, String S2) {
                     // Make sure directories are sorted after their directory contents
                     int diff = S1.compareTo(S2);

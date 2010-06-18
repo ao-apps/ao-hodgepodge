@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.i18n;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Locale;
 
@@ -30,18 +31,21 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-public class LocaleComparator implements Comparator<Locale> {
+public class LocaleComparator implements Comparator<Locale>, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final LocaleComparator instance = new LocaleComparator();
 
-    /**
-     * Singleton that may be shared.
-     */
     public static LocaleComparator getInstance() {
         return instance;
     }
 
     private LocaleComparator() {
+    }
+
+    private Object readResolve() {
+        return getInstance();
     }
 
     @Override

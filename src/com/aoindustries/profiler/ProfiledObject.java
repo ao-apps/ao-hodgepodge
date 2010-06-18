@@ -50,6 +50,7 @@ public class ProfiledObject {
      * note that finalize and actual memory freeing are separate steps so heap
      * use could still be high even if the object count is low.
      */
+    @Override
     protected void finalize() throws Throwable {
         decrementCount(getClass());
         super.finalize();

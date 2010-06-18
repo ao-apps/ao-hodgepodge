@@ -67,6 +67,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
      */
     static class ColorCountCountComparator implements Comparator<ColorCount> {
 
+        @Override
         public int compare(ColorCount o1, ColorCount o2) {
             return o1.count-o2.count;
         }
@@ -74,12 +75,6 @@ public class OptimalIndexColorModel extends IndexColorModel {
         @Override
         public boolean equals(Object obj) {
             return obj!=null && (obj instanceof ColorCountCountComparator);
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            return hash;
         }
     }
 
