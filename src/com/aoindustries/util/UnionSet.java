@@ -36,14 +36,6 @@ import java.util.Set;
  * <code>addAll(Set)</code> must not be modified after being added.  For
  * performance purposes, defensive copying is not performed.
  * </p>
- * <pre>
- * DependecyTest:
- *   Before:
- *     testGetDependencies:   244.443 s
- *     testGetDependentObjects: 0.622 s
- *   After:
- *     testGetDependencies:    12.675 s
- *     testGetDependentObjects: 0.748 s
  *
  * @author  AO Industries, Inc.
  */
@@ -57,7 +49,7 @@ public class UnionSet<E> implements Set<E> {
      */
     private static final int MAXIMUM_COMBINE_SIZE = 10;
 
-    private final Set<E> combined;
+    private Set<E> combined;
 
     /**
      * Will never contain any empty sets.
@@ -65,7 +57,6 @@ public class UnionSet<E> implements Set<E> {
     private final List<Set<? extends E>> added = new ArrayList<Set<? extends E>>();
 
     public UnionSet() {
-        combined = new HashSet<E>();
     }
 
     public UnionSet(Collection<? extends E> c) {
@@ -74,13 +65,20 @@ public class UnionSet<E> implements Set<E> {
     }
 
     public UnionSet(Set<? extends E> set) {
-        combined = new HashSet<E>(set.size()*4/3+1);
     	addAll(set);
     }
 
     private void combine() {
-        for(Set<? extends E> set : added) combined.addAll(set);
-        added.clear();
+        if(!added.isEmpty()) {
+            if(combined==null) {
+                // Avoid rehash at the expense of possibly allocating more than needed when there are duplicates
+                int totalSize = 0;
+                for(Set<? extends E> set : added) totalSize += set.size();
+                combined = new HashSet<E>(totalSize*4/3+1);
+            }
+            for(Set<? extends E> set : added) combined.addAll(set);
+            added.clear();
+        }
     }
 
     /**
@@ -89,17 +87,17 @@ public class UnionSet<E> implements Set<E> {
     @Override
     public int size() {
         combine();
-        return combined.size();
+        return combined==null ? 0 : combined.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return combined.isEmpty() && added.isEmpty();
+        return (combined==null || combined.isEmpty()) && added.isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-        if(combined.contains(o)) return true;
+        if(combined!=null && combined.contains(o)) return true;
         for(Set<? extends E> set : added) if(set.contains(o)) return true;
         return false;
     }
@@ -110,6 +108,10 @@ public class UnionSet<E> implements Set<E> {
     @Override
     public Iterator<E> iterator() {
         combine();
+        if(combined==null) {
+            Set<E> emptySet = java.util.Collections.emptySet();
+            return emptySet.iterator();
+        }
         return combined.iterator();
     }
 
@@ -119,6 +121,10 @@ public class UnionSet<E> implements Set<E> {
     @Override
     public Object[] toArray() {
         combine();
+        if(combined==null) {
+            Set<E> emptySet = java.util.Collections.emptySet();
+            return emptySet.toArray();
+        }
         return combined.toArray();
     }
 
@@ -128,11 +134,16 @@ public class UnionSet<E> implements Set<E> {
     @Override
     public <T> T[] toArray(T[] a) {
         combine();
+        if(combined==null) {
+            Set<E> emptySet = java.util.Collections.emptySet();
+            return emptySet.toArray(a);
+        }
         return combined.toArray(a);
     }
 
     @Override
     public boolean add(E e) {
+        if(combined==null) combined = new HashSet<E>();
         return combined.add(e);
     }
 
@@ -142,7 +153,7 @@ public class UnionSet<E> implements Set<E> {
     @Override
     public boolean remove(Object o) {
         combine();
-        return combined.remove(o);
+        return combined!=null && combined.remove(o);
     }
 
     @Override
@@ -158,8 +169,14 @@ public class UnionSet<E> implements Set<E> {
      */
     @Override
     public boolean addAll(Collection<? extends E> c) {
+        if(c.isEmpty()) return false;
         combine();
-        return combined.addAll(c);
+        if(combined==null) {
+            combined = new HashSet<E>(c);
+            return true;
+        } else {
+            return combined.addAll(c);
+        }
     }
 
     /**
@@ -169,8 +186,12 @@ public class UnionSet<E> implements Set<E> {
      * subsequently altered.
      */
     public void addAll(Set<? extends E> set) {
-        if(set.size()<=MAXIMUM_COMBINE_SIZE) combined.addAll(set);
-        else added.add(set);
+        if(set.size()<=MAXIMUM_COMBINE_SIZE) {
+            if(combined==null) combined = new HashSet<E>(set);
+            else combined.addAll(set);
+        } else {
+            added.add(set);
+        }
     }
 
     /**
@@ -179,6 +200,7 @@ public class UnionSet<E> implements Set<E> {
     @Override
     public boolean retainAll(Collection<?> c) {
         combine();
+        if(combined==null) combined = new HashSet<E>();
         return combined.retainAll(c);
     }
 
@@ -188,12 +210,13 @@ public class UnionSet<E> implements Set<E> {
     @Override
     public boolean removeAll(Collection<?> c) {
         combine();
+        if(combined==null) combined = new HashSet<E>();
         return combined.removeAll(c);
     }
 
     @Override
     public void clear() {
-        combined.clear();
+        if(combined!=null) combined.clear();
         added.clear();
     }
 }
