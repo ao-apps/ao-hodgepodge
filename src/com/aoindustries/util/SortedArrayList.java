@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * A <code>SortedArrayList</code> stores is elements in hashCode order and provides means of quickly
+ * A <code>SortedArrayList</code> stores its elements in hashCode order and provides means of quickly
  * locating objects.
  * 
  * @author  AO Industries, Inc.
