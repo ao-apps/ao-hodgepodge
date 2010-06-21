@@ -43,6 +43,7 @@ public class PersistentLinkedListRandomFailBufferNoFailTest extends PersistentLi
         super(testName);
     }
 
+    @Override
     protected PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception {
         return new RandomFailBuffer(PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), protectionLevel, Long.MAX_VALUE), false);
     }
