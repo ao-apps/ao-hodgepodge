@@ -38,6 +38,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLData;
 import java.sql.SQLException;
 import java.sql.Struct;
@@ -58,6 +59,55 @@ import java.util.logging.Level;
  * @author  AO Industries, Inc.
  */
 public class DatabaseConnection extends AbstractDatabaseAccess {
+
+    /**
+     * Gets a user-friendly description of the provided result in a string formatted like
+     * <code>('value', 'value', int_value, ...)</code>.  This must not be used generate
+     * SQL statements - it is just to provider user display.
+     */
+    @SuppressWarnings("deprecation")
+    private static String getRow(ResultSet result) throws SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        ResultSetMetaData metaData = result.getMetaData();
+        int colCount = metaData.getColumnCount();
+        for(int c=1; c<=colCount; c++) {
+            if(c>1) sb.append(", ");
+            int colType = metaData.getColumnType(c);
+            switch(colType) {
+                case Types.BIGINT :
+                case Types.BIT :
+                case Types.BOOLEAN :
+                case Types.DECIMAL :
+                case Types.DOUBLE :
+                case Types.FLOAT :
+                case Types.INTEGER :
+                case Types.NUMERIC :
+                case Types.REAL :
+                case Types.SMALLINT :
+                case Types.TINYINT :
+                    sb.append(result.getObject(c));
+                    break;
+                case Types.CHAR :
+                case Types.DATE :
+                case Types.LONGNVARCHAR :
+                case Types.LONGVARCHAR :
+                case Types.NCHAR :
+                case Types.NVARCHAR :
+                case Types.TIME :
+                case Types.TIMESTAMP :
+                case Types.VARCHAR :
+                    sb.append('\'');
+                    SQLUtility.escapeSQL(result.getString(c), sb);
+                    sb.append('\'');
+                    break;
+                default :
+                    throw new SQLException("Unexpected column type: "+colType);
+            }
+        }
+        sb.append(')');
+        return sb.toString();
+    }
 
     private final Database database;
 
@@ -487,7 +537,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     Set<T> set=new HashSet<T>();
                     while(results.next()) {
                         T newObj = constructor.newInstance(results);
-                        if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+newObj);
+                        if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
                     }
                     return set;
                 } finally {
@@ -529,7 +579,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                 Set<T> set=new HashSet<T>();
                 while(results.next()) {
                     T newObj = objectFactory.createObject(results);
-                    if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+newObj);
+                    if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
                 }
                 return set;
             } finally {
