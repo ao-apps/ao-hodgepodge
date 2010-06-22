@@ -196,7 +196,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                             Method valueOfIntMethod = getValueOfIntMethod(paramType);
                             if(valueOfIntMethod!=null) {
                                 int value = result.getInt(c);
-                                if(result.wasNull()) throw new SQLException(c+": "+metaData.getColumnName(c)+": null int");
+                                if(result.wasNull()) params[i] = null;
                                 params[i] = valueOfIntMethod.invoke(null, value);
                             } else {
                                 // Try to find valueOf(String) for unknown types
