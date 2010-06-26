@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -99,14 +100,30 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, objectFactory, sql, params);
     }
 
-    @Override
+    /**
+     * @deprecated Please provide the best set implementation.
+     */
+    @Deprecated
     public <T> Set<T> executeObjectSetQuery(Class<T> clazz, String sql, Object ... params) throws SQLException {
-        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, clazz, sql, params);
+        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, new HashSet<T>(), clazz, sql, params);
     }
 
     @Override
+    public <T> Set<T> executeObjectSetQuery(Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException {
+        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, set, clazz, sql, params);
+    }
+
+    /**
+     * @deprecated Please provide the best set implementation.
+     */
+    @Deprecated
     public <T> Set<T> executeObjectSetQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
-        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, objectFactory, sql, params);
+        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, new HashSet<T>(), objectFactory, sql, params);
+    }
+
+    @Override
+    public <T> Set<T> executeObjectSetQuery(Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, set, objectFactory, sql, params);
     }
 
     @Override

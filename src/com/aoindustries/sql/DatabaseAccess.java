@@ -282,12 +282,12 @@ public interface DatabaseAccess {
      *   <li>readOnly = <code>true</code></li>
      * </ul>
      */
-    <T> Set<T> executeObjectSetQuery(Class<T> clazz, String sql, Object ... params) throws SQLException;
+    <T> Set<T> executeObjectSetQuery(Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException;
 
     /**
      * Query the database with a <code>Set&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
      */
-    <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException;
+    <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException;
 
     /**
      * Read-only query the database with a <code>Set&lt;T&gt;</code> return type, objects are created with the provided factory.
@@ -296,12 +296,12 @@ public interface DatabaseAccess {
      *   <li>readOnly = <code>true</code></li>
      * </ul>
      */
-    <T> Set<T> executeObjectSetQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
+    <T> Set<T> executeObjectSetQuery(Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
 
     /**
      * Query the database with a <code>Set&lt;T&gt;</code> return type, objects are created with the provided factory.
      */
-    <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
+    <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
 
     /**
      * Read-only query the database, calling the <code>ResultSetHandler</code> for each row retrieved.

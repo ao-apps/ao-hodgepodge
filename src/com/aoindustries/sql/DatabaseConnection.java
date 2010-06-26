@@ -46,7 +46,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -59,6 +58,8 @@ import java.util.logging.Level;
  * @author  AO Industries, Inc.
  */
 public class DatabaseConnection extends AbstractDatabaseAccess {
+
+    private static final int FETCH_SIZE = 1000;
 
     /**
      * Gets a user-friendly description of the provided result in a string formatted like
@@ -133,7 +134,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             _conn=c;
         } else if(c.getTransactionIsolation()<isolationLevel) {
             if(!c.getAutoCommit()) {
-                c.commit();
+                // c.commit();
                 c.setAutoCommit(true);
             }
             c.setTransactionIsolation(isolationLevel);
@@ -296,8 +297,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+        Connection conn = getConnection(isolationLevel, readOnly);
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
+            pstmt.setFetchSize(FETCH_SIZE);
             setParams(pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
@@ -342,8 +346,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+        Connection conn = getConnection(isolationLevel, readOnly);
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
+            pstmt.setFetchSize(FETCH_SIZE);
             setParams(pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
@@ -465,8 +472,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     @Override
     public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
+        conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
+            pstmt.setFetchSize(FETCH_SIZE);
             try {
                 setParams(pstmt, params);
                 ResultSet results=pstmt.executeQuery();
@@ -505,8 +514,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     @Override
     public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
+        conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
+            pstmt.setFetchSize(FETCH_SIZE);
             setParams(pstmt, params);
 
             ResultSet results=pstmt.executeQuery();
@@ -525,16 +536,17 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
+        conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
+            pstmt.setFetchSize(FETCH_SIZE);
             try {
                 setParams(pstmt, params);
                 ResultSet results=pstmt.executeQuery();
                 try {
                     Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
-                    Set<T> set=new HashSet<T>();
                     while(results.next()) {
                         T newObj = constructor.newInstance(results);
                         if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
@@ -568,15 +580,15 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
+        conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
+            pstmt.setFetchSize(FETCH_SIZE);
             setParams(pstmt, params);
-
             ResultSet results=pstmt.executeQuery();
             try {
-                Set<T> set=new HashSet<T>();
                 while(results.next()) {
                     T newObj = objectFactory.createObject(results);
                     if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
@@ -595,8 +607,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     @Override
     public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
+        conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
+            pstmt.setFetchSize(FETCH_SIZE);
             setParams(pstmt, params);
 
             ResultSet results=pstmt.executeQuery();
@@ -614,8 +628,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+        Connection conn = getConnection(isolationLevel, readOnly);
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
+            pstmt.setFetchSize(FETCH_SIZE);
             setParams(pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
@@ -686,8 +703,11 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+        Connection conn = getConnection(isolationLevel, readOnly);
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
+            pstmt.setFetchSize(FETCH_SIZE);
             setParams(pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {

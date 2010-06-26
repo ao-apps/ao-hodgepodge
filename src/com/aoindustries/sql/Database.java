@@ -126,6 +126,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -145,6 +146,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -164,6 +166,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -183,6 +186,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -202,6 +206,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public IntList executeIntListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -219,6 +224,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -238,6 +244,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public LongList executeLongListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -255,6 +262,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -274,6 +282,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -293,6 +302,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -312,6 +322,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -329,6 +340,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -346,10 +358,11 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
+    @Override
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
-            Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, clazz, sql, params);
+            Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, set, clazz, sql, params);
             if(!readOnly) conn.commit();
             return value;
         } catch(RuntimeException err) {
@@ -363,10 +376,11 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+    @Override
+    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
-            Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, objectFactory, sql, params);
+            Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, set, objectFactory, sql, params);
             if(!readOnly) conn.commit();
             return value;
         } catch(RuntimeException err) {
@@ -380,6 +394,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -396,6 +411,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -413,6 +429,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -432,6 +449,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -451,6 +469,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -468,6 +487,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -487,6 +507,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
+    @Override
     public int executeUpdate(String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
@@ -512,6 +533,7 @@ public class Database extends AbstractDatabaseAccess {
     public void executeTransaction(final DatabaseRunnable runnable) throws SQLException {
         executeTransaction(
             new DatabaseCallable<Void>() {
+                @Override
                 public Void call(DatabaseConnection db) throws SQLException {
                     runnable.run(db);
                     return null;
