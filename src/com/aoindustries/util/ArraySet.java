@@ -33,11 +33,12 @@ import java.util.SortedSet;
 
 /**
  * <p>
- * A compact <code>Set</code> implementation that stores the elements in order.
+ * A compact <code>SortedSet</code> implementation that stores the elements in order.
  * The emphasis is to use as little heap space as possible - this is not a general-purpose
  * <code>Set</code> implementation as it has specific constraints about the order elements
  * may be added or removed.  To avoid the possibility of O(n^2) behavior, the elements must
- * be added in ascending order.  One may also remove the last element of the set.
+ * already by sorted and be added in ascending order.  Also, only the last element may be
+ * removed.
  * </p>
  * <p>
  * This set does not support null values.
@@ -146,7 +147,7 @@ public class ArraySet<E> implements SortedSet<E>, Serializable {
     @SuppressWarnings("unchecked")
     public boolean contains(Object o) {
         // TODO: How can we check if the passed-in object is of an unrelated, unexpected class
-        // TODO: without passing around unserializable Class objects?
+        // TODO: without passing around Class objects?
         return binarySearch((E)o)>=0;
     }
 

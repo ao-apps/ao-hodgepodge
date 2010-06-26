@@ -46,6 +46,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -483,7 +484,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
                     List<T> list=new ArrayList<T>();
                     while(results.next()) list.add(constructor.newInstance(results));
-                    return list;
+                    int size = list.size();
+                    if(size==0) return Collections.emptyList();
+                    else if(size==1) return Collections.singletonList(list.get(0));
+                    else return list;
                 } finally {
                     results.close();
                 }
@@ -524,7 +528,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 List<T> list=new ArrayList<T>();
                 while(results.next()) list.add(objectFactory.createObject(results));
-                return list;
+                int size = list.size();
+                if(size==0) return Collections.emptyList();
+                else if(size==1) return Collections.singletonList(list.get(0));
+                else return list;
             } finally {
                 results.close();
             }
@@ -551,7 +558,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                         T newObj = constructor.newInstance(results);
                         if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
                     }
-                    return set;
+                    int size = set.size();
+                    if(size==0) return Collections.emptySet();
+                    else if(size==1) return Collections.singleton(set.iterator().next());
+                    else return set;
                 } finally {
                     results.close();
                 }
@@ -593,7 +603,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     T newObj = objectFactory.createObject(results);
                     if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
                 }
-                return set;
+                int size = set.size();
+                if(size==0) return Collections.emptySet();
+                else if(size==1) return Collections.singleton(set.iterator().next());
+                else return set;
             } finally {
                 results.close();
             }
@@ -636,9 +649,12 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             setParams(pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
-                List<Short> V=new ArrayList<Short>();
-                while(results.next()) V.add(results.getShort(1));
-                return V;
+                List<Short> list = new ArrayList<Short>();
+                while(results.next()) list.add(results.getShort(1));
+                int size = list.size();
+                if(size==0) return Collections.emptyList();
+                else if(size==1) return Collections.singletonList(list.get(0));
+                else return list;
             } finally {
                 results.close();
             }
@@ -711,9 +727,12 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             setParams(pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
-                List<String> V=new ArrayList<String>();
-                while(results.next()) V.add(results.getString(1));
-                return V;
+                List<String> list = new ArrayList<String>();
+                while(results.next()) list.add(results.getString(1));
+                int size = list.size();
+                if(size==0) return Collections.emptyList();
+                else if(size==1) return Collections.singletonList(list.get(0));
+                else return list;
             } finally {
                 results.close();
             }
