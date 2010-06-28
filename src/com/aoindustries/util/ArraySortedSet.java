@@ -25,12 +25,15 @@ package com.aoindustries.util;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.SortedSet;
 
 /**
  * <p>
- * A compact <code>Set</code> implementation that stores the elements in hashCode order.
+ * A compact <code>SortedSet</code> implementation that stores the elements in order.
  * The emphasis is to use as little heap space as possible - this is not a general-purpose
  * <code>Set</code> implementation as it has specific constraints about the order elements
  * may be added or removed.  To avoid the possibility of O(n^2) behavior, the elements must
@@ -44,46 +47,99 @@ import java.util.Set;
  * This set is not thread safe.
  * </p>
  *
- * @see  HashCodeComparator to properly sort objects before adding to the set
- *
  * @author  AO Industries, Inc.
  */
-public class ArraySet<E> implements Set<E>, Serializable {
+public class ArraySortedSet<E> implements SortedSet<E>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private final Comparator<? super E> comparator;
     private final ArrayList<E> elements;
 
-    public ArraySet() {
+    public ArraySortedSet() {
+        this.comparator = null;
         this.elements = new ArrayList<E>();
     }
 
-    public ArraySet(int initialCapacity) {
+    public ArraySortedSet(int initialCapacity) {
+        this.comparator = null;
         this.elements = new ArrayList<E>(initialCapacity);
     }
 
-    public ArraySet(Collection<? extends E> c) {
+    public ArraySortedSet(Comparator<? super E> comparator) {
+        this.comparator = comparator;
+        this.elements = new ArrayList<E>();
+    }
+
+    public ArraySortedSet(Comparator<? super E> comparator, int initialCapacity) {
+        this.comparator = comparator;
+        this.elements = new ArrayList<E>(initialCapacity);
+    }
+
+    public ArraySortedSet(Collection<? extends E> c) {
+        this.comparator = null;
         this.elements = new ArrayList<E>(c.size());
         addAll(c);
     }
 
-    /**
-     * Uses the provided elements list without copying, which must already
-     * be sorted in hashCode order.
-     *
-     * @see  HashCodeComparator to properly sort objects before adding to the set
-     */
-    public ArraySet(ArrayList<E> elements) {
-        this.elements = elements;
+    public ArraySortedSet(SortedSet<E> s) {
+        this.comparator = s.comparator();
+        this.elements = new ArrayList<E>(s);
     }
 
     @SuppressWarnings("unchecked")
     private int binarySearch(E elem) {
-        return java.util.Collections.binarySearch(elements, elem, HashCodeComparator.getInstance());
+        return
+            comparator==null
+            ? java.util.Collections.binarySearch((List)elements, elem)
+            : java.util.Collections.binarySearch(elements, elem, comparator)
+        ;
+    }
+
+    @SuppressWarnings("unchecked")
+    private int compare(E elem1, E elem2) {
+        return
+            comparator==null
+            ? ((Comparable)elem1).compareTo(elem2)
+            : comparator.compare(elem1, elem2)
+        ;
     }
 
     public void trimToSize() {
         elements.trimToSize();
+    }
+
+    @Override
+    public Comparator<? super E> comparator() {
+        return comparator;
+    }
+
+    @Override
+    public SortedSet<E> subSet(E fromElement, E toElement) {
+        throw new UnsupportedOperationException("TODO: Not supported yet.");
+    }
+
+    @Override
+    public SortedSet<E> headSet(E toElement) {
+        throw new UnsupportedOperationException("TODO: Not supported yet.");
+    }
+
+    @Override
+    public SortedSet<E> tailSet(E fromElement) {
+        throw new UnsupportedOperationException("TODO: Not supported yet.");
+    }
+
+    @Override
+    public E first() {
+        if(elements.isEmpty()) throw new NoSuchElementException();
+        return elements.get(0);
+    }
+
+    @Override
+    public E last() {
+        int size = elements.size();
+        if(size==0) throw new NoSuchElementException();
+        return elements.get(size-1);
     }
 
     @Override
@@ -99,27 +155,9 @@ public class ArraySet<E> implements Set<E>, Serializable {
     @Override
     @SuppressWarnings("unchecked")
     public boolean contains(Object o) {
-        int size = elements.size();
-        if(size==0) return false;
-        int index = binarySearch((E)o);
-        if(index<0) return false;
-        // Matches at index?
-        E elem = elements.get(index);
-        if(elem.equals(o)) return true;
-        // Look forward until different hashCode
-        int oHash = o.hashCode();
-        for(int i=index+1; i<size; i++) {
-            elem = elements.get(i);
-            if(elem.hashCode()!=oHash) break;
-            if(elem.equals(o)) return true;
-        }
-        // Look backward until different hashCode
-        for(int i=index-1; i>=0; i--) {
-            elem = elements.get(i);
-            if(elem.hashCode()!=oHash) break;
-            if(elem.equals(o)) return true;
-        }
-        return false;
+        // TODO: How can we check if the passed-in object is of an unrelated, unexpected class
+        // TODO: without passing around Class objects?
+        return binarySearch((E)o)>=0;
     }
 
     @Override
@@ -146,11 +184,12 @@ public class ArraySet<E> implements Set<E>, Serializable {
         } else {
             // Shortcut for adding last element
             E last = elements.get(size-1);
-            if(e.hashCode()>=last.hashCode()) {
+            if(compare(e, last)>0) {
                 elements.add(e);
                 return true;
             } else {
-                if(contains(e)) {
+                int index = binarySearch(e);
+                if(index>=0) {
                     // Already in set
                     return false;
                 } else {
