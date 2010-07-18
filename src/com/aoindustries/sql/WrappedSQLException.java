@@ -47,7 +47,7 @@ public class WrappedSQLException extends SQLException {
         SQLException initCause,
         String sqlString
     ) {
-        super(initCause.getMessage()+"\nSQL Query:\n"+sqlString, initCause.getSQLState(), initCause.getErrorCode());
+        super(initCause.getMessage()+"\nSQL:\n"+sqlString, initCause.getSQLState(), initCause.getErrorCode());
         initCause(initCause);
         this.sqlString=sqlString;
     }
