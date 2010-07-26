@@ -25,6 +25,7 @@ package com.aoindustries.servlet.filter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
@@ -71,13 +72,19 @@ public class TrimFilterResponse extends HttpServletResponseWrapper {
 
     @Override
     public PrintWriter getWriter() throws IOException {
-        if(writer==null) writer = new TrimFilterWriter(getResponse().getWriter());
+        if(writer==null) {
+            ServletResponse response = getResponse();
+            writer = new TrimFilterWriter(response.getWriter(), response);
+        }
         return writer;
     }
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        if(outputStream==null) outputStream = new TrimFilterOutputStream(getResponse().getOutputStream());
+        if(outputStream==null) {
+            ServletResponse response = getResponse();
+            outputStream = new TrimFilterOutputStream(response.getOutputStream(), response);
+        }
         return outputStream;
     }
 }

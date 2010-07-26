@@ -24,6 +24,7 @@ package com.aoindustries.servlet.filter;
 
 import java.io.PrintWriter;
 import java.util.Locale;
+import javax.servlet.ServletResponse;
 
 /**
  * Filters the output and removes extra white space at the beginning of lines and completely removes blank lines.
@@ -39,7 +40,8 @@ public class TrimFilterWriter extends PrintWriter {
 
     private static String lineSeparator = System.getProperty("line.separator");
 
-    private PrintWriter wrapped;
+    private final PrintWriter wrapped;
+    private final ServletResponse response;
     boolean inTextArea = false;
     boolean inPre = false;
     private boolean atLineStart = true;
@@ -50,9 +52,24 @@ public class TrimFilterWriter extends PrintWriter {
     private char[] outputBuffer = new char[OUPUT_BUFFER_SIZE];
     private int outputBufferUsed = 0;
 
-    public TrimFilterWriter(PrintWriter wrapped) {
+    public TrimFilterWriter(PrintWriter wrapped, ServletResponse response) {
         super(wrapped);
         this.wrapped = wrapped;
+        this.response = response;
+    }
+
+    /**
+     * Determines if trimming is enabled based on the output content type.
+     */
+    private boolean isTrimEnabled() {
+        String contentType = response.getContentType();
+        return
+            contentType==null
+            || contentType.equals("text/html")
+            || contentType.startsWith("text/html;")
+            || contentType.equals("application/xhtml+xml")
+            || contentType.startsWith("application/xhtml+xml;")
+        ;
     }
 
     @Override
@@ -173,54 +190,61 @@ public class TrimFilterWriter extends PrintWriter {
 
     @Override
     public void write(int c) {
-        if(processChar((char)c)) wrapped.write(c);
+        if(!isTrimEnabled() || processChar((char)c)) wrapped.write(c);
     }
 
     @Override
     public void write(char buf[], int off, int len) {
-        outputBufferUsed = 0;
-        // If len > OUPUT_BUFFER_SIZE, process in blocks
-        while(len>0) {
-            int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
-            int blockEnd = off + blockLen;
-            for(int index = off; index<blockEnd ; index++) {
-                char c = buf[index];
-                if(processChar(c)) outputBuffer[outputBufferUsed++]=c;
+        if(isTrimEnabled()) {
+            outputBufferUsed = 0;
+            // If len > OUPUT_BUFFER_SIZE, process in blocks
+            while(len>0) {
+                int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
+                int blockEnd = off + blockLen;
+                for(int index = off; index<blockEnd ; index++) {
+                    char c = buf[index];
+                    if(processChar(c)) outputBuffer[outputBufferUsed++]=c;
+                }
+                if(outputBufferUsed>0) {
+                    if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
+                    else wrapped.write(outputBuffer, 0, outputBufferUsed);
+                    outputBufferUsed = 0;
+                }
+                off+=blockLen;
+                len-=blockLen;
             }
-            if(outputBufferUsed>0) {
-                if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
-                else wrapped.write(outputBuffer, 0, outputBufferUsed);
-                outputBufferUsed = 0;
-            }
-            off+=blockLen;
-            len-=blockLen;
+        } else {
+            wrapped.write(buf, off, len);
         }
     }
 
     @Override
     public void write(char buf[]) {
-        write(buf, 0, buf.length);
+        if(isTrimEnabled()) write(buf, 0, buf.length);
+        else wrapped.write(buf);
     }
 
     @Override
     public void write(String s, int off, int len) {
-        outputBufferUsed = 0;
-        // If len > OUPUT_BUFFER_SIZE, process in blocks
-        while(len>0) {
-            int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
-            int blockEnd = off + blockLen;
-            for(int index = off; index<blockEnd ; index++) {
-                char c = s.charAt(index);
-                if(processChar(c)) outputBuffer[outputBufferUsed++]=c;
+        if(isTrimEnabled()) {
+            outputBufferUsed = 0;
+            // If len > OUPUT_BUFFER_SIZE, process in blocks
+            while(len>0) {
+                int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
+                int blockEnd = off + blockLen;
+                for(int index = off; index<blockEnd ; index++) {
+                    char c = s.charAt(index);
+                    if(processChar(c)) outputBuffer[outputBufferUsed++]=c;
+                }
+                if(outputBufferUsed>0) {
+                    if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
+                    else wrapped.write(outputBuffer, 0, outputBufferUsed);
+                    outputBufferUsed = 0;
+                }
+                off+=blockLen;
+                len-=blockLen;
             }
-            if(outputBufferUsed>0) {
-                if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
-                else wrapped.write(outputBuffer, 0, outputBufferUsed);
-                outputBufferUsed = 0;
-            }
-            off+=blockLen;
-            len-=blockLen;
-        }
+        } else wrapped.write(s, off, len);
     }
 
     @Override
@@ -233,7 +257,7 @@ public class TrimFilterWriter extends PrintWriter {
 
     @Override
     public void print(char c) {
-        if(processChar(c)) wrapped.print(c);
+        if(!isTrimEnabled() || processChar(c)) wrapped.print(c);
     }
 
     @Override
@@ -270,7 +294,8 @@ public class TrimFilterWriter extends PrintWriter {
 
     @Override
     public void println() {
-        write(lineSeparator);
+        if(isTrimEnabled()) write(lineSeparator);
+        else wrapped.println();
     }
 
     @Override
@@ -283,8 +308,10 @@ public class TrimFilterWriter extends PrintWriter {
 
     @Override
     public void println(char x) {
-        if(processChar(x)) wrapped.print(x);
-        write(lineSeparator);
+        if(isTrimEnabled()) {
+            if(processChar(x)) wrapped.print(x);
+            write(lineSeparator);
+        } else wrapped.println(x);
     }
 
     @Override
@@ -321,30 +348,42 @@ public class TrimFilterWriter extends PrintWriter {
     
     @Override
     public void println(char x[]) {
-        write(x);
-        write(lineSeparator);
+        if(isTrimEnabled()) {
+            write(x);
+            write(lineSeparator);
+        } else wrapped.println(x);
     }
 
     @Override
     public void println(String x) {
-        write(x);
-        write(lineSeparator);
+        if(isTrimEnabled()) {
+            write(x);
+            write(lineSeparator);
+        } else wrapped.println(x);
     }
     
     @Override
     public void println(Object x) {
-        print(x);
-        write(lineSeparator);
+        if(isTrimEnabled()) {
+            print(x);
+            write(lineSeparator);
+        } else wrapped.println(x);
     }
 
     @Override
     public PrintWriter format(String format, Object ... args) {
+        atLineStart = false;
+        readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.format(format, args);
         return this;
     }
 
     @Override
     public PrintWriter format(Locale l, String format, Object ... args) {
+        atLineStart = false;
+        readCharMatchCount = 0;
+        preReadCharMatchCount = 0;
         wrapped.format(l, format, args);
         return this;
     }

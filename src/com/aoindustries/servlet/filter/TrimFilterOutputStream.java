@@ -24,6 +24,7 @@ package com.aoindustries.servlet.filter;
 
 import java.io.IOException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
 
 /**
  * Filters the output and removes extra white space at the beginning of lines and completely removes blank lines.
@@ -40,7 +41,8 @@ public class TrimFilterOutputStream extends ServletOutputStream {
 
     private static String lineSeparator = System.getProperty("line.separator");
 
-    private ServletOutputStream wrapped;
+    private final ServletOutputStream wrapped;
+    private final ServletResponse response;
     boolean inTextArea = false;
     boolean inPre = false;
     private boolean atLineStart = true;
@@ -51,8 +53,23 @@ public class TrimFilterOutputStream extends ServletOutputStream {
     private byte[] outputBuffer = new byte[OUPUT_BUFFER_SIZE];
     private int outputBufferUsed = 0;
 
-    public TrimFilterOutputStream(ServletOutputStream wrapped) {
+    public TrimFilterOutputStream(ServletOutputStream wrapped, ServletResponse response) {
         this.wrapped = wrapped;
+        this.response = response;
+    }
+
+    /**
+     * Determines if trimming is enabled based on the output content type.
+     */
+    private boolean isTrimEnabled() {
+        String contentType = response.getContentType();
+        return
+            contentType==null
+            || contentType.equals("text/html")
+            || contentType.startsWith("text/html;")
+            || contentType.equals("application/xhtml+xml")
+            || contentType.startsWith("application/xhtml+xml;")
+        ;
     }
 
     @Override
@@ -154,34 +171,40 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         }
     }
 
+    @Override
     public void write(int b) throws IOException {
-        if(processChar((char)b)) wrapped.write(b);
+        if(!isTrimEnabled() || processChar((char)b)) wrapped.write(b);
     }
 
     @Override
     public void write(byte[] buf, int off, int len) throws IOException {
-        outputBufferUsed = 0;
-        // If len > OUPUT_BUFFER_SIZE, process in blocks
-        while(len>0) {
-            int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
-            int blockEnd = off + blockLen;
-            for(int index = off; index<blockEnd ; index++) {
-                byte b = buf[index];
-                if(processChar((char)b)) outputBuffer[outputBufferUsed++]=b;
+        if(isTrimEnabled()) {
+            outputBufferUsed = 0;
+            // If len > OUPUT_BUFFER_SIZE, process in blocks
+            while(len>0) {
+                int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
+                int blockEnd = off + blockLen;
+                for(int index = off; index<blockEnd ; index++) {
+                    byte b = buf[index];
+                    if(processChar((char)b)) outputBuffer[outputBufferUsed++]=b;
+                }
+                if(outputBufferUsed>0) {
+                    if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
+                    else wrapped.write(outputBuffer, 0, outputBufferUsed);
+                    outputBufferUsed = 0;
+                }
+                off+=blockLen;
+                len-=blockLen;
             }
-            if(outputBufferUsed>0) {
-                if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
-                else wrapped.write(outputBuffer, 0, outputBufferUsed);
-                outputBufferUsed = 0;
-            }
-            off+=blockLen;
-            len-=blockLen;
+        } else {
+            wrapped.write(buf, off, len);
         }
     }
 
     @Override
     public void write(byte[] b) throws IOException {
-        write(b, 0, b.length);
+        if(isTrimEnabled()) write(b, 0, b.length);
+        else wrapped.write(b);
     }
 
     @Override
@@ -194,7 +217,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
 
     @Override
     public void print(char c) throws IOException {
-        if(processChar(c)) wrapped.print(c);
+        if(!isTrimEnabled() || processChar(c)) wrapped.print(c);
     }
 
     @Override
@@ -231,30 +254,33 @@ public class TrimFilterOutputStream extends ServletOutputStream {
 
     @Override
     public void print(String s) throws IOException {
-        outputBufferUsed = 0;
-        // If len > OUPUT_BUFFER_SIZE, process in blocks
-        int off = 0;
-        int len = s.length();
-        while(len>0) {
-            int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
-            int blockEnd = off + blockLen;
-            for(int index = off; index<blockEnd ; index++) {
-                char c = s.charAt(index);
-                if(processChar(c)) outputBuffer[outputBufferUsed++]=(byte)c;
+        if(isTrimEnabled()) {
+            outputBufferUsed = 0;
+            // If len > OUPUT_BUFFER_SIZE, process in blocks
+            int off = 0;
+            int len = s.length();
+            while(len>0) {
+                int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
+                int blockEnd = off + blockLen;
+                for(int index = off; index<blockEnd ; index++) {
+                    char c = s.charAt(index);
+                    if(processChar(c)) outputBuffer[outputBufferUsed++]=(byte)c;
+                }
+                if(outputBufferUsed>0) {
+                    if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
+                    else wrapped.write(outputBuffer, 0, outputBufferUsed);
+                    outputBufferUsed = 0;
+                }
+                off+=blockLen;
+                len-=blockLen;
             }
-            if(outputBufferUsed>0) {
-                if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
-                else wrapped.write(outputBuffer, 0, outputBufferUsed);
-                outputBufferUsed = 0;
-            }
-            off+=blockLen;
-            len-=blockLen;
-        }
+        } else wrapped.print(s);
     }
 
     @Override
     public void println() throws IOException {
-        print(lineSeparator);
+        if(isTrimEnabled()) print(lineSeparator);
+        else wrapped.println();
     }
 
     @Override
@@ -267,8 +293,12 @@ public class TrimFilterOutputStream extends ServletOutputStream {
 
     @Override
     public void println(char c) throws IOException {
-        if(processChar(c)) wrapped.print(c);
-        print(lineSeparator);
+        if(isTrimEnabled()) {
+            if(processChar(c)) wrapped.print(c);
+            print(lineSeparator);
+        } else {
+            wrapped.println(c);
+        }
     }
 
     @Override
@@ -305,7 +335,11 @@ public class TrimFilterOutputStream extends ServletOutputStream {
 
     @Override
     public void println(String s) throws IOException {
-        print(s);
-        print(lineSeparator);
+        if(isTrimEnabled()) {
+            print(s);
+            print(lineSeparator);
+        } else {
+            wrapped.println(s);
+        }
     }
 }
