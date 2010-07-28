@@ -57,6 +57,7 @@ public class StringBuilderWriter extends Writer {
         buffer.append(cbuf);
     }
 
+    @Override
     public void write(char cbuf[], int off, int len) {
         buffer.append(cbuf, off, len);
     }
@@ -92,6 +93,7 @@ public class StringBuilderWriter extends Writer {
     /**
      * Does nothing on flush.
      */
+    @Override
     public void flush() {
         // Do nothing
     }
@@ -99,6 +101,7 @@ public class StringBuilderWriter extends Writer {
     /**
      * Does nothing on close.
      */
+    @Override
     public void close() {
         // Do nothing
     }
