@@ -68,7 +68,7 @@ public class StringBuilderWriter extends Writer {
 
     @Override
     public void write(String str, int off, int len) {
-        buffer.append((CharSequence)str, off, off+len);
+        buffer.append(str, off, off+len);
     }
 
     @Override
