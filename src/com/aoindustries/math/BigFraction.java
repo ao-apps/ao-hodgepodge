@@ -25,7 +25,9 @@ package com.aoindustries.math;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 
 /**
  * Stores arbitrary size fractions by their numerator and denominator.
@@ -49,6 +51,34 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
             if(numerator==1) return ONE;
         }
         return new BigFraction(numerator, denominator);
+    }
+
+    public static BigFraction valueOf(BigInteger value) throws NumberFormatException {
+        if(value.compareTo(BigInteger.ZERO)==0) return ZERO;
+        if(value.compareTo(BigInteger.ONE)==0) return ONE;
+        return new BigFraction(value, BigInteger.ONE);
+    }
+
+    /**
+     * Gets the big decimal as a fraction, reduced.
+     */
+    public static BigFraction valueOf(BigDecimal value) throws NumberFormatException {
+        if(value.compareTo(BigDecimal.ZERO)==0) return ZERO;
+        if(value.compareTo(BigDecimal.ONE)==0) return ONE;
+        int scale = value.scale();
+        if(scale<=0) {
+            // Has no decimal point
+            return new BigFraction(
+                value.toBigIntegerExact(),
+                BigInteger.ONE
+            );
+        } else {
+            // Has a decimal point
+            return new BigFraction(
+                value.movePointRight(scale).toBigIntegerExact(),
+                BigInteger.TEN.pow(scale)
+            ).reduce();
+        }
     }
 
     public static BigFraction valueOf(BigInteger numerator, BigInteger denominator) throws NumberFormatException {
@@ -118,6 +148,38 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
     @Override
     public double doubleValue() {
         return numerator.doubleValue() / denominator.doubleValue();
+    }
+
+    /**
+     * Gets this fraction as a BigInteger using <code>RoundingMode.UNNECESSARY</code>
+     */
+    public BigInteger getBigInteger() throws ArithmeticException {
+        return getBigInteger(RoundingMode.UNNECESSARY);
+    }
+
+    /**
+     * Gets this fraction as a BigInteger using the provided rounding mode.
+     */
+    public BigInteger getBigInteger(RoundingMode roundingMode) throws ArithmeticException {
+        return getBigDecimal(0, roundingMode).toBigIntegerExact();
+    }
+
+    /**
+     * Gets this fraction as a BigDecimal using <code>RoundingMode.UNNECESSARY</code>
+     */
+    public BigDecimal getBigDecimal(int scale) throws ArithmeticException {
+        return getBigDecimal(scale, RoundingMode.UNNECESSARY);
+    }
+
+    /**
+     * Gets this fraction as a BigDecimal using the provided rounding mode.
+     */
+    public BigDecimal getBigDecimal(int scale, RoundingMode roundingMode) throws ArithmeticException {
+        return new BigDecimal(numerator).divide(
+            new BigDecimal(denominator),
+            scale,
+            roundingMode
+        );
     }
 
     @Override

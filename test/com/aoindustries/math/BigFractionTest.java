@@ -22,13 +22,10 @@
  */
 package com.aoindustries.math;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -301,6 +298,163 @@ public class BigFractionTest extends TestCase {
         assertEquals(
             new BigFraction("-1/27"),
             new BigFraction("-3/9").pow(3)
+        );
+    }
+
+    public void testValueOfBigDecimal() {
+        assertEquals(
+            new BigFraction("1/10"),
+            BigFraction.valueOf(new BigDecimal("0.1"))
+        );
+        assertEquals(
+            new BigFraction("1/4"),
+            BigFraction.valueOf(new BigDecimal("0.25"))
+        );
+        assertEquals(
+            new BigFraction("2398/1"),
+            BigFraction.valueOf(new BigDecimal("2398"))
+        );
+        assertEquals(
+            new BigFraction("4797/2"),
+            BigFraction.valueOf(new BigDecimal("2398.5"))
+        );
+    }
+
+    public void testGetBigInteger() {
+        assertEquals(
+            new BigInteger("0"),
+            new BigFraction("1/3").getBigInteger(RoundingMode.DOWN)
+        );
+        assertEquals(
+            new BigInteger("0"),
+            new BigFraction("-1/3").getBigInteger(RoundingMode.DOWN)
+        );
+        assertEquals(
+            new BigInteger("1"),
+            new BigFraction("1/3").getBigInteger(RoundingMode.UP)
+        );
+        assertEquals(
+            new BigInteger("-1"),
+            new BigFraction("-1/3").getBigInteger(RoundingMode.UP)
+        );
+        assertEquals(
+            new BigInteger("0"),
+            new BigFraction("1/3").getBigInteger(RoundingMode.FLOOR)
+        );
+        assertEquals(
+            new BigInteger("-1"),
+            new BigFraction("-1/3").getBigInteger(RoundingMode.FLOOR)
+        );
+        assertEquals(
+            new BigInteger("254"),
+            new BigFraction("59436/234").getBigInteger()
+        );
+        assertEquals(
+            new BigInteger("25"),
+            new BigFraction("59436/2340").getBigInteger(RoundingMode.HALF_DOWN)
+        );
+    }
+
+    public void testGetBigDecimal() {
+        assertEquals(
+            new BigDecimal("0.333"),
+            new BigFraction("1/3").getBigDecimal(3, RoundingMode.DOWN)
+        );
+        assertEquals(
+            new BigDecimal("-0.333"),
+            new BigFraction("-1/3").getBigDecimal(3, RoundingMode.DOWN)
+        );
+        assertEquals(
+            new BigDecimal("-0.334"),
+            new BigFraction("-1/3").getBigDecimal(3, RoundingMode.FLOOR)
+        );
+        assertEquals(
+            new BigDecimal("0.33333333333333333333"),
+            new BigFraction("1/3").getBigDecimal(20, RoundingMode.DOWN)
+        );
+        assertEquals(
+            new BigDecimal("-0.33333333333333333333"),
+            new BigFraction("-1/3").getBigDecimal(20, RoundingMode.DOWN)
+        );
+        assertEquals(
+            new BigDecimal("-0.33333333333333333334"),
+            new BigFraction("-1/3").getBigDecimal(20, RoundingMode.FLOOR)
+        );
+    }
+
+    private BigDecimal[] distributeFractionalMoney(BigDecimal total, BigFraction[] fractions) {
+        // Make sure fractions sum to one
+        BigFraction sum = BigFraction.ZERO;
+        for(BigFraction fraction : fractions) sum = sum.add(fraction);
+        assertEquals(
+            BigFraction.ONE,
+            sum
+        );
+        BigFraction totalFraction = BigFraction.valueOf(total);
+        BigDecimal remaining = total;
+        BigDecimal[] results = new BigDecimal[fractions.length];
+        for(int c=0; c<fractions.length-1; c++) {
+            remaining = remaining.subtract(results[c] = totalFraction.multiply(fractions[c]).getBigDecimal(2, RoundingMode.HALF_EVEN));
+        }
+        results[fractions.length-1] = remaining;
+        return results;
+    }
+
+    public static void assertEquals(Object[] array1, Object[] array2) {
+        if(!Arrays.equals(array1, array2)) {
+            failNotEquals(null, Arrays.toString(array1), Arrays.toString(array2));
+        }
+    }
+
+    public void testFractionalMoney() {
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.34")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("100000.00"),
+                new BigFraction[] {
+                    new BigFraction("1/3"),
+                    new BigFraction("1/3"),
+                    new BigFraction("1/3")
+                }
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("25000.00"),
+                new BigDecimal("25000.00"),
+                new BigDecimal("25000.00"),
+                new BigDecimal("25000.00")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("100000.00"),
+                new BigFraction[] {
+                    new BigFraction("1/4"),
+                    new BigFraction("1/4"),
+                    new BigFraction("1/4"),
+                    new BigFraction("1/4")
+                }
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("25000.00"),
+                new BigDecimal("25000.00"),
+                new BigDecimal("25000.00"),
+                new BigDecimal("25000.00")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("0.02"),
+                new BigFraction[] {
+                    new BigFraction("1/4"),
+                    new BigFraction("1/4"),
+                    new BigFraction("1/4"),
+                    new BigFraction("1/4")
+                }
+            )
         );
     }
 }
