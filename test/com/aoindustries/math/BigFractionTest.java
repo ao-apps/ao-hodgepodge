@@ -394,7 +394,7 @@ public class BigFractionTest extends TestCase {
         BigDecimal remaining = total;
         BigDecimal[] results = new BigDecimal[fractions.length];
         for(int c=0; c<fractions.length-1; c++) {
-            remaining = remaining.subtract(results[c] = totalFraction.multiply(fractions[c]).getBigDecimal(2, RoundingMode.HALF_EVEN));
+            remaining = remaining.subtract(results[c] = totalFraction.multiply(fractions[c]).getBigDecimal(2, RoundingMode.HALF_UP));
         }
         results[fractions.length-1] = remaining;
         return results;
@@ -441,10 +441,31 @@ public class BigFractionTest extends TestCase {
         );
         assertEquals(
             new BigDecimal[] {
-                new BigDecimal("25000.00"),
-                new BigDecimal("25000.00"),
-                new BigDecimal("25000.00"),
-                new BigDecimal("25000.00")
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.34"),
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.34")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("200000.00"),
+                new BigFraction[] {
+                    new BigFraction("1/6"),
+                    new BigFraction("1/6"),
+                    new BigFraction("1/6"),
+                    new BigFraction("1/6"),
+                    new BigFraction("1/6"),
+                    new BigFraction("1/6")
+                }
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("0.00"),
+                new BigDecimal("0.01"),
+                new BigDecimal("0.00"),
+                new BigDecimal("0.01")
             },
             distributeFractionalMoney(
                 new BigDecimal("0.02"),
