@@ -382,31 +382,41 @@ public class BigFractionTest extends TestCase {
         );
     }
 
-    private BigDecimal[] distributeFractionalMoney(BigDecimal total, BigFraction... fractions) {
+    private BigDecimal[] distributeFractionalMoney(final BigDecimal total, final BigFraction... fractions) {
+        // Must have at least one fraction
         int len = fractions.length;
-        if(len==1) throw new IllegalArgumentException("fractions must contain at least one element");
-        BigFraction[] fractionsCopy = Arrays.copyOf(fractions, len);
+        if(len==0) throw new IllegalArgumentException("fractions must contain at least one element");
 
         // Make sure fractions sum to one
         BigFraction sum = BigFraction.ZERO;
-        for(BigFraction fraction : fractionsCopy) {
+        for(BigFraction fraction : fractions) {
             if(fraction.compareTo(BigFraction.ZERO)<0) throw new IllegalArgumentException("fractions contains value<0: "+fraction);
             sum = sum.add(fraction);
         }
-        assertEquals(
-            BigFraction.ONE,
-            sum
-        );
+        if(!sum.equals(BigFraction.ONE)) throw new IllegalArgumentException("sum(fractions)!=1: " + sum);
+
+        // Sort the fractions from lowest to highest
+        BigFraction[] fractionOrdereds = Arrays.copyOf(fractions, len);
+        Arrays.sort(fractionOrdereds);
+        BigFraction[] fractionAltereds = Arrays.copyOf(fractionOrdereds, len);
+
         BigDecimal remaining = total;
         BigDecimal[] results = new BigDecimal[len];
-        for(int c=0; c<len; c++) {
-            BigFraction fraction = fractionsCopy[c];
-            BigDecimal result = BigFraction.valueOf(remaining).multiply(fraction).getBigDecimal(2, RoundingMode.HALF_DOWN);
-            if(result.compareTo(BigDecimal.ZERO)<0) throw new AssertionError("result<0: "+result);
+        for(int c=len-1; c>=0; c--) {
+            BigFraction fractionAltered = fractionAltereds[c];
+            BigDecimal result = BigFraction.valueOf(remaining).multiply(fractionAltered).getBigDecimal(2, RoundingMode.UP);
+            if(result.compareTo(BigDecimal.ZERO)!=0 && result.signum()!=total.signum()) throw new AssertionError("sign(result)!=sign(total): "+result);
+            remaining = remaining.subtract(result);
+            BigFraction divisor = BigFraction.ONE.subtract(fractionAltered);
+            for(int d=c-1; d>=0; d--) fractionAltereds[d] = fractionAltereds[d].divide(divisor);
 
-            remaining = remaining.subtract(results[c] = result);
-            BigFraction divisor = BigFraction.ONE.subtract(fraction);
-            for(int d=c+1; d<len; d++) fractionsCopy[d] = fractionsCopy[d].divide(divisor);
+            BigFraction fractionOrdered = fractionOrdereds[c];
+            for(int d=0;d<len;d++) {
+                if(results[d]==null && fractions[d].equals(fractionOrdered)) {
+                    results[d] = result;
+                    break;
+                }
+            }
         }
         if(remaining.compareTo(BigDecimal.ZERO)!=0) throw new AssertionError("remaining!=0: "+remaining);
         return results;
@@ -421,9 +431,9 @@ public class BigFractionTest extends TestCase {
     public void testFractionalMoney() {
         assertEquals(
             new BigDecimal[] {
+                new BigDecimal("33333.34"),
                 new BigDecimal("33333.33"),
-                new BigDecimal("33333.33"),
-                new BigDecimal("33333.34")
+                new BigDecimal("33333.33")
             },
             distributeFractionalMoney(
                 new BigDecimal("100000.00"),
@@ -449,12 +459,12 @@ public class BigFractionTest extends TestCase {
         );
         assertEquals(
             new BigDecimal[] {
-                new BigDecimal("33333.33"),
-                new BigDecimal("33333.33"),
+                new BigDecimal("33333.34"),
                 new BigDecimal("33333.34"),
                 new BigDecimal("33333.33"),
                 new BigDecimal("33333.33"),
-                new BigDecimal("33333.34")
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.33")
             },
             distributeFractionalMoney(
                 new BigDecimal("200000.00"),
@@ -468,10 +478,87 @@ public class BigFractionTest extends TestCase {
         );
         assertEquals(
             new BigDecimal[] {
+                new BigDecimal("33333.34"),
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.33"),
+                new BigDecimal("100000.00")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("200000.00"),
+                new BigFraction("1/6"),
+                new BigFraction("1/6"),
+                new BigFraction("1/6"),
+                new BigFraction("1/2")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("-33333.34"),
+                new BigDecimal("-33333.33"),
+                new BigDecimal("-33333.33"),
+                new BigDecimal("-100000.00")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("-200000.00"),
+                new BigFraction("1/6"),
+                new BigFraction("1/6"),
+                new BigFraction("1/6"),
+                new BigFraction("1/2")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("33333.34"),
+                new BigDecimal("100000.00"),
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.33")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("200000.00"),
+                new BigFraction("1/6"),
+                new BigFraction("1/2"),
+                new BigFraction("1/6"),
+                new BigFraction("1/6")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("-33333.34"),
+                new BigDecimal("-100000.00"),
+                new BigDecimal("-33333.33"),
+                new BigDecimal("-33333.33")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("-200000.00"),
+                new BigFraction("1/6"),
+                new BigFraction("1/2"),
+                new BigFraction("1/6"),
+                new BigFraction("1/6")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("33333.34"),
+                new BigDecimal("33333.33"),
                 new BigDecimal("0.00"),
+                new BigDecimal("33333.33"),
+                new BigDecimal("100000.00")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("200000.00"),
+                new BigFraction("1/6"),
+                new BigFraction("1/6"),
+                new BigFraction("0/1"),
+                new BigFraction("1/6"),
+                new BigFraction("1/2")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("0.01"),
                 new BigDecimal("0.01"),
                 new BigDecimal("0.00"),
-                new BigDecimal("0.01")
+                new BigDecimal("0.00")
             },
             distributeFractionalMoney(
                 new BigDecimal("0.02"),
@@ -479,6 +566,119 @@ public class BigFractionTest extends TestCase {
                 new BigFraction("1/4"),
                 new BigFraction("1/4"),
                 new BigFraction("1/4")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("0.01"),
+                new BigDecimal("0.00"),
+                new BigDecimal("0.00"),
+                new BigDecimal("0.00")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("0.01"),
+                new BigFraction("1/4"),
+                new BigFraction("1/4"),
+                new BigFraction("1/4"),
+                new BigFraction("1/4")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("0.00"),
+                new BigDecimal("0.00"),
+                new BigDecimal("0.00"),
+                new BigDecimal("0.00")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("0.00"),
+                new BigFraction("1/4"),
+                new BigFraction("1/4"),
+                new BigFraction("1/4"),
+                new BigFraction("1/4")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("0.01"),
+            },
+            distributeFractionalMoney(
+                new BigDecimal("0.01"),
+                new BigFraction("1/1")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("0.00"),
+            },
+            distributeFractionalMoney(
+                new BigDecimal("0.00"),
+                new BigFraction("1/1")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("33333.33"),
+                new BigDecimal("33333.33"),
+                new BigDecimal("133333.34")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("200000.00"),
+                new BigFraction("1/6"),
+                new BigFraction("1/6"),
+                new BigFraction("2/3")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("28571.42"),
+                new BigDecimal("85714.29"),
+                new BigDecimal("85714.29")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("200000.00"),
+                new BigFraction("1/7"),
+                new BigFraction("3/7"),
+                new BigFraction("3/7")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("28571.43"),
+                new BigDecimal("85714.29"),
+                new BigDecimal("85714.29")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("200000.01"),
+                new BigFraction("1/7"),
+                new BigFraction("3/7"),
+                new BigFraction("3/7")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("28571.43"),
+                new BigDecimal("85714.30"),
+                new BigDecimal("85714.29")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("200000.02"),
+                new BigFraction("1/7"),
+                new BigFraction("3/7"),
+                new BigFraction("3/7")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("28571.43"),
+                new BigDecimal("85714.30"),
+                new BigDecimal("85714.30")
+            },
+            distributeFractionalMoney(
+                new BigDecimal("200000.03"),
+                new BigFraction("1/7"),
+                new BigFraction("3/7"),
+                new BigFraction("3/7")
             )
         );
     }
