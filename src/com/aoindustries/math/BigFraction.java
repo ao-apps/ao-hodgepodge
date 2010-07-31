@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.Arrays;
 
 /**
  * Stores arbitrary size fractions by their numerator and denominator.
@@ -87,6 +88,57 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
             if(numerator.compareTo(BigInteger.ONE)==0) return ONE;
         }
         return new BigFraction(numerator, denominator);
+    }
+
+    /**
+     * Evenly distributes the total value of BigDecimal by fractional amounts.
+     * The results will use the same scale as <code>total</code>.
+     * The results will be rounded where necessary to match the scale of <code>total</code>.
+     * The results are rounded-up for the higher fractions first.
+     *
+     * @param total The total value to be distributed within the results.
+     * @param fractions The fractional amount of each result.  The array elements are unmodified.
+     *
+     * @return the results corresponding to each fractional amount.
+     */
+    public static BigDecimal[] distributeValue(final BigDecimal total, final BigFraction... fractions) {
+        // Must have at least one fraction
+        int len = fractions.length;
+        if(len==0) throw new IllegalArgumentException("fractions must contain at least one element");
+
+        // Make sure fractions sum to one
+        BigFraction sum = BigFraction.ZERO;
+        for(BigFraction fraction : fractions) {
+            if(fraction.compareTo(BigFraction.ZERO)<0) throw new IllegalArgumentException("fractions contains value<0: "+fraction);
+            sum = sum.add(fraction);
+        }
+        if(!sum.equals(BigFraction.ONE)) throw new IllegalArgumentException("sum(fractions)!=1: " + sum);
+
+        // Sort the fractions from lowest to highest
+        BigFraction[] fractionOrdereds = Arrays.copyOf(fractions, len);
+        Arrays.sort(fractionOrdereds);
+        BigFraction[] fractionAltereds = Arrays.copyOf(fractionOrdereds, len);
+
+        BigDecimal remaining = total;
+        BigDecimal[] results = new BigDecimal[len];
+        for(int c=len-1; c>=0; c--) {
+            BigFraction fractionAltered = fractionAltereds[c];
+            BigDecimal result = BigFraction.valueOf(remaining).multiply(fractionAltered).getBigDecimal(total.scale(), RoundingMode.UP);
+            if(result.compareTo(BigDecimal.ZERO)!=0 && result.signum()!=total.signum()) throw new AssertionError("sign(result)!=sign(total): "+result);
+            remaining = remaining.subtract(result);
+            BigFraction divisor = BigFraction.ONE.subtract(fractionAltered);
+            for(int d=c-1; d>=0; d--) fractionAltereds[d] = fractionAltereds[d].divide(divisor);
+
+            BigFraction fractionOrdered = fractionOrdereds[c];
+            for(int d=0;d<len;d++) {
+                if(results[d]==null && fractions[d].equals(fractionOrdered)) {
+                    results[d] = result;
+                    break;
+                }
+            }
+        }
+        if(remaining.compareTo(BigDecimal.ZERO)!=0) throw new AssertionError("remaining!=0: "+remaining);
+        return results;
     }
 
     private final BigInteger numerator;

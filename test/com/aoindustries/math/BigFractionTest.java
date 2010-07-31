@@ -382,46 +382,6 @@ public class BigFractionTest extends TestCase {
         );
     }
 
-    private BigDecimal[] distributeFractionalMoney(final BigDecimal total, final BigFraction... fractions) {
-        // Must have at least one fraction
-        int len = fractions.length;
-        if(len==0) throw new IllegalArgumentException("fractions must contain at least one element");
-
-        // Make sure fractions sum to one
-        BigFraction sum = BigFraction.ZERO;
-        for(BigFraction fraction : fractions) {
-            if(fraction.compareTo(BigFraction.ZERO)<0) throw new IllegalArgumentException("fractions contains value<0: "+fraction);
-            sum = sum.add(fraction);
-        }
-        if(!sum.equals(BigFraction.ONE)) throw new IllegalArgumentException("sum(fractions)!=1: " + sum);
-
-        // Sort the fractions from lowest to highest
-        BigFraction[] fractionOrdereds = Arrays.copyOf(fractions, len);
-        Arrays.sort(fractionOrdereds);
-        BigFraction[] fractionAltereds = Arrays.copyOf(fractionOrdereds, len);
-
-        BigDecimal remaining = total;
-        BigDecimal[] results = new BigDecimal[len];
-        for(int c=len-1; c>=0; c--) {
-            BigFraction fractionAltered = fractionAltereds[c];
-            BigDecimal result = BigFraction.valueOf(remaining).multiply(fractionAltered).getBigDecimal(2, RoundingMode.UP);
-            if(result.compareTo(BigDecimal.ZERO)!=0 && result.signum()!=total.signum()) throw new AssertionError("sign(result)!=sign(total): "+result);
-            remaining = remaining.subtract(result);
-            BigFraction divisor = BigFraction.ONE.subtract(fractionAltered);
-            for(int d=c-1; d>=0; d--) fractionAltereds[d] = fractionAltereds[d].divide(divisor);
-
-            BigFraction fractionOrdered = fractionOrdereds[c];
-            for(int d=0;d<len;d++) {
-                if(results[d]==null && fractions[d].equals(fractionOrdered)) {
-                    results[d] = result;
-                    break;
-                }
-            }
-        }
-        if(remaining.compareTo(BigDecimal.ZERO)!=0) throw new AssertionError("remaining!=0: "+remaining);
-        return results;
-    }
-
     public static void assertEquals(Object[] array1, Object[] array2) {
         if(!Arrays.equals(array1, array2)) {
             failNotEquals(null, Arrays.toString(array1), Arrays.toString(array2));
@@ -435,7 +395,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("33333.33"),
                 new BigDecimal("33333.33")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("100000.00"),
                 new BigFraction("1/3"),
                 new BigFraction("1/3"),
@@ -449,7 +409,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("25000.00"),
                 new BigDecimal("25000.00")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("100000.00"),
                 new BigFraction("1/4"),
                 new BigFraction("1/4"),
@@ -466,7 +426,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("33333.33"),
                 new BigDecimal("33333.33")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("200000.00"),
                 new BigFraction("1/6"),
                 new BigFraction("1/6"),
@@ -483,7 +443,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("33333.33"),
                 new BigDecimal("100000.00")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("200000.00"),
                 new BigFraction("1/6"),
                 new BigFraction("1/6"),
@@ -498,7 +458,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("-33333.33"),
                 new BigDecimal("-100000.00")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("-200000.00"),
                 new BigFraction("1/6"),
                 new BigFraction("1/6"),
@@ -513,7 +473,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("33333.33"),
                 new BigDecimal("33333.33")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("200000.00"),
                 new BigFraction("1/6"),
                 new BigFraction("1/2"),
@@ -528,7 +488,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("-33333.33"),
                 new BigDecimal("-33333.33")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("-200000.00"),
                 new BigFraction("1/6"),
                 new BigFraction("1/2"),
@@ -544,7 +504,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("33333.33"),
                 new BigDecimal("100000.00")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("200000.00"),
                 new BigFraction("1/6"),
                 new BigFraction("1/6"),
@@ -560,7 +520,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("0.00"),
                 new BigDecimal("0.00")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("0.02"),
                 new BigFraction("1/4"),
                 new BigFraction("1/4"),
@@ -575,7 +535,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("0.00"),
                 new BigDecimal("0.00")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("0.01"),
                 new BigFraction("1/4"),
                 new BigFraction("1/4"),
@@ -590,7 +550,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("0.00"),
                 new BigDecimal("0.00")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("0.00"),
                 new BigFraction("1/4"),
                 new BigFraction("1/4"),
@@ -602,7 +562,7 @@ public class BigFractionTest extends TestCase {
             new BigDecimal[] {
                 new BigDecimal("0.01"),
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("0.01"),
                 new BigFraction("1/1")
             )
@@ -611,7 +571,7 @@ public class BigFractionTest extends TestCase {
             new BigDecimal[] {
                 new BigDecimal("0.00"),
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("0.00"),
                 new BigFraction("1/1")
             )
@@ -622,7 +582,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("33333.33"),
                 new BigDecimal("133333.34")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("200000.00"),
                 new BigFraction("1/6"),
                 new BigFraction("1/6"),
@@ -635,7 +595,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("85714.29"),
                 new BigDecimal("85714.29")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("200000.00"),
                 new BigFraction("1/7"),
                 new BigFraction("3/7"),
@@ -648,7 +608,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("85714.29"),
                 new BigDecimal("85714.29")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("200000.01"),
                 new BigFraction("1/7"),
                 new BigFraction("3/7"),
@@ -661,7 +621,7 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("85714.30"),
                 new BigDecimal("85714.29")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("200000.02"),
                 new BigFraction("1/7"),
                 new BigFraction("3/7"),
@@ -674,8 +634,34 @@ public class BigFractionTest extends TestCase {
                 new BigDecimal("85714.30"),
                 new BigDecimal("85714.30")
             },
-            distributeFractionalMoney(
+            BigFraction.distributeValue(
                 new BigDecimal("200000.03"),
+                new BigFraction("1/7"),
+                new BigFraction("3/7"),
+                new BigFraction("3/7")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("28571.42857"),
+                new BigDecimal("85714.28572"),
+                new BigDecimal("85714.28571")
+            },
+            BigFraction.distributeValue(
+                new BigDecimal("200000.00000"),
+                new BigFraction("1/7"),
+                new BigFraction("3/7"),
+                new BigFraction("3/7")
+            )
+        );
+        assertEquals(
+            new BigDecimal[] {
+                new BigDecimal("28571.42857"),
+                new BigDecimal("85714.28572"),
+                new BigDecimal("85714.28572")
+            },
+            BigFraction.distributeValue(
+                new BigDecimal("200000.00001"),
                 new BigFraction("1/7"),
                 new BigFraction("3/7"),
                 new BigFraction("3/7")
