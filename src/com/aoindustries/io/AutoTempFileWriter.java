@@ -228,4 +228,13 @@ public class AutoTempFileWriter extends Writer {
             tempFile = null;
         }
     }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            delete();
+        } finally {
+            super.finalize();
+        }
+    }
 }
