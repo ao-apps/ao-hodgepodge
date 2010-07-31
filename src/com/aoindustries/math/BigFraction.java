@@ -92,14 +92,19 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
 
     /**
      * Evenly distributes the total value of BigDecimal by fractional amounts.
-     * The results will use the same scale as <code>total</code>.
-     * The results will be rounded where necessary to match the scale of <code>total</code>.
-     * The results are rounded-up for the higher fractions first.
+     * <ul>
+     *   <li>The sum of the results will equal <code>total</code>.</li>
+     *   <li>The results will use the same scale as <code>total</code>.</li>
+     *   <li>The results will be rounded where necessary to match the scale of <code>total</code>.</li>
+     *   <li>The results are rounded-up for the larger fractions first.</li>
+     *   <li>Each result will be zero or have a sign matching <code>total</code>.</li>
+     * </ul>
      *
-     * @param total The total value to be distributed within the results.
+     * @param total The total value to be distributed within the results, the sum must be equal to one.
      * @param fractions The fractional amount of each result.  The array elements are unmodified.
      *
      * @return the results corresponding to each fractional amount.
+     *         
      */
     public static BigDecimal[] distributeValue(final BigDecimal total, final BigFraction... fractions) {
         // Must have at least one fraction
