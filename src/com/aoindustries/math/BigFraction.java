@@ -41,53 +41,66 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
 
     public static final char SOLIDUS = '\u2044';
 
-    public static final BigFraction
-        ZERO = new BigFraction(0,1),
-        ONE = new BigFraction(1,1)
+    private static final BigInteger
+        ONE_HUNDRED = BigInteger.valueOf(100),
+        ONE_THOUSAND = BigInteger.valueOf(1000),
+        TEN_THOUSAND = BigInteger.valueOf(10000),
+        ONE_HUNDRED_THOUSAND = BigInteger.valueOf(100000)
     ;
 
-    public static BigFraction valueOf(long numerator, long denominator) throws NumberFormatException {
-        if(denominator==1) {
+    public static final BigFraction
+        ZERO = new BigFraction(0,1,false),
+        ONE = new BigFraction(1,1,false)
+    ;
+
+    public static BigFraction valueOf(long numerator, long denominator, boolean displayPercentage) throws NumberFormatException {
+        if(!displayPercentage && denominator==1) {
             if(numerator==0) return ZERO;
             if(numerator==1) return ONE;
         }
-        return new BigFraction(numerator, denominator);
+        return new BigFraction(numerator, denominator, displayPercentage);
     }
 
-    public static BigFraction valueOf(BigInteger value) throws NumberFormatException {
-        if(value.compareTo(BigInteger.ZERO)==0) return ZERO;
-        if(value.compareTo(BigInteger.ONE)==0) return ONE;
-        return new BigFraction(value, BigInteger.ONE);
+    public static BigFraction valueOf(BigInteger value, boolean displayPercentage) throws NumberFormatException {
+        if(!displayPercentage) {
+            if(value.compareTo(BigInteger.ZERO)==0) return ZERO;
+            if(value.compareTo(BigInteger.ONE)==0) return ONE;
+        }
+        return new BigFraction(value, BigInteger.ONE, displayPercentage);
     }
 
     /**
      * Gets the big decimal as a fraction, reduced.
      */
-    public static BigFraction valueOf(BigDecimal value) throws NumberFormatException {
-        if(value.compareTo(BigDecimal.ZERO)==0) return ZERO;
-        if(value.compareTo(BigDecimal.ONE)==0) return ONE;
+    public static BigFraction valueOf(BigDecimal value, boolean displayPercentage) throws NumberFormatException {
+        if(!displayPercentage) {
+            if(value.compareTo(BigDecimal.ZERO)==0) return ZERO;
+            if(value.compareTo(BigDecimal.ONE)==0) return ONE;
+        }
         int scale = value.scale();
         if(scale<=0) {
             // Has no decimal point
             return new BigFraction(
                 value.toBigIntegerExact(),
-                BigInteger.ONE
+                BigInteger.ONE,
+                displayPercentage
             );
         } else {
             // Has a decimal point
             return new BigFraction(
                 value.movePointRight(scale).toBigIntegerExact(),
-                BigInteger.TEN.pow(scale)
+                BigInteger.TEN.pow(scale),
+                displayPercentage
             ).reduce();
         }
     }
 
-    public static BigFraction valueOf(BigInteger numerator, BigInteger denominator) throws NumberFormatException {
-        if(denominator.compareTo(BigInteger.ONE)==0) {
+    public static BigFraction valueOf(BigInteger numerator, BigInteger denominator, boolean displayPercentage) throws NumberFormatException {
+        if(!displayPercentage && denominator.compareTo(BigInteger.ONE)==0) {
             if(numerator.compareTo(BigInteger.ZERO)==0) return ZERO;
             if(numerator.compareTo(BigInteger.ONE)==0) return ONE;
         }
-        return new BigFraction(numerator, denominator);
+        return new BigFraction(numerator, denominator, displayPercentage);
     }
 
     /**
@@ -117,7 +130,7 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
             if(fraction.compareTo(BigFraction.ZERO)<0) throw new IllegalArgumentException("fractions contains value<0: "+fraction);
             sum = sum.add(fraction);
         }
-        if(!sum.equals(BigFraction.ONE)) throw new IllegalArgumentException("sum(fractions)!=1: " + sum);
+        if(sum.compareTo(BigFraction.ONE)!=0) throw new IllegalArgumentException("sum(fractions)!=1: " + sum);
 
         // Sort the fractions from lowest to highest
         BigFraction[] fractionOrdereds = Arrays.copyOf(fractions, len);
@@ -128,7 +141,7 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
         BigDecimal[] results = new BigDecimal[len];
         for(int c=len-1; c>=0; c--) {
             BigFraction fractionAltered = fractionAltereds[c];
-            BigDecimal result = BigFraction.valueOf(remaining).multiply(fractionAltered).getBigDecimal(total.scale(), RoundingMode.UP);
+            BigDecimal result = BigFraction.valueOf(remaining, false).multiply(fractionAltered).getBigDecimal(total.scale(), RoundingMode.UP);
             if(result.compareTo(BigDecimal.ZERO)!=0 && result.signum()!=total.signum()) throw new AssertionError("sign(result)!=sign(total): "+result);
             remaining = remaining.subtract(result);
             BigFraction divisor = BigFraction.ONE.subtract(fractionAltered);
@@ -136,7 +149,7 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
 
             BigFraction fractionOrdered = fractionOrdereds[c];
             for(int d=0;d<len;d++) {
-                if(results[d]==null && fractions[d].equals(fractionOrdered)) {
+                if(results[d]==null && fractions[d].compareTo(fractionOrdered)==0) {
                     results[d] = result;
                     break;
                 }
@@ -148,25 +161,44 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
 
     private final BigInteger numerator;
     private final BigInteger denominator;
+    private final boolean displayPercentage;
 
     public BigFraction(String value) throws NumberFormatException {
-        int slashPos = value.indexOf(SOLIDUS);
-        if(slashPos==-1) slashPos = value.indexOf('/'); // Alternate slash
-        if(slashPos==-1) throw new NumberFormatException("Unable to find solidus ("+SOLIDUS+") or slash (/)");
-        this.numerator = new BigInteger(value.substring(0, slashPos));
-        this.denominator = new BigInteger(value.substring(slashPos+1));
+        if(value.endsWith("%")) {
+            BigDecimal bd = new BigDecimal(value.substring(0, value.length()-1)).movePointLeft(2);
+            int scale = bd.scale();
+            if(scale<=0) {
+                // Has no decimal point
+                this.numerator = bd.toBigIntegerExact();
+                this.denominator = BigInteger.ONE;
+            } else {
+                // Has a decimal point
+                this.numerator = bd.movePointRight(scale).toBigIntegerExact();
+                this.denominator = BigInteger.TEN.pow(scale);
+            }
+            this.displayPercentage = true;
+        } else {
+            int slashPos = value.indexOf(SOLIDUS);
+            if(slashPos==-1) slashPos = value.indexOf('/'); // Alternate slash
+            if(slashPos==-1) throw new NumberFormatException("Unable to find solidus ("+SOLIDUS+") or slash (/)");
+            this.numerator = new BigInteger(value.substring(0, slashPos));
+            this.denominator = new BigInteger(value.substring(slashPos+1));
+            this.displayPercentage = false;
+        }
         validate();
     }
 
-    public BigFraction(long numerator, long denominator) throws NumberFormatException {
+    public BigFraction(long numerator, long denominator, boolean displayPercentage) throws NumberFormatException {
         this.numerator = BigInteger.valueOf(numerator);
         this.denominator = BigInteger.valueOf(denominator);
+        this.displayPercentage = displayPercentage;
         validate();
     }
 
-    public BigFraction(BigInteger numerator, BigInteger denominator) throws NumberFormatException {
+    public BigFraction(BigInteger numerator, BigInteger denominator, boolean displayPercentage) throws NumberFormatException {
         this.numerator = numerator;
         this.denominator = denominator;
+        this.displayPercentage = displayPercentage;
         validate();
     }
 
@@ -184,6 +216,34 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
 
     @Override
     public String toString() {
+        if(displayPercentage) {
+            // Short-cut for x/100
+            if(denominator.compareTo(ONE_HUNDRED)==0) return numerator.toString()+'%';
+
+            // Reduce first
+            BigFraction reduced = this.reduce();
+
+            // See if goes into 100 evenly
+            BigInteger[] divideAndRemainer = ONE_HUNDRED.divideAndRemainder(reduced.denominator);
+            if(divideAndRemainer[1].compareTo(BigInteger.ZERO)==0) {
+                return reduced.numerator.multiply(divideAndRemainer[0]).toString()+"%";
+            }
+            // See if goes into 1000 evenly
+            divideAndRemainer = ONE_THOUSAND.divideAndRemainder(reduced.denominator);
+            if(divideAndRemainer[1].compareTo(BigInteger.ZERO)==0) {
+                return new BigDecimal(reduced.numerator.multiply(divideAndRemainer[0]), 1).toPlainString()+"%";
+            }
+            // See if goes into 10000 evenly
+            divideAndRemainer = TEN_THOUSAND.divideAndRemainder(reduced.denominator);
+            if(divideAndRemainer[1].compareTo(BigInteger.ZERO)==0) {
+                return new BigDecimal(reduced.numerator.multiply(divideAndRemainer[0]), 2).toPlainString()+"%";
+            }
+            // See if goes into 100000 evenly
+            divideAndRemainer = ONE_HUNDRED_THOUSAND.divideAndRemainder(reduced.denominator);
+            if(divideAndRemainer[1].compareTo(BigInteger.ZERO)==0) {
+                return new BigDecimal(reduced.numerator.multiply(divideAndRemainer[0]), 3).toPlainString()+"%";
+            }
+        }
         return numerator.toString() + SOLIDUS + denominator.toString();
     }
 
@@ -241,11 +301,11 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
 
     @Override
     public int hashCode() {
-        return numerator.hashCode() * 31 + denominator.hashCode();
+        return numerator.hashCode() * 31 + denominator.hashCode() + (displayPercentage ? 1 : 0);
     }
 
     /**
-     * Two fractions are equal when they have both the same numerator and denominator.
+     * Two fractions are equal when they have both the same numerator, denominator, and displayPercentage.
      * For numerical equality independent of denominator, use <code>compareTo</code>.
      *
      * @see  #compareTo(BigFraction)
@@ -256,7 +316,8 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
         if(!(o instanceof BigFraction)) return false;
         BigFraction other = (BigFraction)o;
         return
-            numerator.equals(other.numerator)
+            displayPercentage==other.displayPercentage
+            && numerator.equals(other.numerator)
             && denominator.equals(other.denominator)
         ;
     }
@@ -268,9 +329,9 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
         return numerator.multiply(o.denominator).compareTo(o.numerator.multiply(denominator));
     }
 
-    private BigFraction reduce(BigInteger newNumerator, BigInteger newDenominator) {
+    private BigFraction reduce(BigInteger newNumerator, BigInteger newDenominator, boolean displayPercentage) {
         // Reduce result
-        if(newNumerator.compareTo(BigInteger.ZERO)==0) return ZERO;
+        if(!displayPercentage && newNumerator.compareTo(BigInteger.ZERO)==0) return ZERO;
         // Change signs if denominator is negative
         if(newDenominator.compareTo(BigInteger.ZERO)<0) {
             newNumerator = newNumerator.negate();
@@ -282,82 +343,103 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
             newNumerator = newNumerator.divide(gcd);
             newDenominator = newDenominator.divide(gcd);
         }
-        if(newNumerator.compareTo(numerator)==0 && newDenominator.compareTo(denominator)==0) return this;
-        return valueOf(newNumerator, newDenominator);
+        if(displayPercentage==this.displayPercentage && newNumerator.compareTo(numerator)==0 && newDenominator.compareTo(denominator)==0) return this;
+        return valueOf(newNumerator, newDenominator, displayPercentage);
     }
 
     /**
      * Reduces this fraction to its lowest terms.
      */
     public BigFraction reduce() {
-        return reduce(numerator, denominator);
+        return reduce(numerator, denominator, displayPercentage);
     }
 
     /**
      * Adds two fractions, returning the value in lowest terms.
+     *
+     * If either is a percentage, the result will be a percentage.
      */
     public BigFraction add(BigFraction val) {
         if(denominator.compareTo(val.denominator)==0) {
             return reduce(
                 numerator.add(val.numerator),
-                denominator
+                denominator,
+                displayPercentage || val.displayPercentage
             );
         } else {
             return reduce(
                 numerator.multiply(val.denominator).add(val.numerator.multiply(denominator)),
-                denominator.multiply(val.denominator)
+                denominator.multiply(val.denominator),
+                displayPercentage || val.displayPercentage
             );
         }
     }
 
     /**
      * Subtracts two fractions, returning the value in lowest terms.
+     *
+     * If either is a percentage, the result will be a percentage.
      */
     public BigFraction subtract(BigFraction val) {
         if(denominator.compareTo(val.denominator)==0) {
             return reduce(
                 numerator.subtract(val.numerator),
-                denominator
+                denominator,
+                displayPercentage || val.displayPercentage
             );
         } else {
             return reduce(
                 numerator.multiply(val.denominator).subtract(val.numerator.multiply(denominator)),
-                denominator.multiply(val.denominator)
+                denominator.multiply(val.denominator),
+                displayPercentage || val.displayPercentage
             );
         }
     }
 
     /**
      * Multiplies two fractions, returning the value in lowest terms.
+     *
+     * If both are percentages, the result will be a percentage.
      */
     public BigFraction multiply(BigFraction val) {
-        if(val.equals(ONE)) {
-            return this.reduce();
-        } else if(this.equals(ONE)) {
-            return val.reduce();
+        if(val.compareTo(ONE)==0) {
+            return this.reduce(this.numerator, this.denominator, this.displayPercentage && val.displayPercentage);
+        } else if(this.compareTo(ONE)==0) {
+            return val.reduce(val.numerator, val.denominator, this.displayPercentage && val.displayPercentage);
         } else {
             return reduce(
                 numerator.multiply(val.numerator),
-                denominator.multiply(val.denominator)
+                denominator.multiply(val.denominator),
+                this.displayPercentage && val.displayPercentage
             );
         }
     }
 
     /**
      * Divides two fractions, returning the value in lowest terms.
+     *
+     * <ul>
+     *   <li>If percent divide by percent: percent</li>
+     *   <li>If percent divide by non-percent: percent</li>
+     *   <li>If non-percent divide by percent: non-percent</li>
+     *   <li>If non-percent divide by non-percent: non-percent</li>
+     * </ul>
      */
     public BigFraction divide(BigFraction val) {
-        if(val.equals(ONE)) {
+        if(val.compareTo(ONE)==0) {
             return this.reduce();
-        } else if(this.equals(ONE)) {
+        } else if(this.compareTo(ONE)==0) {
+            // Simple reciprocal
             return reduce(
                 val.denominator,
-                val.numerator
+                val.numerator,
+                this.displayPercentage
             );
         } else {
             return reduce(
                 numerator.multiply(val.denominator),
-                denominator.multiply(val.numerator)
+                denominator.multiply(val.numerator),
+                this.displayPercentage
             );
         }
     }
@@ -366,7 +448,7 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
      * Negates the value, but is not reduced.
      */
     public BigFraction negate() {
-        return valueOf(numerator.negate(), denominator);
+        return valueOf(numerator.negate(), denominator, displayPercentage);
     }
 
     /**
@@ -411,7 +493,8 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
         if(exponent==1) return reduced;
         return valueOf(
             reduced.numerator.pow(exponent),
-            reduced.denominator.pow(exponent)
+            reduced.denominator.pow(exponent),
+            reduced.displayPercentage
         );
     }
 }

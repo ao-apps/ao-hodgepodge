@@ -304,19 +304,19 @@ public class BigFractionTest extends TestCase {
     public void testValueOfBigDecimal() {
         assertEquals(
             new BigFraction("1/10"),
-            BigFraction.valueOf(new BigDecimal("0.1"))
+            BigFraction.valueOf(new BigDecimal("0.1"), false)
         );
         assertEquals(
             new BigFraction("1/4"),
-            BigFraction.valueOf(new BigDecimal("0.25"))
+            BigFraction.valueOf(new BigDecimal("0.25"), false)
         );
         assertEquals(
             new BigFraction("2398/1"),
-            BigFraction.valueOf(new BigDecimal("2398"))
+            BigFraction.valueOf(new BigDecimal("2398"), false)
         );
         assertEquals(
             new BigFraction("4797/2"),
-            BigFraction.valueOf(new BigDecimal("2398.5"))
+            BigFraction.valueOf(new BigDecimal("2398.5"), false)
         );
     }
 
@@ -386,6 +386,74 @@ public class BigFractionTest extends TestCase {
         if(!Arrays.equals(array1, array2)) {
             failNotEquals(null, Arrays.toString(array1), Arrays.toString(array2));
         }
+    }
+
+    public void testPercentages() {
+        // 48% * 1/4 = 3/25
+        assertEquals(
+            "3\u204425",
+            new BigFraction("48%").multiply(new BigFraction("1/4")).toString()
+        );
+
+        // 48% / 4/1 = 12%
+        assertEquals(
+            "12%",
+            new BigFraction("48%").divide(new BigFraction("4/1")).toString()
+        );
+
+        // 25% + 3/4 = 100%
+        assertEquals(
+            "100%",
+            new BigFraction("25%").add(new BigFraction("3/4")).toString()
+        );
+
+        // 3/4 + 25% = 100%
+        assertEquals(
+            "100%",
+            new BigFraction("3/4").add(new BigFraction("25%")).toString()
+        );
+
+        // 12.5% + 12.5% = 25%
+        assertEquals(
+            "25%",
+            new BigFraction("12.5%").add(new BigFraction("12.5%")).toString()
+        );
+
+        // 25% / 2/1 = 12.5%
+        assertEquals(
+            "12.5%",
+            new BigFraction("25%").divide(new BigFraction("2/1")).toString()
+        );
+
+        // 25% / 4/1 = 6.25%
+        assertEquals(
+            "6.25%",
+            new BigFraction("25%").divide(new BigFraction("4/1")).toString()
+        );
+
+        // 25% / 8/1 = 3.125%
+        assertEquals(
+            "3.125%",
+            new BigFraction("25%").divide(new BigFraction("8/1")).toString()
+        );
+
+        // 25% / 16/1 = 3.125%
+        assertEquals(
+            "1\u204464",
+            new BigFraction("25%").divide(new BigFraction("16/1")).toString()
+        );
+
+        // 25% * 1/1 = 1/4
+        assertEquals(
+            "1\u20444",
+            new BigFraction("25%").multiply(new BigFraction("1/1")).toString()
+        );
+
+        // 25% / 1/1 = 25%
+        assertEquals(
+            "25%",
+            new BigFraction("25%").divide(new BigFraction("1/1")).toString()
+        );
     }
 
     public void testFractionalMoney() {
@@ -564,7 +632,7 @@ public class BigFractionTest extends TestCase {
             },
             BigFraction.distributeValue(
                 new BigDecimal("0.01"),
-                new BigFraction("1/1")
+                new BigFraction("100%")
             )
         );
         assertEquals(
