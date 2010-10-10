@@ -391,7 +391,7 @@ public class BigFractionTest extends TestCase {
     public void testPercentages() {
         // 48% * 1/4 = 3/25
         assertEquals(
-            "3\u204425",
+            "3/25",
             new BigFraction("48%").multiply(new BigFraction("1/4")).toString()
         );
 
@@ -439,13 +439,13 @@ public class BigFractionTest extends TestCase {
 
         // 25% / 16/1 = 3.125%
         assertEquals(
-            "1\u204464",
+            "1/64",
             new BigFraction("25%").divide(new BigFraction("16/1")).toString()
         );
 
         // 25% * 1/1 = 1/4
         assertEquals(
-            "1\u20444",
+            "1/4",
             new BigFraction("25%").multiply(new BigFraction("1/1")).toString()
         );
 

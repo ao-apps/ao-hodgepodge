@@ -39,8 +39,6 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
 
     private static final long serialVersionUID = 1L;
 
-    public static final char SOLIDUS = '\u2044';
-
     private static final BigInteger
         ONE_HUNDRED = BigInteger.valueOf(100),
         ONE_THOUSAND = BigInteger.valueOf(1000),
@@ -178,9 +176,8 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
             }
             this.displayPercentage = true;
         } else {
-            int slashPos = value.indexOf(SOLIDUS);
-            if(slashPos==-1) slashPos = value.indexOf('/'); // Alternate slash
-            if(slashPos==-1) throw new NumberFormatException("Unable to find solidus ("+SOLIDUS+") or slash (/)");
+            int slashPos = value.indexOf('/');
+            if(slashPos==-1) throw new NumberFormatException("Unable to find slash (/)");
             this.numerator = new BigInteger(value.substring(0, slashPos));
             this.denominator = new BigInteger(value.substring(slashPos+1));
             this.displayPercentage = false;
@@ -244,7 +241,7 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
                 return new BigDecimal(reduced.numerator.multiply(divideAndRemainer[0]), 3).toPlainString()+"%";
             }
         }
-        return numerator.toString() + SOLIDUS + denominator.toString();
+        return numerator.toString() + '/' + denominator.toString();
     }
 
     public BigInteger getNumerator() {
