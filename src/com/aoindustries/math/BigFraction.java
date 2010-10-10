@@ -247,6 +247,18 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
         return numerator.toString() + SOLIDUS + denominator.toString();
     }
 
+    public BigInteger getNumerator() {
+        return numerator;
+    }
+
+    public BigInteger getDenominator() {
+        return denominator;
+    }
+
+    public boolean isDisplayPercentage() {
+        return displayPercentage;
+    }
+
     @Override
     public int intValue() {
         return numerator.divide(denominator).intValue();
