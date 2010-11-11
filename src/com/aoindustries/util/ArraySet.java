@@ -145,8 +145,26 @@ public class ArraySet<E> implements Set<E>, Serializable {
             return true;
         } else {
             // Shortcut for adding last element
+            int eHash = e.hashCode();
             E last = elements.get(size-1);
-            if(e.hashCode()>=last.hashCode()) {
+            int lastHash = last.hashCode();
+            if(eHash>lastHash) {
+                elements.add(e);
+                return true;
+            } else if(eHash==lastHash) {
+                if(last.equals(e)) {
+                    // Already in set
+                    return false;
+                }
+                // Look backward until different hashCode
+                for(int i=size-2; i>=0; i--) {
+                    E elem = elements.get(i);
+                    if(elem.hashCode()!=eHash) break;
+                    if(elem.equals(e)) {
+                        // Already in set
+                        return false;
+                    }
+                }
                 elements.add(e);
                 return true;
             } else {

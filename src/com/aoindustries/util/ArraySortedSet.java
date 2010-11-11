@@ -35,9 +35,9 @@ import java.util.SortedSet;
  * <p>
  * A compact <code>SortedSet</code> implementation that stores the elements in order.
  * The emphasis is to use as little heap space as possible - this is not a general-purpose
- * <code>Set</code> implementation as it has specific constraints about the order elements
+ * <code>SortedSet</code> implementation as it has specific constraints about the order elements
  * may be added or removed.  To avoid the possibility of O(n^2) behavior, the elements must
- * already by sorted and be added in ascending order.  Also, only the last element may be
+ * already be sorted and be added in ascending order.  Also, only the last element may be
  * removed.
  * </p>
  * <p>
@@ -184,9 +184,13 @@ public class ArraySortedSet<E> implements SortedSet<E>, Serializable {
         } else {
             // Shortcut for adding last element
             E last = elements.get(size-1);
-            if(compare(e, last)>0) {
+            int diff = compare(e, last);
+            if(diff>0) {
                 elements.add(e);
                 return true;
+            } else if(diff==0) {
+                // Already in set
+                return false;
             } else {
                 int index = binarySearch(e);
                 if(index>=0) {
@@ -200,12 +204,15 @@ public class ArraySortedSet<E> implements SortedSet<E>, Serializable {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean remove(Object o) {
         int size = elements.size();
         if(size==0) return false;
         // Shortcut for removing last element
-        Object lastElem = elements.get(size-1);
-        if(lastElem.equals(o)) {
+        E lastElem = elements.get(size-1);
+        // TODO: How can we check if the passed-in object is of an unrelated, unexpected class
+        // TODO: without passing around Class objects?
+        if(compare(lastElem, (E)o)==0) {
             elements.remove(size-1);
             return true;
         } else {
