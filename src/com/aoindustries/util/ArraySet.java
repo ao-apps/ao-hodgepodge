@@ -34,7 +34,7 @@ import java.util.Set;
  * The emphasis is to use as little heap space as possible - this is not a general-purpose
  * <code>Set</code> implementation as it has specific constraints about the order elements
  * may be added or removed.  To avoid the possibility of O(n^2) behavior, the elements must
- * already by sorted and be added in ascending order.  Also, only the last element may be
+ * already be sorted and be added in ascending order.  Also, only the last element may be
  * removed.
  * </p>
  * <p>

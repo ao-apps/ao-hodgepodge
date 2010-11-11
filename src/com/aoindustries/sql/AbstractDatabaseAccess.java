@@ -29,9 +29,8 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Wraps and simplifies access to a JDBC database.
@@ -100,30 +99,14 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
         return executeObjectListQuery(Connection.TRANSACTION_READ_COMMITTED, true, objectFactory, sql, params);
     }
 
-    /**
-     * @deprecated Please provide the best set implementation.
-     */
-    @Deprecated
-    public <T> Set<T> executeObjectSetQuery(Class<T> clazz, String sql, Object ... params) throws SQLException {
-        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, new HashSet<T>(), clazz, sql, params);
+    @Override
+    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(C collection, Class<T> clazz, String sql, Object ... params) throws SQLException {
+        return executeObjectCollectionQuery(Connection.TRANSACTION_READ_COMMITTED, true, collection, clazz, sql, params);
     }
 
     @Override
-    public <T> Set<T> executeObjectSetQuery(Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException {
-        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, set, clazz, sql, params);
-    }
-
-    /**
-     * @deprecated Please provide the best set implementation.
-     */
-    @Deprecated
-    public <T> Set<T> executeObjectSetQuery(ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
-        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, new HashSet<T>(), objectFactory, sql, params);
-    }
-
-    @Override
-    public <T> Set<T> executeObjectSetQuery(Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
-        return executeObjectSetQuery(Connection.TRANSACTION_READ_COMMITTED, true, set, objectFactory, sql, params);
+    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(C collection, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+        return executeObjectCollectionQuery(Connection.TRANSACTION_READ_COMMITTED, true, collection, objectFactory, sql, params);
     }
 
     @Override

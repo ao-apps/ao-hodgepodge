@@ -29,8 +29,8 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 
@@ -359,10 +359,10 @@ public class Database extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException {
+    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, Class<T> clazz, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
-            Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, set, clazz, sql, params);
+            C value=conn.executeObjectCollectionQuery(isolationLevel, readOnly, collection, clazz, sql, params);
             if(!readOnly) conn.commit();
             return value;
         } catch(RuntimeException err) {
@@ -377,10 +377,10 @@ public class Database extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         DatabaseConnection conn=createDatabaseConnection();
         try {
-            Set<T> value=conn.executeObjectSetQuery(isolationLevel, readOnly, set, objectFactory, sql, params);
+            C value=conn.executeObjectCollectionQuery(isolationLevel, readOnly, collection, objectFactory, sql, params);
             if(!readOnly) conn.commit();
             return value;
         } catch(RuntimeException err) {

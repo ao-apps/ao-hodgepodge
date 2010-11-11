@@ -30,8 +30,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Wraps and simplifies access to a JDBC database.
@@ -276,32 +276,32 @@ public interface DatabaseAccess {
     <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
 
     /**
-     * Read-only query the database with a <code>Set&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
+     * Read-only query the database with a <code>Collection&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
      * </ul>
      */
-    <T> Set<T> executeObjectSetQuery(Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException;
+    <T,C extends Collection<? super T>> C executeObjectCollectionQuery(C collection, Class<T> clazz, String sql, Object ... params) throws SQLException;
 
     /**
-     * Query the database with a <code>Set&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
+     * Query the database with a <code>Collection&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
      */
-    <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException;
+    <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, Class<T> clazz, String sql, Object ... params) throws SQLException;
 
     /**
-     * Read-only query the database with a <code>Set&lt;T&gt;</code> return type, objects are created with the provided factory.
+     * Read-only query the database with a <code>Collection&lt;T&gt;</code> return type, objects are created with the provided factory.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
      * </ul>
      */
-    <T> Set<T> executeObjectSetQuery(Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
+    <T,C extends Collection<? super T>> C executeObjectCollectionQuery(C collection, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
 
     /**
-     * Query the database with a <code>Set&lt;T&gt;</code> return type, objects are created with the provided factory.
+     * Query the database with a <code>Collection&lt;T&gt;</code> return type, objects are created with the provided factory.
      */
-    <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
+    <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
 
     /**
      * Read-only query the database, calling the <code>ResultSetHandler</code> for each row retrieved.

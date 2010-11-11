@@ -46,9 +46,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -543,7 +543,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, Class<T> clazz, String sql, Object ... params) throws SQLException {
+    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, Class<T> clazz, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -556,12 +556,9 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
                     while(results.next()) {
                         T newObj = constructor.newInstance(results);
-                        if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
+                        if(!collection.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
                     }
-                    int size = set.size();
-                    if(size==0) return Collections.emptySet();
-                    else if(size==1) return Collections.singleton(set.iterator().next());
-                    else return set;
+                    return collection;
                 } finally {
                     results.close();
                 }
@@ -590,7 +587,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T> Set<T> executeObjectSetQuery(int isolationLevel, boolean readOnly, Set<T> set, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
         conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -601,12 +598,9 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 while(results.next()) {
                     T newObj = objectFactory.createObject(results);
-                    if(!set.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
+                    if(!collection.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
                 }
-                int size = set.size();
-                if(size==0) return Collections.emptySet();
-                else if(size==1) return Collections.singleton(set.iterator().next());
-                else return set;
+                return collection;
             } finally {
                 results.close();
             }
