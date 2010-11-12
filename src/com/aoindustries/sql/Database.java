@@ -528,7 +528,19 @@ public class Database extends AbstractDatabaseAccess {
     private final ThreadLocal<DatabaseConnection> transactionConnection = new ThreadLocal<DatabaseConnection>();
 
     /**
+     * Checks if currently in a transaction.
+     *
+     * @see #executeTransaction(com.aoindustries.sql.DatabaseCallable)
+     * @see #executeTransaction(com.aoindustries.sql.DatabaseRunnable)
+     */
+    public boolean isInTransaction() {
+        return transactionConnection.get()!=null;
+    }
+
+    /**
      * @see  #executeTransaction(com.aoindustries.sql.DatabaseCallable)
+     *
+     * @see #isInTransaction()
      */
     public void executeTransaction(final DatabaseRunnable runnable) throws SQLException {
         executeTransaction(
@@ -555,6 +567,8 @@ public class Database extends AbstractDatabaseAccess {
      * become part of the enclosing transaction.  For safety, a nested transaction will still rollback the
      * entire transaction on any exception.
      * </p>
+     *
+     * @see #isInTransaction()
      */
     public <V> V executeTransaction(DatabaseCallable<V> callable) throws SQLException {
         DatabaseConnection conn = transactionConnection.get();
