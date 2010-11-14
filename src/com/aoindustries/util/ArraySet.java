@@ -78,20 +78,7 @@ public class ArraySet<E> implements Set<E>, Serializable {
         addAll(c);
     }
 
-    /**
-     * Uses the provided elements list without copying, which must already
-     * be sorted in hashCode order and unique.
-     *
-     * @see  HashCodeComparator to properly sort objects before adding to the set
-     */
-    @Complexity(
-        best=GrowthFunction.LINEAR,
-        bestConditions={GrowthCondition.GOOD_HASH_CODE},
-        average=GrowthFunction.LINEAR,
-        averageConditions={GrowthCondition.GOOD_HASH_CODE},
-        worst=GrowthFunction.QUADRATIC
-    )
-    public ArraySet(ArrayList<E> elements) {
+    private boolean assertInOrderAndUnique(ArrayList<E> elements) {
         // Make sure all elements are in hashCode order and unique
         int size = elements.size();
         if(size>1) {
@@ -100,21 +87,39 @@ public class ArraySet<E> implements Set<E>, Serializable {
             for(int index=1; index<size; index++) {
                 E elem = elements.get(index);
                 int elemHash = elem.hashCode();
-                if(elemHash<prevHash) throw new IllegalArgumentException("elements not sorted by hashCode: "+elemHash+"<"+prevHash+": "+elem+"<"+prev);
+                if(elemHash<prevHash) throw new AssertionError("elements not sorted by hashCode: "+elemHash+"<"+prevHash+": "+elem+"<"+prev);
                 if(elemHash==prevHash) {
                     // Make sure not equal to prev
-                    if(elem.equals(prev)) throw new IllegalArgumentException("Element not unique: "+elem);
+                    if(elem.equals(prev)) throw new AssertionError("Element not unique: "+elem);
                     // Look backward until different hashCode
                     for(int i=index-2; i>=0; i--) {
                         E morePrev = elements.get(i);
                         if(morePrev.hashCode()!=elemHash) break;
-                        if(elem.equals(morePrev)) throw new IllegalArgumentException("Element not unique: "+elem);
+                        if(elem.equals(morePrev)) throw new AssertionError("Element not unique: "+elem);
                     }
                 }
                 prev = elem;
                 prevHash = elemHash;
             }
         }
+        return true;
+    }
+
+    /**
+     * Uses the provided elements list without copying, which must already
+     * be sorted in hashCode order and unique.
+     *
+     * The sort order and uniqueness is only checked with assertions enabled.
+     *
+     * @see  HashCodeComparator to properly sort objects before adding to the set
+     */
+    @Complexity(
+        best=GrowthFunction.CONSTANT,
+        average=GrowthFunction.CONSTANT,
+        worst=GrowthFunction.CONSTANT
+    )
+    public ArraySet(ArrayList<E> elements) {
+        assert assertInOrderAndUnique(elements);
         this.elements = elements;
     }
 
