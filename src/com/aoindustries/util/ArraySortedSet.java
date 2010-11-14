@@ -44,6 +44,10 @@ import java.util.SortedSet;
  * This set does not support null values.
  * </p>
  * <p>
+ * Creation of a set for an already sorted set is O(n) compared to TreeSet's O(n log n).
+ * Other operations perform at O(log n) with times very similar to TreeSet.
+ * </p>
+ * <p>
  * This set is not thread safe.
  * </p>
  *

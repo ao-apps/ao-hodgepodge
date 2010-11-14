@@ -50,20 +50,25 @@ public class Collections {
 
         private static final long serialVersionUID = 1L;
 
+        @Override
         public Iterator<Object> iterator() {
             return new Iterator<Object>() {
+                @Override
                 public boolean hasNext() {
                     return false;
                 }
+                @Override
                 public Object next() {
                     throw new NoSuchElementException();
                 }
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
             };
         }
 
+        @Override
         public int size() {return 0;}
 
         @Override
@@ -75,26 +80,32 @@ public class Collections {
             return EMPTY_SORTED_SET;
         }
 
+        @Override
         public Comparator<? super Object> comparator() {
             return null;
         }
 
+        @Override
         public SortedSet<Object> subSet(Object fromElement, Object toElement) {
             throw new IllegalArgumentException();
         }
 
+        @Override
         public SortedSet<Object> headSet(Object toElement) {
             throw new IllegalArgumentException();
         }
 
+        @Override
         public SortedSet<Object> tailSet(Object fromElement) {
             throw new IllegalArgumentException();
         }
 
+        @Override
         public Object first() {
             throw new NoSuchElementException();
         }
 
+        @Override
         public Object last() {
             throw new NoSuchElementException();
         }
@@ -112,12 +123,15 @@ public class Collections {
 
         SingletonSortedSet(E e) {element = e;}
 
+        @Override
         public Iterator<E> iterator() {
             return new Iterator<E>() {
                 private boolean hasNext = true;
+                @Override
                 public boolean hasNext() {
                     return hasNext;
                 }
+                @Override
                 public E next() {
                     if (hasNext) {
                         hasNext = false;
@@ -125,12 +139,14 @@ public class Collections {
                     }
                     throw new NoSuchElementException();
                 }
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
             };
         }
 
+        @Override
         public int size() {
             return 1;
         }
@@ -138,29 +154,35 @@ public class Collections {
         @Override
         public boolean contains(Object o) {return StringUtility.equals(o, element);}
 
+        @Override
         public Comparator<? super E> comparator() {
             return null;
         }
 
+        @Override
         public SortedSet<E> subSet(E fromElement, E toElement) {
             if(StringUtility.equals(element, fromElement) && StringUtility.equals(element, toElement)) return emptySortedSet();
             throw new IllegalArgumentException();
         }
 
+        @Override
         public SortedSet<E> headSet(E toElement) {
             if(StringUtility.equals(element, toElement)) return emptySortedSet();
             throw new IllegalArgumentException();
         }
 
+        @Override
         public SortedSet<E> tailSet(E fromElement) {
             if(StringUtility.equals(element, fromElement)) return this;
             throw new IllegalArgumentException();
         }
 
+        @Override
         public E first() {
             return element;
         }
 
+        @Override
         public E last() {
             return element;
         }

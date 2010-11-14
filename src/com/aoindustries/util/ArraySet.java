@@ -41,6 +41,10 @@ import java.util.Set;
  * This set does not support null values.
  * </p>
  * <p>
+ * This set will generally operate at O(log n) due to binary search.  In general, it will
+ * not be as fast as the O(1) behavior or HashSet.  Here we give up speed to save space.
+ * </p>
+ * <p>
  * This set is not thread safe.
  * </p>
  *
@@ -62,6 +66,13 @@ public class ArraySet<E> implements Set<E>, Serializable {
         this.elements = new ArrayList<E>(initialCapacity);
     }
 
+    @Complexity(
+        best=GrowthFunction.LINEAR,
+        bestConditions={GrowthCondition.GOOD_HASH_CODE},
+        average=GrowthFunction.LINEAR,
+        averageConditions={GrowthCondition.GOOD_HASH_CODE},
+        worst=GrowthFunction.QUADRATIC
+    )
     public ArraySet(Collection<? extends E> c) {
         this.elements = new ArrayList<E>(c.size());
         addAll(c);
@@ -69,14 +80,49 @@ public class ArraySet<E> implements Set<E>, Serializable {
 
     /**
      * Uses the provided elements list without copying, which must already
-     * be sorted in hashCode order.
+     * be sorted in hashCode order and unique.
      *
      * @see  HashCodeComparator to properly sort objects before adding to the set
      */
+    @Complexity(
+        best=GrowthFunction.LINEAR,
+        bestConditions={GrowthCondition.GOOD_HASH_CODE},
+        average=GrowthFunction.LINEAR,
+        averageConditions={GrowthCondition.GOOD_HASH_CODE},
+        worst=GrowthFunction.QUADRATIC
+    )
     public ArraySet(ArrayList<E> elements) {
+        // Make sure all elements are in hashCode order and unique
+        int size = elements.size();
+        if(size>1) {
+            E prev = elements.get(0);
+            int prevHash = prev.hashCode();
+            for(int index=1; index<size; index++) {
+                E elem = elements.get(index);
+                int elemHash = elem.hashCode();
+                if(elemHash<prevHash) throw new IllegalArgumentException("elements not sorted by hashCode: "+elemHash+"<"+prevHash+": "+elem+"<"+prev);
+                if(elemHash==prevHash) {
+                    // Make sure not equal to prev
+                    if(elem.equals(prev)) throw new IllegalArgumentException("Element not unique: "+elem);
+                    // Look backward until different hashCode
+                    for(int i=index-2; i>=0; i--) {
+                        E morePrev = elements.get(i);
+                        if(morePrev.hashCode()!=elemHash) break;
+                        if(elem.equals(morePrev)) throw new IllegalArgumentException("Element not unique: "+elem);
+                    }
+                }
+                prev = elem;
+                prevHash = elemHash;
+            }
+        }
         this.elements = elements;
     }
 
+    @Complexity(
+        best=GrowthFunction.LOGARITHMIC,
+        average=GrowthFunction.LOGARITHMIC,
+        worst=GrowthFunction.LOGARITHMIC
+    )
     @SuppressWarnings("unchecked")
     private int binarySearch(E elem) {
         return java.util.Collections.binarySearch(elements, elem, HashCodeComparator.getInstance());
@@ -98,6 +144,13 @@ public class ArraySet<E> implements Set<E>, Serializable {
 
     @Override
     @SuppressWarnings("unchecked")
+    @Complexity(
+        best=GrowthFunction.LOGARITHMIC,
+        bestConditions={GrowthCondition.GOOD_HASH_CODE},
+        average=GrowthFunction.LOGARITHMIC,
+        averageConditions={GrowthCondition.GOOD_HASH_CODE},
+        worst=GrowthFunction.LINEAR
+    )
     public boolean contains(Object o) {
         int size = elements.size();
         if(size==0) return false;
@@ -128,16 +181,33 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    @Complexity(
+        best=GrowthFunction.LINEAR,
+        average=GrowthFunction.LINEAR,
+        worst=GrowthFunction.LINEAR
+    )
     public Object[] toArray() {
         return elements.toArray();
     }
 
     @Override
+    @Complexity(
+        best=GrowthFunction.LINEAR,
+        average=GrowthFunction.LINEAR,
+        worst=GrowthFunction.LINEAR
+    )
     public <T> T[] toArray(T[] a) {
         return elements.toArray(a);
     }
 
     @Override
+    @Complexity(
+        best=GrowthFunction.CONSTANT,
+        bestConditions={GrowthCondition.GOOD_HASH_CODE},
+        average=GrowthFunction.CONSTANT,
+        averageConditions={GrowthCondition.GOOD_HASH_CODE},
+        worst=GrowthFunction.LINEAR
+    )
     public boolean add(E e) {
         int size = elements.size();
         if(size==0) {
@@ -179,6 +249,13 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    @Complexity(
+        best=GrowthFunction.CONSTANT,
+        bestConditions={GrowthCondition.GOOD_HASH_CODE},
+        average=GrowthFunction.CONSTANT,
+        averageConditions={GrowthCondition.GOOD_HASH_CODE},
+        worst=GrowthFunction.LINEAR
+    )
     public boolean remove(Object o) {
         int size = elements.size();
         if(size==0) return false;
@@ -194,12 +271,26 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    @Complexity(
+        best=GrowthFunction.LINEAR,
+        bestConditions={GrowthCondition.GOOD_HASH_CODE},
+        average=GrowthFunction.LINEAR,
+        averageConditions={GrowthCondition.GOOD_HASH_CODE},
+        worst=GrowthFunction.QUADRATIC
+    )
     public boolean containsAll(Collection<?> c) {
         for(Object o : c) if(!contains(o)) return false;
         return true;
     }
 
     @Override
+    @Complexity(
+        best=GrowthFunction.LINEAR,
+        bestConditions={GrowthCondition.GOOD_HASH_CODE},
+        average=GrowthFunction.LINEAR,
+        averageConditions={GrowthCondition.GOOD_HASH_CODE},
+        worst=GrowthFunction.QUADRATIC
+    )
     public boolean addAll(Collection<? extends E> c) {
         boolean modified = false;
         for(E elem : c) if(add(elem)) modified = true;
@@ -212,6 +303,13 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    @Complexity(
+        best=GrowthFunction.LINEAR,
+        bestConditions={GrowthCondition.GOOD_HASH_CODE},
+        average=GrowthFunction.LINEAR,
+        averageConditions={GrowthCondition.GOOD_HASH_CODE},
+        worst=GrowthFunction.QUADRATIC
+    )
     public boolean removeAll(Collection<?> c) {
         boolean modified = false;
         for(Object o : c) if(remove(o)) modified = true;
@@ -219,6 +317,11 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    @Complexity(
+        best=GrowthFunction.LINEAR,
+        average=GrowthFunction.LINEAR,
+        worst=GrowthFunction.LINEAR
+    )
     public void clear() {
         elements.clear();
     }
