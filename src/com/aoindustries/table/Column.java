@@ -53,6 +53,7 @@ public class Column implements Comparable<Column> {
         return columnName.hashCode()*31 + indexType.hashCode();
     }
 
+    @Override
     public int compareTo(Column o) {
         int diff = columnName.compareToIgnoreCase(o.columnName);
         if(diff!=0) return diff;
