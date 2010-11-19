@@ -29,6 +29,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -201,6 +202,10 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         return valueMap.keySet();
     }
 
+    public Set<String> keySetNoParents() {
+        return valueMap.keySet();
+    }
+
     @Override
     public boolean isModifiable() {
         return isModifiable;
@@ -214,6 +219,30 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         if(key.endsWith(MODIFIED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
         if(key.endsWith(MEDIATYPE_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MEDIATYPE_SUFFIX+": "+key);
         if(key.endsWith(ISBLOCKELEMENT_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+ISBLOCKELEMENT_SUFFIX+": "+key);
+    }
+
+    /**
+     * Skips any lines that begin with #.  This class is here because it is probably
+     * too simple to be generally useful, as it assumes ISO8859-1 encoding like used
+     * by Properties.store.
+     */
+    static class SkipCommentsFilter extends FilterOutputStream {
+        public SkipCommentsFilter(OutputStream out) {
+            super(out);
+        }
+
+        private boolean lastCharNewline = true;
+        private boolean isCommentLine = false;
+
+        @Override
+        public void write(int ch) throws IOException {
+            if(lastCharNewline) {
+                if(ch=='#') isCommentLine = true;
+                else isCommentLine = false;
+            }
+            lastCharNewline = ch=='\n';
+            if(!isCommentLine) out.write(ch);
+        }
     }
 
     /**
@@ -236,9 +265,13 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             };
             writer.putAll(properties);
             File tmpFile = File.createTempFile("ApplicationResources", null, sourceFile.getParentFile());
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile));
+            OutputStream out = new BufferedOutputStream(
+                new SkipCommentsFilter(
+                    new FileOutputStream(tmpFile)
+                )
+            );
             try {
-                writer.store(out, getClass().getName());
+                writer.store(out, null);
             } finally {
                 out.close();
             }
@@ -287,14 +320,14 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     /**
      * Provides direct read access to the validated times.
      */
-    protected Long getValidatedTime(String key) {
+    public Long getValidatedTime(String key) {
         return validatedMap.get(key);
     }
 
     /**
      * Provides direct read access to the modified times.
      */
-    protected Long getModifiedTime(String key) {
+    public Long getModifiedTime(String key) {
         return modifiedMap.get(key);
     }
 
