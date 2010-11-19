@@ -178,12 +178,20 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
     }
 
     /**
+     * @deprecated Please provide configuration values
+     */
+    @Deprecated
+    public static void printEditableResourceBundleLookups(Appendable out) throws IOException {
+        printEditableResourceBundleLookups(out, 4, true);
+    }
+
+    /**
      * Prints the resource bundle lookup editor.  This should be called at the end of a request,
      * just before the body tag is closed.
      *
      * TODO: Add language resources to properties files (but do not make it an editable properties file to avoid possible infinite recursion?)
      */
-    public static void printEditableResourceBundleLookups(Appendable out) throws IOException {
+    public static void printEditableResourceBundleLookups(Appendable out, int editorRows, boolean verticalButtons) throws IOException {
         final Map<LookupKey,LookupValue> lookups = requestLookups.get();
         final String valueUrl = setValueUrl.get();
         final String mediaTypeUrl = setMediaTypeUrl.get();
@@ -233,27 +241,34 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                 out.append("</span></a>\n"
                         + "</div>\n"
                         + "<div id=\"EditableResourceBundleEditor\" style=\"position:fixed; left:50px; width:640px; top:50px; height:480px; visibility:hidden; border-left:1px solid black; border-top:1px solid black; border-right:2px solid black; border-bottom:2px solid black; background-color:white; overflow:hidden\">\n"
-                        + "  <div style=\"border-top:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; bottom:0px; height:").append(Integer.toString(allLocales.size()*4)).append("em; overflow:hidden\">\n");
+                        + "  <div style=\"border-top:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; bottom:0px; height:").append(Integer.toString(allLocales.size()*editorRows)).append("em; overflow:hidden\">\n");
                 int i = 0;
                 for(Locale locale : allLocales) {
                     String toString = locale.toString();
-                    out.append("    <div style=\"position:absolute; left:0px; width:6em; top:").append(Integer.toString(i*4)).append("em; height:4em\">\n"
+                    out.append("    <div style=\"position:absolute; left:0px; width:6em; top:").append(Integer.toString(i*editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n"
                             // Vertical centering uses Method 1 from http://phrogz.net/CSS/vertical-align/index.html
                             + "      <div style=\"position:absolute; top:50%; height:1em; margin-top:-.5em; padding-left:4px; padding-right:2px\">\n"
                             + "        ").append(toString.length()==0 ? "Default" : toString).append("\n"
                             + "      </div>\n"
                             + "    </div>\n"
-                            + "    <div style=\"position:absolute; left:6em; right:10em; top:").append(Integer.toString(i*4)).append("em; height:4em\">\n"
-                            + "      <textarea disabled=\"disabled\" id=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i+1)).append("\" cols=\"40\" rows=\"4\" style=\"width:100%; height:100%\"></textarea>\n"
+                            + "    <div style=\"position:absolute; left:6em; right:").append(verticalButtons ? "10em" : "15em").append("; top:").append(Integer.toString(i*editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n"
+                            + "      <textarea disabled=\"disabled\" id=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i+1)).append("\" cols=\"40\" rows=\"").append(Integer.toString(editorRows)).append("\" style=\"width:100%; height:100%\"></textarea>\n"
                             + "    </div>\n"
-                            + "    <div style=\"position:absolute; width:10em; right:0px; top:").append(Integer.toString(i*4)).append("em; height:4em\">\n"
-                            + "      <div style=\"position:absolute; left:0px; width:100%; top:30%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                            + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
-                            + "      </div>\n"
-                            + "      <div style=\"position:absolute; left:0px; width:100%; top:70%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                            + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
-                            + "      </div>\n"
-                            + "    </div>\n");
+                            + "    <div style=\"position:absolute; width:").append(verticalButtons ? "10em" : "15em").append("; right:0px; top:").append(Integer.toString(i*editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n");
+                    if(verticalButtons) {
+                        out.append("      <div style=\"position:absolute; left:0px; width:100%; top:30%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
+                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
+                                + "      </div>\n"
+                                + "      <div style=\"position:absolute; left:0px; width:100%; top:70%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
+                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
+                                + "      </div>\n");
+                    } else {
+                        out.append("      <div style=\"position:absolute; left:0px; width:100%; top:50%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
+                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
+                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
+                                + "      </div>\n");
+                    }
+                    out.append("    </div>\n");
                     i++;
                 }
                 out.append("  </div>\n"
@@ -524,11 +539,11 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "      // ]]>\n"
                         + "    </script>\n"
                         + "    <div"
-                            + " style=\"text-align:center; font-weight:bold; font-size:x-large\""
+                            + " style=\"text-align:center; font-weight:bold; font-size:larger\""
                             + " onmousedown=\"return EditableResourceBundleEditorDragMouseDown(this, event);\""
                             + ">Resource Editor</div>\n"
                         + "  </div>\n"
-                        + "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:").append(Integer.toString(allLocales.size()*4)).append("em; overflow:auto\">\n"
+                        + "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:").append(Integer.toString(allLocales.size()*editorRows)).append("em; overflow:auto\">\n"
                         + "    <table border=\"1\" cellspacing=\"0\" cellpadding=\"2\" style=\"width:100%\">\n"
                         + "      <tr style=\"background-color:#e0e0e0\">\n"
                         + "        <th></th>\n"
