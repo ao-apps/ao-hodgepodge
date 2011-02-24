@@ -33,7 +33,7 @@ import java.io.RandomAccessFile;
  *
  * @author  AO Industries, Inc.
  */
-public class BenchmarkCounterBlockDevice_1 {
+public class BenchmarkCounterBlockDevice {
 
     public static void main(String[] args) {
         try {
