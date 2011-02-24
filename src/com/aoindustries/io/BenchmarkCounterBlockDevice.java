@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009, 2010  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,25 +29,25 @@ import java.io.RandomAccessFile;
 
 /**
  * Times how long a counter block device takes to scan all counters.
- * Uses hard-coded 1 MB chunks and 512 byte sectors.
+ * Uses hard-coded 4096 byte sectors.
  *
  * @author  AO Industries, Inc.
  */
-public class BenchmarkCounterBlockDevice {
+public class BenchmarkCounterBlockDevice_1 {
 
     public static void main(String[] args) {
         try {
             if(args.length>0) {
-                final byte[] buff=new byte[512];
+                final byte[] buff=new byte[4096];
                 for(int c=0;c<args.length;c++) {
                     final String filename=args[c];
                     long startTime = System.currentTimeMillis();
                     RandomAccessFile raf=new RandomAccessFile(filename, "r");
                     long length=raf.length();
                     try {
-                        for(long pos=0;pos<length;pos+=(64*512+512)) {
+                        for(long pos=1;pos<length;pos+=(1024*4096+4096)) {
                             raf.seek(pos);
-                            raf.read(buff, 0, 512);
+                            raf.readFully(buff, 0, 4096);
                         }
                     } finally {
                         raf.close();
