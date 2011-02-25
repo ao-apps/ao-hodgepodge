@@ -27,6 +27,7 @@ import com.aoindustries.util.sort.AutoSort;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
@@ -108,14 +109,15 @@ public final class StringUtility {
     }
 
     /**
-     * Constructs a comma separated list from a <code>List</code>.
+     * Constructs a comma separated list from a <code>Collection</code>.
      */
-    public static String buildList(List<?> V) {
+    public static String buildList(Collection<?> V) {
         StringBuilder SB=new StringBuilder();
-        int len=V.size();
-        for(int c=0;c<len;c++) {
-            if(c>0) SB.append(",");
-            SB.append(V.get(c));
+        boolean didOne = false;
+        for(Object elem : V) {
+            if(didOne) SB.append(", ");
+            else didOne = true;
+            SB.append(elem);
         }
         return SB.toString();	
     }
