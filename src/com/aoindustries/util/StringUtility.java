@@ -109,9 +109,9 @@ public final class StringUtility {
     }
 
     /**
-     * Constructs a comma separated list from a <code>Collection</code>.
+     * Constructs a comma separated list from an <code>Iterable</code>.
      */
-    public static String buildList(Collection<?> V) {
+    public static String buildList(Iterable<?> V) {
         StringBuilder SB=new StringBuilder();
         boolean didOne = false;
         for(Object elem : V) {
