@@ -66,6 +66,7 @@ public class ArraySet<E> implements Set<E>, Serializable {
         this.elements = new ArrayList<E>(initialCapacity);
     }
 
+    /**
     @Complexity(
         best=GrowthFunction.LINEAR,
         bestConditions={GrowthCondition.GOOD_HASH_CODE},
@@ -73,6 +74,7 @@ public class ArraySet<E> implements Set<E>, Serializable {
         averageConditions={GrowthCondition.GOOD_HASH_CODE},
         worst=GrowthFunction.QUADRATIC
     )
+     */
     public ArraySet(Collection<? extends E> c) {
         this.elements = new ArrayList<E>(c.size());
         addAll(c);
@@ -112,22 +114,24 @@ public class ArraySet<E> implements Set<E>, Serializable {
      * The sort order and uniqueness is only checked with assertions enabled.
      *
      * @see  HashCodeComparator to properly sort objects before adding to the set
-     */
     @Complexity(
         best=GrowthFunction.CONSTANT,
         average=GrowthFunction.CONSTANT,
         worst=GrowthFunction.CONSTANT
     )
+     */
     public ArraySet(ArrayList<E> elements) {
         assert assertInOrderAndUnique(elements);
         this.elements = elements;
     }
 
+    /**
     @Complexity(
         best=GrowthFunction.LOGARITHMIC,
         average=GrowthFunction.LOGARITHMIC,
         worst=GrowthFunction.LOGARITHMIC
     )
+     */
     @SuppressWarnings("unchecked")
     private int binarySearch(E elem) {
         return java.util.Collections.binarySearch(elements, elem, HashCodeComparator.getInstance());
@@ -149,6 +153,7 @@ public class ArraySet<E> implements Set<E>, Serializable {
 
     @Override
     @SuppressWarnings("unchecked")
+    /**
     @Complexity(
         best=GrowthFunction.LOGARITHMIC,
         bestConditions={GrowthCondition.GOOD_HASH_CODE},
@@ -156,6 +161,7 @@ public class ArraySet<E> implements Set<E>, Serializable {
         averageConditions={GrowthCondition.GOOD_HASH_CODE},
         worst=GrowthFunction.LINEAR
     )
+     */
     public boolean contains(Object o) {
         int size = elements.size();
         if(size==0) return false;
@@ -186,33 +192,37 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    /**
     @Complexity(
         best=GrowthFunction.LINEAR,
         average=GrowthFunction.LINEAR,
         worst=GrowthFunction.LINEAR
     )
+     */
     public Object[] toArray() {
         return elements.toArray();
     }
 
     @Override
+    /**
     @Complexity(
         best=GrowthFunction.LINEAR,
         average=GrowthFunction.LINEAR,
         worst=GrowthFunction.LINEAR
-    )
+    )*/
     public <T> T[] toArray(T[] a) {
         return elements.toArray(a);
     }
 
     @Override
+    /**
     @Complexity(
         best=GrowthFunction.CONSTANT,
         bestConditions={GrowthCondition.GOOD_HASH_CODE},
         average=GrowthFunction.CONSTANT,
         averageConditions={GrowthCondition.GOOD_HASH_CODE},
         worst=GrowthFunction.LINEAR
-    )
+    )*/
     public boolean add(E e) {
         int size = elements.size();
         if(size==0) {
@@ -254,13 +264,14 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    /**
     @Complexity(
         best=GrowthFunction.CONSTANT,
         bestConditions={GrowthCondition.GOOD_HASH_CODE},
         average=GrowthFunction.CONSTANT,
         averageConditions={GrowthCondition.GOOD_HASH_CODE},
         worst=GrowthFunction.LINEAR
-    )
+    )*/
     public boolean remove(Object o) {
         int size = elements.size();
         if(size==0) return false;
@@ -276,26 +287,28 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    /**
     @Complexity(
         best=GrowthFunction.LINEAR,
         bestConditions={GrowthCondition.GOOD_HASH_CODE},
         average=GrowthFunction.LINEAR,
         averageConditions={GrowthCondition.GOOD_HASH_CODE},
         worst=GrowthFunction.QUADRATIC
-    )
+    )*/
     public boolean containsAll(Collection<?> c) {
         for(Object o : c) if(!contains(o)) return false;
         return true;
     }
 
     @Override
+    /**
     @Complexity(
         best=GrowthFunction.LINEAR,
         bestConditions={GrowthCondition.GOOD_HASH_CODE},
         average=GrowthFunction.LINEAR,
         averageConditions={GrowthCondition.GOOD_HASH_CODE},
         worst=GrowthFunction.QUADRATIC
-    )
+    )*/
     public boolean addAll(Collection<? extends E> c) {
         boolean modified = false;
         for(E elem : c) if(add(elem)) modified = true;
@@ -308,13 +321,14 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    /**
     @Complexity(
         best=GrowthFunction.LINEAR,
         bestConditions={GrowthCondition.GOOD_HASH_CODE},
         average=GrowthFunction.LINEAR,
         averageConditions={GrowthCondition.GOOD_HASH_CODE},
         worst=GrowthFunction.QUADRATIC
-    )
+    )*/
     public boolean removeAll(Collection<?> c) {
         boolean modified = false;
         for(Object o : c) if(remove(o)) modified = true;
@@ -322,11 +336,12 @@ public class ArraySet<E> implements Set<E>, Serializable {
     }
 
     @Override
+    /**
     @Complexity(
         best=GrowthFunction.LINEAR,
         average=GrowthFunction.LINEAR,
         worst=GrowthFunction.LINEAR
-    )
+    )*/
     public void clear() {
         elements.clear();
     }

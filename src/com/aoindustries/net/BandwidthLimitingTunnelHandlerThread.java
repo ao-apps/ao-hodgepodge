@@ -24,12 +24,12 @@ package com.aoindustries.net;
 
 import com.aoindustries.io.BitRateOutputStream;
 import com.aoindustries.io.BitRateProvider;
-import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.ErrorPrinter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -66,7 +66,8 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
         this.connectSocket = connectSocket;
         (this.thread=new Thread(this)).start();
     }
-    
+
+    @Override
     public void run() {
         try {
             long totalBytes = 0;
@@ -93,7 +94,7 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
                                     blockStartTime = currentTime;
                                     blockByteCount = 0;
                                 } else if(blockTime >= VERBOSE_REPORT_INTERVAL) {
-                                    System.out.println(getDirection()+" "+totalBytes+" bytes sent in "+SQLUtility.getMilliDecimal(currentTime-startTime)+" seconds, "+(blockByteCount * 8000 / blockTime)+" bits/second");
+                                    System.out.println(getDirection()+" "+totalBytes+" bytes sent in "+BigDecimal.valueOf(currentTime-startTime, 3)+" seconds, "+(blockByteCount * 8000 / blockTime)+" bits/second");
                                     blockStartTime = currentTime;
                                     blockByteCount = 0;
                                 }
@@ -113,17 +114,19 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
             }
             if(verbose) {
                 long endTime = System.currentTimeMillis();
-                System.out.println(getDirection()+" Connection closing: "+totalBytes+" bytes sent in "+SQLUtility.getMilliDecimal(endTime-startTime)+" seconds, "+(totalBytes * 8000 / (endTime - startTime))+" bits/second average");
+                System.out.println(getDirection()+" Connection closing: "+totalBytes+" bytes sent in "+BigDecimal.valueOf(endTime-startTime, 3)+" seconds, "+(totalBytes * 8000 / (endTime - startTime))+" bits/second average");
             }
         } catch(IOException err) {
             ErrorPrinter.printStackTraces(err);
         }
     }
     
+    @Override
     public int getBlockSize() {
         return BufferManager.BUFFER_SIZE;
     }
     
+    @Override
     public Long getBitRate() {
         return bandwidth;
     }

@@ -22,10 +22,10 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.ErrorPrinter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.math.BigDecimal;
 
 /**
  * Times how long a counter block device takes to scan all counters.
@@ -34,6 +34,9 @@ import java.io.RandomAccessFile;
  * @author  AO Industries, Inc.
  */
 public class BenchmarkCounterBlockDevice {
+
+    public BenchmarkCounterBlockDevice() {
+    }
 
     public static void main(String[] args) {
         try {
@@ -52,7 +55,7 @@ public class BenchmarkCounterBlockDevice {
                     } finally {
                         raf.close();
                     }
-                    System.out.println(filename+" scanned in "+SQLUtility.getMilliDecimal(System.currentTimeMillis()-startTime)+" seconds");
+                    System.out.println(filename+" scanned in "+BigDecimal.valueOf(System.currentTimeMillis()-startTime, 3)+" seconds");
                 }
             } else {
                 System.err.println("Usage: BenchmarkCounterBlockDevice filename [filename] [...]");

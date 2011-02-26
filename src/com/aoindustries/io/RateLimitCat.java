@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.GetOpt;
 import com.aoindustries.util.StringUtility;
@@ -32,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +76,7 @@ final public class RateLimitCat {
         System.err.print(" bytes (");
         System.err.print(StringUtility.getApproximateSize(byteCount));
         System.err.print(") transferred in ");
-        System.err.print(SQLUtility.getMilliDecimal(timespan));
+        System.err.print(BigDecimal.valueOf(timespan, 3));
         System.err.print(" seconds (");
         System.err.print(StringUtility.getTimeLengthString(timespan));
         System.err.print(')');
@@ -186,9 +186,11 @@ final public class RateLimitCat {
                         if(bwlimit!=null) out = new BitRateOutputStream(
                             out,
                             new BitRateProvider() {
+                                @Override
                                 public Long getBitRate() {
                                     return bwlimit.getBitRate();
                                 }
+                                @Override
                                 public int getBlockSize() {
                                     return blockSize;
                                 }
