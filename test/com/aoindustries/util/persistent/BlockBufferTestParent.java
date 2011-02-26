@@ -22,10 +22,10 @@
  */
 package com.aoindustries.util.persistent;
 
-import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -236,7 +236,7 @@ abstract public class BlockBufferTestParent extends TestCase {
                 }
 
                 long endNanos = System.nanoTime();
-                if((c%10)==9) System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": Tested block buffer failure recovery in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+                if((c%10)==9) System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": Tested block buffer failure recovery in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
             }
         } finally {
             tempFile.delete();

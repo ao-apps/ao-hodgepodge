@@ -28,6 +28,7 @@ import com.aoindustries.util.UnsynchronizedSequence;
 import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -267,7 +268,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 long startNanos = System.nanoTime();
                 for(int d=0;d<1000;d++) linkedFileList.add(toAdd[d]);
                 long endNanos = System.nanoTime();
-                System.out.println((c+1)+" of 100: Added 1000 random strings in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+                System.out.println((c+1)+" of 100: Added 1000 random strings in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
             }
             // Calculate the mean and standard deviation, compare for linear
         } finally {
@@ -294,7 +295,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 long startNanos = System.nanoTime();
                 for(int d=0;d<1000;d++) linkedFileList.add(toAdd[d]);
                 long endNanos = System.nanoTime();
-                System.out.println((c+1)+" of 100: Added 1000 random integers in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+                System.out.println((c+1)+" of 100: Added 1000 random integers in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
             }
             // Calculate the mean and standard deviation, compare for linear
         } finally {
@@ -319,7 +320,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 long startNanos = System.nanoTime();
                 for(int d=0;d<1000;d++) linkedFileList.add(null);
                 long endNanos = System.nanoTime();
-                System.out.println((c+1)+" of 100: Added 1000 null Integer in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+                System.out.println((c+1)+" of 100: Added 1000 null Integer in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
             }
             // Calculate the mean and standard deviation, compare for linear
         } finally {
@@ -346,7 +347,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                     // Do nothing
                 }
                 long endNanos = System.nanoTime();
-                System.out.println("Iterated "+linkedFileList.size()+" random strings in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+                System.out.println("Iterated "+linkedFileList.size()+" random strings in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
             }
         } finally {
             linkedFileList.close();
@@ -372,7 +373,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                     // Do nothing
                 }
                 long endNanos = System.nanoTime();
-                System.out.println("Iterated "+linkedFileList.size()+" random integers in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+                System.out.println("Iterated "+linkedFileList.size()+" random integers in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
             }
         } finally {
             linkedFileList.close();
@@ -649,7 +650,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
                 // TODO: add random index
                 // TODO: remove random index
                 long endNanos = System.nanoTime();
-                if((c%10)==9) System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": Tested block buffer failure recovery in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+                if((c%10)==9) System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": Tested block buffer failure recovery in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
             }
         } finally {
             tempFile.delete();

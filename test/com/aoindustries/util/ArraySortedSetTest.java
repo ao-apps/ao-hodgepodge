@@ -22,7 +22,7 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.sql.SQLUtility;
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,24 +59,24 @@ public class ArraySortedSetTest extends TestCase {
             long startNanos = System.nanoTime();
             TreeSet<Integer> treeSet = new TreeSet<Integer>(randomValues);
             long timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": Created TreeSet in "+SQLUtility.getMilliDecimal(timeNanos/1000)+" ms");
+            System.out.println(testSize+": Created TreeSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             startNanos = System.nanoTime();
             ArraySortedSet<Integer> arraySortedSet = new ArraySortedSet<Integer>(randomValues);
             timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": Created ArraySortedSet in "+SQLUtility.getMilliDecimal(timeNanos/1000)+" ms");
+            System.out.println(testSize+": Created ArraySortedSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             // Test contains
             startNanos = System.nanoTime();
             for(Integer value : randomList) {
                 if(!treeSet.contains(value)) throw new AssertionError();
             }
             timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": TreeSet contains in "+SQLUtility.getMilliDecimal(timeNanos/1000)+" ms");
+            System.out.println(testSize+": TreeSet contains in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             startNanos = System.nanoTime();
             for(Integer value : randomList) {
                 if(!arraySortedSet.contains(value)) throw new AssertionError();
             }
             timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": ArraySortedSet contains in "+SQLUtility.getMilliDecimal(timeNanos/1000)+" ms");
+            System.out.println(testSize+": ArraySortedSet contains in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
 
         }
     }

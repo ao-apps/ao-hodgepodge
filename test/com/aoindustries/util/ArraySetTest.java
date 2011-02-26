@@ -22,7 +22,7 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.sql.SQLUtility;
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,26 +59,26 @@ public class ArraySetTest extends TestCase {
             long startNanos = System.nanoTime();
             HashSet<Integer> hashSet = new HashSet<Integer>(randomList);
             long timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": Created HashSet in "+SQLUtility.getMilliDecimal(timeNanos/1000)+" ms");
+            System.out.println(testSize+": Created HashSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             startNanos = System.nanoTime();
             ArrayList<Integer> list = new ArrayList<Integer>(randomList);
             java.util.Collections.sort(list, HashCodeComparator.getInstance());
             ArraySet<Integer> arraySet = new ArraySet<Integer>(list);
             timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": Created ArraySet in "+SQLUtility.getMilliDecimal(timeNanos/1000)+" ms");
+            System.out.println(testSize+": Created ArraySet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             // Test contains
             startNanos = System.nanoTime();
             for(Integer value : randomList) {
                 if(!hashSet.contains(value)) throw new AssertionError();
             }
             timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": HashSet contains in "+SQLUtility.getMilliDecimal(timeNanos/1000)+" ms");
+            System.out.println(testSize+": HashSet contains in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             startNanos = System.nanoTime();
             for(Integer value : randomList) {
                 if(!arraySet.contains(value)) throw new AssertionError();
             }
             timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": ArraySet contains in "+SQLUtility.getMilliDecimal(timeNanos/1000)+" ms");
+            System.out.println(testSize+": ArraySet contains in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
 
         }
     }

@@ -22,9 +22,9 @@
  */
 package com.aoindustries.util.persistent;
 
-import com.aoindustries.sql.SQLUtility;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -45,10 +45,12 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
         super(testName);
     }
 
+    @Override
     public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
         return new MappedPersistentBuffer(tempFile, protectionLevel);
     }
 
+    @Override
     public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
         return new FixedPersistentBlockBuffer(pbuffer, 1);
     }
@@ -79,7 +81,7 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
             long startNanos = System.nanoTime();
             for(int c=0;c<numAdd;c++) ids.add(blockBuffer.allocate(1));
             long endNanos = System.nanoTime();
-            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocating "+numAdd+" blocks in "+SQLUtility.getMilliDecimal((endNanos-startNanos)/1000)+" ms");
+            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocating "+numAdd+" blocks in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
             //System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Getting "+numAdd+" ids.");
             //Iterator<Long> iter = blockBuffer.iterateBlockIds();
             //int count = 0;
@@ -114,8 +116,8 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
                 allocCount += numAddBack;
                 allocTime += System.nanoTime() - startNanos;
             }
-            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Deallocated "+deallocCount+" blocks in "+SQLUtility.getMilliDecimal(deallocTime/1000)+" ms");
-            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocated "+allocCount+" blocks in "+SQLUtility.getMilliDecimal(allocTime/1000)+" ms");
+            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Deallocated "+deallocCount+" blocks in "+BigDecimal.valueOf(deallocTime/1000, 3)+" ms");
+            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocated "+allocCount+" blocks in "+BigDecimal.valueOf(allocTime/1000, 3)+" ms");
         } finally {
             blockBuffer.close();
         }
