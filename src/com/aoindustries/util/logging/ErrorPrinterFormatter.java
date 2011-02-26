@@ -71,6 +71,7 @@ public class ErrorPrinterFormatter extends Formatter {
         );
     }
 
+    @Override
     public String format(LogRecord record) {
         StringBuilder buffer = new StringBuilder(1024);
         format(record, buffer);
