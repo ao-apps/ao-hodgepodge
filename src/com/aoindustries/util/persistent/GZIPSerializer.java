@@ -64,23 +64,27 @@ public class GZIPSerializer<E> implements Serializer<E> {
     }
 
     @ThreadSafe
+    @Override
     public boolean isFixedSerializedSize() {
         return false;
     }
 
     @NotThreadSafe
+    @Override
     public long getSerializedSize(E value) throws IOException {
         serializeToBuffer(value);
         return buffer.size();
     }
 
     @NotThreadSafe
+    @Override
     public void serialize(E value, OutputStream out) throws IOException {
         serializeToBuffer(value);
         buffer.writeTo(out);
     }
 
     @NotThreadSafe
+    @Override
     public E deserialize(InputStream in) throws IOException {
         GZIPInputStream gzin = new GZIPInputStream(in);
         try {
