@@ -36,7 +36,7 @@ import java.util.StringTokenizer;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class CronMatcher {
+abstract public class Matcher {
 
     abstract int getStepOffset();
 
@@ -45,7 +45,7 @@ abstract public class CronMatcher {
     /**
      * Parses a minute matcher.
      */
-    public static CronMatcher parseMinute(String str) throws IllegalArgumentException {
+    public static Matcher parseMinute(String str) throws IllegalArgumentException {
         Map<String,Integer> nameMap = Collections.emptyMap();
         return parseMatcher(str, 0, 59, 60, nameMap);
     }
@@ -53,7 +53,7 @@ abstract public class CronMatcher {
     /**
      * Parses a hour matcher.
      */
-    public static CronMatcher parseHour(String str) throws IllegalArgumentException {
+    public static Matcher parseHour(String str) throws IllegalArgumentException {
         Map<String,Integer> nameMap = Collections.emptyMap();
         return parseMatcher(str, 0, 23, 24, nameMap);
     }
@@ -61,7 +61,7 @@ abstract public class CronMatcher {
     /**
      * Parses a dayOfMonth matcher.
      */
-    public static CronMatcher parseDayOfMonth(String str) throws IllegalArgumentException {
+    public static Matcher parseDayOfMonth(String str) throws IllegalArgumentException {
         Map<String,Integer> nameMap = Collections.emptyMap();
         return parseMatcher(str, 1, 31, 32, nameMap);
     }
@@ -97,7 +97,7 @@ abstract public class CronMatcher {
      * Parses a month matcher.
      * Note: months are 1-12 like cron, not 0-11 like Calendar.
      */
-    public static CronMatcher parseMonth(String str) throws IllegalArgumentException {
+    public static Matcher parseMonth(String str) throws IllegalArgumentException {
         return parseMatcher(str, 1, 12, 13, monthNameMap);
     }
 
@@ -123,7 +123,7 @@ abstract public class CronMatcher {
      * Parses a dayOfWeek matcher.
      * Note: Monday is 1, not 2 like Calendar.
      */
-    public static CronMatcher parseDayOfWeek(String str) throws IllegalArgumentException {
+    public static Matcher parseDayOfWeek(String str) throws IllegalArgumentException {
         return parseMatcher(str, 0, 7, 7, dayOfWeekNameMap);
     }
 
@@ -137,10 +137,10 @@ abstract public class CronMatcher {
     /**
      * Parses a cron value, supporting lists, asterisk, and ranges, and steps.
      */
-    public static CronMatcher parseMatcher(String str, int minimum, int maximum, int modulus, Map<String,Integer> nameMap) throws IllegalArgumentException {
+    public static Matcher parseMatcher(String str, int minimum, int maximum, int modulus, Map<String,Integer> nameMap) throws IllegalArgumentException {
         // Handle list
         if(str.indexOf(',')!=-1) {
-            Collection<CronMatcher> list = new ArrayList<CronMatcher>();
+            Collection<Matcher> list = new ArrayList<Matcher>();
             StringTokenizer st = new StringTokenizer(str, ",");
             while(st.hasMoreTokens()) list.add(parseMatcher(st.nextToken(), minimum, maximum, modulus, nameMap));
             return new List(list);
@@ -172,12 +172,12 @@ abstract public class CronMatcher {
     /**
      * Matches any of a list.
      */
-    public static class List extends CronMatcher {
+    public static class List extends Matcher {
 
-        private final CronMatcher[] list;
+        private final Matcher[] list;
 
-        public List(Collection<CronMatcher> list) {
-            this.list = list.toArray(new CronMatcher[list.size()]);
+        public List(Collection<Matcher> list) {
+            this.list = list.toArray(new Matcher[list.size()]);
         }
 
         @Override
@@ -207,12 +207,12 @@ abstract public class CronMatcher {
     /**
      * Matches a step.
      */
-    public static class Step extends CronMatcher {
+    public static class Step extends Matcher {
 
-        private final CronMatcher matcher;
+        private final Matcher matcher;
         private final int step;
 
-        public Step(CronMatcher matcher, int step) {
+        public Step(Matcher matcher, int step) {
             this.matcher = matcher;
             this.step = step;
         }
@@ -239,7 +239,7 @@ abstract public class CronMatcher {
     /**
      * Matches any value.
      */
-    public static class Asterisk extends CronMatcher {
+    public static class Asterisk extends Matcher {
 
         private final int stepOffset;
 
@@ -266,7 +266,7 @@ abstract public class CronMatcher {
     /**
      * Matches a specific range.
      */
-    public static class Range extends CronMatcher {
+    public static class Range extends Matcher {
 
         private final int begin;
         private final int end;
@@ -301,7 +301,7 @@ abstract public class CronMatcher {
     /**
      * Matches a single value.
      */
-    public static class Value extends CronMatcher {
+    public static class Value extends Matcher {
 
         private final int value;
 

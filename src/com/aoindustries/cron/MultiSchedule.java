@@ -23,20 +23,23 @@
 package com.aoindustries.cron;
 
 /**
- * Provides a schedule for a job.
+ * A job is scheduled by matching any of a provided set of schedules.
  *
  * @author  AO Industries, Inc.
  */
-public interface Schedule {
+public class MultiSchedule implements Schedule {
 
-    /**
-     * Determine if the job should run right now.
-     *
-     * @param minute 0-59
-     * @param hour 0-23
-     * @param dayOfMonth 1-31
-     * @param month 0-11
-     * @param dayOfWeek 1-7, <code>Calendar.SUNDAY</code> through <code>Calendar.SATURDAY</code>
-     */
-    boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year);
+    private final Iterable<Schedule> schedules;
+
+    public MultiSchedule(Iterable<Schedule> schedules) {
+        this.schedules = schedules;
+    }
+
+    @Override
+    public boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
+        for(Schedule schedule : schedules) {
+            if(schedule.isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek, year)) return true;
+        }
+        return false;
+    }
 }
