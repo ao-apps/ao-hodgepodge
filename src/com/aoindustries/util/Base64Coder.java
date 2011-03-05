@@ -1,5 +1,7 @@
 package com.aoindustries.util;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * Obtained from: http://www.source-code.biz/snippets/java/Base64Coder.java.txt
  *
@@ -48,7 +50,12 @@ public class Base64Coder {
     * @return   A String with the Base64 encoded data.
     */
     public static String encodeString (String s) {
-       return new String(encode(s.getBytes())); }
+        try {
+            return new String(encode(s.getBytes("UTF-8")));
+        } catch(UnsupportedEncodingException exc) {
+            throw new RuntimeException(exc);
+        }
+    }
 
     /**
     * Encodes a byte array into Base64 format.
