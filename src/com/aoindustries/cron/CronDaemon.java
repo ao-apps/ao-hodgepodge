@@ -293,7 +293,7 @@ public final class CronDaemon {
                     return;
                 }
             }
-            throw new IllegalStateException("CronJob has not been added.");
         }
+        throw new IllegalStateException("CronJob has not been added.");
     }
 }
