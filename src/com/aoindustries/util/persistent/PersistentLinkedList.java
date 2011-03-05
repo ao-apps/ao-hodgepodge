@@ -376,7 +376,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * Adds an entry.  Allocates, writes the header and data, barrier, link-in, barrier, _size++
      * If the serializer is fixed size, will preallocate and serialize directly
-     * the the block.  Otherwise, it serializes to a buffer, and then allocates the
+     * the block.  Otherwise, it serializes to a buffer, and then allocates the
      * appropriate amount of space.
      * Operates in constant time.
      */

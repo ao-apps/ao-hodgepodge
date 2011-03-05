@@ -30,22 +30,12 @@ package com.aoindustries.cron;
 public interface CronJob {
 
     /**
-     * Indicates the jobs should be ran concurrently when running together.
-     */
-    int CRON_JOB_SCHEDULE_CONCURRENT=0;
-    
-    /**
-     * Indicates the new job should be skipped to avoid running the same job concurrently.
-     */
-    int CRON_JOB_SCHEDULE_SKIP=1;
-    
-    /**
      * Determine if the job should run right now.
      *
      * @param minute 0-59
      * @param hour 0-23
      * @param dayOfMonth 1-31
-     * @param month 1-12
+     * @param month 0-11
      * @param dayOfWeek 1-7, <code>Calendar.SUNDAY</code> through <code>Calendar.SATURDAY</code>
      */
     boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year);
@@ -53,10 +43,9 @@ public interface CronJob {
     /**
      * Gets the job scheduling mode.
      *
-     * @see  #CRON_JOB_SCHEDULE_CONCURRENT
-     * @see  #CRON_JOB_SCHEDULE_SKIP
+     * @see  CronJobScheduleMode
      */
-    int getCronJobScheduleMode();
+    CronJobScheduleMode getCronJobScheduleMode();
     
     /**
      * Gets the name for this cron job
@@ -65,6 +54,8 @@ public interface CronJob {
     
     /**
      * Performs the scheduled task.
+     *
+     * @see #isCronJobScheduled
      */
     void runCronJob(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year);
     

@@ -34,12 +34,12 @@ final public class CronDaemonThread extends Thread {
     
     final CronJob cronJob;
     final Logger logger;
-    final int minute;
-    final int hour;
-    final int dayOfMonth;
-    final int month;
-    final int dayOfWeek;
-    final int year;
+    private final int minute;
+    private final int hour;
+    private final int dayOfMonth;
+    private final int month;
+    private final int dayOfWeek;
+    private final int year;
     
     CronDaemonThread(CronJob cronJob, Logger logger, int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
         super(cronJob.getCronJobName());

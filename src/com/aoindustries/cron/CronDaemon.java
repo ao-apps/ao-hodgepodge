@@ -40,12 +40,12 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
-public final class CronDaemon extends Thread {
-    
+public final class CronDaemon {
+
     /**
      * The cron daemon errors will be reported here (not the individual cron jobs).
      */
-    private static Logger logger = Logger.getLogger(CronDaemon.class.getName());
+    private static volatile Logger logger = Logger.getLogger(CronDaemon.class.getName());
 
     /**
      * Sets the logger for the cron daemon errors (not the individual cron jobs).
@@ -64,99 +64,154 @@ public final class CronDaemon extends Thread {
     private static final List<CronDaemonThread> runningJobs=new ArrayList<CronDaemonThread>();
     
     /**
-     * Adds a <code>CronJob</code> to the list of jobs.
+     * Adds a <code>CronJob</code> to the list of jobs.  If the job is already
+     * in the list, it will not be added again.
      */
-    synchronized public static void addCronJob(CronJob job, Logger logger) {
-        cronJobs.add(job);
-        loggers.add(logger);
-        if(runningDaemon==null) {
-            runningDaemon=new CronDaemon();
-            runningDaemon.setPriority(Thread.MAX_PRIORITY);
-            runningDaemon.setDaemon(true);
-            runningDaemon.start();
+    public static void addCronJob(CronJob newJob, Logger logger) {
+        synchronized(cronJobs) {
+            boolean found = false;
+            for(CronJob cronJob : cronJobs) {
+                if(cronJob==newJob) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                cronJobs.add(newJob);
+                loggers.add(logger);
+                if(runningDaemon==null) {
+                    runningDaemon=new CronDaemon();
+                    runningDaemon.start();
+                }
+            }
         }
     }
 
-    @Override
-    public void run() {
-        while(true) {
-            try {
-                while(true) {
-                    long nextRun=runJobs();
-                    long sleepTime=nextRun-System.currentTimeMillis();
-                    if(sleepTime>0) sleep(sleepTime);
+    /**
+     * Removes a <code>CronJob</code> from the list of jobs.
+     */
+    public static void removeCronJob(CronJob job) {
+        synchronized(cronJobs) {
+            for(int i=0, len=cronJobs.size(); i<len; i++) {
+                if(cronJobs.get(i)==job) {
+                    cronJobs.remove(i);
+                    loggers.remove(i);
+                    break;
                 }
-            } catch(ThreadDeath TD) {
-                throw TD;
-            } catch(Throwable T) {
-                logger.log(Level.SEVERE, null, T);
             }
-            try {
-                Thread.sleep(30000);
-            } catch(InterruptedException err) {
-                logger.log(Level.WARNING, null, err);
+            if(runningDaemon!=null && cronJobs.isEmpty()) {
+                runningDaemon.stop();
+                runningDaemon = null;
             }
         }
     }
-    
+
+    private Thread thread;
+    private CronDaemon() {
+    }
+
+    /**
+     * Starts this daemon if it is not already running.
+     */
+    private void start() {
+        thread = new Thread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    while(true) {
+                        synchronized(cronJobs) {
+                            if(runningDaemon!=CronDaemon.this) break;
+                        }
+                        try {
+                            long nextRun=runJobs();
+                            long sleepTime=nextRun-System.currentTimeMillis();
+                            if(sleepTime>0) Thread.sleep(sleepTime);
+                        } catch(ThreadDeath TD) {
+                            throw TD;
+                        } catch(Throwable T) {
+                            logger.log(Level.SEVERE, null, T);
+                            try {
+                                Thread.sleep(30000);
+                            } catch(InterruptedException err) {
+                                logger.log(Level.WARNING, null, err);
+                            }
+                        }
+                    }
+                }
+            },
+            CronDaemon.class.getName()
+        );
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void stop() {
+        thread.interrupt();
+    }
+
     /**
      * Runs the jobs for the current minute, returns the next time to run.
      */
-    synchronized private static long runJobs() {
+    private static long runJobs() {
         Calendar cal=Calendar.getInstance();
         int minute=cal.get(Calendar.MINUTE);
         int hour=cal.get(Calendar.HOUR_OF_DAY);
         int dayOfMonth=cal.get(Calendar.DAY_OF_MONTH);
-        int month=cal.get(Calendar.MONTH)+1;
+        int month=cal.get(Calendar.MONTH);
         int dayOfWeek=cal.get(Calendar.DAY_OF_WEEK);
         int year = cal.get(Calendar.YEAR);
-        for(int c=0;c<cronJobs.size();c++) {
-            CronJob job=cronJobs.get(c);
-            Logger jobLogger=loggers.get(c);
-            try {
-                if(job.isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek, year)) {
-                    int scheduleMode=job.getCronJobScheduleMode();
-                    boolean run;
-                    if(scheduleMode==CronJob.CRON_JOB_SCHEDULE_SKIP) {
-                        // Skip if already running
-                        boolean found=false;
-                        for(CronDaemonThread runningJob : runningJobs) {
-                            if(runningJob.cronJob==job) {
-                                found=true;
-                                break;
+        synchronized(cronJobs) {
+            for(int i=0, size=cronJobs.size(); i<size; i++) {
+                CronJob job=cronJobs.get(i);
+                Logger jobLogger=loggers.get(i);
+                try {
+                    if(job.isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek, year)) {
+                        CronJobScheduleMode scheduleMode=job.getCronJobScheduleMode();
+                        boolean run;
+                        if(scheduleMode==CronJobScheduleMode.SKIP) {
+                            // Skip if already running
+                            boolean found=false;
+                            for(CronDaemonThread runningJob : runningJobs) {
+                                if(runningJob.cronJob==job) {
+                                    found=true;
+                                    break;
+                                }
                             }
+                            run=!found;
+                        } else if(scheduleMode==CronJobScheduleMode.CONCURRENT) {
+                            run=true;
+                        } else throw new RuntimeException("Unknown value from CronJob.getCronJobScheduleMode: "+scheduleMode);
+                        if(run) {
+                            CronDaemonThread thread=new CronDaemonThread(job, jobLogger, minute, hour, dayOfMonth, month, dayOfWeek, year);
+                            thread.setDaemon(false);
+                            thread.setPriority(job.getCronJobThreadPriority());
+                            runningJobs.add(thread);
+                            thread.start();
                         }
-                        run=!found;
-                    } else if(scheduleMode==CronJob.CRON_JOB_SCHEDULE_CONCURRENT) {
-                        run=true;
-                    } else throw new RuntimeException("Unknown value from CronJob.getCronJobScheduleMode: "+scheduleMode);
-                    if(run) {
-                        CronDaemonThread thread=new CronDaemonThread(job, jobLogger, minute, hour, dayOfMonth, month, dayOfWeek, year);
-                        thread.setDaemon(false);
-                        thread.setPriority(job.getCronJobThreadPriority());
-                        runningJobs.add(thread);
-                        thread.start();
                     }
+                } catch(ThreadDeath TD) {
+                    throw TD;
+                } catch(Throwable T) {
+                    jobLogger.log(Level.SEVERE, "cron_job.name="+job.getCronJobName(), T);
                 }
-            } catch(ThreadDeath TD) {
-                throw TD;
-            } catch(Throwable T) {
-                jobLogger.log(Level.SEVERE, "cron_job.name="+job.getCronJobName(), T);
             }
         }
         cal.add(Calendar.MINUTE, 1);
+        cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTimeInMillis();
     }
-    
-    synchronized static void threadDone(CronDaemonThread thread) {
-        for(int c=0;c<runningJobs.size();c++) {
-            if(runningJobs.get(c)==thread) {
-                runningJobs.remove(c);
-                return;
+
+    static void threadDone(CronDaemonThread thread) {
+        synchronized(cronJobs) {
+            for(int c=0;c<runningJobs.size();c++) {
+                if(runningJobs.get(c)==thread) {
+                    runningJobs.remove(c);
+                    return;
+                }
             }
         }
-        Throwable T=new Throwable("Warning: thread not found on threadDone(CronDaemonThread)");
-        thread.logger.log(Level.WARNING, "cron_job.name="+thread.cronJob.getCronJobName(), T);
+        thread.logger.log(Level.WARNING, "cron_job.name="+thread.cronJob.getCronJobName(), new Throwable("Warning: thread not found on threadDone(CronDaemonThread)"));
     }
 }
