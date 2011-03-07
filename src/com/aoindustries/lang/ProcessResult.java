@@ -69,9 +69,11 @@ public class ProcessResult {
                             stdoutIn.close();
                         }
                     } catch(IOException exc) {
-                        synchronized(stdoutException) {
-                            stdoutException[0] = exc;
-                        }
+                        //if(!"Stream closed".equals(exc.getMessage())) {
+                            synchronized(stdoutException) {
+                                stdoutException[0] = exc;
+                            }
+                        //}
                     }
                 }
             }
@@ -99,9 +101,11 @@ public class ProcessResult {
                             stderrIn.close();
                         }
                     } catch(IOException exc) {
-                        synchronized(stderrException) {
-                            stderrException[0] = exc;
-                        }
+                        //if(!"Stream closed".equals(exc.getMessage())) {
+                            synchronized(stderrException) {
+                                stderrException[0] = exc;
+                            }
+                        //}
                     }
                 }
             }
@@ -109,14 +113,14 @@ public class ProcessResult {
         stderrThread.start();
 
         try {
-            // Wait for process to exit
-            int exitVal = process.waitFor();
-
             // Wait for full read of stdout
             stdoutThread.join();
 
             // Wait for full read of stderr
             stderrThread.join();
+
+            // Wait for process to exit
+            int exitVal = process.waitFor();
 
             // Check for exceptions in threads
             synchronized(stdoutException) {
