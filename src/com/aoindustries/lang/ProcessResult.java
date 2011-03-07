@@ -69,11 +69,11 @@ public class ProcessResult {
                             stdoutIn.close();
                         }
                     } catch(IOException exc) {
-                        //if(!"Stream closed".equals(exc.getMessage())) {
+                        if(!"Stream closed".equals(exc.getMessage())) {
                             synchronized(stdoutException) {
                                 stdoutException[0] = exc;
                             }
-                        //}
+                        }
                     }
                 }
             }
@@ -101,11 +101,11 @@ public class ProcessResult {
                             stderrIn.close();
                         }
                     } catch(IOException exc) {
-                        //if(!"Stream closed".equals(exc.getMessage())) {
+                        if(!"Stream closed".equals(exc.getMessage())) {
                             synchronized(stderrException) {
                                 stderrException[0] = exc;
                             }
-                        //}
+                        }
                     }
                 }
             }
