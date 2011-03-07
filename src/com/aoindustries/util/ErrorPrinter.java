@@ -361,6 +361,10 @@ public class ErrorPrinter {
         return false;
     }
 
+    /**
+     * Gets the entire exception report as a <code>String</code>.  This is not
+     * as efficient as directly writing the report due to the extra buffering.
+     */
     public static String getStackTraces(Throwable T) {
         return getStackTraces(T, null);
     }
