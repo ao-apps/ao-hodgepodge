@@ -26,9 +26,9 @@ import com.aoindustries.sql.SQLUtility;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -51,6 +51,10 @@ public final class StringUtility {
         "Dec"
     };
 
+    /**
+     * @deprecated  This method is not locale-aware, is no longer used, and will be removed.
+     */
+    @Deprecated
     public static String getMonth(int month) {
         return MONTHS[month];
     }
@@ -69,7 +73,10 @@ public final class StringUtility {
 
     /**
      * Constructs a comma separated list from a <code>String[]</code>.
+     *
+     * @deprecated  This method is no longer used and will be removed.
      */
+    @Deprecated
     public static String buildEmailList(String[] list) {
         StringBuilder SB=new StringBuilder();
         int len=list.length;
@@ -82,42 +89,95 @@ public final class StringUtility {
 
     /**
      * Constructs a comma separated list from a <code>String[]</code>.
+     *
+     * @deprecated Please use <code>join(objects, ", ")</code> instead.
+     *
+     * @see #join(java.lang.Object[], java.lang.String)
      */
     public static String buildList(String[] list) {
-        StringBuilder SB=new StringBuilder();
-        int len=list.length;
-        for(int c=0;c<len;c++) {
-            if(c>0) SB.append(", ");
-            SB.append(list[c]);
-        }
-        return SB.toString();
+        return join(list, ", ");
     }
 
     /**
      * Constructs a comma separated list from an <code>Object[]</code>.
+     *
+     * @deprecated Please use <code>join(objects, ", ")</code> instead.
+     *
+     * @see #join(java.lang.Object[], java.lang.String)
      */
-    public static String buildList(Object[] list) {
-        StringBuilder SB=new StringBuilder();
-        int len=list.length;
-        for(int c=0;c<len;c++) {
-            if(c>0) SB.append(", ");
-            SB.append(list[c]);
-        }
-        return SB.toString();
+    @Deprecated
+    public static String buildList(Object[] objects) {
+        return join(objects, ", ");
     }
 
     /**
      * Constructs a comma separated list from an <code>Iterable</code>.
+     *
+     * @deprecated Please use <code>join(objects, ", ")</code> instead.
+     *
+     * @see #join(java.lang.Iterable, java.lang.String)
      */
-    public static String buildList(Iterable<?> V) {
-        StringBuilder SB=new StringBuilder();
+    @Deprecated
+    public static String buildList(Iterable<?> objects) {
+        return join(objects, ", ");
+    }
+
+    /**
+     * Joins the string representation of objects on the provided delimiter.
+     * The iteration will be performed twice.  Once to compute the total length
+     * of the resulting string, and the second to build the result.
+     *
+     * @throws ConcurrentModificationException is iteration is not consistent between passes
+     */
+    public static String join(Iterable<?> objects, String delimiter) throws ConcurrentModificationException {
+        int delimiterLength = delimiter.length();
+        // Find total length
+        int totalLength = 0;
         boolean didOne = false;
-        for(Object elem : V) {
-            if(didOne) SB.append(", ");
+        for(Object obj : objects) {
+            if(didOne) totalLength += delimiterLength;
             else didOne = true;
-            SB.append(elem);
+            totalLength += String.valueOf(obj).length();
         }
-        return SB.toString();	
+        // Build result
+        StringBuilder sb = new StringBuilder(totalLength);
+        didOne = false;
+        for(Object obj : objects) {
+            if(didOne) sb.append(delimiter);
+            else didOne = true;
+            sb.append(obj);
+        }
+        if(totalLength!=sb.length()) throw new ConcurrentModificationException();
+        return sb.toString();
+    }
+
+    /**
+     * Joins the string representation of objects on the provided delimiter.
+     * The iteration will be performed twice.  Once to compute the total length
+     * of the resulting string, and the second to build the result.
+     *
+     * @throws ConcurrentModificationException is iteration is not consistent between passes
+     */
+    public static String join(Object[] objects, String delimiter) throws ConcurrentModificationException {
+        int delimiterLength = delimiter.length();
+        // Find total length
+        int totalLength = 0;
+        boolean didOne = false;
+        for(Object obj : objects) {
+            if(didOne) totalLength += delimiterLength;
+            else didOne = true;
+            totalLength += String.valueOf(obj).length();
+        }
+        // Build result
+        StringBuilder sb = new StringBuilder(totalLength);
+        didOne = false;
+        for(Object obj : objects) {
+            if(didOne) sb.append(delimiter);
+            else didOne = true;
+            sb.append(obj);
+        }
+        if(totalLength!=sb.length()) throw new ConcurrentModificationException();
+        return sb.toString();
     }
 
     /**
@@ -192,17 +252,6 @@ public final class StringUtility {
     }
 
     /**
-     * Copies the contents of a String into a char[]
-     *
-     * @deprecated  Please use String.getChars(int,int,char[],int)
-     *
-     * @see String#getChars(int,int,char[],int)
-     */
-    public static void copyString(String S, char[] ch, int pos) {
-        S.getChars(0, S.length(), ch, pos);
-    }
-
-    /**
      * Counts how many times a word appears in a line.  Case insensitive matching.
      */
     public static int countOccurances(byte[] buff, int len, String word) {
@@ -266,35 +315,6 @@ public final class StringUtility {
             count++;
         }
         return count;
-    }
-
-    /**
-     * Decodes a string that was encoded for a form.
-     *
-     * @deprecated  Please find another means of performing this task, this code is not well-tested
-     *              and is no longer supported
-     */
-    public static String decodeFormData(String string) {
-        // Shortcut if no special characters
-        if(string.indexOf('+')==-1 && string.indexOf('%')==-1) return string;
-
-        // Decode each character
-        int len=string.length();
-        StringBuilder result=new StringBuilder(len);
-        int pos=0;
-        while(pos<len) {
-            char ch=string.charAt(pos++);
-            if(ch=='+') result.append(' ');
-            else if(ch=='%') {
-                result.append(
-                    (char)(
-                        (pos<len?getHex(string.charAt(pos++)):0)<<4
-                        | (pos<len?getHex(string.charAt(pos++)):0)
-                    )
-                );
-            } else result.append(ch);
-        }
-        return result.toString();
     }
 
     /**
@@ -864,74 +884,6 @@ public final class StringUtility {
     }
 
     /**
-     * @deprecated  Please use more standard String manipulation
-     */
-    public static String substring(char[] chars, int start, int end) {
-        return substring(chars, chars.length, start, end);
-    }
-
-    /**
-     * @deprecated  Please use more standard String manipulation
-     */
-    public static String substring(char[] chars, int len, int start, int end) {
-        if(end>len) end=len;
-        return (end<=start) ? "" : new String(chars, start, end-start);
-    }
-
-    /**
-     * @deprecated  No longer supported.
-     */
-    public static String titleCase(String input) {
-        input = input.trim();
-        StringBuilder buff = new StringBuilder();
-        boolean lastWasSpace=true;
-        int len=input.length();
-        for(int i=0;i<len;i++) {
-            char ch=input.charAt(i);
-            if(ch<=' ') {
-                buff.append(ch);
-                lastWasSpace=true;
-            } else {
-                if(lastWasSpace) buff.append( (ch>='a' && ch<='z') ? ((char)(ch+'A'-'a')) : ch );
-                else buff.append( (ch>='A' && ch<='Z') ? ((char)(ch+'a'-'A')) : ch );
-                lastWasSpace = (ch<=' ');
-            }
-        }
-        return buff.toString();
-    }
-
-    /**
-     * Creates a <code>String</code> from a <code>char[]</code> while trimming.
-     *
-     * @see  java.lang.String#trim
-     *
-     * @deprecated  Please use more standard String manipulation
-     */
-    public static String trim(char[] ch, int start, int len) {
-        int st=0;
-        while( st<len && ch[start+st]<=' ') st++;
-        while( st<len && ch[start+len-1]<=' ') len--;
-        return new String(ch, start+st, len-st);
-    }
-
-    /**
-     * Creates a <code>char[]</code> from a <code>char[]</code> while trimming.
-     *
-     * @see  java.lang.String#trim
-     *
-     * @deprecated  Please use more standard String manipulation
-     */
-    public static char[] trimCharArray(char[] ch, int start, int len) {
-        int st=0;
-        while( st<len && ch[start+st]<=' ') st++;
-        while( st<len && ch[start+len-1]<=' ') len--;
-
-        char[] ret=new char[len-st];
-        System.arraycopy(ch, start+st, ret, 0, len-st);
-        return ret;
-    }
-
-    /**
      * Word wraps a <code>String</code> to be no longer than the provided number of characters wide.
      *
      * TODO: Make this more efficient by using Appendable and eliminating the internal use of substring.
@@ -1003,17 +955,9 @@ public final class StringUtility {
     }
 
     /**
-     * @deprecated  No longer supported.
+     * @deprecated  This method is no longer used and will be removed.
      */
-    public static String[] getSortedStrings(Iterator I) {
-        List<String> V=new ArrayList<String>();
-        while(I.hasNext()) {
-            Object O=I.next();
-            V.add(O==null?null:O.toString());
-        }
-        return getStringArray(V);
-    }
-
+    @Deprecated
     public static String convertToHex(byte[] bytes) {
         if(bytes==null) return null;
         int len=bytes.length;
