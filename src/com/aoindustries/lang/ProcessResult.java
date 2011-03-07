@@ -76,6 +76,7 @@ public class ProcessResult {
                 }
             }
         );
+        stdoutThread.start();
 
         // Read stderr in background thread
         final StringBuilder stderr = new StringBuilder();
@@ -105,6 +106,8 @@ public class ProcessResult {
                 }
             }
         );
+        stderrThread.start();
+
         try {
             // Wait for process to exit
             int exitVal = process.waitFor();
