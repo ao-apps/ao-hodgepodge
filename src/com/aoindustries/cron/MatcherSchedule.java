@@ -92,6 +92,11 @@ public class MatcherSchedule implements Schedule {
         this.dayOfWeek = dayOfWeek;
     }
 
+    @Override
+    public String toString() {
+        return minute + " " + hour + " " + dayOfMonth + " " + month + " " + dayOfWeek;
+    }
+
     public Matcher getMinute() {
         return minute;
     }

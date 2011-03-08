@@ -69,7 +69,11 @@ public class ProcessResult {
                             stdoutIn.close();
                         }
                     } catch(IOException exc) {
-                        if(!"Stream closed".equals(exc.getMessage())) {
+                        String message = exc.getMessage();
+                        if(
+                            !"Stream closed".equals(message)
+                            && !"Bad file descriptor".equals(message)
+                        ) {
                             synchronized(stdoutException) {
                                 stdoutException[0] = exc;
                             }
@@ -101,7 +105,11 @@ public class ProcessResult {
                             stderrIn.close();
                         }
                     } catch(IOException exc) {
-                        if(!"Stream closed".equals(exc.getMessage())) {
+                        String message = exc.getMessage();
+                        if(
+                            !"Stream closed".equals(message)
+                            && !"Bad file descriptor".equals(message)
+                        ) {
                             synchronized(stderrException) {
                                 stderrException[0] = exc;
                             }

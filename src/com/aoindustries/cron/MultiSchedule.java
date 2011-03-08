@@ -22,6 +22,8 @@
  */
 package com.aoindustries.cron;
 
+import com.aoindustries.util.StringUtility;
+
 /**
  * A job is scheduled by matching any of a provided set of schedules.
  *
@@ -33,6 +35,11 @@ public class MultiSchedule implements Schedule {
 
     public MultiSchedule(Iterable<Schedule> schedules) {
         this.schedules = schedules;
+    }
+
+    @Override
+    public String toString() {
+        return StringUtility.join(schedules, "; ");
     }
 
     @Override
