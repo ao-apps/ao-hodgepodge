@@ -69,4 +69,23 @@ public class Arrays {
         }
         return true;
     }
+
+    /**
+     * Compares two byte[].  Shorter byte[] are ordered before longer when
+     * the shorter is a prefix of the longer.  The comparison considers each
+     * byte as a value from 0-255.
+     */
+    @ThreadSafe
+    public static int compare(byte[] ba1, byte[] ba2) {
+        int len = Math.min(ba1.length, ba2.length);
+        for(int i=0; i<len; i++) {
+            int b1 = ba1[i]&255;
+            int b2 = ba2[i]&255;
+            if(b1<b2) return -1;
+            if(b1>b2) return 1;
+        }
+        if(ba1.length>len) return 1;
+        if(ba2.length>len) return -1;
+        return 0;
+    }
 }
