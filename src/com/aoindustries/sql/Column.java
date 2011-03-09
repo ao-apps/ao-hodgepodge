@@ -41,6 +41,7 @@ public class Column {
     private final int ordinalPosition;
     private final String isNullable;
     private final String isAutoincrement;
+    private final int hashCode;
 
     protected Column(
         Table table,
@@ -68,11 +69,31 @@ public class Column {
         this.ordinalPosition = ordinalPosition;
         this.isNullable = isNullable;
         this.isAutoincrement = isAutoincrement;
+        this.hashCode = table.hashCode() * 31 + name.hashCode();
     }
 
     @Override
     public String toString() {
         return name;
+    }
+
+    /**
+     * Two columns are equal if they have the same schema name, table name, and column name.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Column)) return false;
+        Column other = (Column)obj;
+        return
+            hashCode==other.hashCode
+            && name.equals(other.name)
+            && table.equals(other.table)
+        ;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
     }
 
     public Table getTable() {

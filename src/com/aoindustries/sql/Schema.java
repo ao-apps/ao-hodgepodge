@@ -37,15 +37,35 @@ public class Schema {
 
     private final Catalog catalog;
     private final String name;
+    private final int hashCode;
 
     protected Schema(Catalog catalog, String name) {
         this.catalog = catalog;
         this.name = name;
+        this.hashCode = name.hashCode();
     }
 
     @Override
     public String toString() {
         return name;
+    }
+
+    /**
+     * Two schemas are equal if they have the same name.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Schema)) return false;
+        Schema other = (Schema)obj;
+        return
+            hashCode==other.hashCode
+            && name.equals(other.name)
+        ;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
     }
 
     public Catalog getCatalog() {
