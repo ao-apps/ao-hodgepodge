@@ -22,13 +22,16 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.graph.BackConnectedDirectedGraphVertex;
 import com.aoindustries.table.IndexType;
 import com.aoindustries.util.AutoGrowArrayList;
+import com.aoindustries.util.Collections;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -37,7 +40,7 @@ import java.util.TreeMap;
  *
  * @author  AO Industries, Inc.
  */
-public class Table {
+public class Table implements BackConnectedDirectedGraphVertex<Table,SQLException> {
 
     private final Schema schema;
     private final String name;
@@ -46,6 +49,7 @@ public class Table {
 
     protected Table(Schema schema, String name, String tableType) {
         this.schema = schema;
+        if(name.indexOf('"')!=-1) throw new IllegalArgumentException();
         this.name = name;
         this.tableType = tableType;
         this.hashCode = schema.hashCode() * 31 + name.hashCode();
@@ -127,7 +131,7 @@ public class Table {
                 } finally {
                     results.close();
                 }
-                getColumnMapCache = Collections.unmodifiableSortedMap(newColumnMap);
+                getColumnMapCache = Collections.optimalUnmodifiableSortedMap(newColumnMap);
             }
             return getColumnMapCache;
         }
@@ -166,7 +170,7 @@ public class Table {
                 for(int i=0; i<newColumns.size(); i++) {
                     if(newColumns.get(i)==null) throw new SQLException("Missing ordinal position: "+(i+1));
                 }
-                getColumnsCache = Collections.unmodifiableList(newColumns);
+                getColumnsCache = Collections.optimalUnmodifiableList(newColumns);
             }
             return getColumnsCache;
         }
@@ -197,7 +201,7 @@ public class Table {
             if(!getPrimaryKeyCached) {
                 String pkName = null;
                 List<Column> columns = new AutoGrowArrayList<Column>();
-                ResultSet results = getSchema().getCatalog().getMetaData().getMetaData().getPrimaryKeys(getSchema().getCatalog().getName(), getSchema().getName(), name);
+                ResultSet results = schema.getCatalog().getMetaData().getMetaData().getPrimaryKeys(schema.getCatalog().getName(), schema.getName(), name);
                 try {
                     while(results.next()) {
                         String columnName = results.getString("COLUMN_NAME");
@@ -225,6 +229,76 @@ public class Table {
                 }
             }
             return getPrimaryKeyCache;
+        }
+    }
+
+    private final Object getConnectedVerticesLock = new Object();
+    private Set<? extends Table> getConnectedVerticesCache;
+
+    /**
+     * Gets the set of tables that this table depends on.
+     *
+     * This is based on getImportedKeys
+     */
+    @Override
+    public Set<? extends Table> getConnectedVertices() throws SQLException {
+        synchronized(getConnectedVerticesLock) {
+            if(getConnectedVerticesCache==null) {
+                Set<Table> newConnectedVertices = new HashSet<Table>();
+                Catalog catalog = schema.getCatalog();
+                DatabaseMetaData metaData = catalog.getMetaData();
+                ResultSet results = schema.getCatalog().getMetaData().getMetaData().getImportedKeys(schema.getCatalog().getName(), schema.getName(), name);
+                try {
+                    while(results.next()) {
+                        String pkCat = results.getString("PKTABLE_CAT");
+                        Catalog pkCatalog = pkCat==null ? catalog : metaData.getCatalog(pkCat);
+                        newConnectedVertices.add(
+                            pkCatalog
+                            .getSchema(results.getString("PKTABLE_SCHEM"))
+                            .getTable(results.getString("PKTABLE_NAME"))
+                        );
+                    }
+                } finally {
+                    results.close();
+                }
+                getConnectedVerticesCache = Collections.optimalUnmodifiableSet(newConnectedVertices);
+            }
+            return getConnectedVerticesCache;
+        }
+    }
+
+    private final Object getBackConnectedVerticesLock = new Object();
+    private Set<? extends Table> getBackConnectedVerticesCache;
+
+    /**
+     * Gets the set of tables that depend on this table.
+     *
+     * This is based on getExportedKeys
+     */
+    @Override
+    public Set<? extends Table> getBackConnectedVertices() throws SQLException {
+        synchronized(getBackConnectedVerticesLock) {
+            if(getBackConnectedVerticesCache==null) {
+                Set<Table> newBackConnectedVertices = new HashSet<Table>();
+                Catalog catalog = schema.getCatalog();
+                DatabaseMetaData metaData = catalog.getMetaData();
+                ResultSet results = schema.getCatalog().getMetaData().getMetaData().getExportedKeys(schema.getCatalog().getName(), schema.getName(), name);
+                try {
+                    while(results.next()) {
+                        String fkCat = results.getString("FKTABLE_CAT");
+                        Catalog fkCatalog = fkCat==null ? catalog : metaData.getCatalog(fkCat);
+                        newBackConnectedVertices.add(
+                            fkCatalog
+                            .getSchema(results.getString("FKTABLE_SCHEM"))
+                            .getTable(results.getString("FKTABLE_NAME"))
+                        );
+                    }
+                } finally {
+                    results.close();
+                }
+                getBackConnectedVerticesCache = Collections.optimalUnmodifiableSet(newBackConnectedVertices);
+            }
+            return getBackConnectedVerticesCache;
         }
     }
 }

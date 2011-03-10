@@ -22,9 +22,9 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.util.Collections;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -41,6 +41,7 @@ public class Schema {
 
     protected Schema(Catalog catalog, String name) {
         this.catalog = catalog;
+        if(name.indexOf('"')!=-1) throw new IllegalArgumentException();
         this.name = name;
         this.hashCode = name.hashCode();
     }
@@ -97,7 +98,7 @@ public class Schema {
                 } finally {
                     results.close();
                 }
-                getTablesCache = Collections.unmodifiableSortedMap(newTables);
+                getTablesCache = Collections.optimalUnmodifiableSortedMap(newTables);
             }
             return getTablesCache;
         }

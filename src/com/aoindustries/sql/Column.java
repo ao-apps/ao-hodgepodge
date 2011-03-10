@@ -58,6 +58,7 @@ public class Column {
         String isAutoincrement
     ) {
         this.table = table;
+        if(name.indexOf('"')!=-1) throw new IllegalArgumentException();
         this.name = name;
         this.dataType = dataType;
         this.typeName = typeName;

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 
 /**
@@ -266,15 +267,13 @@ public class Collections {
      * If sorted map has one element, uses <code>singletonSortedMap</code>.
      * Otherwise, wraps the sorted map with <code>Collections.unmodifiableSortedMap</code>.
      */
-    /* TODO
     public static <K,V> SortedMap<K,V> optimalUnmodifiableSortedMap(SortedMap<K, ? extends V> sortedMap) {
-        int size = sortedMap.size();
-        if(size==0) return emptySortedMap();
-        if(size==1) {
-            K key = sortedMap.firstKey();
-            return singletonSortedMap(key, sortedMap.get(key));
-        }
+        // TODO: int size = sortedMap.size();
+        // TODO: if(size==0) return emptySortedMap();
+        // TODO: if(size==1) {
+        // TODO:     K key = sortedMap.firstKey();
+        // TODO:     return singletonSortedMap(key, sortedMap.get(key));
+        // TODO: }
         return java.util.Collections.unmodifiableSortedMap(sortedMap);
     }
-     */
 }

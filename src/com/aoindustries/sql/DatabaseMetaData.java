@@ -22,11 +22,11 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.util.Collections;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.Collator;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -101,7 +101,7 @@ public class DatabaseMetaData {
                 } finally {
                     results.close();
                 }
-                getCatalogsCache = Collections.unmodifiableSortedMap(newCatalogs);
+                getCatalogsCache = Collections.optimalUnmodifiableSortedMap(newCatalogs);
             }
             return getCatalogsCache;
         }

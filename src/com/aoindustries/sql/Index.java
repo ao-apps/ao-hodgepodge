@@ -23,9 +23,9 @@
 package com.aoindustries.sql;
 
 import com.aoindustries.table.IndexType;
+import com.aoindustries.util.Collections;
 import com.aoindustries.util.StringUtility;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -50,8 +50,7 @@ public class Index {
         this.name = name;
         this.type = type;
         if(columns.isEmpty()) throw new IllegalArgumentException("columns.isEmpty()");
-        if(columns.size()==1) this.columns = Collections.singletonList(columns.get(0));
-        else this.columns = Collections.unmodifiableList(new ArrayList<Column>(columns));
+        this.columns = Collections.optimalUnmodifiableList(new ArrayList<Column>(columns));
     }
 
     @Override

@@ -22,10 +22,10 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.util.Collections;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -84,7 +84,7 @@ public class Catalog {
                 } finally {
                     results.close();
                 }
-                getSchemasCache = Collections.unmodifiableSortedMap(newSchemas);
+                getSchemasCache = Collections.optimalUnmodifiableSortedMap(newSchemas);
             }
             return getSchemasCache;
         }
