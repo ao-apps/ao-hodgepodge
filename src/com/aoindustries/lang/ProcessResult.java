@@ -69,15 +69,15 @@ public class ProcessResult {
                             stdoutIn.close();
                         }
                     } catch(IOException exc) {
-                        String message = exc.getMessage();
-                        if(
-                            !"Stream closed".equals(message)
-                            && !"Bad file descriptor".equals(message)
-                        ) {
+                        //String message = exc.getMessage();
+                        //if(
+                        //    !"Stream closed".equals(message)
+                        //    && !"Bad file descriptor".equals(message)
+                        //) {
                             synchronized(stdoutException) {
                                 stdoutException[0] = exc;
                             }
-                        }
+                        //}
                     }
                 }
             }
@@ -92,7 +92,7 @@ public class ProcessResult {
                 @Override
                 public void run() {
                     try {
-                        Reader stderrIn = new InputStreamReader(process.getInputStream());
+                        Reader stderrIn = new InputStreamReader(process.getErrorStream());
                         try {
                             char[] buff = new char[4096];
                             int count;
@@ -105,15 +105,15 @@ public class ProcessResult {
                             stderrIn.close();
                         }
                     } catch(IOException exc) {
-                        String message = exc.getMessage();
-                        if(
-                            !"Stream closed".equals(message)
-                            && !"Bad file descriptor".equals(message)
-                        ) {
+                        //String message = exc.getMessage();
+                        //if(
+                        //    !"Stream closed".equals(message)
+                        //    && !"Bad file descriptor".equals(message)
+                        //) {
                             synchronized(stderrException) {
                                 stderrException[0] = exc;
                             }
-                        }
+                        //}
                     }
                 }
             }
