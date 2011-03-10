@@ -24,9 +24,13 @@ package com.aoindustries.util;
 
 import java.io.Serializable;
 import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -187,4 +191,90 @@ public class Collections {
             return element;
         }
     }
+
+    /**
+     * Gets the optimal implementation for unmodifiable collection.
+     * If collection is empty, uses <code>Collections.emptyList</code>.
+     * If collection has one element, uses <code>Collections.singletonList</code>.
+     * Otherwise, wraps the collection with <code>Collections.unmodifiableCollection</code>.
+     */
+    public static <T> Collection<T> optimalUnmodifiableCollection(Collection<? extends T> collection) {
+        int size = collection.size();
+        if(size==0) return java.util.Collections.emptyList();
+        if(size==1) return java.util.Collections.singletonList(collection.iterator().next());
+        return java.util.Collections.unmodifiableCollection(collection);
+    }
+
+    /**
+     * Gets the optimal implementation for unmodifiable list.
+     * If list is empty, uses <code>Collections.emptyList</code>.
+     * If list has one element, uses <code>Collections.singletonList</code>.
+     * Otherwise, wraps the list with <code>Collections.unmodifiableList</code>.
+     */
+    public static <T> List<T> optimalUnmodifiableList(List<? extends T> list) {
+        int size = list.size();
+        if(size==0) return java.util.Collections.emptyList();
+        if(size==1) return java.util.Collections.singletonList(list.get(0));
+        return java.util.Collections.unmodifiableList(list);
+    }
+
+    /**
+     * Gets the optimal implementation for unmodifiable set.
+     * If set is empty, uses <code>Collections.emptySet</code>.
+     * If set has one element, uses <code>Collections.singleton</code>.
+     * Otherwise, wraps the set with <code>Collections.unmodifiableSet</code>.
+     */
+    public static <T> Set<T> optimalUnmodifiableSet(Set<? extends T> set) {
+        int size = set.size();
+        if(size==0) return java.util.Collections.emptySet();
+        if(size==1) return java.util.Collections.singleton(set.iterator().next());
+        return java.util.Collections.unmodifiableSet(set);
+    }
+
+    /**
+     * Gets the optimal implementation for unmodifiable sorted set.
+     * If sorted set is empty, uses <code>emptySortedSet</code>.
+     * If sorted set has one element, uses <code>singletonSortedSet</code>.
+     * Otherwise, wraps the sorted set with <code>Collections.unmodifiableSortedSet</code>.
+     */
+    public static <T> SortedSet<T> optimalUnmodifiableSortedSet(SortedSet<T> sortedSet) {
+        int size = sortedSet.size();
+        if(size==0) return emptySortedSet();
+        if(size==1) return singletonSortedSet(sortedSet.first());
+        return java.util.Collections.unmodifiableSortedSet(sortedSet);
+    }
+
+    /**
+     * Gets the optimal implementation for unmodifiable map.
+     * If map is empty, uses <code>Collections.emptyMap</code>.
+     * If map has one element, uses <code>Collections.singletonMap</code>.
+     * Otherwise, wraps the map with <code>Collections.unmodifiableMap</code>.
+     */
+    public static <K,V> Map<K,V> optimalUnmodifiableMap(Map<? extends K, ? extends V> map) {
+        int size = map.size();
+        if(size==0) return java.util.Collections.emptyMap();
+        if(size==1) {
+            Map.Entry<? extends K,? extends V> entry = map.entrySet().iterator().next();
+            return java.util.Collections.singletonMap(entry.getKey(), entry.getValue());
+        }
+        return java.util.Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * Gets the optimal implementation for unmodifiable sorted map.
+     * If sorted map is empty, uses <code>emptySortedMap</code>.
+     * If sorted map has one element, uses <code>singletonSortedMap</code>.
+     * Otherwise, wraps the sorted map with <code>Collections.unmodifiableSortedMap</code>.
+     */
+    /* TODO
+    public static <K,V> SortedMap<K,V> optimalUnmodifiableSortedMap(SortedMap<K, ? extends V> sortedMap) {
+        int size = sortedMap.size();
+        if(size==0) return emptySortedMap();
+        if(size==1) {
+            K key = sortedMap.firstKey();
+            return singletonSortedMap(key, sortedMap.get(key));
+        }
+        return java.util.Collections.unmodifiableSortedMap(sortedMap);
+    }
+     */
 }
