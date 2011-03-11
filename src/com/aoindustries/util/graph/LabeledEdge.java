@@ -20,17 +20,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.graph;
-
-import java.util.Set;
+package com.aoindustries.util.graph;
 
 /**
- * One vertex in a two-way directed graph, where each vertex has a conenction back
- * to all vertices that connect to it.
- *
- * @author  AO Industries, Inc.
+ * A weighted edge (or arc) between two vertices.
  */
-public interface BackConnectedDirectedGraphVertex<T extends BackConnectedDirectedGraphVertex<T,E>, E extends Exception> extends DirectedGraphVertex<T,E> {
+public class LabeledEdge<V,L> extends Edge<V> {
 
-    Set<? extends T> getBackConnectedVertices() throws E;
+    protected final L label;
+
+    public LabeledEdge(V from, V to, L label) {
+        super(from, to);
+        this.label = label;
+    }
+    /**
+     * The label of the edge.
+     */
+    final public L getLabel() {
+        return label;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString()+" \""+label+'"';
+    }
 }

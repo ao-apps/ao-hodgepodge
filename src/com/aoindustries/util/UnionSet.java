@@ -45,7 +45,7 @@ public class UnionSet<E> implements Set<E> {
      * Any set added with fewer or equal to this many items will just be added to
      * the internal combined set.
      *
-     * This value is arbitrary.  Other implementations.
+     * TODO: This value is arbitrary.  Benchmark other values.
      */
     private static final int MAXIMUM_COMBINE_SIZE = 10;
 
@@ -104,6 +104,8 @@ public class UnionSet<E> implements Set<E> {
 
     /**
      * Triggers combining.
+     *
+     * TODO: Iterate without combining - benchmark speed versus complexity
      */
     @Override
     public Iterator<E> iterator() {

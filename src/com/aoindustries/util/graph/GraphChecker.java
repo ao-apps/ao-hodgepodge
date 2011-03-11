@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010  AO Industries, Inc.
+ * Copyright (C) 2011  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,17 +20,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.tree;
-
-import java.io.IOException;
-import java.sql.SQLException;
+package com.aoindustries.util.graph;
 
 /**
- * Filters may be applied while copying trees.
+ * Checks a graph for consistency.
  *
  * @author  AO Industries, Inc.
-*/
-public interface NodeFilter<E> {
+ */
+public interface GraphChecker<EX extends Exception> {
 
-    boolean isNodeFiltered(Node<E> node) throws IOException, SQLException;
+    void checkGraph() throws GraphException, EX;
 }

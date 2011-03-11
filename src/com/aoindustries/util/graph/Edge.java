@@ -25,41 +25,53 @@ package com.aoindustries.util.graph;
 /**
  * An edge (or arc) between two vertices.
  */
-abstract public class Edge<V> {
+public class Edge<V> {
+
+    protected final V from;
+    protected final V to;
+
+    public Edge(V from, V to) {
+        this.from = from;
+        this.to = to;
+    }
 
     /**
      * The vertex the edge is from.
      */
-    abstract public V getFrom();
+    final public V getFrom() {
+        return from;
+    }
 
     /**
      * The vertex the edge is to.
      */
-    abstract public V getTo();
+    final public V getTo() {
+        return to;
+    }
 
     @Override
     public String toString() {
-        return getFrom()+"->"+getTo();
+        return from+" -> "+to;
     }
 
     /**
      * Two edges are equal if they have equal from and to.
      */
     @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof Edge)) return false;
-        Edge<?> other = (Edge)obj;
+    final public boolean equals(Object obj) {
+        if(!(obj instanceof Edge<?>)) return false;
+        Edge<?> other = (Edge<?>)obj;
         return
-            getFrom().equals(other.getFrom())
-            && getTo().equals(other.getTo())
+            from.equals(other.from)
+            && to.equals(other.to)
         ;
     }
 
     /**
-     * The hashCode is generated from the hashCodes of from and to.
+     * The hashCode is generated from the from and to.
      */
     @Override
-    public int hashCode() {
-        return getFrom().hashCode() * 31 + getTo().hashCode();
+    final public int hashCode() {
+        return from.hashCode() * 31 + to.hashCode();
     }
 }

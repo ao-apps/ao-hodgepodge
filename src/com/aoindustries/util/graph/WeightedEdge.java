@@ -25,15 +25,24 @@ package com.aoindustries.util.graph;
 /**
  * A weighted edge (or arc) between two vertices.
  */
-abstract public class WeightedEdge<V,W extends Weight<?>> extends Edge<V> {
+public class WeightedEdge<V,W extends Weight<?>> extends Edge<V> {
+
+    protected final W weight;
+
+    public WeightedEdge(V from, V to, W weight) {
+        super(from, to);
+        this.weight = weight;
+    }
 
     /**
-     * The weight of the vertex.
+     * The weight of the edge.
      */
-    abstract public W getWeight();
+    final public W getWeight() {
+        return weight;
+    }
 
     @Override
     public String toString() {
-        return super.toString()+'('+getWeight()+')';
+        return super.toString()+" ("+weight+')';
     }
 }

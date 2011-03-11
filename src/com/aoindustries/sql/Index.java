@@ -23,7 +23,7 @@
 package com.aoindustries.sql;
 
 import com.aoindustries.table.IndexType;
-import com.aoindustries.util.Collections;
+import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.StringUtility;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +50,7 @@ public class Index {
         this.name = name;
         this.type = type;
         if(columns.isEmpty()) throw new IllegalArgumentException("columns.isEmpty()");
-        this.columns = Collections.optimalUnmodifiableList(new ArrayList<Column>(columns));
+        this.columns = AoCollections.optimalUnmodifiableList(new ArrayList<Column>(columns));
     }
 
     @Override

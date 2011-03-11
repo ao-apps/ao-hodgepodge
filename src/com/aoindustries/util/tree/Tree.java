@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,17 +20,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.util.graph;
+package com.aoindustries.util.tree;
 
-import java.util.Set;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
- * One vertex in a two-way directed graph, where each vertex has a conenction back
- * to all vertices that connect to it.
+ * An abstract structure for trees.  Each tree may have multiple roots.
  *
  * @author  AO Industries, Inc.
- */
-public interface SymmetricDirectedGraphVertex<T extends SymmetricDirectedGraphVertex<T,E>, E extends Exception> extends DirectedGraphVertex<T,E> {
+*/
+public interface Tree<E> {
 
-    Set<? extends T> getBackConnectedVertices() throws E;
+    /**
+     * Gets the list of root nodes.  Each root node should have a
+     * <code>null</code> parent.  If there are no roots, should
+     * return an empty list, not null.
+     */
+    List<Node<E>> getRootNodes() throws IOException, SQLException;
 }

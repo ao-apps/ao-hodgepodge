@@ -22,7 +22,7 @@
  */
 package com.aoindustries.sql;
 
-import com.aoindustries.util.Collections;
+import com.aoindustries.util.AoCollections;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.SortedMap;
@@ -98,7 +98,7 @@ public class Schema {
                 } finally {
                     results.close();
                 }
-                getTablesCache = Collections.optimalUnmodifiableSortedMap(newTables);
+                getTablesCache = AoCollections.optimalUnmodifiableSortedMap(newTables);
             }
             return getTablesCache;
         }

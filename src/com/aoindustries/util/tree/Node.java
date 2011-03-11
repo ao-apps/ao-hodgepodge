@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,16 +20,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.util.graph;
+package com.aoindustries.util.tree;
 
-import java.util.Set;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
- * One vertex in a one-way directed graph.
+ * An abstract structure for trees.  Each tree may have multiple roots.
  *
  * @author  AO Industries, Inc.
- */
-public interface DirectedGraphVertex<E extends DirectedGraphVertex<E>> {
+*/
+public interface Node<E> {
 
-    Set<? extends E> getConnectedVertices();
+    /**
+     * Gets the list of direct children of this node.
+     * If this node cannot have children then return <code>null</code>.
+     * If this node can have children but there are none, return an empty List.
+     */
+    List<Node<E>> getChildren() throws IOException, SQLException;
+
+    /**
+     * Gets the value contained in this node.  Comparisions of this value
+     * will be performed using the equals method.
+     */
+    E getValue();
 }

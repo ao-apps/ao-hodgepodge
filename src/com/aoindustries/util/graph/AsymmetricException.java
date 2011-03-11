@@ -20,18 +20,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.graph;
+package com.aoindustries.util.graph;
 
 /**
- * Thrown when a back connection doesn't exist for a connection in a back connected graph.
+ * Thrown when edges are not symmetric in a symmetric graph.
+ * Symmetric is based only on existence of the edge.  Edge-specific details
+ * like weight or label are not compared.
+ *
+ * @see  SymmetricGraph
  *
  * @author  AO Industries, Inc.
  */
-public class BackConnectionException extends GraphException {
+public class AsymmetricException extends GraphException {
+
+    // TODO: private static final long serialVersionUID = 7431301822226465307L;
 
     private static String getMessage(
-        BackConnectedDirectedGraphVertex<?,?> vertex,
-        BackConnectedDirectedGraphVertex<?,?> connected
+        Object vertex,
+        Object connected
     ) {
         return
             "No back connection matching connection:\n"
@@ -40,13 +46,10 @@ public class BackConnectionException extends GraphException {
         ;
     }
 
-    private final BackConnectedDirectedGraphVertex<?,?> vertex;
-    private final BackConnectedDirectedGraphVertex<?,?> connected;
+    private final Object vertex;
+    private final Object connected;
 
-    BackConnectionException(
-        BackConnectedDirectedGraphVertex<?,?> vertex,
-        BackConnectedDirectedGraphVertex<?,?> connected
-    ) {
+    <V> AsymmetricException(V vertex, V connected) {
         super(getMessage(vertex, connected));
         this.vertex = vertex;
         this.connected = connected;
@@ -55,14 +58,14 @@ public class BackConnectionException extends GraphException {
     /**
      * Gets the vertex that the connection was from.
      */
-    public BackConnectedDirectedGraphVertex<?,?> getVertex() {
+    public Object getVertex() {
         return vertex;
     }
 
     /**
      * Gets the connected vertex that doesn't back connect.
      */
-    public BackConnectedDirectedGraphVertex<?,?> getConnected() {
+    public Object getConnected() {
         return connected;
     }
 }

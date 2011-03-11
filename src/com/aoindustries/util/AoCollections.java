@@ -39,9 +39,9 @@ import java.util.SortedSet;
  *
  * @author  AO Industries, Inc.
  */
-public class Collections {
+public class AoCollections {
 
-    private Collections() {
+    private AoCollections() {
     }
 
     public static final SortedSet EMPTY_SORTED_SET = new EmptySortedSet();
@@ -275,5 +275,32 @@ public class Collections {
         // TODO:     return singletonSortedMap(key, sortedMap.get(key));
         // TODO: }
         return java.util.Collections.unmodifiableSortedMap(sortedMap);
+    }
+
+    /**
+     * Gets an unmodifiable iterator for a single object.
+     */
+    public static <E> Iterator<E> singletonIterator(final E value) {
+        return new Iterator<E>() {
+
+            private boolean hasNext = true;
+
+            @Override
+            public boolean hasNext() {
+                return hasNext;
+            }
+
+            @Override
+            public E next() {
+                if(!hasNext) throw new NoSuchElementException();
+                hasNext = false;
+                return value;
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 }

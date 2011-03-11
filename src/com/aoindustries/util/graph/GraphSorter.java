@@ -22,52 +22,14 @@
  */
 package com.aoindustries.util.graph;
 
-import java.util.AbstractSet;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 /**
- * A base implementation for graph.
+ * Sorts the vertices a graph into particular order.
  *
  * @author  AO Industries, Inc.
  */
-abstract public class AbstractGraph<V,E extends Edge<V>> extends AbstractSet<V> implements Graph<V,E> {
+public interface GraphSorter<V,EX extends Exception> {
 
-    // <editor-fold desc="Collection Implementation">
-    @Override
-    public Iterator<V> iterator() {
-        return getVerticies().iterator();
-    }
-
-    @Override
-    public int size() {
-        return 1;
-    }
-    // </editor-fold>
-
-    // <editor-fold desc="Graph Implementation">
-    /**
-     * Always consistent.
-     */
-    @Override
-    public void checkGraph() {
-        // Nothing to do
-    }
-
-    @Override
-    public Set<E> getEdgesFrom(V from) {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<E> getEdgesTo(V to) {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<E> getEdges() {
-        return Collections.emptySet();
-    }
-    // </editor-fold>
+    List<V> sortGraph() throws EX;
 }

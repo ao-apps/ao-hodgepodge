@@ -20,28 +20,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.graph;
+package com.aoindustries.util.graph;
+
+import java.util.Collection;
+import java.util.Set;
 
 /**
- * Exceptions indicating problems have been detected in graph state.
+ * A multi graph is a set of vertices that are connected by directed edges.  Two
+ * vertices may have multiple edges between them.
  *
  * @author  AO Industries, Inc.
  */
-public class GraphException extends RuntimeException {
+public interface MultiGraph<V,E extends Edge<V>,EX extends Exception> {
 
-    public GraphException() {
-        super();
-    }
+    /**
+     * Gets the set of vertices for this graph.
+     */
+    Set<V> getVertices() throws EX;
 
-    public GraphException(String message) {
-        super(message);
-    }
-
-    public GraphException(Throwable cause) {
-        super(cause);
-    }
-
-    public GraphException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    /**
+     * Gets the edges from the provided vertex.  The vertex must be part of this
+     * graph, and the results are undefined if it is not.
+     */
+    Collection<E> getEdgesFrom(V from) throws EX;
 }

@@ -22,36 +22,18 @@
  */
 package com.aoindustries.util.graph;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
- * A directed acyclic graph where the connections only go one direction.
+ * A multi graph where each edge has an edge in the opposite direction.
  *
  * @author  AO Industries, Inc.
  */
-public class DirectedAcyclicGraph<T extends DirectedGraphVertex<T,E>, E extends Exception> {
-
-    private final Iterable<? extends T> vertices;
-
-    public DirectedAcyclicGraph(Iterable<? extends T> vertices) {
-        this.vertices = vertices;
-    }
+public interface SymmetricMultiGraph<V,E extends Edge<V>,EX extends Exception> extends MultiGraph<V,E,EX> {
 
     /**
-     * Test the graph for consistency.  For a directed acyclic graph, must have no cycles.
-     *
-     * @param iter An iterable source of vertices, will be iterated one time.  Duplicates are OK and will be ignored.
-     *
-     * @throws GraphCycleException if the graph is not consistent
+     * Gets the edges to the provided vertex.  The vertex must be part of this
+     * graph, and the results are undefined if it is not.
      */
-    public void checkDirectedAcyclicGraph() throws GraphCycleException, E {
-        throw new RuntimeException("TODO: Not implemented");
-    }
-
-    /**
-     * Performs a topological sort of the graph.
-     */
-    public List<T> topologicalSort(Iterable<? extends T> vertices) throws GraphCycleException, E {
-        throw new RuntimeException("TODO: Not implemented");
-    }
+    Collection<E> getEdgesTo(V to) throws EX;
 }

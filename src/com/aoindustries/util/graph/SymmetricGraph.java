@@ -20,16 +20,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.graph;
+package com.aoindustries.util.graph;
 
 import java.util.Set;
 
 /**
- * One vertex in a one-way directed graph.
+ * A graph where each edge has an edge in the opposite direction.
  *
  * @author  AO Industries, Inc.
  */
-public interface DirectedGraphVertex<T extends DirectedGraphVertex<T,E>, E extends Exception> {
+public interface SymmetricGraph<V,E extends Edge<V>,EX extends Exception> extends Graph<V,E,EX>, SymmetricMultiGraph<V,E,EX> {
 
-    Set<? extends T> getConnectedVertices() throws E;
+    /**
+     * {@inheritDoc}
+     *
+     * A graph only allows unique combinations of from and to vertices.
+     */
+    @Override
+    Set<E> getEdgesTo(V to) throws EX;
 }

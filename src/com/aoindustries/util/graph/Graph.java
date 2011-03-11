@@ -25,32 +25,18 @@ package com.aoindustries.util.graph;
 import java.util.Set;
 
 /**
- * A graph is a type of collection.
- * It is a set of vertices that are connected by edges.
+ * A graph is a set of vertices that are connected by directed edges.  There may
+ * only be one edge for each direction between any two vertices.
  *
  * @author  AO Industries, Inc.
  */
-public interface Graph<V,E extends Edge<V>> extends Set<V> {
+public interface Graph<V,E extends Edge<V>,EX extends Exception> extends MultiGraph<V,E,EX> {
 
     /**
-     * Gets the edges from the provided vertex.  The vertex must be part of this
-     * graph, and the results are undefined if it is not.
+     * {@inheritDoc}
+     *
+     * A graph only allows unique combinations of from and to vertices.
      */
-    Set<E> getEdgesFrom(V from);
-
-    /**
-     * Gets the edges to the provided vertex.  The vertex must be part of this
-     * graph, and the results are undefined if it is not.
-     */
-    Set<E> getEdgesTo(V to);
-
-    /**
-     * Gets all edges for this graph.
-     */
-    Set<E> getEdges();
-
-    /**
-     * TODO: http://en.wikipedia.org/wiki/Graph_(mathematics)#Weighted_graph
-     */
-    
+    @Override
+    Set<E> getEdgesFrom(V from) throws EX;
 }

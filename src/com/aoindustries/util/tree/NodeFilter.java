@@ -20,23 +20,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.tree;
+package com.aoindustries.util.tree;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 
 /**
- * An abstract structure for trees.  Each tree may have multiple roots.
+ * Filters may be applied while copying trees.
  *
  * @author  AO Industries, Inc.
 */
-public interface Tree<E> {
+public interface NodeFilter<E> {
 
-    /**
-     * Gets the list of root nodes.  Each root node should have a
-     * <code>null</code> parent.  If there are no roots, should
-     * return an empty list, not null.
-     */
-    List<Node<E>> getRootNodes() throws IOException, SQLException;
+    boolean isNodeFiltered(Node<E> node) throws IOException, SQLException;
 }

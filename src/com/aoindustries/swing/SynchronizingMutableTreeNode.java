@@ -22,8 +22,8 @@
  */
 package com.aoindustries.swing;
 
-import com.aoindustries.tree.Node;
-import com.aoindustries.tree.Tree;
+import com.aoindustries.util.tree.Node;
+import com.aoindustries.util.tree.Tree;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;

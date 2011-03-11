@@ -22,14 +22,13 @@
  */
 package com.aoindustries.sql;
 
-import com.aoindustries.graph.BackConnectedDirectedGraphVertex;
 import com.aoindustries.table.IndexType;
 import com.aoindustries.util.AutoGrowArrayList;
-import com.aoindustries.util.Collections;
+import com.aoindustries.util.AoCollections;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -40,7 +39,7 @@ import java.util.TreeMap;
  *
  * @author  AO Industries, Inc.
  */
-public class Table implements BackConnectedDirectedGraphVertex<Table,SQLException> {
+public class Table {
 
     private final Schema schema;
     private final String name;
@@ -131,7 +130,7 @@ public class Table implements BackConnectedDirectedGraphVertex<Table,SQLExceptio
                 } finally {
                     results.close();
                 }
-                getColumnMapCache = Collections.optimalUnmodifiableSortedMap(newColumnMap);
+                getColumnMapCache = AoCollections.optimalUnmodifiableSortedMap(newColumnMap);
             }
             return getColumnMapCache;
         }
@@ -170,7 +169,7 @@ public class Table implements BackConnectedDirectedGraphVertex<Table,SQLExceptio
                 for(int i=0; i<newColumns.size(); i++) {
                     if(newColumns.get(i)==null) throw new SQLException("Missing ordinal position: "+(i+1));
                 }
-                getColumnsCache = Collections.optimalUnmodifiableList(newColumns);
+                getColumnsCache = AoCollections.optimalUnmodifiableList(newColumns);
             }
             return getColumnsCache;
         }
@@ -232,19 +231,18 @@ public class Table implements BackConnectedDirectedGraphVertex<Table,SQLExceptio
         }
     }
 
-    private final Object getConnectedVerticesLock = new Object();
-    private Set<? extends Table> getConnectedVerticesCache;
+    private final Object getImportedTablesLock = new Object();
+    private Set<? extends Table> getImportedTablesCache;
 
     /**
      * Gets the set of tables that this table depends on.
      *
      * This is based on getImportedKeys
      */
-    @Override
-    public Set<? extends Table> getConnectedVertices() throws SQLException {
-        synchronized(getConnectedVerticesLock) {
-            if(getConnectedVerticesCache==null) {
-                Set<Table> newConnectedVertices = new HashSet<Table>();
+    public Set<? extends Table> getImportedTables() throws SQLException {
+        synchronized(getImportedTablesLock) {
+            if(getImportedTablesCache==null) {
+                Set<Table> newImportedTables = new LinkedHashSet<Table>();
                 Catalog catalog = schema.getCatalog();
                 DatabaseMetaData metaData = catalog.getMetaData();
                 ResultSet results = schema.getCatalog().getMetaData().getMetaData().getImportedKeys(schema.getCatalog().getName(), schema.getName(), name);
@@ -252,7 +250,7 @@ public class Table implements BackConnectedDirectedGraphVertex<Table,SQLExceptio
                     while(results.next()) {
                         String pkCat = results.getString("PKTABLE_CAT");
                         Catalog pkCatalog = pkCat==null ? catalog : metaData.getCatalog(pkCat);
-                        newConnectedVertices.add(
+                        newImportedTables.add(
                             pkCatalog
                             .getSchema(results.getString("PKTABLE_SCHEM"))
                             .getTable(results.getString("PKTABLE_NAME"))
@@ -261,25 +259,24 @@ public class Table implements BackConnectedDirectedGraphVertex<Table,SQLExceptio
                 } finally {
                     results.close();
                 }
-                getConnectedVerticesCache = Collections.optimalUnmodifiableSet(newConnectedVertices);
+                getImportedTablesCache = AoCollections.optimalUnmodifiableSet(newImportedTables);
             }
-            return getConnectedVerticesCache;
+            return getImportedTablesCache;
         }
     }
 
-    private final Object getBackConnectedVerticesLock = new Object();
-    private Set<? extends Table> getBackConnectedVerticesCache;
+    private final Object getExportedTablesLock = new Object();
+    private Set<? extends Table> getExportedTablesCache;
 
     /**
      * Gets the set of tables that depend on this table.
      *
      * This is based on getExportedKeys
      */
-    @Override
-    public Set<? extends Table> getBackConnectedVertices() throws SQLException {
-        synchronized(getBackConnectedVerticesLock) {
-            if(getBackConnectedVerticesCache==null) {
-                Set<Table> newBackConnectedVertices = new HashSet<Table>();
+    public Set<? extends Table> getExportedTables() throws SQLException {
+        synchronized(getExportedTablesLock) {
+            if(getExportedTablesCache==null) {
+                Set<Table> newExportedTables = new LinkedHashSet<Table>();
                 Catalog catalog = schema.getCatalog();
                 DatabaseMetaData metaData = catalog.getMetaData();
                 ResultSet results = schema.getCatalog().getMetaData().getMetaData().getExportedKeys(schema.getCatalog().getName(), schema.getName(), name);
@@ -287,7 +284,7 @@ public class Table implements BackConnectedDirectedGraphVertex<Table,SQLExceptio
                     while(results.next()) {
                         String fkCat = results.getString("FKTABLE_CAT");
                         Catalog fkCatalog = fkCat==null ? catalog : metaData.getCatalog(fkCat);
-                        newBackConnectedVertices.add(
+                        newExportedTables.add(
                             fkCatalog
                             .getSchema(results.getString("FKTABLE_SCHEM"))
                             .getTable(results.getString("FKTABLE_NAME"))
@@ -296,9 +293,9 @@ public class Table implements BackConnectedDirectedGraphVertex<Table,SQLExceptio
                 } finally {
                     results.close();
                 }
-                getBackConnectedVerticesCache = Collections.optimalUnmodifiableSet(newBackConnectedVertices);
+                getExportedTablesCache = AoCollections.optimalUnmodifiableSet(newExportedTables);
             }
-            return getBackConnectedVerticesCache;
+            return getExportedTablesCache;
         }
     }
 }

@@ -22,10 +22,14 @@
  */
 package com.aoindustries.sql;
 
-import com.aoindustries.util.Collections;
+import com.aoindustries.util.AoCollections;
+import com.aoindustries.util.graph.Edge;
+import com.aoindustries.util.graph.SymmetricGraph;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -84,7 +88,7 @@ public class Catalog {
                 } finally {
                     results.close();
                 }
-                getSchemasCache = Collections.optimalUnmodifiableSortedMap(newSchemas);
+                getSchemasCache = AoCollections.optimalUnmodifiableSortedMap(newSchemas);
             }
             return getSchemasCache;
         }
@@ -99,5 +103,40 @@ public class Catalog {
         Schema schema = getSchemas().get(name);
         if(schema==null) throw new NoRowException();
         return schema;
+    }
+
+    /**
+     * Gets a graph view of the imported/exported table relationships within this catalog.
+     *
+     * TODO: Check is symmetric in JUnit test
+     */
+    public SymmetricGraph<Table,Edge<Table>,SQLException> getForeignKeyGraph() {
+        return new SymmetricGraph<Table, Edge<Table>, SQLException>() {
+
+            @Override
+            public Set<Table> getVertices() throws SQLException {
+                Set<Table> vertices = new LinkedHashSet<Table>();
+                for(Schema schema : getSchemas().values()) {
+                    vertices.addAll(schema.getTables().values());
+                }
+                return AoCollections.optimalUnmodifiableSet(vertices);
+            }
+
+            @Override
+            public Set<Edge<Table>> getEdgesFrom(Table from) throws SQLException {
+                Set<? extends Table> tos = from.getImportedTables();
+                Set<Edge<Table>> edges = new LinkedHashSet<Edge<Table>>(tos.size()*4/3+1);
+                for(Table to : tos) edges.add(new Edge<Table>(from, to));
+                return AoCollections.optimalUnmodifiableSet(edges);
+            }
+
+            @Override
+            public Set<Edge<Table>> getEdgesTo(Table to) throws SQLException {
+                Set<? extends Table> froms = to.getExportedTables();
+                Set<Edge<Table>> edges = new LinkedHashSet<Edge<Table>>(froms.size()*4/3+1);
+                for(Table from : froms) edges.add(new Edge<Table>(from, to));
+                return AoCollections.optimalUnmodifiableSet(edges);
+            }
+        };
     }
 }

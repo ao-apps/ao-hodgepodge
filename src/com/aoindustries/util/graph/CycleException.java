@@ -29,30 +29,35 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class GraphCycleException extends GraphException {
+public class CycleException extends GraphException {
 
     // TODO: private static final long serialVersionUID = -8580121545915979177L;
 
-    private static String getMessage(List<? extends SymmetricDirectedGraphVertex<?,?>> vertices) {
+    private static String getMessage(List<?> vertices) {
         StringBuilder SB = new StringBuilder();
         SB.append("Cycle exists:\n");
-        for(SymmetricDirectedGraphVertex<?,?> v : vertices) {
+        for(Object v : vertices) {
             SB.append("    ").append(v.getClass().getName()).append("(\"").append(v.toString()).append("\")\n");
         }
         return SB.toString();
     }
 
-    private final List<? extends SymmetricDirectedGraphVertex<?,?>> vertices;
+    private final List<?> vertices;
 
-    GraphCycleException(List<? extends SymmetricDirectedGraphVertex<?,?>> vertices) {
+    /**
+     * No defensive copy is made.
+     */
+    CycleException(List<?> vertices) {
         super(getMessage(vertices));
+        if(vertices.size()<2) throw new IllegalArgumentException("Cycle must have at least two vertices (could be the same vertex)");
+        if(!vertices.get(0).equals(vertices.get(vertices.size()-1))) throw new IllegalArgumentException("Cycle must start and end on the same vertex");
         this.vertices = vertices;
     }
 
     /**
      * Gets all vertices that are part of the cycle in the order they create the cycle.
      */
-    public List<? extends SymmetricDirectedGraphVertex<?,?>> getVertices() {
+    public List<?> getVertices() {
         return vertices;
     }
 }

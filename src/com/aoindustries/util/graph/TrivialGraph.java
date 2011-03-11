@@ -22,10 +22,7 @@
  */
 package com.aoindustries.util.graph;
 
-import com.aoindustries.util.AoCollections;
-import java.util.AbstractCollection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -33,33 +30,17 @@ import java.util.Set;
  *
  * @author  AO Industries, Inc.
  */
-public class TrivialGraph<V,E extends Edge<V>> extends AbstractCollection<V> implements Graph<V,E> {
+public class TrivialGraph<V,E extends Edge<V>,EX extends Exception> implements SymmetricGraph<V,E,EX> {
 
-    private final V vertex;
-    
+    private final Set<V> vertices;
+
     public TrivialGraph(V vertex) {
-        this.vertex = vertex;
-    }
-
-    // <editor-fold desc="Collection Implementation">
-    @Override
-    public Iterator<V> iterator() {
-        return AoCollections.singletonIterator(vertex);
+        this.vertices = Collections.singleton(vertex);
     }
 
     @Override
-    public int size() {
-        return 1;
-    }
-    // </editor-fold>
-
-    // <editor-fold desc="Graph Implementation">
-    /**
-     * Always consistent.
-     */
-    @Override
-    public void checkGraph() {
-        // Nothing to do
+    public Set<V> getVertices() {
+        return vertices;
     }
 
     @Override
@@ -71,10 +52,4 @@ public class TrivialGraph<V,E extends Edge<V>> extends AbstractCollection<V> imp
     public Set<E> getEdgesTo(V to) {
         return Collections.emptySet();
     }
-
-    @Override
-    public Set<E> getEdges() {
-        return Collections.emptySet();
-    }
-    // </editor-fold>
 }
