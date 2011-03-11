@@ -29,7 +29,7 @@ package com.aoindustries.util.graph;
  */
 public class GraphException extends RuntimeException {
 
-    // TODO: private static final long serialVersionUID = -7109710596491737582L;
+    private static final long serialVersionUID = -1829212989642756232L;
 
     public GraphException() {
         super();

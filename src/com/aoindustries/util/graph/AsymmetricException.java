@@ -33,7 +33,7 @@ package com.aoindustries.util.graph;
  */
 public class AsymmetricException extends GraphException {
 
-    // TODO: private static final long serialVersionUID = 7431301822226465307L;
+    private static final long serialVersionUID = 7461271328813491659L;
 
     private static String getMessage(
         Object vertex,

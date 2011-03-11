@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class CycleException extends GraphException {
 
-    // TODO: private static final long serialVersionUID = -8580121545915979177L;
+    private static final long serialVersionUID = 7713106090763335656L;
 
     private static String getMessage(List<?> vertices) {
         StringBuilder SB = new StringBuilder();
