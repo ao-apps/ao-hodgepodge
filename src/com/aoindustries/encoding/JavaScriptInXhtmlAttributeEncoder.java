@@ -113,6 +113,7 @@ public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
         super(out);
     }
 
+    @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.JAVASCRIPT
@@ -120,6 +121,7 @@ public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
         ;
     }
 
+    @Override
     public MediaType getValidMediaOutputType() {
         return MediaType.XHTML;
     }
