@@ -377,7 +377,6 @@ public class AoCollections {
         };
     }
 
-    /*
     private static void test() {
         List<Object> list = new ArrayList<Object>();
         list.add("One");
@@ -394,5 +393,5 @@ public class AoCollections {
 
     public static void main(String[] args) {
         for(int c=0;c<30;c++) test();
-    }*/
+    }
 }
