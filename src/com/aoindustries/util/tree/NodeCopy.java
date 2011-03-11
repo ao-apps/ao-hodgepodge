@@ -92,10 +92,12 @@ public class NodeCopy<E> implements Node<E> {
         }
     }
 
+    @Override
     public List<Node<E>> getChildren() {
         return children;
     }
 
+    @Override
     public E getValue() {
         return value;
     }

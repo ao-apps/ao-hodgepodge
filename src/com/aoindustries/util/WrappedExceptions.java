@@ -47,7 +47,7 @@ public class WrappedExceptions extends RuntimeException {
         for(Throwable cause : causes) {
             if(cause!=null && !uniqueCauses.contains(cause)) uniqueCauses.add(cause);
         }
-        return Collections.unmodifiableList(uniqueCauses);
+        return AoCollections.optimalUnmodifiableList(uniqueCauses);
     }
 
     private final List<Throwable> causes;

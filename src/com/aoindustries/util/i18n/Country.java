@@ -22,8 +22,8 @@
  */
 package com.aoindustries.util.i18n;
 
+import com.aoindustries.util.AoCollections;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -559,7 +559,7 @@ public enum Country {
 
     private Country(int since, String[] states) {
         this.since = since;
-        this.states = Collections.unmodifiableList(Arrays.asList(states));
+        this.states = AoCollections.optimalUnmodifiableList(Arrays.asList(states));
     }
 
     /**

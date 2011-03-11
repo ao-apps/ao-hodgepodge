@@ -22,8 +22,8 @@
  */
 package com.aoindustries.util.i18n;
 
+import com.aoindustries.util.AoCollections;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -57,7 +57,7 @@ public class EditableResourceBundleSet {
         SortedSet<Locale> modifiableSet = new TreeSet<Locale>(LocaleComparator.getInstance());
         modifiableSet.addAll(locales);
         this.baseName = baseName;
-        this.locales = Collections.unmodifiableSortedSet(modifiableSet);
+        this.locales = AoCollections.optimalUnmodifiableSortedSet(modifiableSet);
     }
 
     /**

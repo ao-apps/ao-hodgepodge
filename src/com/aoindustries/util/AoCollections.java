@@ -23,16 +23,21 @@
 package com.aoindustries.util;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 
 /**
  * General-purpose collection utilities and constants.
@@ -193,18 +198,45 @@ public class AoCollections {
         }
     }
 
+    private static final Class<?>[] unmodifiableCollectionClasses = {
+        // Collection
+        Collections.unmodifiableCollection(Collections.emptyList()).getClass(),
+
+        // List
+        Collections.singletonList(null).getClass(),
+        Collections.unmodifiableList(new ArrayList<Object>(0)).getClass(), // RandomAccess
+        Collections.unmodifiableList(new LinkedList<Object>()).getClass(), // Sequential
+
+        // Set
+        Collections.singleton(null).getClass(),
+        Collections.unmodifiableSet(Collections.emptySet()).getClass(),
+
+        // SortedSet
+        SingletonSortedSet.class,
+        Collections.unmodifiableSortedSet(emptySortedSet()).getClass(),
+    };
+
     /**
      * Gets the optimal implementation for unmodifiable collection.
+     * If the collection is already unmodifiable, returns the same collection.
      * If collection is empty, uses <code>Collections.emptyList</code>.
      * If collection has one element, uses <code>Collections.singletonList</code>.
      * Otherwise, wraps the collection with <code>Collections.unmodifiableCollection</code>.
      */
-    public static <T> Collection<T> optimalUnmodifiableCollection(Collection<? extends T> collection) {
+    public static <T> Collection<T> optimalUnmodifiableCollection(Collection<T> collection) {
         int size = collection.size();
         if(size==0) return java.util.Collections.emptyList();
+        Class<?> clazz = collection.getClass();
+        for(int i=0, len=unmodifiableCollectionClasses.length; i<len; i++) if(unmodifiableCollectionClasses[i]==clazz) return collection;
         if(size==1) return java.util.Collections.singletonList(collection.iterator().next());
         return java.util.Collections.unmodifiableCollection(collection);
     }
+
+    private static final Class<?>[] unmodifiableListClasses = {
+        Collections.singletonList(null).getClass(),
+        Collections.unmodifiableList(new ArrayList<Object>(0)).getClass(), // RandomAccess
+        Collections.unmodifiableList(new LinkedList<Object>()).getClass() // Sequential
+    };
 
     /**
      * Gets the optimal implementation for unmodifiable list.
@@ -212,12 +244,25 @@ public class AoCollections {
      * If list has one element, uses <code>Collections.singletonList</code>.
      * Otherwise, wraps the list with <code>Collections.unmodifiableList</code>.
      */
-    public static <T> List<T> optimalUnmodifiableList(List<? extends T> list) {
+    public static <T> List<T> optimalUnmodifiableList(List<T> list) {
         int size = list.size();
         if(size==0) return java.util.Collections.emptyList();
+        Class<?> clazz = list.getClass();
+        for(int i=0, len=unmodifiableListClasses.length; i<len; i++) if(unmodifiableListClasses[i]==clazz) return list;
         if(size==1) return java.util.Collections.singletonList(list.get(0));
         return java.util.Collections.unmodifiableList(list);
     }
+
+    private static final Class<?>[] unmodifiableSetClasses = {
+        // Set
+        Collections.singleton(null).getClass(),
+        Collections.unmodifiableSet(Collections.emptySet()).getClass(),
+        Collections.unmodifiableMap(Collections.emptyMap()).entrySet().getClass(),
+
+        // SortedSet
+        SingletonSortedSet.class,
+        Collections.unmodifiableSortedSet(emptySortedSet()).getClass()
+    };
 
     /**
      * Gets the optimal implementation for unmodifiable set.
@@ -225,12 +270,20 @@ public class AoCollections {
      * If set has one element, uses <code>Collections.singleton</code>.
      * Otherwise, wraps the set with <code>Collections.unmodifiableSet</code>.
      */
-    public static <T> Set<T> optimalUnmodifiableSet(Set<? extends T> set) {
+    public static <T> Set<T> optimalUnmodifiableSet(Set<T> set) {
         int size = set.size();
         if(size==0) return java.util.Collections.emptySet();
+        Class<?> clazz = set.getClass();
+        for(int i=0, len=unmodifiableSetClasses.length; i<len; i++) if(unmodifiableSetClasses[i]==clazz) return set;
         if(size==1) return java.util.Collections.singleton(set.iterator().next());
         return java.util.Collections.unmodifiableSet(set);
     }
+
+    private static final Class<?>[] unmodifiableSortedSetClasses = {
+        // SortedSet
+        SingletonSortedSet.class,
+        Collections.unmodifiableSortedSet(emptySortedSet()).getClass()
+    };
 
     /**
      * Gets the optimal implementation for unmodifiable sorted set.
@@ -241,9 +294,21 @@ public class AoCollections {
     public static <T> SortedSet<T> optimalUnmodifiableSortedSet(SortedSet<T> sortedSet) {
         int size = sortedSet.size();
         if(size==0) return emptySortedSet();
+        Class<?> clazz = sortedSet.getClass();
+        for(int i=0, len=unmodifiableSortedSetClasses.length; i<len; i++) if(unmodifiableSortedSetClasses[i]==clazz) return sortedSet;
         if(size==1) return singletonSortedSet(sortedSet.first());
         return java.util.Collections.unmodifiableSortedSet(sortedSet);
     }
+
+    private static final Class<?>[] unmodifiableMapClasses = {
+        // Map
+        Collections.emptyMap().getClass(),
+        Collections.singletonMap(null, null).getClass(),
+        Collections.unmodifiableMap(Collections.emptyMap()).getClass(),
+
+        // SortedMap
+        Collections.unmodifiableSortedMap(new TreeMap<Object,Object>()).getClass()
+    };
 
     /**
      * Gets the optimal implementation for unmodifiable map.
@@ -251,9 +316,11 @@ public class AoCollections {
      * If map has one element, uses <code>Collections.singletonMap</code>.
      * Otherwise, wraps the map with <code>Collections.unmodifiableMap</code>.
      */
-    public static <K,V> Map<K,V> optimalUnmodifiableMap(Map<? extends K, ? extends V> map) {
+    public static <K,V> Map<K,V> optimalUnmodifiableMap(Map<K,V> map) {
         int size = map.size();
         if(size==0) return java.util.Collections.emptyMap();
+        Class<?> clazz = map.getClass();
+        for(int i=0, len=unmodifiableMapClasses.length; i<len; i++) if(unmodifiableMapClasses[i]==clazz) return map;
         if(size==1) {
             Map.Entry<? extends K,? extends V> entry = map.entrySet().iterator().next();
             return java.util.Collections.singletonMap(entry.getKey(), entry.getValue());
@@ -261,15 +328,21 @@ public class AoCollections {
         return java.util.Collections.unmodifiableMap(map);
     }
 
+    private static final Class<?>[] unmodifiableSortedMapClasses = {
+        Collections.unmodifiableSortedMap(new TreeMap<Object,Object>()).getClass()
+    };
+
     /**
      * Gets the optimal implementation for unmodifiable sorted map.
      * If sorted map is empty, uses <code>emptySortedMap</code>.
      * If sorted map has one element, uses <code>singletonSortedMap</code>.
      * Otherwise, wraps the sorted map with <code>Collections.unmodifiableSortedMap</code>.
      */
-    public static <K,V> SortedMap<K,V> optimalUnmodifiableSortedMap(SortedMap<K, ? extends V> sortedMap) {
+    public static <K,V> SortedMap<K,V> optimalUnmodifiableSortedMap(SortedMap<K,V> sortedMap) {
         // TODO: int size = sortedMap.size();
         // TODO: if(size==0) return emptySortedMap();
+        Class<?> clazz = sortedMap.getClass();
+        for(int i=0, len=unmodifiableSortedMapClasses.length; i<len; i++) if(unmodifiableSortedMapClasses[i]==clazz) return sortedMap;
         // TODO: if(size==1) {
         // TODO:     K key = sortedMap.firstKey();
         // TODO:     return singletonSortedMap(key, sortedMap.get(key));
@@ -303,4 +376,23 @@ public class AoCollections {
             }
         };
     }
+
+    /*
+    private static void test() {
+        List<Object> list = new ArrayList<Object>();
+        list.add("One");
+        list.add("Two");
+        list = optimalUnmodifiableList(list);
+        // Collection
+        long startTime = System.currentTimeMillis();
+        for(int c=0;c<100000000;c++) {
+            optimalUnmodifiableList(list);
+        }
+        long endTime = System.currentTimeMillis() - startTime;
+        System.out.println("    Finished optimalUnmodifiableCollection in "+BigDecimal.valueOf(endTime, 3)+" sec");
+    }
+
+    public static void main(String[] args) {
+        for(int c=0;c<30;c++) test();
+    }*/
 }

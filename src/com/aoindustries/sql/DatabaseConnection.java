@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.IntArrayList;
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.LongArrayList;
@@ -47,7 +48,6 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -484,10 +484,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
                     List<T> list=new ArrayList<T>();
                     while(results.next()) list.add(constructor.newInstance(results));
-                    int size = list.size();
-                    if(size==0) return Collections.emptyList();
-                    else if(size==1) return Collections.singletonList(list.get(0));
-                    else return list;
+                    return AoCollections.optimalUnmodifiableList(list);
                 } finally {
                     results.close();
                 }
@@ -528,10 +525,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 List<T> list=new ArrayList<T>();
                 while(results.next()) list.add(objectFactory.createObject(results));
-                int size = list.size();
-                if(size==0) return Collections.emptyList();
-                else if(size==1) return Collections.singletonList(list.get(0));
-                else return list;
+                return AoCollections.optimalUnmodifiableList(list);
             } finally {
                 results.close();
             }
@@ -645,10 +639,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 List<Short> list = new ArrayList<Short>();
                 while(results.next()) list.add(results.getShort(1));
-                int size = list.size();
-                if(size==0) return Collections.emptyList();
-                else if(size==1) return Collections.singletonList(list.get(0));
-                else return list;
+                return AoCollections.optimalUnmodifiableList(list);
             } finally {
                 results.close();
             }
@@ -723,10 +714,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 List<String> list = new ArrayList<String>();
                 while(results.next()) list.add(results.getString(1));
-                int size = list.size();
-                if(size==0) return Collections.emptyList();
-                else if(size==1) return Collections.singletonList(list.get(0));
-                else return list;
+                return AoCollections.optimalUnmodifiableList(list);
             } finally {
                 results.close();
             }

@@ -44,7 +44,7 @@ public class HashCodeComparator implements Comparator<Object>, Serializable {
     }
 
     private Object readResolve() {
-        return getInstance();
+        return singleton;
     }
 
     @Override

@@ -58,10 +58,18 @@ public class ArraySet<E> implements Set<E>, Serializable {
 
     private final ArrayList<E> elements;
 
+    /**
+     * @deprecated  This is for convention only, please provide a previously sorted ArrayList for best performance.
+     */
+    @Deprecated
     public ArraySet() {
         this.elements = new ArrayList<E>();
     }
 
+    /**
+     * @deprecated  This is for convention only, please provide a previously sorted ArrayList for best performance.
+     */
+    @Deprecated
     public ArraySet(int initialCapacity) {
         this.elements = new ArrayList<E>(initialCapacity);
     }
@@ -75,6 +83,10 @@ public class ArraySet<E> implements Set<E>, Serializable {
         worst=GrowthFunction.QUADRATIC
     )
      */
+    /**
+     * @deprecated  This is for convention only, please provide a previously sorted ArrayList for best performance.
+     */
+    @Deprecated
     public ArraySet(Collection<? extends E> c) {
         this.elements = new ArrayList<E>(c.size());
         addAll(c);
