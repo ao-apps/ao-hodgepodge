@@ -391,7 +391,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 raf.readFully(buff, 0, inBytes);
                 if(sectorEnd>oldCapacity) {
                     // Old capacity too small, add to oldWriteCache if can't assume all zeros
-                    if(sector<oldCapacity || !com.aoindustries.util.Arrays.allEquals(buff, 0, inBytes, (byte)0)) {
+                    if(sector<oldCapacity || !com.aoindustries.util.AoArrays.allEquals(buff, 0, inBytes, (byte)0)) {
                         if(inBytes<sectorSize) Arrays.fill(buff, sectorSize-inBytes, sectorSize, (byte)0);
                         oldWriteCache.put(sector, buff);
                         buff = new byte[sectorSize];
@@ -399,7 +399,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 } else {
                     // Read old bytes
                     PersistentCollections.readFully(oldIn, oldBuff, 0, inBytes);
-                    if(!com.aoindustries.util.Arrays.equals(buff, oldBuff, 0, inBytes)) {
+                    if(!com.aoindustries.util.AoArrays.equals(buff, oldBuff, 0, inBytes)) {
                         // Not equal, add to oldWriteCache
                         if(inBytes<sectorSize) Arrays.fill(buff, sectorSize-inBytes, sectorSize, (byte)0);
                         oldWriteCache.put(sector, buff);
@@ -760,7 +760,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                         System.arraycopy(buff, off, oldCached, (int)(position-sector), bytesToWrite);
                     } else {
                         // Only add to current cache when data changed (save flash writes)
-                        if(!com.aoindustries.util.Arrays.equals(buff, off, oldCached, (int)(position-sector), bytesToWrite)) {
+                        if(!com.aoindustries.util.AoArrays.equals(buff, off, oldCached, (int)(position-sector), bytesToWrite)) {
                             markFirstWriteTime();
                             currentWriteCache.put(sector, oldCached); // Shares the byte[] buffer
                             // Update cache only (do not write-through)
@@ -795,7 +795,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                         }
                     }
                     // Only add to caches when data changed (save flash writes)
-                    if(!com.aoindustries.util.Arrays.equals(buff, off, readBuff, (int)(position-sector), bytesToWrite)) {
+                    if(!com.aoindustries.util.AoArrays.equals(buff, off, readBuff, (int)(position-sector), bytesToWrite)) {
                         markFirstWriteTime();
                         currentWriteCache.put(sector, readBuff); // Shares the byte[] buffer
                         oldWriteCache.put(sector, readBuff); // Shares the byte[] buffer

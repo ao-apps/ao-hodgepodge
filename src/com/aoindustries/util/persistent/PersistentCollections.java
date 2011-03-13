@@ -169,7 +169,7 @@ public class PersistentCollections {
             if(count>0) {
                 raf.seek(position);
                 raf.readFully(buff, 0, (int)count);
-                if(!com.aoindustries.util.Arrays.equals(buff, zeros, 0, (int)count)) {
+                if(!com.aoindustries.util.AoArrays.equals(buff, zeros, 0, (int)count)) {
                     raf.seek(position);
                     raf.write(zeros, 0, (int)count);
                 }
@@ -202,7 +202,7 @@ public class PersistentCollections {
             if(count>0) {
                 byteBuffer.position(position);
                 byteBuffer.get(buff, 0, count);
-                if(!com.aoindustries.util.Arrays.equals(buff, zeros, 0, count)) {
+                if(!com.aoindustries.util.AoArrays.equals(buff, zeros, 0, count)) {
                     byteBuffer.position(position);
                     byteBuffer.put(zeros, 0, count);
                 }

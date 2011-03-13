@@ -23,7 +23,6 @@
 package com.aoindustries.util;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -211,6 +210,7 @@ public class AoCollections {
         Collections.singleton(null).getClass(),
         Collections.unmodifiableSet(Collections.emptySet()).getClass(),
         UnionMethodSet.class,
+        UnmodifiableArraySet.class,
 
         // SortedSet
         SingletonSortedSet.class,
@@ -260,6 +260,7 @@ public class AoCollections {
         Collections.unmodifiableSet(Collections.emptySet()).getClass(),
         Collections.unmodifiableMap(Collections.emptyMap()).entrySet().getClass(),
         UnionMethodSet.class,
+        UnmodifiableArraySet.class,
 
         // SortedSet
         SingletonSortedSet.class,

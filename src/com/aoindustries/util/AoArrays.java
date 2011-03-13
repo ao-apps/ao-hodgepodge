@@ -30,9 +30,9 @@ import org.checkthread.annotations.ThreadSafe;
  *
  * @author  AO Industries, Inc.
  */
-public class Arrays {
+public class AoArrays {
 
-    private Arrays() {
+    private AoArrays() {
     }
 
     public static final Serializable[] EMPTY_SERIALIZABLE_ARRAY = {};

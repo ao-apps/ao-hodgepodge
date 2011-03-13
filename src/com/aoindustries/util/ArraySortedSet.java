@@ -160,9 +160,12 @@ public class ArraySortedSet<E> extends AbstractSet<E> implements SortedSet<E>, S
     @Override
     @SuppressWarnings("unchecked")
     public boolean contains(Object o) {
+        if(o==null) return false;
         // TODO: How can we check if the passed-in object is of an unrelated, unexpected class
         // TODO: without passing around Class objects?
-        return binarySearch((E)o)>=0;
+        // TODO: with equals - just like ArraySet.
+        throw new RuntimeException("TODO: Finish method");
+        //return binarySearch((E)o)>=0;
     }
 
     @Override

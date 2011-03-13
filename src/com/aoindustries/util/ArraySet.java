@@ -216,7 +216,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
      */
     public boolean contains(Object o) {
         int size = elements.size();
-        if(size==0) return false;
+        if(size==0 || o==null) return false;
         if(size<BINARY_SEARCH_THRESHOLD) {
             // Simple search
             for(int i=0;i<size;i++) if(elements.get(i).equals(o)) return true;

@@ -49,7 +49,7 @@ import java.util.Set;
  */
 public class UnionMethodSet<E> extends AbstractSet<E> {
 
-    private static final Object[] NO_PARAMS = new Object[0];
+    static final Object[] NO_PARAMS = new Object[0];
 
     public static interface Method<E> {
 
@@ -201,7 +201,7 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
      */
     @Override
     public int size() {
-        throw new RuntimeException("TODO: Implement method");
+        throw new RuntimeException("TODO: Implement method with similar results as iterator()");
     }
 
     /**
