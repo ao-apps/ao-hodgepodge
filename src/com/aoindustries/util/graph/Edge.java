@@ -31,7 +31,9 @@ public class Edge<V> {
     protected final V to;
 
     public Edge(V from, V to) {
+        if(from==null) throw new IllegalArgumentException("from is null, to="+to);
         this.from = from;
+        if(to==null) throw new IllegalArgumentException("to is null, from="+from);
         this.to = to;
     }
 

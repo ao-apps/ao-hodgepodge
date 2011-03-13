@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -46,6 +46,7 @@ final public class ImageLoader implements ImageConsumer {
         this.logger=logger;
     }
 
+    @Override
     synchronized public void imageComplete(int status) {
         this.status|=status;
         notify();
@@ -68,10 +69,16 @@ final public class ImageLoader implements ImageConsumer {
         }
     }
 
+    @Override
     public void setColorModel(ColorModel mode) {}
+    @Override
     public void setDimensions(int width, int height) {}
+    @Override
     public void setHints(int flags) {}
+    @Override
     public void setPixels(int x, int y, int width, int height, ColorModel model, byte[] pixels, int offset, int scansize) {}
+    @Override
     public void setPixels(int x, int y, int width, int height, ColorModel model, int[] pixels, int offset, int scansize) {}
+    @Override
     public void setProperties(Hashtable properties) {}
 }
