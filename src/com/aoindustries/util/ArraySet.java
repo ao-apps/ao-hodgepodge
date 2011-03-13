@@ -23,10 +23,10 @@
 package com.aoindustries.util;
 
 import java.io.Serializable;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 
 /**
  * <p>
@@ -52,7 +52,7 @@ import java.util.Set;
  *
  * @author  AO Industries, Inc.
  */
-public class ArraySet<E> implements Set<E>, Serializable {
+public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -60,6 +60,41 @@ public class ArraySet<E> implements Set<E>, Serializable {
      * May more forcefully disable asserts for benchmarking.
      */
     private static final boolean ASSERTIONS_ENABLED = true;
+
+    /**
+     * The number of elements at which a linear search switches to a binary search.
+     */
+    private static final int BINARY_SEARCH_THRESHOLD = 13; // The point where the O(n) line and O(log n) curves intersect.
+
+    // Used to find BINARY_SEARCH_THRESHOLD
+    /*
+    private static void test() {
+        final int numSearches = 10000;
+        final int searchPasses = 100;
+        Integer[] searches = new Integer[numSearches];
+        Random random = new Random();
+        for(int size=0;size<=32;size++) {
+            ArrayList<Integer> values = new ArrayList<Integer>(size);
+            int range = 0;
+            for(int i=0; i<size; i++) {
+                values.add(range);
+                range += 1 + random.nextInt(10);
+            }
+            ArraySet<Integer> set = new ArraySet<Integer>(values);
+            for(int i=0;i<numSearches;i++) searches[i] = range==0 ? 0 : random.nextInt(range);
+            long startTime = System.currentTimeMillis();
+            for(int pass=0; pass<searchPasses; pass++) {
+                for(int i=0;i<numSearches;i++) set.contains(searches[i]);
+            }
+            long endTime = System.currentTimeMillis();
+            System.out.println(size+":"+(endTime-startTime));
+        }
+    }
+
+    public static void main(String[] args) {
+        for(int c=0;c<10;c++) test();
+    }
+     //*/
 
     private final ArrayList<E> elements;
 
@@ -182,23 +217,28 @@ public class ArraySet<E> implements Set<E>, Serializable {
     public boolean contains(Object o) {
         int size = elements.size();
         if(size==0) return false;
-        int index = binarySearch((E)o);
-        if(index<0) return false;
-        // Matches at index?
-        E elem = elements.get(index);
-        if(elem.equals(o)) return true;
-        // Look forward until different hashCode
-        int oHash = o.hashCode();
-        for(int i=index+1; i<size; i++) {
-            elem = elements.get(i);
-            if(elem.hashCode()!=oHash) break;
+        if(size<BINARY_SEARCH_THRESHOLD) {
+            // Simple search
+            for(int i=0;i<size;i++) if(elements.get(i).equals(o)) return true;
+        } else {
+            int index = binarySearch((E)o);
+            if(index<0) return false;
+            // Matches at index?
+            E elem = elements.get(index);
             if(elem.equals(o)) return true;
-        }
-        // Look backward until different hashCode
-        for(int i=index-1; i>=0; i--) {
-            elem = elements.get(i);
-            if(elem.hashCode()!=oHash) break;
-            if(elem.equals(o)) return true;
+            // Look forward until different hashCode
+            int oHash = o.hashCode();
+            for(int i=index+1; i<size; i++) {
+                elem = elements.get(i);
+                if(elem.hashCode()!=oHash) break;
+                if(elem.equals(o)) return true;
+            }
+            // Look backward until different hashCode
+            for(int i=index-1; i>=0; i--) {
+                elem = elements.get(i);
+                if(elem.hashCode()!=oHash) break;
+                if(elem.equals(o)) return true;
+            }
         }
         return false;
     }

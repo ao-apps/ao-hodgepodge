@@ -23,6 +23,7 @@
 package com.aoindustries.util;
 
 import java.io.Serializable;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -53,7 +54,7 @@ import java.util.SortedSet;
  *
  * @author  AO Industries, Inc.
  */
-public class ArraySortedSet<E> implements SortedSet<E>, Serializable {
+public class ArraySortedSet<E> extends AbstractSet<E> implements SortedSet<E>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
