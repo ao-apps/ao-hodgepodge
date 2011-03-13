@@ -38,6 +38,7 @@ import java.util.Set;
  * <ol>
  *   <li>All elements of the added sets are of the same exact class</li>
  *   <li>Objects of different classes are not equal.</li>
+ *   <li>No set will contain <code>null</code></li>
  *   <li>A set for a specific class may only be added once.</li>
  *   <li>Sets that have been added do not change after being added.</li>
  *   <li>Only sets will be added.</li>
@@ -47,6 +48,11 @@ import java.util.Set;
  * @author  AO Industries, Inc.
  */
 public class UnionClassSet<E> extends AbstractSet<E> {
+
+    /**
+     * May disable assertions more completely for benchmarking
+     */
+    private static final boolean ENABLE_ASSERTIONS = true;
 
     private int size = 0;
 
@@ -133,10 +139,17 @@ public class UnionClassSet<E> extends AbstractSet<E> {
         else throw new UnsupportedOperationException("May only add sets");
     }
 
+    private static boolean allSameClass(Class<?> clazz, Iterator<?> iter) {
+        while(iter.hasNext()) if(iter.next().getClass()!=clazz) return false;
+        return true;
+    }
+
     public boolean addAll(Set<? extends E> set) {
         int setSize = set.size();
         if(setSize==0) return false;
-        Class<?> clazz = set.iterator().next().getClass();
+        Iterator<? extends E> iter = set.iterator();
+        Class<?> clazz = iter.next().getClass();
+        if(ENABLE_ASSERTIONS) assert allSameClass(clazz, iter) : "Not all objects are of the same exact class";
         if(added.containsKey(clazz)) throw new IllegalArgumentException("Set already added for class: "+clazz);
         size += setSize;
         added.put(clazz, set);
