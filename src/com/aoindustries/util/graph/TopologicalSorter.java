@@ -63,6 +63,7 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
             if(
                 // Getting edges can be expensive, while checking visited should always be cheap
                 !visited.contains(n)
+                // This check is looking for starting nodes
                 && (isForward ? graph.getEdgesTo(n) : graph.getEdgesFrom(n)).isEmpty()
             ) {
                 topologicalSortVisit(n, L, visited, sequence);

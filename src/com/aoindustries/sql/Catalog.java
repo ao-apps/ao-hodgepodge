@@ -107,17 +107,28 @@ public class Catalog {
 
     /**
      * Gets a graph view of the imported/exported table relationships within this catalog.
-     *
-     * TODO: Check is symmetric in JUnit test
      */
     public SymmetricGraph<Table,Edge<Table>,SQLException> getForeignKeyGraph() {
+        return getForeignKeyGraph(null);
+    }
+
+    /**
+     * Gets a graph view of the imported/exported table relationships within this catalog.
+     *
+     * TODO: Check is symmetric in JUnit test
+     *
+     * @param the set of tables types or <code>null</code> for all types
+     */
+    public SymmetricGraph<Table,Edge<Table>,SQLException> getForeignKeyGraph(final Set<String> tableTypes) {
         return new SymmetricGraph<Table, Edge<Table>, SQLException>() {
 
             @Override
             public Set<Table> getVertices() throws SQLException {
                 Set<Table> vertices = new LinkedHashSet<Table>();
                 for(Schema schema : getSchemas().values()) {
-                    vertices.addAll(schema.getTables().values());
+                    for(Table table : schema.getTables().values()) {
+                        if(tableTypes==null || tableTypes.contains(table.getTableType())) vertices.add(table);
+                    }
                 }
                 return AoCollections.optimalUnmodifiableSet(vertices);
             }
@@ -126,7 +137,13 @@ public class Catalog {
             public Set<Edge<Table>> getEdgesFrom(Table from) throws SQLException {
                 Set<? extends Table> tos = from.getImportedTables();
                 Set<Edge<Table>> edges = new LinkedHashSet<Edge<Table>>(tos.size()*4/3+1);
-                for(Table to : tos) edges.add(new Edge<Table>(from, to));
+                for(Table to : tos) {
+                    if(
+                        tableTypes==null
+                        || tableTypes.contains(from.getTableType())
+                        || tableTypes.contains(to.getTableType())
+                    ) edges.add(new Edge<Table>(from, to));
+                }
                 return AoCollections.optimalUnmodifiableSet(edges);
             }
 
@@ -134,7 +151,13 @@ public class Catalog {
             public Set<Edge<Table>> getEdgesTo(Table to) throws SQLException {
                 Set<? extends Table> froms = to.getExportedTables();
                 Set<Edge<Table>> edges = new LinkedHashSet<Edge<Table>>(froms.size()*4/3+1);
-                for(Table from : froms) edges.add(new Edge<Table>(from, to));
+                for(Table from : froms) {
+                    if(
+                        tableTypes==null
+                        || tableTypes.contains(from.getTableType())
+                        || tableTypes.contains(to.getTableType())
+                    ) edges.add(new Edge<Table>(from, to));
+                }
                 return AoCollections.optimalUnmodifiableSet(edges);
             }
         };

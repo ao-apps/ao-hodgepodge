@@ -56,6 +56,11 @@ public class ArraySet<E> implements Set<E>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * May more forcefully disable asserts for benchmarking.
+     */
+    private static final boolean ASSERTIONS_ENABLED = true;
+
     private final ArrayList<E> elements;
 
     /**
@@ -133,7 +138,7 @@ public class ArraySet<E> implements Set<E>, Serializable {
     )
      */
     public ArraySet(ArrayList<E> elements) {
-        assert assertInOrderAndUnique(elements);
+        if(ASSERTIONS_ENABLED) assert assertInOrderAndUnique(elements);
         this.elements = elements;
     }
 
