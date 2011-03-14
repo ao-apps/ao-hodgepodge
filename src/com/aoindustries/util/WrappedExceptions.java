@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class WrappedExceptions extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     /**
      * Gets an unmodifiable, unique set of exceptions.

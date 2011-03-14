@@ -32,9 +32,9 @@ public interface Row {
     /**
      * Gets the data contained within one column in this row.
      *
-     * @param columnIndex the zero-based column index
+     * @param columnIndex the zero-based column ordinal
      */
-    Object getColumn(int columnIndex);
+    Object getColumn(int ordinal);
 
     /**
      * Gets the data contained within one column in this row.

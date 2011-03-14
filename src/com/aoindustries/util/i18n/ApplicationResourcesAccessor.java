@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ApplicationResourcesAccessor implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     /**
      * The maximum number of arguments allowed 

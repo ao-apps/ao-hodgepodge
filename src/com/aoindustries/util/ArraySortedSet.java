@@ -56,7 +56,7 @@ import java.util.SortedSet;
  */
 public class ArraySortedSet<E> extends AbstractSet<E> implements SortedSet<E>, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     private final Comparator<? super E> comparator;
     private final ArrayList<E> elements;

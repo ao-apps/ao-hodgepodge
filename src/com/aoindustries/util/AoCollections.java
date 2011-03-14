@@ -57,7 +57,7 @@ public class AoCollections {
 
     private static class EmptySortedSet extends AbstractSet<Object> implements SortedSet<Object>, Serializable {
 
-        private static final long serialVersionUID = 1L;
+        // TODO: private static final long serialVersionUID = 1L;
 
         @Override
         public Iterator<Object> iterator() {
@@ -126,7 +126,7 @@ public class AoCollections {
 
     private static class SingletonSortedSet<E> extends AbstractSet<E> implements SortedSet<E>, Serializable {
 
-        private static final long serialVersionUID = 1L;
+        // TODO: private static final long serialVersionUID = 1L;
 
         final private E element;
 

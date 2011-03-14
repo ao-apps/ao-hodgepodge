@@ -29,47 +29,50 @@ package com.aoindustries.table;
  */
 public class Column implements Comparable<Column> {
 
-    private final String columnName;
+    private final String name;
     private final IndexType indexType;
 
-    public Column(String columnName, IndexType indexType) {
-        this.columnName = columnName;
+    public Column(String name, IndexType indexType) {
+        this.name = name;
         this.indexType = indexType;
     }
 
+    /**
+     * Two column with the same name are equal.
+     */
     @Override
     public boolean equals(Object O) {
-        if(O==null) return false;
         if(!(O instanceof Column)) return false;
         Column other = (Column)O;
-        return
-            columnName.equals(other.columnName)
-            && indexType==other.indexType
-        ;
+        return name.equals(other.name);
     }
 
+    /**
+     * Hashed by column name only.
+     */
     @Override
     public int hashCode() {
-        return columnName.hashCode()*31 + indexType.hashCode();
+        return name.hashCode();
     }
 
+    /**
+     * Ordered by column name only.
+     */
     @Override
     public int compareTo(Column o) {
-        int diff = columnName.compareToIgnoreCase(o.columnName);
+        int diff = name.compareToIgnoreCase(o.name);
         if(diff!=0) return diff;
-        diff = columnName.compareTo(o.columnName);
-        if(diff!=0) return diff;
-        return indexType.compareTo(o.indexType);
+        return name.compareTo(o.name);
     }
 
     @Override
     public String toString() {
-        if(indexType!=IndexType.NONE) return columnName+" ("+indexType+')';
-        return columnName;
+        if(indexType!=IndexType.NONE) return name+" ("+indexType+')';
+        return name;
     }
     
-    public String getColumnName() {
-        return columnName;
+    public String getName() {
+        return name;
     }
 
     public IndexType getIndexType() {

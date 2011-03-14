@@ -37,7 +37,7 @@ import java.util.Arrays;
  */
 public class BigFraction extends Number implements Serializable, Comparable<BigFraction> {
 
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     private static final BigInteger
         ONE_HUNDRED = BigInteger.valueOf(100),

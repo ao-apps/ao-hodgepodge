@@ -254,7 +254,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         try {
             // Create a properties instance that sorts the output by keys (case-insensitive)
             Properties writer = new Properties() {
-                private static final long serialVersionUID = 1L;
+                // TODO: private static final long serialVersionUID = 1L;
                 @Override
                 public Enumeration<Object> keys() {
                     SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ENGLISH));

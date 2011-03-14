@@ -46,7 +46,7 @@ import javax.swing.tree.MutableTreeNode;
  */
 public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     public SynchronizingMutableTreeNode() {
         super();

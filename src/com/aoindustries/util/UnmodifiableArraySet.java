@@ -23,11 +23,11 @@
 package com.aoindustries.util;
 
 import java.io.Serializable;
+import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 /**
  * <p>
@@ -50,9 +50,9 @@ import java.util.Set;
  *
  * @author  AO Industries, Inc.
  */
-public class UnmodifiableArraySet<E> implements Set<E>, Serializable {
+public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     /**
      * May more forcefully disable asserts for benchmarking.

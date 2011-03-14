@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util;
 
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -39,7 +40,7 @@ import java.util.Set;
  *
  * @author  AO Industries, Inc.
  */
-public class UnionSet<E> implements Set<E> {
+public class UnionSet<E> extends AbstractSet<E> {
 
     /**
      * Any set added with fewer or equal to this many items will just be added to

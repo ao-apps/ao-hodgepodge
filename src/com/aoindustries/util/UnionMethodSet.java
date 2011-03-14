@@ -112,9 +112,9 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
             try {
                 return (E)method.invoke(target, NO_PARAMS);
             } catch(IllegalAccessException exc) {
-                throw new RuntimeException(exc);
+                throw new RuntimeException(target+"."+method+"()", exc);
             } catch(InvocationTargetException exc) {
-                throw new RuntimeException(exc);
+                throw new RuntimeException(target+"."+method+"()", exc);
             }
         }
 
@@ -154,9 +154,9 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
             try {
                 return (Set<E>)method.invoke(target, NO_PARAMS);
             } catch(IllegalAccessException exc) {
-                throw new RuntimeException(exc);
+                throw new RuntimeException(target+"."+method+"()", exc);
             } catch(InvocationTargetException exc) {
-                throw new RuntimeException(exc);
+                throw new RuntimeException(target+"."+method+"()", exc);
             }
         }
     }

@@ -36,7 +36,7 @@ import java.rmi.server.RMIClientSocketFactory;
  */
 public class RMIClientSocketFactoryTCP implements RMIClientSocketFactory, Serializable {
     
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     final private String localAddress;
 

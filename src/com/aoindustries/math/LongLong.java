@@ -366,7 +366,7 @@ public class LongLong extends Number implements Comparable<LongLong> {
         return valueOf(PersistentCollections.bufferToLong(bytes, 0), PersistentCollections.bufferToLong(bytes, 8));
     }
 
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     /**
      * Gets the high-order long.

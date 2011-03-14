@@ -32,7 +32,7 @@ import java.sql.SQLException;
  */
 public class WrappedSQLException extends SQLException {
 
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     final private String sqlString;
 

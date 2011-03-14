@@ -34,7 +34,7 @@ import java.sql.SQLException;
  */
 public class LocalizedSQLException extends SQLException {
 
-    private static final long serialVersionUID = 1L;
+    // TODO: private static final long serialVersionUID = 1L;
 
     private final ApplicationResourcesAccessor accessor;
     private final String key;
