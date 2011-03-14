@@ -30,10 +30,21 @@ import java.io.*;
  * <code>CompressedDataOutputStream</code>.
  *
  * @author  AO Industries, Inc.
+ *
+ * @deprecated  Please favor standard serialization.
  */
+@Deprecated
 public interface Streamable {
 
+    /**
+     * @deprecated  Please favor standard serialization.
+     */
+    @Deprecated
     void read(CompressedDataInputStream in) throws IOException;
 
+    /**
+     * @deprecated  Please favor standard serialization.
+     */
+    @Deprecated
     void write(CompressedDataOutputStream out, String version) throws IOException;
 }

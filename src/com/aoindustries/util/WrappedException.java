@@ -27,7 +27,7 @@ package com.aoindustries.util;
  */
 public class WrappedException extends RuntimeException {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -987777760527780052L;
 
     private final Object[] extraInfo;
 

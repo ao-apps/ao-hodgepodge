@@ -32,7 +32,7 @@ import java.util.Comparator;
  */
 public class HashCodeComparator implements Comparator<Object>, Serializable {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5468576960399075645L;
 
     private static final HashCodeComparator singleton = new HashCodeComparator();
 

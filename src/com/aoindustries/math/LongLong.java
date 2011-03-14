@@ -147,6 +147,8 @@ public class LongLong extends Number implements Comparable<LongLong> {
         return result;
     }
 
+    private static final long serialVersionUID = -8296704159343817686L;
+
     private final long hi, lo;
 
     public LongLong(long hi, long lo) {
@@ -170,10 +172,12 @@ public class LongLong extends Number implements Comparable<LongLong> {
         return (short)lo;
     }
 
+    @Override
     public int intValue() {
         return (int)lo;
     }
 
+    @Override
     public long longValue() {
         return lo;
     }
@@ -185,10 +189,12 @@ public class LongLong extends Number implements Comparable<LongLong> {
         return new BigInteger(bytes);
     }
 
+    @Override
     public float floatValue() {
         return getBigInteger().floatValue();
     }
 
+    @Override
     public double doubleValue() {
         return getBigInteger().doubleValue();
     }
@@ -235,6 +241,7 @@ public class LongLong extends Number implements Comparable<LongLong> {
         return val;
     }
 
+    @Override
     public int compareTo(LongLong other) {
         if(hi<other.hi) return -1;
         if(hi>other.hi) return 1;
@@ -365,8 +372,6 @@ public class LongLong extends Number implements Comparable<LongLong> {
         byte[] bytes = getBytes(getBigInteger().negate());
         return valueOf(PersistentCollections.bufferToLong(bytes, 0), PersistentCollections.bufferToLong(bytes, 8));
     }
-
-    // TODO: private static final long serialVersionUID = 1L;
 
     /**
      * Gets the high-order long.

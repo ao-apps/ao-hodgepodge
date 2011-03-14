@@ -33,7 +33,7 @@ import java.io.Serializable;
  */
 public class LocalizedIllegalArgumentException extends IllegalArgumentException {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -4941714282849295887L;
 
     private final ApplicationResourcesAccessor accessor;
     private final String key;

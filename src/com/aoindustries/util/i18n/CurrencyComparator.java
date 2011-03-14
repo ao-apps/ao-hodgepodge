@@ -33,7 +33,7 @@ import java.util.Currency;
  */
 public class CurrencyComparator implements Comparator<Currency>, Serializable {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -6360174337692570997L;
 
     private static final CurrencyComparator singleton = new CurrencyComparator();
 

@@ -29,7 +29,7 @@ import java.security.GeneralSecurityException;
  */
 public class LoginException extends GeneralSecurityException {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 725311633658233258L;
 
     public LoginException() {
         super();

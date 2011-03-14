@@ -54,7 +54,7 @@ import java.util.Iterator;
  */
 public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7396605502356021412L;
 
     /**
      * May more forcefully disable asserts for benchmarking.

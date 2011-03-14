@@ -40,7 +40,7 @@ import javax.swing.SwingUtilities;
  */
 public class SynchronizingListModel extends DefaultListModel {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -4928047430792677729L;
 
     private final Object constantFirstRow;
 

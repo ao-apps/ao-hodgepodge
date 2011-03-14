@@ -33,7 +33,7 @@ import java.util.Locale;
  */
 public class LocaleComparator implements Comparator<Locale>, Serializable {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7238956708102131937L;
 
     private static final LocaleComparator instance = new LocaleComparator();
 

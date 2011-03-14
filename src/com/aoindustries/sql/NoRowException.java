@@ -26,7 +26,7 @@ import java.sql.SQLException;
 
 public class NoRowException extends SQLException {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5397878995581459678L;
 
     public NoRowException() {
         super();

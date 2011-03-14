@@ -27,7 +27,7 @@ package com.aoindustries.security;
  */
 public class IncompleteLoginException extends LoginException {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 9054762314826268351L;
 
     public IncompleteLoginException() {
         super();

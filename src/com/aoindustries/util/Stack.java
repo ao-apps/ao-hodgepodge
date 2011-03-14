@@ -35,7 +35,7 @@ import java.util.EmptyStackException;
  */
 public class Stack<E> extends ArrayList<E> {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -3967561912087026100L;
 
     /**
      * @see java.util.Stack#Stack

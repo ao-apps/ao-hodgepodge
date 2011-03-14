@@ -23,7 +23,6 @@
 package com.aoindustries.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,7 +35,7 @@ import java.util.List;
  */
 public class WrappedExceptions extends RuntimeException {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -3938902089134728394L;
 
     /**
      * Gets an unmodifiable, unique set of exceptions.

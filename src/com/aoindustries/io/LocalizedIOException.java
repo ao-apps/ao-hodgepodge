@@ -34,7 +34,7 @@ import java.io.Serializable;
  */
 public class LocalizedIOException extends IOException {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -8061894547736048986L;
 
     private final ApplicationResourcesAccessor accessor;
     private final String key;

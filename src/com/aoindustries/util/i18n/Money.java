@@ -39,7 +39,7 @@ import java.util.Currency;
  */
 final public class Money implements Serializable, Comparable<Money> {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -4196384784676068001L;
 
     private final Currency currency;
     private final BigDecimal value;

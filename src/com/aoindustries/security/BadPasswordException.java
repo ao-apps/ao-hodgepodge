@@ -27,7 +27,7 @@ package com.aoindustries.security;
  */
 public class BadPasswordException extends LoginException {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1595478687416397264L;
 
     public BadPasswordException() {
         super();

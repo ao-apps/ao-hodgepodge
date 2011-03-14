@@ -33,7 +33,7 @@ import org.checkthread.annotations.NotThreadSafe;
  */
 public class AutoGrowArrayList<E> extends ArrayList<E> {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 4698056683308968140L;
 
     public AutoGrowArrayList() {
         super();

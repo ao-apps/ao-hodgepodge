@@ -52,7 +52,7 @@ import java.util.NoSuchElementException;
  */
 public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializable {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7835328127783275038L;
 
     /**
      * May more forcefully disable asserts for benchmarking.

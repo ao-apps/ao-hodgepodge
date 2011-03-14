@@ -27,7 +27,7 @@ package com.aoindustries.security;
  */
 public class AccountNotFoundException extends LoginException {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 6715770039654209688L;
 
     public AccountNotFoundException() {
         super();

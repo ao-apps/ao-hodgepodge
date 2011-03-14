@@ -27,7 +27,7 @@ package com.aoindustries.encoding;
  */
 public class MediaException extends Exception {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7504967502925628639L;
 
     public MediaException() {
         super();

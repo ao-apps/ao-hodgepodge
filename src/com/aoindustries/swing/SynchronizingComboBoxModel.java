@@ -40,7 +40,7 @@ import javax.swing.SwingUtilities;
  */
 public class SynchronizingComboBoxModel extends DefaultComboBoxModel {
 
-    // TODO: private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2421298474426921512L;
 
     private final Object constantFirstRow;
 
