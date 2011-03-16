@@ -22,10 +22,8 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.io.FastExternalizableReadContext;
-import com.aoindustries.io.FastExternalizableWriteContext;
-import com.aoindustries.io.FastReadObjectRunnable;
-import com.aoindustries.io.FastWriteObjectRunnable;
+import com.aoindustries.io.FastObjectInput;
+import com.aoindustries.io.FastObjectOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -297,40 +295,34 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
     private static final long serialVersionUID = 5725680713634634667L;
 
     @Override
-    public void writeExternal(final ObjectOutput out) throws IOException {
-        final int len = elements.length;
-        out.writeInt(len);
-        if(len>0) {
-            FastExternalizableWriteContext.call(
-                new FastWriteObjectRunnable() {
-                    @Override
-                    public void run(FastExternalizableWriteContext context) throws IOException {
-                        E[] elems = UnmodifiableArraySet.this.elements; // Local fast reference
-                        for(int i=0; i<len; i++) {
-                            context.writeObject(out, elems[i]);
-                        }
-                    }
-                }
-            );
+    public void writeExternal(ObjectOutput out) throws IOException {
+        FastObjectOutput fastOut = FastObjectOutput.wrap(out);
+        try {
+            int len = elements.length;
+            fastOut.writeInt(len);
+            if(len>0) {
+                E[] elems = UnmodifiableArraySet.this.elements; // Local fast reference
+                for(int i=0; i<len; i++) fastOut.writeObject(elems[i]);
+            }
+        } finally {
+            fastOut.unwrap();
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        final int len = in.readInt();
-        if(len==0) elements = (E[])emptyArray;
-        else {
-            FastExternalizableReadContext.call(
-                new FastReadObjectRunnable() {
-                    @Override
-                    public void run(FastExternalizableReadContext context) throws IOException, ClassNotFoundException {
-                        E[] newElements = (E[])new Object[len];
-                        for(int i=0; i<len; i++) newElements[i] = (E)context.readObject(in);
-                        UnmodifiableArraySet.this.elements = newElements;
-                    }
-                }
-            );
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        FastObjectInput fastIn = FastObjectInput.wrap(in);
+        try {
+            final int len = fastIn.readInt();
+            if(len==0) elements = (E[])emptyArray;
+            else {
+                E[] newElements = (E[])new Object[len];
+                for(int i=0; i<len; i++) newElements[i] = (E)fastIn.readObject();
+                UnmodifiableArraySet.this.elements = newElements;
+            }
+        } finally {
+            fastIn.unwrap();
         }
     }
 }

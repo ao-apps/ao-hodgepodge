@@ -34,107 +34,36 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class FastExternalizableWriteContext {
+public class FastObjectOutput implements ObjectOutput {
 
-    private static final ThreadLocal<FastExternalizableWriteContext> threadContext = new ThreadLocal<FastExternalizableWriteContext>();
+    private static final ThreadLocal<FastObjectOutput> threadFastObjectOutput = new ThreadLocal<FastObjectOutput>();
 
     /**
-     * Sets-up or reuses the thread context, then calls the runnable.
-     * For highest performance, this should be called as high as possible in the serialization process.
-     * The same context must be established for writing.
-     *
-     * Because the context is associated with the thread, a thread should not write
-     * to different objects streams at the same time within this runnable.  It should
-     * also not hand-off the work to another thread (or ExecutorService).
-     *
-     * @see  #call(com.aoindustries.io.FastReadObjectRunnable)
+     * Gets the wrapper for the provided ObjectOutput, creating if needed.
+     * To avoid memory leaks, it should also be unwrapped in a finally block.
      */
-    public static void call(FastWriteObjectRunnable runnable) throws IOException {
-        FastExternalizableWriteContext context = threadContext.get();
-        if(context!=null) {
-            // Reuse existing
-            runnable.run(context);
+    public static FastObjectOutput wrap(ObjectOutput out) throws IOException {
+        FastObjectOutput fastOut;
+        if(out instanceof FastObjectOutput) {
+            fastOut = (FastObjectOutput)out;
         } else {
-            context = new FastExternalizableWriteContext();
-            threadContext.set(context);
-            try {
-                runnable.run(context);
-            } finally {
-                threadContext.remove();
+            fastOut = threadFastObjectOutput.get();
+            if(fastOut==null) {
+                threadFastObjectOutput.set(fastOut = new FastObjectOutput(out));
+            } else {
+                // Must be same as previously used value
+                if(out!=fastOut.out) throw new IOException("ObjectOutput changed unexpectedly");
             }
         }
+        fastOut.incrementWrapCount();
+        return fastOut;
     }
 
     /**
-     * Resolves or creates the context, then calls writeObject.
-     *
-     * @see #writeObject
-     *
-     * @see  #readObjectInContext
+     * Unwraps the object output.
      */
-    public static void writeObjectInContext(ObjectOutput out, Object obj) throws IOException {
-        FastExternalizableWriteContext context = threadContext.get();
-        if(context!=null) {
-            // Reuse existing
-            context.writeObject(out, obj);
-        } else {
-            context = new FastExternalizableWriteContext();
-            threadContext.set(context);
-            try {
-                context.writeObject(out, obj);
-            } finally {
-                threadContext.remove();
-            }
-        }
-    }
-
-    /**
-     * Resolves or creates the context, then calls writeFastObject.
-     *
-     * @see #writeFastObject
-     *
-     * @see  #readFastObjectInContext
-     */
-    public static void writeFastObjectInContext(ObjectOutput out, FastExternalizable obj) throws IOException {
-        FastExternalizableWriteContext context = threadContext.get();
-        if(context!=null) {
-            // Reuse existing
-            context.writeFastObject(out, obj);
-        } else {
-            context = new FastExternalizableWriteContext();
-            threadContext.set(context);
-            try {
-                context.writeFastObject(out, obj);
-            } finally {
-                threadContext.remove();
-            }
-        }
-    }
-
-    /**
-     * Resolves or creates the context, then calls writeFastUTF.
-     *
-     * For maximum performance, an array is used to compare strings by identity first, thus
-     * already interned strings will benefit the most.
-     *
-     * @see #writeFastUTF
-     *
-     * @see  #readFastUTFInContext
-     */
-    public static void writeFastUTFInContext(ObjectOutput out, String value) throws IOException {
-        FastExternalizableWriteContext context = threadContext.get();
-        if(context!=null) {
-            // Reuse existing
-            context.writeFastUTF(out, value);
-        } else {
-            context = new FastExternalizableWriteContext();
-            threadContext.set(context);
-            try {
-                context.writeFastUTF(out, value);
-            } finally {
-                threadContext.remove();
-            }
-        }
+    public void unwrap() throws IOException {
+        if(decrementWrapCount()==0) threadFastObjectOutput.remove();
     }
 
     static final int
@@ -155,6 +84,9 @@ public class FastExternalizableWriteContext {
 
     private static final int MAP_ARRAY_LENGTH = 20; // TODO: Benchmark what is best value
 
+    private final ObjectOutput out;
+    private int wrapCount;
+
     /**
      * A mapping of classes to generated class IDs.
      */
@@ -171,7 +103,18 @@ public class FastExternalizableWriteContext {
     private int nextStringId = 0;
     private String lastString = null;
 
-    private FastExternalizableWriteContext() {
+    private FastObjectOutput(ObjectOutput out) {
+        this.out = out;
+    }
+
+    private void incrementWrapCount() throws IOException {
+        if(wrapCount==Integer.MAX_VALUE) throw new IOException("Maximum wrap count reached.");
+        wrapCount++;
+    }
+
+    private int decrementWrapCount() {
+        if(wrapCount>0) wrapCount--;
+        return wrapCount;
     }
 
     /**
@@ -188,14 +131,15 @@ public class FastExternalizableWriteContext {
      *
      * @see  #readObject
      */
-    public void writeObject(ObjectOutput out, Object obj) throws IOException {
+    @Override
+    public void writeObject(Object obj) throws IOException {
         if(obj==null) {
             out.write(NULL);
         } else if(!(obj instanceof FastExternalizable)) {
             out.write(STANDARD);
             out.writeObject(obj);
         } else {
-            writeFastObject(out, (FastExternalizable)obj);
+            writeFastObject((FastExternalizable)obj);
         }
     }
 
@@ -204,7 +148,7 @@ public class FastExternalizableWriteContext {
      *
      * @see  #readFastObject
      */
-    public void writeFastObject(ObjectOutput out, FastExternalizable obj) throws IOException {
+    protected void writeFastObject(FastExternalizable obj) throws IOException {
         if(obj==null) {
             out.write(NULL);
         } else {
@@ -255,7 +199,7 @@ public class FastExternalizableWriteContext {
                 }
                 lastClass = clazz;
             }
-            obj.writeExternal(out);
+            obj.writeExternal(this);
         }
     }
 
@@ -263,7 +207,7 @@ public class FastExternalizableWriteContext {
      * Writes a string to the output, not writing any duplicates.
      * Supports nulls.
      */
-    public void writeFastUTF(ObjectOutput out, String value) throws IOException {
+    public void writeFastUTF(String value) throws IOException {
         if(value==null) {
             out.write(NULL);
         } else {
@@ -317,5 +261,85 @@ public class FastExternalizableWriteContext {
                 lastString = value;
             }
         }
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        out.write(b);
+    }
+
+    @Override
+    public void write(byte[] b) throws IOException {
+        out.write(b);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        out.write(b, off, len);
+    }
+
+    @Override
+    public void flush() throws IOException {
+        out.flush();
+    }
+
+    @Override
+    public void close() throws IOException {
+        out.close();
+    }
+
+    @Override
+    public void writeBoolean(boolean v) throws IOException {
+        out.writeBoolean(v);
+    }
+
+    @Override
+    public void writeByte(int v) throws IOException {
+        out.writeByte(v);
+    }
+
+    @Override
+    public void writeShort(int v) throws IOException {
+        out.writeShort(v);
+    }
+
+    @Override
+    public void writeChar(int v) throws IOException {
+        out.writeChar(v);
+    }
+
+    @Override
+    public void writeInt(int v) throws IOException {
+        out.writeInt(v);
+    }
+
+    @Override
+    public void writeLong(long v) throws IOException {
+        out.writeLong(v);
+    }
+
+    @Override
+    public void writeFloat(float v) throws IOException {
+        out.writeFloat(v);
+    }
+
+    @Override
+    public void writeDouble(double v) throws IOException {
+        out.writeDouble(v);
+    }
+
+    @Override
+    public void writeBytes(String s) throws IOException {
+        out.writeBytes(s);
+    }
+
+    @Override
+    public void writeChars(String s) throws IOException {
+        out.writeChars(s);
+    }
+
+    @Override
+    public void writeUTF(String s) throws IOException {
+        out.writeUTF(s);
     }
 }
