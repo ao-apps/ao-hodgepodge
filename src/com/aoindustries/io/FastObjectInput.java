@@ -34,11 +34,11 @@ import java.util.List;
 /**
  * Utilities to read FastExternalizable, Externalizable, and Serializable objects.
  *
+ * When multiple objects are being written, this avoids the repetative writing of classnames and serialVersionUIDs.
+ *
  * Any object that is ObjectInputValidation is validated immediately - there is no need
  * and no mechanism to register the validation since this is for simple value objects
  * that don't participate in more complex object graphs.
- *
- * When multiple objects are being written, this avoids the repetative writing of classnames and serialVersionUIDs.
  *
  * @author  AO Industries, Inc.
  */
@@ -221,11 +221,20 @@ public class FastObjectInput implements ObjectInput {
      */
     public String readFastUTF() throws IOException, ClassNotFoundException {
         int code = in.read();
-        if(code==FastObjectOutput.NULL) return null;
-        if(code==FastObjectOutput.STANDARD) throw new IOException("Unexpected code: "+code);
-        if(code==-1) throw new EOFException();
         // Resolve string by code
         switch(code) {
+            case FastObjectOutput.NULL :
+            {
+                return null;
+            }
+            case FastObjectOutput.STANDARD :
+            {
+                throw new IOException("Unexpected code: "+code);
+            }
+            case -1 :
+            {
+                throw new EOFException();
+            }
             case FastObjectOutput.FAST_SAME :
             {
                 if(lastString==null) throw new StreamCorruptedException("lastString is null");
