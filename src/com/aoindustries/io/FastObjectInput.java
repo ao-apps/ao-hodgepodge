@@ -26,12 +26,17 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.ObjectInput;
+import java.io.ObjectInputValidation;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Utilities to read FastExternalizable, Externalizable, and Serializable objects.
+ *
+ * Any object that is ObjectInputValidation is validated immediately - there is no need
+ * and no mechanism to register the validation since this is for simple value objects
+ * that don't participate in more complex object graphs.
  *
  * When multiple objects are being written, this avoids the repetative writing of classnames and serialVersionUIDs.
  *
@@ -196,6 +201,7 @@ public class FastObjectInput implements ObjectInput {
             long actualSerialVersionUID = obj.getSerialVersionUID();
             if(lastSerialVersionUID!=actualSerialVersionUID) throw new InvalidClassException(lastClass.getName(), "Mismatched serialVersionUID: expected "+lastSerialVersionUID+", got "+actualSerialVersionUID);
             obj.readExternal(this);
+            if(obj instanceof ObjectInputValidation) ((ObjectInputValidation)obj).validateObject();
             return obj;
         } catch(InstantiationException exc) {
             InvalidClassException newExc = new InvalidClassException("InstantiationException");

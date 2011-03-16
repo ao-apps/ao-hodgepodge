@@ -129,14 +129,6 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
     private static final Object[] emptyArray = new Object[0];
 
     /**
-     * Creates empty set.
-     */
-    @SuppressWarnings("unchecked")
-    public UnmodifiableArraySet() {
-        elements = (E[])emptyArray;
-    }
-
-    /**
      * Uses the provided elements, which must already be sorted in hashCode order and unique.
      *
      * The sort order and uniqueness is only checked with assertions enabled.
@@ -292,7 +284,11 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
         throw new UnsupportedOperationException();
     }
 
+    // <editor-fold defaultstate="collapsed" desc="FastExternalizable">
     private static final long serialVersionUID = 5725680713634634667L;
+
+    public UnmodifiableArraySet() {
+    }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
@@ -312,6 +308,7 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
     @Override
     @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        if(elements!=null) throw new IllegalStateException();
         FastObjectInput fastIn = FastObjectInput.wrap(in);
         try {
             final int len = fastIn.readInt();
@@ -325,4 +322,5 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
             fastIn.unwrap();
         }
     }
+    // </editor-fold>
 }

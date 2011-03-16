@@ -23,13 +23,16 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.io.FastExternalizable;
+import com.aoindustries.io.FastObjectInput;
+import com.aoindustries.io.FastObjectOutput;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInput;
+import java.io.ObjectInputValidation;
 import java.io.ObjectOutput;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Currency;
-import java.util.Locale;
 
 /**
  * Stores a monetary value as a combination of currency and amount.  It supports
@@ -39,23 +42,11 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-final public class Money implements FastExternalizable, Comparable<Money> {
-
-    private static final Currency defaultCurrency = Currency.getInstance(Locale.getDefault());
-    private static final int defaultScale = defaultCurrency.getDefaultFractionDigits()==-1 ? 0 : defaultCurrency.getDefaultFractionDigits();
+final public class Money implements FastExternalizable, ObjectInputValidation, Comparable<Money> {
 
     private Currency currency;
     private long value;
     private int scale;
-
-    /**
-     * Creates money equal to zero in the default currency.
-     */
-    public Money() {
-        currency = defaultCurrency;
-        value = 0;
-        scale = defaultScale;
-    }
 
     /**
      * Will change the scale of the value to match the currency, but will not round.
@@ -195,6 +186,9 @@ final public class Money implements FastExternalizable, Comparable<Money> {
     // <editor-fold defaultstate="collapsed" desc="FastExternalizable">
     private static final long serialVersionUID = 2287045704444180509L;
 
+    public Money() {
+    }
+
     @Override
     public long getSerialVersionUID() {
         return serialVersionUID;
@@ -202,17 +196,38 @@ final public class Money implements FastExternalizable, Comparable<Money> {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeUTF(currency.getCurrencyCode());
-        out.writeLong(value);
-        out.writeInt(scale);
+        FastObjectOutput fastOut = FastObjectOutput.wrap(out);
+        try {
+            fastOut.writeFastUTF(currency.getCurrencyCode());
+            fastOut.writeLong(value);
+            fastOut.writeInt(scale);
+        } finally {
+            fastOut.unwrap();
+        }
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        currency = Currency.getInstance(in.readUTF());
-        value = in.readLong();
-        scale = in.readInt();
-        validate();
+        if(currency!=null) throw new IllegalStateException();
+        FastObjectInput fastIn = FastObjectInput.wrap(in);
+        try {
+            currency = Currency.getInstance(fastIn.readFastUTF());
+            value = fastIn.readLong();
+            scale = fastIn.readInt();
+        } finally {
+            fastIn.unwrap();
+        }
+    }
+
+    @Override
+    public void validateObject() throws InvalidObjectException {
+        try {
+            validate();
+        } catch(NumberFormatException err) {
+            InvalidObjectException newErr = new InvalidObjectException(err.getMessage());
+            newErr.initCause(err);
+            throw newErr;
+        }
     }
     // </editor-fold>
 }
