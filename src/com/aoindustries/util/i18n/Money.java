@@ -22,12 +22,14 @@
  */
 package com.aoindustries.util.i18n;
 
+import com.aoindustries.io.FastExternalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Currency;
+import java.util.Locale;
 
 /**
  * Stores a monetary value as a combination of currency and amount.  It supports
@@ -37,12 +39,23 @@ import java.util.Currency;
  *
  * @author  AO Industries, Inc.
  */
-final public class Money implements Serializable, Comparable<Money> {
+final public class Money implements FastExternalizable, Comparable<Money> {
 
-    private static final long serialVersionUID = -4196384784676068001L;
+    private static final Currency defaultCurrency = Currency.getInstance(Locale.getDefault());
+    private static final int defaultScale = defaultCurrency.getDefaultFractionDigits()==-1 ? 0 : defaultCurrency.getDefaultFractionDigits();
 
-    private final Currency currency;
-    private final BigDecimal value;
+    private Currency currency;
+    private long value;
+    private int scale;
+
+    /**
+     * Creates money equal to zero in the default currency.
+     */
+    public Money() {
+        currency = defaultCurrency;
+        value = 0;
+        scale = defaultScale;
+    }
 
     /**
      * Will change the scale of the value to match the currency, but will not round.
@@ -51,8 +64,28 @@ final public class Money implements Serializable, Comparable<Money> {
     public Money(Currency currency, BigDecimal value) throws NumberFormatException {
         this.currency = currency;
         try {
-            int scale = currency.getDefaultFractionDigits();
-            this.value = scale==-1 || scale==value.scale() ? value : value.setScale(scale);
+            int currencyScale = currency.getDefaultFractionDigits();
+            if(currencyScale!=-1) value = value.setScale(currencyScale);
+            this.scale = value.scale();
+            this.value = value.movePointRight(value.scale()).longValueExact();
+        } catch(ArithmeticException err) {
+            NumberFormatException newErr = new NumberFormatException(err.getMessage());
+            newErr.initCause(err);
+            throw newErr;
+        }
+        validate();
+    }
+
+    public Money(Currency currency, long value, int scale) throws NumberFormatException {
+        this.currency = currency;
+        try {
+            int currencyScale = currency.getDefaultFractionDigits();
+            if(currencyScale!=-1 && currencyScale!=scale) {
+                value = BigDecimal.valueOf(value, scale).setScale(currencyScale).movePointRight(currencyScale).longValueExact();
+                scale = currencyScale;
+            }
+            this.value = value;
+            this.scale = scale;
         } catch(ArithmeticException err) {
             NumberFormatException newErr = new NumberFormatException(err.getMessage());
             newErr.initCause(err);
@@ -62,35 +95,30 @@ final public class Money implements Serializable, Comparable<Money> {
     }
 
     private void validate() throws NumberFormatException {
-        int scale = currency.getDefaultFractionDigits();
-        if(scale!=-1 && scale!=value.scale()) throw new NumberFormatException("currency.scale!=value.scale: "+scale+"!="+value.scale());
+        int currencyScale = currency.getDefaultFractionDigits();
+        if(currencyScale!=-1 && currencyScale!=scale) throw new NumberFormatException("currency.scale!=value.scale: "+currencyScale+"!="+scale);
     }
 
     /**
-     * Perform same validation as constructor on readObject.
+     * Equal when has same currency, value, and scale.
      */
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        validate();
-    }
-
     @Override
     public boolean equals(Object o) {
-        if(this==o) return true;
-        if(o==null || !(o instanceof Money)) return false;
+        if(!(o instanceof Money)) return false;
         Money other = (Money)o;
         return
-            value.equals(other.value)
-            && (
-                currency==other.currency
-                || currency.getCurrencyCode().equals(other.currency.getCurrencyCode())
-            )
+            currency==other.currency
+            && value==other.value
+            && scale==other.scale
         ;
     }
 
     @Override
     public int hashCode() {
-        return currency.getCurrencyCode().hashCode()*31 + value.hashCode();
+        int hash = currency.getCurrencyCode().hashCode();
+        hash = hash * 31 + (int)value;
+        hash = hash * 31 + scale;
+        return hash;
     }
 
     /**
@@ -102,7 +130,7 @@ final public class Money implements Serializable, Comparable<Money> {
     public int compareTo(Money other) {
         int diff = CurrencyComparator.getInstance().compare(currency, other.currency);
         if(diff!=0) return diff;
-        return value.compareTo(other.value);
+        return getValue().compareTo(other.getValue());
     }
 
     public Currency getCurrency() {
@@ -110,7 +138,21 @@ final public class Money implements Serializable, Comparable<Money> {
     }
 
     public BigDecimal getValue() {
+        return BigDecimal.valueOf(value, scale);
+    }
+
+    /**
+     * Gets the unscaled value of this currency.
+     */
+    public long getUnscaledValue() {
         return value;
+    }
+
+    /**
+     * Gets the scale of this currency.
+     */
+    public int getScale() {
+        return scale;
     }
 
     /**
@@ -119,12 +161,12 @@ final public class Money implements Serializable, Comparable<Money> {
      */
     @Override
     public String toString() {
-        return currency.getSymbol(ThreadLocale.get())+value.toPlainString();
+        return currency.getSymbol(ThreadLocale.get())+getValue().toPlainString();
     }
 
     public Money add(Money augend) throws ArithmeticException {
         if(currency!=augend.currency) throw new ArithmeticException("currency!=augend.currency: "+currency+"!="+augend.currency);
-        return new Money(currency, value.add(augend.value));
+        return new Money(currency, getValue().add(augend.getValue()));
     }
 
     /**
@@ -138,13 +180,39 @@ final public class Money implements Serializable, Comparable<Money> {
      * Multiplies with rounding.
      */
     public Money multiply(BigDecimal multiplicand, RoundingMode roundingMode) throws ArithmeticException {
-        return new Money(currency, value.multiply(multiplicand).setScale(currency.getDefaultFractionDigits(), roundingMode));
+        int currencyScale = currency.getDefaultFractionDigits();
+        if(currencyScale==-1) currencyScale = scale; // Use same scale if currency doesn't dictate
+        return new Money(currency, getValue().multiply(multiplicand).setScale(currencyScale, roundingMode));
     }
 
     /**
      * Returns a monetary amount that is the negative of this amount.
      */
     public Money negate() {
-        return new Money(currency, value.negate());
+        return new Money(currency, getValue().negate());
     }
+
+    // <editor-fold defaultstate="collapsed" desc="FastExternalizable">
+    private static final long serialVersionUID = 2287045704444180509L;
+
+    @Override
+    public long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(currency.getCurrencyCode());
+        out.writeLong(value);
+        out.writeInt(scale);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        currency = Currency.getInstance(in.readUTF());
+        value = in.readLong();
+        scale = in.readInt();
+        validate();
+    }
+    // </editor-fold>
 }

@@ -22,7 +22,14 @@
  */
 package com.aoindustries.util;
 
-import java.io.Serializable;
+import com.aoindustries.io.FastExternalizableReadContext;
+import com.aoindustries.io.FastExternalizableWriteContext;
+import com.aoindustries.io.FastReadObjectRunnable;
+import com.aoindustries.io.FastWriteObjectRunnable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,9 +57,7 @@ import java.util.NoSuchElementException;
  *
  * @author  AO Industries, Inc.
  */
-public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializable {
-
-    private static final long serialVersionUID = 7835328127783275038L;
+public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externalizable {
 
     /**
      * May more forcefully disable asserts for benchmarking.
@@ -94,16 +99,16 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializa
     }
      //*/
 
-    final E[] elements;
+    E[] elements;
 
-    private boolean assertInOrderAndUnique(E[] elements) {
+    private static boolean assertInOrderAndUnique(Object[] elements) {
         // Make sure all elements are in hashCode order and unique
         int size = elements.length;
         if(size>1) {
-            E prev = elements[0];
+            Object prev = elements[0];
             int prevHash = prev.hashCode();
             for(int index=1; index<size; index++) {
-                E elem = elements[index];
+                Object elem = elements[index];
                 int elemHash = elem.hashCode();
                 if(elemHash<prevHash) throw new AssertionError("elements not sorted by hashCode: "+elemHash+"<"+prevHash+": "+elem+"<"+prev);
                 if(elemHash==prevHash) {
@@ -111,7 +116,7 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializa
                     if(elem.equals(prev)) throw new AssertionError("Element not unique: "+elem);
                     // Look backward until different hashCode
                     for(int i=index-2; i>=0; i--) {
-                        E morePrev = elements[i];
+                        Object morePrev = elements[i];
                         if(morePrev.hashCode()!=elemHash) break;
                         if(elem.equals(morePrev)) throw new AssertionError("Element not unique: "+elem);
                     }
@@ -121,6 +126,16 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializa
             }
         }
         return true;
+    }
+
+    private static final Object[] emptyArray = new Object[0];
+
+    /**
+     * Creates empty set.
+     */
+    @SuppressWarnings("unchecked")
+    public UnmodifiableArraySet() {
+        elements = (E[])emptyArray;
     }
 
     /**
@@ -148,10 +163,10 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializa
         this((E[])elements.toArray());
     }
 
-    private int binarySearch(int oHash) {
-        return binarySearch0(0, elements.length, oHash);
+    private static int binarySearch(Object[] elements, int oHash) {
+        return binarySearch0(elements, 0, elements.length, oHash);
     }
-    private int binarySearch0(int fromIndex, int toIndex, int oHash) {
+    private static int binarySearch0(Object[] elements, int fromIndex, int toIndex, int oHash) {
         int low = fromIndex;
         int high = toIndex - 1;
         while (low <= high) {
@@ -177,27 +192,28 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializa
     @Override
     @SuppressWarnings("unchecked")
     public boolean contains(Object o) {
-        int size = elements.length;
+        E[] elems = this.elements; // Local fast reference
+        int size = elems.length;
         if(size==0 || o==null) return false;
         if(size<BINARY_SEARCH_THRESHOLD) {
             // Simple search
-            for(int i=0;i<size;i++) if(elements[i].equals(o)) return true;
+            for(int i=0;i<size;i++) if(elems[i].equals(o)) return true;
         } else {
-            int index = binarySearch(o.hashCode());
+            int index = binarySearch(elems, o.hashCode());
             if(index<0) return false;
             // Matches at index?
-            E elem = elements[index];
+            E elem = elems[index];
             if(elem.equals(o)) return true;
             // Look forward until different hashCode
             int oHash = o.hashCode();
             for(int i=index+1; i<size; i++) {
-                elem = elements[i];
+                elem = elems[i];
                 if(elem.hashCode()!=oHash) break;
                 if(elem.equals(o)) return true;
             }
             // Look backward until different hashCode
             for(int i=index-1; i>=0; i--) {
-                elem = elements[i];
+                elem = elems[i];
                 if(elem.hashCode()!=oHash) break;
                 if(elem.equals(o)) return true;
             }
@@ -209,13 +225,14 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializa
     public Iterator<E> iterator() {
         return new Iterator<E>() {
             int index = 0;
+            final E[] elems = UnmodifiableArraySet.this.elements; // Local fast reference
             @Override
             public boolean hasNext() {
-                return index<elements.length;
+                return index<elems.length;
             }
             @Override
             public E next() {
-                if(index<elements.length) return elements[index++];
+                if(index<elems.length) return elems[index++];
                 else throw new NoSuchElementException();
             }
             @Override
@@ -275,5 +292,45 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Serializa
     @Override
     public void clear() {
         throw new UnsupportedOperationException();
+    }
+
+    private static final long serialVersionUID = 5725680713634634667L;
+
+    @Override
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        final int len = elements.length;
+        out.writeInt(len);
+        if(len>0) {
+            FastExternalizableWriteContext.call(
+                new FastWriteObjectRunnable() {
+                    @Override
+                    public void run(FastExternalizableWriteContext context) throws IOException {
+                        E[] elems = UnmodifiableArraySet.this.elements; // Local fast reference
+                        for(int i=0; i<len; i++) {
+                            context.writeObject(out, elems[i]);
+                        }
+                    }
+                }
+            );
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        final int len = in.readInt();
+        if(len==0) elements = (E[])emptyArray;
+        else {
+            FastExternalizableReadContext.call(
+                new FastReadObjectRunnable() {
+                    @Override
+                    public void run(FastExternalizableReadContext context) throws IOException, ClassNotFoundException {
+                        E[] newElements = (E[])new Object[len];
+                        for(int i=0; i<len; i++) newElements[i] = (E)context.readObject(in);
+                        UnmodifiableArraySet.this.elements = newElements;
+                    }
+                }
+            );
+        }
     }
 }
