@@ -30,7 +30,7 @@ import java.util.Comparator;
  *
  * @author  AO Industries, Inc.
  */
-public class HashCodeComparator implements Comparator<Object>, Serializable {
+final public class HashCodeComparator implements Comparator<Object>, Serializable {
 
     private static final long serialVersionUID = 5468576960399075645L;
 
