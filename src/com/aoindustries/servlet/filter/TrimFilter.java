@@ -46,12 +46,14 @@ public class TrimFilter implements Filter {
 
     private boolean enabled;
 
+    @Override
     public void init(FilterConfig config) {
         String enabledParam = config.getServletContext().getInitParameter("com.aoindustries.servlet.filter.TrimFilter.enabled");
         if(enabledParam==null || (enabledParam=enabledParam.trim()).length()==0) enabledParam = "true";
         enabled = Boolean.parseBoolean(enabledParam);
     }
 
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         // Makes sure only one trim filter is applied per request
         if(
@@ -70,6 +72,7 @@ public class TrimFilter implements Filter {
         }
     }
 
+    @Override
     public void destroy() {
         enabled = false;
     }
