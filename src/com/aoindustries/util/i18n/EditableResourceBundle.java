@@ -257,15 +257,15 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                             + "    <div style=\"position:absolute; width:").append(verticalButtons ? "10em" : "14em").append("; right:0px; top:").append(Integer.toString(i*editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n");
                     if(verticalButtons) {
                         out.append("      <div style=\"position:absolute; left:0px; width:100%; top:30%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
+                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
                                 + "      </div>\n"
                                 + "      <div style=\"position:absolute; left:0px; width:100%; top:70%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
+                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
                                 + "      </div>\n");
                     } else {
                         out.append("      <div style=\"position:absolute; left:0px; width:100%; top:50%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
                                 + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
+                                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
                                 + "      </div>\n");
                     }
                     out.append("    </div>\n");
@@ -374,18 +374,18 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "          for(var c=0; c<").append(Integer.toString(allLocales.size())).append("; c++) {\n"
                         + "            var value=rowValues[c];\n"
                         + "            var textArea=document.getElementById(\"EditableResourceBundleEditorTextArea\"+(c+1));\n"
-                        + "            var modifyButton=document.getElementById(\"EditableResourceBundleEditorModifyButton\"+(c+1));\n"
                         + "            var validateButton=document.getElementById(\"EditableResourceBundleEditorValidateButton\"+(c+1));\n"
+                        + "            var modifyButton=document.getElementById(\"EditableResourceBundleEditorModifyButton\"+(c+1));\n"
                         + "            if(value==null) {\n"
                         + "              textArea.disabled=true;\n"
-                        + "              modifyButton.disabled=true;\n"
                         + "              validateButton.disabled=true;\n"
+                        + "              modifyButton.disabled=true;\n"
                         + "              textArea.value=\"\";\n"
                         + "            } else {\n"
                         + "              textArea.value=value;\n"
                         + "              textArea.disabled=false;\n"
-                        + "              modifyButton.disabled=false;\n"
                         + "              validateButton.disabled=false;\n"
+                        + "              modifyButton.disabled=false;\n"
                         + "            }\n"
                         + "          }\n"
                         + "        }\n"

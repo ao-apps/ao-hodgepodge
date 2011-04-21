@@ -695,6 +695,32 @@ public final class StringUtility {
     }
 
     /**
+     * Replaces all occurances of a String with a String.
+     */
+    public static void replace(final StringBuffer sb, final String find, final String replacement) {
+        int pos = 0;
+        while(pos<sb.length()) {
+            pos = sb.indexOf(find, pos);
+            if(pos==-1) break;
+            sb.replace(pos, pos+find.length(), replacement);
+            pos += replacement.length();
+        }
+    }
+
+    /**
+     * Replaces all occurances of a String with a String.
+     */
+    public static void replace(final StringBuilder sb, final String find, final String replacement) {
+        int pos = 0;
+        while(pos<sb.length()) {
+            pos = sb.indexOf(find, pos);
+            if(pos==-1) break;
+            sb.replace(pos, pos+find.length(), replacement);
+            pos += replacement.length();
+        }
+    }
+
+    /**
      * Splits a String into lines on any '\n' characters.  Also removes any ending '\r' characters if present
      */
     public static List<String> splitLines(String S) {
