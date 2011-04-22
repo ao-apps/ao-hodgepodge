@@ -204,13 +204,17 @@ public class AutoTempFileWriter extends Writer {
             Reader in = new FileReader(tempFile);
             try {
                 long totalRead = 0;
-                char[] buff = new char[BufferManager.BUFFER_SIZE];
-                int numChars;
-                while((numChars=in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-                    out.write(buff, 0, numChars);
-                    totalRead += numChars;
+                char[] buff = BufferManager.getChars();
+                try {
+                    int numChars;
+                    while((numChars=in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+                        out.write(buff, 0, numChars);
+                        totalRead += numChars;
+                    }
+                    if(totalRead!=length) throw new AssertionError("totalRead!=length: "+totalRead+"!="+length);
+                } finally {
+                    BufferManager.release(buff);
                 }
-                if(totalRead!=length) throw new AssertionError("totalRead!=length: "+totalRead+"!="+length);
             } finally {
                 in.close();
             }
