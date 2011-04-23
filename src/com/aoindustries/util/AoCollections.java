@@ -353,31 +353,107 @@ public class AoCollections {
         return java.util.Collections.unmodifiableSortedMap(sortedMap);
     }
 
+    static class EmptyIterator<E> implements Iterator<E> {
+
+        static final EmptyIterator instance = new EmptyIterator();
+
+        private EmptyIterator() {
+        }
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public E next() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Gets the empty iterator.
+     */
+    @SuppressWarnings("unchecked")
+    public static <E> Iterator<E> emptyIterator() {
+        return EmptyIterator.instance;
+    }
+
+    static class SingletonIterator<E> implements Iterator<E> {
+
+        private final E value;
+        private boolean hasNext = true;
+
+        SingletonIterator(E value) {
+            this.value = value;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return hasNext;
+        }
+
+        @Override
+        public E next() {
+            if(!hasNext) throw new NoSuchElementException();
+            hasNext = false;
+            return value;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     /**
      * Gets an unmodifiable iterator for a single object.
      */
-    public static <E> Iterator<E> singletonIterator(final E value) {
-        return new Iterator<E>() {
+    public static <E> Iterator<E> singletonIterator(E value) {
+        return new SingletonIterator<E>(value);
+    }
 
-            private boolean hasNext = true;
+    static class UnmodifiableIterator<E> implements Iterator<E> {
 
-            @Override
-            public boolean hasNext() {
-                return hasNext;
-            }
+        private final Iterator<E> iter;
 
-            @Override
-            public E next() {
-                if(!hasNext) throw new NoSuchElementException();
-                hasNext = false;
-                return value;
-            }
+        UnmodifiableIterator(Iterator<E> iter) {
+            this.iter = iter;
+        }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+        @Override
+        public boolean hasNext() {
+            return iter.hasNext();
+        }
+
+        @Override
+        public E next() {
+            return iter.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Wraps an iterator to make it unmodifiable.
+     */
+    public static <E> Iterator<E> unmodifiableIterator(Iterator<E> iter) {
+        // Don't wrap already unmodifiable iterator types.
+        if(
+            (iter instanceof UnmodifiableIterator)
+            || (iter instanceof EnumerationIterator)
+            || (iter instanceof SingletonIterator)
+            || (iter==EmptyIterator.instance)
+        ) return iter;
+        return new UnmodifiableIterator<E>(iter);
     }
 
     /*
