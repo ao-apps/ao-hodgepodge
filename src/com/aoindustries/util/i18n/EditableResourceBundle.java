@@ -416,7 +416,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "          var value=textArea.value;\n"
                         // Update server
                         + "          var request=new XMLHttpRequest();\n"
-                        + "          var url=\"").append(valueUrl).append("?baseName=\"+encodeURI(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])+\"&locale=\"+encodeURI(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURI(EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURI(value)+\"&modified=\"+modified;\n"
+                        + "          var url=\"").append(valueUrl).append("?baseName=\"+encodeURIComponent(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])+\"&locale=\"+encodeURIComponent(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURIComponent(EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURIComponent(value)+\"&modified=\"+modified;\n"
                         //+ "          window.alert(url);\n"
                         + "          request.open('GET', url, false);\n"
                         + "          request.send(null);\n"
@@ -529,7 +529,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "      function EditableResourceBundleEditorMediaTypeOnChange(index, selectElem) {\n"
                         + "        var value = selectElem.options[selectElem.selectedIndex].value;\n"
                         + "        var request=new XMLHttpRequest();\n"
-                        + "        var url=\"").append(mediaTypeUrl).append("?baseName=\"+encodeURI(EditableResourceBundleEditorRowBaseNames[index])+\"&key=\"+encodeURI(EditableResourceBundleEditorRowKeys[index])+\"&mediaType=\"+encodeURI(value);\n"
+                        + "        var url=\"").append(mediaTypeUrl).append("?baseName=\"+encodeURIComponent(EditableResourceBundleEditorRowBaseNames[index])+\"&key=\"+encodeURIComponent(EditableResourceBundleEditorRowKeys[index])+\"&mediaType=\"+encodeURIComponent(value);\n"
                         //+ "        window.alert(url);\n"
                         + "        request.open('GET', url, false);\n"
                         + "        request.send(null);\n"

@@ -22,8 +22,8 @@
  */
 package com.aoindustries.util.i18n;
 
-import com.aoindustries.util.StringUtility;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -43,12 +43,13 @@ public class ApplicationResourcesAccessor implements Serializable {
     /**
      * The maximum number of arguments allowed 
      */
-    public static final int MAX_ARGUMENTS = 256;
+    //public static final int MAX_ARGUMENTS = 256;
 
     /**
      * Access to this array is not synchronized because it uses a static initializer
      * and is then read-only.
      */
+    /*
     private static final String[] argsHolderCache = new String[MAX_ARGUMENTS];
     static {
         StringBuilder argSB = new StringBuilder(5);
@@ -58,9 +59,13 @@ public class ApplicationResourcesAccessor implements Serializable {
             argSB.append(c).append('}');
             argsHolderCache[c] = argSB.toString();
         }
-    }
+    }*/
 
-    private static String multiReplace(String message, Object... args) {
+    // Cache MessageFormat objects for performance?
+    private static String formatMessage(String message, Object... args) {
+        //if(args.length==0) return message;
+        return new MessageFormat(message, ThreadLocale.get()).format(args, new StringBuffer(), null).toString();
+        /*
         int messageLen = message.length();
         int argsLen = args.length;
         if(messageLen<3 || argsLen==0) return message;
@@ -91,6 +96,7 @@ public class ApplicationResourcesAccessor implements Serializable {
             }
         }
         return messageSB.toString();
+         */
     }
 
     private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<String,ApplicationResourcesAccessor>();
@@ -115,6 +121,8 @@ public class ApplicationResourcesAccessor implements Serializable {
         return getInstance(resourceName);
     }
 
+    private static final Object[] emptyArgs = new Object[0];
+
     /**
      * <p>
      * Gets the message.  If missing, will generate a struts-like value including
@@ -132,7 +140,7 @@ public class ApplicationResourcesAccessor implements Serializable {
      * @see ThreadLocale
      */
     public String getMessage(String key) {
-        return getString(key);
+        return formatMessage(getString(key), emptyArgs);
     }
 
     /**
@@ -143,8 +151,7 @@ public class ApplicationResourcesAccessor implements Serializable {
      * @see  #getMessage(String,Locale,String)
      */
     public String getMessage(String key, Object... args) {
-        String message = getString(key);
-        return multiReplace(message, args);
+        return formatMessage(getString(key), args);
     }
 
     private String getString(String key) {
