@@ -31,73 +31,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Provides a simplified interface for obtaining localized values from a <code>ResourceBundle</code>.
- * It is designed to be similar to the use of the related Struts classes.
+ * Provides a simplified interface for obtaining localized and formatted values
+ * from a <code>ResourceBundle</code>.  It is designed to be compatible with the
+ * use of JSTL classes and taglibs.
  *
  * @author  AO Industries, Inc.
  */
 public class ApplicationResourcesAccessor implements Serializable {
 
     private static final long serialVersionUID = -8735217773587095120L;
-
-    /**
-     * The maximum number of arguments allowed 
-     */
-    //public static final int MAX_ARGUMENTS = 256;
-
-    /**
-     * Access to this array is not synchronized because it uses a static initializer
-     * and is then read-only.
-     */
-    /*
-    private static final String[] argsHolderCache = new String[MAX_ARGUMENTS];
-    static {
-        StringBuilder argSB = new StringBuilder(5);
-        argSB.append('{');
-        for(int c=0;c<MAX_ARGUMENTS;c++) {
-            argSB.setLength(1);
-            argSB.append(c).append('}');
-            argsHolderCache[c] = argSB.toString();
-        }
-    }*/
-
-    // Cache MessageFormat objects for performance?
-    private static String formatMessage(String message, Object... args) {
-        //if(args.length==0) return message;
-        return new MessageFormat(message, ThreadLocale.get()).format(args, new StringBuffer(), null).toString();
-        /*
-        int messageLen = message.length();
-        int argsLen = args.length;
-        if(messageLen<3 || argsLen==0) return message;
-        if(argsLen>MAX_ARGUMENTS) throw new IllegalArgumentException("Maximum of "+MAX_ARGUMENTS+" arguments supported");
-
-        StringBuilder messageSB = new StringBuilder(messageLen+argsLen*20);
-        int lastPos = 0;
-        while(lastPos<messageLen) {
-            int nextArg = -1;
-            int nextArgPos = -1;
-            int nextArgHolderLen = -1;
-            for(int c=0;c<argsLen;c++) {
-                String argHolder = argsHolderCache[c];
-                int argPos = nextArgPos==-1 ? message.indexOf(argHolder, lastPos) : StringUtility.indexOf(message, argHolder, lastPos, nextArgPos);
-                if(argPos!=-1) {
-                    nextArg = c;
-                    nextArgPos = argPos;
-                    nextArgHolderLen = argHolder.length();
-                }
-            }
-            if(nextArg==-1) {
-                // None found
-                messageSB.append(message, lastPos, messageLen);
-                lastPos = messageLen;
-            } else {
-                messageSB.append(message, lastPos, nextArgPos).append(args[nextArg]);
-                lastPos = nextArgPos + nextArgHolderLen;
-            }
-        }
-        return messageSB.toString();
-         */
-    }
 
     private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<String,ApplicationResourcesAccessor>();
 
@@ -121,8 +63,6 @@ public class ApplicationResourcesAccessor implements Serializable {
         return getInstance(resourceName);
     }
 
-    private static final Object[] emptyArgs = new Object[0];
-
     /**
      * <p>
      * Gets the message.  If missing, will generate a struts-like value including
@@ -140,7 +80,16 @@ public class ApplicationResourcesAccessor implements Serializable {
      * @see ThreadLocale
      */
     public String getMessage(String key) {
-        return formatMessage(getString(key), emptyArgs);
+        Locale locale = ThreadLocale.get();
+        String string = null;
+        try {
+            ResourceBundle applicationResources = ResourceBundle.getBundle(resourceName, locale);
+            string = applicationResources.getString(key);
+        } catch(MissingResourceException err) {
+            // string remains null
+        }
+        if(string==null) return "???"+locale.toString()+"."+key+"???";
+        return string;
     }
 
     /**
@@ -151,10 +100,6 @@ public class ApplicationResourcesAccessor implements Serializable {
      * @see  #getMessage(String,Locale,String)
      */
     public String getMessage(String key, Object... args) {
-        return formatMessage(getString(key), args);
-    }
-
-    private String getString(String key) {
         Locale locale = ThreadLocale.get();
         String string = null;
         try {
@@ -163,18 +108,9 @@ public class ApplicationResourcesAccessor implements Serializable {
         } catch(MissingResourceException err) {
             // string remains null
         }
-        if(string==null) string = "???"+locale.toString()+"."+key+"???";
-        return string;
+        if(string==null) return "???"+locale.toString()+"."+key+"???";
+        if(args.length==0) return string;
+        // TODO: Cache MessageFormat objects for performance?
+        return new MessageFormat(string, ThreadLocale.get()).format(args, new StringBuffer(), null).toString();
     }
-
-    /*
-    public static void main(String[] args) {
-        System.out.println(multiReplace("test"));
-        System.out.println(multiReplace("test {0} {1}", "one", "two"));
-        System.out.println(multiReplace("test {1} {0}", "one", "two"));
-        System.out.println(multiReplace("test {0} {1}", "{1}", "{0}"));
-        System.out.println(multiReplace("test {1} {0}", "{1}", "{0}"));
-        System.out.println(multiReplace("test {0} {1}", "{2}", "{2}", "three"));
-        System.out.println(multiReplace("test {1} {0}", "{2}", "{2}", "three"));
-    }*/
 }
