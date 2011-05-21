@@ -202,6 +202,8 @@ public class NoSessionFilter implements Filter {
                                 return url;
                             } else if(url.startsWith("mailto:")) {
                                 return url;
+                            } else if(url.startsWith("cid:")) {
+                                return url;
                             } else {
                                 return addCookieValues(httpRequest, newCookies, url);
                             }
@@ -240,6 +242,8 @@ public class NoSessionFilter implements Filter {
                             } else if(url.startsWith("javascript:")) {
                                 return url;
                             } else if(url.startsWith("mailto:")) {
+                                return url;
+                            } else if(url.startsWith("cid:")) {
                                 return url;
                             } else {
                                 return addCookieValues(httpRequest, newCookies, url);
