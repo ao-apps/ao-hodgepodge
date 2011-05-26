@@ -42,6 +42,8 @@ public final class EncodingUtils {
      * Escapes for use in a XML attribute and writes to the provided <code>Appendable</code>.
      * Any characters less than 0x1f that are not \t, \r, or \n are completely filtered.
      *
+     * TODO: Make a new TextInXhtmlAttributeEncoder and move this method there.
+     *
      * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
      *
      * @see  #encodeXml(CharSequence, Appendable)

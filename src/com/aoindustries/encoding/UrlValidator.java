@@ -41,8 +41,7 @@ public class UrlValidator extends MediaValidator {
     public static boolean checkCharacter(int c, boolean foundQuestionMark) throws IOException {
         if(foundQuestionMark) {
             if(
-                foundQuestionMark
-                && (c<'a' || c>'z')
+                (c<'a' || c>'z')
                 && (c<'A' || c>'Z')
                 && (c<'0' || c>'9')
                 && c!='.'
@@ -52,12 +51,14 @@ public class UrlValidator extends MediaValidator {
                 && c!='+' // converted space
                 && c!='%' // encoded value
                 // Other characters used outside the URL data
-                && c!=':'
-                && c!='/'
-                && c!=';'
-                && c!='?'
+                //&& c!=':'
+                //&& c!='/'
+                //&& c!=';'
+                //&& c!='?'
+                // Parameter separators
                 && c!='='
                 && c!='&'
+                // Anchor separator
                 && c!='#'
             ) throw new IOException(ApplicationResources.accessor.getMessage("UrlMediaValidator.invalidCharacter", Integer.toHexString(c)));
             return true;
@@ -93,7 +94,6 @@ public class UrlValidator extends MediaValidator {
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.URL
-            || inputType==MediaType.JAVASCRIPT  // No validation required
             || inputType==MediaType.TEXT        // No validation required
         ;
     }

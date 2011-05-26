@@ -40,7 +40,9 @@ abstract public class MediaValidator extends FilterWriter implements ValidMediaF
      * @exception MediaException when unable to find an appropriate validator.
      */
     public static MediaValidator getMediaValidator(MediaType contentType, Writer out) throws MediaException {
-        // If the existing out is already validating for this type, use it
+        // If the existing out is already validating for this type, use it.
+        // This occurs when one validation validates to a set of characters that are a subset of the requested validator.
+        // For example, a URL is always valid TEXT.
         if(out instanceof MediaValidator) {
             MediaValidator inputValidator = (MediaValidator)out;
             if(inputValidator.isValidatingMediaInputType(contentType)) return inputValidator;

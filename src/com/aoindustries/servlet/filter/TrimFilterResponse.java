@@ -53,9 +53,11 @@ public class TrimFilterResponse extends HttpServletResponseWrapper {
         getResponse().reset();
         if(writer!=null) {
             writer.inTextArea = false;
+            writer.inPre = false;
         }
         if(outputStream!=null) {
             outputStream.inTextArea = false;
+            outputStream.inPre = false;
         }
     }
 
@@ -64,9 +66,11 @@ public class TrimFilterResponse extends HttpServletResponseWrapper {
         getResponse().resetBuffer();
         if(writer!=null) {
             writer.inTextArea = false;
+            writer.inPre = false;
         }
         if(outputStream!=null) {
             outputStream.inTextArea = false;
+            outputStream.inPre = false;
         }
     }
 

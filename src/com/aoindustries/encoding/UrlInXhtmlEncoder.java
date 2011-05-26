@@ -29,7 +29,7 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Encodes a URL into XHTML.  It uses HttpServletRequest.encodeURL
+ * Encodes a URL into XHTML.  It uses HttpServletRequest.encodeURL to
  * rewrite the URL as needed.
  *
  * @author  AO Industries, Inc.
@@ -56,7 +56,6 @@ public class UrlInXhtmlEncoder extends MediaEncoder {
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.URL
-            || inputType==MediaType.JAVASCRIPT  // No validation required
             || inputType==MediaType.TEXT        // No validation required
         ;
     }
@@ -68,21 +67,13 @@ public class UrlInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void writeSuffix() throws IOException {
-        //String url = StringUtility.replace(
-        //    response.encodeURL(
-        //        NewEncodingUtils.encodeURL(
-        //            buffer.toString()
-        //        )
-        //    ),
-        //    "&amp;",
-        //    "&"
-        //);
-        originalOut.append(response.encodeURL(EncodingUtils.encodeXmlAttribute(NewEncodingUtils.encodeURL(buffer.toString()))));
-        //StringUtility.replace(
-        //    url,
-        //    "&",
-        //    "&amp;",
-        //    originalOut
-        //);
+        EncodingUtils.encodeXmlAttribute(
+            response.encodeURL(
+                NewEncodingUtils.encodeUrlPath(
+                    buffer.toString()
+                )
+            ),
+            originalOut
+        );
     }
 }

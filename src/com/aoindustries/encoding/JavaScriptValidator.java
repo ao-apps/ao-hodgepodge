@@ -36,6 +36,7 @@ public class JavaScriptValidator extends MediaValidator {
         super(out);
     }
 
+    @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.JAVASCRIPT
@@ -43,6 +44,7 @@ public class JavaScriptValidator extends MediaValidator {
         ;
     }
 
+    @Override
     public MediaType getValidMediaOutputType() {
         return MediaType.JAVASCRIPT;
     }

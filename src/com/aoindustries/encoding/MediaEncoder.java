@@ -44,13 +44,13 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
      * Gets the media encoder for the requested types or <code>null</code> if
      * no encoding is necessary.  When an encoder is returned it is also a validator
      * for the contentType and produces valid output for the containerType.
-     * If no encoder is returned, it may be necessary to use a separate validator
+     * If no encoder is returned, it is necessary to use a separate validator
      * if character validation is required.
      *
      * @return the encoder or <code>null</code> if no encoding is necessary
      *
      * @exception MediaException when unable to encode the content into the container
-     *                            either because it is impossible or not yet implemented.
+     *                           either because it is impossible or not yet implemented.
      */
     public static MediaEncoder getMediaEncoder(HttpServletResponse response, MediaType contentType, MediaType containerType, Writer out) throws MediaException {
         // If the types match then no conversion is necessary
@@ -77,7 +77,7 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
             case URL:
                 switch(containerType) {
                     case JAVASCRIPT: encoder = new UrlInJavaScriptEncoder(out, response); break;
-                    case TEXT: encoder = new UrlInTextEncoder(out); break;
+                    case TEXT: encoder = null; break; // No conversion necessary
                     case XHTML: encoder = new UrlInXhtmlEncoder(out, response); break;
                     default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }

@@ -35,13 +35,15 @@ public class TextValidator extends MediaValidator {
         super(out);
     }
 
+    @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
-            inputType==MediaType.JAVASCRIPT        // No validation required
-            || inputType==MediaType.TEXT
+            inputType==MediaType.TEXT
+            // || inputType==MediaType.JAVASCRIPT        // No validation required
         ;
     }
 
+    @Override
     public MediaType getValidMediaOutputType() {
         return MediaType.TEXT;
     }

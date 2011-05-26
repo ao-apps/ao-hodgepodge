@@ -87,7 +87,7 @@ public class NewEncodingUtils {
      * UTF-8 encodes the URL up to the first ?, if present.  Does not encode
      * any characters in the set { '?', ':', '/', ';', '#' }.
      */
-    public static String encodeURL(String href) throws UnsupportedEncodingException {
+    public static String encodeUrlPath(String href) throws UnsupportedEncodingException {
         int len = href.length();
         int pos = 0;
         StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding

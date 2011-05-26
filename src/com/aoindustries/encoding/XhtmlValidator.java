@@ -74,7 +74,7 @@ public class XhtmlValidator extends MediaValidator {
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.XHTML
-            || inputType==MediaType.JAVASCRIPT  // No validation required
+            // || inputType==MediaType.JAVASCRIPT  // No validation required
             || inputType==MediaType.TEXT        // No validation required
         ;
     }

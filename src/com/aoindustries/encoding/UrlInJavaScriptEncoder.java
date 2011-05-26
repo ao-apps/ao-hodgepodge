@@ -23,7 +23,6 @@
 package com.aoindustries.encoding;
 
 import com.aoindustries.io.StringBuilderWriter;
-import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.io.Writer;
 import javax.servlet.http.HttpServletResponse;
@@ -56,7 +55,6 @@ public class UrlInJavaScriptEncoder extends MediaEncoder {
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.URL
-            || inputType==MediaType.JAVASCRIPT  // No validation required
             || inputType==MediaType.TEXT        // No validation required
         ;
     }
@@ -73,10 +71,12 @@ public class UrlInJavaScriptEncoder extends MediaEncoder {
 
     @Override
     public void writeSuffix() throws IOException {
-        StringUtility.replace(
-            response.encodeURL(buffer.toString()),
-            "&amp;",
-            "&",
+        TextInJavaScriptEncoder.encodeTextInJavaScript(
+            response.encodeURL(
+                NewEncodingUtils.encodeUrlPath(
+                    buffer.toString()
+                )
+            ),
             originalOut
         );
         originalOut.write('"');

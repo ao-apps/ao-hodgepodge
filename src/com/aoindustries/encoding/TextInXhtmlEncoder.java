@@ -149,7 +149,7 @@ public class TextInXhtmlEncoder extends MediaEncoder {
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.TEXT
-            || inputType==MediaType.JAVASCRIPT  // No validation required
+            //|| inputType==MediaType.JAVASCRIPT  // No validation required
         ;
     }
 

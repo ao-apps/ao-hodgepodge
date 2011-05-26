@@ -78,7 +78,7 @@ public class XhtmlPreValidator extends MediaValidator {
         return
             inputType==MediaType.XHTML_PRE
             || inputType==MediaType.XHTML       // All valid XHTML+PRE characters are also valid XHTML characters
-            || inputType==MediaType.JAVASCRIPT  // No validation required
+            //|| inputType==MediaType.JAVASCRIPT  // No validation required
             || inputType==MediaType.TEXT        // No validation required
         ;
     }
