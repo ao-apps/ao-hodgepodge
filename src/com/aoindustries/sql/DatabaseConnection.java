@@ -174,6 +174,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         else if(param instanceof Time) pstmt.setTime(pos, (Time)param);
         else if(param instanceof Timestamp) pstmt.setTimestamp(pos, (Timestamp)param);
         else if(param instanceof URL) pstmt.setURL(pos, (URL)param);
+        else if(param instanceof Enum) pstmt.setString(pos, ((Enum)param).name());
         else if(
             // Note: Several more added in Java 1.6
             (param instanceof SQLData)
