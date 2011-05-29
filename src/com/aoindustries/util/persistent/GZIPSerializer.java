@@ -28,8 +28,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Wraps a serializer and compresses the data using GZIP.
@@ -48,7 +48,7 @@ public class GZIPSerializer<E> implements Serializer<E> {
         this.wrapped = wrapped;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     private void serializeToBuffer(E value) throws IOException {
         if(lastSerialized!=value) {
             lastSerialized = null;
@@ -63,27 +63,27 @@ public class GZIPSerializer<E> implements Serializer<E> {
         }
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     @Override
     public boolean isFixedSerializedSize() {
         return false;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public long getSerializedSize(E value) throws IOException {
         serializeToBuffer(value);
         return buffer.size();
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public void serialize(E value, OutputStream out) throws IOException {
         serializeToBuffer(value);
         buffer.writeTo(out);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public E deserialize(InputStream in) throws IOException {
         GZIPInputStream gzin = new GZIPInputStream(in);

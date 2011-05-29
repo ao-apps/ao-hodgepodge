@@ -29,8 +29,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Uses <code>MappedByteBuffer</code> for persistence.  It maps the entire file
@@ -110,13 +110,13 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
         mappedBuffer = channel.map(protectionLevel==ProtectionLevel.READ_ONLY ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, raf.length());
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean isClosed() {
         return closed;
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void finalize() {
         try {
             close();
@@ -125,14 +125,14 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void close() throws IOException {
         closed = true;
         raf.close();
         if(tempFile!=null && tempFile.exists() && !tempFile.delete()) throw new IOException("Unable to delete temp file: "+tempFile);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public long capacity() throws IOException {
         return raf.length();
     }
@@ -140,14 +140,14 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     /**
      * Gets the position as an integer or throws IOException if too big for a mapped buffer.
      */
-    @ThreadSafe
+    // @ThreadSafe
     private static int getIndex(long position) throws IOException {
         if(position<0) throw new IllegalArgumentException("position<0: "+position);
         if(position>Integer.MAX_VALUE) throw new IOException("position too large for MappedPersistentBuffer: "+position);
         return (int)position;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void setCapacity(long newLength) throws IOException {
         long oldLength = capacity();
         if(oldLength!=newLength) {
@@ -173,13 +173,13 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void get(long position, byte[] buff, int off, int len) throws IOException {
         mappedBuffer.position(getIndex(position));
         mappedBuffer.get(buff, off, len);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public int getSome(long position, byte[] buff, int off, int len) throws IOException {
         mappedBuffer.position(getIndex(position));
         mappedBuffer.get(buff, off, len);
@@ -190,7 +190,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
      * Gets a single byte from the buffer.
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public byte get(long position) throws IOException {
         return mappedBuffer.get(getIndex(position));
     }
@@ -199,13 +199,13 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
      * Puts a single byte in the buffer.
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void put(long position, byte value) throws IOException {
         mappedBuffer.put(getIndex(position), value);
         modified = true;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         mappedBuffer.position(getIndex(position));
         mappedBuffer.put(buff, off, len);
@@ -216,7 +216,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
      * There is not currently a way to provide a barrier without using <code>force</code>.
      * This just uses force for both.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void barrier(boolean force) throws IOException {
         if(modified) {
             if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) mappedBuffer.force();
@@ -225,32 +225,32 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean getBoolean(long position) throws IOException {
         return mappedBuffer.get(getIndex(position))!=0;
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public int getInt(long position) throws IOException {
         return mappedBuffer.getInt(getIndex(position));
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public long getLong(long position) throws IOException {
         return mappedBuffer.getLong(getIndex(position));
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void putInt(long position, int value) throws IOException {
         mappedBuffer.putInt(getIndex(position), value);
         modified = true;
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void putLong(long position, long value) throws IOException {
         mappedBuffer.putLong(getIndex(position), value);
         modified = true;

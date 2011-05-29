@@ -30,7 +30,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.channels.FileChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
 
 /**
  * Uses <code>RandomAccessFile</code> for persistence.  Obtains a shared lock
@@ -103,13 +103,13 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         channel.lock(0L, Long.MAX_VALUE, protectionLevel==ProtectionLevel.READ_ONLY);
     }
 
-    @NotThreadSafe // closed field is not volatile
+    // @NotThreadSafe // closed field is not volatile
     public boolean isClosed() {
         return closed;
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void finalize() {
         try {
             close();
@@ -118,19 +118,19 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void close() throws IOException {
         closed = true;
         raf.close();
         if(tempFile!=null && tempFile.exists() && !tempFile.delete()) throw new IOException("Unable to delete temp file: "+tempFile);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public long capacity() throws IOException {
         return raf.length();
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void setCapacity(long newLength) throws IOException {
         long oldLength = capacity();
         raf.setLength(newLength);
@@ -140,7 +140,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public int getSome(long position, byte[] buff, int off, int len) throws IOException {
         raf.seek(position);
         int count = raf.read(buff, off, len);
@@ -152,7 +152,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
      * Gets a single byte from the buffer.
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public byte get(long position) throws IOException {
         raf.seek(position);
         return raf.readByte();
@@ -162,14 +162,14 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
      * Puts a single byte in the buffer.
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void put(long position, byte value) throws IOException {
         if(position>=capacity()) throw new BufferOverflowException();
         raf.seek(position);
         raf.write(value);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         if((position+len)>capacity()) throw new BufferOverflowException();
         raf.seek(position);
@@ -180,7 +180,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
      * There is not currently a way to provide a barrier without using <code>force</code>.
      * This just uses force for each case.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void barrier(boolean force) throws IOException {
         if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) channel.force(false);
     }

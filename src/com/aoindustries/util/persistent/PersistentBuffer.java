@@ -27,8 +27,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * <p>
@@ -52,19 +52,19 @@ public interface PersistentBuffer {
     /**
      * Checks if this buffer is closed.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     boolean isClosed();
 
     /**
      * Closes this buffer.  It is OK to close an already closed buffer.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void close() throws IOException;
 
     /**
      * Gets the capacity of this buffer.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     long capacity() throws IOException;
 
     /**
@@ -73,7 +73,7 @@ public interface PersistentBuffer {
      * automatic <code>barrier(true)</code>, depending on implementation.  This
      * should be considered an expensive operation.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void setCapacity(long newCapacity) throws IOException;
 
     /**
@@ -83,7 +83,7 @@ public interface PersistentBuffer {
      * @exception  BufferUnderflowException on end of file
      * @exception  IOException
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void get(long position, byte[] buff, int off, int len) throws IOException;
 
     /**
@@ -94,38 +94,38 @@ public interface PersistentBuffer {
      * @exception  BufferUnderflowException on end of file
      * @exception  IOException
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     int getSome(long position, byte[] buff, int off, int len) throws IOException;
 
     /**
      * Reads a boolean at the provided position, zero is considered <code>false</code>
      * and any non-zero value is <code>true</code>.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     boolean getBoolean(long position) throws IOException;
 
     /**
      * Reads a byte at the provided position.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     byte get(long position) throws IOException;
 
     /**
      * Reads an integer at the provided position.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     int getInt(long position) throws IOException;
 
     /**
      * Reads a long at the provided position.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     long getLong(long position) throws IOException;
 
     /**
      * Puts a single value in the buffer.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void put(long position, byte value) throws IOException;
 
     /**
@@ -134,7 +134,7 @@ public interface PersistentBuffer {
      *
      * @exception  BufferOverflowException on end of file
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void put(long position, byte[] buff, int off, int len) throws IOException;
 
     /**
@@ -143,7 +143,7 @@ public interface PersistentBuffer {
      *
      * @exception  BufferOverflowException on end of file
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void putInt(long position, int value) throws IOException;
 
     /**
@@ -152,7 +152,7 @@ public interface PersistentBuffer {
      *
      * @exception  BufferOverflowException on end of file
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void putLong(long position, long value) throws IOException;
 
     /**
@@ -160,7 +160,7 @@ public interface PersistentBuffer {
      *
      * @see  #barrier(boolean)
      */
-    @ThreadSafe
+    // @ThreadSafe
     ProtectionLevel getProtectionLevel();
 
     /**
@@ -172,7 +172,7 @@ public interface PersistentBuffer {
      *
      * @see  #getProtectionLevel()
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void barrier(boolean force) throws IOException;
 
     /**
@@ -180,7 +180,7 @@ public interface PersistentBuffer {
      *
      * @throws BufferUnderflowException
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     InputStream getInputStream(long position, long length) throws IOException, BufferUnderflowException;
 
     /**
@@ -188,6 +188,6 @@ public interface PersistentBuffer {
      *
      * @throws BufferOverflowException
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     OutputStream getOutputStream(long position, long length) throws IOException, BufferOverflowException;
 }

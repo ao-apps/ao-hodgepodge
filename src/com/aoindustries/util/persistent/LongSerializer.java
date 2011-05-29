@@ -25,8 +25,8 @@ package com.aoindustries.util.persistent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Serializes <code>Long</code> objects.
@@ -36,25 +36,25 @@ import org.checkthread.annotations.ThreadSafe;
  */
 public class LongSerializer implements Serializer<Long> {
 
-    @ThreadSafe
+    // @ThreadSafe
     public boolean isFixedSerializedSize() {
         return true;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public long getSerializedSize(Long value) {
         return 8;
     }
 
     private final byte[] buffer = new byte[8];
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void serialize(Long value, OutputStream out) throws IOException {
         PersistentCollections.longToBuffer(value, buffer, 0);
         out.write(buffer, 0, 8);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public Long deserialize(InputStream in) throws IOException {
         PersistentCollections.readFully(in, buffer, 0, 8);
         return PersistentCollections.bufferToLong(buffer, 0);

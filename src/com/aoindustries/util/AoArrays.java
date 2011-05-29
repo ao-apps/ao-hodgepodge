@@ -23,7 +23,7 @@
 package com.aoindustries.util;
 
 import java.io.Serializable;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * General-purpose array utilities and constants.
@@ -40,7 +40,7 @@ public class AoArrays {
     /**
      * Checks if the subrange of two byte arrays is equal.
      */
-    @ThreadSafe
+    // @ThreadSafe
     public static boolean equals(byte[] b1, byte[] b2, int off, int len) {
         for(int end=off+len; off<end; off++) {
             if(b1[off]!=b2[off]) return false;
@@ -51,7 +51,7 @@ public class AoArrays {
     /**
      * Checks if the subrange of two byte arrays is equal.
      */
-    @ThreadSafe
+    // @ThreadSafe
     public static boolean equals(byte[] b1, int off1, byte[] b2, int off2, int len) {
         for(int end=off1+len; off1<end; off1++, off2++) {
             if(b1[off1]!=b2[off2]) return false;
@@ -62,7 +62,7 @@ public class AoArrays {
     /**
      * Checks if all the values in the provided range are equal to <code>value</code>.
      */
-    @ThreadSafe
+    // @ThreadSafe
     public static boolean allEquals(byte[] b, int off, int len, byte value) {
         for(int end=off+len; off<end; off++) {
             if(b[off]!=value) return false;
@@ -75,7 +75,7 @@ public class AoArrays {
      * the shorter is a prefix of the longer.  The comparison considers each
      * byte as a value from 0-255.
      */
-    @ThreadSafe
+    // @ThreadSafe
     public static int compare(byte[] ba1, byte[] ba2) {
         int len = Math.min(ba1.length, ba2.length);
         for(int i=0; i<len; i++) {

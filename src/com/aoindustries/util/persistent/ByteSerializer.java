@@ -26,8 +26,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Serializes <code>Byte</code> objects.
@@ -36,22 +36,22 @@ import org.checkthread.annotations.ThreadSafe;
  */
 public class ByteSerializer implements Serializer<Byte> {
 
-    @ThreadSafe
+    // @ThreadSafe
     public boolean isFixedSerializedSize() {
         return true;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public long getSerializedSize(Byte value) {
         return 1;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void serialize(Byte value, OutputStream out) throws IOException {
         out.write(value);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public Byte deserialize(InputStream in) throws IOException {
         int value = in.read();
         if(value==-1) throw new EOFException();

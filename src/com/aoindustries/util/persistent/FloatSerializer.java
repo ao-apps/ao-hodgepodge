@@ -25,8 +25,8 @@ package com.aoindustries.util.persistent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Serializes <code>Float</code> objects.
@@ -36,25 +36,25 @@ import org.checkthread.annotations.ThreadSafe;
  */
 public class FloatSerializer implements Serializer<Float> {
 
-    @ThreadSafe
+    // @ThreadSafe
     public boolean isFixedSerializedSize() {
         return true;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public long getSerializedSize(Float value) {
         return 4;
     }
 
     private final byte[] buffer = new byte[4];
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void serialize(Float value, OutputStream out) throws IOException {
         PersistentCollections.intToBuffer(Float.floatToRawIntBits(value), buffer, 0);
         out.write(buffer, 0, 4);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public Float deserialize(InputStream in) throws IOException {
         PersistentCollections.readFully(in, buffer, 0, 4);
         return Float.intBitsToFloat(PersistentCollections.bufferToInt(buffer, 0));

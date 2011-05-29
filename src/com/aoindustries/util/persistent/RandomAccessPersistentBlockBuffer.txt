@@ -35,12 +35,12 @@ public interface RandomAccessPersistentBlockBuffer extends PersistentBlockBuffer
     /**
      * Gets the number of allocated blocks.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     long getBlockCount() throws IOException;
 
     /**
      * Gets the allocated block id at the provided index.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     long getBlockId(long index) throws IOException;
 }

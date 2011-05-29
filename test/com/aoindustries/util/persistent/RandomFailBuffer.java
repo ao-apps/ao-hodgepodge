@@ -32,8 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * This buffer wraps a buffer and introduces random failures.  All writes between
@@ -123,7 +123,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     /**
      * Fails in a one-in-interval chance.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void randomFail(FailureMethod failureMethod) throws IOException {
         if(allowFailures) {
             if(random.nextInt(failureMethod.getFailInterval())==0) {
@@ -149,7 +149,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     private void flushWriteCache() throws IOException {
         if(!writeCache.isEmpty()) {
             long capacity = wrapped.capacity();
@@ -164,12 +164,12 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean isClosed() {
         return isClosed;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void close() throws IOException {
         flushWriteCache();
         isClosed = true;
@@ -179,19 +179,19 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     /**
      * Checks if closed and throws IOException if so.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void checkClosed() throws IOException {
         if(isClosed) throw new IOException("RandomFailBuffer closed");
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public long capacity() throws IOException {
         checkClosed();
         randomFail(FailureMethod.capacity);
         return wrapped.capacity();
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void setCapacity(long newCapacity) throws IOException {
         checkClosed();
         randomFail(FailureMethod.setCapacity);
@@ -213,7 +213,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
         wrapped.setCapacity(newCapacity);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public int getSome(long position, final byte[] buff, int off, int len) throws IOException {
         checkClosed();
         if(position<0) throw new IllegalArgumentException("position<0: "+position);
@@ -247,7 +247,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
         return bytesRead;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         checkClosed();
         if(position<0) throw new IllegalArgumentException("position<0: "+position);
@@ -281,12 +281,12 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
-    @ThreadSafe
+    // @ThreadSafe
     public ProtectionLevel getProtectionLevel() {
         return wrapped.getProtectionLevel();
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void barrier(boolean force) throws IOException {
         checkClosed();
         randomFail(FailureMethod.barrier);

@@ -27,8 +27,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Provides a base implementation of <code>PersistentBuffer</code> in terms of
@@ -45,7 +45,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
         this.protectionLevel = protectionLevel;
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     public ProtectionLevel getProtectionLevel() {
         return protectionLevel;
     }
@@ -55,7 +55,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #read(long, byte[], int, int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void get(long position, byte[] buff, int off, int len) throws IOException {
         while(len>0) {
             int count = getSome(position, buff, off, len);
@@ -70,7 +70,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #readByte(long)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean getBoolean(long position) throws IOException {
         return get(position)!=0;
     }
@@ -82,7 +82,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #get(long, byte[], int, int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public byte get(long position) throws IOException {
         get(position, ioBuffer, 0, 1);
         return ioBuffer[0];
@@ -93,7 +93,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #get(long, byte[], int, int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public int getInt(long position) throws IOException {
         get(position, ioBuffer, 0, 4);
         return PersistentCollections.bufferToInt(ioBuffer, 0);
@@ -104,7 +104,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #get(long, byte[], int, int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public long getLong(long position) throws IOException {
         get(position, ioBuffer, 0, 8);
         return
@@ -126,7 +126,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #put(long, byte[], int, int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void put(long position, byte value) throws IOException {
         ioBuffer[0] = value;
         put(position, ioBuffer, 0, 1);
@@ -137,7 +137,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #write(long, byte[], int, int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void putInt(long position, int value) throws IOException {
         PersistentCollections.intToBuffer(value, ioBuffer, 0);
         put(position, ioBuffer, 0, 4);
@@ -148,7 +148,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      *
      * @see  #write(long, byte[], int, int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void putLong(long position, long value) throws IOException {
         PersistentCollections.longToBuffer(value, ioBuffer, 0);
         put(position, ioBuffer, 0, 8);
@@ -160,7 +160,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #get(long)
      * @see  #getSome(long, byte[], int, int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public InputStream getInputStream(final long position, final long length) throws IOException, BufferUnderflowException {
         return new InputStream() {
             private boolean closed = false;
@@ -228,7 +228,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #put(long, byte)
      * @see  #put(long, byte[], int, int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public OutputStream getOutputStream(final long position, final long length) throws IOException, BufferOverflowException {
         return new OutputStream() {
             private boolean closed = false;

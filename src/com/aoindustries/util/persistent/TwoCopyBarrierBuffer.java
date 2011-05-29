@@ -45,8 +45,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * <p>
@@ -420,7 +420,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
      *
      * @param isClosing  when <code>true</code>, will not reopen raf.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void flushWriteCache(boolean isClosing) throws IOException {
         if(PersistentCollections.ASSERT) assert Thread.holdsLock(cacheLock);
         if(!currentWriteCache.isEmpty()) {
@@ -466,7 +466,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
-    @ThreadSafe
+    // @ThreadSafe
     public void finalize() {
         try {
             close();
@@ -475,14 +475,14 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     public boolean isClosed() {
         synchronized(cacheLock) {
             return isClosed;
         }
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     public void close() throws IOException {
         synchronized(shutdownBuffers) {
             shutdownBuffers.remove(this);
@@ -504,13 +504,13 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     /**
      * Checks if closed and throws IOException if so.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void checkClosed() throws IOException {
         if(PersistentCollections.ASSERT) assert Thread.holdsLock(cacheLock);
         if(isClosed) throw new IOException("TwoCopyBarrierBuffer(\""+file.getPath()+"\") is closed");
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     public long capacity() throws IOException {
         synchronized(cacheLock) {
             checkClosed();
@@ -521,7 +521,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     /**
      * Clears the starting time for the write cache.  Also cancels and removes the asynchronous timer, if exists.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void clearFirstWriteTime() {
         if(PersistentCollections.ASSERT) assert Thread.holdsLock(cacheLock);
         firstWriteTime = -1;
@@ -534,7 +534,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     /**
      * Marks the starting time for the write cache.  Also starts the asynchronous timer, if not yet started.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void markFirstWriteTime() {
         if(PersistentCollections.ASSERT) assert Thread.holdsLock(cacheLock);
         // Mark as needing flush
@@ -570,7 +570,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     public void setCapacity(long newCapacity) throws IOException {
         synchronized(cacheLock) {
             checkClosed();
@@ -597,7 +597,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     @Override
     public byte get(long position) throws IOException {
         synchronized(cacheLock) {
@@ -622,7 +622,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     public int getSome(long position, final byte[] buff, int off, int len) throws IOException {
         synchronized(cacheLock) {
             checkClosed();
@@ -667,7 +667,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     }
 
     @Override
-    @ThreadSafe
+    // @ThreadSafe
     public void put(long position, byte value) throws IOException {
         synchronized(cacheLock) {
             checkClosed();
@@ -735,7 +735,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         synchronized(cacheLock) {
             checkClosed();
@@ -811,7 +811,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     public void barrier(boolean force) throws IOException {
         synchronized(cacheLock) {
             checkClosed();

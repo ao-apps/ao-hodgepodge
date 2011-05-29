@@ -26,8 +26,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * Serializes <code>Boolean</code> objects.
@@ -36,22 +36,22 @@ import org.checkthread.annotations.ThreadSafe;
  */
 public class BooleanSerializer implements Serializer<Boolean> {
 
-    @ThreadSafe
+    // @ThreadSafe
     public boolean isFixedSerializedSize() {
         return true;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public long getSerializedSize(Boolean value) {
         return 1;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void serialize(Boolean value, OutputStream out) throws IOException {
         out.write(value ? 1 : 0);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public Boolean deserialize(InputStream in) throws IOException {
         int value = in.read();
         if(value==-1) throw new EOFException();

@@ -24,7 +24,7 @@ package com.aoindustries.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
 
 /**
  * Automatically extends the size of the list instead of throwing exceptions on set, add, and addAll.
@@ -47,7 +47,7 @@ public class AutoGrowArrayList<E> extends ArrayList<E> {
         super(c);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public E set(int index, E element) {
         int minSize = index+1;
@@ -56,7 +56,7 @@ public class AutoGrowArrayList<E> extends ArrayList<E> {
         return super.set(index, element);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public void add(int index, E element) {
         ensureCapacity(index+1);
@@ -64,7 +64,7 @@ public class AutoGrowArrayList<E> extends ArrayList<E> {
         super.add(index, element);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
         ensureCapacity(index+c.size());

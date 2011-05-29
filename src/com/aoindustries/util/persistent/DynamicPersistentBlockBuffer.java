@@ -32,8 +32,8 @@ import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * <p>
@@ -128,12 +128,12 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     private static final long PAGE_OFFSET_MASK = PAGE_SIZE-1;
     private static final long PAGE_MASK = -PAGE_SIZE;
 
-    @ThreadSafe
+    // @ThreadSafe
     private static boolean isAllocated(byte header) {
         return (header&0x80)!=0;
     }
 
-    @ThreadSafe
+    // @ThreadSafe
     private static int getBlockSizeBits(byte header) {
         return header&0x3f;
     }
@@ -141,7 +141,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     /**
      * Gets the block size given the block size bits.
      */
-    @ThreadSafe
+    // @ThreadSafe
     private static long getBlockSize(int blockSizeBits) {
         return 1L<<blockSizeBits;
     }
@@ -149,7 +149,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     /**
      * Gets the offset of an id within a page.
      */
-    @ThreadSafe
+    // @ThreadSafe
     private static long getPageOffset(long id) {
         return id&PAGE_OFFSET_MASK;
     }
@@ -157,7 +157,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     /**
      * Gets the nearest page boundary, rounding up if necessary.
      */
-    @ThreadSafe
+    // @ThreadSafe
     private static long getNearestPage(long id) {
         if(getPageOffset(id)!=0) id = (id & PAGE_MASK)+PAGE_SIZE;
         return id;
@@ -168,7 +168,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     /**
      * Checks that is a valid blockSizeBits.
      */
-    @ThreadSafe
+    // @ThreadSafe
     private static boolean isValidBlockSizeBits(int blockSizeBits) {
         return blockSizeBits>=0 && blockSizeBits<=0x3f;
     }
@@ -176,7 +176,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     /**
      * Makes sure the id is in the valid range: <code>0 &lt;= id &lt; capacity</code>
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private boolean isValidRange(long id) throws IOException {
         return id>=0 && id<pbuffer.capacity();
     }
@@ -185,7 +185,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      * Each block should always be aligned based on its size.  This means that
      * all bits for its location less than its size should be zero.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private boolean isBlockAligned(long id, int blockSizeBits) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(id);
         if(PersistentCollections.ASSERT) assert isValidBlockSizeBits(blockSizeBits);
@@ -195,7 +195,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     /**
      * Makes sure a block is complete: <code>(id + blockSize) &lt;= capacity</code>
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private boolean isBlockComplete(long id, int blockSizeBits) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(id);
         if(PersistentCollections.ASSERT) assert isValidBlockSizeBits(blockSizeBits);
@@ -209,7 +209,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      * data.  The only true way to check if allocated is to sequentially scan
      * from the beginning of the file considering each block size.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private boolean isAllocated(long id) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(id);
         byte header = pbuffer.get(id);
@@ -228,7 +228,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      *                        is used when initially populating the free space maps or when increasing
      *                        the capacity.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void addFreeSpaceMap(long id, int blockSizeBits, long capacity, boolean groupPrevOnly) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(id);
         if(PersistentCollections.ASSERT) assert isValidBlockSizeBits(blockSizeBits);
@@ -312,7 +312,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      *
      * @return  the address of the block or <code>-1</code> if no free space can be found
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private long splitAllocate(int blockSizeBits, long capacity) throws IOException {
         return splitAllocate(blockSizeBits, capacity, 0);
     }
@@ -358,7 +358,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     /**
      * Adds newly allocated space to the free space maps.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void configureNewAllocation(long start, long capacity) throws IOException {
         //System.out.println("DEBUG: start="+start+", capacity="+capacity+", capacity/start="+((float)capacity/(float)start));
         //long iterations = 0;
@@ -397,7 +397,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     /**
      * This will call <code>barrier</code> as necessary during block splitting.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public long allocate(long minimumSize) throws IOException {
         if(minimumSize<0) throw new IllegalArgumentException("minimumSize<0: "+minimumSize);
@@ -463,7 +463,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
         return id;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public void deallocate(long id) throws IOException, IllegalStateException {
         if(PersistentCollections.ASSERT) assert isValidRange(id);
@@ -481,7 +481,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     // </editor-fold>
 
     // <editor-fold desc="PersistentBlockBuffer Implementation">
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public Iterator<Long> iterateBlockIds() throws IOException {
         return new Iterator<Long>() {
@@ -489,7 +489,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             private long lastId = -1;
             private long nextId = 0;
 
-            @NotThreadSafe
+            // @NotThreadSafe
             @Override
             public boolean hasNext() {
                 if(expectedModCount!=modCount) throw new ConcurrentModificationException();
@@ -509,7 +509,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 }
             }
 
-            @NotThreadSafe
+            // @NotThreadSafe
             @Override
             public Long next() {
                 if(expectedModCount!=modCount) throw new ConcurrentModificationException();
@@ -530,7 +530,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 }
             }
 
-            @NotThreadSafe
+            // @NotThreadSafe
             @Override
             public void remove() {
                 try {
@@ -552,7 +552,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      * the block size of allocated blocks (not necessarily enforced, it is up
      * to the caller to ensure this).
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     public long getBlockSize(long id) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(id);
@@ -565,7 +565,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     }
 
     // The block data starts one byte past the block header
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     protected long getBlockAddress(long id) throws IOException {
         if(PersistentCollections.ASSERT) assert isAllocated(id) : "Block not allocated: "+id;
@@ -577,7 +577,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      * constrained to a single block, and blocks are always allocated fully.
      * This merely asserts this fact.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     @Override
     protected void ensureCapacity(long capacity) throws IOException {
         if(PersistentCollections.ASSERT) assert pbuffer.capacity()>=capacity: "pbuffer.capacity()<capacity";

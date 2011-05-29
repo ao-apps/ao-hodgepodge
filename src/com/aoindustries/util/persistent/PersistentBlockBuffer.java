@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * A persistent set of blocks of arbitrary data.  Each block may be any
@@ -45,13 +45,13 @@ public interface PersistentBlockBuffer {
     /**
      * Checks if this buffer is closed.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     boolean isClosed();
 
     /**
      * Closes this buffer.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void close() throws IOException;
 
     /**
@@ -59,7 +59,7 @@ public interface PersistentBlockBuffer {
      *
      * @see  #barrier(boolean)
      */
-    @ThreadSafe
+    // @ThreadSafe
     ProtectionLevel getProtectionLevel();
 
     /**
@@ -71,7 +71,7 @@ public interface PersistentBlockBuffer {
      *
      * @see  #getProtectionLevel()
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void barrier(boolean force) throws IOException;
 
     /**
@@ -90,7 +90,7 @@ public interface PersistentBlockBuffer {
      * in this case, but this is only intended to catch bugs.
      * </p>
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     Iterator<Long> iterateBlockIds() throws IOException;
 
     /**
@@ -115,7 +115,7 @@ public interface PersistentBlockBuffer {
      * This will manifest itself as an extra allocated block after recovery.
      * </p>
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     long allocate(long minimumSize) throws IOException;
 
     /**
@@ -134,37 +134,37 @@ public interface PersistentBlockBuffer {
      *
      * @throws IllegalStateException if the block is not allocated.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void deallocate(long id) throws IOException, IllegalStateException;
 
     /**
      * Gets the block size for the provided id.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     long getBlockSize(long id) throws IOException;
 
     /**
      * Gets bytes from this block.  Bounds checking is performed only when assertions are enabled.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void get(long id, long offset, byte[] buff, int off, int len) throws IOException;
 
     /**
      * Gets an integer from this block.  Bounds checking is performed only when assertions are enabled.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     int getInt(long id, long offset) throws IOException;
 
     /**
      * Gets a long from this block.  Bounds checking is performed only when assertions are enabled.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     long getLong(long id, long offset) throws IOException;
 
     /**
      * Gets an input stream that reads from this buffer.  Bounds checking is performed only when assertions are enabled.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     InputStream getInputStream(long id, long offset, long length) throws IOException;
 
     /**
@@ -172,7 +172,7 @@ public interface PersistentBlockBuffer {
      *
      * @throws BufferOverflowException
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void put(long id, long offset, byte[] buff, int off, int len) throws IOException;
 
     /**
@@ -180,7 +180,7 @@ public interface PersistentBlockBuffer {
      *
      * @throws BufferOverflowException
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void putInt(long id, long offset, int value) throws IOException;
 
     /**
@@ -188,7 +188,7 @@ public interface PersistentBlockBuffer {
      *
      * @throws BufferOverflowException
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     void putLong(long id, long offset, long value) throws IOException;
 
     /**
@@ -196,6 +196,6 @@ public interface PersistentBlockBuffer {
      *
      * @throws BufferOverflowException
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     OutputStream getOutputStream(long id, long offset, long length) throws IOException;
 }

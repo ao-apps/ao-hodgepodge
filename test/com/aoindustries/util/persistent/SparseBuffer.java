@@ -29,8 +29,8 @@ import java.nio.ReadOnlyBufferException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.checkthread.annotations.NotThreadSafe;
-import org.checkthread.annotations.ThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.ThreadSafe;
 
 /**
  * This buffer allows very large address spaces for testing purposes.  It is backed by
@@ -56,22 +56,22 @@ public class SparseBuffer extends AbstractPersistentBuffer {
         super(protectionLevel);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean isClosed() {
         return isClosed;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void close() throws IOException {
         isClosed = true;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public long capacity() throws IOException {
         return capacity;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void setCapacity(long newCapacity) throws IOException {
         if(newCapacity<0) throw new IllegalArgumentException("capacity<0: "+capacity);
         if(protectionLevel==ProtectionLevel.READ_ONLY) throw new ReadOnlyBufferException();
@@ -89,14 +89,14 @@ public class SparseBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public int getSome(long position, byte[] buff, int off, int len) throws IOException {
         get(position, buff, off, len);
         return len;
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void get(long position, byte[] buff, int off, int len) throws IOException {
         if((position+len)>capacity) throw new BufferUnderflowException();
         // TODO: More efficient algorithm using blocks calling System.arraycopy.
@@ -112,7 +112,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
         }
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         if(protectionLevel==ProtectionLevel.READ_ONLY) throw new ReadOnlyBufferException();
         if((position+len)>capacity) throw new BufferOverflowException();
@@ -135,7 +135,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
     /**
      * Does nothing because this is only a volatile test buffer.
      */
-    @ThreadSafe
+    // @ThreadSafe
     public void barrier(boolean force) throws IOException {
     }
 }

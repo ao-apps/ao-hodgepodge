@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.logging.Logger;
-import org.checkthread.annotations.NotThreadSafe;
+// import org.checkthread.annotations.NotThreadSafe;
 
 /**
  * <p>
@@ -213,7 +213,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Checks that the ptr is in the valid address range.  It must be >=0 and
      * not the metadata block pointer.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private boolean isValidRange(long ptr) throws IOException {
         return ptr>=0 && ptr!=metaDataBlockId;
     }
@@ -223,7 +223,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * Gets the head pointer or <code>TAIL_PTR</code> if the list is empty.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private long getHead() {
         return _head;
     }
@@ -231,14 +231,14 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * Sets the head to the provided value.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void setHead(long head) throws IOException {
         if(PersistentCollections.ASSERT) assert head==END_PTR || isValidRange(head);
         blockBuffer.putLong(metaDataBlockId, HEAD_OFFSET, head);
         this._head = head;
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     private long getTail() {
         return _tail;
     }
@@ -246,7 +246,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * Sets the tail to the provided value.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void setTail(long tail) throws IOException {
         if(PersistentCollections.ASSERT) assert tail==END_PTR || isValidRange(tail);
         blockBuffer.putLong(metaDataBlockId, TAIL_OFFSET, tail);
@@ -257,7 +257,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Gets the next pointer for the entry at the provided location.
      * The entry must have non-null next and prev.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private long getNext(long ptr) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         return blockBuffer.getLong(ptr, NEXT_OFFSET);
@@ -267,7 +267,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Sets the next pointer for the entry at the provided location.
      * The entry must have non-null next and prev.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void setNext(long ptr, long next) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         if(PersistentCollections.ASSERT) assert next==END_PTR || isValidRange(next);
@@ -278,7 +278,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Gets the prev pointer for the entry at the provided location.
      * The entry must have non-null next and prev.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private long getPrev(long ptr) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         return blockBuffer.getLong(ptr, PREV_OFFSET);
@@ -288,7 +288,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Sets the prev pointer for the entry at the provided location.
      * The entry must have non-null next and prev.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void setPrev(long ptr, long prev) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         if(PersistentCollections.ASSERT) assert prev==END_PTR || isValidRange(prev);
@@ -300,7 +300,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * This does not include the block header.
      * The entry must have non-null next and prev.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private long getDataSize(long ptr) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         return blockBuffer.getLong(ptr, DATA_SIZE_OFFSET);
@@ -310,7 +310,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Checks if the provided element is null.
      * The entry must have non-null next and prev.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private boolean isNull(long ptr) throws IOException {
         return getDataSize(ptr)==DATA_SIZE_NULL;
     }
@@ -319,7 +319,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Gets the element for the entry at the provided location.
      * The entry must have non-null next and prev.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private E getElement(long ptr) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         long dataSize = getDataSize(ptr);
@@ -341,7 +341,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Operates in constant time.
      * The entry must have non-null next and prev.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void remove(long ptr) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         if(PersistentCollections.ASSERT) assert _size>0;
@@ -380,7 +380,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * appropriate amount of space.
      * Operates in constant time.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private long addEntry(long next, long prev, E element) throws IOException {
         //System.err.println("DEBUG: addEntry: element="+element);
         if(PersistentCollections.ASSERT) assert next==END_PTR || isValidRange(next);
@@ -438,7 +438,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * Adds the first entry to the list.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void addFirstEntry(final E element) throws IOException {
         if(PersistentCollections.ASSERT) assert getHead()==END_PTR;
         if(PersistentCollections.ASSERT) assert getTail()==END_PTR;
@@ -448,7 +448,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * Adds the provided element before the element at the provided location.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void addBefore(final E element, final long ptr) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         addEntry(ptr, getPrev(ptr), element);
@@ -457,7 +457,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * Adds the provided element after the element at the provided location.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void addAfter(final E element, final long ptr) throws IOException {
         if(PersistentCollections.ASSERT) assert isValidRange(ptr);
         addEntry(getNext(ptr), ptr, element);
@@ -509,12 +509,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @exception  IOException if IO error occurs during check
      * @exception  IllegalStateException when in an inconsistent state and, if autoCorrect, is uncorrectable
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     protected void checkConsistency(boolean autoCorrect) throws IOException, IllegalStateException {
         checkConsistency(autoCorrect, false);
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     private void dumpPointer(long ptr) throws IOException {
         System.err.println("_head="+_head);
         if(_head!=END_PTR) System.err.println("  _head->next="+getNext(_head));
@@ -539,7 +539,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         if(_tail!=END_PTR) System.err.println("  _tail->prev="+getPrev(_tail));
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     private void checkConsistency(boolean autoCorrect, boolean isInit) throws IOException, IllegalStateException {
         if(autoCorrect && blockBuffer.getProtectionLevel()==ProtectionLevel.READ_ONLY) throw new IllegalArgumentException("autoCorrect on read-only block buffer is not allowed");
         // Meta data block is present and complete
@@ -755,7 +755,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return the first element in this list
      * @throws NoSuchElementException if this list is empty
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E getFirst() {
         long head=getHead();
         if(head==END_PTR) throw new NoSuchElementException();
@@ -773,7 +773,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return the last element in this list
      * @throws NoSuchElementException if this list is empty
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E getLast()  {
         long tail=getTail();
         if(tail==END_PTR) throw new NoSuchElementException();
@@ -791,7 +791,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return the first element from this list
      * @throws NoSuchElementException if this list is empty
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E removeFirst() {
         long head = getHead();
         if(head==END_PTR) throw new NoSuchElementException();
@@ -812,7 +812,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return the last element from this list
      * @throws NoSuchElementException if this list is empty
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E removeLast() {
         long tail = getTail();
         if(tail==END_PTR) throw new NoSuchElementException();
@@ -832,7 +832,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *
      * @param e the element to add
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void addFirst(E element) {
         try {
             modCount++;
@@ -852,7 +852,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *
      * @param e the element to add
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void addLast(E element) {
         try {
             modCount++;
@@ -874,7 +874,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return <tt>true</tt> if this list contains the specified element
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean contains(Object o) {
         return indexOf(o) != -1;
     }
@@ -884,7 +884,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *
      * This runs in linear time.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private long getPointerForIndex(long index) throws IOException {
         if(PersistentCollections.ASSERT) assert _size>0;
         if(index<(_size >> 1)) {
@@ -923,7 +923,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return <tt>true</tt> if this list contained the specified element
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean remove(Object o) {
         try {
             if(o==null) {
@@ -962,7 +962,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws NullPointerException if the specified collection is null
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean addAll(Collection<? extends E> c) {
         if(c.isEmpty()) return false;
         modCount++;
@@ -986,7 +986,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws NullPointerException if the specified collection is null
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean addAll(int index, Collection<? extends E> c) {
         if(index==_size) return addAll(c);
         if(c.isEmpty()) return false;
@@ -1007,7 +1007,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *
      * @return the number of elements in this list
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public int size() {
         return _size > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)_size;
     }
@@ -1021,7 +1021,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return <tt>true</tt> (as specified by {@link Collection#add})
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean add(E element) {
         addLast(element);
         return true;
@@ -1032,7 +1032,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * Clears the list.
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void clear() {
         try {
             modCount++;
@@ -1063,7 +1063,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public E get(int index) {
         try {
             return getElement(getPointerForIndex(index));
@@ -1082,7 +1082,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @param element element to be stored at the specified position
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     private void setElement(long ptr, E element) {
         modCount++;
         try {
@@ -1105,7 +1105,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public E set(int index, E element) {
         try {
             long ptr = getPointerForIndex(index);
@@ -1127,7 +1127,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void add(int index, E element) {
         modCount++;
         try {
@@ -1150,7 +1150,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public E remove(int index) {
         modCount++;
         try {
@@ -1175,7 +1175,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *         this list, or -1 if this list does not contain the element
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public int indexOf(Object o) {
         try {
             int index = 0;
@@ -1208,7 +1208,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *         this list, or -1 if this list does not contain the element
      */
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public int lastIndexOf(Object o) {
         try {
             long index = _size;
@@ -1235,7 +1235,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
     }
 
-    @NotThreadSafe
+    // @NotThreadSafe
     public E peek() {
         if(_size==0) return null;
         return getFirst();
@@ -1247,7 +1247,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws NoSuchElementException if this list is empty
      * @since 1.5
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E element() {
         return getFirst();
     }
@@ -1257,7 +1257,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return the head of this list, or <tt>null</tt> if this list is empty
      * @since 1.5
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E poll() {
         if(_size==0) return null;
         return removeFirst();
@@ -1270,7 +1270,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws NoSuchElementException if this list is empty
      * @since 1.5
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E remove() {
         return removeFirst();
     }
@@ -1282,7 +1282,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return <tt>true</tt> (as specified by {@link Queue#offer})
      * @since 1.5
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean offer(E e) {
         return add(e);
     }
@@ -1294,7 +1294,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return <tt>true</tt> (as specified by {@link Deque#offerFirst})
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean offerFirst(E e) {
         addFirst(e);
         return true;
@@ -1307,7 +1307,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return <tt>true</tt> (as specified by {@link Deque#offerLast})
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean offerLast(E e) {
         addLast(e);
         return true;
@@ -1321,7 +1321,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *         if this list is empty
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E peekFirst() {
         if(_size==0)
             return null;
@@ -1336,7 +1336,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *         if this list is empty
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E peekLast() {
         if(_size==0)
             return null;
@@ -1351,7 +1351,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *     this list is empty
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E pollFirst() {
         if(_size==0)
             return null;
@@ -1366,7 +1366,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      *     this list is empty
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E pollLast() {
         if (_size==0)
             return null;
@@ -1382,7 +1382,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @param e the element to push
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void push(E e) {
         addFirst(e);
     }
@@ -1398,7 +1398,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws NoSuchElementException if this list is empty
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public E pop() {
         return removeFirst();
     }
@@ -1412,7 +1412,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return <tt>true</tt> if the list contained the specified element
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean removeFirstOccurrence(Object o) {
         return remove(o);
     }
@@ -1426,7 +1426,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return <tt>true</tt> if the list contained the specified element
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public boolean removeLastOccurrence(Object o) {
         try {
             if(o==null) {
@@ -1473,7 +1473,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @see List#listIterator(int)
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public ListIterator<E> listIterator(int index) {
         return new ListItr(index);
     }
@@ -1501,12 +1501,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             }
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         public boolean hasNext() {
             return nextIndex != _size;
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         public E next() {
             checkForComodification();
             if (nextIndex == _size) throw new NoSuchElementException();
@@ -1521,12 +1521,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             }
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         public boolean hasPrevious() {
             return nextIndex != 0;
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         public E previous() {
             checkForComodification();
             if (nextIndex == 0) throw new NoSuchElementException();
@@ -1540,14 +1540,14 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             }
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         public int nextIndex() {
             if(nextIndex>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from nextIndex: "+nextIndex);
             assert nextIndex>=0;
             return (int)nextIndex;
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         public int previousIndex() {
             long prevIndex = nextIndex-1;
             if(prevIndex>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from previousIndex: "+prevIndex);
@@ -1555,7 +1555,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             return (int)prevIndex;
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         public void remove() {
             checkForComodification();
             try {
@@ -1575,7 +1575,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             }
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         public void set(E e) {
             if (lastReturned == END_PTR)
             throw new IllegalStateException();
@@ -1584,7 +1584,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             expectedModCount++;
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         public void add(E e) {
             checkForComodification();
             try {
@@ -1598,7 +1598,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             }
         }
 
-        @NotThreadSafe
+        // @NotThreadSafe
         final void checkForComodification() {
             if (modCount != expectedModCount)
             throw new ConcurrentModificationException();
@@ -1608,7 +1608,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * @since 1.6
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public Iterator<E> descendingIterator() {
         return new DescendingIterator();
     }
@@ -1616,22 +1616,22 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /** Adapter to provide descending iterators via ListItr.previous */
     private class DescendingIterator implements Iterator<E> {
         final ListItr itr = new ListItr(size());
-        @NotThreadSafe
+        // @NotThreadSafe
         public boolean hasNext() {
             return itr.hasPrevious();
         }
-        @NotThreadSafe
+        // @NotThreadSafe
         public E next() {
                 return itr.previous();
             }
-        @NotThreadSafe
+        // @NotThreadSafe
         public void remove() {
             itr.remove();
         }
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public Object[] toArray() {
         try {
             if(_size>Integer.MAX_VALUE) throw new RuntimeException("Too many elements in list to create Object[]: "+_size);
@@ -1645,7 +1645,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
         if(_size>Integer.MAX_VALUE) throw new RuntimeException("Too many elements in list to fill or create array: "+_size);
@@ -1666,7 +1666,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     }
 
     @Override
-    @NotThreadSafe
+    // @NotThreadSafe
     public void finalize() throws IOException {
         close();
     }
@@ -1674,7 +1674,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     /**
      * Closes the random access file backing this list.
      */
-    @NotThreadSafe
+    // @NotThreadSafe
     public void close() throws IOException {
         if(!blockBuffer.isClosed()) {
             // if(PersistentCollections.ASSERT) assert isConsistent();
