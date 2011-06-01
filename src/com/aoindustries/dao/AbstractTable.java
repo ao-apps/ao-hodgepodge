@@ -272,8 +272,22 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
         return database;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * This default implementation does nothing.
+     */
     @Override
     public void clearCaches() {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * This default implementation does nothing.
+     */
+    @Override
+    public void tableUpdated() {
     }
 
     @Override

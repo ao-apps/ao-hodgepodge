@@ -65,13 +65,29 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
         super(keyClass, rowClass, database);
     }
 
-    @Override
-    public void clearCaches() {
-        super.clearCaches();
+    private void clearCaches0() {
         unsortedRowsCache.remove();
         sortedRowsCache.remove();
         rowCachedLoaded.set(Boolean.FALSE);
         rowCache.get().clear();
+    }
+
+    /**
+     * Clears all caches for the current thread.
+     */
+    @Override
+    public void clearCaches() {
+        super.clearCaches();
+        clearCaches0();
+    }
+
+    /**
+     * When the table is updated, all caches are cleared for the current thread.
+     */
+    @Override
+    public void tableUpdated() {
+        super.tableUpdated();
+        clearCaches0();
     }
 
     @Override

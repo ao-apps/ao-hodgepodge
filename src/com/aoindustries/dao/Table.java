@@ -39,13 +39,23 @@ public interface Table<K extends Comparable<? super K>,R extends Row<K,R>> exten
     DaoDatabase getDatabase();
 
     /**
-     * Clears the caches for this table.  Cache coherency is maintained between users for global tables,
-     * or for per-user caches only your own view is affected.  No updates will be seen until the end
-     * of their caching transaction, generally a web request.
+     * Clears the caches for this table that apply to the current thread.
+     * This is used to end a caching session, generally short-term and associated
+     * with a single request or process.
      *
-     * Any overriding method should call super.clearCaches(boolean).
+     * Any overriding method should call super.clearCaches().
      */
     void clearCaches();
+
+    /**
+     * Called after the table is updated to ensure cache integrity.  Cache coherency
+     * is maintained between users for global tables.  For per-user caches only
+     * your own view is affected; no updates will be seen until the end
+     * of their caching transaction, generally a web request.
+     *
+     * Any overriding method should call super.tableUpdated().
+     */
+    void tableUpdated();
 
     /**
      * Gets thte number of accessible rows in this table.
@@ -56,6 +66,9 @@ public interface Table<K extends Comparable<? super K>,R extends Row<K,R>> exten
     /**
      * Iterates the rows in sorted order.
      * This also provides JavaBeans-compatible iterator.
+     * 
+     * @see #getRows() Different calls may return different results, for
+     *                 snapshot-like behavior see getRows.
      */
     Iterator<R> getIterator() throws SQLException;
 
@@ -76,11 +89,19 @@ public interface Table<K extends Comparable<? super K>,R extends Row<K,R>> exten
 
     /**
      * Gets all rows in no particular order.
+     *
+     * This is an unmodifiable snapshot of the data and will not change over time.
+     * It may be iterated multiple times with the same results.  The contents
+     * are not changed by the transactions of the current user or any other user.
      */
     Set<R> getUnsortedRows() throws SQLException;
 
     /**
      * Gets all rows, sorted by their natural ordering.
+     *
+     * This is an unmodifiable snapshot of the data and will not change over time.
+     * It may be iterated multiple times with the same results.  The contents
+     * are not changed by the transactions of the current user or any other user.
      */
     SortedSet<R> getRows() throws SQLException;
 
@@ -102,6 +123,10 @@ public interface Table<K extends Comparable<? super K>,R extends Row<K,R>> exten
 
     /**
      * Gets an unmodifiable sorted set of each object corresponding to the set of keys.
+     *
+     * This is an unmodifiable snapshot of the data and will not change over time.
+     * It may be iterated multiple times with the same results.  The contents
+     * are not changed by the transactions of the current user or any other user.
      */
     SortedSet<R> getRows(Iterable<? extends K> keys) throws SQLException;
 }

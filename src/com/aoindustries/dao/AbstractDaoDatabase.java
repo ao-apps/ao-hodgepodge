@@ -57,6 +57,9 @@ abstract public class AbstractDaoDatabase implements DaoDatabase {
      */
     abstract protected Database getDatabase() throws SQLException;
 
+    /**
+     * Clears all caches for all tables for the current thread.
+     */
     @Override
     public void clearAllCaches() {
         for(Table<?,?> table : getTables().values()) table.clearCaches();

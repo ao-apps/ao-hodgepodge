@@ -60,9 +60,12 @@ abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends
         super(keyClass, rowClass, database);
     }
 
+    /**
+     * Clears the global caches when the table is updated.
+     */
     @Override
-    public void clearCaches() {
-        super.clearCaches();
+    public void tableUpdated() {
+        super.tableUpdated();
         synchronized(unsortedRowsCacheLock) {
             unsortedRowsCache = null;
         }
