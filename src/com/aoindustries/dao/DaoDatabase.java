@@ -22,10 +22,6 @@
  */
 package com.aoindustries.dao;
 
-import com.aoindustries.sql.Database;
-import com.aoindustries.sql.DatabaseCallable;
-import com.aoindustries.sql.DatabaseConnection;
-import com.aoindustries.sql.DatabaseRunnable;
 import java.sql.SQLException;
 import java.text.Collator;
 import java.util.Map;
@@ -33,99 +29,37 @@ import java.util.Map;
 /**
  * A database is a collection of tables, and a collection of reports.
  */
-abstract public class DaoDatabase {
-
-    /**
-     * Provides a single Collator for shared use.  This sorts in the system
-     * locale in effect when first created.
-     */
-    public static Collator collator = Collator.getInstance();
+public interface DaoDatabase {
 
     /**
      * Gets the name of this database.
      */
-    abstract public String getName();
+    String getName();
 
     /**
-     * Gets the underlying database that should be used at this moment in time.
-     * It is possible that the database will change in an fail-over state.
-     * Within a single transaction, however, the database returned must be the
-     * same.
+     * Gets the collator used by this database.
      */
-    abstract protected Database getDatabase() throws SQLException;
+    Collator getCollator();
 
     /**
      * Gets the set of all tables in this database.  This is a map keyed on table
      * name to be useful in JSP EL without requiring a separate getter for each
      * table.
      */
-    abstract public Map<String,? extends Table<?,?>> getTables();
+    Map<String,? extends Table<?,?>> getTables();
 
     /**
      * Clears all caches used for the current request.
      */
-    public void clearAllCaches(boolean requestOnly) {
-        for(Table<?,?> table : getTables().values()) table.clearCaches(requestOnly);
-    }
+    void clearAllCaches();
 
     /**
-     * Uses a ThreadLocal to make sure an entire transaction is executed against the same
-     * underlying database.  This way, nothing funny will happen if master/slave databases
-     * are switched mid-transaction.
+     * Executes a transaction between any number of calls to this database and its tables.
      */
-    protected final ThreadLocal<Database> transactionDatabase = new ThreadLocal<Database>();
-
-    protected <V> V executeTransaction(DatabaseCallable<V> callable) throws SQLException {
-        Database database = transactionDatabase.get();
-        if(database!=null) {
-            // Reuse current database
-            return database.executeTransaction(callable);
-        } else {
-            // Get database
-            database=getDatabase();
-            transactionDatabase.set(database);
-            try {
-                return database.executeTransaction(callable);
-            } finally {
-                transactionDatabase.remove();
-            }
-        }
-    }
-
-    protected void executeTransaction(DatabaseRunnable runnable) throws SQLException {
-        Database database = transactionDatabase.get();
-        if(database!=null) {
-            // Reuse current database
-            database.executeTransaction(runnable);
-        } else {
-            // Get database
-            database=getDatabase();
-            transactionDatabase.set(database);
-            try {
-                database.executeTransaction(runnable);
-            } finally {
-                transactionDatabase.remove();
-            }
-        }
-    }
-
-    /**
-     * Executes a transaction between any number of calls to this database and
-     * its tables.
-     */
-    public void executeTransaction(final Runnable runnable) throws SQLException {
-        executeTransaction(
-            new DatabaseRunnable() {
-                @Override
-                public void run(DatabaseConnection db) {
-                    runnable.run();
-                }
-            }
-        );
-    }
+    void executeTransaction(final Runnable runnable) throws SQLException;
 
     /**
      * Gets the set of all reports that are supported by this repository implementation, keyed on its unique name.
      */
-    public abstract Map<String,? extends Report> getReports();
+    Map<String,? extends Report> getReports();
 }

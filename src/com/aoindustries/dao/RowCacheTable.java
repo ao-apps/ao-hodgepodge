@@ -34,7 +34,7 @@ import java.util.TreeSet;
 /**
  * Caches results on a per-row basis.
  */
-abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Row<K,R>> extends Table<K,R> {
+abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Row<K,R>> extends AbstractTable<K,R> {
 
     protected final ThreadLocal<Set<R>> unsortedRowsCache = new ThreadLocal<Set<R>>();
 
@@ -52,8 +52,8 @@ abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Ro
     }
 
     @Override
-    public void clearCaches(boolean requestOnly) {
-        super.clearCaches(requestOnly);
+    public void clearCaches() {
+        super.clearCaches();
         unsortedRowsCache.remove();
         sortedRowsCache.remove();
         rowCache.get().clear();
@@ -68,7 +68,7 @@ abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Ro
             // Populate rowCache fully
             Map<K,R> cache = rowCache.get();
             cache.clear();
-            for(R row : rows) if(cache.put(row.getKey(), row)!=null) throw new SQLException("Duplicate key: "+row.getKey());
+            for(R row : rows) if(cache.put(canonicalize(row.getKey()), row)!=null) throw new SQLException("Duplicate key: "+row.getKey());
 
             allRowsLoaded(rows);
             unsortedRowsCache.set(rows);
@@ -97,30 +97,31 @@ abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Ro
     }
 
     @Override
-    public R get(K key) throws NoRowException, SQLException {
+    public R get(final K key) throws NoRowException, SQLException {
+        final K canonicalKey = canonicalize(key);
         Map<K,R> cache = rowCache.get();
-        if(cache.containsKey(key)) {
-            R row = cache.get(key);
-            if(row==null) throw new NoRowException(getClass().getSimpleName()+" not found: "+key);
+        if(cache.containsKey(canonicalKey)) {
+            R row = cache.get(canonicalKey);
+            if(row==null) throw new NoRowException(getName()+" not found: "+key);
             return row;
         }
 
         // Doesn't exist when all rows have been loaded
-        if(unsortedRowsCache.get()!=null) throw new NoRowException(getClass().getSimpleName()+" not found: "+key);
+        if(unsortedRowsCache.get()!=null) throw new NoRowException(getName()+" not found: "+key);
 
         // Try single row query - cache hits and misses
         try {
-            R row = getNoCache(key);
-            assert row.getKey().equals(key);
-            cache.put(key, row);
+            R row = getNoCache(canonicalKey);
+            assert canonicalize(row.getKey()).equals(canonicalKey);
+            cache.put(canonicalKey, row);
             return row;
         } catch(NoRowException err) {
-            cache.put(key, null);
-            throw new NoRowException(getClass().getSimpleName()+" not found: "+key, err);
+            cache.put(canonicalKey, null);
+            throw new NoRowException(getName()+" not found: "+key, err);
         }
     }
 
-    abstract protected R getNoCache(K key) throws NoRowException, SQLException;
+    abstract protected R getNoCache(K canonicalKey) throws NoRowException, SQLException;
 
     abstract protected Set<R> getRowsNoCache() throws SQLException;
 }

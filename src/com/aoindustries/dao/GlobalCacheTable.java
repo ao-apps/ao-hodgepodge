@@ -44,7 +44,7 @@ import java.util.TreeSet;
  * TODO: Coordinate invalidation between PHP and Java
  * TODO: Once both done, more aggressively use global caches for better remote database performance
  */
-abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends Row<K,R>> extends Table<K,R> {
+abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends Row<K,R>> extends AbstractTable<K,R> {
 
     private final Object unsortedRowsCacheLock = new Object();
     private Set<R> unsortedRowsCache = null;
@@ -61,19 +61,17 @@ abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends
     }
 
     @Override
-    public void clearCaches(boolean requestOnly) {
-        super.clearCaches(requestOnly);
-        if(!requestOnly) {
-            synchronized(unsortedRowsCacheLock) {
-                unsortedRowsCache = null;
-            }
-            synchronized(sortedRowsCacheLock) {
-                sortedRowsCache = null;
-            }
-            synchronized(rowCacheLock) {
-                rowCacheLoaded = false;
-                rowCache.clear();
-            }
+    public void clearCaches() {
+        super.clearCaches();
+        synchronized(unsortedRowsCacheLock) {
+            unsortedRowsCache = null;
+        }
+        synchronized(sortedRowsCacheLock) {
+            sortedRowsCache = null;
+        }
+        synchronized(rowCacheLock) {
+            rowCacheLoaded = false;
+            rowCache.clear();
         }
     }
 
@@ -118,11 +116,11 @@ abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends
             if(!rowCacheLoaded) {
                 // Load all rows in a single query
                 rowCache.clear();
-                for(R row : getUnsortedRows()) if(rowCache.put(row.getKey(), row)!=null) throw new SQLException("Duplicate key: "+row.getKey());
+                for(R row : getUnsortedRows()) if(rowCache.put(canonicalize(row.getKey()), row)!=null) throw new SQLException("Duplicate key: "+row.getKey());
                 rowCacheLoaded = true;
             }
-            R row = rowCache.get(key);
-            if(row==null) throw new NoRowException(getClass().getSimpleName()+" not found: "+key);
+            R row = rowCache.get(canonicalize(key));
+            if(row==null) throw new NoRowException(getName()+" not found: "+key);
             return row;
         }
     }

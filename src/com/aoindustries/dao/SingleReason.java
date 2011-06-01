@@ -22,6 +22,9 @@
  */
 package com.aoindustries.dao;
 
+import com.aoindustries.util.i18n.ThreadLocale;
+import java.text.Collator;
+
 public final class SingleReason extends Reason {
 
     private final String reason;
@@ -52,7 +55,7 @@ public final class SingleReason extends Reason {
     public int compareTo(Reason other) {
         if(other instanceof SingleReason) {
             SingleReason otherSingleReason = (SingleReason)other;
-            return DaoDatabase.collator.compare(reason, otherSingleReason.reason);
+            return Collator.getInstance(ThreadLocale.get()).compare(reason, otherSingleReason.reason);
         } else {
             return -1; // Single reasons before aggregate
         }

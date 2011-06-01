@@ -41,7 +41,7 @@ import java.util.TreeSet;
  *   <li>Rows are sorted upon first call to getRows</li>
  * </ol>
  */
-abstract public class TableCacheTable<K extends Comparable<? super K>,R extends Row<K,R>> extends Table<K,R> {
+abstract public class TableCacheTable<K extends Comparable<? super K>,R extends Row<K,R>> extends AbstractTable<K,R> {
 
     protected final ThreadLocal<Set<R>> unsortedRowsCache = new ThreadLocal<Set<R>>();
 
@@ -66,8 +66,8 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
     }
 
     @Override
-    public void clearCaches(boolean requestOnly) {
-        super.clearCaches(requestOnly);
+    public void clearCaches() {
+        super.clearCaches();
         unsortedRowsCache.remove();
         sortedRowsCache.remove();
         rowCachedLoaded.set(Boolean.FALSE);
@@ -111,11 +111,11 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
         if(!rowCachedLoaded.get()) {
             // Load all rows in a single query
             cache.clear();
-            for(R row : getUnsortedRows()) if(cache.put(row.getKey(), row)!=null) throw new SQLException("Duplicate key: "+row.getKey());
+            for(R row : getUnsortedRows()) if(cache.put(canonicalize(row.getKey()), row)!=null) throw new SQLException("Duplicate key: "+row.getKey());
             rowCachedLoaded.set(Boolean.TRUE);
         }
-        R row = cache.get(key);
-        if(row==null) throw new NoRowException(getClass().getSimpleName()+" not found: "+key);
+        R row = cache.get(canonicalize(key));
+        if(row==null) throw new NoRowException(getName()+" not found: "+key);
         return row;
     }
 

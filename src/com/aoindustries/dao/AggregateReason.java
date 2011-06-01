@@ -22,6 +22,9 @@
  */
 package com.aoindustries.dao;
 
+import com.aoindustries.util.i18n.ThreadLocale;
+import java.text.Collator;
+
 public final class AggregateReason extends Reason {
 
     private final int count;
@@ -88,7 +91,7 @@ public final class AggregateReason extends Reason {
             if(count<otherAggregateReason.count) return 1;
             if(count>otherAggregateReason.count) return -1;
             // Sort by lexical display
-            return DaoDatabase.collator.compare(toString(), otherAggregateReason.toString());
+            return Collator.getInstance(ThreadLocale.get()).compare(toString(), otherAggregateReason.toString());
         } else {
             return 1; // Aggregate reasons after single
         }

@@ -22,70 +22,15 @@
  */
 package com.aoindustries.dao;
 
-abstract public class Row<K extends Comparable<? super K>,R extends Row<K,R>> implements Comparable<R> {
-
-    private final DaoDatabase database;
-    private final Class<R> clazz;
-
-    protected Row(
-        DaoDatabase database,
-        Class<R> clazz
-    ) {
-        this.database = database;
-        this.clazz = clazz;
-    }
+public interface Row<K extends Comparable<? super K>,R extends Row<K,R>> extends Comparable<R> {
 
     /**
-     * The default String representation is the key value.
+     * Gets the table this row is part of.
      */
-    @Override
-    public String toString() {
-        return getKey().toString();
-    }
+    Table<K,R> getTable();
 
     /**
-     * The default hashCode is based on the key value.
+     * Gets the key value for this row.
      */
-    @Override
-    public int hashCode() {
-        return getKey().hashCode();
-    }
-
-    /**
-     * By default equality is based on same interface, compatible class, and equal key objects.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if(o==null) return false;
-        if(!clazz.isInstance(o)) return false;
-        R other = clazz.cast(o);
-        return database==other.database && getKey().equals(other.getKey());
-    }
-
-    /**
-     * The default ordering is based on key comparison.  If both keys
-     * are Strings, will use the system default collator.
-     */
-    @Override
-    public int compareTo(R o) {
-        K key1 = getKey();
-        K key2 = o.getKey();
-        if(key1.getClass()==String.class && key2.getClass()==String.class) {
-            String s1 = key1.toString();
-            String s2 = key2.toString();
-            // TODO: If both strings begin with a number, sort by that first
-            // TODO: This is for lot numbers, such as 1A, 1B, 2, 3, 10, 20, 100A
-            return s1.equals(s2) ? 0 : DaoDatabase.collator.compare(s1, s2);
-        } else {
-            return key1.compareTo(key2);
-        }
-    }
-
-    protected DaoDatabase getDatabase() {
-        return database;
-    }
-
-    abstract public Table<K,R> getTable();
-
-    abstract public K getKey();
+    K getKey();
 }

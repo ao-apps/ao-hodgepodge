@@ -70,7 +70,7 @@ public class Encryption {
     /**
      * Gets the secure random.
      */
-    public static Random getRandom() {
+    private static Random getRandom() {
         return random;
     }
 
