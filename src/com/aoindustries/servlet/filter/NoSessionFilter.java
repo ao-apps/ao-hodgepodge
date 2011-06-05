@@ -314,7 +314,7 @@ public class NoSessionFilter implements Filter {
                                         !allCookies.containsKey(cookieName) // Header cookies have priority over parameter cookies
                                         && cookieNames.contains(cookieName) // Only add expected cookie names
                                     ) {
-                                        String value = getParameter(paramName);
+                                        String value = originalRequest.getParameter(paramName);
                                         assert value!=null;
                                         allCookies.put(cookieName, new Cookie(cookieName, value));
                                     }
