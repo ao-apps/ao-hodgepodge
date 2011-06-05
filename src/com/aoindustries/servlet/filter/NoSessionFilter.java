@@ -27,7 +27,10 @@ import com.aoindustries.util.WrappedException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
@@ -46,23 +49,54 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 
 /**
+ * <p>
  * Prevents sessions from being created.  Without sessions, minimal information
  * should be stored as cookies.  In the event cookies are disabled, this filter
  * also adds the cookie values during URL rewriting.  Any cookies added to the
  * URLs through rewriting will have a parameter name beginning with
  * <code>cookie:</code>
+ * </p>
+ * <p>
+ * Only cookie names and values are encoded as URL parameters.  Comments, paths
+ * 
+ * </p>
+ * <p>
+ * To ensure no namespace conflicts with cookies potentially rewritten as URL
+ * parameters, any parameter in the request beginning with <code>cookie:</code>
+ * is filtered, even if it doesn't currently match an allowed cookie name.
+ * The result of <code>getQueryString</code>, however, is unaltered any may possibly
+ * contain cookie parameters.
+ * </p>
+ * <p>
+ * Any cookie name that is not in the configured list of cookies names is ignored
+ * and not presented to the application, whether it came from HTTP headers or
+ * URL parameters.
+ * </p>
+ * <p>
+ * In the event a cookie value is available from both the headers and the URL
+ * parameters, the headers take precedence.
+ * </p>
+ * <p>
+ * Note: If using JSP, add <code>session="false"</code>, for example:
+ * <pre>&lt;%@ page language="java" session="false" %&gt;</pre>
+ * </p>
  */
 public class NoSessionFilter implements Filter {
 
     public static final String COOKIE_URL_PARAM_PREFIX = "cookie:";
+
+    /**
+     * The maximum number of cookie names allowed.
+     */
+    public static final int MAXIMUM_COOKIES = 20;
 
     private static final String REQUEST_ATTRIBUTE_KEY = NoSessionFilter.class.getName()+".filter_applied";
 
     private final SortedSet<String> cookieNames = new TreeSet<String>();
 
     /**
-     * Adds the values for any new cookies to the URL.  This handles session
-     * management through URL rewriting.
+     * Adds the values for any new cookies to the URL.  This handles cookie-based
+     * session management through URL rewriting.
      */
     private String addCookieValues(HttpServletRequest request, Map<String,Cookie> newCookies, String url) {
         // Split the anchor
@@ -88,6 +122,8 @@ public class NoSessionFilter implements Filter {
             && !lowerPath.endsWith(".zip")
         ) {
             try {
+                Cookie[] oldCookies = null;
+                boolean oldCookiesSet = false;
                 StringBuilder urlSB = new StringBuilder(url);
                 boolean hasParam = questionPos!=-1;
                 for(String cookieName : cookieNames) {
@@ -114,7 +150,10 @@ public class NoSessionFilter implements Filter {
                         String[] values = request.getParameterValues(paramName);
                         if(values!=null && values.length>0) {
                             boolean found = false;
-                            Cookie[] oldCookies = request.getCookies();
+                            if(!oldCookiesSet) {
+                                oldCookies = request.getCookies();
+                                oldCookiesSet = true;
+                            }
                             if(oldCookies!=null) {
                                 for(Cookie oldCookie : oldCookies) {
                                     if(oldCookie.getName().equals(cookieName)) {
@@ -151,6 +190,7 @@ public class NoSessionFilter implements Filter {
     public void init(FilterConfig config) {
         cookieNames.clear();
         cookieNames.addAll(StringUtility.splitStringCommaSpace(config.getInitParameter("cookieNames")));
+        if(cookieNames.size()>MAXIMUM_COOKIES) throw new IllegalArgumentException("cookieNames.size()>"+MAXIMUM_COOKIES);
     }
 
     @Override
@@ -167,28 +207,132 @@ public class NoSessionFilter implements Filter {
         ) {
             request.setAttribute(REQUEST_ATTRIBUTE_KEY, Boolean.TRUE);
             try {
-                final HttpServletRequest httpRequest = (HttpServletRequest)request;
-                final HttpServletResponse httpResponse = (HttpServletResponse)response;
+                final HttpServletRequest originalRequest = (HttpServletRequest)request;
+                final HttpServletResponse originalResponse = (HttpServletResponse)response;
                 final Map<String,Cookie> newCookies = new HashMap<String,Cookie>(cookieNames.size()*4/3+1);
                 chain.doFilter(
-                    new HttpServletRequestWrapper(httpRequest) {
+                    new HttpServletRequestWrapper(originalRequest) {
                         @Override
                         public HttpSession getSession() {
-                            throw new RuntimeException("Sessions are disabled");
+                            throw new RuntimeException("Sessions are disabled by NoSessionFilter");
                         }
                         @Override
                         public HttpSession getSession(boolean create) {
-                            if(create) throw new RuntimeException("Sessions are disabled");
+                            if(create) throw new RuntimeException("Sessions are disabled by NoSessionFilter");
                             return null;
                         }
+                        /** Filter cookie parameters */
+                        @Override
+                        public String getParameter(String name) {
+                            if(name.startsWith(COOKIE_URL_PARAM_PREFIX)) return null;
+                            return originalRequest.getParameter(name);
+                        }
+                        /** Filter cookie parameters */
+                        @Override
+                        public Map<String,String[]> getParameterMap() {
+                            // Only create new map if at least one parameter is filtered
+                            @SuppressWarnings("unchecked")
+                            Map<String,String[]> completeMap = (Map<String,String[]>)originalRequest.getParameterMap();
+                            boolean needsFilter = false;
+                            for(String paramName : completeMap.keySet()) {
+                                if(paramName.startsWith(COOKIE_URL_PARAM_PREFIX)) {
+                                    needsFilter = true;
+                                    break;
+                                }
+                            }
+                            if(!needsFilter) return completeMap;
+                            Map<String,String[]> filteredMap = new LinkedHashMap<String,String[]>(completeMap.size()*4/3); // No +1 on size since we will filter at least one - guaranteed no rehash
+                            for(Map.Entry<String,String[]> entry : completeMap.entrySet()) {
+                                String paramName = entry.getKey();
+                                if(!paramName.startsWith(COOKIE_URL_PARAM_PREFIX)) filteredMap.put(paramName, entry.getValue());
+                            }
+                            return Collections.unmodifiableMap(filteredMap);
+                        }
+                        /** Filter cookie parameters */
+                        @Override
+                        public Enumeration<String> getParameterNames() {
+                            @SuppressWarnings("unchecked")
+                            final Enumeration<String> completeNames = originalRequest.getParameterNames();
+                            return new Enumeration<String>() {
+                                // Need to look one ahead
+                                private String nextName = null;
+                                @Override
+                                public boolean hasMoreElements() {
+                                    if(nextName!=null) return true;
+                                    while(completeNames.hasMoreElements()) {
+                                        String name = completeNames.nextElement();
+                                        if(!name.startsWith(COOKIE_URL_PARAM_PREFIX)) {
+                                            nextName = name;
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                }
+                                @Override
+                                public String nextElement() {
+                                    String name = nextName;
+                                    if(name!=null) {
+                                        nextName = null;
+                                        return name;
+                                    }
+                                    while(true) {
+                                        name = completeNames.nextElement();
+                                        if(!name.startsWith(COOKIE_URL_PARAM_PREFIX)) return name;
+                                    }
+                                }
+                            };
+                        }
+                        /** Filter cookie parameters */
+                        @Override
+                        public String[] getParameterValues(String name) {
+                            if(name.startsWith(COOKIE_URL_PARAM_PREFIX)) return null;
+                            return originalRequest.getParameterValues(name);
+                        }
+
+                        @Override
+                        public Cookie[] getCookies() {
+                            Cookie[] headerCookies = originalRequest.getCookies();
+                            @SuppressWarnings("unchecked")
+                            Enumeration<String> parameterNames = originalRequest.getParameterNames();
+                            if(headerCookies==null && !parameterNames.hasMoreElements()) return null; // Not possibly any cookies
+                            // Add header cookies
+                            Map<String,Cookie> allCookies = new LinkedHashMap<String,Cookie>(cookieNames.size()*4/3+1); // Worst-case map size is cookieNames
+                            if(headerCookies!=null) {
+                                for(Cookie cookie : headerCookies) {
+                                    String cookieName = cookie.getName();
+                                    if(cookieNames.contains(cookieName)) { // Only add expected cookie names
+                                        allCookies.put(cookieName, cookie);
+                                    }
+                                }
+                            }
+                            // Add parameter cookies
+                            while(parameterNames.hasMoreElements()) {
+                                String paramName = parameterNames.nextElement();
+                                if(paramName.startsWith(COOKIE_URL_PARAM_PREFIX)) {
+                                    String cookieName = paramName.substring(COOKIE_URL_PARAM_PREFIX.length());
+                                    if(
+                                        !allCookies.containsKey(cookieName) // Header cookies have priority over parameter cookies
+                                        && cookieNames.contains(cookieName) // Only add expected cookie names
+                                    ) {
+                                        String value = getParameter(paramName);
+                                        assert value!=null;
+                                        allCookies.put(cookieName, new Cookie(cookieName, value));
+                                    }
+                                }
+                            }
+                            return allCookies.values().toArray(new Cookie[allCookies.size()]);
+                        }
                     },
-                    new HttpServletResponseWrapper(httpResponse) {
+                    new HttpServletResponseWrapper(originalResponse) {
                         @Override
                         @Deprecated
                         public String encodeRedirectUrl(String url) {
                             return encodeRedirectURL(url);
                         }
 
+                        /**
+                         * TODO: Only add cookies if their domain and path would make the available to the given url.
+                         */
                         @Override
                         public String encodeRedirectURL(String url) {
                             // If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
@@ -205,18 +349,18 @@ public class NoSessionFilter implements Filter {
                             } else if(url.startsWith("cid:")) {
                                 return url;
                             } else {
-                                return addCookieValues(httpRequest, newCookies, url);
+                                return addCookieValues(originalRequest, newCookies, url);
                             }
                             int slashPos = remaining.indexOf('/');
                             if(slashPos==-1) {
-                                return addCookieValues(httpRequest, newCookies, url);
+                                return addCookieValues(originalRequest, newCookies, url);
                             }
                             String hostPort = remaining.substring(0, slashPos);
                             int colonPos = hostPort.indexOf(':');
                             String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
                             String encoded;
-                            if(host.equalsIgnoreCase(httpRequest.getServerName())) {
-                                encoded = protocol + hostPort + addCookieValues(httpRequest, newCookies, remaining.substring(slashPos));
+                            if(host.equalsIgnoreCase(originalRequest.getServerName())) {
+                                encoded = protocol + hostPort + addCookieValues(originalRequest, newCookies, remaining.substring(slashPos));
                             } else {
                                 // Going to an different hostname, do not add request parameters
                                 encoded = url;
@@ -230,6 +374,9 @@ public class NoSessionFilter implements Filter {
                             return encodeURL(url);
                         }
 
+                        /**
+                         * TODO: Only add cookies if their domain and path would make the available to the given url.
+                         */
                         @Override
                         public String encodeURL(String url) {
                             // If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
@@ -246,18 +393,18 @@ public class NoSessionFilter implements Filter {
                             } else if(url.startsWith("cid:")) {
                                 return url;
                             } else {
-                                return addCookieValues(httpRequest, newCookies, url);
+                                return addCookieValues(originalRequest, newCookies, url);
                             }
                             int slashPos = remaining.indexOf('/');
                             if(slashPos==-1) {
-                                return addCookieValues(httpRequest, newCookies, url);
+                                return addCookieValues(originalRequest, newCookies, url);
                             }
                             String hostPort = remaining.substring(0, slashPos);
                             int colonPos = hostPort.indexOf(':');
                             String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
                             String encoded;
-                            if(host.equalsIgnoreCase(httpRequest.getServerName())) {
-                                encoded = protocol + hostPort + addCookieValues(httpRequest, newCookies, remaining.substring(slashPos));
+                            if(host.equalsIgnoreCase(originalRequest.getServerName())) {
+                                encoded = protocol + hostPort + addCookieValues(originalRequest, newCookies, remaining.substring(slashPos));
                             } else {
                                 // Going to an different hostname, do not add request parameters
                                 encoded = url;
@@ -267,13 +414,15 @@ public class NoSessionFilter implements Filter {
 
                         @Override
                         public void addCookie(Cookie newCookie) {
-                            super.addCookie(newCookie);
                             String cookieName = newCookie.getName();
-                            if(!cookieNames.contains(cookieName)) throw new AssertionError("Unexpected cookie name, add to cookieNames init parameter: "+cookieName);
-                            if(newCookie.getMaxAge()==0) newCookies.put(cookieName, null);
-                            else {
+                            if(!cookieNames.contains(cookieName)) throw new IllegalArgumentException("Unexpected cookie name, add to cookieNames init parameter: "+cookieName);
+                            originalResponse.addCookie(newCookie);
+                            if(newCookie.getMaxAge()==0) {
+                                // Cookie deleted
+                                newCookies.put(cookieName, null);
+                            } else {
                                 boolean found = false;
-                                Cookie[] oldCookies = httpRequest.getCookies();
+                                Cookie[] oldCookies = originalRequest.getCookies();
                                 if(oldCookies!=null) {
                                     for(Cookie oldCookie : oldCookies) {
                                         if(oldCookie.getName().equals(cookieName)) {
@@ -297,5 +446,6 @@ public class NoSessionFilter implements Filter {
 
     @Override
     public void destroy() {
+        cookieNames.clear();
     }
 }

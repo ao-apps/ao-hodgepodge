@@ -58,12 +58,15 @@ public class Database extends AbstractDatabaseAccess {
     }
 
     public Database(AOConnectionPool pool) {
+        if(pool==null) throw new IllegalArgumentException("pool==null");
         this.pool = pool;
         this.dataSource = null;
         this.logger = null;
     }
 
     public Database(DataSource dataSource, Logger logger) {
+        if(dataSource==null) throw new IllegalArgumentException("dataSource==null");
+        if(logger==null) throw new IllegalArgumentException("logger==null");
         this.pool = null;
         this.dataSource = dataSource;
         this.logger = logger;
