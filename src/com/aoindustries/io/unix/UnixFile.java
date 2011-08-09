@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io.unix;
 
+import com.aoindustries.io.FileUtils;
 import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.Stack;
 import java.io.BufferedInputStream;
@@ -357,21 +358,7 @@ public class UnixFile {
     public boolean contentEquals(byte[] otherFile) throws IOException {
         Stat stat = getStat();
         if(!stat.isRegularFile()) throw new IOException("Not a regular file: "+path);
-        long size=stat.getSize();
-        if(size!=otherFile.length) return false;
-        int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
-        if(buffSize<64) buffSize=64;
-        InputStream in1=new BufferedInputStream(new FileInputStream(getFile()), buffSize);
-        try {
-            for(int c=0;c<otherFile.length;c++) {
-                int b1=in1.read();
-                int b2=otherFile[c]&0xff;
-                if(b1!=b2) return false;
-            }
-        } finally {
-            in1.close();
-        }
-        return true;
+        return FileUtils.contentEquals(getFile(), otherFile);
     }
 
     /**

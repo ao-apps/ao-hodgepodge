@@ -853,16 +853,14 @@ public final class StringUtility {
         while (pos < len) {
             int start = pos;
             pos = line.indexOf(delim, pos);
-            if (pos == -1)
-                    pos = len;
+            if (pos == -1) pos = len;
             words.add(line.substring(start, pos));
             pos++;
         }
         // If ending in a delimeter, add the empty string
         if(len>0 && line.charAt(len-1)==delim) words.add("");
 
-        // Copy the ArrayList into a String[]
-        return getStringArray(words);
+        return words.toArray(new String[words.size()]);
     }
 
     public static List<String> splitString(String line, String delim) {

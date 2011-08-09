@@ -20,10 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.util.i18n;
+package com.aoindustries.lang;
 
+import com.aoindustries.util.i18n.EditableResourceBundle;
 import java.io.File;
-import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -32,26 +32,16 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-public final class ApplicationResources extends EditableResourceBundle {
-
-    static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
-        ApplicationResources.class.getName(),
-        Arrays.asList(
-            Locale.ROOT,
-            Locale.JAPANESE
-        )
-    );
+public final class ApplicationResources_ja extends EditableResourceBundle {
 
     /**
      * Do not use directly.
      */
-    public ApplicationResources() {
+    public ApplicationResources_ja() {
         super(
-            Locale.ROOT,
-            bundleSet,
-            new File(System.getProperty("user.home")+"/common/ao/cvswork/aocode-public/src/com/aoindustries/util/i18n/ApplicationResources.properties")
+            Locale.JAPANESE,
+            ApplicationResources.bundleSet,
+            new File(System.getProperty("user.home")+"/common/ao/cvswork/aocode-public/src/com/aoindustries/encoding/ApplicationResources_ja.properties")
         );
     }
-
-    static final ApplicationResourcesAccessor accessor = ApplicationResourcesAccessor.getInstance(bundleSet.getBaseName());
 }

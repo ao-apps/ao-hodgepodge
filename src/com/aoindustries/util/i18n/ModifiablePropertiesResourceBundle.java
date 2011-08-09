@@ -124,24 +124,39 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     private final Properties properties = new Properties();
 
     /**
-     * @param sourceFile  The source file or <code>null</code> for none.
+     * @param sourceFile  The source file(s).  If multiple source files are provided,
+     *                    only one may exist and be both readable and writable.  If more than
+     *                    one possible source file exists, will throw an IllegalStateException.
      */
-    public ModifiablePropertiesResourceBundle(File sourceFile) {
-        this.sourceFile = sourceFile;
+    public ModifiablePropertiesResourceBundle(File... sourceFiles) {
+        File goodSourceFile = null;
+        if(sourceFiles!=null) {
+            for(File file : sourceFiles) {
+                if(file.canRead() && file.canWrite()) {
+                    if(goodSourceFile!=null) throw new IllegalStateException(ApplicationResources.accessor.getMessage("ModifiablePropertiesResourceBundle.init.moreThanOneSourceFile", goodSourceFile, file));
+                    goodSourceFile = file;
+                }
+            }
+        }
+        this.sourceFile = goodSourceFile;
 
         // Try to load from the sourceFile
         boolean myIsModifiable = false;
         boolean loaded = false;
-        if(sourceFile!=null && sourceFile.canRead() && sourceFile.canWrite()) {
+        if(goodSourceFile!=null) {
             try {
-                InputStream in = new BufferedInputStream(new FileInputStream(sourceFile));
+                InputStream in = new BufferedInputStream(new FileInputStream(goodSourceFile));
                 try {
                     properties.load(in);
                 } finally {
                     in.close();
                 }
             } catch(IOException err) {
-                logger.log(Level.WARNING, "Unable to load properties from "+sourceFile.getAbsolutePath()+", defaulting to getResourceAsStream", err);
+                logger.log(
+                    Level.WARNING,
+                    ApplicationResources.accessor.getMessage("ModifiablePropertiesResourceBundle.init.ioException", goodSourceFile),
+                    err
+                );
             }
             loaded = true;
             myIsModifiable = true;
@@ -152,7 +167,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             Class clazz = getClass();
             String resourceName = '/'+clazz.getName().replace('.', '/')+".properties";
             InputStream in = getClass().getResourceAsStream(resourceName);
-            if(in==null) throw new RuntimeException("Resource not found: "+resourceName);
+            if(in==null) throw new RuntimeException(ApplicationResources.accessor.getMessage("ModifiablePropertiesResourceBundle.init.resourceNotFound", resourceName));
             try {
                 try {
                     properties.load(in);
@@ -275,7 +290,11 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             } finally {
                 out.close();
             }
-            if(!tmpFile.renameTo(sourceFile)) throw new IOException("Unable to rename \""+tmpFile+"\" to \""+sourceFile+'"');
+            if(!tmpFile.renameTo(sourceFile)) {
+                // Try delete then rename for Windows
+                if(!sourceFile.delete()) throw new IOException("Unable to delete \""+sourceFile+'"');
+                if(!tmpFile.renameTo(sourceFile)) throw new IOException("Unable to rename \""+tmpFile+"\" to \""+sourceFile+'"');
+            }
         } catch(IOException err) {
             throw new RuntimeException(err);
         }

@@ -90,8 +90,6 @@ public class NoSessionFilter implements Filter {
      */
     public static final int MAXIMUM_COOKIES = 20;
 
-    private static final String REQUEST_ATTRIBUTE_KEY = NoSessionFilter.class.getName()+".filter_applied";
-
     private final SortedSet<String> cookieNames = new TreeSet<String>();
 
     /**
@@ -201,244 +199,242 @@ public class NoSessionFilter implements Filter {
     ) throws IOException, ServletException {
         // Makes sure only one trim filter is applied per request
         if(
-            request.getAttribute(REQUEST_ATTRIBUTE_KEY)==null
-            && (request instanceof HttpServletRequest)
+            (request instanceof HttpServletRequest)
             && (response instanceof HttpServletResponse)
         ) {
-            request.setAttribute(REQUEST_ATTRIBUTE_KEY, Boolean.TRUE);
-            try {
-                final HttpServletRequest originalRequest = (HttpServletRequest)request;
-                final HttpServletResponse originalResponse = (HttpServletResponse)response;
-                final Map<String,Cookie> newCookies = new HashMap<String,Cookie>(cookieNames.size()*4/3+1);
-                chain.doFilter(
-                    new HttpServletRequestWrapper(originalRequest) {
-                        @Override
-                        public HttpSession getSession() {
-                            throw new RuntimeException("Sessions are disabled by NoSessionFilter");
+            final HttpServletRequest originalRequest = (HttpServletRequest)request;
+            final HttpServletResponse originalResponse = (HttpServletResponse)response;
+            final Map<String,Cookie> newCookies = new HashMap<String,Cookie>(cookieNames.size()*4/3+1);
+            chain.doFilter(
+                new HttpServletRequestWrapper(originalRequest) {
+                    @Override
+                    public HttpSession getSession() {
+                        throw new RuntimeException("Sessions are disabled by NoSessionFilter");
+                    }
+                    @Override
+                    public HttpSession getSession(boolean create) {
+                        if(create) throw new RuntimeException("Sessions are disabled by NoSessionFilter");
+                        return null;
+                    }
+                    /** Filter cookie parameters */
+                    @Override
+                    public String getParameter(String name) {
+                        if(name.startsWith(COOKIE_URL_PARAM_PREFIX)) return null;
+                        return super.getParameter(name);
+                    }
+                    /** Filter cookie parameters */
+                    @Override
+                    public Map getParameterMap() {
+                        // Only create new map if at least one parameter is filtered
+                        @SuppressWarnings("unchecked")
+                        Map<String,String[]> completeMap = (Map<String,String[]>)super.getParameterMap();
+                        boolean needsFilter = false;
+                        for(String paramName : completeMap.keySet()) {
+                            if(paramName.startsWith(COOKIE_URL_PARAM_PREFIX)) {
+                                needsFilter = true;
+                                break;
+                            }
                         }
-                        @Override
-                        public HttpSession getSession(boolean create) {
-                            if(create) throw new RuntimeException("Sessions are disabled by NoSessionFilter");
-                            return null;
+                        if(!needsFilter) return completeMap;
+                        Map<String,String[]> filteredMap = new LinkedHashMap<String,String[]>(completeMap.size()*4/3); // No +1 on size since we will filter at least one - guaranteed no rehash
+                        for(Map.Entry<String,String[]> entry : completeMap.entrySet()) {
+                            String paramName = entry.getKey();
+                            if(!paramName.startsWith(COOKIE_URL_PARAM_PREFIX)) filteredMap.put(paramName, entry.getValue());
                         }
-                        /** Filter cookie parameters */
-                        @Override
-                        public String getParameter(String name) {
-                            if(name.startsWith(COOKIE_URL_PARAM_PREFIX)) return null;
-                            return originalRequest.getParameter(name);
-                        }
-                        /** Filter cookie parameters */
-                        @Override
-                        public Map<String,String[]> getParameterMap() {
-                            // Only create new map if at least one parameter is filtered
-                            @SuppressWarnings("unchecked")
-                            Map<String,String[]> completeMap = (Map<String,String[]>)originalRequest.getParameterMap();
-                            boolean needsFilter = false;
-                            for(String paramName : completeMap.keySet()) {
-                                if(paramName.startsWith(COOKIE_URL_PARAM_PREFIX)) {
-                                    needsFilter = true;
-                                    break;
+                        return Collections.unmodifiableMap(filteredMap);
+                    }
+                    /** Filter cookie parameters */
+                    @Override
+                    public Enumeration getParameterNames() {
+                        @SuppressWarnings("unchecked")
+                        final Enumeration<String> completeNames = super.getParameterNames();
+                        return new Enumeration<String>() {
+                            // Need to look one ahead
+                            private String nextName = null;
+                            @Override
+                            public boolean hasMoreElements() {
+                                if(nextName!=null) return true;
+                                while(completeNames.hasMoreElements()) {
+                                    String name = completeNames.nextElement();
+                                    if(!name.startsWith(COOKIE_URL_PARAM_PREFIX)) {
+                                        nextName = name;
+                                        return true;
+                                    }
+                                }
+                                return false;
+                            }
+                            @Override
+                            public String nextElement() {
+                                String name = nextName;
+                                if(name!=null) {
+                                    nextName = null;
+                                    return name;
+                                }
+                                while(true) {
+                                    name = completeNames.nextElement();
+                                    if(!name.startsWith(COOKIE_URL_PARAM_PREFIX)) return name;
                                 }
                             }
-                            if(!needsFilter) return completeMap;
-                            Map<String,String[]> filteredMap = new LinkedHashMap<String,String[]>(completeMap.size()*4/3); // No +1 on size since we will filter at least one - guaranteed no rehash
-                            for(Map.Entry<String,String[]> entry : completeMap.entrySet()) {
-                                String paramName = entry.getKey();
-                                if(!paramName.startsWith(COOKIE_URL_PARAM_PREFIX)) filteredMap.put(paramName, entry.getValue());
-                            }
-                            return Collections.unmodifiableMap(filteredMap);
-                        }
-                        /** Filter cookie parameters */
-                        @Override
-                        public Enumeration<String> getParameterNames() {
-                            @SuppressWarnings("unchecked")
-                            final Enumeration<String> completeNames = originalRequest.getParameterNames();
-                            return new Enumeration<String>() {
-                                // Need to look one ahead
-                                private String nextName = null;
-                                @Override
-                                public boolean hasMoreElements() {
-                                    if(nextName!=null) return true;
-                                    while(completeNames.hasMoreElements()) {
-                                        String name = completeNames.nextElement();
-                                        if(!name.startsWith(COOKIE_URL_PARAM_PREFIX)) {
-                                            nextName = name;
-                                            return true;
-                                        }
-                                    }
-                                    return false;
-                                }
-                                @Override
-                                public String nextElement() {
-                                    String name = nextName;
-                                    if(name!=null) {
-                                        nextName = null;
-                                        return name;
-                                    }
-                                    while(true) {
-                                        name = completeNames.nextElement();
-                                        if(!name.startsWith(COOKIE_URL_PARAM_PREFIX)) return name;
-                                    }
-                                }
-                            };
-                        }
-                        /** Filter cookie parameters */
-                        @Override
-                        public String[] getParameterValues(String name) {
-                            if(name.startsWith(COOKIE_URL_PARAM_PREFIX)) return null;
-                            return originalRequest.getParameterValues(name);
-                        }
+                        };
+                    }
+                    /** Filter cookie parameters */
+                    @Override
+                    public String[] getParameterValues(String name) {
+                        if(name.startsWith(COOKIE_URL_PARAM_PREFIX)) return null;
+                        return super.getParameterValues(name);
+                    }
 
-                        @Override
-                        public Cookie[] getCookies() {
-                            Cookie[] headerCookies = originalRequest.getCookies();
-                            @SuppressWarnings("unchecked")
-                            Enumeration<String> parameterNames = originalRequest.getParameterNames();
-                            if(headerCookies==null && !parameterNames.hasMoreElements()) return null; // Not possibly any cookies
-                            // Add header cookies
-                            Map<String,Cookie> allCookies = new LinkedHashMap<String,Cookie>(cookieNames.size()*4/3+1); // Worst-case map size is cookieNames
-                            if(headerCookies!=null) {
-                                for(Cookie cookie : headerCookies) {
-                                    String cookieName = cookie.getName();
-                                    if(cookieNames.contains(cookieName)) { // Only add expected cookie names
-                                        allCookies.put(cookieName, cookie);
+                    @Override
+                    public Cookie[] getCookies() {
+                        Cookie[] headerCookies = originalRequest.getCookies();
+                        @SuppressWarnings("unchecked")
+                        Enumeration<String> parameterNames = originalRequest.getParameterNames();
+                        if(headerCookies==null && !parameterNames.hasMoreElements()) return null; // Not possibly any cookies
+                        // Add header cookies
+                        Map<String,Cookie> allCookies = new LinkedHashMap<String,Cookie>(cookieNames.size()*4/3+1); // Worst-case map size is cookieNames
+                        if(headerCookies!=null) {
+                            for(Cookie cookie : headerCookies) {
+                                String cookieName = cookie.getName();
+                                if(cookieNames.contains(cookieName)) { // Only add expected cookie names
+                                    allCookies.put(cookieName, cookie);
+                                }
+                            }
+                        }
+                        // Add parameter cookies
+                        while(parameterNames.hasMoreElements()) {
+                            String paramName = parameterNames.nextElement();
+                            if(paramName.startsWith(COOKIE_URL_PARAM_PREFIX)) {
+                                String cookieName = paramName.substring(COOKIE_URL_PARAM_PREFIX.length());
+                                if(
+                                    !allCookies.containsKey(cookieName) // Header cookies have priority over parameter cookies
+                                    && cookieNames.contains(cookieName) // Only add expected cookie names
+                                ) {
+                                    String value = originalRequest.getParameter(paramName);
+                                    assert value!=null;
+                                    allCookies.put(cookieName, new Cookie(cookieName, value));
+                                }
+                            }
+                        }
+                        return allCookies.values().toArray(new Cookie[allCookies.size()]);
+                    }
+                },
+                new HttpServletResponseWrapper(originalResponse) {
+                    @Override
+                    @Deprecated
+                    public String encodeRedirectUrl(String url) {
+                        return encodeRedirectURL(url);
+                    }
+
+                    /**
+                     * TODO: Only add cookies if their domain and path would make the available to the given url.
+                     */
+                    @Override
+                    public String encodeRedirectURL(String url) {
+                        // Don't rewrite anchor-only URLs
+                        if(url.length()>0 && url.charAt(0)=='#') return url;
+                        // If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
+                        String protocol;
+                        String remaining;
+                        if(url.length()>7 && (protocol=url.substring(0, 7)).equalsIgnoreCase("http://")) {
+                            remaining = url.substring(7);
+                        } else if(url.length()>8 && (protocol=url.substring(0, 8)).equalsIgnoreCase("https://")) {
+                            remaining = url.substring(8);
+                        } else if(url.startsWith("javascript:")) {
+                            return url;
+                        } else if(url.startsWith("mailto:")) {
+                            return url;
+                        } else if(url.startsWith("cid:")) {
+                            return url;
+                        } else {
+                            return addCookieValues(originalRequest, newCookies, url);
+                        }
+                        int slashPos = remaining.indexOf('/');
+                        if(slashPos==-1) {
+                            return addCookieValues(originalRequest, newCookies, url);
+                        }
+                        String hostPort = remaining.substring(0, slashPos);
+                        int colonPos = hostPort.indexOf(':');
+                        String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
+                        String encoded;
+                        if(host.equalsIgnoreCase(originalRequest.getServerName())) {
+                            encoded = protocol + hostPort + addCookieValues(originalRequest, newCookies, remaining.substring(slashPos));
+                        } else {
+                            // Going to an different hostname, do not add request parameters
+                            encoded = url;
+                        }
+                        return encoded;
+                    }
+
+                    @Override
+                    @Deprecated
+                    public String encodeUrl(String url) {
+                        return encodeURL(url);
+                    }
+
+                    /**
+                     * TODO: Only add cookies if their domain and path would make the available to the given url.
+                     */
+                    @Override
+                    public String encodeURL(String url) {
+                        // Don't rewrite anchor-only URLs
+                        if(url.length()>0 && url.charAt(0)=='#') return url;
+                        // If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
+                        String protocol;
+                        String remaining;
+                        if(url.length()>7 && (protocol=url.substring(0, 7)).equalsIgnoreCase("http://")) {
+                            remaining = url.substring(7);
+                        } else if(url.length()>8 && (protocol=url.substring(0, 8)).equalsIgnoreCase("https://")) {
+                            remaining = url.substring(8);
+                        } else if(url.startsWith("javascript:")) {
+                            return url;
+                        } else if(url.startsWith("mailto:")) {
+                            return url;
+                        } else if(url.startsWith("cid:")) {
+                            return url;
+                        } else {
+                            return addCookieValues(originalRequest, newCookies, url);
+                        }
+                        int slashPos = remaining.indexOf('/');
+                        if(slashPos==-1) {
+                            return addCookieValues(originalRequest, newCookies, url);
+                        }
+                        String hostPort = remaining.substring(0, slashPos);
+                        int colonPos = hostPort.indexOf(':');
+                        String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
+                        String encoded;
+                        if(host.equalsIgnoreCase(originalRequest.getServerName())) {
+                            encoded = protocol + hostPort + addCookieValues(originalRequest, newCookies, remaining.substring(slashPos));
+                        } else {
+                            // Going to an different hostname, do not add request parameters
+                            encoded = url;
+                        }
+                        return encoded;
+                    }
+
+                    @Override
+                    public void addCookie(Cookie newCookie) {
+                        String cookieName = newCookie.getName();
+                        if(!cookieNames.contains(cookieName)) throw new IllegalArgumentException("Unexpected cookie name, add to cookieNames init parameter: "+cookieName);
+                        super.addCookie(newCookie);
+                        if(newCookie.getMaxAge()==0) {
+                            // Cookie deleted
+                            newCookies.put(cookieName, null);
+                        } else {
+                            boolean found = false;
+                            Cookie[] oldCookies = originalRequest.getCookies();
+                            if(oldCookies!=null) {
+                                for(Cookie oldCookie : oldCookies) {
+                                    if(oldCookie.getName().equals(cookieName)) {
+                                        found = true;
+                                        break;
                                     }
                                 }
                             }
-                            // Add parameter cookies
-                            while(parameterNames.hasMoreElements()) {
-                                String paramName = parameterNames.nextElement();
-                                if(paramName.startsWith(COOKIE_URL_PARAM_PREFIX)) {
-                                    String cookieName = paramName.substring(COOKIE_URL_PARAM_PREFIX.length());
-                                    if(
-                                        !allCookies.containsKey(cookieName) // Header cookies have priority over parameter cookies
-                                        && cookieNames.contains(cookieName) // Only add expected cookie names
-                                    ) {
-                                        String value = originalRequest.getParameter(paramName);
-                                        assert value!=null;
-                                        allCookies.put(cookieName, new Cookie(cookieName, value));
-                                    }
-                                }
-                            }
-                            return allCookies.values().toArray(new Cookie[allCookies.size()]);
-                        }
-                    },
-                    new HttpServletResponseWrapper(originalResponse) {
-                        @Override
-                        @Deprecated
-                        public String encodeRedirectUrl(String url) {
-                            return encodeRedirectURL(url);
-                        }
-
-                        /**
-                         * TODO: Only add cookies if their domain and path would make the available to the given url.
-                         */
-                        @Override
-                        public String encodeRedirectURL(String url) {
-                            // If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
-                            String protocol;
-                            String remaining;
-                            if(url.length()>7 && (protocol=url.substring(0, 7)).equalsIgnoreCase("http://")) {
-                                remaining = url.substring(7);
-                            } else if(url.length()>8 && (protocol=url.substring(0, 8)).equalsIgnoreCase("https://")) {
-                                remaining = url.substring(8);
-                            } else if(url.startsWith("javascript:")) {
-                                return url;
-                            } else if(url.startsWith("mailto:")) {
-                                return url;
-                            } else if(url.startsWith("cid:")) {
-                                return url;
-                            } else {
-                                return addCookieValues(originalRequest, newCookies, url);
-                            }
-                            int slashPos = remaining.indexOf('/');
-                            if(slashPos==-1) {
-                                return addCookieValues(originalRequest, newCookies, url);
-                            }
-                            String hostPort = remaining.substring(0, slashPos);
-                            int colonPos = hostPort.indexOf(':');
-                            String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
-                            String encoded;
-                            if(host.equalsIgnoreCase(originalRequest.getServerName())) {
-                                encoded = protocol + hostPort + addCookieValues(originalRequest, newCookies, remaining.substring(slashPos));
-                            } else {
-                                // Going to an different hostname, do not add request parameters
-                                encoded = url;
-                            }
-                            return encoded;
-                        }
-
-                        @Override
-                        @Deprecated
-                        public String encodeUrl(String url) {
-                            return encodeURL(url);
-                        }
-
-                        /**
-                         * TODO: Only add cookies if their domain and path would make the available to the given url.
-                         */
-                        @Override
-                        public String encodeURL(String url) {
-                            // If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
-                            String protocol;
-                            String remaining;
-                            if(url.length()>7 && (protocol=url.substring(0, 7)).equalsIgnoreCase("http://")) {
-                                remaining = url.substring(7);
-                            } else if(url.length()>8 && (protocol=url.substring(0, 8)).equalsIgnoreCase("https://")) {
-                                remaining = url.substring(8);
-                            } else if(url.startsWith("javascript:")) {
-                                return url;
-                            } else if(url.startsWith("mailto:")) {
-                                return url;
-                            } else if(url.startsWith("cid:")) {
-                                return url;
-                            } else {
-                                return addCookieValues(originalRequest, newCookies, url);
-                            }
-                            int slashPos = remaining.indexOf('/');
-                            if(slashPos==-1) {
-                                return addCookieValues(originalRequest, newCookies, url);
-                            }
-                            String hostPort = remaining.substring(0, slashPos);
-                            int colonPos = hostPort.indexOf(':');
-                            String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
-                            String encoded;
-                            if(host.equalsIgnoreCase(originalRequest.getServerName())) {
-                                encoded = protocol + hostPort + addCookieValues(originalRequest, newCookies, remaining.substring(slashPos));
-                            } else {
-                                // Going to an different hostname, do not add request parameters
-                                encoded = url;
-                            }
-                            return encoded;
-                        }
-
-                        @Override
-                        public void addCookie(Cookie newCookie) {
-                            String cookieName = newCookie.getName();
-                            if(!cookieNames.contains(cookieName)) throw new IllegalArgumentException("Unexpected cookie name, add to cookieNames init parameter: "+cookieName);
-                            originalResponse.addCookie(newCookie);
-                            if(newCookie.getMaxAge()==0) {
-                                // Cookie deleted
-                                newCookies.put(cookieName, null);
-                            } else {
-                                boolean found = false;
-                                Cookie[] oldCookies = originalRequest.getCookies();
-                                if(oldCookies!=null) {
-                                    for(Cookie oldCookie : oldCookies) {
-                                        if(oldCookie.getName().equals(cookieName)) {
-                                            found = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if(!found) newCookies.put(cookieName, newCookie);
-                            }
+                            if(!found) newCookies.put(cookieName, newCookie);
                         }
                     }
-                );
-            } finally {
-                request.removeAttribute(REQUEST_ATTRIBUTE_KEY);
-            }
+                }
+            );
         } else {
             chain.doFilter(request, response);
         }

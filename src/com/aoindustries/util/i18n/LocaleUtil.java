@@ -27,19 +27,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Parses locales from their <code>toString</code> representation.  Caches
- * locales for faster lookups.
- *
  * @author  AO Industries, Inc.
  */
-public class LocaleParser {
+public class LocaleUtil {
 
-    private LocaleParser() {}
+    private LocaleUtil() {}
     
     private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>();
 
     /**
-     * Parses a locale from its <code>toString</code> representation.
+     * Parses locales from their <code>toString</code> representation.  Caches
+     * locales for faster lookups.
      */
     public static Locale parseLocale(String locale) {
         Locale l = locales.get(locale);
@@ -58,5 +56,17 @@ public class LocaleParser {
             if(existing!=null) l = existing;
         }
         return l;
+    }
+
+    /**
+     * Determines if the provided locale should be displayed from right to left.
+     */
+    public static final boolean isRightToLeft(Locale locale) {
+        String language = locale.getLanguage();
+        return
+            "ar".equals(language)    // arabic
+            || "iw".equals(language) // hebrew
+            || "fa".equals(language) // persian
+        ;
     }
 }

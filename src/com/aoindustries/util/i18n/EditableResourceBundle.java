@@ -50,6 +50,8 @@ import java.util.TreeSet;
  */
 abstract public class EditableResourceBundle extends ModifiablePropertiesResourceBundle implements Comparable<EditableResourceBundle> {
 
+    public static final String VISIBILITY_COOKIE_NAME = "EditableResourceBundleEditorVisibility";
+
     private static final ThreadLocal<Boolean> canEditResources = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
@@ -213,7 +215,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                 SortedSet<Locale> allLocales = new TreeSet<Locale>(LocaleComparator.getInstance());
                 for(LookupKey lookupKey : lookupKeys) allLocales.addAll(lookupKey.bundleSet.getLocales());
 
-                out.append("<div style='position:fixed; bottom:0px; left:0px; width:100%; text-align:center'>\n");
+                out.append("<div style='position:fixed; bottom:0px; left:50%; width:300px; margin-left:-150px; text-align:center'>\n");
                 int invalidatedCount = 0;
                 int missingCount = 0;
                 for(LookupValue lookupValue : lookups.values()) {
@@ -298,7 +300,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         + "\n"
                         + "      function EditableResourceBundleEditorSetVisibility(visibility) {\n"
                         + "        document.getElementById('EditableResourceBundleEditor').style.visibility=visibility;\n"
-                        + "        EditableResourceBundleEditorSetCookie(\"EditableResourceBundleEditorVisibility\", visibility, 31);\n"
+                        + "        EditableResourceBundleEditorSetCookie(\""+VISIBILITY_COOKIE_NAME+"\", visibility, 31);\n"
                         + "      }\n"
                         + "\n"
                         + "      var EditableResourceBundleEditorRowValues=[");
@@ -566,8 +568,8 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     out.append("      <tr"
                             + " id=\"EditableResourceBundleEditorRow").append(id).append("\""
                             + " style=\"background-color:").append((i&1)==1 ? "white" : "#e0e0e0").append('"'
-                            + " onmouseover=\"if(typeof EditableResourceBundleHighlightAll == 'function') EditableResourceBundleHighlightAll(").append(id).append(", false);\""
-                            + " onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == 'function') EditableResourceBundleUnhighlightAll(").append(ids.get(0).toString()).append(");\""
+                            + " onmouseover=\"if(typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(").append(id).append(", false);\""
+                            + " onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(").append(ids.get(0).toString()).append(");\""
                             + ">\n"
                             + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\" style=\"text-align:right\">").append(Long.toString(lookupValue.id)).append("</td>\n"
                             + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\">");
@@ -701,7 +703,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     + "  if(EditableResourceBundleEditorTop!=\"\" && parseInt(EditableResourceBundleEditorTop)>=0 && (parseInt(EditableResourceBundleEditorTop)+parseInt(EditableResourceBundleEditorStyle.height))<=window.innerHeight) EditableResourceBundleEditorStyle.top=EditableResourceBundleEditorTop;\n"
                     + "  var EditableResourceBundleEditorLeft = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorLeft\");\n"
                     + "  if(EditableResourceBundleEditorLeft!=\"\" && parseInt(EditableResourceBundleEditorLeft)>=0 && (parseInt(EditableResourceBundleEditorLeft)+parseInt(EditableResourceBundleEditorStyle.width))<=window.innerWidth) EditableResourceBundleEditorStyle.left=EditableResourceBundleEditorLeft;\n"
-                    + "  var EditableResourceBundleEditorVisibility = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorVisibility\");\n"
+                    + "  var EditableResourceBundleEditorVisibility = EditableResourceBundleEditorGetCookie(\""+VISIBILITY_COOKIE_NAME+"\");\n"
                     + "  if(EditableResourceBundleEditorVisibility!=\"\") EditableResourceBundleEditorStyle.visibility=EditableResourceBundleEditorVisibility;\n"
                     + "\n"
                     + "  var EditableResourceBundleElementSets=[");
@@ -775,14 +777,22 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         }
     }
 
-    final Locale locale;
-    final EditableResourceBundleSet bundleSet;
+    private final Locale locale;
+    private final EditableResourceBundleSet bundleSet;
 
-    public EditableResourceBundle(File sourceFile, Locale locale, EditableResourceBundleSet bundleSet) {
-        super(sourceFile);
+    public EditableResourceBundle(Locale locale, EditableResourceBundleSet bundleSet, File... sourceFiles) {
+        super(sourceFiles);
         this.locale = locale;
         this.bundleSet = bundleSet;
         bundleSet.addBundle(this);
+    }
+
+    Locale getBundleLocale() {
+        return locale;
+    }
+
+    EditableResourceBundleSet getBundleSet() {
+        return bundleSet;
     }
 
     /**
@@ -851,8 +861,8 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     ;
                     //if(invalidated) SB.append(" style=\"color:red\"");
                     SB
-                        .append(" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == 'function') EditableResourceBundleHighlightAll(").append(elementId).append(", true);\"")
-                        .append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == 'function') EditableResourceBundleUnhighlightAll(").append(elementId).append(");\"")
+                        .append(" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(").append(elementId).append(", true);\"")
+                        .append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(").append(elementId).append(");\"")
                         .append('>')
                         .append(value)
                         .append(isBlockElement ? "</div>" : "</span>")
@@ -861,7 +871,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     break;
                 case TEXT :
                 case XHTML_PRE :
-                    // <#< and >#> used to cause XHTML parse errors if text value not properly escaped
+                    // <#< and >#> used to cause XHTML parse errors if text value not properly encoded
                     modifiedValue = invalidated ? ("<<<"+lookupValue.id+"<"+value+">"+lookupValue.id+">>>") : myModifyAllText ? ("<"+lookupValue.id+"<"+value+">"+lookupValue.id+">") : value;
                     break;
                 case URL :

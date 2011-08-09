@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.Reader;
+import java.nio.charset.Charset;
 
 /**
  * Contains the result of executing a process, including return code, standard output, and standard error.
@@ -35,16 +36,30 @@ import java.io.Reader;
 public class ProcessResult {
 
     /**
-     * Executes the provided command and gets the result.
+     * Executes the provided command and gets the result in the system default character set.
      */
     public static ProcessResult exec(String[] command) throws IOException {
-        return getProcessResult(Runtime.getRuntime().exec(command));
+        return getProcessResult(Runtime.getRuntime().exec(command), Charset.defaultCharset());
     }
 
     /**
-     * Gets the result of the provided process.
+     * Executes the provided command and gets the result in the provided character set.
      */
-    public static ProcessResult getProcessResult(final Process process) throws IOException {
+    public static ProcessResult exec(String[] command, Charset charset) throws IOException {
+        return getProcessResult(Runtime.getRuntime().exec(command), charset);
+    }
+
+    /**
+     * Gets the result of the provided process in the system default character set.
+     */
+    public static ProcessResult getProcessResult(Process process) throws IOException {
+        return getProcessResult(process, Charset.defaultCharset());
+    }
+
+    /**
+     * Gets the result of the provided process in the provided character set.
+     */
+    public static ProcessResult getProcessResult(final Process process, final Charset charset) throws IOException {
         // Close the input immediately
         process.getOutputStream().close();
 
@@ -56,7 +71,7 @@ public class ProcessResult {
                 @Override
                 public void run() {
                     try {
-                        Reader stdoutIn = new InputStreamReader(process.getInputStream());
+                        Reader stdoutIn = new InputStreamReader(process.getInputStream(), charset);
                         try {
                             char[] buff = new char[4096];
                             int count;
@@ -69,15 +84,9 @@ public class ProcessResult {
                             stdoutIn.close();
                         }
                     } catch(IOException exc) {
-                        //String message = exc.getMessage();
-                        //if(
-                        //    !"Stream closed".equals(message)
-                        //    && !"Bad file descriptor".equals(message)
-                        //) {
-                            synchronized(stdoutException) {
-                                stdoutException[0] = exc;
-                            }
-                        //}
+                        synchronized(stdoutException) {
+                            stdoutException[0] = exc;
+                        }
                     }
                 }
             }
@@ -92,7 +101,7 @@ public class ProcessResult {
                 @Override
                 public void run() {
                     try {
-                        Reader stderrIn = new InputStreamReader(process.getErrorStream());
+                        Reader stderrIn = new InputStreamReader(process.getErrorStream(), charset);
                         try {
                             char[] buff = new char[4096];
                             int count;
@@ -105,15 +114,9 @@ public class ProcessResult {
                             stderrIn.close();
                         }
                     } catch(IOException exc) {
-                        //String message = exc.getMessage();
-                        //if(
-                        //    !"Stream closed".equals(message)
-                        //    && !"Bad file descriptor".equals(message)
-                        //) {
-                            synchronized(stderrException) {
-                                stderrException[0] = exc;
-                            }
-                        //}
+                        synchronized(stderrException) {
+                            stderrException[0] = exc;
+                        }
                     }
                 }
             }

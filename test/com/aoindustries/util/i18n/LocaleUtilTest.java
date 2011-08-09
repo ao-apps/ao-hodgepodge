@@ -31,19 +31,19 @@ import junit.framework.TestSuite;
 /**
  * @author  AO Industries, Inc.
  */
-public class LocaleParserTest extends TestCase {
+public class LocaleUtilTest extends TestCase {
 
-    public LocaleParserTest(String testName) {
+    public LocaleUtilTest(String testName) {
         super(testName);
     }
 
     public static Test suite() {
-        return new TestSuite(LocaleParserTest.class);
+        return new TestSuite(LocaleUtilTest.class);
     }
 
     public void testParseLocale() throws IOException {
         for(Locale locale : Locale.getAvailableLocales()) {
-            Locale parsed = LocaleParser.parseLocale(locale.toString());
+            Locale parsed = LocaleUtil.parseLocale(locale.toString());
             // System.out.println(locale+"->"+parsed);
             assertEquals(locale, parsed);
         }

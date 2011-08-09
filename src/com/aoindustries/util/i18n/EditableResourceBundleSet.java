@@ -64,7 +64,7 @@ public class EditableResourceBundleSet {
      * The constructor of EditableResourceBundle adds itself here.
      */
     void addBundle(EditableResourceBundle bundle) {
-        Locale locale = bundle.locale;
+        Locale locale = bundle.getBundleLocale();
         if(!locales.contains(locale)) throw new AssertionError("locale not in locales: "+locale);
         bundles.put(locale, bundle);
     }
@@ -90,8 +90,8 @@ public class EditableResourceBundleSet {
             if(!resourceBundle.getLocale().equals(locale)) throw new AssertionError("ResourceBundle not for this locale: "+locale);
             if(!(resourceBundle instanceof EditableResourceBundle)) throw new AssertionError("ResourceBundle is not a EditableResourceBundle: "+resourceBundle);
             localeBundle = (EditableResourceBundle)resourceBundle;
-            if(localeBundle.bundleSet!=this) throw new AssertionError("EditableResourceBundle not for this EditableResourceBundleSet: "+localeBundle);
-            if(!localeBundle.locale.equals(locale)) throw new AssertionError("EditableResourceBundle not for this locale: "+locale);
+            if(localeBundle.getBundleSet()!=this) throw new AssertionError("EditableResourceBundle not for this EditableResourceBundleSet: "+localeBundle);
+            if(!localeBundle.getBundleLocale().equals(locale)) throw new AssertionError("EditableResourceBundle not for this locale: "+locale);
             // EditableResourceBundle will have added the bundle to the bundles map.
         }
         return localeBundle;

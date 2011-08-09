@@ -69,11 +69,6 @@ public class ApplicationResourcesAccessor implements Serializable {
      * the locale and key.
      * </p>
      * <p>
-     * This should be used very sparingly.  It is intended for situations where
-     * the associated properties file may be unavailable in specific
-     * circumstances, such as a TagExtraInfo implementation in NetBeans 6.5.
-     * </p>
-     * <p>
      * Gets the message in the current thread's locale.
      * </p>
      *

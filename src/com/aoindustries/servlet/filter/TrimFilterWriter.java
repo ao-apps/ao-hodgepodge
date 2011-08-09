@@ -65,10 +65,14 @@ public class TrimFilterWriter extends PrintWriter {
         String contentType = response.getContentType();
         return
             contentType==null
-            || contentType.equals("text/html")
-            || contentType.startsWith("text/html;")
             || contentType.equals("application/xhtml+xml")
             || contentType.startsWith("application/xhtml+xml;")
+            || contentType.equals("text/html")
+            || contentType.startsWith("text/html;")
+            || contentType.equals("application/xml")
+            || contentType.startsWith("application/xml;")
+            || contentType.equals("text/xml")
+            || contentType.startsWith("text/xml;")
         ;
     }
 

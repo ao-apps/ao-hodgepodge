@@ -22,6 +22,7 @@
  */
 package com.aoindustries.servlet.http;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -139,5 +140,32 @@ public class ServletUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * @see #getAbsoluteUrl(javax.servlet.http.HttpServletRequest, java.lang.String, java.lang.Appendable)
+     */
+    public static String getAbsoluteUrl(HttpServletRequest request, String relPath) {
+        try {
+            StringBuilder buffer = new StringBuilder();
+            getAbsoluteUrl(request, relPath, buffer);
+            return buffer.toString();
+        } catch(IOException e) {
+            // Should never get IOException from StringBuilder.
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Gets an absolute URL for the given context-relative path.  This includes
+     * protocol, port, context path, and relative path.
+     */
+    public static void getAbsoluteUrl(HttpServletRequest request, String relPath, Appendable out) throws IOException {
+        out.append(request.isSecure() ? "https://" : "http://");
+        out.append(request.getServerName());
+        int port = request.getServerPort();
+        if(port!=(request.isSecure() ? 443 : 80)) out.append(':').append(Integer.toString(port));
+        out.append(request.getContextPath());
+        out.append(relPath);
     }
 }
