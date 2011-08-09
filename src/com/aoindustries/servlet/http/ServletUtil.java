@@ -143,12 +143,12 @@ public class ServletUtil {
     }
 
     /**
-     * @see #getAbsoluteUrl(javax.servlet.http.HttpServletRequest, java.lang.String, java.lang.Appendable)
+     * @see #getAbsoluteURL(javax.servlet.http.HttpServletRequest, java.lang.String, java.lang.Appendable)
      */
-    public static String getAbsoluteUrl(HttpServletRequest request, String relPath) {
+    public static String getAbsoluteURL(HttpServletRequest request, String relPath) {
         try {
             StringBuilder buffer = new StringBuilder();
-            getAbsoluteUrl(request, relPath, buffer);
+            getAbsoluteURL(request, relPath, buffer);
             return buffer.toString();
         } catch(IOException e) {
             // Should never get IOException from StringBuilder.
@@ -160,7 +160,7 @@ public class ServletUtil {
      * Gets an absolute URL for the given context-relative path.  This includes
      * protocol, port, context path, and relative path.
      */
-    public static void getAbsoluteUrl(HttpServletRequest request, String relPath, Appendable out) throws IOException {
+    public static void getAbsoluteURL(HttpServletRequest request, String relPath, Appendable out) throws IOException {
         out.append(request.isSecure() ? "https://" : "http://");
         out.append(request.getServerName());
         int port = request.getServerPort();

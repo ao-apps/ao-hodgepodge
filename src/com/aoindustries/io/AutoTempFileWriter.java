@@ -160,6 +160,13 @@ public class AutoTempFileWriter extends Writer {
     }
 
     /**
+     * Gets the current length of the buffer in characters.
+     */
+    public long getLength() {
+        return length;
+    }
+
+    /**
      * Gets the captured body as a string.  For larger amounts of data, especially when
      * in excess of <code>tempFileThreshold</code>, it is much more efficient to call
      * the <code>writeTo</code> method.
