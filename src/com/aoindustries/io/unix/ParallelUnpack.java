@@ -23,6 +23,7 @@
 package com.aoindustries.io.unix;
 
 import com.aoindustries.io.CompressedDataInputStream;
+import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.Stack;
 import java.io.DataInput;
 import java.io.EOFException;
@@ -220,95 +221,67 @@ public class ParallelUnpack {
             if(compress) compressedIn = new CompressedDataInputStream(new GZIPInputStream(in, PackProtocol.BUFFER_SIZE));
             // Reused in main loop
             final StringBuilder SB = new StringBuilder();
-            final byte[] buffer = new byte[PackProtocol.BUFFER_SIZE];
-            // Hard link management
-            final Map<Long,PathAndCount> linkPathAndCounts = new HashMap<Long,PathAndCount>();
-            // Directory modify time management
-            final Map<String,Stack<PathAndModifyTime>> directoryModifyTimes = new HashMap<String,Stack<PathAndModifyTime>>();
+            final byte[] buffer = PackProtocol.BUFFER_SIZE == BufferManager.BUFFER_SIZE ? BufferManager.getBytes() : new byte[PackProtocol.BUFFER_SIZE];
             try {
-                // Main loop
-                while(true) {
-                    byte type = compressedIn.readByte();
-                    if(type==PackProtocol.END) break;
-                    String packPath = compressedIn.readCompressedUTF();
-                    // Verbose output
-                    if(verboseQueue!=null) {
-                        try {
-                            verboseQueue.put(packPath);
-                        } catch(InterruptedException err) {
-                            IOException ioErr = new InterruptedIOException();
-                            ioErr.initCause(err);
-                            throw ioErr;
-                        }
-                    }
-
-                    if(packPath.length()==0) throw new IOException("Empty packPath");
-                    if(packPath.charAt(0)!='/') throw new IOException("Invalid packPath, first character is not /");
-                    SB.setLength(0);
-                    SB.append(path);
-                    SB.append(packPath);
-                    String fullPath = SB.toString();
-
-                    // Maintain modify time of directories
-                    int slashPos = packPath.indexOf('/', 1);
-                    String subtreeRoot = slashPos==-1 ? packPath : packPath.substring(0, slashPos);
-                    Stack<PathAndModifyTime> mtimeStack = directoryModifyTimes.get(subtreeRoot);
-                    if(mtimeStack!=null) {
-                        // Unroll stack as much as needed for current item
-                        while(!mtimeStack.isEmpty()) {
-                            PathAndModifyTime pathAndMod = mtimeStack.peek();
-                            if(packPath.startsWith(pathAndMod.path)) break;
-                            SB.setLength(0);
-                            UnixFile uf = new UnixFile(SB.append(path).append(pathAndMod.path).toString());
-                            uf.getStat(stat);
-                            uf.utime(stat.getAccessTime(), pathAndMod.modifyTime);
-                            mtimeStack.pop();
-                        }
-                    }
-
-                    // Make sure doesn't exist if not in force mode
-                    UnixFile uf = new UnixFile(fullPath);
-                    uf.getStat(stat);
-                    if(!force && stat.exists()) throw new IOException("Exists: "+fullPath);
-
-                    // Handle this file
-                    if(type==PackProtocol.REGULAR_FILE) {
-                        long linkId = compressedIn.readLong();
-                        if(linkId==0) {
-                            // No hard links
-                            int uid = compressedIn.readInt();
-                            int gid = compressedIn.readInt();
-                            long mode = compressedIn.readLong();
-                            long modifyTime = compressedIn.readLong();
-                            if(dryRun) skipFile(compressedIn, buffer);
-                            else {
-                                if(stat.exists()) uf.deleteRecursive();
-                                readFile(uf, compressedIn, buffer);
-                                uf.chown(uid, gid).setMode(mode);
-                                uf.getStat(stat);
-                                uf.utime(stat.getAccessTime(), modifyTime);
+                // Hard link management
+                final Map<Long,PathAndCount> linkPathAndCounts = new HashMap<Long,PathAndCount>();
+                // Directory modify time management
+                final Map<String,Stack<PathAndModifyTime>> directoryModifyTimes = new HashMap<String,Stack<PathAndModifyTime>>();
+                try {
+                    // Main loop
+                    while(true) {
+                        byte type = compressedIn.readByte();
+                        if(type==PackProtocol.END) break;
+                        String packPath = compressedIn.readCompressedUTF();
+                        // Verbose output
+                        if(verboseQueue!=null) {
+                            try {
+                                verboseQueue.put(packPath);
+                            } catch(InterruptedException err) {
+                                IOException ioErr = new InterruptedIOException();
+                                ioErr.initCause(err);
+                                throw ioErr;
                             }
-                        } else {
-                            Long linkIdL = Long.valueOf(linkId);
-                            PathAndCount pathAndCount = linkPathAndCounts.get(linkIdL);
-                            if(pathAndCount!=null) {
-                                // Already sent, link and decrement our count
-                                if(!dryRun) {
-                                    if(stat.exists()) uf.deleteRecursive();
-                                    SB.setLength(0);
-                                    SB.append(path);
-                                    SB.append(pathAndCount.path);
-                                    String linkPath = SB.toString();
-                                    uf.link(linkPath);
-                                }
-                                if(--pathAndCount.linkCount<=0) linkPathAndCounts.remove(linkIdL);
-                            } else {
-                                // New file, receive file data
+                        }
+
+                        if(packPath.length()==0) throw new IOException("Empty packPath");
+                        if(packPath.charAt(0)!='/') throw new IOException("Invalid packPath, first character is not /");
+                        SB.setLength(0);
+                        SB.append(path);
+                        SB.append(packPath);
+                        String fullPath = SB.toString();
+
+                        // Maintain modify time of directories
+                        int slashPos = packPath.indexOf('/', 1);
+                        String subtreeRoot = slashPos==-1 ? packPath : packPath.substring(0, slashPos);
+                        Stack<PathAndModifyTime> mtimeStack = directoryModifyTimes.get(subtreeRoot);
+                        if(mtimeStack!=null) {
+                            // Unroll stack as much as needed for current item
+                            while(!mtimeStack.isEmpty()) {
+                                PathAndModifyTime pathAndMod = mtimeStack.peek();
+                                if(packPath.startsWith(pathAndMod.path)) break;
+                                SB.setLength(0);
+                                UnixFile uf = new UnixFile(SB.append(path).append(pathAndMod.path).toString());
+                                uf.getStat(stat);
+                                uf.utime(stat.getAccessTime(), pathAndMod.modifyTime);
+                                mtimeStack.pop();
+                            }
+                        }
+
+                        // Make sure doesn't exist if not in force mode
+                        UnixFile uf = new UnixFile(fullPath);
+                        uf.getStat(stat);
+                        if(!force && stat.exists()) throw new IOException("Exists: "+fullPath);
+
+                        // Handle this file
+                        if(type==PackProtocol.REGULAR_FILE) {
+                            long linkId = compressedIn.readLong();
+                            if(linkId==0) {
+                                // No hard links
                                 int uid = compressedIn.readInt();
                                 int gid = compressedIn.readInt();
                                 long mode = compressedIn.readLong();
                                 long modifyTime = compressedIn.readLong();
-                                int numLinks = compressedIn.readInt();
                                 if(dryRun) skipFile(compressedIn, buffer);
                                 else {
                                     if(stat.exists()) uf.deleteRecursive();
@@ -317,76 +290,108 @@ public class ParallelUnpack {
                                     uf.getStat(stat);
                                     uf.utime(stat.getAccessTime(), modifyTime);
                                 }
-                                linkPathAndCounts.put(linkIdL, new PathAndCount(packPath, numLinks-1));
-                            }
-                        }
-                    } else if(type==PackProtocol.DIRECTORY) {
-                        int uid = compressedIn.readInt();
-                        int gid = compressedIn.readInt();
-                        long mode = compressedIn.readLong();
-                        long modifyTime = compressedIn.readLong();
-                        if(!dryRun) {
-                            if(stat.exists()) {
-                                if(!stat.isDirectory()) {
-                                    uf.deleteRecursive();
-                                    uf.mkdir().chown(uid, gid).setMode(mode);
-                                } else {
-                                    if(stat.getUid()!=uid || stat.getGid()!=gid) uf.chown(uid, gid);
-                                    if(stat.getMode()!=mode) uf.setMode(mode);
-                                }
                             } else {
-                                uf.mkdir().chown(uid, gid).setMode(mode);
+                                Long linkIdL = Long.valueOf(linkId);
+                                PathAndCount pathAndCount = linkPathAndCounts.get(linkIdL);
+                                if(pathAndCount!=null) {
+                                    // Already sent, link and decrement our count
+                                    if(!dryRun) {
+                                        if(stat.exists()) uf.deleteRecursive();
+                                        SB.setLength(0);
+                                        SB.append(path);
+                                        SB.append(pathAndCount.path);
+                                        String linkPath = SB.toString();
+                                        uf.link(linkPath);
+                                    }
+                                    if(--pathAndCount.linkCount<=0) linkPathAndCounts.remove(linkIdL);
+                                } else {
+                                    // New file, receive file data
+                                    int uid = compressedIn.readInt();
+                                    int gid = compressedIn.readInt();
+                                    long mode = compressedIn.readLong();
+                                    long modifyTime = compressedIn.readLong();
+                                    int numLinks = compressedIn.readInt();
+                                    if(dryRun) skipFile(compressedIn, buffer);
+                                    else {
+                                        if(stat.exists()) uf.deleteRecursive();
+                                        readFile(uf, compressedIn, buffer);
+                                        uf.chown(uid, gid).setMode(mode);
+                                        uf.getStat(stat);
+                                        uf.utime(stat.getAccessTime(), modifyTime);
+                                    }
+                                    linkPathAndCounts.put(linkIdL, new PathAndCount(packPath, numLinks-1));
+                                }
                             }
+                        } else if(type==PackProtocol.DIRECTORY) {
+                            int uid = compressedIn.readInt();
+                            int gid = compressedIn.readInt();
+                            long mode = compressedIn.readLong();
+                            long modifyTime = compressedIn.readLong();
+                            if(!dryRun) {
+                                if(stat.exists()) {
+                                    if(!stat.isDirectory()) {
+                                        uf.deleteRecursive();
+                                        uf.mkdir().chown(uid, gid).setMode(mode);
+                                    } else {
+                                        if(stat.getUid()!=uid || stat.getGid()!=gid) uf.chown(uid, gid);
+                                        if(stat.getMode()!=mode) uf.setMode(mode);
+                                    }
+                                } else {
+                                    uf.mkdir().chown(uid, gid).setMode(mode);
+                                }
+                            }
+                            if(mtimeStack==null) directoryModifyTimes.put(subtreeRoot, mtimeStack = new Stack<PathAndModifyTime>());
+                            mtimeStack.push(new PathAndModifyTime(packPath+'/', modifyTime));
+                        } else if(type==PackProtocol.SYMLINK) {
+                            int uid = compressedIn.readInt();
+                            int gid = compressedIn.readInt();
+                            String target = compressedIn.readCompressedUTF();
+                            if(!dryRun) {
+                                if(stat.exists()) uf.deleteRecursive();
+                                uf.symLink(target).chown(uid, gid);
+                            }
+                        } else if(type==PackProtocol.BLOCK_DEVICE) {
+                            int uid = compressedIn.readInt();
+                            int gid = compressedIn.readInt();
+                            long mode = compressedIn.readLong();
+                            long deviceIdentifier = compressedIn.readLong();
+                            if(!dryRun) {
+                                if(stat.exists()) uf.deleteRecursive();
+                                uf.mknod(mode|UnixFile.IS_BLOCK_DEVICE, deviceIdentifier).chown(uid, gid);
+                            }
+                        } else if(type==PackProtocol.CHARACTER_DEVICE) {
+                            int uid = compressedIn.readInt();
+                            int gid = compressedIn.readInt();
+                            long mode = compressedIn.readLong();
+                            long deviceIdentifier = compressedIn.readLong();
+                            if(!dryRun) {
+                                if(stat.exists()) uf.deleteRecursive();
+                                uf.mknod(mode|UnixFile.IS_CHARACTER_DEVICE, deviceIdentifier).chown(uid, gid);
+                            }
+                        } else if(type==PackProtocol.FIFO) {
+                            int uid = compressedIn.readInt();
+                            int gid = compressedIn.readInt();
+                            long mode = compressedIn.readLong();
+                            if(!dryRun) {
+                                if(stat.exists()) uf.deleteRecursive();
+                                uf.mkfifo(mode).chown(uid, gid);
+                            }
+                        } else throw new IOException("Unexpected value for type: "+type);
+                    }
+                } finally {
+                    // Unroll stacks entirely
+                    for(Stack<PathAndModifyTime> mtimeStack : directoryModifyTimes.values()) {
+                        while(!mtimeStack.isEmpty()) {
+                            PathAndModifyTime pathAndMod = mtimeStack.pop();
+                            SB.setLength(0);
+                            UnixFile uf = new UnixFile(SB.append(path).append(pathAndMod.path).toString());
+                            uf.getStat(stat);
+                            uf.utime(stat.getAccessTime(), pathAndMod.modifyTime);
                         }
-                        if(mtimeStack==null) directoryModifyTimes.put(subtreeRoot, mtimeStack = new Stack<PathAndModifyTime>());
-                        mtimeStack.push(new PathAndModifyTime(packPath+'/', modifyTime));
-                    } else if(type==PackProtocol.SYMLINK) {
-                        int uid = compressedIn.readInt();
-                        int gid = compressedIn.readInt();
-                        String target = compressedIn.readCompressedUTF();
-                        if(!dryRun) {
-                            if(stat.exists()) uf.deleteRecursive();
-                            uf.symLink(target).chown(uid, gid);
-                        }
-                    } else if(type==PackProtocol.BLOCK_DEVICE) {
-                        int uid = compressedIn.readInt();
-                        int gid = compressedIn.readInt();
-                        long mode = compressedIn.readLong();
-                        long deviceIdentifier = compressedIn.readLong();
-                        if(!dryRun) {
-                            if(stat.exists()) uf.deleteRecursive();
-                            uf.mknod(mode|UnixFile.IS_BLOCK_DEVICE, deviceIdentifier).chown(uid, gid);
-                        }
-                    } else if(type==PackProtocol.CHARACTER_DEVICE) {
-                        int uid = compressedIn.readInt();
-                        int gid = compressedIn.readInt();
-                        long mode = compressedIn.readLong();
-                        long deviceIdentifier = compressedIn.readLong();
-                        if(!dryRun) {
-                            if(stat.exists()) uf.deleteRecursive();
-                            uf.mknod(mode|UnixFile.IS_CHARACTER_DEVICE, deviceIdentifier).chown(uid, gid);
-                        }
-                    } else if(type==PackProtocol.FIFO) {
-                        int uid = compressedIn.readInt();
-                        int gid = compressedIn.readInt();
-                        long mode = compressedIn.readLong();
-                        if(!dryRun) {
-                            if(stat.exists()) uf.deleteRecursive();
-                            uf.mkfifo(mode).chown(uid, gid);
-                        }
-                    } else throw new IOException("Unexpected value for type: "+type);
-                }
-            } finally {
-                // Unroll stacks entirely
-                for(Stack<PathAndModifyTime> mtimeStack : directoryModifyTimes.values()) {
-                    while(!mtimeStack.isEmpty()) {
-                        PathAndModifyTime pathAndMod = mtimeStack.pop();
-                        SB.setLength(0);
-                        UnixFile uf = new UnixFile(SB.append(path).append(pathAndMod.path).toString());
-                        uf.getStat(stat);
-                        uf.utime(stat.getAccessTime(), pathAndMod.modifyTime);
                     }
                 }
+            } finally {
+                if(PackProtocol.BUFFER_SIZE == BufferManager.BUFFER_SIZE) BufferManager.release(buffer);
             }
             // TODO: If verbose, warn hard links not fully transferred
         } finally {

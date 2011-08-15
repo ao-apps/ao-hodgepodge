@@ -23,6 +23,7 @@
 package com.aoindustries.io;
 
 import com.aoindustries.math.Statistics;
+import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.ErrorPrinter;
 import com.aoindustries.util.StringUtility;
 import java.io.File;
@@ -109,68 +110,72 @@ public class Benchmark {
             }
 
             System.out.println("Random Seek by Concurrency (4 kB Blocks)");
-            final byte[] buff=new byte[4096];
-            for(int ci=0;ci<concurrencies.length;ci++) {
-                List<Double> concurrencySeekRates = fileSeekRates.get(ci);
-                int concurrency=concurrencies[ci];
-                final int[] counter=new int[1];
-                Thread[] threads=new Thread[concurrency];
-                for(int d=0;d<concurrency;d++) {
-                    Thread T=threads[d]=new Thread() {
-                        @Override
-                        public void run() {
-                            int count=0;
-                            try {
-                                RandomAccessFile raf=new RandomAccessFile(file, "r");
-                                long length=raf.length();
+            final byte[] buff = BufferManager.getBytes();
+            try {
+                for(int ci=0;ci<concurrencies.length;ci++) {
+                    List<Double> concurrencySeekRates = fileSeekRates.get(ci);
+                    int concurrency=concurrencies[ci];
+                    final int[] counter=new int[1];
+                    Thread[] threads=new Thread[concurrency];
+                    for(int d=0;d<concurrency;d++) {
+                        Thread T=threads[d]=new Thread() {
+                            @Override
+                            public void run() {
+                                int count=0;
                                 try {
-                                    long endTime=System.currentTimeMillis()+30*1000;
-                                    while(System.currentTimeMillis()<endTime) {
-                                        raf.seek((long)(Math.random()*(length-4096)));
-                                        raf.read(buff, 0, 4096);
-                                        count++;
+                                    RandomAccessFile raf=new RandomAccessFile(file, "r");
+                                    long length=raf.length();
+                                    try {
+                                        long endTime=System.currentTimeMillis()+30*1000;
+                                        while(System.currentTimeMillis()<endTime) {
+                                            raf.seek((long)(Math.random()*(length-4096)));
+                                            raf.read(buff, 0, 4096);
+                                            count++;
+                                        }
+                                    } finally {
+                                        raf.close();
                                     }
-                                } finally {
-                                    raf.close();
+                                } catch(IOException err) {
+                                    ErrorPrinter.printStackTraces(err);
                                 }
-                            } catch(IOException err) {
-                                ErrorPrinter.printStackTraces(err);
+                                synchronized(counter) {
+                                    counter[0]+=count;
+                                }
                             }
-                            synchronized(counter) {
-                                counter[0]+=count;
-                            }
-                        }
-                    };
-                    T.start();
-                }
-                for(int d=0;d<concurrency;d++) {
-                    try {
-                        threads[d].join();
-                    } catch(InterruptedException err) {
-                        ErrorPrinter.printStackTraces(err);
+                        };
+                        T.start();
                     }
+                    for(int d=0;d<concurrency;d++) {
+                        try {
+                            threads[d].join();
+                        } catch(InterruptedException err) {
+                            ErrorPrinter.printStackTraces(err);
+                        }
+                    }
+                    double seekRate = (double)counter[0]/30L;
+                    concurrencySeekRates.add(seekRate);
+                    System.out.print("    ");
+                    System.out.print(concurrency);
+                    System.out.print(": ");
+                    System.out.print(numberFormat.format(seekRate));
+                    System.out.print(" seeks/sec");
+                    if(concurrencySeekRates.size()>1) {
+                        System.out.print(" (");
+                        System.out.print(numberFormat.format(Collections.min(concurrencySeekRates)));
+                        System.out.print(", ");
+                        double mean = Statistics.mean(concurrencySeekRates);
+                        System.out.print(numberFormat.format(mean));
+                        System.out.print('±');
+                        System.out.print(numberFormat.format(Statistics.standardDeviation(mean, concurrencySeekRates)));
+                        System.out.print(", ");
+                        System.out.print(numberFormat.format(Collections.max(concurrencySeekRates)));
+                        System.out.print(')');
+                    }
+                    System.out.println();
+                    //System.out.println("    "+concurrency+": "+seekRate+" seeks/sec, "+SQLUtility.getDecimal((int)(1000000d*concurrency/counter[0]))+" ms/seek");
                 }
-                double seekRate = (double)counter[0]/30L;
-                concurrencySeekRates.add(seekRate);
-                System.out.print("    ");
-                System.out.print(concurrency);
-                System.out.print(": ");
-                System.out.print(numberFormat.format(seekRate));
-                System.out.print(" seeks/sec");
-                if(concurrencySeekRates.size()>1) {
-                    System.out.print(" (");
-                    System.out.print(numberFormat.format(Collections.min(concurrencySeekRates)));
-                    System.out.print(", ");
-                    double mean = Statistics.mean(concurrencySeekRates);
-                    System.out.print(numberFormat.format(mean));
-                    System.out.print('±');
-                    System.out.print(numberFormat.format(Statistics.standardDeviation(mean, concurrencySeekRates)));
-                    System.out.print(", ");
-                    System.out.print(numberFormat.format(Collections.max(concurrencySeekRates)));
-                    System.out.print(')');
-                }
-                System.out.println();
-                //System.out.println("    "+concurrency+": "+seekRate+" seeks/sec, "+SQLUtility.getDecimal((int)(1000000d*concurrency/counter[0]))+" ms/seek");
+            } finally {
+                BufferManager.release(buff);
             }
         }
     }

@@ -59,7 +59,7 @@ public class LongLong extends Number implements Comparable<LongLong> {
 
     public static LongLong parseLongLong(String s, int radix) throws NumberFormatException {
         byte[] bytes = parseLongLongToBytes(s, radix);
-        return valueOf(PersistentCollections.bufferToLong(bytes, 0), PersistentCollections.bufferToLong(bytes, 8));
+        return valueOf(PersistentCollections.bufferToLong(bytes), PersistentCollections.bufferToLong(bytes, 8));
     }
 
     public static LongLong parseLongLong(String s) throws NumberFormatException {
@@ -158,7 +158,7 @@ public class LongLong extends Number implements Comparable<LongLong> {
 
     public LongLong(String s) throws NumberFormatException {
         byte[] bytes = parseLongLongToBytes(s, 10);
-        this.hi = PersistentCollections.bufferToLong(bytes, 0);
+        this.hi = PersistentCollections.bufferToLong(bytes);
         this.lo = PersistentCollections.bufferToLong(bytes, 8);
     }
 
@@ -184,7 +184,7 @@ public class LongLong extends Number implements Comparable<LongLong> {
 
     private BigInteger getBigInteger() {
         byte[] bytes = new byte[16];
-        PersistentCollections.longToBuffer(hi, bytes, 0);
+        PersistentCollections.longToBuffer(hi, bytes);
         PersistentCollections.longToBuffer(lo, bytes, 8);
         return new BigInteger(bytes);
     }
@@ -370,7 +370,7 @@ public class LongLong extends Number implements Comparable<LongLong> {
 
     public LongLong negate() {
         byte[] bytes = getBytes(getBigInteger().negate());
-        return valueOf(PersistentCollections.bufferToLong(bytes, 0), PersistentCollections.bufferToLong(bytes, 8));
+        return valueOf(PersistentCollections.bufferToLong(bytes), PersistentCollections.bufferToLong(bytes, 8));
     }
 
     /**

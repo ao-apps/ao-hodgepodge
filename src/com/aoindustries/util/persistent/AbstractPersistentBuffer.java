@@ -46,6 +46,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
     }
 
     // @ThreadSafe
+    @Override
     public ProtectionLevel getProtectionLevel() {
         return protectionLevel;
     }
@@ -56,6 +57,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #read(long, byte[], int, int)
      */
     // @NotThreadSafe
+    @Override
     public void get(long position, byte[] buff, int off, int len) throws IOException {
         while(len>0) {
             int count = getSome(position, buff, off, len);
@@ -71,6 +73,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #readByte(long)
      */
     // @NotThreadSafe
+    @Override
     public boolean getBoolean(long position) throws IOException {
         return get(position)!=0;
     }
@@ -83,6 +86,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #get(long, byte[], int, int)
      */
     // @NotThreadSafe
+    @Override
     public byte get(long position) throws IOException {
         get(position, ioBuffer, 0, 1);
         return ioBuffer[0];
@@ -94,9 +98,10 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #get(long, byte[], int, int)
      */
     // @NotThreadSafe
+    @Override
     public int getInt(long position) throws IOException {
         get(position, ioBuffer, 0, 4);
-        return PersistentCollections.bufferToInt(ioBuffer, 0);
+        return PersistentCollections.bufferToInt(ioBuffer);
     }
 
     /**
@@ -105,18 +110,10 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #get(long, byte[], int, int)
      */
     // @NotThreadSafe
+    @Override
     public long getLong(long position) throws IOException {
         get(position, ioBuffer, 0, 8);
-        return
-            ((ioBuffer[0]&255L) << 56)
-            + ((ioBuffer[1]&255L) << 48)
-            + ((ioBuffer[2]&255L) << 40)
-            + ((ioBuffer[3]&255L) << 32)
-            + ((ioBuffer[4]&255L) << 24)
-            + ((ioBuffer[5]&255L) << 16)
-            + ((ioBuffer[6]&255L) << 8)
-            + (ioBuffer[7]&255L)
-        ;
+        return PersistentCollections.bufferToLong(ioBuffer);
     }
 
     /**
@@ -127,6 +124,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #put(long, byte[], int, int)
      */
     // @NotThreadSafe
+    @Override
     public void put(long position, byte value) throws IOException {
         ioBuffer[0] = value;
         put(position, ioBuffer, 0, 1);
@@ -138,8 +136,9 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #write(long, byte[], int, int)
      */
     // @NotThreadSafe
+    @Override
     public void putInt(long position, int value) throws IOException {
-        PersistentCollections.intToBuffer(value, ioBuffer, 0);
+        PersistentCollections.intToBuffer(value, ioBuffer);
         put(position, ioBuffer, 0, 4);
     }
 
@@ -149,8 +148,9 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #write(long, byte[], int, int)
      */
     // @NotThreadSafe
+    @Override
     public void putLong(long position, long value) throws IOException {
-        PersistentCollections.longToBuffer(value, ioBuffer, 0);
+        PersistentCollections.longToBuffer(value, ioBuffer);
         put(position, ioBuffer, 0, 8);
     }
 
@@ -161,6 +161,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #getSome(long, byte[], int, int)
      */
     // @NotThreadSafe
+    @Override
     public InputStream getInputStream(final long position, final long length) throws IOException, BufferUnderflowException {
         return new InputStream() {
             private boolean closed = false;
@@ -229,6 +230,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
      * @see  #put(long, byte[], int, int)
      */
     // @NotThreadSafe
+    @Override
     public OutputStream getOutputStream(final long position, final long length) throws IOException, BufferOverflowException {
         return new OutputStream() {
             private boolean closed = false;

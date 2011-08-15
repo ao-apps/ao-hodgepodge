@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.IoUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,11 +38,13 @@ import java.io.OutputStream;
 public class LongSerializer implements Serializer<Long> {
 
     // @ThreadSafe
+    @Override
     public boolean isFixedSerializedSize() {
         return true;
     }
 
     // @NotThreadSafe
+    @Override
     public long getSerializedSize(Long value) {
         return 8;
     }
@@ -49,14 +52,16 @@ public class LongSerializer implements Serializer<Long> {
     private final byte[] buffer = new byte[8];
 
     // @NotThreadSafe
+    @Override
     public void serialize(Long value, OutputStream out) throws IOException {
-        PersistentCollections.longToBuffer(value, buffer, 0);
+        PersistentCollections.longToBuffer(value, buffer);
         out.write(buffer, 0, 8);
     }
 
     // @NotThreadSafe
+    @Override
     public Long deserialize(InputStream in) throws IOException {
-        PersistentCollections.readFully(in, buffer, 0, 8);
-        return PersistentCollections.bufferToLong(buffer, 0);
+        IoUtils.readFully(in, buffer, 0, 8);
+        return PersistentCollections.bufferToLong(buffer);
     }
 }

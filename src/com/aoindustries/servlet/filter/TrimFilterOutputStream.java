@@ -22,6 +22,7 @@
  */
 package com.aoindustries.servlet.filter;
 
+import com.aoindustries.util.BufferManager;
 import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
@@ -49,9 +50,11 @@ public class TrimFilterOutputStream extends ServletOutputStream {
 
     private int readCharMatchCount = 0;
     private int preReadCharMatchCount = 0;
-    private static final int OUPUT_BUFFER_SIZE=4096;
-    private byte[] outputBuffer = new byte[OUPUT_BUFFER_SIZE];
-    private int outputBufferUsed = 0;
+
+    /**
+     * Only used within individual methods, released on close.
+     */
+    private byte[] outputBuffer = BufferManager.getBytes();
 
     public TrimFilterOutputStream(ServletOutputStream wrapped, ServletResponse response) {
         this.wrapped = wrapped;
@@ -77,7 +80,16 @@ public class TrimFilterOutputStream extends ServletOutputStream {
     }
 
     @Override
+    public void flush() throws IOException {
+        wrapped.flush();
+    }
+
+    @Override
     public void close() throws IOException {
+        if(outputBuffer!=null) {
+            BufferManager.release(outputBuffer);
+            outputBuffer = null;
+        }
         wrapped.close();
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
@@ -86,11 +98,6 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         atLineStart = true;
     }
     
-    @Override
-    public void flush() throws IOException {
-        wrapped.flush();
-    }
-
     /**
      * Processes one character and returns true if the character should be outputted.
      */
@@ -183,23 +190,29 @@ public class TrimFilterOutputStream extends ServletOutputStream {
     @Override
     public void write(byte[] buf, int off, int len) throws IOException {
         if(isTrimEnabled()) {
-            outputBufferUsed = 0;
+            byte[] buff = outputBuffer;
             // If len > OUPUT_BUFFER_SIZE, process in blocks
+            int buffUsed = 0;
             while(len>0) {
-                int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
-                int blockEnd = off + blockLen;
-                for(int index = off; index<blockEnd ; index++) {
+                int blockLen = len<=BufferManager.BUFFER_SIZE ? len : BufferManager.BUFFER_SIZE;
+                for(
+                    int index = off, blockEnd = off + blockLen;
+                    index<blockEnd;
+                    index++
+                ) {
                     byte b = buf[index];
-                    if(processChar((char)b)) outputBuffer[outputBufferUsed++]=b;
-                }
-                if(outputBufferUsed>0) {
-                    if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
-                    else wrapped.write(outputBuffer, 0, outputBufferUsed);
-                    outputBufferUsed = 0;
+                    if(processChar((char)b)) {
+                        buff[buffUsed++] = b;
+                        if(buffUsed>=BufferManager.BUFFER_SIZE) {
+                            assert buffUsed==BufferManager.BUFFER_SIZE;
+                            wrapped.write(buff, 0, buffUsed);
+                        }
+                    }
                 }
                 off+=blockLen;
                 len-=blockLen;
             }
+            if(buffUsed>0) wrapped.write(buff, 0, buffUsed);
         } else {
             wrapped.write(buf, off, len);
         }
@@ -259,26 +272,34 @@ public class TrimFilterOutputStream extends ServletOutputStream {
     @Override
     public void print(String s) throws IOException {
         if(isTrimEnabled()) {
-            outputBufferUsed = 0;
+            byte[] buff = outputBuffer;
             // If len > OUPUT_BUFFER_SIZE, process in blocks
             int off = 0;
             int len = s.length();
+            int buffUsed = 0;
             while(len>0) {
-                int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
-                int blockEnd = off + blockLen;
-                for(int index = off; index<blockEnd ; index++) {
+                int blockLen = len<=BufferManager.BUFFER_SIZE ? len : BufferManager.BUFFER_SIZE;
+                for(
+                    int index = off, blockEnd = off + blockLen;
+                    index<blockEnd;
+                    index++
+                ) {
                     char c = s.charAt(index);
-                    if(processChar(c)) outputBuffer[outputBufferUsed++]=(byte)c;
-                }
-                if(outputBufferUsed>0) {
-                    if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
-                    else wrapped.write(outputBuffer, 0, outputBufferUsed);
-                    outputBufferUsed = 0;
+                    if(processChar(c)) {
+                        buff[buffUsed++] = (byte)c;
+                        if(buffUsed>=BufferManager.BUFFER_SIZE) {
+                            assert buffUsed==BufferManager.BUFFER_SIZE;
+                            wrapped.write(buff, 0, buffUsed);
+                        }
+                    }
                 }
                 off+=blockLen;
                 len-=blockLen;
             }
-        } else wrapped.print(s);
+            if(buffUsed>0) wrapped.write(buff, 0, buffUsed);
+        } else {
+            wrapped.print(s);
+        }
     }
 
     @Override

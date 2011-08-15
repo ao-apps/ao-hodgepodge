@@ -30,7 +30,9 @@ import java.io.OutputStream;
 
 /**
  * Serializes any objects by using a buffer between the <code>getSerializedSize</code>
- * and <code>serialize</code> calls.  This and all subclasses are not fixed size.
+ * and <code>serialize</code> calls.  This avoids serializing the object twice in the
+ * common sequence of getSerializedSize followed by serialize.  This and all subclasses
+ * are not fixed size.
  *
  * This class is not thread safe.
  *
@@ -55,17 +57,20 @@ abstract public class BufferedSerializer<E> implements Serializer<E> {
     }
 
     // @ThreadSafe
+    @Override
     final public boolean isFixedSerializedSize() {
         return false;
     }
 
     // @NotThreadSafe
+    @Override
     final public long getSerializedSize(E value) throws IOException {
         serializeToBuffer(value);
         return buffer.size();
     }
 
     // @NotThreadSafe
+    @Override
     final public void serialize(E value, OutputStream out) throws IOException {
         serializeToBuffer(value);
         buffer.writeTo(out);

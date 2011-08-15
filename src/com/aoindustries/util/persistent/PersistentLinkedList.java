@@ -58,8 +58,8 @@ import java.util.logging.Logger;
  * may also provide a more efficient or more compact representation of an object.
  * </p>
  * <p>
- * This class is intended for persistence, not for intra-process or intra-thread
- * shared data.
+ * This class is intended for scalability and persistence, not for intra-process
+ * or intra-thread shared data.
  * </p>
  * <p>
  * The first block allocated is a header:
@@ -1008,6 +1008,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @return the number of elements in this list
      */
     // @NotThreadSafe
+    @Override
     public int size() {
         return _size > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)_size;
     }
@@ -1236,6 +1237,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     }
 
     // @NotThreadSafe
+    @Override
     public E peek() {
         if(_size==0) return null;
         return getFirst();
@@ -1248,6 +1250,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @since 1.5
      */
     // @NotThreadSafe
+    @Override
     public E element() {
         return getFirst();
     }
@@ -1258,6 +1261,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @since 1.5
      */
     // @NotThreadSafe
+    @Override
     public E poll() {
         if(_size==0) return null;
         return removeFirst();
@@ -1271,6 +1275,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @since 1.5
      */
     // @NotThreadSafe
+    @Override
     public E remove() {
         return removeFirst();
     }
@@ -1283,6 +1288,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @since 1.5
      */
     // @NotThreadSafe
+    @Override
     public boolean offer(E e) {
         return add(e);
     }
@@ -1474,6 +1480,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
      * @see List#listIterator(int)
      */
     // @NotThreadSafe
+    @Override
     public ListIterator<E> listIterator(int index) {
         return new ListItr(index);
     }
@@ -1502,11 +1509,13 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
 
         // @NotThreadSafe
+        @Override
         public boolean hasNext() {
             return nextIndex != _size;
         }
 
         // @NotThreadSafe
+        @Override
         public E next() {
             checkForComodification();
             if (nextIndex == _size) throw new NoSuchElementException();
@@ -1522,11 +1531,13 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
 
         // @NotThreadSafe
+        @Override
         public boolean hasPrevious() {
             return nextIndex != 0;
         }
 
         // @NotThreadSafe
+        @Override
         public E previous() {
             checkForComodification();
             if (nextIndex == 0) throw new NoSuchElementException();
@@ -1541,6 +1552,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
 
         // @NotThreadSafe
+        @Override
         public int nextIndex() {
             if(nextIndex>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from nextIndex: "+nextIndex);
             assert nextIndex>=0;
@@ -1548,6 +1560,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
 
         // @NotThreadSafe
+        @Override
         public int previousIndex() {
             long prevIndex = nextIndex-1;
             if(prevIndex>Integer.MAX_VALUE) throw new RuntimeException("Index too high to return from previousIndex: "+prevIndex);
@@ -1556,6 +1569,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
 
         // @NotThreadSafe
+        @Override
         public void remove() {
             checkForComodification();
             try {
@@ -1576,6 +1590,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
 
         // @NotThreadSafe
+        @Override
         public void set(E e) {
             if (lastReturned == END_PTR)
             throw new IllegalStateException();
@@ -1585,6 +1600,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
         }
 
         // @NotThreadSafe
+        @Override
         public void add(E e) {
             checkForComodification();
             try {
@@ -1617,14 +1633,17 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
     private class DescendingIterator implements Iterator<E> {
         final ListItr itr = new ListItr(size());
         // @NotThreadSafe
+        @Override
         public boolean hasNext() {
             return itr.hasPrevious();
         }
         // @NotThreadSafe
+        @Override
         public E next() {
                 return itr.previous();
             }
         // @NotThreadSafe
+        @Override
         public void remove() {
             itr.remove();
         }

@@ -143,7 +143,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
      */
     // @ThreadSafe
     private static long getBlockSize(int blockSizeBits) {
-        return 1L<<blockSizeBits;
+        return 1L << blockSizeBits;
     }
 
     /**
@@ -244,7 +244,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             long blockOffsetMask = blockSize-1;
             // Only allow grouping if id is aligned with the current number of bits
             if((id&blockOffsetMask)!=0) break;
-            long biggerBlockSize = blockSize<<1;
+            long biggerBlockSize = blockSize << 1;
             long biggerBlockMask = -biggerBlockSize;
             long idBiggerBlockMask = id&biggerBlockMask;
             long prevId = id - blockSize;
@@ -367,11 +367,11 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             // Find the largest power of two block that aligns with the start and fits between start and end
             int bits = 1;
             while(bits<0x3f) {
-                if((start&((1L<<bits)-1))!=0) {
+                if((start&((1L << bits)-1))!=0) {
                     // Not aligned
                     break;
                 }
-                long blockEnd = start + (1L<<bits);
+                long blockEnd = start + (1L << bits);
                 if(blockEnd<0 || blockEnd>capacity) {
                     // Outside capacity
                     break;
@@ -387,7 +387,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 //pbuffer.barrier(false); // Not necessary because free space will be combined an recovery for TIGHT.  BALANCED will combine when needed, and FAST allocates minimally
             }
             addFreeSpaceMap(start, bits, capacity, true);
-            start += 1L<<bits;
+            start += 1L << bits;
             //iterations++;
         }
         //System.out.println("DEBUG: Completed in "+iterations+" iterations");
@@ -433,7 +433,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             if(PersistentCollections.ASSERT) assert (blockStart & blockMask)==0;
             long newCapacity = blockStart + blockSize;
             // Grow the file by at least 25% its previous size
-            long percentCapacity = capacity + (capacity>>2);
+            long percentCapacity = capacity + (capacity >> 2);
             if(percentCapacity>newCapacity) newCapacity = percentCapacity;
             // Align with page
             newCapacity = getNearestPage(newCapacity);

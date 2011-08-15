@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.IoUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -174,6 +175,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                         final TwoCopyBarrierBuffer buffer = toClose.get(c);
                         executorService.submit(
                             new Runnable() {
+                                @Override
                                 public void run() {
                                     synchronized(fieldLock) {
                                         long currentTime = System.currentTimeMillis();
@@ -398,7 +400,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                     }
                 } else {
                     // Read old bytes
-                    PersistentCollections.readFully(oldIn, oldBuff, 0, inBytes);
+                    IoUtils.readFully(oldIn, oldBuff, 0, inBytes);
                     if(!com.aoindustries.util.AoArrays.equals(buff, oldBuff, 0, inBytes)) {
                         // Not equal, add to oldWriteCache
                         if(inBytes<sectorSize) Arrays.fill(buff, sectorSize-inBytes, sectorSize, (byte)0);
@@ -476,6 +478,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     }
 
     // @ThreadSafe
+    @Override
     public boolean isClosed() {
         synchronized(cacheLock) {
             return isClosed;
@@ -483,6 +486,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     }
 
     // @ThreadSafe
+    @Override
     public void close() throws IOException {
         synchronized(shutdownBuffers) {
             shutdownBuffers.remove(this);
@@ -511,6 +515,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     }
 
     // @ThreadSafe
+    @Override
     public long capacity() throws IOException {
         synchronized(cacheLock) {
             checkClosed();
@@ -571,6 +576,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     }
 
     // @ThreadSafe
+    @Override
     public void setCapacity(long newCapacity) throws IOException {
         synchronized(cacheLock) {
             checkClosed();
@@ -623,6 +629,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     }
 
     // @ThreadSafe
+    @Override
     public int getSome(long position, final byte[] buff, int off, int len) throws IOException {
         synchronized(cacheLock) {
             checkClosed();
@@ -736,6 +743,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     }
 
     // @ThreadSafe
+    @Override
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         synchronized(cacheLock) {
             checkClosed();
@@ -812,6 +820,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
     }
 
     // @ThreadSafe
+    @Override
     public void barrier(boolean force) throws IOException {
         synchronized(cacheLock) {
             checkClosed();

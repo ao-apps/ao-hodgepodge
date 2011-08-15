@@ -23,11 +23,12 @@
 package com.aoindustries.io;
 
 import com.aoindustries.util.BufferManager;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * File utilities.
@@ -58,8 +59,36 @@ final public class FileUtils {
      * Compares the contents of a file to the provided array.
      */
     public static boolean contentEquals(File file, byte[] contents) throws IOException {
-        long length = file.length();
-        if(length!=contents.length) return false;
+        final int contentLen = contents.length;
+        {
+            final long length = file.length();
+            if(length>Integer.MAX_VALUE) return false;
+            // Be careful about file.length() returning zero on error - always read file for zero case - no shortcut.
+            if(contentLen>0 && length!=contentLen) return false;
+        }
+        final InputStream in = new FileInputStream(file);
+        try {
+            final byte[] buff = BufferManager.getBytes();
+            try {
+                int readPos = 0;
+                while(readPos<contentLen) {
+                    int bytesRemaining = contentLen - readPos;
+                    int bytesRead = in.read(buff, 0, bytesRemaining > BufferManager.BUFFER_SIZE ? BufferManager.BUFFER_SIZE : contentLen);
+                    if(bytesRead==-1) return false; // End of file
+                    int i=0;
+                    while(i<bytesRead) {
+                        if(buff[i++]!=contents[readPos++]) return false;
+                    }
+                }
+                // Next read must be end of file - otherwise file content longer than contents.
+                if(in.read()!=-1) return false;
+            } finally {
+                BufferManager.release(buff);
+            }
+        } finally {
+            in.close();
+        }
+        /*
         int buffSize = length<BufferManager.BUFFER_SIZE ? (int)length : BufferManager.BUFFER_SIZE;
         if(buffSize < 64) buffSize=64;
         InputStream in = new BufferedInputStream(new FileInputStream(file), buffSize);
@@ -71,7 +100,7 @@ final public class FileUtils {
             }
         } finally {
             in.close();
-        }
+        }*/
         return true;
     }
 
@@ -91,6 +120,33 @@ final public class FileUtils {
             if(!tempFile.delete()) throw new IOException(tempFile.getPath());
             // Check result of mkdir to catch race condition
             if(tempFile.mkdir()) return tempFile;
+        }
+    }
+
+    /**
+     * Copies a stream to a newly created temporary file.
+     */
+    public static File copyToTempFile(InputStream in, String prefix, String suffix) throws IOException {
+        return copyToTempFile(in, prefix, suffix, null);
+    }
+
+    /**
+     * Copies a stream to a newly created temporary file.
+     */
+    public static File copyToTempFile(InputStream in, String prefix, String suffix, File directory) throws IOException {
+        File tmpFile = File.createTempFile("cache_", null);
+        boolean successful = false;
+        try {
+            OutputStream out = new FileOutputStream(tmpFile);
+            try {
+                IoUtils.copy(in, out);
+            } finally {
+                out.close();
+            }
+            successful = true;
+            return tmpFile;
+        } finally {
+            if(!successful) tmpFile.delete();
         }
     }
 }

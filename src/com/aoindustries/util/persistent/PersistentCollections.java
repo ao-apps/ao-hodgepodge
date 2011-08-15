@@ -23,9 +23,7 @@
 package com.aoindustries.util.persistent;
 
 import com.aoindustries.util.BufferManager;
-import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -53,19 +51,41 @@ public class PersistentCollections {
 
     // <editor-fold desc="Protected byte[] manipulation methods">
     // @ThreadSafe
+    public static void charToBuffer(char ch, byte[] ioBuffer) {
+        ioBuffer[0] = (byte)(ch >>> 8);
+        ioBuffer[1] = (byte)ch;
+    }
+
+    // @ThreadSafe
     public static void charToBuffer(char ch, byte[] ioBuffer, int off) {
         ioBuffer[off] = (byte)(ch >>> 8);
         ioBuffer[off+1] = (byte)ch;
     }
 
     // @ThreadSafe
+    public static char bufferToChar(byte[] ioBuffer) {
+        return
+            (char)(
+                (ioBuffer[0]<<8)
+                | (ioBuffer[1]&255)
+            )
+        ;
+    }
+
+    // @ThreadSafe
     public static char bufferToChar(byte[] ioBuffer, int off) {
         return
             (char)(
-                ((ioBuffer[off+0]&255) << 8)
-                + (ioBuffer[off+1]&255)
+                (ioBuffer[off+0] << 8)
+                | (ioBuffer[off+1]&255)
             )
         ;
+    }
+
+    // @ThreadSafe
+    public static void shortToBuffer(short s, byte[] ioBuffer) {
+        ioBuffer[0] = (byte)(s >>> 8);
+        ioBuffer[1] = (byte)s;
     }
 
     // @ThreadSafe
@@ -75,13 +95,31 @@ public class PersistentCollections {
     }
 
     // @ThreadSafe
+    public static short bufferToShort(byte[] ioBuffer) {
+        return
+            (short)(
+                (ioBuffer[0] << 8)
+                | (ioBuffer[1]&255)
+            )
+        ;
+    }
+
+    // @ThreadSafe
     public static short bufferToShort(byte[] ioBuffer, int off) {
         return
             (short)(
-                ((ioBuffer[off+0]&255) << 8)
-                + (ioBuffer[off+1]&255)
+                (ioBuffer[off+0] << 8)
+                | (ioBuffer[off+1]&255)
             )
         ;
+    }
+
+    // @ThreadSafe
+    public static void intToBuffer(int i, byte[] ioBuffer) {
+        ioBuffer[0] = (byte)(i >>> 24);
+        ioBuffer[1] = (byte)(i >>> 16);
+        ioBuffer[2] = (byte)(i >>> 8);
+        ioBuffer[3] = (byte)i;
     }
 
     // @ThreadSafe
@@ -93,13 +131,35 @@ public class PersistentCollections {
     }
 
     // @ThreadSafe
+    public static int bufferToInt(byte[] ioBuffer) {
+        return
+              (ioBuffer[0] << 24)
+            + ((ioBuffer[1]&255) << 16)
+            + ((ioBuffer[2]&255) << 8)
+            + (ioBuffer[3]&255)
+        ;
+    }
+
+    // @ThreadSafe
     public static int bufferToInt(byte[] ioBuffer, int off) {
         return
-              ((ioBuffer[off]&255) << 24)
+              (ioBuffer[off] << 24)
             + ((ioBuffer[off+1]&255) << 16)
             + ((ioBuffer[off+2]&255) << 8)
             + (ioBuffer[off+3]&255)
         ;
+    }
+
+    // @ThreadSafe
+    public static void longToBuffer(long l, byte[] ioBuffer) {
+        ioBuffer[0] = (byte)(l >>> 56);
+        ioBuffer[1] = (byte)(l >>> 48);
+        ioBuffer[2] = (byte)(l >>> 40);
+        ioBuffer[3] = (byte)(l >>> 32);
+        ioBuffer[4] = (byte)(l >>> 24);
+        ioBuffer[5] = (byte)(l >>> 16);
+        ioBuffer[6] = (byte)(l >>> 8);
+        ioBuffer[7] = (byte)l;
     }
 
     // @ThreadSafe
@@ -115,9 +175,23 @@ public class PersistentCollections {
     }
 
     // @ThreadSafe
+    public static long bufferToLong(byte[] ioBuffer) {
+        return
+              (ioBuffer[0] << 56)
+            + ((ioBuffer[1]&255L) << 48)
+            + ((ioBuffer[2]&255L) << 40)
+            + ((ioBuffer[3]&255L) << 32)
+            + ((ioBuffer[4]&255L) << 24)
+            + ((ioBuffer[5]&255L) << 16)
+            + ((ioBuffer[6]&255L) << 8)
+            + (ioBuffer[7]&255L)
+        ;
+    }
+
+    // @ThreadSafe
     public static long bufferToLong(byte[] ioBuffer, int off) {
         return
-              ((ioBuffer[off]&255L) << 56)
+              (ioBuffer[off] << 56)
             + ((ioBuffer[off+1]&255L) << 48)
             + ((ioBuffer[off+2]&255L) << 40)
             + ((ioBuffer[off+3]&255L) << 32)
@@ -149,7 +223,8 @@ public class PersistentCollections {
     /**
      * Writes the requested number of zeros to the provided RandomAccessFile, but
      * only if they do not already contain zeros.  This is to avoid unnecessary
-     * writes on flash media.
+     * writes on flash media.  This may also have a positive interaction with
+     * sparse files.
      */
     // @ThreadSafe
     public static void ensureZeros(RandomAccessFile raf, long position, long count) throws IOException {
@@ -182,7 +257,8 @@ public class PersistentCollections {
     /**
      * Stores the requested number of zeros to the provided ByteBuffer, but
      * only if they do not already contain zeros.  This is to avoid unnecessary
-     * writes on flash media.
+     * writes on flash media.  This may also have a positive interaction with
+     * sparse files.
      */
     // @ThreadSafe
     public static void ensureZeros(ByteBuffer byteBuffer, int position, int count) throws IOException {
@@ -224,19 +300,6 @@ public class PersistentCollections {
         }
         if(count>0) buffer.put(zeros, 0, (int)count);
     }*/
-
-    /**
-     * Fully reads a buffer.
-     */
-    // @ThreadSafe
-    public static void readFully(InputStream in, byte[] buffer, int off, int len) throws IOException {
-        while(len>0) {
-            int count = in.read(buffer, off, len);
-            if(count==-1) throw new EOFException();
-            off += count;
-            len -= count;
-        }
-    }
     // </editor-fold>
 
     /**

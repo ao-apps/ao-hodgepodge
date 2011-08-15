@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.ErrorPrinter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -41,21 +42,25 @@ public class BenchmarkCounterBlockDevice {
     public static void main(String[] args) {
         try {
             if(args.length>0) {
-                final byte[] buff=new byte[4096];
-                for(int c=0;c<args.length;c++) {
-                    final String filename=args[c];
-                    long startTime = System.currentTimeMillis();
-                    RandomAccessFile raf=new RandomAccessFile(filename, "r");
-                    long length=raf.length();
-                    try {
-                        for(long pos=1;pos<length;pos+=(1024*4096+4096)) {
-                            raf.seek(pos);
-                            raf.readFully(buff, 0, 4096);
+                final byte[] buff = BufferManager.getBytes();
+                try {
+                    for(int c=0;c<args.length;c++) {
+                        final String filename=args[c];
+                        long startTime = System.currentTimeMillis();
+                        RandomAccessFile raf=new RandomAccessFile(filename, "r");
+                        long length=raf.length();
+                        try {
+                            for(long pos=1;pos<length;pos+=(1024*4096+4096)) {
+                                raf.seek(pos);
+                                raf.readFully(buff, 0, BufferManager.BUFFER_SIZE);
+                            }
+                        } finally {
+                            raf.close();
                         }
-                    } finally {
-                        raf.close();
+                        System.out.println(filename+" scanned in "+BigDecimal.valueOf(System.currentTimeMillis()-startTime, 3)+" seconds");
                     }
-                    System.out.println(filename+" scanned in "+BigDecimal.valueOf(System.currentTimeMillis()-startTime, 3)+" seconds");
+                } finally {
+                    BufferManager.release(buff);
                 }
             } else {
                 System.err.println("Usage: BenchmarkCounterBlockDevice filename [filename] [...]");

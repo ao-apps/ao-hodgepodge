@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.IoUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,30 +38,34 @@ import java.io.OutputStream;
 public class ByteArraySerializer implements Serializer<byte[]> {
 
     // @ThreadSafe
+    @Override
     public boolean isFixedSerializedSize() {
         return false;
     }
 
     // @NotThreadSafe
+    @Override
     public long getSerializedSize(byte[] value) {
         return 4+value.length;
     }
 
-    private final byte[] buffer = new byte[4];
+    private final byte[] ioBuffer = new byte[4];
 
     // @NotThreadSafe
+    @Override
     public void serialize(byte[] value, OutputStream out) throws IOException {
-        PersistentCollections.intToBuffer(value.length, buffer, 0);
-        out.write(buffer, 0, 4);
+        PersistentCollections.intToBuffer(value.length, ioBuffer);
+        out.write(ioBuffer, 0, 4);
         out.write(value);
     }
 
     // @NotThreadSafe
+    @Override
     public byte[] deserialize(InputStream in) throws IOException {
-        PersistentCollections.readFully(in, buffer, 0, 4);
-        int length = PersistentCollections.bufferToInt(buffer, 0);
+        IoUtils.readFully(in, ioBuffer, 0, 4);
+        int length = PersistentCollections.bufferToInt(ioBuffer);
         byte[] value = new byte[length];
-        PersistentCollections.readFully(in, value, 0, length);
+        IoUtils.readFully(in, value, 0, length);
         return value;
     }
 }

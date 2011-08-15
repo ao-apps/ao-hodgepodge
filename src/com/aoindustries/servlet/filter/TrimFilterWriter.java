@@ -22,6 +22,7 @@
  */
 package com.aoindustries.servlet.filter;
 
+import com.aoindustries.util.BufferManager;
 import java.io.PrintWriter;
 import java.util.Locale;
 import javax.servlet.ServletResponse;
@@ -48,9 +49,11 @@ public class TrimFilterWriter extends PrintWriter {
 
     private int readCharMatchCount = 0;
     private int preReadCharMatchCount = 0;
-    private static final int OUPUT_BUFFER_SIZE=4096;
-    private char[] outputBuffer = new char[OUPUT_BUFFER_SIZE];
-    private int outputBufferUsed = 0;
+
+    /**
+     * Used within individual methods only and released on close.
+     */
+    private char[] outputBuffer = BufferManager.getChars();
 
     public TrimFilterWriter(PrintWriter wrapped, ServletResponse response) {
         super(wrapped);
@@ -83,6 +86,10 @@ public class TrimFilterWriter extends PrintWriter {
     
     @Override
     public void close() {
+        if(outputBuffer!=null) {
+            BufferManager.release(outputBuffer);
+            outputBuffer = null;
+        }
         wrapped.close();
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
@@ -200,23 +207,29 @@ public class TrimFilterWriter extends PrintWriter {
     @Override
     public void write(char buf[], int off, int len) {
         if(isTrimEnabled()) {
-            outputBufferUsed = 0;
+            char[] buff = outputBuffer;
             // If len > OUPUT_BUFFER_SIZE, process in blocks
+            int buffUsed = 0;
             while(len>0) {
-                int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
-                int blockEnd = off + blockLen;
-                for(int index = off; index<blockEnd ; index++) {
+                int blockLen = len<=BufferManager.BUFFER_SIZE ? len : BufferManager.BUFFER_SIZE;
+                for(
+                    int index = off, blockEnd = off + blockLen;
+                    index<blockEnd;
+                    index++
+                ) {
                     char c = buf[index];
-                    if(processChar(c)) outputBuffer[outputBufferUsed++]=c;
-                }
-                if(outputBufferUsed>0) {
-                    if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
-                    else wrapped.write(outputBuffer, 0, outputBufferUsed);
-                    outputBufferUsed = 0;
+                    if(processChar(c)) {
+                        buff[buffUsed++] = c;
+                        if(buffUsed>=BufferManager.BUFFER_SIZE) {
+                            assert buffUsed==BufferManager.BUFFER_SIZE;
+                            wrapped.write(buff, 0, buffUsed);
+                        }
+                    }
                 }
                 off+=blockLen;
                 len-=blockLen;
             }
+            if(buffUsed>0) wrapped.write(buff, 0, buffUsed);
         } else {
             wrapped.write(buf, off, len);
         }
@@ -231,24 +244,32 @@ public class TrimFilterWriter extends PrintWriter {
     @Override
     public void write(String s, int off, int len) {
         if(isTrimEnabled()) {
-            outputBufferUsed = 0;
+            char[] buff = outputBuffer;
             // If len > OUPUT_BUFFER_SIZE, process in blocks
+            int buffUsed = 0;
             while(len>0) {
-                int blockLen = len<=OUPUT_BUFFER_SIZE ? len : OUPUT_BUFFER_SIZE;
-                int blockEnd = off + blockLen;
-                for(int index = off; index<blockEnd ; index++) {
+                int blockLen = len<=BufferManager.BUFFER_SIZE ? len : BufferManager.BUFFER_SIZE;
+                for(
+                    int index = off, blockEnd = off + blockLen;
+                    index<blockEnd;
+                    index++
+                ) {
                     char c = s.charAt(index);
-                    if(processChar(c)) outputBuffer[outputBufferUsed++]=c;
-                }
-                if(outputBufferUsed>0) {
-                    if(outputBufferUsed==OUPUT_BUFFER_SIZE) wrapped.write(outputBuffer);
-                    else wrapped.write(outputBuffer, 0, outputBufferUsed);
-                    outputBufferUsed = 0;
+                    if(processChar(c)) {
+                        buff[buffUsed++] = c;
+                        if(buffUsed>=BufferManager.BUFFER_SIZE) {
+                            assert buffUsed==BufferManager.BUFFER_SIZE;
+                            wrapped.write(buff, 0, buffUsed);
+                        }
+                    }
                 }
                 off+=blockLen;
                 len-=blockLen;
             }
-        } else wrapped.write(s, off, len);
+            if(buffUsed>0) wrapped.write(buff, 0, buffUsed);
+        } else {
+            wrapped.write(s, off, len);
+        }
     }
 
     @Override

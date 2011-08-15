@@ -23,7 +23,6 @@
 package com.aoindustries.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,6 +30,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * <code>BufferManager</code> manages a reusable pool of <code>byte[]</code> and <code>char[]</code>
  * buffers.  The buffers are stored as <code>ThreadLocal</code> to avoid overhead in NUMA architectures.
  * This avoids the repetitive allocation of memory for an operation that only needs a temporary buffer.
+ *
+ * The buffers are not cleared between invocations so the results of previous operations may be available
+ * to additional callers.  On the scale of security versus performance, this is biased toward performance.
+ * However, being thread local there remains some control over the visibility of the data.
+ * 
+ * Do not use if intra-thread security is more important than performance.
  *
  * @author  AO Industries, Inc.
  */
@@ -91,7 +96,7 @@ final public class BufferManager {
             return new byte[BUFFER_SIZE];
         }
         byte[] buffer = myBytes.remove(len-1);
-        Arrays.fill(buffer, (byte)0);
+        // Arrays.fill(buffer, (byte)0);
         return buffer;
     }
 
@@ -110,7 +115,7 @@ final public class BufferManager {
             return new char[BUFFER_SIZE];
         }
         char[] buffer = myChars.remove(len-1);
-        Arrays.fill(buffer, (char)0);
+        // Arrays.fill(buffer, (char)0);
         return buffer;
     }
 

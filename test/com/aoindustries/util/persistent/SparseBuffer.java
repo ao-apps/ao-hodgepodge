@@ -41,6 +41,8 @@ import java.util.Map;
  */
 public class SparseBuffer extends AbstractPersistentBuffer {
 
+    private static final int BIT_SHIFT = 12;
+
     private boolean isClosed = false;
     private long capacity = 0L;
     private Map<Long,byte[]> buffers = new HashMap<Long,byte[]>();
@@ -57,21 +59,25 @@ public class SparseBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public boolean isClosed() {
         return isClosed;
     }
 
     // @NotThreadSafe
+    @Override
     public void close() throws IOException {
         isClosed = true;
     }
 
     // @NotThreadSafe
+    @Override
     public long capacity() throws IOException {
         return capacity;
     }
 
     // @NotThreadSafe
+    @Override
     public void setCapacity(long newCapacity) throws IOException {
         if(newCapacity<0) throw new IllegalArgumentException("capacity<0: "+capacity);
         if(protectionLevel==ProtectionLevel.READ_ONLY) throw new ReadOnlyBufferException();
@@ -80,7 +86,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
         }
         this.capacity = newCapacity;
         // Discard any pages above new capacity
-        long highestPage = newCapacity>>>12;
+        long highestPage = newCapacity >>> BIT_SHIFT;
         if((newCapacity&0x7ff)!=0) highestPage++;
         Iterator<Long> keyIter = buffers.keySet().iterator();
         while(keyIter.hasNext()) {
@@ -90,6 +96,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public int getSome(long position, byte[] buff, int off, int len) throws IOException {
         get(position, buff, off, len);
         return len;
@@ -103,7 +110,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
         long lastBufferNum = -1;
         byte[] lastBuffer = null;
         while(len>0) {
-            long blockNum = position >>> 12;
+            long blockNum = position >>> BIT_SHIFT;
             if(blockNum!=lastBufferNum) lastBuffer = buffers.get(lastBufferNum = blockNum);
             buff[off] = lastBuffer==null ? 0 : lastBuffer[(int)(position & 0xfffL)];
             position++;
@@ -113,6 +120,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         if(protectionLevel==ProtectionLevel.READ_ONLY) throw new ReadOnlyBufferException();
         if((position+len)>capacity) throw new BufferOverflowException();
@@ -120,7 +128,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
         long lastBufferNum = -1;
         byte[] lastBuffer = null;
         while(len>0) {
-            long blockNum = position >>> 12;
+            long blockNum = position >>> BIT_SHIFT;
             if(blockNum!=lastBufferNum) lastBuffer = buffers.get(lastBufferNum = blockNum);
             byte value = buff[off];
             // Only create the buffer when a non-zero value is being added
@@ -136,6 +144,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
      * Does nothing because this is only a volatile test buffer.
      */
     // @ThreadSafe
+    @Override
     public void barrier(boolean force) throws IOException {
     }
 }

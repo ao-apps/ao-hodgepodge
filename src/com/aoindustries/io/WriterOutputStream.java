@@ -27,7 +27,7 @@ import java.io.*;
 
 /**
  * A writer output stream makes a <code>Writer</code> behave like an
- * <code>OutputStream</code>.
+ * <code>OutputStream</code>.  No encoding/decoding is performed.
  *
  * @author  AO Industries, Inc.
  */
@@ -37,6 +37,7 @@ final public class WriterOutputStream extends OutputStream {
 
     /**
      * The conversions are done in this buffer for minimal memory allocation.
+     * Released on close.
      */
     private char[] buff=BufferManager.getChars();
 
@@ -49,6 +50,7 @@ final public class WriterOutputStream extends OutputStream {
         this.out=out;
     }
 
+    @Override
     public void close() throws IOException {
         synchronized(this) {
             out.close();
@@ -59,10 +61,12 @@ final public class WriterOutputStream extends OutputStream {
         }
     }
 
+    @Override
     public void flush() throws IOException {
         out.flush();
     }
 
+    @Override
     public void write(byte b[], int off, int len) throws IOException {
         synchronized(this) {
             if (b == null) throw new NullPointerException();
@@ -76,6 +80,7 @@ final public class WriterOutputStream extends OutputStream {
         }
     }
 
+    @Override
     public void write(int b) throws IOException {
         out.write(b);
     }

@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.WrappedException;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -186,9 +185,7 @@ public class AutoTempFileWriter extends Writer {
                 flush();
                 Reader in = new FileReader(tempFile);
                 try {
-                    char[] buff = new char[BufferManager.BUFFER_SIZE];
-                    int numChars;
-                    while((numChars=in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) toStringResult.append(buff, 0, numChars);
+                    IoUtils.copy(in, toStringResult);
                     if(toStringResult.length()!=length) throw new AssertionError("toStringResult.length()!=length: "+toStringResult.length()+"!="+length);
                 } finally {
                     in.close();
@@ -210,18 +207,8 @@ public class AutoTempFileWriter extends Writer {
             flush();
             Reader in = new FileReader(tempFile);
             try {
-                long totalRead = 0;
-                char[] buff = BufferManager.getChars();
-                try {
-                    int numChars;
-                    while((numChars=in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-                        out.write(buff, 0, numChars);
-                        totalRead += numChars;
-                    }
-                    if(totalRead!=length) throw new AssertionError("totalRead!=length: "+totalRead+"!="+length);
-                } finally {
-                    BufferManager.release(buff);
-                }
+                long totalRead = IoUtils.copy(in, out);
+                if(totalRead!=length) throw new AssertionError("totalRead!=length: "+totalRead+"!="+length);
             } finally {
                 in.close();
             }

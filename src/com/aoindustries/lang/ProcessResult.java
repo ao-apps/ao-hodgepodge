@@ -22,6 +22,7 @@
  */
 package com.aoindustries.lang;
 
+import com.aoindustries.util.BufferManager;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
@@ -73,12 +74,16 @@ public class ProcessResult {
                     try {
                         Reader stdoutIn = new InputStreamReader(process.getInputStream(), charset);
                         try {
-                            char[] buff = new char[4096];
-                            int count;
-                            while((count=stdoutIn.read(buff))!=-1) {
-                                synchronized(stdout) {
-                                    stdout.append(buff, 0, count);
+                            char[] buff = BufferManager.getChars();
+                            try {
+                                int count;
+                                while((count=stdoutIn.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+                                    synchronized(stdout) {
+                                        stdout.append(buff, 0, count);
+                                    }
                                 }
+                            } finally {
+                                BufferManager.release(buff);
                             }
                         } finally {
                             stdoutIn.close();
@@ -103,12 +108,16 @@ public class ProcessResult {
                     try {
                         Reader stderrIn = new InputStreamReader(process.getErrorStream(), charset);
                         try {
-                            char[] buff = new char[4096];
-                            int count;
-                            while((count=stderrIn.read(buff))!=-1) {
-                                synchronized(stderr) {
-                                    stderr.append(buff, 0, count);
+                            char[] buff = BufferManager.getChars();
+                            try {
+                                int count;
+                                while((count=stderrIn.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+                                    synchronized(stderr) {
+                                        stderr.append(buff, 0, count);
+                                    }
                                 }
+                            } finally {
+                                BufferManager.release(buff);
                             }
                         } finally {
                             stderrIn.close();

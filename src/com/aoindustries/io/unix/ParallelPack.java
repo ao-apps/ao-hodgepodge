@@ -25,6 +25,7 @@ package com.aoindustries.io.unix;
 import com.aoindustries.io.CompressedDataOutputStream;
 import com.aoindustries.io.FilesystemIterator;
 import com.aoindustries.io.FilesystemIteratorRule;
+import com.aoindustries.util.BufferManager;
 import java.io.DataOutput;
 import java.io.EOFException;
 import java.io.File;
@@ -258,127 +259,131 @@ public class ParallelPack {
                 if(compress) compressedOut = new CompressedDataOutputStream(new GZIPOutputStream(out, PackProtocol.BUFFER_SIZE));
                 // Reused in main loop
                 final StringBuilder SB = new StringBuilder();
-                final byte[] buffer = new byte[PackProtocol.BUFFER_SIZE];
-                // Main loop, continue until nextFiles is empty
-                while(true) {
-                    Iterator<String> iter = nextFiles.keySet().iterator();
-                    if(!iter.hasNext()) break;
-                    String relPath = iter.next();
-                    for(FilesystemIteratorAndSlot iteratorAndSlot : nextFiles.remove(relPath)) {
-                        FilesystemIterator iterator = iteratorAndSlot.iterator;
-                        // Get the full path on this machine
-                        SB.setLength(0);
-                        String startPath = iterator.getStartPath();
-                        SB.append(startPath);
-                        SB.append(relPath);
-                        String fullPath = SB.toString();
-                        UnixFile uf = new UnixFile(fullPath);
-                        // Get the pack path
-                        SB.setLength(0);
-                        int lastSlashPos = startPath.lastIndexOf(File.separatorChar);
-                        if(lastSlashPos==-1) SB.append(startPath);
-                        else SB.append(startPath, lastSlashPos, startPath.length());
-                        SB.append(relPath);
-                        String packPath = SB.toString();
-                        // Verbose output
-                        if(verboseQueue!=null) {
-                            try {
-                                verboseQueue.put(packPath);
-                            } catch(InterruptedException err) {
-                                IOException ioErr = new InterruptedIOException();
-                                ioErr.initCause(err);
-                                throw ioErr;
+                final byte[] buffer = PackProtocol.BUFFER_SIZE==BufferManager.BUFFER_SIZE ? BufferManager.getBytes() : new byte[PackProtocol.BUFFER_SIZE];
+                try {
+                    // Main loop, continue until nextFiles is empty
+                    while(true) {
+                        Iterator<String> iter = nextFiles.keySet().iterator();
+                        if(!iter.hasNext()) break;
+                        String relPath = iter.next();
+                        for(FilesystemIteratorAndSlot iteratorAndSlot : nextFiles.remove(relPath)) {
+                            FilesystemIterator iterator = iteratorAndSlot.iterator;
+                            // Get the full path on this machine
+                            SB.setLength(0);
+                            String startPath = iterator.getStartPath();
+                            SB.append(startPath);
+                            SB.append(relPath);
+                            String fullPath = SB.toString();
+                            UnixFile uf = new UnixFile(fullPath);
+                            // Get the pack path
+                            SB.setLength(0);
+                            int lastSlashPos = startPath.lastIndexOf(File.separatorChar);
+                            if(lastSlashPos==-1) SB.append(startPath);
+                            else SB.append(startPath, lastSlashPos, startPath.length());
+                            SB.append(relPath);
+                            String packPath = SB.toString();
+                            // Verbose output
+                            if(verboseQueue!=null) {
+                                try {
+                                    verboseQueue.put(packPath);
+                                } catch(InterruptedException err) {
+                                    IOException ioErr = new InterruptedIOException();
+                                    ioErr.initCause(err);
+                                    throw ioErr;
+                                }
                             }
-                        }
 
-                        // Handle this file
-                        uf.getStat(stat);
-                        if(stat.isRegularFile()) {
-                            compressedOut.writeByte(PackProtocol.REGULAR_FILE);
-                            compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            int numLinks = stat.getNumberLinks();
-                            if(numLinks==1) {
-                                // No hard links
-                                compressedOut.writeLong(0);
-                                compressedOut.writeInt(stat.getUid());
-                                compressedOut.writeInt(stat.getGid());
-                                compressedOut.writeLong(stat.getMode());
-                                compressedOut.writeLong(stat.getModifyTime());
-                                writeFile(uf, compressedOut, buffer);
-                            } else if(numLinks>1) {
-                                // Has hard links
-                                // Look for already found
-                                Long device = stat.getDevice();
-                                Long inode = stat.getInode();
-                                Map<Long,LinkAndCount> inodeMap = deviceInodeIdMap.get(device);
-                                if(inodeMap==null) deviceInodeIdMap.put(device, inodeMap = new HashMap<Long,LinkAndCount>());
-                                LinkAndCount linkAndCount = inodeMap.get(inode);
-                                if(linkAndCount!=null) {
-                                    // Already sent, send the link ID and decrement our count
-                                    compressedOut.writeLong(linkAndCount.linkId);
-                                    if(--linkAndCount.linkCount<=0) {
-                                        inodeMap.remove(inode);
-                                        // This keeps memory tighter but can increase overhead by making many new maps:
-                                        // if(inodeMap.isEmpty()) deviceInodeIdMap.remove(device);
-                                    }
-                                } else {
-                                    // New file, send file data
-                                    long linkId = nextLinkId++;
-                                    compressedOut.writeLong(linkId);
+                            // Handle this file
+                            uf.getStat(stat);
+                            if(stat.isRegularFile()) {
+                                compressedOut.writeByte(PackProtocol.REGULAR_FILE);
+                                compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
+                                int numLinks = stat.getNumberLinks();
+                                if(numLinks==1) {
+                                    // No hard links
+                                    compressedOut.writeLong(0);
                                     compressedOut.writeInt(stat.getUid());
                                     compressedOut.writeInt(stat.getGid());
                                     compressedOut.writeLong(stat.getMode());
                                     compressedOut.writeLong(stat.getModifyTime());
-                                    compressedOut.writeInt(numLinks);
                                     writeFile(uf, compressedOut, buffer);
-                                    inodeMap.put(inode, new LinkAndCount(linkId, numLinks-1));
-                                }
-                            } else throw new IOException("Invalid link count: "+numLinks);
-                        } else if(stat.isDirectory()) {
-                            compressedOut.writeByte(PackProtocol.DIRECTORY);
-                            compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUid());
-                            compressedOut.writeInt(stat.getGid());
-                            compressedOut.writeLong(stat.getMode());
-                            compressedOut.writeLong(stat.getModifyTime());
-                        } else if(stat.isSymLink()) {
-                            compressedOut.writeByte(PackProtocol.SYMLINK);
-                            compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUid());
-                            compressedOut.writeInt(stat.getGid());
-                            compressedOut.writeCompressedUTF(uf.readLink(), 63);
-                        } else if(stat.isBlockDevice()) {
-                            compressedOut.writeByte(PackProtocol.BLOCK_DEVICE);
-                            compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUid());
-                            compressedOut.writeInt(stat.getGid());
-                            compressedOut.writeLong(stat.getMode());
-                            compressedOut.writeLong(stat.getDeviceIdentifier());
-                        } else if(stat.isCharacterDevice()) {
-                            compressedOut.writeByte(PackProtocol.CHARACTER_DEVICE);
-                            compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUid());
-                            compressedOut.writeInt(stat.getGid());
-                            compressedOut.writeLong(stat.getMode());
-                            compressedOut.writeLong(stat.getDeviceIdentifier());
-                        } else if(stat.isFifo()) {
-                            compressedOut.writeByte(PackProtocol.FIFO);
-                            compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
-                            compressedOut.writeInt(stat.getUid());
-                            compressedOut.writeInt(stat.getGid());
-                            compressedOut.writeLong(stat.getMode());
-                        } else if(stat.isSocket()) {
-                            throw new IOException("Unable to pack socket: "+uf.getPath());
-                        }
-                        // Get the next file
-                        File nextFile = iterator.getNextFile();
-                        if(nextFile!=null) {
-                            String newRelPath = getRelativePath(nextFile, iterator);
-                            List<FilesystemIteratorAndSlot> list = nextFiles.get(newRelPath);
-                            if(list==null) nextFiles.put(newRelPath, list = new ArrayList<FilesystemIteratorAndSlot>(numDirectories));
-                            list.add(iteratorAndSlot);
+                                } else if(numLinks>1) {
+                                    // Has hard links
+                                    // Look for already found
+                                    Long device = stat.getDevice();
+                                    Long inode = stat.getInode();
+                                    Map<Long,LinkAndCount> inodeMap = deviceInodeIdMap.get(device);
+                                    if(inodeMap==null) deviceInodeIdMap.put(device, inodeMap = new HashMap<Long,LinkAndCount>());
+                                    LinkAndCount linkAndCount = inodeMap.get(inode);
+                                    if(linkAndCount!=null) {
+                                        // Already sent, send the link ID and decrement our count
+                                        compressedOut.writeLong(linkAndCount.linkId);
+                                        if(--linkAndCount.linkCount<=0) {
+                                            inodeMap.remove(inode);
+                                            // This keeps memory tighter but can increase overhead by making many new maps:
+                                            // if(inodeMap.isEmpty()) deviceInodeIdMap.remove(device);
+                                        }
+                                    } else {
+                                        // New file, send file data
+                                        long linkId = nextLinkId++;
+                                        compressedOut.writeLong(linkId);
+                                        compressedOut.writeInt(stat.getUid());
+                                        compressedOut.writeInt(stat.getGid());
+                                        compressedOut.writeLong(stat.getMode());
+                                        compressedOut.writeLong(stat.getModifyTime());
+                                        compressedOut.writeInt(numLinks);
+                                        writeFile(uf, compressedOut, buffer);
+                                        inodeMap.put(inode, new LinkAndCount(linkId, numLinks-1));
+                                    }
+                                } else throw new IOException("Invalid link count: "+numLinks);
+                            } else if(stat.isDirectory()) {
+                                compressedOut.writeByte(PackProtocol.DIRECTORY);
+                                compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
+                                compressedOut.writeInt(stat.getUid());
+                                compressedOut.writeInt(stat.getGid());
+                                compressedOut.writeLong(stat.getMode());
+                                compressedOut.writeLong(stat.getModifyTime());
+                            } else if(stat.isSymLink()) {
+                                compressedOut.writeByte(PackProtocol.SYMLINK);
+                                compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
+                                compressedOut.writeInt(stat.getUid());
+                                compressedOut.writeInt(stat.getGid());
+                                compressedOut.writeCompressedUTF(uf.readLink(), 63);
+                            } else if(stat.isBlockDevice()) {
+                                compressedOut.writeByte(PackProtocol.BLOCK_DEVICE);
+                                compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
+                                compressedOut.writeInt(stat.getUid());
+                                compressedOut.writeInt(stat.getGid());
+                                compressedOut.writeLong(stat.getMode());
+                                compressedOut.writeLong(stat.getDeviceIdentifier());
+                            } else if(stat.isCharacterDevice()) {
+                                compressedOut.writeByte(PackProtocol.CHARACTER_DEVICE);
+                                compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
+                                compressedOut.writeInt(stat.getUid());
+                                compressedOut.writeInt(stat.getGid());
+                                compressedOut.writeLong(stat.getMode());
+                                compressedOut.writeLong(stat.getDeviceIdentifier());
+                            } else if(stat.isFifo()) {
+                                compressedOut.writeByte(PackProtocol.FIFO);
+                                compressedOut.writeCompressedUTF(packPath, iteratorAndSlot.slot);
+                                compressedOut.writeInt(stat.getUid());
+                                compressedOut.writeInt(stat.getGid());
+                                compressedOut.writeLong(stat.getMode());
+                            } else if(stat.isSocket()) {
+                                throw new IOException("Unable to pack socket: "+uf.getPath());
+                            }
+                            // Get the next file
+                            File nextFile = iterator.getNextFile();
+                            if(nextFile!=null) {
+                                String newRelPath = getRelativePath(nextFile, iterator);
+                                List<FilesystemIteratorAndSlot> list = nextFiles.get(newRelPath);
+                                if(list==null) nextFiles.put(newRelPath, list = new ArrayList<FilesystemIteratorAndSlot>(numDirectories));
+                                list.add(iteratorAndSlot);
+                            }
                         }
                     }
+                } finally {
+                    if(PackProtocol.BUFFER_SIZE==BufferManager.BUFFER_SIZE) BufferManager.release(buffer);
                 }
                 compressedOut.writeByte(PackProtocol.END);
             } finally {

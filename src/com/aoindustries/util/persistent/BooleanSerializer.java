@@ -37,21 +37,25 @@ import java.io.OutputStream;
 public class BooleanSerializer implements Serializer<Boolean> {
 
     // @ThreadSafe
+    @Override
     public boolean isFixedSerializedSize() {
         return true;
     }
 
     // @NotThreadSafe
+    @Override
     public long getSerializedSize(Boolean value) {
         return 1;
     }
 
     // @NotThreadSafe
+    @Override
     public void serialize(Boolean value, OutputStream out) throws IOException {
         out.write(value ? 1 : 0);
     }
 
     // @NotThreadSafe
+    @Override
     public Boolean deserialize(InputStream in) throws IOException {
         int value = in.read();
         if(value==-1) throw new EOFException();

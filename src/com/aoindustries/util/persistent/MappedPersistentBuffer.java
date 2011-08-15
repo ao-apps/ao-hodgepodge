@@ -111,6 +111,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public boolean isClosed() {
         return closed;
     }
@@ -126,6 +127,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public void close() throws IOException {
         closed = true;
         raf.close();
@@ -133,6 +135,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public long capacity() throws IOException {
         return raf.length();
     }
@@ -148,6 +151,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public void setCapacity(long newLength) throws IOException {
         long oldLength = capacity();
         if(oldLength!=newLength) {
@@ -180,6 +184,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public int getSome(long position, byte[] buff, int off, int len) throws IOException {
         mappedBuffer.position(getIndex(position));
         mappedBuffer.get(buff, off, len);
@@ -206,6 +211,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         mappedBuffer.position(getIndex(position));
         mappedBuffer.put(buff, off, len);
@@ -217,6 +223,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
      * This just uses force for both.
      */
     // @NotThreadSafe
+    @Override
     public void barrier(boolean force) throws IOException {
         if(modified) {
             if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) mappedBuffer.force();

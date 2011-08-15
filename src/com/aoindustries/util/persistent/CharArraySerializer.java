@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.IoUtils;
 import com.aoindustries.util.BufferManager;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,21 +39,24 @@ import java.io.OutputStream;
 public class CharArraySerializer implements Serializer<char[]> {
 
     // @ThreadSafe
+    @Override
     public boolean isFixedSerializedSize() {
         return false;
     }
 
     // @NotThreadSafe
+    @Override
     public long getSerializedSize(char[] value) {
         return 4+value.length/2;
     }
 
     // @NotThreadSafe
+    @Override
     public void serialize(char[] chars, OutputStream out) throws IOException {
         byte[] bytes = BufferManager.getBytes();
         try {
             int len = chars.length;
-            PersistentCollections.intToBuffer(len, bytes, 0);
+            PersistentCollections.intToBuffer(len, bytes);
             out.write(bytes, 0, 4);
             int pos = 0;
             while(len>0) {
@@ -71,17 +75,18 @@ public class CharArraySerializer implements Serializer<char[]> {
     }
 
     // @NotThreadSafe
+    @Override
     public char[] deserialize(InputStream in) throws IOException {
         byte[] bytes = BufferManager.getBytes();
         try {
-            PersistentCollections.readFully(in, bytes, 0, 4);
-            int len = PersistentCollections.bufferToInt(bytes, 0);
+            IoUtils.readFully(in, bytes, 0, 4);
+            int len = PersistentCollections.bufferToInt(bytes);
             char[] chars = new char[len];
             int pos = 0;
             while(len>0) {
                 int count = BufferManager.BUFFER_SIZE/2;
                 if(len<count) count = len;
-                PersistentCollections.readFully(in, bytes, pos, len);
+                IoUtils.readFully(in, bytes, pos, len);
                 for(int charsIndex=0, bytesIndex = 0; charsIndex<count; charsIndex++, bytesIndex+=2) {
                     chars[pos+charsIndex] = PersistentCollections.bufferToChar(bytes, bytesIndex);
                 }

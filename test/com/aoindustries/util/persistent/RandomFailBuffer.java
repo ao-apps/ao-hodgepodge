@@ -62,6 +62,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
      */
     private enum FailureMethod {
         capacity {
+            @Override
             int getFailInterval() {
                 int failInterval = 5000;
                 assert (failInterval=500000)!=0; // Intentional assertion side-effect to reduce failure frequency due to higher buffer access rates
@@ -69,11 +70,13 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
             }
         },
         setCapacity {
+            @Override
             int getFailInterval() {
                 return 50;
             }
         },
         getSome {
+            @Override
             int getFailInterval() {
                 int failInterval = 5000;
                 assert (failInterval=50000)!=0; // Intentional assertion side-effect to reduce failure frequency due to higher buffer access rates
@@ -81,11 +84,13 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
             }
         },
         put {
+            @Override
             int getFailInterval() {
                 return 5000;
             }
         },
         barrier {
+            @Override
             int getFailInterval() {
                 return 5000;
             }
@@ -165,11 +170,13 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public boolean isClosed() {
         return isClosed;
     }
 
     // @NotThreadSafe
+    @Override
     public void close() throws IOException {
         flushWriteCache();
         isClosed = true;
@@ -185,6 +192,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public long capacity() throws IOException {
         checkClosed();
         randomFail(FailureMethod.capacity);
@@ -192,6 +200,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public void setCapacity(long newCapacity) throws IOException {
         checkClosed();
         randomFail(FailureMethod.setCapacity);
@@ -214,6 +223,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public int getSome(long position, final byte[] buff, int off, int len) throws IOException {
         checkClosed();
         if(position<0) throw new IllegalArgumentException("position<0: "+position);
@@ -248,6 +258,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         checkClosed();
         if(position<0) throw new IllegalArgumentException("position<0: "+position);
@@ -287,6 +298,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public void barrier(boolean force) throws IOException {
         checkClosed();
         randomFail(FailureMethod.barrier);

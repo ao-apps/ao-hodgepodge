@@ -104,6 +104,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe // closed field is not volatile
+    @Override
     public boolean isClosed() {
         return closed;
     }
@@ -119,6 +120,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public void close() throws IOException {
         closed = true;
         raf.close();
@@ -126,11 +128,13 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public long capacity() throws IOException {
         return raf.length();
     }
 
     // @NotThreadSafe
+    @Override
     public void setCapacity(long newLength) throws IOException {
         long oldLength = capacity();
         raf.setLength(newLength);
@@ -141,6 +145,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public int getSome(long position, byte[] buff, int off, int len) throws IOException {
         raf.seek(position);
         int count = raf.read(buff, off, len);
@@ -170,6 +175,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
+    @Override
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         if((position+len)>capacity()) throw new BufferOverflowException();
         raf.seek(position);
@@ -181,6 +187,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
      * This just uses force for each case.
      */
     // @NotThreadSafe
+    @Override
     public void barrier(boolean force) throws IOException {
         if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) channel.force(false);
     }

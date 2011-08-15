@@ -43,6 +43,8 @@ import java.util.Random;
  */
 public class DevRandom extends Random {
 
+    private static final long serialVersionUID = 4190090095484650210L;
+
     /**
      * The device file path used to obtain and add random data.
      */

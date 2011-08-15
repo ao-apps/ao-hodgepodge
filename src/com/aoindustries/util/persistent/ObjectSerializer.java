@@ -46,6 +46,7 @@ public class ObjectSerializer<E> extends BufferedSerializer<E> {
     }
 
     // @NotThreadSafe
+    @Override
     protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException {
         ObjectOutputStream oout = new ObjectOutputStream(buffer);
         try {
@@ -56,6 +57,7 @@ public class ObjectSerializer<E> extends BufferedSerializer<E> {
     }
 
     // @NotThreadSafe
+    @Override
     public E deserialize(InputStream in) throws IOException {
         ObjectInputStream oin = new ObjectInputStream(in);
         try {

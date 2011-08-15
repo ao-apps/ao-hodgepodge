@@ -80,6 +80,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
         }
     }
 
+    @Override
     public T get(int index) {
         try {
             frf.seekToExistingRecord(index);
@@ -102,6 +103,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
         }
     }
 
+    @Override
     public int size() {
         try {
             return frf.getRecordCount();
