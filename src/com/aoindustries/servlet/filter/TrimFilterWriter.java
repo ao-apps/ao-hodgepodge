@@ -223,6 +223,7 @@ public class TrimFilterWriter extends PrintWriter {
                         if(buffUsed>=BufferManager.BUFFER_SIZE) {
                             assert buffUsed==BufferManager.BUFFER_SIZE;
                             wrapped.write(buff, 0, buffUsed);
+                            buffUsed = 0;
                         }
                     }
                 }
@@ -260,6 +261,7 @@ public class TrimFilterWriter extends PrintWriter {
                         if(buffUsed>=BufferManager.BUFFER_SIZE) {
                             assert buffUsed==BufferManager.BUFFER_SIZE;
                             wrapped.write(buff, 0, buffUsed);
+                            buffUsed = 0;
                         }
                     }
                 }

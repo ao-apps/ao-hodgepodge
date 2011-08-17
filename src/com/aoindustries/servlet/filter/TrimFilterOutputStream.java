@@ -206,6 +206,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
                         if(buffUsed>=BufferManager.BUFFER_SIZE) {
                             assert buffUsed==BufferManager.BUFFER_SIZE;
                             wrapped.write(buff, 0, buffUsed);
+                            buffUsed = 0;
                         }
                     }
                 }
@@ -290,6 +291,7 @@ public class TrimFilterOutputStream extends ServletOutputStream {
                         if(buffUsed>=BufferManager.BUFFER_SIZE) {
                             assert buffUsed==BufferManager.BUFFER_SIZE;
                             wrapped.write(buff, 0, buffUsed);
+                            buffUsed = 0;
                         }
                     }
                 }
