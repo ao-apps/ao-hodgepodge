@@ -58,7 +58,7 @@ abstract public class AbstractRow<K extends Comparable<? super K>,R extends Abst
     public boolean equals(Object o) {
         if(o==null) return false;
         if(!clazz.isInstance(o)) return false;
-        R other = clazz.cast(o);
+        AbstractRow<K,R> other = clazz.cast(o);
         if(database!=other.database) return false;
         K canonicalKey1 = getTable().canonicalize(getKey());
         K canonicalKey2 = other.getTable().canonicalize(other.getKey());
