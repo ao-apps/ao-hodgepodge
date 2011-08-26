@@ -29,7 +29,7 @@ package com.aoindustries.lang;
  */
 public class NullArgumentException extends IllegalArgumentException {
 
-    // TODO: private static final long serialVersionUID = -4941714282849295887L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Checks an argument and throws an exception if null.

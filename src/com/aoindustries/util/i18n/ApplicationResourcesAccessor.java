@@ -22,8 +22,8 @@
  */
 package com.aoindustries.util.i18n;
 
+import com.aoindustries.text.MessageFormatFactory;
 import java.io.Serializable;
-import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -105,7 +105,6 @@ public class ApplicationResourcesAccessor implements Serializable {
         }
         if(string==null) return "???"+locale.toString()+"."+key+"???";
         if(args.length==0) return string;
-        // TODO: Cache MessageFormat objects for performance?
-        return new MessageFormat(string, ThreadLocale.get()).format(args, new StringBuffer(), null).toString();
+        return MessageFormatFactory.getMessageFormat(key, locale).format(args, new StringBuffer(), null).toString();
     }
 }
