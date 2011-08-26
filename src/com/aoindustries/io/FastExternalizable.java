@@ -25,10 +25,10 @@ package com.aoindustries.io;
 import java.io.Externalizable;
 
 /**
- * A fast Externalizable object does not have any loops in its object graph,
+ * A FastExternalizable object does not have any loops in its object graph,
  * or is able to restore the loops itself upon deserialization.
  *
- * FastExternalizable-aware contains may use this assumption to perform more
+ * FastExternalizable-aware containers may use this assumption to perform more
  * efficient serialization.
  *
  * @author  AO Industries, Inc.

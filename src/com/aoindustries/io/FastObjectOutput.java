@@ -82,6 +82,7 @@ public class FastObjectOutput implements ObjectOutput {
         // The remaining values are for direct already seen classes between 0 <= ID < (255-FAST_SEEN_CLASS_INT)
     ;
 
+    // Arrays are used for a quick sequential scan before performing the Map lookup.
     private static final int MAP_ARRAY_LENGTH = 20; // TODO: Benchmark what is best value
 
     private final ObjectOutput out;
