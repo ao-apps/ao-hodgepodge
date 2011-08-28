@@ -63,7 +63,7 @@ public class AutoTempFileWriter extends Writer {
         if(sb!=null && newLength>=tempFileThreshold) {
             tempFile = File.createTempFile("AutoTempFileWriter", null);
             tempFile.deleteOnExit();
-            if(logger.isLoggable(Level.FINE)) logger.fine("Switching to temp file: "+tempFile);
+            if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
             fileWriter = new BufferedWriter(new FileWriter(tempFile));
             fileWriter.write(sb.toString());
             sb = null;
