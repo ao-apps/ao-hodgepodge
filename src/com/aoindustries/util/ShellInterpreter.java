@@ -52,7 +52,8 @@ abstract public class ShellInterpreter implements Runnable {
     protected final TerminalWriter err;
     private final String[] args;
 
-    private boolean isInteractive = false;
+    private boolean interactive = false;
+    private boolean readOnly = false;
 
     /**
      * If running as a separate thread, a handle to the thread
@@ -66,11 +67,7 @@ abstract public class ShellInterpreter implements Runnable {
 
     protected String status="Running";
 
-    public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err) {
-    	this(in, out, err, noArgs);
-    }
-
-    public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String[] args) {
+    public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String ... args) {
         this.pid = getNextPID();
         this.in = in;
         this.out = out;
@@ -81,7 +78,10 @@ abstract public class ShellInterpreter implements Runnable {
         for(int c=0;c<args.length;c++) {
             String arg=args[c];
             if("-i".equals(arg)) {
-                isInteractive=true;
+                interactive = true;
+                skipped++;
+            } else if("-r".equals(arg)) {
+                readOnly = true;
                 skipped++;
             } else if("--".equals(arg)) {
                 skipped++;
@@ -97,8 +97,8 @@ abstract public class ShellInterpreter implements Runnable {
                 System.arraycopy(args, skipped, this.args, 0, args.length-skipped);
             }
         }
-        out.setEnabled(isInteractive);
-        err.setEnabled(isInteractive);
+        out.setEnabled(interactive);
+        err.setEnabled(interactive);
     }
 
     /**
@@ -142,7 +142,7 @@ abstract public class ShellInterpreter implements Runnable {
                 shell.parent=this;
                 synchronized(jobs) {
                     jobs.add(shell);
-                    if(isInteractive) {
+                    if(interactive) {
                         out.print('[');
                         out.print(jobs.size());
                         out.print("] ");
@@ -158,7 +158,7 @@ abstract public class ShellInterpreter implements Runnable {
         } catch(ThreadDeath TD) {
             throw TD;
         } catch(Throwable T) {
-            if(isInteractive) {
+            if(interactive) {
                 ErrorPrinter.printStackTraces(T, err);
                 err.flush();
                 return true;
@@ -181,7 +181,11 @@ abstract public class ShellInterpreter implements Runnable {
     }
 
     final protected boolean isInteractive() {
-        return isInteractive;
+        return interactive;
+    }
+
+    final protected boolean isReadOnly() {
+        return readOnly;
     }
 
     final public void jobs(String[] args) {
@@ -205,7 +209,7 @@ abstract public class ShellInterpreter implements Runnable {
                 if(shell!=null) {
                     if(!shell.isAlive()) {
                         shell.parent=null;
-                        if(isInteractive) {
+                        if(interactive) {
                             printJobLine(c+1, shell);
                             out.flush();
                         }
@@ -282,7 +286,7 @@ abstract public class ShellInterpreter implements Runnable {
             boolean hasArgument=false;
             int quoteChar=-1;
 
-            if(isInteractive) {
+            if(interactive) {
                 out.print(getPrompt());
                 out.flush();
             }
@@ -302,7 +306,7 @@ abstract public class ShellInterpreter implements Runnable {
                         }
                         // Skip '\n' when it is escaped
                         if(ch=='\n') {
-                            if(isInteractive) {
+                            if(interactive) {
                                 out.print("\\> ");
                                 out.flush();
                             }
@@ -322,7 +326,7 @@ abstract public class ShellInterpreter implements Runnable {
                         if(ch=='\'') quoteChar=-1;
                         else {
                             argument.append((char)ch);
-                            if(isInteractive && ch=='\n') {
+                            if(interactive && ch=='\n') {
                                 out.print("'> ");
                                 out.flush();
                             }
@@ -332,7 +336,7 @@ abstract public class ShellInterpreter implements Runnable {
                         if(ch=='"') quoteChar=-1;
                         else {
                             argument.append((char)ch);
-                            if(isInteractive && ch=='\n') {
+                            if(interactive && ch=='\n') {
                                 out.print("\"> ");
                                 out.flush();
                             }
@@ -346,13 +350,13 @@ abstract public class ShellInterpreter implements Runnable {
                                 argument.setLength(0);
                                 hasArgument=false;
                             }
-                            if(isInteractive) printFinishedJobs();
+                            if(interactive) printFinishedJobs();
                             if(arguments.size()>0) {
                                 boolean doMore=handleCommandImpl(arguments);
                                 arguments.clear();
                                 if(!doMore) break;
                             }
-                            if(isInteractive) {
+                            if(interactive) {
                                 out.print(getPrompt());
                                 out.flush();
                             }

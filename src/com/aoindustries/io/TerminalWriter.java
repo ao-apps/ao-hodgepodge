@@ -105,7 +105,10 @@ public class TerminalWriter extends PrintWriter {
         return enabled;
     }
 
+    /**
+     * Enables the special features of the terminal writer.
+     */
     public void setEnabled(boolean enabled) {
-        this.enabled=enabled;
+        this.enabled = enabled;
     }
 }

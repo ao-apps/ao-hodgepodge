@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * Utilities to read FastExternalizable, Externalizable, and Serializable objects.
  *
- * When multiple objects are being written, this avoids the repetative writing of classnames and serialVersionUIDs.
+ * When multiple objects are being written, this avoids the repetitive writing of classnames and serialVersionUIDs.
  *
  * Any object that is ObjectInputValidation is validated immediately - there is no need
  * and no mechanism to register the validation since this is for simple value objects

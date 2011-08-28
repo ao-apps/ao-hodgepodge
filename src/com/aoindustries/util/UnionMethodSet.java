@@ -315,7 +315,7 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
                             nextElement = null;
                         } else if(previousSets!=null) {
                             for(int i=0, size=previousSets.size(); i<size; i++) {
-                                if(previousSets.contains(nextElement)) {
+                                if(previousSets.get(i).contains(nextElement)) {
                                     nextElement = null;
                                     break;
                                 }

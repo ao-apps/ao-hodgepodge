@@ -22,7 +22,14 @@
  */
 package com.aoindustries.util;
 
+import com.aoindustries.util.AoCollections.PeekIterator;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.PriorityQueue;
 // import org.checkthread.annotations.ThreadSafe;
 
 /**
@@ -87,5 +94,104 @@ public class AoArrays {
         if(ba1.length>len) return 1;
         if(ba2.length>len) return -1;
         return 0;
+    }
+
+    /**
+     * Merges multiple already-sorted collections into one big array.
+     *
+     * Worst-cast Complexity:
+     * 
+     *     0 collections: constant
+     *
+     *     1 collection: O(n), where n is the number of elements in the collection
+     *
+     *     2 collection: O(n+m), where n is the number of elements in one collection, and m is the number of elements in the other collection
+     *
+     *     3+ collections: O(n*log(m)), where n is the total number of elements in all collections, and m is the number of collections
+     *
+     * @return Object[] of results.
+     */
+    @SuppressWarnings("unchecked")
+    public static <V> V[] merge(Class<V> clazz, Collection<? extends Collection<? extends V>> collections, final Comparator<? super V> comparator) {
+        final int numCollections = collections.size();
+        // Zero is easy
+        if(numCollections==0) return (V[])Array.newInstance(clazz, 0);
+        // One collection - just use toArray
+        else if(numCollections == 1) {
+            Collection<? extends V> collection = collections.iterator().next();
+            return collection.toArray((V[])Array.newInstance(clazz, collection.size()));
+        }
+        // Two collections - use very simple merge
+        else if(numCollections == 2) {
+            Iterator<? extends Collection<? extends V>> collIter = collections.iterator();
+            final Collection<? extends V> c1 = collIter.next();
+            final Collection<? extends V> c2 = collIter.next();
+            assert !collIter.hasNext();
+            final Iterator<? extends V> i1 = c1.iterator();
+            final Iterator<? extends V> i2 = c2.iterator();
+            final int totalSize = c1.size() + c2.size();
+
+            @SuppressWarnings("unchecked")
+            final V[] results = (V[])Array.newInstance(clazz, totalSize);
+            V next1 = i1.hasNext() ? i1.next() : null;
+            V next2 = i2.hasNext() ? i2.next() : null;
+            int pos = 0;
+            while(true) {
+                if(next1==null) {
+                    if(next2==null) {
+                        // Both done
+                        break;
+                    } else {
+                        // Get rest of i2
+                        results[pos++] = next2;
+                        while(i2.hasNext()) results[pos++] = i2.next();
+                        break;
+                    }
+                } else {
+                    if(next2==null) {
+                        // Get rest of i1
+                        results[pos++] = next1;
+                        while(i1.hasNext()) results[pos++] = i1.next();
+                        break;
+                    } else {
+                        if(comparator.compare(next1, next2)<=0) {
+                            results[pos++] = next1;
+                            next1 = i1.hasNext() ? i1.next() : null;
+                        } else {
+                            results[pos++] = next2;
+                            next2 = i2.hasNext() ? i2.next() : null;
+                        }
+                    }
+                }
+            }
+            if(pos!=totalSize) throw new ConcurrentModificationException();
+            return results;
+        } else {
+            // 3+ collections, use priority queue
+            PriorityQueue<AoCollections.PeekIterator<? extends V>> pq = new PriorityQueue<AoCollections.PeekIterator<? extends V>>(
+                numCollections,
+                new Comparator<AoCollections.PeekIterator<? extends V>>() {
+                    @Override
+                    public int compare(PeekIterator<? extends V> i1, PeekIterator<? extends V> i2) {
+                        return comparator.compare(i1.peek(), i2.peek());
+                    }
+                }
+            );
+            int totalSize = 0;
+            for(Collection<? extends V> collection : collections) {
+                pq.add(AoCollections.peekIterator(collection.iterator()));
+                totalSize += collection.size();
+            }
+            @SuppressWarnings("unchecked")
+            final V[] results = (V[])Array.newInstance(clazz, totalSize);
+            int pos = 0;
+            PeekIterator<? extends V> pi;
+            while((pi=pq.poll())!=null) {
+                results[pos++] = pi.next();
+                if(pi.hasNext()) pq.offer(pi);
+            }
+            if(pos!=totalSize) throw new ConcurrentModificationException();
+            return results;
+        }
     }
 }

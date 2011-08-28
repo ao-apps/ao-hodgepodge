@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * Utilities to write FastExternalizable, Externalizable, and Serializable objects.
  *
- * When multiple objects are being written, this avoids the repetative writing of classnames and serialVersionUIDs.
+ * When multiple objects are being written, this avoids the repetitive writing of classnames and serialVersionUIDs.
  *
  * @author  AO Industries, Inc.
  */

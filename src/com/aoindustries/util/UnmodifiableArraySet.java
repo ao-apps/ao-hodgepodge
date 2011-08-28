@@ -99,7 +99,7 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
 
     E[] elements;
 
-    private static boolean assertInOrderAndUnique(Object[] elements) {
+    private static boolean inOrderAndUnique(Object[] elements) {
         // Make sure all elements are in hashCode order and unique
         int size = elements.length;
         if(size>1) {
@@ -108,15 +108,15 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
             for(int index=1; index<size; index++) {
                 Object elem = elements[index];
                 int elemHash = elem.hashCode();
-                if(elemHash<prevHash) throw new AssertionError("elements not sorted by hashCode: "+elemHash+"<"+prevHash+": "+elem+"<"+prev);
+                if(elemHash<prevHash) return false; //throw new AssertionError("elements not sorted by hashCode: "+elemHash+"<"+prevHash+": "+elem+"<"+prev);
                 if(elemHash==prevHash) {
                     // Make sure not equal to prev
-                    if(elem.equals(prev)) throw new AssertionError("Element not unique: "+elem);
+                    if(elem.equals(prev)) return false; //throw new AssertionError("Element not unique: "+elem);
                     // Look backward until different hashCode
                     for(int i=index-2; i>=0; i--) {
                         Object morePrev = elements[i];
                         if(morePrev.hashCode()!=elemHash) break;
-                        if(elem.equals(morePrev)) throw new AssertionError("Element not unique: "+elem);
+                        if(elem.equals(morePrev)) return false; // throw new AssertionError("Element not unique: "+elem);
                     }
                 }
                 prev = elem;
@@ -136,7 +136,7 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
      * @see  HashCodeComparator to properly sort objects before adding to the set
      */
     public UnmodifiableArraySet(E... elements) {
-        if(ASSERTIONS_ENABLED) assert assertInOrderAndUnique(elements);
+        if(ASSERTIONS_ENABLED) assert inOrderAndUnique(elements);
         this.elements = elements;
     }
 
@@ -259,7 +259,7 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        // Could do a nifty merge if the other collection is also an UnmodifiableArraySet
+        // Could do a nifty single-pass merge if the other collection is also an UnmodifiableArraySet and contains a large number of elements
         for(Object o : c) if(!contains(o)) return false;
         return true;
     }
@@ -316,6 +316,7 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
             else {
                 E[] newElements = (E[])new Object[len];
                 for(int i=0; i<len; i++) newElements[i] = (E)fastIn.readObject();
+                if(ASSERTIONS_ENABLED) assert inOrderAndUnique(newElements);
                 UnmodifiableArraySet.this.elements = newElements;
             }
         } finally {

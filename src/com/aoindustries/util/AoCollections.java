@@ -448,9 +448,9 @@ public class AoCollections {
     public static <E> Iterator<E> unmodifiableIterator(Iterator<E> iter) {
         // Don't wrap already unmodifiable iterator types.
         if(
-            (iter instanceof UnmodifiableIterator)
-            || (iter instanceof EnumerationIterator)
-            || (iter instanceof SingletonIterator)
+            (iter instanceof UnmodifiableIterator<?>)
+            || (iter instanceof EnumerationIterator<?>)
+            || (iter instanceof SingletonIterator<?>)
             || (iter==EmptyIterator.instance)
         ) return iter;
         return new UnmodifiableIterator<E>(iter);
@@ -474,4 +474,53 @@ public class AoCollections {
     public static void main(String[] args) {
         for(int c=0;c<30;c++) test();
     }*/
+
+    /**
+     * Allows peeking the first element of iteration.  Does not support remove.
+     * Does not support null elements.
+     */
+    public static class PeekIterator<E> implements Iterator<E> {
+        private final Iterator<? extends E> iter;
+        private E next;
+        PeekIterator(Iterator<? extends E> iter) {
+            this.iter = iter;
+            next = iter.hasNext() ? iter.next() : null;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return next!=null;
+        }
+
+        @Override
+        public E next() {
+            E value = next;
+            if(value==null) throw new NoSuchElementException();
+            next = iter.hasNext() ? iter.next() : null;
+            return value;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        /**
+         * Gets the next value without removing it.
+         *
+         * @throws NoSuchElementException if no next value
+         */
+        public E peek() {
+            E value = next;
+            if(value==null) throw new NoSuchElementException();
+            return value;
+        }
+    }
+    /**
+     * Wraps the provided iterator, allowing peek of first element.
+     * Does not support null elements.
+     */
+    public static <E> PeekIterator<E> peekIterator(Iterator<? extends E> iter) {
+        return new PeekIterator<E>(iter);
+    }
 }
