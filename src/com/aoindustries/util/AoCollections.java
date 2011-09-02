@@ -29,6 +29,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * General-purpose collection utilities and constants.
@@ -226,11 +229,23 @@ public class AoCollections {
      */
     public static <T> Collection<T> optimalUnmodifiableCollection(Collection<T> collection) {
         int size = collection.size();
-        if(size==0) return java.util.Collections.emptyList();
+        if(size==0) return Collections.emptyList();
         Class<?> clazz = collection.getClass();
         for(int i=0, len=unmodifiableCollectionClasses.length; i<len; i++) if(unmodifiableCollectionClasses[i]==clazz) return collection;
-        if(size==1) return java.util.Collections.singletonList(collection.iterator().next());
-        return java.util.Collections.unmodifiableCollection(collection);
+        if(size==1) return Collections.singletonList(collection.iterator().next());
+        return Collections.unmodifiableCollection(collection);
+    }
+
+    /**
+     * Performs defensive shallow copy and returns unmodifiable collection.
+     */
+    public static <T> Collection<T> unmodifiableCopyCollection(Collection<T> collection) {
+        int size = collection.size();
+        if(size==0) return Collections.emptyList();
+        Class<?> clazz = collection.getClass();
+        for(int i=0, len=unmodifiableCollectionClasses.length; i<len; i++) if(unmodifiableCollectionClasses[i]==clazz) return collection;
+        if(size==1) return Collections.singletonList(collection.iterator().next());
+        return Collections.unmodifiableCollection(new ArrayList<T>(collection));
     }
 
     private static final Class<?>[] unmodifiableListClasses = {
@@ -247,11 +262,23 @@ public class AoCollections {
      */
     public static <T> List<T> optimalUnmodifiableList(List<T> list) {
         int size = list.size();
-        if(size==0) return java.util.Collections.emptyList();
+        if(size==0) return Collections.emptyList();
         Class<?> clazz = list.getClass();
         for(int i=0, len=unmodifiableListClasses.length; i<len; i++) if(unmodifiableListClasses[i]==clazz) return list;
-        if(size==1) return java.util.Collections.singletonList(list.get(0));
-        return java.util.Collections.unmodifiableList(list);
+        if(size==1) return Collections.singletonList(list.get(0));
+        return Collections.unmodifiableList(list);
+    }
+
+    /**
+     * Performs defensive shallow copy and returns unmodifiable list.
+     */
+    public static <T> List<T> unmodifiableCopyList(Collection<T> collection) {
+        int size = collection.size();
+        if(size==0) return Collections.emptyList();
+        Class<?> clazz = collection.getClass();
+        for(int i=0, len=unmodifiableListClasses.length; i<len; i++) if(unmodifiableListClasses[i]==clazz) return (List<T>)collection;
+        if(size==1) return Collections.singletonList(collection.iterator().next());
+        return Collections.unmodifiableList(new ArrayList<T>(collection));
     }
 
     private static final Class<?>[] unmodifiableSetClasses = {
@@ -275,11 +302,24 @@ public class AoCollections {
      */
     public static <T> Set<T> optimalUnmodifiableSet(Set<T> set) {
         int size = set.size();
-        if(size==0) return java.util.Collections.emptySet();
+        if(size==0) return Collections.emptySet();
         Class<?> clazz = set.getClass();
         for(int i=0, len=unmodifiableSetClasses.length; i<len; i++) if(unmodifiableSetClasses[i]==clazz) return set;
-        if(size==1) return java.util.Collections.singleton(set.iterator().next());
-        return java.util.Collections.unmodifiableSet(set);
+        if(size==1) return Collections.singleton(set.iterator().next());
+        return Collections.unmodifiableSet(set);
+    }
+
+    /**
+     * Performs defensive shallow copy and returns unmodifiable set.
+     * The iteration order of the original set is maintained.
+     */
+    public static <T> Set<T> unmodifiableCopySet(Collection<T> collection) {
+        int size = collection.size();
+        if(size==0) return Collections.emptySet();
+        Class<?> clazz = collection.getClass();
+        for(int i=0, len=unmodifiableSetClasses.length; i<len; i++) if(unmodifiableSetClasses[i]==clazz) return (Set<T>)collection;
+        if(size==1) return Collections.singleton(collection.iterator().next());
+        return Collections.unmodifiableSet(new LinkedHashSet<T>(collection));
     }
 
     private static final Class<?>[] unmodifiableSortedSetClasses = {
@@ -300,7 +340,25 @@ public class AoCollections {
         Class<?> clazz = sortedSet.getClass();
         for(int i=0, len=unmodifiableSortedSetClasses.length; i<len; i++) if(unmodifiableSortedSetClasses[i]==clazz) return sortedSet;
         if(size==1) return singletonSortedSet(sortedSet.first());
-        return java.util.Collections.unmodifiableSortedSet(sortedSet);
+        return Collections.unmodifiableSortedSet(sortedSet);
+    }
+
+    /**
+     * Performs defensive shallow copy and returns unmodifiable sorted set.
+     */
+    public static <T> SortedSet<T> unmodifiableCopySortedSet(Collection<T> collection) {
+        int size = collection.size();
+        if(size==0) return emptySortedSet();
+        Class<?> clazz = collection.getClass();
+        for(int i=0, len=unmodifiableSortedSetClasses.length; i<len; i++) if(unmodifiableSortedSetClasses[i]==clazz) return (SortedSet<T>)collection;
+        if(size==1) return singletonSortedSet(collection.iterator().next());
+        SortedSet<T> copy;
+        if(collection instanceof SortedSet<?>) {
+            copy = new TreeSet<T>((SortedSet<T>)collection);
+        } else {
+            copy = new TreeSet<T>(collection);
+        }
+        return Collections.unmodifiableSortedSet(copy);
     }
 
     private static final Class<?>[] unmodifiableMapClasses = {
@@ -321,14 +379,30 @@ public class AoCollections {
      */
     public static <K,V> Map<K,V> optimalUnmodifiableMap(Map<K,V> map) {
         int size = map.size();
-        if(size==0) return java.util.Collections.emptyMap();
+        if(size==0) return Collections.emptyMap();
         Class<?> clazz = map.getClass();
         for(int i=0, len=unmodifiableMapClasses.length; i<len; i++) if(unmodifiableMapClasses[i]==clazz) return map;
         if(size==1) {
             Map.Entry<? extends K,? extends V> entry = map.entrySet().iterator().next();
-            return java.util.Collections.singletonMap(entry.getKey(), entry.getValue());
+            return Collections.singletonMap(entry.getKey(), entry.getValue());
         }
-        return java.util.Collections.unmodifiableMap(map);
+        return Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * Performs defensive shallow copy and returns unmodifiable map.
+     * The iteration order of the original set is maintained.
+     */
+    public static <K,V> Map<K,V> unmodifiableCopyMap(Map<K,V> map) {
+        int size = map.size();
+        if(size==0) return Collections.emptyMap();
+        Class<?> clazz = map.getClass();
+        for(int i=0, len=unmodifiableMapClasses.length; i<len; i++) if(unmodifiableMapClasses[i]==clazz) return map;
+        if(size==1) {
+            Map.Entry<? extends K,? extends V> entry = map.entrySet().iterator().next();
+            return Collections.singletonMap(entry.getKey(), entry.getValue());
+        }
+        return Collections.unmodifiableMap(new LinkedHashMap<K,V>(map));
     }
 
     private static final Class<?>[] unmodifiableSortedMapClasses = {
@@ -350,7 +424,28 @@ public class AoCollections {
         // TODO:     K key = sortedMap.firstKey();
         // TODO:     return singletonSortedMap(key, sortedMap.get(key));
         // TODO: }
-        return java.util.Collections.unmodifiableSortedMap(sortedMap);
+        return Collections.unmodifiableSortedMap(sortedMap);
+    }
+
+    /**
+     * Performs defensive shallow copy and returns unmodifiable sorted map.
+     */
+    public static <K,V> SortedMap<K,V> unmodifiableCopySortedMap(Map<K,V> map) {
+        // TODO: int size = sortedMap.size();
+        // TODO: if(size==0) return emptySortedMap();
+        Class<?> clazz = map.getClass();
+        for(int i=0, len=unmodifiableSortedMapClasses.length; i<len; i++) if(unmodifiableSortedMapClasses[i]==clazz) return (SortedMap<K,V>)map;
+        // TODO: if(size==1) {
+        // TODO:     K key = sortedMap.firstKey();
+        // TODO:     return singletonSortedMap(key, sortedMap.get(key));
+        // TODO: }
+        SortedMap<K,V> copy;
+        if(map instanceof SortedMap<?,?>) {
+            copy = new TreeMap<K,V>((SortedMap<K,V>)map);
+        } else {
+            copy = new TreeMap<K,V>(map);
+        }
+        return Collections.unmodifiableSortedMap(copy);
     }
 
     static class EmptyIterator<E> implements Iterator<E> {
