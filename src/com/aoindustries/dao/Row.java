@@ -22,12 +22,12 @@
  */
 package com.aoindustries.dao;
 
-public interface Row<K extends Comparable<? super K>,R extends Row<K,R>> extends Comparable<R> {
+public interface Row<K extends Comparable<? super K>,R extends Row<K,? extends R>> extends Comparable<R> {
 
     /**
      * Gets the table this row is part of.
      */
-    Table<K,R> getTable();
+    Table<K,? extends R> getTable();
 
     /**
      * Gets the key value for this row.

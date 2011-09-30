@@ -44,7 +44,7 @@ import java.util.TreeSet;
  * TODO: Coordinate invalidation between PHP and Java
  * TODO: Once both done, more aggressively use global caches for better remote database performance
  */
-abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends Row<K,R>> extends AbstractTable<K,R> {
+abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends Row<K,? extends R>> extends AbstractTable<K,R> {
 
     private final Object unsortedRowsCacheLock = new Object();
     private Set<R> unsortedRowsCache = null;

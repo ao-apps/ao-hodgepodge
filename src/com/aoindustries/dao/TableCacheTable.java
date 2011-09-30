@@ -41,7 +41,7 @@ import java.util.TreeSet;
  *   <li>Rows are sorted upon first call to getRows</li>
  * </ol>
  */
-abstract public class TableCacheTable<K extends Comparable<? super K>,R extends Row<K,R>> extends AbstractTable<K,R> {
+abstract public class TableCacheTable<K extends Comparable<? super K>,R extends Row<K,? extends R>> extends AbstractTable<K,R> {
 
     protected final ThreadLocal<Set<R>> unsortedRowsCache = new ThreadLocal<Set<R>>();
 

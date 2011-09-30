@@ -37,7 +37,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-abstract public class AbstractTable<K extends Comparable<? super K>,R extends Row<K,R>> implements Table<K,R> {
+abstract public class AbstractTable<K extends Comparable<? super K>,R extends Row<K,? extends R>> implements Table<K,R> {
 
     private final Class<K> keyClass;
     private final Class<R> rowClass;
