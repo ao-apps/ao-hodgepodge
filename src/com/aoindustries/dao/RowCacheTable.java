@@ -128,13 +128,20 @@ abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Ro
         // Try single row query - cache hits and misses
         try {
             R row = getNoCache(canonicalKey);
-            assert canonicalize(row.getKey()).equals(canonicalKey);
-            cache.put(canonicalKey, row);
+            addToCache(canonicalKey, row);
             return row;
         } catch(NoRowException err) {
             cache.put(canonicalKey, null);
             throw new NoRowException(getName()+" not found: "+key, err);
         }
+    }
+
+    /**
+     * Adds a single object to the cache.
+     */
+    protected void addToCache(K canonicalKey, R row) {
+        assert canonicalize(row.getKey()).equals(canonicalKey);
+        rowCache.get().put(canonicalKey, row);
     }
 
     abstract protected R getNoCache(K canonicalKey) throws NoRowException, SQLException;
