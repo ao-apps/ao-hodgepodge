@@ -22,7 +22,7 @@
  */
 package com.aoindustries.dao;
 
-abstract public class AbstractRow<K extends Comparable<? super K>,R extends AbstractRow<K,? extends R>> implements Row<K,R> {
+abstract public class AbstractRow<K extends Comparable<? super K>,R extends AbstractRow<K,? extends R> & Comparable<? super R>> implements Row<K,R> {
 
     private final DaoDatabase database;
     private final Class<R> clazz;
@@ -69,7 +69,7 @@ abstract public class AbstractRow<K extends Comparable<? super K>,R extends Abst
      * The default ordering is based on key comparison.  If both keys
      * are Strings, will use the database collator.
      */
-    @Override
+    //@Override
     public int compareTo(R o) {
         K key1 = getKey();
         K key2 = o.getKey();

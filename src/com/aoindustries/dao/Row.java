@@ -22,7 +22,7 @@
  */
 package com.aoindustries.dao;
 
-public interface Row<K extends Comparable<? super K>,R extends Row<K,? extends R>> extends Comparable<R> {
+public interface Row<K extends Comparable<? super K>,R extends Row<K,? extends R> & Comparable<? super R>> {
 
     /**
      * Gets the table this row is part of.
