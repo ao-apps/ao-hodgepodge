@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Encodes a URL into a JavaScript string.  It uses HttpServletRequest.encodeURL
- * rewrite the URL as needed and surrounds it in double quotes.
+ * to rewrite the URL as needed and surrounds it in double quotes.
  *
  * @author  AO Industries, Inc.
  */
