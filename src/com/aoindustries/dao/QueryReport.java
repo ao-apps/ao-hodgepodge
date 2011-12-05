@@ -168,87 +168,112 @@ public class QueryReport implements Report {
     public ReportResult getResult(Map<String,? extends Object> parameterValues) throws SQLException {
         Connection conn = database.getConnection(Connection.TRANSACTION_READ_COMMITTED, true, 1);
         try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            beforeQuery(parameterValues, conn);
             try {
-                /**
-                 * Substitute any parameters with the values provided.
-                 */
-                Object[] sqlParams = new Object[params.length];
-                for(int i=0; i<params.length; i++) {
-                    Object param = params[i];
-                    if(param instanceof Parameter) {
-                        // Replace placeholder with value
-                        Parameter reportParam = (Parameter)param;
-                        String paramName = reportParam.getName();
-                        param = parameterValues.get(paramName);
-                        if(param==null) throw new IllegalArgumentException("Parameter required: " + paramName);
-                    }
-                    sqlParams[i] = param;
-                }
-
-                DatabaseConnection.setParams(pstmt, sqlParams);
-                ResultSet results = pstmt.executeQuery();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
                 try {
-                    ResultSetMetaData meta = results.getMetaData();
-                    int numColumns = meta.getColumnCount();
-                    List<QueryColumn> columns = new ArrayList<QueryColumn>();
-                    for(int columnIndex=1; columnIndex<=numColumns; columnIndex++) {
-                        final Alignment alignment;
-                        switch(meta.getColumnType(columnIndex)) {
-                            case Types.BIGINT :
-                            case Types.DECIMAL :
-                            case Types.DOUBLE :
-                            case Types.FLOAT :
-                            case Types.INTEGER :
-                            case Types.NUMERIC :
-                            case Types.REAL :
-                            case Types.SMALLINT :
-                            case Types.TINYINT :
-                                alignment = Alignment.right;
-                                break;
-                            case Types.BOOLEAN :
-                            case Types.BIT :
-                                alignment = Alignment.center;
-                                break;
-                            default :
-                                alignment = Alignment.left;
+                    /**
+                     * Substitute any parameters with the values provided.
+                     */
+                    Object[] sqlParams = new Object[params.length];
+                    for(int i=0; i<params.length; i++) {
+                        Object param = params[i];
+                        if(param instanceof Parameter) {
+                            // Replace placeholder with value
+                            Parameter reportParam = (Parameter)param;
+                            String paramName = reportParam.getName();
+                            param = parameterValues.get(paramName);
+                            if(param==null) throw new IllegalArgumentException("Parameter required: " + paramName);
                         }
-                        columns.add(new QueryColumn(this, meta.getColumnName(columnIndex), alignment, accessor));
+                        sqlParams[i] = param;
                     }
-                    List<List<Object>> tableData = new ArrayList<List<Object>>();
-                    while(results.next()) {
-                        List<Object> row = new ArrayList<Object>(numColumns);
+
+                    DatabaseConnection.setParams(pstmt, sqlParams);
+                    ResultSet results = pstmt.executeQuery();
+                    try {
+                        ResultSetMetaData meta = results.getMetaData();
+                        int numColumns = meta.getColumnCount();
+                        List<QueryColumn> columns = new ArrayList<QueryColumn>();
                         for(int columnIndex=1; columnIndex<=numColumns; columnIndex++) {
-                            // Convert arrays to lists
-                            Object value = results.getObject(columnIndex);
-                            if(value instanceof Array) {
-                                List<Object> values = new ArrayList<Object>();
-                                ResultSet arrayResults = ((Array)value).getResultSet();
-                                try {
-                                    while(arrayResults.next()) values.add(arrayResults.getObject(2));
-                                } finally {
-                                    arrayResults.close();
-                                }
-                                value = AoCollections.optimalUnmodifiableList(values);
+                            final Alignment alignment;
+                            switch(meta.getColumnType(columnIndex)) {
+                                case Types.BIGINT :
+                                case Types.DECIMAL :
+                                case Types.DOUBLE :
+                                case Types.FLOAT :
+                                case Types.INTEGER :
+                                case Types.NUMERIC :
+                                case Types.REAL :
+                                case Types.SMALLINT :
+                                case Types.TINYINT :
+                                    alignment = Alignment.right;
+                                    break;
+                                case Types.BOOLEAN :
+                                case Types.BIT :
+                                    alignment = Alignment.center;
+                                    break;
+                                default :
+                                    alignment = Alignment.left;
                             }
-                            row.add(value);
+                            columns.add(new QueryColumn(this, meta.getColumnName(columnIndex), alignment, accessor));
                         }
-                        tableData.add(Collections.unmodifiableList(row));
+                        List<List<Object>> tableData = new ArrayList<List<Object>>();
+                        while(results.next()) {
+                            List<Object> row = new ArrayList<Object>(numColumns);
+                            for(int columnIndex=1; columnIndex<=numColumns; columnIndex++) {
+                                // Convert arrays to lists
+                                Object value = results.getObject(columnIndex);
+                                if(value instanceof Array) {
+                                    List<Object> values = new ArrayList<Object>();
+                                    ResultSet arrayResults = ((Array)value).getResultSet();
+                                    try {
+                                        while(arrayResults.next()) values.add(arrayResults.getObject(2));
+                                    } finally {
+                                        arrayResults.close();
+                                    }
+                                    value = AoCollections.optimalUnmodifiableList(values);
+                                }
+                                row.add(value);
+                            }
+                            tableData.add(Collections.unmodifiableList(row));
+                        }
+                        return new ReportResult(
+                            Collections.unmodifiableList(columns),
+                            Collections.unmodifiableList(tableData)
+                        );
+                    } finally {
+                        results.close();
                     }
-                    return new ReportResult(
-                        Collections.unmodifiableList(columns),
-                        Collections.unmodifiableList(tableData)
-                    );
+                } catch(SQLException e) {
+                    throw new WrappedSQLException(e, pstmt);
                 } finally {
-                    results.close();
+                    pstmt.close();
                 }
-            } catch(SQLException e) {
-                throw new WrappedSQLException(e, pstmt);
             } finally {
-                pstmt.close();
+                afterQuery(parameterValues, conn);
             }
         } finally {
             database.releaseConnection(conn);
         }
+    }
+
+    /**
+     * Called before the query is executed, this may setup any temp tables or views that are required
+     * by the main query.
+     *
+     * This default implementation does nothing.
+     */
+    public void beforeQuery(Map<String,? extends Object> parameterValues, Connection conn) throws SQLException {
+        // Do nothing
+    }
+
+    /**
+     * Called in try/finally after the query is executed, this may release any temp tables or views that were setup
+     * by beforeQuery.
+     *
+     * This default implementation does nothing.
+     */
+    public void afterQuery(Map<String,? extends Object> parameterValues, Connection conn) throws SQLException {
+        // Do nothing
     }
 }
