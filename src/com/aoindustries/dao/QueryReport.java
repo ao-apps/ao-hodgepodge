@@ -43,7 +43,7 @@ import java.util.Map;
 /**
  * A report that is obtained from a SQL query database.
  */
-public class QueryReport implements Report {
+public abstract class QueryReport implements Report {
 
     public static class QueryColumn implements Report.Column {
 
@@ -99,18 +99,16 @@ public class QueryReport implements Report {
     private final Database database;
     private final String name;
     private final ApplicationResourcesAccessor accessor;
-    private final String description;
     private final String sql;
     private final Object[] params;
 
     /**
      * @param params to substitute a parameter, provide the Parameter object.
      */
-    public QueryReport(Database database, String name, String description, String sql, Object... params) {
+    public QueryReport(Database database, String name, String sql, Object... params) {
         this.database = database;
         this.name = name;
         this.accessor = null;
-        this.description = description;
         this.sql = sql;
         this.params = params;
     }
@@ -118,8 +116,8 @@ public class QueryReport implements Report {
     /**
      * @param params to substitute a parameter, provide the Parameter object.
      */
-    public QueryReport(Database database, String name, String description, String sql, Collection<?> params) {
-        this(database, name, description, sql, params.toArray());
+    public QueryReport(Database database, String name, String sql, Collection<?> params) {
+        this(database, name, sql, params.toArray());
     }
 
     /**
@@ -129,7 +127,6 @@ public class QueryReport implements Report {
         this.database = database;
         this.name = name;
         this.accessor = accessor;
-        this.description = null;
         this.sql = sql;
         this.params = params;
     }
@@ -146,14 +143,20 @@ public class QueryReport implements Report {
         return name;
     }
 
+    /**
+     * Defaults to calling getTitle().
+     */
     @Override
-    public String getTitle() {
-        return accessor==null ? name : accessor.getMessage("report."+name+".title");
+    public String getTitle(Map<String, ? extends Object> parameterValues) {
+        return getTitle();
     }
 
+    /**
+     * Defaults to calling getDescription().
+     */
     @Override
-    public String getDescription() {
-        return accessor==null ? description : accessor.getMessage("report."+name+".description");
+    public String getDescription(Map<String, ? extends Object> parameterValues) {
+        return getDescription();
     }
 
     /**
@@ -164,9 +167,17 @@ public class QueryReport implements Report {
         return Collections.emptyList();
     }
 
+    /**
+     * Checks if this is a read-only report.  No temp tables or views may be created on
+     * a read-only report.  Defaults to true.
+     */
+    public boolean isReadOnly() {
+        return true;
+    }
+
     @Override
-    public ReportResult getResult(Map<String,? extends Object> parameterValues) throws SQLException {
-        Connection conn = database.getConnection(Connection.TRANSACTION_READ_COMMITTED, true, 1);
+    public ReportResult executeReport(Map<String,? extends Object> parameterValues) throws SQLException {
+        Connection conn = database.getConnection(Connection.TRANSACTION_READ_COMMITTED, isReadOnly(), 1);
         try {
             beforeQuery(parameterValues, conn);
             try {

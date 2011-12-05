@@ -49,9 +49,10 @@ public interface Report {
             /**
              * Converts this value to a string.
              */
+            /*
             public String toString(Object value) {
                 return value.toString();
-            }
+            }*/
 
             /**
              * Parses this value from a string.
@@ -121,9 +122,19 @@ public interface Report {
     String getTitle();
 
     /**
+     * Gets a display title of this report in the user locale with the provided parameters.
+     */
+    String getTitle(Map<String,? extends Object> parameterValues);
+
+    /**
      * Gets a description of this report in the user locale.
      */
     String getDescription();
+
+    /**
+     * Gets a description of this report in the user locale with the provided parameters.
+     */
+    String getDescription(Map<String,? extends Object> parameterValues);
 
     /**
      * Gets the set of parameters that this report requires.
@@ -133,5 +144,5 @@ public interface Report {
     /**
      * Executes the report and gets the results.
      */
-    Result getResult(Map<String,? extends Object> parameterValues) throws SQLException;
+    Result executeReport(Map<String,? extends Object> parameterValues) throws SQLException;
 }
