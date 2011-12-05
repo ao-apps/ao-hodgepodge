@@ -61,5 +61,5 @@ public interface DaoDatabase {
     /**
      * Gets the set of all reports that are supported by this repository implementation, keyed on its unique name.
      */
-    Map<String,? extends Report> getReports();
+    Map<String,? extends Report> getReports() throws SQLException;
 }

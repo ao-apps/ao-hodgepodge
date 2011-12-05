@@ -122,7 +122,7 @@ abstract public class AbstractDaoDatabase implements DaoDatabase {
      * By default, there are no reports.
      */
     @Override
-    public Map<String,? extends Report> getReports() {
+    public Map<String,? extends Report> getReports() throws SQLException {
         return Collections.emptyMap();
     }
 }
