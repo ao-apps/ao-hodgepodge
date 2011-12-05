@@ -24,11 +24,62 @@ package com.aoindustries.dao;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * One report generated from the underlying database.
  */
 public interface Report {
+
+    public static interface Parameter {
+        public enum Type {
+            TEXT {
+                @Override
+                public Object parse(String str) {
+                    return str;
+                }
+            },
+            INTEGER {
+                @Override
+                public Object parse(String str) {
+                    return Integer.parseInt(str);
+                }
+            };
+
+            /**
+             * Converts this value to a string.
+             */
+            public String toString(Object value) {
+                return value.toString();
+            }
+
+            /**
+             * Parses this value from a string.
+             */
+            public abstract Object parse(String str);
+        }
+
+        /**
+         * Gets the name of this parameter.
+         */
+        String getName();
+
+        /**
+         * Gets a display label for this parameter in the user locale.
+         */
+        String getLabel();
+
+        /**
+         * Gets the type of this parameter.
+         */
+        Type getType();
+
+        /**
+         * Gets the set of valid values or <code>null</code> if the user may
+         * enter a value.
+         */
+        Iterable<? extends Object> getValidValues() throws SQLException;
+    }
 
     enum Alignment {
         left,
@@ -36,23 +87,51 @@ public interface Report {
         center
     }
 
-    static interface Column {
+    public static interface Column {
+        /**
+         * Gets the constant name of this column.
+         */
         String getName();
+
+        /**
+         * Gets a display label for this column in the user locale.
+         */
         String getLabel();
+
+        /**
+         * Gets the display alignment of this column.
+         */
         Alignment getAlignment();
     }
 
-    static interface Result {
+    public static interface Result {
         List<? extends Column> getColumns() throws SQLException;
 
         Iterable<? extends Iterable<?>> getTableData() throws SQLException;
     }
 
+    /**
+     * Gets the constant name of this report.
+     */
     String getName();
 
+    /**
+     * Gets a display title of this report in the user locale.
+     */
     String getTitle();
 
+    /**
+     * Gets a description of this report in the user locale.
+     */
     String getDescription();
 
-    Result getResult() throws SQLException;
+    /**
+     * Gets the set of parameters that this report requires.
+     */
+    Iterable<? extends Parameter> getParameters();
+
+    /**
+     * Executes the report and gets the results.
+     */
+    Result getResult(Map<String,? extends Object> parameterValues) throws SQLException;
 }

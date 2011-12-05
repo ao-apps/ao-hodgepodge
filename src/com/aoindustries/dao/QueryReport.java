@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A report that is obtained from a SQL query database.
@@ -102,6 +103,9 @@ public class QueryReport implements Report {
     private final String sql;
     private final Object[] params;
 
+    /**
+     * @param params to substitute a parameter, provide the Parameter object.
+     */
     public QueryReport(Database database, String name, String description, String sql, Object... params) {
         this.database = database;
         this.name = name;
@@ -111,10 +115,16 @@ public class QueryReport implements Report {
         this.params = params;
     }
 
+    /**
+     * @param params to substitute a parameter, provide the Parameter object.
+     */
     public QueryReport(Database database, String name, String description, String sql, Collection<?> params) {
         this(database, name, description, sql, params.toArray());
     }
 
+    /**
+     * @param params to substitute a parameter, provide the Parameter object.
+     */
     public QueryReport(Database database, String name, ApplicationResourcesAccessor accessor, String sql, Object... params) {
         this.database = database;
         this.name = name;
@@ -124,6 +134,9 @@ public class QueryReport implements Report {
         this.params = params;
     }
 
+    /**
+     * @param params to substitute a parameter, provide the Parameter object.
+     */
     public QueryReport(Database database, String name, ApplicationResourcesAccessor accessor, String sql, Collection<?> params) {
         this(database, name, accessor, sql, params.toArray());
     }
@@ -143,13 +156,37 @@ public class QueryReport implements Report {
         return accessor==null ? description : accessor.getMessage("report."+name+".description");
     }
 
+    /**
+     * Get default, no parameters are required.
+     */
     @Override
-    public ReportResult getResult() throws SQLException {
+    public Iterable<? extends Parameter> getParameters() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public ReportResult getResult(Map<String,? extends Object> parameterValues) throws SQLException {
         Connection conn = database.getConnection(Connection.TRANSACTION_READ_COMMITTED, true, 1);
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             try {
-                DatabaseConnection.setParams(pstmt, params);
+                /**
+                 * Substitute any parameters with the values provided.
+                 */
+                Object[] sqlParams = new Object[params.length];
+                for(int i=0; i<params.length; i++) {
+                    Object param = params[i];
+                    if(param instanceof Parameter) {
+                        // Replace placeholder with value
+                        Parameter reportParam = (Parameter)param;
+                        String paramName = reportParam.getName();
+                        param = parameterValues.get(paramName);
+                        if(param==null) throw new IllegalArgumentException("Parameter required: " + paramName);
+                    }
+                    sqlParams[i] = param;
+                }
+
+                DatabaseConnection.setParams(pstmt, sqlParams);
                 ResultSet results = pstmt.executeQuery();
                 try {
                     ResultSetMetaData meta = results.getMetaData();
