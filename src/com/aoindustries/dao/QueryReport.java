@@ -26,7 +26,6 @@ import com.aoindustries.sql.Database;
 import com.aoindustries.sql.DatabaseConnection;
 import com.aoindustries.sql.WrappedSQLException;
 import com.aoindustries.util.AoCollections;
-import com.aoindustries.util.i18n.ApplicationResourcesAccessor;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,13 +49,11 @@ public abstract class QueryReport implements Report {
         private final QueryReport report;
         private final String name;
         private final Report.Alignment alignment;
-        private final ApplicationResourcesAccessor accessor;
 
-        QueryColumn(QueryReport report, String name, Report.Alignment alignment, ApplicationResourcesAccessor accessor) {
+        QueryColumn(QueryReport report, String name, Report.Alignment alignment) {
             this.report = report;
             this.name = name;
             this.alignment = alignment;
-            this.accessor = accessor;
         }
 
         @Override
@@ -64,9 +61,14 @@ public abstract class QueryReport implements Report {
             return name;
         }
 
+        /**
+         * Gets the label from the report.
+         *
+         * @see Report#getColumnLabel
+         */
         @Override
         public String getLabel() {
-            return accessor==null ? name : accessor.getMessage("report."+report.getName()+".columns."+name+".label");
+            return report.getColumnLabel(this);
         }
 
         @Override
@@ -98,7 +100,6 @@ public abstract class QueryReport implements Report {
 
     private final Database database;
     private final String name;
-    private final ApplicationResourcesAccessor accessor;
     private final String sql;
     private final Object[] params;
 
@@ -108,7 +109,6 @@ public abstract class QueryReport implements Report {
     public QueryReport(Database database, String name, String sql, Object... params) {
         this.database = database;
         this.name = name;
-        this.accessor = null;
         this.sql = sql;
         this.params = params;
     }
@@ -118,24 +118,6 @@ public abstract class QueryReport implements Report {
      */
     public QueryReport(Database database, String name, String sql, Collection<?> params) {
         this(database, name, sql, params.toArray());
-    }
-
-    /**
-     * @param params to substitute a parameter, provide the Parameter object.
-     */
-    public QueryReport(Database database, String name, ApplicationResourcesAccessor accessor, String sql, Object... params) {
-        this.database = database;
-        this.name = name;
-        this.accessor = accessor;
-        this.sql = sql;
-        this.params = params;
-    }
-
-    /**
-     * @param params to substitute a parameter, provide the Parameter object.
-     */
-    public QueryReport(Database database, String name, ApplicationResourcesAccessor accessor, String sql, Collection<?> params) {
-        this(database, name, accessor, sql, params.toArray());
     }
 
     @Override
@@ -160,6 +142,15 @@ public abstract class QueryReport implements Report {
     }
 
     /**
+     * Gets the label for the provided column.  Defaults to column name.
+     *
+     * @see QueryColumn#getLabel()
+     */
+    public String getColumnLabel(QueryColumn column) {
+        return column.name;
+    }
+
+    /**
      * Get default, no parameters are required.
      */
     @Override
@@ -179,8 +170,8 @@ public abstract class QueryReport implements Report {
     public ReportResult executeReport(Map<String,? extends Object> parameterValues) throws SQLException {
         Connection conn = database.getConnection(Connection.TRANSACTION_READ_COMMITTED, isReadOnly(), 1);
         try {
-            beforeQuery(parameterValues, conn);
             try {
+                beforeQuery(parameterValues, conn);
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 try {
                     /**
@@ -226,7 +217,7 @@ public abstract class QueryReport implements Report {
                                 default :
                                     alignment = Alignment.left;
                             }
-                            columns.add(new QueryColumn(this, meta.getColumnName(columnIndex), alignment, accessor));
+                            columns.add(new QueryColumn(this, meta.getColumnName(columnIndex), alignment));
                         }
                         List<List<Object>> tableData = new ArrayList<List<Object>>();
                         while(results.next()) {
@@ -280,7 +271,7 @@ public abstract class QueryReport implements Report {
 
     /**
      * Called in try/finally after the query is executed, this may release any temp tables or views that were setup
-     * by beforeQuery.
+     * by beforeQuery.  This will be called even when the beforeQuery does not complete fully.
      *
      * This default implementation does nothing.
      */
