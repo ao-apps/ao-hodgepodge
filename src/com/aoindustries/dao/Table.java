@@ -73,6 +73,12 @@ public interface Table<K extends Comparable<? super K>,R extends Row<K,? extends
     Iterator<R> getIterator() throws SQLException;
 
     /**
+     * @see  #getIterator()
+     */
+    @Override
+    Iterator<R> iterator();
+    
+    /**
      * Gets a map view of this table.
      */
     Map<K,R> getMap();
