@@ -30,6 +30,7 @@ import com.aoindustries.util.LongList;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.sql.Array;
 import java.sql.Blob;
@@ -158,6 +159,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         else if(param instanceof Null) pstmt.setNull(pos, ((Null)param).getType());
         else if(param instanceof Array) pstmt.setArray(pos, (Array)param);
         else if(param instanceof BigDecimal) pstmt.setBigDecimal(pos, (BigDecimal)param);
+        else if(param instanceof BigInteger) pstmt.setBigDecimal(pos, new BigDecimal((BigInteger)param));
         else if(param instanceof Blob) pstmt.setBlob(pos, (Blob)param);
         else if(param instanceof Boolean) pstmt.setBoolean(pos, (Boolean)param);
         else if(param instanceof Byte) pstmt.setByte(pos, (Byte)param);
