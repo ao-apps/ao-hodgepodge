@@ -197,7 +197,6 @@ public class NoSessionFilter implements Filter {
         ServletResponse response,
         FilterChain chain
     ) throws IOException, ServletException {
-        // Makes sure only one trim filter is applied per request
         if(
             (request instanceof HttpServletRequest)
             && (response instanceof HttpServletResponse)

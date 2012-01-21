@@ -42,7 +42,7 @@ abstract public class AbstractDaoDatabase implements DaoDatabase {
     private static Collator collator = Collator.getInstance();
 
     /**
-     * By defaults, sorts in the system locale.
+     * By default, sorts in the system locale.
      */
     @Override
     public Collator getCollator() {
