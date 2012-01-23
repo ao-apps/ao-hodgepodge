@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 // import org.checkthread.annotations.NotThreadSafe;
 // import org.checkthread.annotations.ThreadSafe;
@@ -118,11 +117,11 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
 
     @Override
     // @NotThreadSafe
-    public void finalize() {
+    protected void finalize() throws Throwable {
         try {
             close();
-        } catch(IOException err) {
-            logger.log(Level.WARNING, null, err);
+        } finally {
+            super.finalize();
         }
     }
 

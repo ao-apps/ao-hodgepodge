@@ -86,11 +86,14 @@ final public class WriterOutputStream extends OutputStream {
     }
 
     @Override
-    public void finalize() throws Throwable {
-        if(buff!=null) {
-            BufferManager.release(buff);
-            buff=null;
+    protected void finalize() throws Throwable {
+        try {
+            if(buff!=null) {
+                BufferManager.release(buff);
+                buff=null;
+            }
+        } finally {
+            super.finalize();
         }
-        super.finalize();
     }
 }

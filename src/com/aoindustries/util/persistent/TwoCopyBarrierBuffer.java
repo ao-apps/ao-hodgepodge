@@ -469,11 +469,11 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 
     @Override
     // @ThreadSafe
-    public void finalize() {
+    protected void finalize() throws Throwable {
         try {
             close();
-        } catch(IOException err) {
-            logger.log(Level.WARNING, null, err);
+        } finally {
+            super.finalize();
         }
     }
 

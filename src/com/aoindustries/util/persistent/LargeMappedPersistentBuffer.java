@@ -130,11 +130,11 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
 
     @Override
     // @NotThreadSafe
-    public void finalize() {
+    protected void finalize() throws Throwable {
         try {
             close();
-        } catch(IOException err) {
-            logger.log(Level.WARNING, null, err);
+        } finally {
+            super.finalize();
         }
     }
 

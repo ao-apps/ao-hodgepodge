@@ -28,7 +28,6 @@ import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.channels.FileChannel;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 // import org.checkthread.annotations.NotThreadSafe;
 
@@ -111,11 +110,11 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
 
     @Override
     // @NotThreadSafe
-    public void finalize() {
+    protected void finalize() throws Throwable {
         try {
             close();
-        } catch(IOException err) {
-            logger.log(Level.WARNING, null, err);
+        } finally {
+            super.finalize();
         }
     }
 

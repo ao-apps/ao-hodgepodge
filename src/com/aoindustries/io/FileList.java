@@ -265,8 +265,12 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
     }
     
     @Override
-    public void finalize() throws IOException {
-        close();
+    protected void finalize() throws Throwable {
+        try {
+            close();
+        } finally {
+            super.finalize();
+        }
     }
     
     public void close() throws IOException {

@@ -72,6 +72,7 @@ public class LogFollower extends InputStream {
         }
     }
 
+    @Override
     synchronized public int available() throws IOException {
         openIfNeeded();
         long available=randomAccess.length()-filePos;
@@ -80,6 +81,7 @@ public class LogFollower extends InputStream {
         return (int)available;
     }
 
+    @Override
     public void close() throws IOException {
         isClosed=true;
         RandomAccessFile R=randomAccess;
@@ -93,11 +95,16 @@ public class LogFollower extends InputStream {
         return pollInterval;
     }
 
-    public void finalize() throws Throwable {
-        close();
-        super.finalize();
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            close();
+        } finally {
+            super.finalize();
+        }
     }
 
+    @Override
     synchronized public int read() throws IOException {
         openIfNeeded();
         while(!isClosed) {
@@ -138,6 +145,7 @@ public class LogFollower extends InputStream {
         throw new IOException("LogFollower has been closed: "+path);
     }
 
+    @Override
     synchronized public int read(byte[] b, int offset, int len) throws IOException {
         openIfNeeded();
         while(!isClosed) {
@@ -186,6 +194,7 @@ public class LogFollower extends InputStream {
         throw new IOException("LogFollower has been closed: "+path);
     }
 
+    @Override
     synchronized public long skip(long n) throws IOException {
         openIfNeeded();
         while(!isClosed) {

@@ -1686,8 +1686,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 
     @Override
     // @NotThreadSafe
-    public void finalize() throws IOException {
-        close();
+    protected void finalize() throws Throwable {
+        try {
+            close();
+        } finally {
+            super.finalize();
+        }
     }
 
     /**
