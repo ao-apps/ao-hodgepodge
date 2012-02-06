@@ -803,9 +803,9 @@ public class UnixFile {
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
      *
-     * @deprecated  Please use getStat(Stat).getGID()
+     * @deprecated  Please use getStat(Stat).getGid()
      */
-    final public int getGID() throws IOException {
+    final public int getGid() throws IOException {
         Stat stat = getStat();
         if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getGid();
@@ -1051,9 +1051,9 @@ public class UnixFile {
      *
      * This method will follow symbolic links in the path but not a final symbolic link.
      *
-     * @deprecated  Please use getStat(Stat).getUID()
+     * @deprecated  Please use getStat(Stat).getUid()
      */
-    public final int getUID() throws IOException {
+    public final int getUid() throws IOException {
         Stat stat = getStat();
         if(!stat.exists()) throw new FileNotFoundException(path);
         return stat.getUid();
