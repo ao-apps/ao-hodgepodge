@@ -73,7 +73,7 @@ final public class FileUtils {
                 int readPos = 0;
                 while(readPos<contentLen) {
                     int bytesRemaining = contentLen - readPos;
-                    int bytesRead = in.read(buff, 0, bytesRemaining > BufferManager.BUFFER_SIZE ? BufferManager.BUFFER_SIZE : contentLen);
+                    int bytesRead = in.read(buff, 0, bytesRemaining > BufferManager.BUFFER_SIZE ? BufferManager.BUFFER_SIZE : bytesRemaining);
                     if(bytesRead==-1) return false; // End of file
                     int i=0;
                     while(i<bytesRead) {
