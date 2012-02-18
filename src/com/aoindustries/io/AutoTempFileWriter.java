@@ -23,11 +23,14 @@
 package com.aoindustries.io;
 
 import com.aoindustries.util.WrappedException;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.logging.Level;
@@ -61,10 +64,12 @@ public class AutoTempFileWriter extends Writer {
 
     private void switchIfNeeded(long newLength) throws IOException {
         if(sb!=null && newLength>=tempFileThreshold) {
-            tempFile = File.createTempFile("AutoTempFileWriter", null);
+            tempFile = File.createTempFile("AutoTempFileWriter", null/*, new File("/dev/shm")*/);
             tempFile.deleteOnExit();
             if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
             fileWriter = new BufferedWriter(new FileWriter(tempFile));
+            //fileWriter = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(tempFile)));
+            //fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile)));
             fileWriter.write(sb.toString());
             sb = null;
         }

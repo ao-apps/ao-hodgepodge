@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -52,7 +52,7 @@ public final class ApplicationResources extends EditableResourceBundle {
         super(
             Locale.ROOT,
             bundleSet,
-            new File(System.getProperty("user.home")+"/common/ao/cvswork/aocode-public/src/com/aoindustries/version/ApplicationResources.properties")
+            new File(System.getProperty("user.home")+"/common/aodev/cvswork/aocode-public/src/com/aoindustries/version/ApplicationResources.properties")
         );
     }
 
