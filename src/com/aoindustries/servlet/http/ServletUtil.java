@@ -111,9 +111,10 @@ public class ServletUtil {
      * http://www.google.com/support/webmasters/bin/answer.py?answer=80553
      */
     public static boolean isGooglebot(HttpServletRequest request) {
-        Enumeration headers = request.getHeaders("User-Agent");
+        @SuppressWarnings("unchecked")
+        Enumeration<String> headers = request.getHeaders("User-Agent");
         while(headers.hasMoreElements()) {
-            String userAgent = (String)headers.nextElement();
+            String userAgent = headers.nextElement();
             if(userAgent.contains("Googlebot")) {
                 // Verify through reverse then forward DNS lookups
                 String remoteAddr = request.getRemoteAddr();
