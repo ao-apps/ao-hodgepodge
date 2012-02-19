@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,22 +43,21 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
      */
     private static String getEscapedCharacter(char ch) {
         // These characters are allowed in JavaScript but need encoded for XHTML
-        // Commented-out because now using CDATA
-        // if(ch=='<') return "&lt;";
-        // if(ch=='>') return "&gt;";
-        // if(ch=='&') return "&amp;";
-        if(
+        switch(ch) {
+            // Commented-out because now using CDATA
+            // case '<': return "&lt;";
+            // case '>': return "&gt;";
+            // case '&': return "&amp;";
             // These character ranges are passed through unmodified
-            ch=='\r'
-            || ch=='\n'
-            || ch=='\t'
-            || (ch>=0x20 && ch<=0xD7FF)
-            || (ch>=0xE000 && ch<=0xFFFD)
-            // Out of 16-bit unicode range: || (ch>=0x10000 && ch<=0x10FFFF)
-        ) return null;
-
-        // Escape using JavaScript unicode escape.
-        return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
+            case '\r':
+            case '\n':
+            case '\t':
+            case '\\':
+                return null;
+            default:
+                // Escape using JavaScript unicode escape when needed.
+                return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
+        }
     }
 
     public static void encodeJavaScriptInXhtml(CharSequence S, Appendable out) throws IOException {
@@ -134,7 +133,6 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void write(int c) throws IOException {
-        if(c>Character.MAX_VALUE) throw new AssertionError("Character value out of range: 0x"+Integer.toHexString(c));
         encodeJavaScriptInXhtml((char)c, out);
     }
 

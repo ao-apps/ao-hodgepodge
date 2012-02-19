@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -40,7 +40,7 @@ public class XhtmlValidator extends MediaValidator {
      *
      * {@link http://www.w3.org/TR/REC-xml/#charsets}
      */
-    public static void checkCharacter(int c) throws IOException {
+    public static void checkCharacter(char c) throws IOException {
         if(
             c!=0x9
             && c!=0xA
@@ -86,7 +86,7 @@ public class XhtmlValidator extends MediaValidator {
 
     @Override
     public void write(int c) throws IOException {
-        checkCharacter(c);
+        checkCharacter((char)c);
         out.write(c);
     }
 

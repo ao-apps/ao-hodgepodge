@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,17 +43,9 @@ public class TextInXhtmlEncoder extends MediaEncoder {
      * Encodes a single character and returns its String representation
      * or null if no modification is necessary.
      *
-     * @see XhtmlMediaValidator#checkCharacter(int)
+     * @see XhtmlMediaValidator#checkCharacter(char)
      */
-    private static String getEscapedCharacter(int c, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
-        boolean oldPreviousWasSpace;
-        if(encodingState==null) {
-            if(makeNbsp) throw new IllegalArgumentException("encodingState is null while makeNbsp is true");
-            oldPreviousWasSpace = false;
-        } else {
-            oldPreviousWasSpace = encodingState.previousWasSpace;
-            encodingState.previousWasSpace = c==' ';
-        }
+    private static String getEscapedCharacter(char c, boolean makeBr) throws IOException {
         switch(c) {
             case '<': return "&lt;";
             case '>': return "&gt;";
@@ -65,9 +57,38 @@ public class TextInXhtmlEncoder extends MediaEncoder {
                 if(makeBr) return "<br />\n";
                 return null;
             case ' ':
-                if(makeNbsp && oldPreviousWasSpace) return "&#160;";
                 return null;
             default:
+                // Cause error if any text character cannot be converted to XHTML
+                XhtmlValidator.checkCharacter(c);
+                return null;
+        }
+    }
+
+    /**
+     * Encodes a single character and returns its String representation
+     * or null if no modification is necessary.
+     *
+     * @see XhtmlMediaValidator#checkCharacter(char)
+     */
+    private static String getEscapedCharacterMakeNbps(char c, boolean makeBr, EncodingState encodingState) throws IOException {
+        boolean oldPreviousWasSpace = encodingState.previousWasSpace;
+        encodingState.previousWasSpace = c==' ';
+        switch(c) {
+            case '<': return "&lt;";
+            case '>': return "&gt;";
+            case '&': return "&amp;";
+            case '\r':
+                if(makeBr) return "";
+                return null;
+            case '\n':
+                if(makeBr) return "<br />\n";
+                return null;
+            case ' ':
+                if(oldPreviousWasSpace) return "&#160;";
+                return null;
+            default:
+                // Cause error if any text character cannot be converted to XHTML
                 XhtmlValidator.checkCharacter(c);
                 return null;
         }
@@ -89,16 +110,31 @@ public class TextInXhtmlEncoder extends MediaEncoder {
     public static void encodeTextInXhtml(CharSequence S, int start, int end, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
         if(S==null) S = "null";
         int toPrint = 0;
-        for (int c = start; c < end; c++) {
-            String escaped = getEscapedCharacter(S.charAt(c), makeBr, makeNbsp, encodingState);
-            if(escaped!=null) {
-                if(toPrint>0) {
-                    out.append(S, c-toPrint, c);
-                    toPrint=0;
+        if(makeNbsp) {
+            for (int c = start; c < end; c++) {
+                String escaped = getEscapedCharacterMakeNbps(S.charAt(c), makeBr, encodingState);
+                if(escaped!=null) {
+                    if(toPrint>0) {
+                        out.append(S, c-toPrint, c);
+                        toPrint=0;
+                    }
+                    out.append(escaped);
+                } else {
+                    toPrint++;
                 }
-                out.append(escaped);
-            } else {
-                toPrint++;
+            }
+        } else {
+            for (int c = start; c < end; c++) {
+                String escaped = getEscapedCharacter(S.charAt(c), makeBr);
+                if(escaped!=null) {
+                    if(toPrint>0) {
+                        out.append(S, c-toPrint, c);
+                        toPrint=0;
+                    }
+                    out.append(escaped);
+                } else {
+                    toPrint++;
+                }
             }
         }
         if(toPrint>0) out.append(S, end-toPrint, end);
@@ -111,16 +147,31 @@ public class TextInXhtmlEncoder extends MediaEncoder {
     public static void encodeTextInXhtml(char[] cbuf, int start, int len, Writer out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
         int end = start+len;
         int toPrint = 0;
-        for (int c = start; c < end; c++) {
-            String escaped = getEscapedCharacter(cbuf[c], makeBr, makeNbsp, encodingState);
-            if(escaped!=null) {
-                if(toPrint>0) {
-                    out.write(cbuf, c-toPrint, toPrint);
-                    toPrint=0;
+        if(makeNbsp) {
+            for (int c = start; c < end; c++) {
+                String escaped = getEscapedCharacterMakeNbps(cbuf[c], makeBr, encodingState);
+                if(escaped!=null) {
+                    if(toPrint>0) {
+                        out.write(cbuf, c-toPrint, toPrint);
+                        toPrint=0;
+                    }
+                    out.append(escaped);
+                } else {
+                    toPrint++;
                 }
-                out.append(escaped);
-            } else {
-                toPrint++;
+            }
+        } else {
+            for (int c = start; c < end; c++) {
+                String escaped = getEscapedCharacter(cbuf[c], makeBr);
+                if(escaped!=null) {
+                    if(toPrint>0) {
+                        out.write(cbuf, c-toPrint, toPrint);
+                        toPrint=0;
+                    }
+                    out.append(escaped);
+                } else {
+                    toPrint++;
+                }
             }
         }
         if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
@@ -131,7 +182,9 @@ public class TextInXhtmlEncoder extends MediaEncoder {
     }
 
     public static void encodeTextInXhtml(char ch, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
-        String escaped = getEscapedCharacter(ch, makeBr, makeNbsp, encodingState);
+        String escaped;
+        if(makeNbsp) escaped = getEscapedCharacterMakeNbps(ch, makeBr, encodingState);
+        else escaped = getEscapedCharacter(ch, makeBr);
         if(escaped!=null) out.append(escaped);
         else out.append(ch);
     }
@@ -186,13 +239,11 @@ public class TextInXhtmlEncoder extends MediaEncoder {
         this.makeNbsp = makeNbsp;
     }
 
-    /**
-     * Will accept values higher than <code>Character.MAX_VALUE</code>.
-     * The wrapped out may reject them, however.
-     */
     @Override
     public void write(int c) throws IOException {
-        String escaped = getEscapedCharacter(c, makeBr, makeNbsp, encodingState);
+        String escaped;
+        if(makeNbsp) escaped = getEscapedCharacterMakeNbps((char)c, makeBr, encodingState);
+        else escaped = getEscapedCharacter((char) c, makeBr);
         if(escaped!=null) out.write(escaped);
         else out.write(c);
     }

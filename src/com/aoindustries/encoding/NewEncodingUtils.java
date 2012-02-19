@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,7 +26,6 @@ import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * Encoding helper utilities.
@@ -50,15 +49,27 @@ public class NewEncodingUtils {
     /**
      * The Strings are kept here after first created.
      */
-    private static final AtomicReferenceArray<String> javaScriptUnicodeEscapeStrings = new AtomicReferenceArray<String>((int)Character.MAX_VALUE+1);
-    static String getJavaScriptUnicodeEscapeString(char ch) {
-        int chInt = ch;
-        String escaped = javaScriptUnicodeEscapeStrings.get(chInt);
-        if(escaped==null) {
-            escaped = "\\u" + getHex(chInt>>>12) + getHex(chInt>>>8) + getHex(chInt>>>4) + getHex(chInt);
-            javaScriptUnicodeEscapeStrings.set(chInt, escaped);
+    private static final String[] javaScriptUnicodeEscapeStrings = new String[(int)Character.MAX_VALUE+1];
+    static {
+        for(int ch=0; ch<javaScriptUnicodeEscapeStrings.length; ch++) {
+            if(
+                // These character ranges are passed through unmodified
+                (ch<0x20 || ch>0xD7FF)
+                && (ch<0xE000 || ch>0xFFFD)
+                // Out of 16-bit unicode range: && (ch<0x10000 || ch>0x10FFFF)
+            ) {
+                // Escape using JavaScript unicode escape.
+                javaScriptUnicodeEscapeStrings[ch] = "\\u" + getHex(ch>>>12) + getHex(ch>>>8) + getHex(ch>>>4) + getHex(ch);
+            }
         }
-        return escaped;
+    }
+    /**
+     * Gets the unicode escape for a JavaScript character or null if may be passed-through without escape.
+     * @param ch
+     * @return
+     */
+    static String getJavaScriptUnicodeEscapeString(char ch) {
+        return javaScriptUnicodeEscapeStrings[ch];
     }
 
     public static void encodeTextInJavaScriptInXhtml(String text, Appendable out) throws IOException {

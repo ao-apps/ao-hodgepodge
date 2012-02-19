@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -40,28 +40,32 @@ public class UrlValidator extends MediaValidator {
      */
     public static boolean checkCharacter(int c, boolean foundQuestionMark) throws IOException {
         if(foundQuestionMark) {
-            if(
-                (c<'a' || c>'z')
-                && (c<'A' || c>'Z')
-                && (c<'0' || c>'9')
-                && c!='.'
-                && c!='-'
-                && c!='*'
-                && c!='_'
-                && c!='+' // converted space
-                && c!='%' // encoded value
+            switch(c) {
+                case '.':
+                case '-':
+                case '*':
+                case '_':
+                case '+': // converted space
+                case '%': // encoded value
                 // Other characters used outside the URL data
-                //&& c!=':'
-                //&& c!='/'
-                //&& c!=';'
-                //&& c!='?'
+                //case ':':
+                //case '/':
+                //case ';':
+                //case '?':
                 // Parameter separators
-                && c!='='
-                && c!='&'
+                case '=':
+                case '&':
                 // Anchor separator
-                && c!='#'
-            ) throw new IOException(ApplicationResources.accessor.getMessage("UrlMediaValidator.invalidCharacter", Integer.toHexString(c)));
-            return true;
+                case '#':
+                    return true;
+                default:
+                    if(
+                        (c<'a' || c>'z')
+                        && (c<'A' || c>'Z')
+                        && (c<'0' || c>'9')
+                    ) throw new IOException(ApplicationResources.accessor.getMessage("UrlMediaValidator.invalidCharacter", Integer.toHexString(c)));
+                    return true;
+            }
         } else {
             return c=='?';
         }

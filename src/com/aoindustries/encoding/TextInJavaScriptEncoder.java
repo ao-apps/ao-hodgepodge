@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -50,18 +50,15 @@ public class TextInJavaScriptEncoder extends MediaEncoder {
             case '\r': return "\\r";
             case '\n': return "\\n";
             case '\t': return "\\t";
+
+            // Encode the following as unicode because escape for HTML and XHTML is different
+            case '&': return "\\u0026";
+            case '<': return "\\u003c";
+            case '>': return "\\u003e";
             default:
-            {
-                if(
-                    ch<' '
-                    // Encode the following as unicode because escape for HTML and XHTML is different
-                    || ch=='&' 
-                    || ch=='<'
-                    || ch=='>'
-                ) return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
+                if(ch<' ') return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
                 // No conversion necessary
                 return null;
-            }
         }
     }
 
@@ -137,7 +134,6 @@ public class TextInJavaScriptEncoder extends MediaEncoder {
 
     @Override
     public void write(int c) throws IOException {
-        if(c>Character.MAX_VALUE) throw new AssertionError("Character value out of range: 0x"+Integer.toHexString(c));
         encodeTextInJavaScript((char)c, out);
     }
 
