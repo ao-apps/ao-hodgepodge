@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -322,7 +322,7 @@ public final class StringUtility {
      *
      * @see  SQLUtility#escapeSQL(String)
      */
-    public static final String escapeSQL(String s) {
+    public static String escapeSQL(String s) {
         return SQLUtility.escapeSQL(s.replace('*', '%'));
     }
 
@@ -479,7 +479,7 @@ public final class StringUtility {
      *
      * @see  List#toArray(Object[])
      */
-    public static String[] getStringArray(List V) {
+    public static String[] getStringArray(List<?> V) {
         if(V==null) return null;
         int len = V.size();
         String[] SA = new String[len];
@@ -910,11 +910,32 @@ public final class StringUtility {
     /**
      * Word wraps a <code>String</code> to be no longer than the provided number of characters wide.
      *
-     * TODO: Make this more efficient by using Appendable and eliminating the internal use of substring.
+     * @deprecated  Use new version with Appendable for higher performance
      */
+    @Deprecated
     public static String wordWrap(String string, int width) {
+        // Leave room for two word wrap characters every width / 2 characters, on average.
+        int inputLength = string.length();
+        int estimatedLines = 2 * inputLength / width;
+        int initialLength = inputLength + estimatedLines * 2;
+        try {
+            StringBuilder buffer = new StringBuilder(initialLength);
+            wordWrap(string, width, buffer);
+            return buffer.toString();
+        } catch(IOException e) {
+            AssertionError assertionError = new AssertionError("Should not get IOException from StringBuilder");
+            assertionError.initCause(e);
+            throw assertionError;
+        }
+    }
+
+    /**
+     * Word wraps a <code>String</code> to be no longer than the provided number of characters wide.
+     *
+     * TODO: Make this more efficient by eliminating the internal use of substring.
+     */
+    public static void wordWrap(String string, int width, Appendable out) throws IOException {
         width++;
-        StringBuilder SB = new StringBuilder();
         boolean useCR = false;
         do {
             int pos = string.indexOf('\n');
@@ -922,7 +943,7 @@ public final class StringUtility {
             int linelength = pos == -1 ? string.length() : pos + 1;
             if ((pos==-1?linelength-1:pos) <= width) {
                 // No wrap required
-                SB.append(string.substring(0, linelength));
+                out.append(string, 0, linelength);
                 string = string.substring(linelength);
             } else {
                 // Word wrap required
@@ -964,18 +985,17 @@ public final class StringUtility {
 
                 if (lastBreakChar == 0) {
                     // Take the whole line
-                    SB.append(string.substring(0, linelength));
+                    out.append(string, 0, linelength);
                     string = string.substring(linelength);
                 } else {
                     // Break out the section
-                    SB.append(string.substring(0, lastBreakChar));
-                    if (useCR) SB.append('\r');
-                    SB.append('\n');
+                    out.append(string, 0, lastBreakChar);
+                    if(useCR) out.append("\r\n");
+                    else out.append('\n');
                     string = string.substring(lastBreakChar);
                 }
             }
         } while (string.length() > 0);
-        return SB.toString();
     }
 
     /**
