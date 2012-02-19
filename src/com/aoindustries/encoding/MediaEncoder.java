@@ -99,8 +99,8 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
         }
         if(encoder!=null) {
             // Make sure types match - bug catching
-            if(encoder.getValidMediaOutputType()!=containerType) throw new AssertionError("encoder.getValidMediaOutputType()!=containerType: "+encoder.getValidMediaOutputType()+"!="+containerType);
-            if(!encoder.isValidatingMediaInputType(contentType)) throw new AssertionError("encoder="+encoder.getClass().getName()+" is not a validator for contentType="+contentType);
+            assert encoder.getValidMediaOutputType()==containerType : "encoder.getValidMediaOutputType()!=containerType: "+encoder.getValidMediaOutputType()+"!="+containerType;
+            assert encoder.isValidatingMediaInputType(contentType) : "encoder="+encoder.getClass().getName()+" is not a validator for contentType="+contentType;
         }
         return encoder;
     }
