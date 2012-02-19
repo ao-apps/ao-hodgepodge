@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,7 +25,7 @@ package com.aoindustries.encoding;
 /**
  * Indicates that the object validates its input for the provided type.
  * If invalid characters are received it will throw an appropriate exception.
- * When the input is already being validated against equal or more restrive
+ * When the input is already being validated against equal or more restrictive
  * filtering, the redundant validation is not performed.
  *
  * @author  AO Industries, Inc.
