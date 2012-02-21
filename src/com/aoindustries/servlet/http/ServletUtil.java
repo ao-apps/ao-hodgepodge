@@ -22,7 +22,9 @@
  */
 package com.aoindustries.servlet.http;
 
+import com.aoindustries.encoding.NewEncodingUtils;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,6 +32,7 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Static utilities that may be useful by servlet/JSP/taglib environments.
@@ -169,5 +172,35 @@ public class ServletUtil {
         if(port!=(request.isSecure() ? 443 : 80)) out.append(':').append(Integer.toString(port));
         out.append(request.getContextPath());
         out.append(relPath);
+    }
+
+    /**
+     * Sends a redirect of the provided status.
+     *
+     * @param  href  The absolute, context-relative, or page-relative path to redirect to.
+     *               The following actions are performed on the provided href:
+     *               <ol>
+     *                 <li>Convert page-relative paths to context-relative path, resolving ./ and ../</li>
+     *                 <li>Encode URL path elements (like Japanese filenames)</li>
+     *                 <li>Perform URL rewriting (response.encodeRedirectURL)</li>
+     *                 <li>Convert to absolute path if needed.  This will also add the context path.</li>
+     *               </ol>
+     * @param  status  The HTTP status.  Only 301, 302, or 303 make sense.
+     */
+    public static void sendRedirect(HttpServletRequest request, HttpServletResponse response, String href, int status) throws UnsupportedEncodingException, MalformedURLException, IOException {
+        // Convert page-relative paths to context-relative path, resolving ./ and ../
+        href = getAbsolutePath(request, href);
+
+        // Encode URL path elements (like Japanese filenames)
+        href = NewEncodingUtils.encodeUrlPath(href);
+
+        // Perform URL rewriting
+        href = response.encodeRedirectURL(href);
+
+        // Convert to absolute path if needed.  This will also add the context path.
+        if(href.startsWith("/")) href = ServletUtil.getAbsoluteURL(request, href);
+
+        response.setHeader("Location", href);
+        response.sendError(status);
     }
 }
