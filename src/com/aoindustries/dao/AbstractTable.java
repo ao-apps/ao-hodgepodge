@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -119,9 +119,10 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public Collection<R> values() {
             try {
-                return getUnsortedRows();
+                return (Collection<R>)getUnsortedRows();
             } catch(SQLException err) {
                 throw new WrappedException(err);
             }
@@ -209,9 +210,10 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public Collection<R> values() {
             try {
-                return getRows();
+                return (Collection<R>)getRows();
             } catch(SQLException err) {
                 throw new WrappedException(err);
             }
@@ -369,8 +371,9 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Iterator<R> getIterator() throws SQLException {
-        return getRows().iterator();
+        return (Iterator<R>)getRows().iterator();
     }
 
     /**
@@ -422,7 +425,7 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
      * {@inheritDoc}  This implementation iterates through the keys calling get.
      */
     @Override
-    public SortedSet<R> getRows(Iterable<? extends K> keys) throws SQLException {
+    public SortedSet<? extends R> getRows(Iterable<? extends K> keys) throws SQLException {
         Iterator<? extends K> iter = keys.iterator();
         if(!iter.hasNext()) return AoCollections.emptySortedSet();
         SortedSet<R> results = new TreeSet<R>();

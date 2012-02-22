@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,9 +43,9 @@ import java.util.TreeSet;
  */
 abstract public class TableCacheTable<K extends Comparable<? super K>,R extends Row<K,? extends R>> extends AbstractTable<K,R> {
 
-    protected final ThreadLocal<Set<R>> unsortedRowsCache = new ThreadLocal<Set<R>>();
+    protected final ThreadLocal<Set<? extends R>> unsortedRowsCache = new ThreadLocal<Set<? extends R>>();
 
-    private final ThreadLocal<SortedSet<R>> sortedRowsCache = new ThreadLocal<SortedSet<R>>();
+    private final ThreadLocal<SortedSet<? extends R>> sortedRowsCache = new ThreadLocal<SortedSet<? extends R>>();
 
     private final ThreadLocal<Boolean> rowCachedLoaded = new ThreadLocal<Boolean>() {
         @Override
@@ -91,8 +91,8 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
     }
 
     @Override
-    public Set<R> getUnsortedRows() throws SQLException {
-        Set<R> rows = unsortedRowsCache.get();
+    public Set<? extends R> getUnsortedRows() throws SQLException {
+        Set<? extends R> rows = unsortedRowsCache.get();
         if(rows==null) {
             rows = Collections.unmodifiableSet(getRowsNoCache());
             allRowsLoaded(rows);
@@ -107,13 +107,13 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
      *
      * This default implementation does nothing.
      */
-    protected void allRowsLoaded(Set<R> rows) throws SQLException {
+    protected void allRowsLoaded(Set<? extends R> rows) throws SQLException {
         // Does nothing.
     }
 
     @Override
-    public SortedSet<R> getRows() throws SQLException {
-        SortedSet<R> rows = sortedRowsCache.get();
+    public SortedSet<? extends R> getRows() throws SQLException {
+        SortedSet<? extends R> rows = sortedRowsCache.get();
         if(rows==null) {
             rows = Collections.unmodifiableSortedSet(new TreeSet<R>(getUnsortedRows()));
             sortedRowsCache.set(rows);
@@ -135,5 +135,5 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
         return row;
     }
 
-    abstract protected Set<R> getRowsNoCache() throws SQLException;
+    abstract protected Set<? extends R> getRowsNoCache() throws SQLException;
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -100,7 +100,7 @@ public interface Table<K extends Comparable<? super K>,R extends Row<K,? extends
      * It may be iterated multiple times with the same results.  The contents
      * are not changed by the transactions of the current user or any other user.
      */
-    Set<R> getUnsortedRows() throws SQLException;
+    Set<? extends R> getUnsortedRows() throws SQLException;
 
     /**
      * Gets all rows, sorted by their natural ordering.
@@ -109,7 +109,7 @@ public interface Table<K extends Comparable<? super K>,R extends Row<K,? extends
      * It may be iterated multiple times with the same results.  The contents
      * are not changed by the transactions of the current user or any other user.
      */
-    SortedSet<R> getRows() throws SQLException;
+    SortedSet<? extends R> getRows() throws SQLException;
 
     /**
      * Gets the canonical key used for internal indexing.  In the case of case-
@@ -134,5 +134,5 @@ public interface Table<K extends Comparable<? super K>,R extends Row<K,? extends
      * It may be iterated multiple times with the same results.  The contents
      * are not changed by the transactions of the current user or any other user.
      */
-    SortedSet<R> getRows(Iterable<? extends K> keys) throws SQLException;
+    SortedSet<? extends R> getRows(Iterable<? extends K> keys) throws SQLException;
 }
