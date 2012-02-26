@@ -28,23 +28,23 @@ package com.aoindustries.security;
  *
  * @author  AO Industries, Inc.
  */
-public class NotLoggedInException extends SecurityException {
+public class NotAuthenticatedException extends SecurityException {
 
     private static final long serialVersionUID = 1L;
 
-    public NotLoggedInException() {
+    public NotAuthenticatedException() {
         super();
     }
     
-    public NotLoggedInException(String message) {
+    public NotAuthenticatedException(String message) {
         super(message);
     }
 
-    public NotLoggedInException(Throwable cause) {
+    public NotAuthenticatedException(Throwable cause) {
         super(cause);
     }
     
-    public NotLoggedInException(String message, Throwable cause) {
+    public NotAuthenticatedException(String message, Throwable cause) {
         super(message, cause);
     }
 }
