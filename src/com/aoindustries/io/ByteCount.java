@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.math.SafeMath;
-import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -134,7 +134,7 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
     public boolean equals(Object O) {
         if(!(O instanceof ByteCount)) return false;
         ByteCount other = (ByteCount)O;
-        return quantity==other.quantity && StringUtility.equals(unit, other.unit);
+        return quantity==other.quantity && ObjectUtils.equals(unit, other.unit);
     }
 
     @Override
@@ -148,6 +148,7 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
         return Long.toString(quantity)+unit.getName();
     }
 
+    @Override
     public int compareTo(ByteCount o) {
         return byteCount<o.byteCount ? -1 : byteCount==o.byteCount ? 0 : 1;
     }

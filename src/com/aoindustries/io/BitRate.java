@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.math.SafeMath;
-import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -147,7 +147,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
     public boolean equals(Object O) {
         if(!(O instanceof BitRate)) return false;
         BitRate other = (BitRate)O;
-        return quantity==other.quantity && StringUtility.equals(unit, other.unit);
+        return quantity==other.quantity && ObjectUtils.equals(unit, other.unit);
     }
 
     @Override
@@ -161,6 +161,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
         return Long.toString(quantity)+unit.getName();
     }
 
+    @Override
     public int compareTo(BitRate o) {
         return bitRate.compareTo(o.bitRate);
     }

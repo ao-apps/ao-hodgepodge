@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util;
 
+import com.aoindustries.lang.ObjectUtils;
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -164,7 +165,7 @@ public class AoCollections {
         }
 
         @Override
-        public boolean contains(Object o) {return StringUtility.equals(o, element);}
+        public boolean contains(Object o) {return ObjectUtils.equals(o, element);}
 
         @Override
         public Comparator<? super E> comparator() {
@@ -173,19 +174,19 @@ public class AoCollections {
 
         @Override
         public SortedSet<E> subSet(E fromElement, E toElement) {
-            if(StringUtility.equals(element, fromElement) && StringUtility.equals(element, toElement)) return emptySortedSet();
+            if(ObjectUtils.equals(element, fromElement) && ObjectUtils.equals(element, toElement)) return emptySortedSet();
             throw new IllegalArgumentException();
         }
 
         @Override
         public SortedSet<E> headSet(E toElement) {
-            if(StringUtility.equals(element, toElement)) return emptySortedSet();
+            if(ObjectUtils.equals(element, toElement)) return emptySortedSet();
             throw new IllegalArgumentException();
         }
 
         @Override
         public SortedSet<E> tailSet(E fromElement) {
-            if(StringUtility.equals(element, fromElement)) return this;
+            if(ObjectUtils.equals(element, fromElement)) return this;
             throw new IllegalArgumentException();
         }
 

@@ -327,13 +327,6 @@ public final class StringUtility {
     }
 
     /**
-     * Compares the equality of two objects, including their null states.
-     */
-    public static boolean equals(Object O1, Object O2) {
-        return O1==null?O2==null:O1.equals(O2); 
-    }
-
-    /**
      * Converts a date in a the format MMDDYYYY to a <code>Date</code>.
      *
      * @param  date  a <code>String</code> containing the date in MMDDYYYY format.

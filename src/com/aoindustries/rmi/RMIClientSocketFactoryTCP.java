@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.aoindustries.rmi;
 
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.lang.ObjectUtils;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
@@ -59,7 +59,7 @@ public class RMIClientSocketFactoryTCP implements RMIClientSocketFactory, Serial
         return
             O!=null
             && (O instanceof RMIClientSocketFactoryTCP)
-            && StringUtility.equals(localAddress, ((RMIClientSocketFactoryTCP)O).localAddress)
+            && ObjectUtils.equals(localAddress, ((RMIClientSocketFactoryTCP)O).localAddress)
         ;
     }
     
