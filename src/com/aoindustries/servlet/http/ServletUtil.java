@@ -183,7 +183,7 @@ public class ServletUtil {
      *                 <li>Convert page-relative paths to context-relative path, resolving ./ and ../</li>
      *                 <li>Encode URL path elements (like Japanese filenames)</li>
      *                 <li>Perform URL rewriting (response.encodeRedirectURL)</li>
-     *                 <li>Convert to absolute path if needed.  This will also add the context path.</li>
+     *                 <li>Convert to absolute URL if needed.  This will also add the context path.</li>
      *               </ol>
      * @param  status  The HTTP status.  Only 301, 302, or 303 make sense.
      */
@@ -197,7 +197,7 @@ public class ServletUtil {
         // Perform URL rewriting
         href = response.encodeRedirectURL(href);
 
-        // Convert to absolute path if needed.  This will also add the context path.
+        // Convert to absolute URL if needed.  This will also add the context path.
         if(href.startsWith("/")) href = ServletUtil.getAbsoluteURL(request, href);
 
         response.setHeader("Location", href);
