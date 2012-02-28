@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -121,6 +121,17 @@ public interface PersistentBuffer {
      */
     // @NotThreadSafe
     long getLong(long position) throws IOException;
+
+    /**
+     * Ensures that all values from the position for the provided length
+     * are zeros.  This may or may not modify the buffer in the process.
+     * The values will all be zero upon return.  Some implementations
+     * may choose to overwrite zeros and return modified, others may choose
+     * to detect zeros and avoid modifications.  Thus it is possible for
+     * existing zeros to still result in a modification.
+     */
+    // @NotThreadSafe
+    void ensureZeros(long position, long len) throws IOException;
 
     /**
      * Puts a single value in the buffer.

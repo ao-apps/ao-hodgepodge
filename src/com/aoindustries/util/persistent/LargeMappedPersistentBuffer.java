@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,8 +29,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 // import org.checkthread.annotations.NotThreadSafe;
 // import org.checkthread.annotations.ThreadSafe;
 
@@ -45,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
 
-    private static final Logger logger = Logger.getLogger(LargeMappedPersistentBuffer.class.getName());
+    //private static final Logger logger = Logger.getLogger(LargeMappedPersistentBuffer.class.getName());
 
     // For testing, change this value to something smaller, like 12.  This will
     // allow the testing of the buffer boundary conditions.
@@ -188,21 +186,6 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     }
 
     // @NotThreadSafe
-    private void ensureZeros(long position, long len) throws IOException {
-        while(len>0) {
-            long bufferStart = position & BUFFER_INDEX_MASK;
-            long bufferSize = BUFFER_SIZE - bufferStart;
-            if(bufferSize > len) bufferSize = len;
-            int bufferNum = getBufferNum(position);
-            MappedByteBuffer mappedBuffer = mappedBuffers.get(bufferNum);
-            PersistentCollections.ensureZeros(mappedBuffer, (int)bufferStart, (int)bufferSize);
-            if(modifiedBuffers!=null) modifiedBuffers.set(bufferNum, true);
-            position += bufferSize;
-            len -= bufferSize;
-        }
-    }
-
-    // @NotThreadSafe
     @Override
     public void setCapacity(long newLength) throws IOException {
         long oldLength = capacity();
@@ -231,25 +214,27 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     // @NotThreadSafe
     public void get(long position, byte[] buff, int off, int len) throws IOException {
         if(len>0) {
-            int startBufferNum = getBufferNum(position);
-            int endBufferNum = getBufferNum(position+len-1);
-            if(startBufferNum==endBufferNum) {
-                MappedByteBuffer mappedBuffer = mappedBuffers.get(startBufferNum);
-                mappedBuffer.position(getIndex(position));
-                mappedBuffer.get(buff, off, len);
-            } else {
-                do {
-                    int bufferStart = (int)(position & BUFFER_INDEX_MASK);
-                    int bufferSize = BUFFER_SIZE - bufferStart;
-                    if(bufferSize > len) bufferSize = len;
-                    MappedByteBuffer mappedBuffer = mappedBuffers.get(getBufferNum(position));
-                    mappedBuffer.position(bufferStart);
-                    mappedBuffer.get(buff, off, bufferSize);
-                    position += bufferSize;
-                    off += bufferSize;
-                    len -= bufferSize;
-                } while(len>0);
-            }
+            int bufferNum = getBufferNum(position);
+            int bufferStart = getIndex(position);
+            int bufferSize = BUFFER_SIZE - bufferStart;
+            do {
+                if(bufferSize > len) bufferSize = len;
+                MappedByteBuffer mappedBuffer = mappedBuffers.get(bufferNum);
+                mappedBuffer.position(bufferStart);
+                mappedBuffer.get(buff, off, bufferSize);
+                len -= bufferSize;
+                // Don't need to offset values on last iteration, end loop here
+                if(len<=0) {
+                    assert len==0;
+                    break;
+                }
+                position += bufferSize;
+                off += bufferSize;
+                // Starting at the beginning of the next buffer
+                bufferNum++;
+                bufferStart = 0;
+                bufferSize = BUFFER_SIZE;
+            } while(true);
         }
     }
 
@@ -269,6 +254,35 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
         return mappedBuffers.get(getBufferNum(position)).get(getIndex(position));
     }
 
+    @Override
+    // @NotThreadSafe
+    public void ensureZeros(long position, long len) throws IOException {
+        if(len>0) {
+            int bufferNum = getBufferNum(position);
+            int bufferStart = getIndex(position);
+            int bufferSize = BUFFER_SIZE - bufferStart;
+            do {
+                if(bufferSize > len) bufferSize = (int)len;
+                MappedByteBuffer mappedBuffer = mappedBuffers.get(bufferNum);
+                if(
+                    PersistentCollections.ensureZeros(mappedBuffer, bufferStart, bufferSize)
+                    && modifiedBuffers!=null
+                ) modifiedBuffers.set(bufferNum, true);
+                len -= bufferSize;
+                // Don't need to offset values on last iteration, end loop here
+                if(len<=0) {
+                    assert len==0;
+                    break;
+                }
+                position += bufferSize;
+                // Starting at the beginning of the next buffer
+                bufferNum++;
+                bufferStart = 0;
+                bufferSize = BUFFER_SIZE;
+            } while(true);
+        }
+    }
+
     /**
      * Puts a single byte in the buffer.
      */
@@ -284,28 +298,28 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     @Override
     public void put(long position, byte[] buff, int off, int len) throws IOException {
         if(len>0) {
-            int startBufferNum = getBufferNum(position);
-            int endBufferNum = getBufferNum(position+len-1);
-            if(startBufferNum==endBufferNum) {
-                MappedByteBuffer mappedBuffer = mappedBuffers.get(startBufferNum);
-                mappedBuffer.position(getIndex(position));
-                mappedBuffer.put(buff, off, len);
-                if(modifiedBuffers!=null) modifiedBuffers.set(startBufferNum, true);
-            } else {
-                do {
-                    int bufferStart = (int)(position & BUFFER_INDEX_MASK);
-                    int bufferSize = BUFFER_SIZE - bufferStart;
-                    if(bufferSize > len) bufferSize = len;
-                    int bufferNum = getBufferNum(position);
-                    MappedByteBuffer mappedBuffer = mappedBuffers.get(bufferNum);
-                    mappedBuffer.position(bufferStart);
-                    mappedBuffer.put(buff, off, bufferSize);
-                    if(modifiedBuffers!=null) modifiedBuffers.set(bufferNum, true);
-                    position += bufferSize;
-                    off += bufferSize;
-                    len -= bufferSize;
-                } while(len>0);
-            }
+            int bufferNum = getBufferNum(position);
+            int bufferStart = getIndex(position);
+            int bufferSize = BUFFER_SIZE - bufferStart;
+            do {
+                if(bufferSize > len) bufferSize = len;
+                MappedByteBuffer mappedBuffer = mappedBuffers.get(bufferNum);
+                mappedBuffer.position(bufferStart);
+                mappedBuffer.put(buff, off, bufferSize);
+                if(modifiedBuffers!=null) modifiedBuffers.set(bufferNum, true);
+                len -= bufferSize;
+                // Don't need to offset values on last iteration, end loop here
+                if(len<=0) {
+                    assert len==0;
+                    break;
+                }
+                position += bufferSize;
+                off += bufferSize;
+                // Starting at the beginning of the next buffer
+                bufferNum++;
+                bufferStart = 0;
+                bufferSize = BUFFER_SIZE;
+            } while(true);
         }
     }
 

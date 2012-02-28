@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.lang.NotImplementedException;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -255,6 +256,12 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
             len -= count;
         }
         return bytesRead;
+    }
+
+    // @NotThreadSafe
+    @Override
+    public void ensureZeros(long position, long len) throws IOException {
+        throw new NotImplementedException("Implement when first needed");
     }
 
     // @NotThreadSafe

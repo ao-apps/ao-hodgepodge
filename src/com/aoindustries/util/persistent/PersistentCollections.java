@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,6 +26,7 @@ import com.aoindustries.util.BufferManager;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.logging.Logger;
 // import org.checkthread.annotations.ThreadSafe;
@@ -225,10 +226,13 @@ public class PersistentCollections {
      * only if they do not already contain zeros.  This is to avoid unnecessary
      * writes on flash media.  This may also have a positive interaction with
      * sparse files.
+     *
+     * @return  true  when the byteBuffer was written to
      */
     // @ThreadSafe
-    public static void ensureZeros(RandomAccessFile raf, long position, long count) throws IOException {
+    public static boolean ensureZeros(RandomAccessFile raf, long position, long count) throws IOException {
         if(count<0) throw new IllegalArgumentException("count<0: "+count);
+        boolean modified = false;
         byte[] buff = BufferManager.getBytes();
         try {
             while(count>BufferManager.BUFFER_SIZE) {
@@ -237,6 +241,7 @@ public class PersistentCollections {
                 if(!Arrays.equals(buff, zeros)) {
                     raf.seek(position);
                     raf.write(zeros, 0, BufferManager.BUFFER_SIZE);
+                    modified = true;
                 }
                 position += BufferManager.BUFFER_SIZE;
                 count -= BufferManager.BUFFER_SIZE;
@@ -247,11 +252,13 @@ public class PersistentCollections {
                 if(!com.aoindustries.util.AoArrays.equals(buff, zeros, 0, (int)count)) {
                     raf.seek(position);
                     raf.write(zeros, 0, (int)count);
+                    modified = true;
                 }
             }
         } finally {
             BufferManager.release(buff);
         }
+        return modified;
     }
 
     /**
@@ -259,10 +266,15 @@ public class PersistentCollections {
      * only if they do not already contain zeros.  This is to avoid unnecessary
      * writes on flash media.  This may also have a positive interaction with
      * sparse files.
+     *
+     * @return  true  when the byteBuffer was written to
      */
     // @ThreadSafe
-    public static void ensureZeros(ByteBuffer byteBuffer, int position, int count) throws IOException {
+    // TODO: Try with readLong instead of copying the array values
+    public static boolean ensureZeros(ByteBuffer byteBuffer, int position, int count) throws IOException {
         if(count<0) throw new IllegalArgumentException("count<0: "+count);
+        boolean modified = false;
+        /*
         byte[] buff = BufferManager.getBytes();
         try {
             while(count>BufferManager.BUFFER_SIZE) {
@@ -271,6 +283,7 @@ public class PersistentCollections {
                 if(!Arrays.equals(buff, zeros)) {
                     byteBuffer.position(position);
                     byteBuffer.put(zeros, 0, BufferManager.BUFFER_SIZE);
+                    modified = true;
                 }
                 position += BufferManager.BUFFER_SIZE;
                 count -= BufferManager.BUFFER_SIZE;
@@ -281,11 +294,54 @@ public class PersistentCollections {
                 if(!com.aoindustries.util.AoArrays.equals(buff, zeros, 0, count)) {
                     byteBuffer.position(position);
                     byteBuffer.put(zeros, 0, count);
+                    modified = true;
                 }
             }
         } finally {
             BufferManager.release(buff);
         }
+         */
+        ByteOrder previousByteOrder = byteBuffer.order();
+        ByteOrder nativeByteOrder = ByteOrder.nativeOrder();
+        try {
+            if(previousByteOrder!=nativeByteOrder) byteBuffer.order(nativeByteOrder);
+            // Align to 8-byte boundary
+            byteBuffer.position(position);
+            while(count>0 && (position&7)!=0) {
+                byte b = byteBuffer.get();
+                if(b!=0) {
+                    byteBuffer.put(position, (byte)0);
+                    modified = true;
+                }
+                position++;
+                count--;
+            }
+            // Read in long values to get 64 bits at a time
+            do {
+                int nextCount = count - 8;
+                if(nextCount<0) break;
+                if(byteBuffer.getLong()!=0) {
+                    byteBuffer.putLong(position, 0);
+                    modified = true;
+                }
+                position += 8;
+                count = nextCount;
+            } while(true);
+            // Trailing bytes
+            while(count>0) {
+                byte b = byteBuffer.get();
+                if(b!=0) {
+                    byteBuffer.put(position, (byte)0);
+                    modified = true;
+                }
+                position++;
+                count--;
+            }
+        } finally {
+            if(previousByteOrder!=nativeByteOrder) byteBuffer.order(previousByteOrder);
+        }
+
+        return modified;
     }
 
     /**

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -139,7 +139,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         raf.setLength(newLength);
         if(newLength>oldLength) {
             // Ensure zero-filled
-            PersistentCollections.ensureZeros(raf, oldLength, newLength - oldLength);
+            ensureZeros(oldLength, newLength - oldLength);
         }
     }
 
@@ -161,6 +161,12 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
         raf.seek(position);
         return raf.readByte();
     }
+
+    @Override
+    public void ensureZeros(long position, long len) throws IOException {
+        PersistentCollections.ensureZeros(raf, position, len);
+    }
+
 
     /**
      * Puts a single byte in the buffer.

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,10 @@
  */
 package com.aoindustries.util.persistent;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.security.SecureRandom;
+import java.util.Random;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -48,5 +52,43 @@ public class PersistentCollectionsTest extends TestCase {
 
         PersistentBuffer largeBuffer = PersistentCollections.getPersistentBuffer(Long.MAX_VALUE);
         largeBuffer.close();
+    }
+
+    private static final int ENSURE_ZEROS_TEST_SIZE = 1<<20;
+
+    private static final Random random = new SecureRandom();
+    private static void doTestEnsureZeros(PersistentBuffer buffer) throws IOException {
+        long totalNanos = 0;
+        for(int c=0; c<100; c++) {
+            // Update 1/8192 of buffer with random values
+            for(int d=0; d<(ENSURE_ZEROS_TEST_SIZE>>>13); d++) {
+                buffer.put(
+                    random.nextInt() & (ENSURE_ZEROS_TEST_SIZE-1),
+                    (byte)random.nextInt()
+                );
+                long startNanos = System.nanoTime();
+                buffer.ensureZeros(0, ENSURE_ZEROS_TEST_SIZE);
+                totalNanos += System.nanoTime() - startNanos;
+            }
+        }
+        System.out.println(buffer.getClass().getName()+": ensureZeros in " + BigDecimal.valueOf(totalNanos, 6)+" ms");
+    }
+
+    public void testEnsureZeros() throws Exception {
+        PersistentBuffer smallBuffer = PersistentCollections.getPersistentBuffer(ENSURE_ZEROS_TEST_SIZE);
+        try {
+            smallBuffer.setCapacity(ENSURE_ZEROS_TEST_SIZE);
+            for(int i=0; i<10; i++) doTestEnsureZeros(smallBuffer);
+        } finally {
+            smallBuffer.close();
+        }
+
+        PersistentBuffer largeBuffer = PersistentCollections.getPersistentBuffer(Long.MAX_VALUE);
+        try {
+            largeBuffer.setCapacity(ENSURE_ZEROS_TEST_SIZE);
+            for(int i=0; i<10; i++) doTestEnsureZeros(largeBuffer);
+        } finally {
+            largeBuffer.close();
+        }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.logging.Logger;
 // import org.checkthread.annotations.NotThreadSafe;
 // import org.checkthread.annotations.ThreadSafe;
 
@@ -43,7 +42,7 @@ import java.util.logging.Logger;
  */
 public class MappedPersistentBuffer extends AbstractPersistentBuffer {
 
-    private static final Logger logger = Logger.getLogger(MappedPersistentBuffer.class.getName());
+    //private static final Logger logger = Logger.getLogger(MappedPersistentBuffer.class.getName());
 
     private final File tempFile;
     private final RandomAccessFile raf;
@@ -169,8 +168,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
                 }
                 mappedBuffer = channel.map(protectionLevel==ProtectionLevel.READ_ONLY ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE, 0, newLength);
                 // Ensure zero-filled
-                PersistentCollections.ensureZeros(mappedBuffer, getIndex(oldLength), (int)(newLength - oldLength));
-                modified = true;
+                ensureZeros(oldLength, newLength-oldLength);
             }
         }
     }
@@ -197,6 +195,15 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
     // @NotThreadSafe
     public byte get(long position) throws IOException {
         return mappedBuffer.get(getIndex(position));
+    }
+
+    @Override
+    public void ensureZeros(long position, long len) throws IOException {
+        if(len>0) {
+            // Check bounds with getIndex
+            int endIndex = getIndex(position + len - 1);
+            if(PersistentCollections.ensureZeros(mappedBuffer, getIndex(position), (int)len)) modified = true;
+        }
     }
 
     /**

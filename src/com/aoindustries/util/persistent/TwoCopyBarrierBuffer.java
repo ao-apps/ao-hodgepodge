@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,6 +23,7 @@
 package com.aoindustries.util.persistent;
 
 import com.aoindustries.io.IoUtils;
+import com.aoindustries.lang.NotImplementedException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -740,6 +741,12 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 }
             }
         }
+    }
+
+    @Override
+    // @ThreadSafe
+    public void ensureZeros(long position, long len) throws IOException {
+        throw new NotImplementedException("TODO: Implement by using PersistentCollection.zero, passing to put sector aligned");
     }
 
     // @ThreadSafe
