@@ -66,10 +66,10 @@ public class PersistentCollectionsTest extends TestCase {
                     random.nextInt() & (ENSURE_ZEROS_TEST_SIZE-1),
                     (byte)random.nextInt()
                 );
-                long startNanos = System.nanoTime();
-                buffer.ensureZeros(0, ENSURE_ZEROS_TEST_SIZE);
-                totalNanos += System.nanoTime() - startNanos;
             }
+            long startNanos = System.nanoTime();
+            buffer.ensureZeros(0, ENSURE_ZEROS_TEST_SIZE);
+            totalNanos += System.nanoTime() - startNanos;
         }
         System.out.println(buffer.getClass().getName()+": ensureZeros in " + BigDecimal.valueOf(totalNanos, 6)+" ms");
     }
