@@ -29,11 +29,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 /**
- * A 128-bit random identifier internally stored as two long values.  The external
- * representation is a string of characters similar to base-64 in that 6 bits
- * are encoded in each character, with the exception that '+' is replaced with
- * '*' and '/' is replaced with '_' to be compatible with URL parameter values
- * without further encoding.
+ * A 128-bit random identifier internally stored as two long values.
  *
  * @author  AO Industries, Inc.
  */
@@ -41,7 +37,10 @@ public class Identifier implements Serializable, Comparable<Identifier> {
 
     private static final long serialVersionUID = 1L;
 
-    public static Identifier valueOf(String encoded) {
+    /**
+     * @see  #toString()
+     */
+    public static Identifier valueOf(String encoded) throws IllegalArgumentException {
         return new Identifier(encoded);
     }
 
@@ -108,7 +107,10 @@ public class Identifier implements Serializable, Comparable<Identifier> {
         this.lo = lo;
     }
 
-    public Identifier(String encoded) {
+    /**
+     * @see  #toString()
+     */
+    public Identifier(String encoded) throws IllegalArgumentException {
         if(encoded.length()!=22) throw new IllegalArgumentException();
         // Only two bits encoded in the top-most character
         long topBits = getValue(encoded.charAt(0));
@@ -156,6 +158,12 @@ public class Identifier implements Serializable, Comparable<Identifier> {
         return (int)lo;
     }
 
+    /**
+     * The external representation is a string of characters similar to base-64 in
+     * that 6 bits are encoded in each character, with the exception that '+' is
+     * replaced with '*' and '/' is replaced with '_' to be compatible with URL
+     * parameter values without further encoding.
+     */
     @Override
     public String toString() {
         return new String(
