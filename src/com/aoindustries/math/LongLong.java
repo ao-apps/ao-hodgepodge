@@ -105,6 +105,7 @@ public class LongLong extends Number implements Comparable<LongLong> {
         return new LongLong(hi, lo);
     }
 
+    /* Unused
     public static LongLong decode(String nm) throws NumberFormatException {
         int radix = 10;
         int index = 0;
@@ -145,7 +146,7 @@ public class LongLong extends Number implements Comparable<LongLong> {
             result = LongLong.valueOf(constant, radix);
         }
         return result;
-    }
+    }*/
 
     private static final long serialVersionUID = -8296704159343817686L;
 
@@ -221,10 +222,12 @@ public class LongLong extends Number implements Comparable<LongLong> {
         return false;
     }
 
+    /* Unused
     public static LongLong getLongLong(String nm) {
     	return getLongLong(nm, null);
-    }
+    }*/
 
+    /* Unused
     public static LongLong getLongLong(String nm, LongLong val) {
         String v = null;
         try {
@@ -239,33 +242,37 @@ public class LongLong extends Number implements Comparable<LongLong> {
             }
         }
         return val;
+    }*/
+
+    /**
+     * Compares two longs as unsigned.
+     */
+    public static int compareUnsigned(long value1, long value2) {
+        long i1 = value1 >>> 32;
+        long i2 = value2 >>> 32;
+        if(i1 < i2) return -1;
+        if(i1 > i2) return 1;
+        i1 = value1 & 0xffffffffL;
+        i2 = value2 & 0xffffffffL;
+        if(i1 < i2) return -1;
+        if(i1 > i2) return 1;
+        return 0;
     }
 
     @Override
     public int compareTo(LongLong other) {
         if(hi<other.hi) return -1;
         if(hi>other.hi) return 1;
-        return (lo<other.lo ? -1 : (lo==other.lo ? 0 : 1));
+        //return (lo<other.lo ? -1 : (lo==other.lo ? 0 : 1));
+        // Compare lo as unsigned
+        return compareUnsigned(lo, other.lo);
     }
 
+
     public int compareToUnsigned(LongLong other) {
-        long i1 = hi>>>32;
-        long i2 = other.hi>>>32;
-        if(i1<i2) return -1;
-        if(i1>i2) return 1;
-        i1 = hi&0xffffffff;
-        i2 = other.hi&0xffffffff;
-        if(i1<i2) return -1;
-        if(i1>i2) return 1;
-        i1 = lo>>>32;
-        i2 = other.lo>>>32;
-        if(i1<i2) return -1;
-        if(i1>i2) return 1;
-        i1 = lo&0xffffffff;
-        i2 = other.lo&0xffffffff;
-        if(i1<i2) return -1;
-        if(i1>i2) return 1;
-        return 0;
+        int diff = compareUnsigned(hi, other.hi);
+        if(diff != 0) return diff;
+        return compareUnsigned(lo, other.lo);
     }
 
     public static final int SIZE = 128;
