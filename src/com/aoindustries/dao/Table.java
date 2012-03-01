@@ -128,11 +128,30 @@ public interface Table<K extends Comparable<? super K>,R extends Row<K,? extends
     R get(K key) throws NoRowException, SQLException;
 
     /**
-     * Gets an unmodifiable sorted set of each object corresponding to the set of keys.
+     * Gets an unmodifiable set of each object corresponding to the set of keys.
+     * The elements will be in the set in the same order as the keys iterator.
+     * If a key is found twice, the element we be in the position of the first
+     * key.
      *
      * This is an unmodifiable snapshot of the data and will not change over time.
      * It may be iterated multiple times with the same results.  The contents
      * are not changed by the transactions of the current user or any other user.
+     *
+     * @throws NoRowException if any key is not found
+     * @throws SQLException if database error occurs
      */
-    SortedSet<? extends R> getRows(Iterable<? extends K> keys) throws SQLException;
+    Set<? extends R> getOrderedRows(Iterable<? extends K> keys) throws NoRowException, SQLException;
+
+    /**
+     * Gets an unmodifiable sorted set of each object corresponding to the set of
+     * keys, sorted by their natural ordering.
+     *
+     * This is an unmodifiable snapshot of the data and will not change over time.
+     * It may be iterated multiple times with the same results.  The contents
+     * are not changed by the transactions of the current user or any other user.
+     *
+     * @throws NoRowException if any key is not found
+     * @throws SQLException if database error occurs
+     */
+    SortedSet<? extends R> getRows(Iterable<? extends K> keys) throws NoRowException, SQLException;
 }

@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -341,7 +342,21 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
      * {@inheritDoc}  This implementation iterates through the keys calling get.
      */
     @Override
-    public SortedSet<? extends R> getRows(Iterable<? extends K> keys) throws SQLException {
+    public Set<? extends R> getOrderedRows(Iterable<? extends K> keys) throws NoRowException, SQLException {
+        Iterator<? extends K> iter = keys.iterator();
+        if(!iter.hasNext()) return Collections.emptySet();
+        Set<R> results = new LinkedHashSet<R>();
+        do {
+            results.add(get(iter.next()));
+        } while(iter.hasNext());
+        return Collections.unmodifiableSet(results);
+    }
+
+    /**
+     * {@inheritDoc}  This implementation iterates through the keys calling get.
+     */
+    @Override
+    public SortedSet<? extends R> getRows(Iterable<? extends K> keys) throws NoRowException, SQLException {
         Iterator<? extends K> iter = keys.iterator();
         if(!iter.hasNext()) return AoCollections.emptySortedSet();
         SortedSet<R> results = new TreeSet<R>();
