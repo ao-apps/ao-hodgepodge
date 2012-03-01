@@ -50,6 +50,7 @@ public class UrlValidator extends MediaValidator {
                 // Other characters used outside the URL data
                 //case ':':
                 //case '/':
+                //case '@':
                 //case ';':
                 //case '?':
                 // Parameter separators
