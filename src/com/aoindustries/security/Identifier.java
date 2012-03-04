@@ -22,6 +22,8 @@
  */
 package com.aoindustries.security;
 
+import static com.aoindustries.math.UnsignedLong.divide;
+import static com.aoindustries.math.UnsignedLong.remainder;
 import com.aoindustries.math.LongLong;
 import com.aoindustries.util.persistent.PersistentCollections;
 import java.io.Serializable;
@@ -49,23 +51,20 @@ public class Identifier implements Serializable, Comparable<Identifier> {
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
         'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '_'
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
     };
 
+    private static final long BASE = 62;
+
     /**
-     * Gets the character for the low-order 6 bits of a long value.
+     * Gets the character for the low-order modulus 62 a long value.
      */
     private static char getCharacter(long value) {
-        return characters[((int)value) & 0x3f];
-        /*
-        int lowBits = ((int)value) & 0x3f;
-        if(lowBits>=0 && lowBits<=25) return (char)(lowBits + 'A');
-        if(lowBits>=26 && lowBits<=51) return (char)(lowBits - 26 + 'a');
-        if(lowBits>=52 && lowBits<=61) return (char)(lowBits - 52 + '0');
-        if(lowBits==62) return '*';
-        assert lowBits==63;
-        return '_';
-         */
+        //long remainder = value % BASE;
+        //int index = (int)((remainder + BASE) % BASE); // Make sure is always positive
+        //int index = (int)Math.abs(remainder);
+        int index = (int)remainder(value, BASE);
+        return characters[index];
     }
 
     /**
@@ -75,11 +74,28 @@ public class Identifier implements Serializable, Comparable<Identifier> {
         if(ch>='A' && ch<='Z') return (long)(ch - 'A');
         if(ch>='a' && ch<='z') return (long)(ch - 'a' + 26);
         if(ch>='0' && ch<='9') return (long)(ch - '0' + 52);
-        if(ch=='*') return 62;
-        if(ch=='_') return 63;
         throw new IllegalArgumentException(Character.toString(ch));
     }
 
+    /**
+     * Decodes one set of 11 characters to a long.
+     */
+    private static long decode(String encoded) {
+        assert encoded.length()==11;
+        return
+              getValue(encoded.charAt(0)) * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE
+            + getValue(encoded.charAt(1)) * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE
+            + getValue(encoded.charAt(2)) * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE
+            + getValue(encoded.charAt(3)) * BASE * BASE * BASE * BASE * BASE * BASE * BASE
+            + getValue(encoded.charAt(4)) * BASE * BASE * BASE * BASE * BASE * BASE
+            + getValue(encoded.charAt(5)) * BASE * BASE * BASE * BASE * BASE
+            + getValue(encoded.charAt(6)) * BASE * BASE * BASE * BASE
+            + getValue(encoded.charAt(7)) * BASE * BASE * BASE
+            + getValue(encoded.charAt(8)) * BASE * BASE
+            + getValue(encoded.charAt(9)) * BASE
+            + getValue(encoded.charAt(10))
+        ;
+    }
     private static final Random random = new SecureRandom();
 
     private final long hi;
@@ -97,6 +113,14 @@ public class Identifier implements Serializable, Comparable<Identifier> {
      */
     public Identifier(Random random) {
         byte[] bytes = new byte[16];
+        /*
+        for(int i=0; i<16; i+=2) {
+            int val = random.nextInt();
+            bytes[i] = (byte)(val>>>8);
+            bytes[i+1] = (byte)(val);
+        }
+         */
+        // This seems to never give non-zero in the high range:
         random.nextBytes(bytes);
         hi = PersistentCollections.bufferToLong(bytes);
         lo = PersistentCollections.bufferToLong(bytes, 8);
@@ -112,37 +136,8 @@ public class Identifier implements Serializable, Comparable<Identifier> {
      */
     public Identifier(String encoded) throws IllegalArgumentException {
         if(encoded.length()!=22) throw new IllegalArgumentException();
-        // Only two bits encoded in the top-most character
-        long topBits = getValue(encoded.charAt(0));
-        if(topBits>3) throw new IllegalArgumentException();
-        long midBits = getValue(encoded.charAt(11));
-        hi =
-            (topBits << 62)
-            | (getValue(encoded.charAt(1)) << 56)
-            | (getValue(encoded.charAt(2)) << 50)
-            | (getValue(encoded.charAt(3)) << 44)
-            | (getValue(encoded.charAt(4)) << 38)
-            | (getValue(encoded.charAt(5)) << 32)
-            | (getValue(encoded.charAt(6)) << 26)
-            | (getValue(encoded.charAt(7)) << 20)
-            | (getValue(encoded.charAt(8)) << 14)
-            | (getValue(encoded.charAt(9)) <<  8)
-            | (getValue(encoded.charAt(10)) << 2)
-            | (midBits >>> 4)
-        ;
-        lo =
-            (midBits << 60)
-            | (getValue(encoded.charAt(12)) << 54)
-            | (getValue(encoded.charAt(13)) << 48)
-            | (getValue(encoded.charAt(14)) << 42)
-            | (getValue(encoded.charAt(15)) << 36)
-            | (getValue(encoded.charAt(16)) << 30)
-            | (getValue(encoded.charAt(17)) << 24)
-            | (getValue(encoded.charAt(18)) << 18)
-            | (getValue(encoded.charAt(19)) << 12)
-            | (getValue(encoded.charAt(20)) <<  6)
-            | getValue(encoded.charAt(21))
-        ;
+        this.hi = decode(encoded.substring(0, 11));
+        this.lo = decode(encoded.substring(11));
     }
 
     @Override
@@ -159,36 +154,34 @@ public class Identifier implements Serializable, Comparable<Identifier> {
     }
 
     /**
-     * The external representation is a string of characters similar to base-64 in
-     * that 6 bits are encoded in each character, with the exception that '+' is
-     * replaced with '*' and '/' is replaced with '_' to be compatible with URL
-     * parameter values without further encoding.
+     * The external representation is a string of characters encoded in base 62, with
+     * the first 11 characters for "hi" and the last 11 characters for "lo".
      */
     @Override
     public String toString() {
         return new String(
             new char[] {
-                getCharacter(hi >>> 62),
-                getCharacter(hi >>> 56),
-                getCharacter(hi >>> 50),
-                getCharacter(hi >>> 44),
-                getCharacter(hi >>> 38),
-                getCharacter(hi >>> 32),
-                getCharacter(hi >>> 26),
-                getCharacter(hi >>> 20),
-                getCharacter(hi >>> 14),
-                getCharacter(hi >>> 8),
-                getCharacter(hi >>> 2),
-                getCharacter((lo >>> 60) | ((hi & 3) << 4)),
-                getCharacter(lo >>> 54),
-                getCharacter(lo >>> 48),
-                getCharacter(lo >>> 42),
-                getCharacter(lo >>> 36),
-                getCharacter(lo >>> 30),
-                getCharacter(lo >>> 24),
-                getCharacter(lo >>> 18),
-                getCharacter(lo >>> 12),
-                getCharacter(lo >>> 6),
+                getCharacter(divide(hi, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(hi, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(hi, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(hi, BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(hi, BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(hi, BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(hi, BASE * BASE * BASE * BASE)),
+                getCharacter(divide(hi, BASE * BASE * BASE)),
+                getCharacter(divide(hi, BASE * BASE)),
+                getCharacter(divide(hi, BASE)),
+                getCharacter(hi),
+                getCharacter(divide(lo, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(lo, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(lo, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(lo, BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(lo, BASE * BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(lo, BASE * BASE * BASE * BASE * BASE)),
+                getCharacter(divide(lo, BASE * BASE * BASE * BASE)),
+                getCharacter(divide(lo, BASE * BASE * BASE)),
+                getCharacter(divide(lo, BASE * BASE)),
+                getCharacter(divide(lo, BASE)),
                 getCharacter(lo)
             }
         );

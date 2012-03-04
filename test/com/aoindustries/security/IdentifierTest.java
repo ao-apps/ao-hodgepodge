@@ -43,16 +43,31 @@ public class IdentifierTest extends TestCase {
     }
 
     public void testToStringValueOfEquals() {
+        //long divider = (BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE);
+        //System.out.println("DEBUG: " + divider+" : " + (-1L / divider));
+        //System.out.println("DEBUG: "+(Long.MAX_VALUE / (BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)));
+        //System.out.println("DEBUG: "+(Long.MIN_VALUE / (BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)));
+        //System.out.println("DEBUG: "+((-1) / (BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)));
+        //System.out.println("DEBUG: " + new Identifier(-1L, 0xffffffffffffffffl));
         for(int i=0; i<100000; i++) {
             Identifier i1 = new Identifier();
-            String s = i1.toString();
-            Identifier i2 = Identifier.valueOf(s);
-            /*
-            System.out.print(Long.toHexString(i1.getHi()));
-            System.out.println(Long.toHexString(i1.getLo()));
-            System.out.print(Long.toHexString(i2.getHi()));
-            System.out.println(Long.toHexString(i2.getLo()));
-             */
+            String s1 = i1.toString();
+            Identifier i2 = Identifier.valueOf(s1);
+            String s2 = i2.toString();
+            if(
+                !s1.equals(s2)
+                || !i1.equals(i2)
+            ) {
+                System.out.print(s1);
+                System.out.print(' ');
+                System.out.print(Long.toHexString(i1.getHi()));
+                System.out.println(Long.toHexString(i1.getLo()));
+                System.out.print(s2);
+                System.out.print(' ');
+                System.out.print(Long.toHexString(i2.getHi()));
+                System.out.println(Long.toHexString(i2.getLo()));
+            }
+            assertEquals(s1, s2);
             assertEquals(i1, i2);
         }
     }
