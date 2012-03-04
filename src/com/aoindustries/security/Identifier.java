@@ -51,13 +51,12 @@ public class Identifier implements Serializable, Comparable<Identifier> {
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
         'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+        '0', '1', '2', '3', '4', /*'5', '6', '7', '8', '9'*/
     };
 
-    private static final long BASE = 62;
-
+    private static final long BASE = 57;
     /**
-     * Gets the character for the low-order modulus 62 a long value.
+     * Gets the character for the low-order modulus BASE a long value.
      */
     private static char getCharacter(long value) {
         //long remainder = value % BASE;
@@ -73,7 +72,7 @@ public class Identifier implements Serializable, Comparable<Identifier> {
     private static long getValue(char ch) {
         if(ch>='A' && ch<='Z') return (long)(ch - 'A');
         if(ch>='a' && ch<='z') return (long)(ch - 'a' + 26);
-        if(ch>='0' && ch<='9') return (long)(ch - '0' + 52);
+        if(ch>='0' && ch<='4') return (long)(ch - '0' + 52);
         throw new IllegalArgumentException(Character.toString(ch));
     }
 
