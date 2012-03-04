@@ -178,7 +178,7 @@ public class PersistentCollections {
     // @ThreadSafe
     public static long bufferToLong(byte[] ioBuffer) {
         return
-              (ioBuffer[0] << 56)
+              ((ioBuffer[0]&255L) << 56)
             + ((ioBuffer[1]&255L) << 48)
             + ((ioBuffer[2]&255L) << 40)
             + ((ioBuffer[3]&255L) << 32)
@@ -192,7 +192,7 @@ public class PersistentCollections {
     // @ThreadSafe
     public static long bufferToLong(byte[] ioBuffer, int off) {
         return
-              (ioBuffer[off] << 56)
+              ((ioBuffer[off  ]&255L) << 56)
             + ((ioBuffer[off+1]&255L) << 48)
             + ((ioBuffer[off+2]&255L) << 40)
             + ((ioBuffer[off+3]&255L) << 32)
