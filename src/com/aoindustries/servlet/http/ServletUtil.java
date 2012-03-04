@@ -189,7 +189,10 @@ public class ServletUtil {
      */
     public static void sendRedirect(HttpServletRequest request, HttpServletResponse response, String href, int status) throws UnsupportedEncodingException, MalformedURLException, IOException {
         // Convert page-relative paths to context-relative path, resolving ./ and ../
-        href = getAbsolutePath(request, href);
+        if(
+            !href.startsWith("http://")
+            && !href.startsWith("https://")
+        ) href = getAbsolutePath(request, href);
 
         // Encode URL path elements (like Japanese filenames)
         href = NewEncodingUtils.encodeUrlPath(href);
