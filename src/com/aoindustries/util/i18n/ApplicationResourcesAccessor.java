@@ -43,24 +43,38 @@ public class ApplicationResourcesAccessor implements Serializable {
 
     private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<String,ApplicationResourcesAccessor>();
 
-    public static ApplicationResourcesAccessor getInstance(String resourceName) {
-        ApplicationResourcesAccessor existing = accessors.get(resourceName);
+    public static ApplicationResourcesAccessor getInstance(String baseName) {
+        ApplicationResourcesAccessor existing = accessors.get(baseName);
         if(existing==null) {
-            ApplicationResourcesAccessor newAccessor = new ApplicationResourcesAccessor(resourceName);
-            existing = accessors.putIfAbsent(resourceName, newAccessor);
+            ApplicationResourcesAccessor newAccessor = new ApplicationResourcesAccessor(baseName);
+            existing = accessors.putIfAbsent(baseName, newAccessor);
             if(existing==null) existing = newAccessor;
         }
         return existing;
     }
 
-    final private String resourceName;
+    final private String baseName;
 
-    private ApplicationResourcesAccessor(String resourceName) {
-        this.resourceName = resourceName;
+    private ApplicationResourcesAccessor(String baseName) {
+        this.baseName = baseName;
     }
 
     private Object readResolve() {
-        return getInstance(resourceName);
+        return getInstance(baseName);
+    }
+
+    /**
+     * Gets the baseName being accessed by this accessor.
+     */
+    public String getBaseName() {
+        return baseName;
+    }
+
+    /**
+     * Gets the bundle for the provided locale.
+     */
+    public ResourceBundle getResourceBundle(Locale locale) {
+        return ResourceBundle.getBundle(baseName, locale);
     }
 
     /**
@@ -78,8 +92,7 @@ public class ApplicationResourcesAccessor implements Serializable {
         Locale locale = ThreadLocale.get();
         String string = null;
         try {
-            ResourceBundle applicationResources = ResourceBundle.getBundle(resourceName, locale);
-            string = applicationResources.getString(key);
+            string = getResourceBundle(locale).getString(key);
         } catch(MissingResourceException err) {
             // string remains null
         }
@@ -98,8 +111,7 @@ public class ApplicationResourcesAccessor implements Serializable {
         Locale locale = ThreadLocale.get();
         String string = null;
         try {
-            ResourceBundle applicationResources = ResourceBundle.getBundle(resourceName, locale);
-            string = applicationResources.getString(key);
+            string = getResourceBundle(locale).getString(key);
         } catch(MissingResourceException err) {
             // string remains null
         }
