@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -39,6 +39,41 @@ import java.util.StringTokenizer;
  */
 public class MatcherSchedule implements Schedule {
 
+    private static final Schedule YEARLY = new Schedule() {
+        @Override
+        public boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
+            return minute==0 && hour==0 && dayOfMonth==1 && month==Calendar.JANUARY;
+        }
+    };
+
+    private static final Schedule MONTHLY = new Schedule() {
+        @Override
+        public boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
+            return minute==0 && hour==0 && dayOfMonth==1;
+        }
+    };
+
+    private static final Schedule WEEKLY = new Schedule() {
+        @Override
+        public boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
+            return minute==0 && hour==0 && dayOfWeek==Calendar.SUNDAY;
+        }
+    };
+
+    private static final Schedule DAILY = new Schedule() {
+        @Override
+        public boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
+            return minute==0 && hour==0;
+        }
+    };
+
+    private static final Schedule HOURLY = new Schedule() {
+        @Override
+        public boolean isCronJobScheduled(int minute, int hour, int dayOfMonth, int month, int dayOfWeek, int year) {
+            return minute==0;
+        }
+    };
+
     /**
      * Parses an entire schedule.
      */
@@ -51,11 +86,11 @@ public class MatcherSchedule implements Schedule {
             return new MultiSchedule(schedules);
         }
         // Special strings
-        if("@yearly".equalsIgnoreCase(str) || "@annually".equalsIgnoreCase(str)) str = "0 0 1 1 *";
-        else if("@monthly".equalsIgnoreCase(str)) str = "0 0 1 * *";
-        else if("@weekly".equalsIgnoreCase(str)) str = "0 0 * * 0";
-        else if("@daily".equalsIgnoreCase(str) || "@midnight".equalsIgnoreCase(str)) str = "0 0 * * *";
-        else if("@hourly".equalsIgnoreCase(str)) str = "0 * * * *";
+        if("@yearly".equalsIgnoreCase(str) || "@annually".equalsIgnoreCase(str)) return YEARLY;
+        if("@monthly".equalsIgnoreCase(str)) return MONTHLY;
+        if("@weekly".equalsIgnoreCase(str)) return WEEKLY;
+        if("@daily".equalsIgnoreCase(str) || "@midnight".equalsIgnoreCase(str)) return DAILY;
+        if("@hourly".equalsIgnoreCase(str)) return HOURLY;
         // Individual fields
         StringTokenizer st = new StringTokenizer(str);
         if(!st.hasMoreTokens()) throw new IllegalArgumentException();
