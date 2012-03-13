@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,38 +20,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.util;
-
-import java.util.concurrent.atomic.AtomicLong;
+package com.aoindustries.lang;
 
 /**
- * Generates incrementing identifiers in a thread-safe manner using atomic
- * primitives.
+ * A method has been invoked on a disposed object.
  *
- * @author  AO Industries, Inc.
+ * @see Disposable
  */
-public class AtomicSequence implements Sequence {
+public class DisposedException extends IllegalStateException {
 
-    final private AtomicLong counter;
+    private static final long serialVersionUID = 2L;
 
-    /**
-     * Starts at the value of 1.
-     */
-    public AtomicSequence() {
-        this(1);
+    public DisposedException() {
+        super();
     }
 
-    public AtomicSequence(long initialValue) {
-        counter = new AtomicLong(initialValue);
+    public DisposedException(String message) {
+        super(message);
     }
 
-    @Override
-    public long getNextSequenceValue() {
-        return counter.getAndIncrement();
+    public DisposedException(Throwable cause) {
+        super(cause);
     }
 
-    @Override
-    public void setNextSequenceValue(long nextValue) {
-        counter.set(nextValue);
+    public DisposedException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.concurrent;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,23 +52,23 @@ public class ExecutorServiceShutdownHook extends Thread {
     private static final long DEFAULT_SHUTDOWN_TIMEOUT = 60;
     private static final TimeUnit DEFAULT_SHUTDOWN_TIMEUNIT = TimeUnit.SECONDS;
 
-    private final ExecutorService executorService;
+    private final java.util.concurrent.ExecutorService executorService;
     private final long shutdownTimeout;
     private final TimeUnit shutdownTimeoutUnit;
 
-    public ExecutorServiceShutdownHook(ExecutorService executorService) {
+    public ExecutorServiceShutdownHook(java.util.concurrent.ExecutorService executorService) {
         this(executorService, DEFAULT_THREAD_NAME, DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEUNIT);
     }
 
-    public ExecutorServiceShutdownHook(ExecutorService executorService, long shutdownTimeout, TimeUnit shutdownTimeoutUnit) {
+    public ExecutorServiceShutdownHook(java.util.concurrent.ExecutorService executorService, long shutdownTimeout, TimeUnit shutdownTimeoutUnit) {
         this(executorService, DEFAULT_THREAD_NAME, shutdownTimeout, shutdownTimeoutUnit);
     }
 
-    public ExecutorServiceShutdownHook(ExecutorService executorService, String threadName) {
+    public ExecutorServiceShutdownHook(java.util.concurrent.ExecutorService executorService, String threadName) {
         this(executorService, threadName, DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEUNIT);
     }
 
-    public ExecutorServiceShutdownHook(ExecutorService executorService, String threadName, long shutdownTimeout, TimeUnit shutdownTimeoutUnit) {
+    public ExecutorServiceShutdownHook(java.util.concurrent.ExecutorService executorService, String threadName, long shutdownTimeout, TimeUnit shutdownTimeoutUnit) {
         super(threadName);
         this.executorService = executorService;
         this.shutdownTimeout = shutdownTimeout;
