@@ -83,8 +83,15 @@ public class PropertiesVersions {
     public Version getVersion(String product) throws IllegalArgumentException {
         String three = properties.getProperty(product);
         if(three==null) throw new IllegalArgumentException(accessor.getMessage("PropertiesVersions.getVersion.productNotFound", product));
+        return Version.valueOf(three+"."+getBuild());
+    }
+
+    /**
+     * Gets the build number that is applied to all products.
+     */
+    public int getBuild() throws IllegalArgumentException {
         String build = properties.getProperty("build.number");
         if(build==null) throw new IllegalArgumentException(accessor.getMessage("PropertiesVersions.getVersion.buildNotFound"));
-        return Version.valueOf(three+'.'+build);
+        return Integer.parseInt(build);
     }
 }
