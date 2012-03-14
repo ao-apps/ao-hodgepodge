@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -162,7 +161,7 @@ public class ZipUtils {
     /**
      * Unzips the provided file to the given destination directory.
      */
-    public static void unzip(File sourceFile, String sourcePrefix, File destination, Iterable<Pattern> skipPatterns) throws IOException {
+    public static void unzip(File sourceFile, String sourcePrefix, File destination, ZipEntryFilter filter) throws IOException {
         // Destination directory must exist
         if(!destination.isDirectory()) throw new IOException("Not a directory: "+destination.getPath());
         // Add trailing / to sourcePrefix if missing
@@ -179,17 +178,7 @@ public class ZipUtils {
                 if(sourcePrefix.isEmpty() || name.startsWith(sourcePrefix)) {
                     name = name.substring(sourcePrefix.length());
                     if(!name.isEmpty()) {
-                        // Check if skipped
-                        boolean skipped = false;
-                        if(skipPatterns!=null) {
-                            for(Pattern pattern : skipPatterns) {
-                                if(pattern.matcher(name).matches()) {
-                                    skipped = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if(!skipped) {
+                        if(filter==null || filter.accept(entry)) {
                             long entryTime = getZipEntryTime(entry);
                             if(entry.isDirectory()) {
                                 name = name.substring(0, name.length()-1);
@@ -244,6 +233,58 @@ public class ZipUtils {
                 unzip(zipFiles[0], destination);
             } else {
                 throw new NotImplementedException("Implement merge feature when first needed");
+            }
+        }
+    }
+
+    /**
+     * Copies all non-directory entries.
+     */
+    public static void copyEntries(File file, ZipOutputStream zipOut) throws IOException {
+        copyEntries(file, zipOut, null);
+    }
+
+    /**
+     * Copies all non-directory entries.
+     */
+    public static void copyEntries(File file, ZipOutputStream zipOut, ZipEntryFilter filter) throws IOException {
+        ZipFile zipFile = new ZipFile(file);
+        try {
+            copyEntries(zipFile, zipOut, filter);
+        } finally {
+            zipFile.close();
+        }
+    }
+
+    /**
+     * Copies all non-directory entries.
+     */
+    public static void copyEntries(ZipFile zipFile, ZipOutputStream zipOut) throws IOException {
+        copyEntries(zipFile, zipOut, null);
+    }
+
+    /**
+     * Copies all entries.
+     */
+    public static void copyEntries(ZipFile zipFile, ZipOutputStream zipOut, ZipEntryFilter filter) throws IOException {
+        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while(entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            if(filter==null || filter.accept(entry)) {
+                ZipEntry newEntry = new ZipEntry(entry.getName());
+                long time = entry.getTime();
+                if(time!=-1) newEntry.setTime(time);
+                zipOut.putNextEntry(newEntry);
+                try {
+                    InputStream in = zipFile.getInputStream(entry);
+                    try {
+                        IoUtils.copy(in, zipOut);
+                    } finally {
+                        in.close();
+                    }
+                } finally {
+                    zipOut.closeEntry();
+                }
             }
         }
     }

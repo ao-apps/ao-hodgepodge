@@ -25,6 +25,7 @@ package com.aoindustries.io;
 import com.aoindustries.util.BufferManager;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -201,17 +202,57 @@ final public class FileUtils {
      *
      * @return  the number of bytes copied
      */
-    public static long copy(File source, File destination) throws IOException {
-        InputStream in = new FileInputStream(source);
+    public static long copy(File from, File to) throws IOException {
+        InputStream in = new FileInputStream(from);
         try {
-            OutputStream out = new FileOutputStream(destination);
+            long bytes;
+            long modified = from.lastModified();
+            OutputStream out = new FileOutputStream(to);
             try {
-                return IoUtils.copy(in, out);
+                bytes = IoUtils.copy(in, out);
             } finally {
                 out.close();
             }
+            if(modified!=0) to.setLastModified(modified);
+            return bytes;
         } finally {
             in.close();
+        }
+    }
+
+    /**
+     * Recursively copies source to destination.  Destination must not exist.
+     */
+    public static void copyRecursive(File from, File to) throws IOException {
+        copyRecursive(from, to, null);
+    }
+
+    /**
+     * Recursively copies source to destination.  Destination must not exist.
+     */
+    public static void copyRecursive(File from, File to, FileFilter fileFilter) throws IOException {
+        if(fileFilter==null || fileFilter.accept(from)) {
+            if(from.isDirectory()) {
+                if(to.exists()) throw new IOException("Directory exists: "+to);
+                long modified = from.lastModified();
+                mkdir(to);
+                String[] list = from.list();
+                if(list!=null) {
+                    for(String child : list) {
+                        copyRecursive(
+                            new File(from, child),
+                            new File(to, child),
+                            fileFilter
+                        );
+                    }
+                }
+                if(modified!=0) to.setLastModified(modified);
+            } else if(from.isFile()) {
+                if(to.exists()) throw new IOException("File exists: "+to);
+                copy(from, to);
+            } else {
+                throw new IOException("Neither directory not file: "+to);
+            }
         }
     }
 }
