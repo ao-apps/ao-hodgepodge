@@ -149,4 +149,22 @@ final public class FileUtils {
             if(!successful) tmpFile.delete();
         }
     }
+
+    /**
+     * Makes a directory.  The directory must not already exist.
+     *
+     * @exception  IOException  if mkdir fails.
+     */
+    public static void mkdir(File directory) throws IOException {
+        if(!directory.mkdir()) throw new IOException("Unable to create directory: "+directory.getPath());
+    }
+
+    /**
+     * Ensures that the file is a directory.
+     *
+     * @exception  IOException  if not a directory
+     */
+    public static void checkIsDirectory(File directory) throws IOException {
+        if(!directory.isDirectory()) throw new IOException("Not a directory: " + directory.getPath());
+    }
 }

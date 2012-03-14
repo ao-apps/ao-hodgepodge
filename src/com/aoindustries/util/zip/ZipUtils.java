@@ -23,14 +23,22 @@
 package com.aoindustries.util.zip;
 
 import com.aoindustries.io.IoUtils;
+import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.TimeZone;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -42,11 +50,13 @@ public class ZipUtils {
      * Gets the time for a ZipEntry, converting from GMT as stored in the ZIP
      * entry to make times correct between time zones.
      *
+     * @return  the time assuming GMT zone or <code>-1</code> if not specified.
+     *
      * @see #setZipEntryTime(ZipEntry,long)
      */
     public static long getZipEntryTime(ZipEntry entry) {
         long time = entry.getTime();
-        return time + TimeZone.getDefault().getOffset(time);
+        return time==-1 ? -1 : time + TimeZone.getDefault().getOffset(time);
     }
 
     /**
@@ -109,7 +119,7 @@ public class ZipUtils {
             // Add all children
             File[] list = file.listFiles();
             if(list!=null) {
-                for(File child : list) createZipFile(child, zipOut, filename);
+                for(File child : list) createZipFile(child, zipOut, newPath);
             }
         } else {
             ZipEntry zipEntry = new ZipEntry(newPath);
@@ -125,6 +135,100 @@ public class ZipUtils {
             } finally {
                 zipOut.closeEntry();
             }
+        }
+    }
+
+    /**
+     * Unzips the provided file to the given destination directory.
+     */
+    public static void unzip(File sourceFile, File destination) throws IOException {
+        unzip(sourceFile, "", destination, null);
+    }
+
+    /**
+     * Unzips the provided file to the given destination directory.
+     */
+    public static void unzip(File sourceFile, String sourcePrefix, File destination, Iterable<Pattern> skipPatterns) throws IOException {
+        // Destination directory must exist
+        if(!destination.isDirectory()) throw new IOException("Not a directory: "+destination.getPath());
+        // Add trailing / to sourcePrefix if missing
+        if(!sourcePrefix.isEmpty() && !sourcePrefix.endsWith("/")) sourcePrefix = sourcePrefix+"/";
+        ZipFile zipFile = new ZipFile(sourceFile);
+        try {
+            SortedMap<File,Long> directoryModifyTimes = new TreeMap<File,Long>(
+                new Comparator<File>() {
+                    @Override
+                    public int compare(File o1, File o2) {
+                        try {
+                            String path1 = o1.getCanonicalPath();
+                            String path2 = o2.getCanonicalPath();
+                            return path2.compareTo(path1);
+                        } catch(IOException e) {
+                            throw new WrappedException(e);
+                        }
+                    }
+                }
+            );
+
+            // Pass one: create directories and files
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while(entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String name = entry.getName();
+                if(sourcePrefix.isEmpty() || name.startsWith(sourcePrefix)) {
+                    name = name.substring(sourcePrefix.length());
+                    if(!name.isEmpty()) {
+                        // Check if skipped
+                        boolean skipped = false;
+                        if(skipPatterns!=null) {
+                            for(Pattern pattern : skipPatterns) {
+                                if(pattern.matcher(name).matches()) {
+                                    skipped = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if(!skipped) {
+                            long entryTime = getZipEntryTime(entry);
+                            if(entry.isDirectory()) {
+                                name = name.substring(0, name.length()-1);
+                                //System.out.println("Directory: "+name);
+                                File directory = new File(destination, name);
+                                if(!directory.exists()) directory.mkdirs();
+                                if(entryTime!=-1) directoryModifyTimes.put(directory, entryTime);
+                            } else {
+                                //System.out.println("File: "+name);
+                                File file = new File(destination, name);
+                                File directory = file.getParentFile();
+                                if(!directory.exists()) directory.mkdirs();
+                                if(file.exists()) throw new IOException("File exists: "+file.getPath());
+                                InputStream in = zipFile.getInputStream(entry);
+                                try {
+                                    OutputStream out = new FileOutputStream(file);
+                                    try {
+                                        long copyBytes = IoUtils.copy(in, out);
+                                        long size = entry.getSize();
+                                        if(size!=-1 && copyBytes!=size) throw new IOException("copyBytes!=size: "+copyBytes+"!="+size);
+                                    } finally {
+                                        out.close();
+                                    }
+                                    if(entryTime!=-1) file.setLastModified(entryTime);
+                                } finally {
+                                    in.close();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Pass two: go backwards through directories, setting the modification times
+            for(Map.Entry<File,Long> entry : directoryModifyTimes.entrySet()) {
+                //System.out.println("File: "+entry.getKey()+", mtime="+entry.getValue());
+                entry.getKey().setLastModified(entry.getValue());
+            }
+        } finally {
+            zipFile.close();
         }
     }
 

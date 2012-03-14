@@ -42,6 +42,8 @@ final public class IoUtils {
 
     /**
      * copies without flush.
+     *
+     * @see #copy(java.io.InputStream, java.io.OutputStream, boolean)
      */
     public static long copy(InputStream in, OutputStream out) throws IOException {
         return copy(in, out, false);
