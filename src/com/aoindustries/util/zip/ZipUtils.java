@@ -23,6 +23,7 @@
 package com.aoindustries.util.zip;
 
 import com.aoindustries.io.IoUtils;
+import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -145,6 +146,19 @@ public class ZipUtils {
         unzip(sourceFile, "", destination, null);
     }
 
+    private static Comparator<File> reverseFileComparator = new Comparator<File>() {
+        @Override
+        public int compare(File o1, File o2) {
+            try {
+                String path1 = o1.getCanonicalPath();
+                String path2 = o2.getCanonicalPath();
+                return path2.compareTo(path1);
+            } catch(IOException e) {
+                throw new WrappedException(e);
+            }
+        }
+    };
+
     /**
      * Unzips the provided file to the given destination directory.
      */
@@ -155,20 +169,7 @@ public class ZipUtils {
         if(!sourcePrefix.isEmpty() && !sourcePrefix.endsWith("/")) sourcePrefix = sourcePrefix+"/";
         ZipFile zipFile = new ZipFile(sourceFile);
         try {
-            SortedMap<File,Long> directoryModifyTimes = new TreeMap<File,Long>(
-                new Comparator<File>() {
-                    @Override
-                    public int compare(File o1, File o2) {
-                        try {
-                            String path1 = o1.getCanonicalPath();
-                            String path2 = o2.getCanonicalPath();
-                            return path2.compareTo(path1);
-                        } catch(IOException e) {
-                            throw new WrappedException(e);
-                        }
-                    }
-                }
-            );
+            SortedMap<File,Long> directoryModifyTimes = new TreeMap<File,Long>(reverseFileComparator);
 
             // Pass one: create directories and files
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -229,6 +230,21 @@ public class ZipUtils {
             }
         } finally {
             zipFile.close();
+        }
+    }
+
+    /**
+     * Combine contents of all ZIP files while unzipping, only allowing duplicates
+     * where the file contents are equal.  When duplicates are found, uses the most
+     * recent modification time.
+     */
+    public static void mergeUnzip(File destination, File ... zipFiles) throws IOException {
+        if(zipFiles.length>0) {
+            if(zipFiles.length==1) {
+                unzip(zipFiles[0], destination);
+            } else {
+                throw new NotImplementedException("Implement merge feature when first needed");
+            }
         }
     }
 

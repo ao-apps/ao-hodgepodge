@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,6 +23,7 @@
 package com.aoindustries.io;
 
 import com.aoindustries.util.BufferManager;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -105,6 +106,33 @@ final public class FileUtils {
     }
 
     /**
+     * Compares the contents of two files, not supporting directories.
+     */
+    public static boolean contentEquals(File file1, File file2) throws IOException {
+        long len1 = file1.length();
+        long len2 = file2.length();
+        // Read file when zero length
+        if(len1!=0 && len2!=0 && len1!=len2) return false;
+        final InputStream in1 = new BufferedInputStream(new FileInputStream(file1));
+        try {
+            final InputStream in2 = new BufferedInputStream(new FileInputStream(file2));
+            try {
+                while(true) {
+                    int b1 = in1.read();
+                    int b2 = in2.read();
+                    if(b1!=b2) return false;
+                    if(b1==-1) break;
+                }
+                return true;
+            } finally {
+                in2.close();
+            }
+        } finally {
+            in1.close();
+        }
+    }
+
+    /**
      * Creates a temporary directory.
      */
     public static File createTempDirectory(String prefix, String suffix) throws IOException {
@@ -166,5 +194,24 @@ final public class FileUtils {
      */
     public static void checkIsDirectory(File directory) throws IOException {
         if(!directory.isDirectory()) throw new IOException("Not a directory: " + directory.getPath());
+    }
+
+    /**
+     * Copies one file over another, possibly creating if needed.
+     *
+     * @return  the number of bytes copied
+     */
+    public static long copy(File source, File destination) throws IOException {
+        InputStream in = new FileInputStream(source);
+        try {
+            OutputStream out = new FileOutputStream(destination);
+            try {
+                return IoUtils.copy(in, out);
+            } finally {
+                out.close();
+            }
+        } finally {
+            in.close();
+        }
     }
 }
