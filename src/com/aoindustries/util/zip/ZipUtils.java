@@ -228,9 +228,18 @@ public class ZipUtils {
      * recent modification time.
      */
     public static void mergeUnzip(File destination, File ... zipFiles) throws IOException {
+        mergeUnzip((ZipEntryFilter)null, destination, zipFiles);
+    }
+
+    /**
+     * Combine contents of all ZIP files while unzipping, only allowing duplicates
+     * where the file contents are equal.  When duplicates are found, uses the most
+     * recent modification time.
+     */
+    public static void mergeUnzip(ZipEntryFilter filter, File destination, File ... zipFiles) throws IOException {
         if(zipFiles.length>0) {
             if(zipFiles.length==1) {
-                unzip(zipFiles[0], destination);
+                unzip(zipFiles[0], "", destination, filter);
             } else {
                 throw new NotImplementedException("Implement merge feature when first needed");
             }

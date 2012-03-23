@@ -182,19 +182,25 @@ final public class FileUtils {
     /**
      * Makes a directory.  The directory must not already exist.
      *
+     * @return  The directory itself.
+     *
      * @exception  IOException  if mkdir fails.
      */
-    public static void mkdir(File directory) throws IOException {
+    public static File mkdir(File directory) throws IOException {
         if(!directory.mkdir()) throw new IOException("Unable to create directory: "+directory.getPath());
+        return directory;
     }
 
     /**
      * Ensures that the file is a directory.
      *
+     * @return  The directory itself.
+     *
      * @exception  IOException  if not a directory
      */
-    public static void checkIsDirectory(File directory) throws IOException {
+    public static File checkIsDirectory(File directory) throws IOException {
         if(!directory.isDirectory()) throw new IOException("Not a directory: " + directory.getPath());
+        return directory;
     }
 
     /**

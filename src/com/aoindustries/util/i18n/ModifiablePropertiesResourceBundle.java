@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,6 +24,7 @@ package com.aoindustries.util.i18n;
 
 import com.aoindustries.encoding.MediaException;
 import com.aoindustries.encoding.MediaType;
+import com.aoindustries.util.SortedProperties;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -33,16 +34,11 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.Collator;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -164,7 +160,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         this.isModifiable = myIsModifiable;
         // Load from resources if sourceFile inaccessible
         if(!loaded) {
-            Class clazz = getClass();
+            Class<?> clazz = getClass();
             String resourceName = '/'+clazz.getName().replace('.', '/')+".properties";
             InputStream in = getClass().getResourceAsStream(resourceName);
             if(in==null) throw new RuntimeException(ApplicationResources.accessor.getMessage("ModifiablePropertiesResourceBundle.init.resourceNotFound", resourceName));
@@ -242,7 +238,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
      * by Properties.store.
      */
     static class SkipCommentsFilter extends FilterOutputStream {
-        public SkipCommentsFilter(OutputStream out) {
+        SkipCommentsFilter(OutputStream out) {
             super(out);
         }
 
@@ -268,16 +264,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         assert Thread.holdsLock(properties);
         try {
             // Create a properties instance that sorts the output by keys (case-insensitive)
-            Properties writer = new Properties() {
-                private static final long serialVersionUID = 6953022173340009928L;
-                @Override
-                public Enumeration<Object> keys() {
-                    SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ENGLISH));
-                    Enumeration<Object> e = super.keys();
-                    while(e.hasMoreElements()) sortedSet.add(e.nextElement());
-                    return Collections.enumeration(sortedSet);
-                }
-            };
+            Properties writer = new SortedProperties();
             writer.putAll(properties);
             File tmpFile = File.createTempFile("ApplicationResources", null, sourceFile.getParentFile());
             OutputStream out = new BufferedOutputStream(
