@@ -37,6 +37,10 @@ import junit.framework.TestSuite;
  */
 public class PersistentCollectionsTest extends TestCase {
 
+    private static final int ITERATIONS = 1000;
+
+    private static final Random random = new SecureRandom();
+
     public static Test suite() {
         TestSuite suite = new TestSuite(PersistentCollectionsTest.class);
         return suite;
@@ -54,9 +58,48 @@ public class PersistentCollectionsTest extends TestCase {
         largeBuffer.close();
     }
 
+    public void testCharToBuffer() throws Exception {
+        byte[] buff = new byte[2];
+        for(int i=0; i<ITERATIONS; i++) {
+            char value = (char)random.nextInt(Character.MAX_VALUE+1);
+            PersistentCollections.charToBuffer(value, buff);
+            char result = PersistentCollections.bufferToChar(buff);
+            assertEquals(value, result);
+        }
+    }
+
+    public void testShortToBuffer() throws Exception {
+        byte[] buff = new byte[2];
+        for(int i=0; i<ITERATIONS; i++) {
+            short value = (short)(random.nextInt(32768)-16384);
+            PersistentCollections.shortToBuffer(value, buff);
+            short result = PersistentCollections.bufferToShort(buff);
+            assertEquals(value, result);
+        }
+    }
+
+    public void testIntToBuffer() throws Exception {
+        byte[] buff = new byte[4];
+        for(int i=0; i<ITERATIONS; i++) {
+            int value = random.nextInt();
+            PersistentCollections.intToBuffer(value, buff);
+            int result = PersistentCollections.bufferToInt(buff);
+            assertEquals(value, result);
+        }
+    }
+
+    public void testLongToBuffer() throws Exception {
+        byte[] buff = new byte[8];
+        for(int i=0; i<ITERATIONS; i++) {
+            long value = random.nextInt();
+            PersistentCollections.longToBuffer(value, buff);
+            long result = PersistentCollections.bufferToLong(buff);
+            assertEquals(value, result);
+        }
+    }
+
     private static final int ENSURE_ZEROS_TEST_SIZE = 1<<20;
 
-    private static final Random random = new SecureRandom();
     private static void doTestEnsureZeros(PersistentBuffer buffer) throws IOException {
         long totalNanos = 0;
         for(int c=0; c<100; c++) {
