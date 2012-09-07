@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2012  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,10 +31,10 @@ package com.aoindustries.table;
  *
  * @author  AO Industries, Inc.
  */
-public interface TableListener<C extends Column, R extends Row> {
+public interface TableListener {
 
     /**
      * Invoked when a <code>Table</code> is updated.
      */
-    void tableUpdated(Table<? extends C,? extends R> table);
+    void tableUpdated(Table<?> table);
 }
