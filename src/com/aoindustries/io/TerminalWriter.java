@@ -23,6 +23,7 @@
 package com.aoindustries.io;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 
@@ -51,6 +52,14 @@ public class TerminalWriter extends PrintWriter {
     }
 
     private boolean enabled=true;
+
+    /**
+     * @deprecated  For more control over character conversion, explicit use of a writer is recommended.
+     */
+    @Deprecated
+    public TerminalWriter(OutputStream out) {
+    	super(out);
+    }
 
     public TerminalWriter(Writer out) {
     	super(out);
