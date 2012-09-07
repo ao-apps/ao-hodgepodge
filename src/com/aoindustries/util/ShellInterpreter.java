@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,8 +25,9 @@ package com.aoindustries.util;
 import com.aoindustries.io.TerminalWriter;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.Reader;
-import java.rmi.RemoteException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ import java.util.List;
  */
 abstract public class ShellInterpreter implements Runnable {
 
-    private static final Sequence lastPID = new AtomicSequence();
+    private static long lastPID=0;
 
     /**
      * Used to indicate to arguments.
@@ -47,13 +48,12 @@ abstract public class ShellInterpreter implements Runnable {
 
     private final long pid;
 
-    protected final Reader in;
+    protected final InputStream in;
     protected final TerminalWriter out;
     protected final TerminalWriter err;
     private final String[] args;
 
-    private boolean interactive = false;
-    private boolean readOnly = false;
+    private boolean isInteractive=false;
 
     /**
      * If running as a separate thread, a handle to the thread
@@ -67,21 +67,22 @@ abstract public class ShellInterpreter implements Runnable {
 
     protected String status="Running";
 
-    public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String ... args) {
-        this.pid = getNextPID();
-        this.in = in;
-        this.out = out;
-        this.err = err;
+    public ShellInterpreter(InputStream in, TerminalWriter out, TerminalWriter err) {
+	this(in, out, err, noArgs);
+    }
+
+    public ShellInterpreter(InputStream in, TerminalWriter out, TerminalWriter err, String[] args) {
+        this.pid=getNextPID();
+        this.in=in;
+        this.out=out;
+        this.err=err;
 
         // Process any command line arguments
         int skipped=0;
         for(int c=0;c<args.length;c++) {
             String arg=args[c];
             if("-i".equals(arg)) {
-                interactive = true;
-                skipped++;
-            } else if("-r".equals(arg)) {
-                readOnly = true;
+                isInteractive=true;
                 skipped++;
             } else if("--".equals(arg)) {
                 skipped++;
@@ -97,8 +98,25 @@ abstract public class ShellInterpreter implements Runnable {
                 System.arraycopy(args, skipped, this.args, 0, args.length-skipped);
             }
         }
-        out.setEnabled(interactive);
-        err.setEnabled(interactive);
+        out.setEnabled(isInteractive);
+        err.setEnabled(isInteractive);
+    }
+
+    public ShellInterpreter(InputStream in, OutputStream out, OutputStream err) {
+	this(
+            in,
+            new TerminalWriter(out),
+            new TerminalWriter(err)
+	);
+    }
+
+    public ShellInterpreter(InputStream in, OutputStream out, OutputStream err, String[] args) {
+	this(
+            in,
+            new TerminalWriter(out),
+            new TerminalWriter(err),
+            args
+	);
     }
 
     /**
@@ -111,24 +129,26 @@ abstract public class ShellInterpreter implements Runnable {
     abstract protected String getName();
 
     private static long getNextPID() {
-        return lastPID.getNextSequenceValue();
+        synchronized(ShellInterpreter.class) {
+            return ++lastPID;
+        }
     }
 
     final public long getPID() {
         return pid;
     }
 
-    abstract protected String getPrompt() throws IOException;
+    abstract protected String getPrompt() throws IOException, SQLException;
 
     /**
      * Processes one command and returns.
      */
-    abstract protected boolean handleCommand(String[] args) throws IOException;
+    abstract protected boolean handleCommand(String[] args) throws IOException, SQLException;
 
     /**
      * Processes one command and returns.
      */
-    private boolean handleCommandImpl(String[] args) throws IOException, Throwable {
+    private boolean handleCommandImpl(String[] args) throws IOException, SQLException, Throwable {
         try {
             // Fork to background task
             if(args.length>0 && "&".equals(args[args.length-1])) {
@@ -142,7 +162,7 @@ abstract public class ShellInterpreter implements Runnable {
                 shell.parent=this;
                 synchronized(jobs) {
                     jobs.add(shell);
-                    if(interactive) {
+                    if(isInteractive) {
                         out.print('[');
                         out.print(jobs.size());
                         out.print("] ");
@@ -158,7 +178,7 @@ abstract public class ShellInterpreter implements Runnable {
         } catch(ThreadDeath TD) {
             throw TD;
         } catch(Throwable T) {
-            if(interactive) {
+            if(isInteractive) {
                 ErrorPrinter.printStackTraces(T, err);
                 err.flush();
                 return true;
@@ -169,7 +189,7 @@ abstract public class ShellInterpreter implements Runnable {
     /**
      * Processes one command and returns.
      */
-    private boolean handleCommandImpl(List<String> arguments) throws IOException, Throwable {
+    private boolean handleCommandImpl(List<String> arguments) throws IOException, SQLException, Throwable {
         String[] myargs=new String[arguments.size()];
         arguments.toArray(myargs);
         return handleCommandImpl(myargs);
@@ -181,11 +201,7 @@ abstract public class ShellInterpreter implements Runnable {
     }
 
     final protected boolean isInteractive() {
-        return interactive;
-    }
-
-    final protected boolean isReadOnly() {
-        return readOnly;
+        return isInteractive;
     }
 
     final public void jobs(String[] args) {
@@ -199,7 +215,7 @@ abstract public class ShellInterpreter implements Runnable {
         out.flush();
     }
 
-    protected abstract ShellInterpreter newShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String[] args);
+    protected abstract ShellInterpreter newShellInterpreter(InputStream in, TerminalWriter out, TerminalWriter err, String[] args);
 
     private void printFinishedJobs() {
         synchronized(jobs) {
@@ -209,7 +225,7 @@ abstract public class ShellInterpreter implements Runnable {
                 if(shell!=null) {
                     if(!shell.isAlive()) {
                         shell.parent=null;
-                        if(interactive) {
+                        if(isInteractive) {
                             printJobLine(c+1, shell);
                             out.flush();
                         }
@@ -245,19 +261,18 @@ abstract public class ShellInterpreter implements Runnable {
      * If arguments were provided, executes that command.  Otherwise,
      * reads from <code>in</code> until end of file or <code>exit</code>.
      */
-    @Override
     final public void run() {
         try {
             if(args.length>0) handleCommand(args);
             else runImpl();
             status="Done";
-        } catch(RemoteException exception) {
-            this.err.println(getName()+": "+exception.getMessage());
-            status="Remote Error: "+exception.getMessage();
-            this.err.flush();
         } catch(IOException exception) {
             this.err.println(getName()+": "+exception.getMessage());
             status="IO Error: "+exception.getMessage();
+            this.err.flush();
+        } catch(SQLException exception) {
+            this.err.println(getName()+": "+exception.getMessage());
+            status="SQL Error: "+exception.getMessage();
             this.err.flush();
         } catch(ThreadDeath TD) {
             throw TD;
@@ -274,7 +289,7 @@ abstract public class ShellInterpreter implements Runnable {
      * If arguments were provided, executes that command.  Otherwise,
      * reads from <code>in</code> until end of file or <code>exit</code>.
      */
-    private void runImpl() throws IOException, Throwable {
+    private void runImpl() throws IOException, SQLException, Throwable {
         if(args!=null && args.length>0) {
             handleCommandImpl(args);
         } else {
@@ -286,7 +301,7 @@ abstract public class ShellInterpreter implements Runnable {
             boolean hasArgument=false;
             int quoteChar=-1;
 
-            if(interactive) {
+            if(isInteractive) {
                 out.print(getPrompt());
                 out.flush();
             }
@@ -306,7 +321,7 @@ abstract public class ShellInterpreter implements Runnable {
                         }
                         // Skip '\n' when it is escaped
                         if(ch=='\n') {
-                            if(interactive) {
+                            if(isInteractive) {
                                 out.print("\\> ");
                                 out.flush();
                             }
@@ -326,7 +341,7 @@ abstract public class ShellInterpreter implements Runnable {
                         if(ch=='\'') quoteChar=-1;
                         else {
                             argument.append((char)ch);
-                            if(interactive && ch=='\n') {
+                            if(isInteractive && ch=='\n') {
                                 out.print("'> ");
                                 out.flush();
                             }
@@ -336,7 +351,7 @@ abstract public class ShellInterpreter implements Runnable {
                         if(ch=='"') quoteChar=-1;
                         else {
                             argument.append((char)ch);
-                            if(interactive && ch=='\n') {
+                            if(isInteractive && ch=='\n') {
                                 out.print("\"> ");
                                 out.flush();
                             }
@@ -350,13 +365,13 @@ abstract public class ShellInterpreter implements Runnable {
                                 argument.setLength(0);
                                 hasArgument=false;
                             }
-                            if(interactive) printFinishedJobs();
+                            if(isInteractive) printFinishedJobs();
                             if(arguments.size()>0) {
                                 boolean doMore=handleCommandImpl(arguments);
                                 arguments.clear();
                                 if(!doMore) break;
                             }
-                            if(interactive) {
+                            if(isInteractive) {
                                 out.print(getPrompt());
                                 out.flush();
                             }
