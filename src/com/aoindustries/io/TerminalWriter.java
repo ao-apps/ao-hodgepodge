@@ -23,7 +23,6 @@
 package com.aoindustries.io;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 
@@ -46,20 +45,14 @@ public class TerminalWriter extends PrintWriter {
         //ECHO_ON=new char[] {ESC, '[', '1', '2', 'l'}
     ;
 
-    private static final boolean supported=System.getProperty("os.name").toLowerCase().indexOf("linux")>=0;
+    // If this is not enough, could also check the TERM environment variable for expected values
+    private static final boolean supported=System.getProperty("os.name").toLowerCase().contains("linux");
+
     public static boolean isSupported() {
         return supported;
     }
 
     private boolean enabled=true;
-
-    /**
-     * @deprecated  For more control over character conversion, explicit use of a writer is recommended.
-     */
-    @Deprecated
-    public TerminalWriter(OutputStream out) {
-    	super(out);
-    }
 
     public TerminalWriter(Writer out) {
     	super(out);

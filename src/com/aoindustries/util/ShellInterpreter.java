@@ -25,8 +25,8 @@ package com.aoindustries.util;
 import com.aoindustries.io.TerminalWriter;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ abstract public class ShellInterpreter implements Runnable {
 
     private final long pid;
 
-    protected final InputStream in;
+    protected final Reader in;
     protected final TerminalWriter out;
     protected final TerminalWriter err;
     private final String[] args;
@@ -67,11 +67,11 @@ abstract public class ShellInterpreter implements Runnable {
 
     protected String status="Running";
 
-    public ShellInterpreter(InputStream in, TerminalWriter out, TerminalWriter err) {
+    public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err) {
 	this(in, out, err, noArgs);
     }
 
-    public ShellInterpreter(InputStream in, TerminalWriter out, TerminalWriter err, String[] args) {
+    public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String[] args) {
         this.pid=getNextPID();
         this.in=in;
         this.out=out;
@@ -102,19 +102,19 @@ abstract public class ShellInterpreter implements Runnable {
         err.setEnabled(isInteractive);
     }
 
-    public ShellInterpreter(InputStream in, OutputStream out, OutputStream err) {
+    public ShellInterpreter(Reader in, Writer out, Writer err) {
 	this(
             in,
-            new TerminalWriter(out),
-            new TerminalWriter(err)
+            (out instanceof TerminalWriter) ? (TerminalWriter)out : new TerminalWriter(out),
+            (err instanceof TerminalWriter) ? (TerminalWriter)err : new TerminalWriter(err)
 	);
     }
 
-    public ShellInterpreter(InputStream in, OutputStream out, OutputStream err, String[] args) {
+    public ShellInterpreter(Reader in, Writer out, Writer err, String[] args) {
 	this(
             in,
-            new TerminalWriter(out),
-            new TerminalWriter(err),
+            (out instanceof TerminalWriter) ? (TerminalWriter)out : new TerminalWriter(out),
+            (err instanceof TerminalWriter) ? (TerminalWriter)err : new TerminalWriter(err),
             args
 	);
     }
@@ -215,7 +215,7 @@ abstract public class ShellInterpreter implements Runnable {
         out.flush();
     }
 
-    protected abstract ShellInterpreter newShellInterpreter(InputStream in, TerminalWriter out, TerminalWriter err, String[] args);
+    protected abstract ShellInterpreter newShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String[] args);
 
     private void printFinishedJobs() {
         synchronized(jobs) {
