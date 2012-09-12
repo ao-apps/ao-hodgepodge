@@ -20,32 +20,38 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.lang;
+package com.aoindustries.util;
 
 /**
- * Utilities that help when working with objects.
+ * Allows any object to be used as a hash key, with identity used for
+ * hashCode and equals.  They may be used, for example, to have IdentityHashMap
+ * semantics with WeakHashMap references.
+ *
+ * Supports null value, which may allow null keys in maps that otherwise do not
+ * support null keys.
  *
  * @author  AO Industries, Inc.
  */
-public final class ObjectUtils {
+public class IdentityKey<T> {
 
-    /**
-     * Make no instances.
-     */
-    private ObjectUtils() {
+    private final T value;
+
+    public IdentityKey(T value) {
+        this.value = value;
     }
 
-    /**
-     * Gets the hashCode for an object or <code>0</code> when <code>null</code>.
-     */
-    public static int hashCode(Object obj) {
-        return obj==null ? 0 : obj.hashCode();
+    @Override
+    public String toString() {
+        return value==null ? "null" : value.toString();
     }
 
-    /**
-     * Compares the equality of two objects, including their null states.
-     */
-    public static boolean equals(Object obj1, Object obj2) {
-        return obj1==null ? obj2==null : obj1.equals(obj2);
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this==obj;
     }
 }
