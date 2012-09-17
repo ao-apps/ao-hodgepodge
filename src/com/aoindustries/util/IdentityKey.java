@@ -54,4 +54,8 @@ public class IdentityKey<T> {
     public boolean equals(Object obj) {
         return this==obj;
     }
+
+    public T getValue() {
+        return value;
+    }
 }
