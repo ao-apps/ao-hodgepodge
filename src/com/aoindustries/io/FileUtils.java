@@ -31,6 +31,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLDecoder;
 
 /**
  * File utilities.
@@ -259,6 +261,42 @@ final public class FileUtils {
             } else {
                 throw new IOException("Neither directory not file: "+to);
             }
+        }
+    }
+
+    /**
+     * Gets a File for a URL, retrieving the contents into a temporary file if needed.
+     * Assumes URL is UTF-8 encoded.
+     *
+     * @param  deleteOnExit  when <code>true</code>, any newly created temp file will be flagged for delete of exit
+     */
+    public static File getFile(URL url, boolean deleteOnExit) throws IOException {
+        if("file".equalsIgnoreCase(url.getProtocol())) {
+            String path = url.getFile();
+            if(path.length()>0) {
+                File file = new File(URLDecoder.decode(path, "UTF-8").replace('/', File.separatorChar));
+                if(file.exists() && file.isFile()) return file;
+            }
+        }
+        File file = File.createTempFile("url", null);
+        boolean successful = false;
+        try {
+            if(deleteOnExit) file.deleteOnExit();
+            OutputStream out = new FileOutputStream(file);
+            try {
+                InputStream in = url.openStream();
+                try {
+                    IoUtils.copy(in, out);
+                } finally {
+                    in.close();
+                }
+            } finally {
+                out.close();
+            }
+            successful = true;
+            return file;
+        } finally {
+            if(!successful) file.delete();
         }
     }
 }
