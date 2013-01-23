@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,7 +24,6 @@ package com.aoindustries.util.i18n;
 
 import com.aoindustries.encoding.MediaException;
 import com.aoindustries.encoding.MediaType;
-import com.aoindustries.util.SortedProperties;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -34,11 +33,19 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,6 +74,9 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
     private static final Logger logger = Logger.getLogger(ModifiablePropertiesResourceBundle.class.getName());
 
+    private static final Charset propertiesCharset = Charset.forName("ISO-8859-1");
+    private static final String EOL = System.getProperty("line.separator");
+
     private static final String VALIDATED_SUFFIX = ".ModifiableResourceBundle.validated";
     private static final String MODIFIED_SUFFIX = ".ModifiableResourceBundle.modified";
     private static final String MEDIATYPE_SUFFIX = ".ModifiableResourceBundle.mediaType";
@@ -86,6 +96,12 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
      * </p>
      */
     private final File sourceFile;
+
+    /**
+     * Any comments from the original source file, if available.  Each does not
+     * contain an end of line character.
+     */
+    private final List<String> sourceFileComments;
 
     private final boolean isModifiable;
 
@@ -120,6 +136,64 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     private final Properties properties = new Properties();
 
     /**
+     * Captures comments from any lines that begin with #.  This class is here because it is probably
+     * too simple to be generally useful, as it assumes ISO-8859-1 encoding like used
+     * by Properties.store.
+     */
+    static class CommentCaptureInputStream extends InputStream {
+        private final InputStream in;
+        CommentCaptureInputStream(InputStream in) {
+            this.in = in;
+        }
+
+        private boolean lastCharNewline = true;
+        private boolean isCommentLine = false;
+        private StringBuilder currentComment = new StringBuilder();
+
+        private List<String> comments = new ArrayList<String>();
+
+        /**
+         * Adds buffered comment to comments if non-empty.
+         */
+        private void addComment() {
+            if(currentComment.length()>0) {
+                comments.add(currentComment.toString());
+                currentComment.setLength(0);
+            }
+        }
+
+        @Override
+        public int read() throws IOException {
+            int ch = in.read();
+            if(ch==-1) {
+                // Handle EOL as newline terminator
+                lastCharNewline = true;
+                isCommentLine = false;
+                addComment();
+            } else {
+                if(lastCharNewline) isCommentLine = ch=='#';
+                lastCharNewline = ch=='\n';
+                if(lastCharNewline) addComment();
+                if(isCommentLine && ch!='\n' && ch!='\r') {
+                    // This int->char conversion by cast only words because ISO-8859-1 encoding
+                    currentComment.append((char)ch);
+                }
+            }
+            return ch;
+        }
+
+        @Override
+        public void close() throws IOException {
+            addComment();
+            super.close();
+        }
+
+        List<String> getComments() {
+            return comments;
+        }
+    }
+
+    /**
      * @param sourceFile  The source file(s).  If multiple source files are provided,
      *                    only one may exist and be both readable and writable.  If more than
      *                    one possible source file exists, will throw an IllegalStateException.
@@ -128,25 +202,31 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         File goodSourceFile = null;
         if(sourceFiles!=null) {
             for(File file : sourceFiles) {
-                if(file.canRead() && file.canWrite()) {
-                    if(goodSourceFile!=null) throw new IllegalStateException(ApplicationResources.accessor.getMessage("ModifiablePropertiesResourceBundle.init.moreThanOneSourceFile", goodSourceFile, file));
-                    goodSourceFile = file;
+                try {
+                    if(file.canRead() && file.canWrite()) {
+                        if(goodSourceFile!=null) throw new IllegalStateException(ApplicationResources.accessor.getMessage("ModifiablePropertiesResourceBundle.init.moreThanOneSourceFile", goodSourceFile, file));
+                        goodSourceFile = file;
+                    }
+                } catch(SecurityException e) {
+                    // OK when sandboxed, goodSourceFile remains null
                 }
             }
         }
         this.sourceFile = goodSourceFile;
 
         // Try to load from the sourceFile
+        List<String> mySourceFileComments = null;
         boolean myIsModifiable = false;
         boolean loaded = false;
         if(goodSourceFile!=null) {
             try {
-                InputStream in = new BufferedInputStream(new FileInputStream(goodSourceFile));
+                CommentCaptureInputStream in = new CommentCaptureInputStream(new BufferedInputStream(new FileInputStream(goodSourceFile)));
                 try {
                     properties.load(in);
                 } finally {
                     in.close();
                 }
+                mySourceFileComments = in.getComments();
             } catch(IOException err) {
                 logger.log(
                     Level.WARNING,
@@ -157,6 +237,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             loaded = true;
             myIsModifiable = true;
         }
+        this.sourceFileComments = mySourceFileComments;
         this.isModifiable = myIsModifiable;
         // Load from resources if sourceFile inaccessible
         if(!loaded) {
@@ -234,11 +315,11 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
     /**
      * Skips any lines that begin with #.  This class is here because it is probably
-     * too simple to be generally useful, as it assumes ISO8859-1 encoding like used
+     * too simple to be generally useful, as it assumes ISO-8859-1 encoding like used
      * by Properties.store.
      */
-    static class SkipCommentsFilter extends FilterOutputStream {
-        SkipCommentsFilter(OutputStream out) {
+    static class SkipCommentsFilterOutputStream extends FilterOutputStream {
+        SkipCommentsFilterOutputStream(OutputStream out) {
             super(out);
         }
 
@@ -247,10 +328,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
         @Override
         public void write(int ch) throws IOException {
-            if(lastCharNewline) {
-                if(ch=='#') isCommentLine = true;
-                else isCommentLine = false;
-            }
+            if(lastCharNewline) isCommentLine = ch=='#';
             lastCharNewline = ch=='\n';
             if(!isCommentLine) out.write(ch);
         }
@@ -264,15 +342,29 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         assert Thread.holdsLock(properties);
         try {
             // Create a properties instance that sorts the output by keys (case-insensitive)
-            Properties writer = new SortedProperties();
+            Properties writer = new Properties() {
+                private static final long serialVersionUID = 6953022173340009928L;
+                @Override
+                public Enumeration<Object> keys() {
+                    SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ENGLISH));
+                    Enumeration<Object> e = super.keys();
+                    while(e.hasMoreElements()) sortedSet.add(e.nextElement());
+                    return Collections.enumeration(sortedSet);
+                }
+            };
             writer.putAll(properties);
             File tmpFile = File.createTempFile("ApplicationResources", null, sourceFile.getParentFile());
-            OutputStream out = new BufferedOutputStream(
-                new SkipCommentsFilter(
-                    new FileOutputStream(tmpFile)
-                )
-            );
+            OutputStream out = out = new BufferedOutputStream(new FileOutputStream(tmpFile));
             try {
+                // Write any comments from when file was read
+                if(sourceFileComments!=null) {
+                    for(String line : sourceFileComments) {
+                        out.write(line.getBytes(propertiesCharset));
+                        out.write(EOL.getBytes(propertiesCharset));
+                    }
+                }
+                // Wrap to skip any comments generated by Properties code
+                out = new SkipCommentsFilterOutputStream(out);
                 writer.store(out, null);
             } finally {
                 out.close();
