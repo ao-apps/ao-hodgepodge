@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,12 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.io.unix.*;
-import java.io.*;
+import com.aoindustries.io.unix.Stat;
+import com.aoindustries.io.unix.UnixFile;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.RandomAccessFile;
 
 /**
  * Reads data as is it appended to a log file.  If the log file
