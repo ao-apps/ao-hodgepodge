@@ -579,25 +579,25 @@ public final class StringUtility {
     }
 
     /**
-     * Finds the first occurance of any of the supplied characters
+     * Finds the first occurrence of any of the supplied characters
      *
      * @param  S  the <code>String</code> to search
      * @param  chars  the characters to look for
      *
-     * @return  the index of the first occurance of <code>-1</code> if none found
+     * @return  the index of the first occurrence of <code>-1</code> if none found
      */
     public static int indexOf(String S, char[] chars) {
         return indexOf(S, chars, 0);
     }
 
     /**
-     * Finds the first occurance of any of the supplied characters starting at the specified index.
+     * Finds the first occurrence of any of the supplied characters starting at the specified index.
      *
      * @param  S  the <code>String</code> to search
      * @param  chars  the characters to look for
      * @param  start  the starting index.
      *
-     * @return  the index of the first occurance of <code>-1</code> if none found
+     * @return  the index of the first occurrence of <code>-1</code> if none found
      */
     public static int indexOf(String S, char[] chars, int start) {
         int Slen=S.length();
@@ -633,7 +633,7 @@ public final class StringUtility {
     }
 
     /**
-     * Removes all occurances of a <code>char</code> from a <code>String</code>
+     * Removes all occurrences of a <code>char</code> from a <code>String</code>
      *
      * @deprecated  this method is slow and no longer supported
      */
@@ -644,7 +644,7 @@ public final class StringUtility {
     }
 
     /**
-     * Removes all occurances of a <code>char</code> from a <code>String</code>
+     * Removes all occurrences of a <code>char</code> from a <code>String</code>
      *
      * @deprecated  this method is slow and no longer supported
      */
@@ -655,7 +655,7 @@ public final class StringUtility {
     }
 
     /**
-     * Replaces all occurances of a character with a String
+     * Replaces all occurrences of a character with a String
      */
     public static String replace(String string, char ch, String replacement) {
         int pos = string.indexOf(ch);
@@ -673,7 +673,7 @@ public final class StringUtility {
     }
 
     /**
-     * Replaces all occurances of a String with a String
+     * Replaces all occurrences of a String with a String
      * Please consider the variant with the Appendable for higher performance.
      */
     public static String replace(final String string, final String find, final String replacement) {
@@ -694,7 +694,7 @@ public final class StringUtility {
     }
 
     /**
-     * Replaces all occurances of a String with a String, appends the replacement
+     * Replaces all occurrences of a String with a String, appends the replacement
      * to <code>out</code>.
      */
     public static void replace(final String string, final String find, final String replacement, final Appendable out) throws IOException {
@@ -716,7 +716,7 @@ public final class StringUtility {
     }
 
     /**
-     * Replaces all occurances of a String with a String.
+     * Replaces all occurrences of a String with a String.
      */
     public static void replace(final StringBuffer sb, final String find, final String replacement) {
         int pos = 0;
@@ -729,7 +729,7 @@ public final class StringUtility {
     }
 
     /**
-     * Replaces all occurances of a String with a String.
+     * Replaces all occurrences of a String with a String.
      */
     public static void replace(final StringBuilder sb, final String find, final String replacement) {
         int pos = 0;
