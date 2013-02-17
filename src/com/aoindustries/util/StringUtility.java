@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -253,8 +253,18 @@ public final class StringUtility {
 
     /**
      * Counts how many times a word appears in a line.  Case insensitive matching.
+     *
+     * @deprecated Corrected spelling
      */
+    @Deprecated
     public static int countOccurances(byte[] buff, int len, String word) {
+        return countOccurrences(buff, len, word);
+    }
+
+    /**
+     * Counts how many times a word appears in a line.  Case insensitive matching.
+     */
+    public static int countOccurrences(byte[] buff, int len, String word) {
         int wordlen=word.length();
         int end=len-wordlen;
         int count=0;
@@ -275,8 +285,17 @@ public final class StringUtility {
 
     /**
      * Counts how many times a word appears in a line.  Case insensitive matching.
+     *
+     * @deprecated Corrected spelling
      */
     public static int countOccurances(byte[] buff, String word) {
+        return countOccurrences(buff, word);
+    }
+
+    /**
+     * Counts how many times a word appears in a line.  Case insensitive matching.
+     */
+    public static int countOccurrences(byte[] buff, String word) {
         int wordlen=word.length();
         int end=buff.length-wordlen;
         int count=0;
@@ -297,8 +316,17 @@ public final class StringUtility {
 
     /**
      * Counts how many times a word appears in a line.  Case insensitive matching.
+     *
+     * @deprecated Corrected spelling
      */
     public static int countOccurances(String line, String word) {
+        return countOccurrences(line, word);
+    }
+
+    /**
+     * Counts how many times a word appears in a line.  Case insensitive matching.
+     */
+    public static int countOccurrences(String line, String word) {
         int wordlen=word.length();
         int end=line.length()-wordlen;
         int count=0;
