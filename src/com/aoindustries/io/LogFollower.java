@@ -22,8 +22,7 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.io.unix.Stat;
-import com.aoindustries.io.unix.UnixFile;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -32,13 +31,13 @@ import java.io.RandomAccessFile;
 /**
  * Reads data as is it appended to a log file.  If the log file
  * is closed and recreated, which is typical during log rotations,
- * the new file is opened and read from the beginning.  The file
- * closure is identified by occasionally statting and comparing inode
- * numbers.
+ * the new file is opened and read from the beginning.  The file is assumed
+ * to have been replaced when its length is smaller than before.
  * <p>
  * This class will block on read.  If end of file is reached, it will continue
  * to block until data becomes available.  End of file is never returned from
  * this class, it will wait indefinitely for data.
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
@@ -46,53 +45,74 @@ public class LogFollower extends InputStream {
 
     public static final int DEFAULT_POLL_INTERVAL=60*1000;
 
-    private final String path;
     private final int pollInterval;
-    private final UnixFile unixFile;
+    private final File file;
 
-    private boolean isClosed;
+    private volatile boolean closed;
 
-    private RandomAccessFile randomAccess;
+    private final Object filePosLock = new Object();
     private long filePos;
-    private long currentInode;
 
     public LogFollower(String path) {
-        this(path, DEFAULT_POLL_INTERVAL);
+        this(new File(path), DEFAULT_POLL_INTERVAL);
     }
     
-    public LogFollower(String path, int pollInterval) {
-        this.path=path;
-        this.pollInterval=pollInterval;
-        this.unixFile=new UnixFile(path);
+    public LogFollower(File file) {
+        this(file, DEFAULT_POLL_INTERVAL);
     }
 
-    private void openIfNeeded() throws IOException {
-        if(isClosed) throw new IOException("LogFollower has been closed: "+path);
+    public LogFollower(String path, int pollInterval) {
+        this(new File(path), pollInterval);
+    }
 
-        if(randomAccess==null) {
-            randomAccess=new RandomAccessFile(path, "r");
-            filePos=randomAccess.length();
-            currentInode=unixFile.getStat().getInode();
+    public LogFollower(File file, int pollInterval) {
+        this.pollInterval = pollInterval;
+        this.file = file;
+    }
+
+    private void checkClosed() throws IOException {
+        if(closed) throw new IOException("LogFollower has been closed: "+file.getPath());
+    }
+
+    /**
+     * Checks the current position in the file.
+     * Detects if the file has changed in length.
+     * If closed, throws an exception.
+     * If file doesn't exist, waits until it does exist.
+     */
+    private void detectFileChange() throws IOException {
+        checkClosed();
+        assert Thread.holdsLock(filePosLock);
+        while(!file.exists()) {
+            try {
+                System.err.println("File not found, waiting: " + file.getPath());
+                Thread.sleep(pollInterval);
+            } catch(InterruptedException e) {
+                InterruptedIOException newExc = new InterruptedIOException(e.getMessage());
+                newExc.initCause(e);
+                throw newExc;
+            }
+            checkClosed();
+        }
+        long fileLen = file.length();
+        if(fileLen<filePos) filePos = 0;
+    }
+
+    @Override
+    public int available() throws IOException {
+        checkClosed();
+        synchronized(filePosLock) {
+            detectFileChange();
+            long available = file.length() - filePos;
+            if(available < 0) available = 0;
+            else if(available>Integer.MAX_VALUE) available = Integer.MAX_VALUE;
+            return (int)available;
         }
     }
 
     @Override
-    synchronized public int available() throws IOException {
-        openIfNeeded();
-        long available=randomAccess.length()-filePos;
-        if(available<0) available=0;
-        else if(available>Integer.MAX_VALUE) available=Integer.MAX_VALUE;
-        return (int)available;
-    }
-
-    @Override
     public void close() throws IOException {
-        isClosed=true;
-        RandomAccessFile R=randomAccess;
-        randomAccess=null;
-        if(R!=null) R.close();
-        filePos=0;
-        currentInode=0;
+        closed = true;
     }
 
     public int getPollInterval() {
@@ -109,30 +129,20 @@ public class LogFollower extends InputStream {
     }
 
     @Override
-    synchronized public int read() throws IOException {
-        openIfNeeded();
-        while(!isClosed) {
-            // Read to the end of the file
-            long ral=randomAccess.length();
-            if(ral>filePos) {
-                randomAccess.seek(filePos++);
-                return randomAccess.read();
-            } else filePos=ral;
-
-            // Reopen if the inode has changed
-            Stat stat = unixFile.getStat();
-            if(stat.exists()) {
-                long newInode=stat.getInode();
-                if(newInode!=currentInode) {
-                    randomAccess.close();
-                    randomAccess=new RandomAccessFile(path, "r");
-                    filePos=0;
-                    currentInode=newInode;
-
-                    // Return a byte of the new file if available
-                    if(randomAccess.length()>filePos) {
+    public int read() throws IOException {
+        checkClosed();
+        while(true) {
+            synchronized(filePosLock) {
+                detectFileChange();
+                // Read to the end of the file
+                long ral = file.length();
+                if(ral>filePos) {
+                    RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
+                    try {
                         randomAccess.seek(filePos++);
                         return randomAccess.read();
+                    } finally {
+                        randomAccess.close();
                     }
                 }
             }
@@ -146,42 +156,27 @@ public class LogFollower extends InputStream {
                 throw ioErr;
             }
         }
-        throw new IOException("LogFollower has been closed: "+path);
     }
 
     @Override
-    synchronized public int read(byte[] b, int offset, int len) throws IOException {
-        openIfNeeded();
-        while(!isClosed) {
-            // Read to the end of the file
-            long ral=randomAccess.length();
-            if(ral>filePos) {
-                randomAccess.seek(filePos);
-                long avail=randomAccess.length()-filePos;
-                if(avail>len) avail=len;
-                int actual=randomAccess.read(b, offset, (int)avail);
-                filePos+=actual;
-                return actual;
-            } else filePos=ral;
-
-            // Reopen if the inode has changed
-            Stat stat = unixFile.getStat();
-            if(stat.exists()) {
-                long newInode=stat.getInode();
-                if(newInode!=currentInode) {
-                    randomAccess.close();
-                    randomAccess=new RandomAccessFile(path, "r");
-                    filePos=0;
-                    currentInode=newInode;
-
-                    // Read from the file if available
-                    if(randomAccess.length()>filePos) {
+    public int read(byte[] b, int offset, int len) throws IOException {
+        checkClosed();
+        while(true) {
+            synchronized(filePosLock) {
+                detectFileChange();
+                // Read to the end of the file
+                long ral = file.length();
+                if(ral>filePos) {
+                    RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
+                    try {
                         randomAccess.seek(filePos);
-                        long avail=randomAccess.length()-filePos;
-                        if(avail>len) avail=len;
-                        int actual=randomAccess.read(b, offset, (int)avail);
-                        filePos+=actual;
+                        long avail = randomAccess.length() - filePos;
+                        if(avail>len) avail = len;
+                        int actual = randomAccess.read(b, offset, (int)avail);
+                        filePos += actual;
                         return actual;
+                    } finally {
+                        randomAccess.close();
                     }
                 }
             }
@@ -195,42 +190,27 @@ public class LogFollower extends InputStream {
                 throw ioErr;
             }
         }
-        throw new IOException("LogFollower has been closed: "+path);
     }
 
     @Override
-    synchronized public long skip(long n) throws IOException {
-        openIfNeeded();
-        while(!isClosed) {
-            // Skip to the end of the file
-            long ral=randomAccess.length();
-            if(ral>filePos) {
-                randomAccess.seek(filePos);
-                long avail=randomAccess.length()-filePos;
-                if(avail>n) avail=n;
-                int actual=randomAccess.skipBytes((int)avail);
-                filePos+=actual;
-                return actual;
-            } else filePos=ral;
-
-            // Reopen if the inode has changed
-            Stat stat = unixFile.getStat();
-            if(stat.exists()) {
-                long newInode=stat.getInode();
-                if(newInode!=currentInode) {
-                    randomAccess.close();
-                    randomAccess=new RandomAccessFile(path, "r");
-                    filePos=0;
-                    currentInode=newInode;
-
-                    // Read from the file if available
-                    if(randomAccess.length()>filePos) {
+    public long skip(long n) throws IOException {
+        checkClosed();
+        while(true) {
+            synchronized(filePosLock) {
+                detectFileChange();
+                // Skip to the end of the file
+                long ral = file.length();
+                if(ral>filePos) {
+                    RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
+                    try {
                         randomAccess.seek(filePos);
-                        long avail=randomAccess.length()-filePos;
-                        if(avail>n) avail=n;
-                        int actual=randomAccess.skipBytes((int)avail);
-                        filePos+=actual;
+                        long avail = randomAccess.length()-filePos;
+                        if(avail>n) avail = n;
+                        int actual = randomAccess.skipBytes((int)avail);
+                        filePos += actual;
                         return actual;
+                    } finally {
+                        randomAccess.close();
                     }
                 }
             }
@@ -244,6 +224,5 @@ public class LogFollower extends InputStream {
                 throw ioErr;
             }
         }
-        throw new IOException("LogFollower has been closed: "+path);
     }
 }
