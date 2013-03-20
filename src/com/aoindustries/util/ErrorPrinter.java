@@ -136,10 +136,14 @@ public class ErrorPrinter {
 
             // Threads
             appendln("    Threading", out);
-            appendln("        Thread", out);
-            append("            Name........: ", out);
             Thread thread=Thread.currentThread();
+            appendln("        Thread", out);
+            append("            ID..........: ", out);
+            appendln(Long.toString(thread.getId()), out);
+            append("            Name........: ", out);
             appendln(thread.getName(), out);
+            append("            Daemon......: ", out);
+            appendln(Boolean.toString(thread.isDaemon()), out);
             append("            Class.......: ", out);
             appendln(thread.getClass().getName(), out);
             append("            Priority....: ", out);
