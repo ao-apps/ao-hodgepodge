@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012  AO Industries, Inc.
+ * Copyright (C) 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,6 +24,7 @@ package com.aoindustries.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -51,17 +52,18 @@ public class ZeroFile {
     }
 
     public static void main(String[] args) {
-        if(args.length!=1) {
-            System.err.println("usage: "+ZeroFile.class.getName()+" <path>");
+        if(args.length!=2) {
+            System.err.println("usage: "+ZeroFile.class.getName()+" <mb_per_sec> <path>");
             System.exit(1);
         } else {
             try {
+                int bps = Integer.parseInt(args[0]);
                 long bytesWritten;
-                File file = new File(args[0]);
+                File file = new File(args[1]);
                 if(DEBUG) System.err.println("Opening " + file);
                 RandomAccessFile raf = new RandomAccessFile(file, DRY_RUN ? "r" : "rw");
                 try {
-                    bytesWritten = zeroFile(raf);
+                    bytesWritten = zeroFile(bps, raf);
                 } finally {
                     if(DEBUG) System.err.println("Closing " + file);
                     raf.close();
@@ -73,12 +75,37 @@ public class ZeroFile {
         }
     }
 
+    private static long sleep(int bps, long lastTime) throws IOException {
+        try {
+            long millisPerBlock = 1000 / bps;
+            long sleepUntil = lastTime + millisPerBlock;
+            long currentTime = System.currentTimeMillis();
+            long sleepyTime = sleepUntil - currentTime;
+            if(sleepyTime<=0) {
+                // IO too slow or system time set to future
+                return currentTime;
+            } if(sleepyTime>millisPerBlock) {
+                // System time set to past
+                Thread.sleep(millisPerBlock);
+                return currentTime + millisPerBlock;
+            } else {
+                // Normal case
+                Thread.sleep(sleepyTime);
+                return currentTime + sleepyTime;
+            }
+        } catch(InterruptedException e) {
+            InterruptedIOException ioExc = new InterruptedIOException(e.getMessage());
+            ioExc.initCause(e);
+            throw ioExc;
+        }
+    }
+
     /**
      * Zeroes the provided random access file, only writing blocks that contain
-     * non-zero.
+     * non-zero.  Writes at the maximum provided bps blocks per second.
      * Returns the number of bytes written.
      */
-    public static long zeroFile(RandomAccessFile raf) throws IOException {
+    public static long zeroFile(int bps, RandomAccessFile raf) throws IOException {
         // Initialize bitset
         final long len = raf.length();
         final int blocks;
@@ -90,6 +117,7 @@ public class ZeroFile {
         }
         BitSet dirtyBlocks = new BitSet(blocks);
         // Pass one: read for non zeros
+        long lastTime = System.currentTimeMillis();
         byte[] buff = new byte[BLOCK_SIZE];
         int blockIndex = 0;
         for(long pos=0; pos<len; pos+=BLOCK_SIZE, blockIndex++) {
@@ -100,6 +128,7 @@ public class ZeroFile {
             }
             raf.seek(pos);
             raf.readFully(buff, 0, blockSize);
+            lastTime = sleep(bps, lastTime);
             boolean allZero = true;
             for(int i=0; i<blockSize; i++) {
                 if(buff[i]!=0) {
@@ -125,6 +154,7 @@ public class ZeroFile {
                 if(!DRY_RUN) {
                     raf.seek(pos);
                     raf.write(buff, 0, blockSize);
+                    lastTime = sleep(bps, lastTime);
                     bytesWritten += blockSize;
                 }
             }

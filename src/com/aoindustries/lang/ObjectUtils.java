@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012  AO Industries, Inc.
+ * Copyright (C) 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -47,5 +47,12 @@ public final class ObjectUtils {
      */
     public static boolean equals(Object obj1, Object obj2) {
         return obj1==null ? obj2==null : obj1.equals(obj2);
+    }
+
+    /**
+     * Calls toString if non-null, returns null when null.
+     */
+    public static String toString(Object obj) {
+        return obj==null ? null : obj.toString();
     }
 }

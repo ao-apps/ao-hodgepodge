@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,6 +25,7 @@ package com.aoindustries.io;
 import com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder;
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
 import com.aoindustries.encoding.TextInXhtmlEncoder;
+import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.Sequence;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -423,21 +425,12 @@ final public class ChainWriter implements Appendable {
 
     // <editor-fold defaultstate="collapsed" desc="Encoding Methods">
     /**
-     * @deprecated  Please use encodeXmlAttribute instead.
-     *
-     * @param S the string to be escaped.
-     */
-    public ChainWriter printEI(String S) throws IOException {
-        return encodeXmlAttribute(S);
-    }
-
-    /**
      * @see  EncodingUtils#encodeXmlAttribute(String, Appendable)
      *
      * @param S the string to be escaped
      */
-    public ChainWriter encodeXmlAttribute(String S) throws IOException {
-        EncodingUtils.encodeXmlAttribute(S, out);
+    public ChainWriter encodeXmlAttribute(Object value) throws IOException {
+        EncodingUtils.encodeXmlAttribute(ObjectUtils.toString(value), out);
         return this;
     }
 
@@ -456,23 +449,9 @@ final public class ChainWriter implements Appendable {
      *
      * @param S the string to be escaped.
      */
-    public ChainWriter encodeHtml(String S) throws IOException {
-        EncodingUtils.encodeHtml(S, true, true, out);
+    public ChainWriter encodeHtml(Object value) throws IOException {
+        EncodingUtils.encodeHtml(ObjectUtils.toString(value), true, true, out);
         return this;
-    }
-
-    /**
-     * @deprecated  Please use encodeHtml instead.
-     */
-    public ChainWriter printEH(String S) throws IOException {
-        return encodeHtml(S);
-    }
-
-    /**
-     * @deprecated  Please use encodeHtml instead.
-     */
-    public ChainWriter printEH(String S, boolean make_br, boolean make_nbsp) throws IOException {
-        return encodeHtml(S, make_br, make_nbsp);
     }
 
     /**
@@ -481,8 +460,8 @@ final public class ChainWriter implements Appendable {
      * @param S the string to be escaped.
      * @param make_br  will write &lt;BR&gt; tags for every newline character
      */
-    public ChainWriter encodeHtml(String S, boolean make_br, boolean make_nbsp) throws IOException {
-        EncodingUtils.encodeHtml(S, make_br, make_nbsp, out);
+    public ChainWriter encodeHtml(Object value, boolean make_br, boolean make_nbsp) throws IOException {
+        EncodingUtils.encodeHtml(ObjectUtils.toString(value), make_br, make_nbsp, out);
         return this;
     }
 
@@ -500,7 +479,8 @@ final public class ChainWriter implements Appendable {
     /**
      * @see EncodingUtils#encodeJavaScriptStringInXml(java.lang.String, Appendable)
      */
-    public ChainWriter encodeJavaScriptStringInXml(String text) throws IOException {
+    public ChainWriter encodeJavaScriptStringInXml(Object value) throws IOException {
+        String text = ObjectUtils.toString(value);
         // Escape for javascript
         StringBuilder javascript = new StringBuilder(text.length());
         TextInJavaScriptEncoder.encodeTextInJavaScript(text, javascript);
@@ -613,10 +593,10 @@ final public class ChainWriter implements Appendable {
      * The provided sequence should start at one for any given HTML page because parts of the
      * script will only be written when the sequence is equal to one.
      */
-    public static void writeDateJavaScript(long date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
-        if(date==-1) out.append("&#160;");
+    public static void writeDateJavaScript(Date date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
+        if(date==null) out.append("&#160;");
         else {
-            String dateString = SQLUtility.getDate(date);
+            String dateString = SQLUtility.getDate(date.getTime());
             long id = sequence.getNextSequenceValue();
             String idString = Long.toString(id);
             // Write the element
@@ -644,7 +624,7 @@ final public class ChainWriter implements Appendable {
             scriptOut.append("  chainWriterUpdateDate(");
             scriptOut.append(idString);
             scriptOut.append(", ");
-            scriptOut.append(Long.toString(date));
+            scriptOut.append(Long.toString(date.getTime()));
             scriptOut.append(", \"");
             EncodingUtils.encodeHtml(dateString, scriptOut);
             scriptOut.append("\");\n");
@@ -660,25 +640,25 @@ final public class ChainWriter implements Appendable {
      * @see  #writeDateJavaScript(long)
      */
     @Deprecated
-    final public ChainWriter printDateJS(long date, Sequence sequence, Appendable scriptOut) throws IOException {
-        return writeDateJavaScript(date, sequence, scriptOut);
+    public ChainWriter printDateJS(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+        return writeDateJavaScript(date==-1 ? null : new Date(date), sequence, scriptOut);
     }
 
     /**
      * Writes a JavaScript script tag that shows a date in the user's locale.  Prints <code>&amp;#160;</code>
-     * if the date is <code>-1</code>.
+     * if the date is <code>null</code>.
      * Writes to the internal <code>PrintWriter</code>.
      *
      * @see  #writeDateJavaScript(long,Appendable)
      */
-    public ChainWriter writeDateJavaScript(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+    public ChainWriter writeDateJavaScript(Date date, Sequence sequence, Appendable scriptOut) throws IOException {
         writeDateJavaScript(date, sequence, out, scriptOut);
         return this;
     }
 
     /**
      * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;#160;</code>
-     * if the date is <code>-1</code>.
+     * if the date is <code>null</code>.
      *
      * Because this needs to modify the DOM it can lead to poor performance or large data sets.
      * To provide more performance options, the JavaScript is written to scriptOut.  This could
@@ -687,10 +667,10 @@ final public class ChainWriter implements Appendable {
      * The provided sequence should start at one for any given HTML page because parts of the
      * script will only be written when the sequence is equal to one.
      */
-    public static void writeDateTimeJavaScript(long date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
-        if(date==-1) out.append("&#160;");
+    public static void writeDateTimeJavaScript(Date date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
+        if(date==null) out.append("&#160;");
         else {
-            String dateTimeString = SQLUtility.getDateTime(date);
+            String dateTimeString = SQLUtility.getDateTime(date.getTime());
             long id = sequence.getNextSequenceValue();
             String idString = Long.toString(id);
             // Write the element
@@ -727,7 +707,7 @@ final public class ChainWriter implements Appendable {
             scriptOut.append("  chainWriterUpdateDateTime(");
             scriptOut.append(idString);
             scriptOut.append(", ");
-            scriptOut.append(Long.toString(date));
+            scriptOut.append(Long.toString(date.getTime()));
             scriptOut.append(", \"");
             EncodingUtils.encodeHtml(dateTimeString, scriptOut);
             scriptOut.append("\");\n");
@@ -743,24 +723,24 @@ final public class ChainWriter implements Appendable {
      * @see #writeDateTimeJavaScript(long)
      */
     @Deprecated
-    final public ChainWriter printDateTimeJS(long date, Sequence sequence, Appendable scriptOut) throws IOException {
-        return writeDateTimeJavaScript(date, sequence, scriptOut);
+    public ChainWriter printDateTimeJS(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+        return writeDateTimeJavaScript(date==-1 ? null : new Date(date), sequence, scriptOut);
     }
 
     /**
      * Writes a JavaScript script tag that shows a date and time in the user's locale.  Prints <code>&amp;#160;</code>
-     * if the date is <code>-1</code>.
+     * if the date is <code>null</code>.
      * Writes to the internal <code>PrintWriter</code>.
      * @see #writeDateTimeJavaScript(long, Appendable)
      */
-    public ChainWriter writeDateTimeJavaScript(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+    public ChainWriter writeDateTimeJavaScript(Date date, Sequence sequence, Appendable scriptOut) throws IOException {
         writeDateTimeJavaScript(date, sequence, out, scriptOut);
         return this;
     }
 
     /**
      * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;#160;</code>
-     * if the date is <code>-1</code>.
+     * if the date is <code>null</code>.
      *
      * Because this needs to modify the DOM it can lead to poor performance or large data sets.
      * To provide more performance options, the JavaScript is written to scriptOut.  This could
@@ -769,10 +749,10 @@ final public class ChainWriter implements Appendable {
      * The provided sequence should start at one for any given HTML page because parts of the
      * script will only be written when the sequence is equal to one.
      */
-    public static void writeTimeJavaScript(long date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
-        if(date==-1) out.append("&#160;");
+    public static void writeTimeJavaScript(Date date, Sequence sequence, Appendable out, Appendable scriptOut) throws IOException {
+        if(date==null) out.append("&#160;");
         else {
-            String timeString = SQLUtility.getTime(date);
+            String timeString = SQLUtility.getTime(date.getTime());
             long id = sequence.getNextSequenceValue();
             String idString = Long.toString(id);
             // Write the element
@@ -802,7 +782,7 @@ final public class ChainWriter implements Appendable {
             scriptOut.append("  chainWriterUpdateTime(");
             scriptOut.append(idString);
             scriptOut.append(", ");
-            scriptOut.append(Long.toString(date));
+            scriptOut.append(Long.toString(date.getTime()));
             scriptOut.append(", \"");
             EncodingUtils.encodeHtml(timeString, scriptOut);
             scriptOut.append("\");\n");
@@ -818,18 +798,18 @@ final public class ChainWriter implements Appendable {
      * @see #writeTimeJavaScript(long)
      */
     @Deprecated
-    final public ChainWriter printTimeJS(long date, Sequence sequence, Appendable scriptOut) throws IOException {
-        return writeTimeJavaScript(date, sequence, scriptOut);
+    public ChainWriter printTimeJS(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+        return writeTimeJavaScript(date==-1 ? null : new Date(date), sequence, scriptOut);
     }
 
     /**
      * Writes a JavaScript script tag that a time in the user's locale.  Prints <code>&amp;#160;</code>
-     * if the date is <code>-1</code>.
+     * if the date is <code>null</code>.
      * Writes to the internal <code>PrintWriter</code>.
      *
      * @see #writeTimeJavaScript(long,Appendable)
      */
-    public ChainWriter writeTimeJavaScript(long date, Sequence sequence, Appendable scriptOut) throws IOException {
+    public ChainWriter writeTimeJavaScript(Date date, Sequence sequence, Appendable scriptOut) throws IOException {
         writeTimeJavaScript(date, sequence, out, scriptOut);
         return this;
     }

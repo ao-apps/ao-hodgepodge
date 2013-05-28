@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,31 +20,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
-
-import java.io.*;
+package com.aoindustries.util;
 
 /**
- * Indicates that an object may be sent across a
- * <code>CompressedDataInputStream</code> and
- * <code>CompressedDataOutputStream</code>.
- *
  * @author  AO Industries, Inc.
- *
- * @ deprecated  Please favor standard serialization.
  */
-//@Deprecated
-public interface Streamable {
+public final class InternUtils {
 
     /**
-     * @ deprecated  Please favor standard serialization.
+     * No instances
      */
-    //@Deprecated
-    void read(CompressedDataInputStream in) throws IOException;
+    private InternUtils() {
+    }
 
     /**
-     * @ deprecated  Please favor standard serialization.
+     * Interns the object, return null when null.
      */
-    //@Deprecated
-    void write(CompressedDataOutputStream out, String version) throws IOException;
+    public static <T extends Internable<T>> T intern(T value) {
+        if(value==null) return null;
+        return value.intern();
+    }
+
+    /**
+     * Null-safe intern: interns a String if it is not null, returns null if parameter is null.
+     */
+    public static String intern(String S) {
+        if(S==null) return null;
+        return S.intern();
+    }
 }

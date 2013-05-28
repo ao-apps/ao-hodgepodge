@@ -1138,10 +1138,12 @@ public final class StringUtility {
     
     /**
      * Null-safe intern: interns a String if it is not null, returns null if parameter is null.
+     *
+     * @deprecated  Use InternUtils instead.
      */
+    @Deprecated
     public static String intern(String S) {
-        if(S==null) return null;
-        return S.intern();
+        return InternUtils.intern(S);
     }
     
     /**
