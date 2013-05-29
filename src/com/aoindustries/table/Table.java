@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,15 +22,16 @@
  */
 package com.aoindustries.table;
 
-import java.util.Iterator;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
  * An abstract structure for tables.
  *
  * @author  AO Industries, Inc.
- */
-public interface Table<C extends Column, R extends Row> {
+*/
+public interface Table<T extends Row> {
 
     /**
      * Registers a <code>TableListener</code> to be notified when
@@ -39,7 +40,7 @@ public interface Table<C extends Column, R extends Row> {
      *
      * @see  #addTableListener(TableListener,long)
      */
-    void addTableListener(TableListener<? super C, ? super R> listener);
+    void addTableListener(TableListener listener);
 
     /**
      * Registers a <code>TableListener</code> to be notified when
@@ -53,26 +54,15 @@ public interface Table<C extends Column, R extends Row> {
      * run immediately, because it causes serial processing of the event
      * and may potentially slow down the responsiveness of the server.
      */
-    void addTableListener(TableListener<? super C, ? super R> listener, long batchTime);
+    void addTableListener(TableListener listener, long batchTime);
 
     /**
      * Removes a <code>TableListener</code> from the list of
      * objects being notified when the data is updated.
      */
-    void removeTableListener(TableListener<? super C, ? super R> listener);
+    void removeTableListener(TableListener listener);
 
-    /**
-     * Gets the name of this table.
-     */
-    String getTableName();
-
-    /**
-     * Gets the unmodifiable list of column names.
-     */
-    List<? extends C> getColumns();
-
-    /**
-     * Gets the unmodifiable set of all rows.
-     */
-    Iterator<? extends R> getRows();
+    List<T> getRows() throws IOException, SQLException;
+    
+    String getTableName() throws IOException, SQLException;
 }
