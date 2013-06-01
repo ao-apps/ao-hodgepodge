@@ -37,6 +37,9 @@ import junit.framework.TestSuite;
  */
 public class IntegerRadixSortTest extends TestCase {
 
+	private static final boolean GC_EACH_PASS = true;
+	private static final long GC_SLEEP_TIME = 100;
+
     public IntegerRadixSortTest(String testName) {
         super(testName);
     }
@@ -49,6 +52,15 @@ public class IntegerRadixSortTest extends TestCase {
 
 	@SuppressWarnings("unchecked")
     private <T extends Number> void doTestPerformance(List<T> randomValues, int pass, int testSize) {
+		if(GC_EACH_PASS) {
+			System.gc();
+			try {
+				Thread.sleep(GC_SLEEP_TIME);
+			} catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
 		// Time radix sort
 		List<T> radixResult = new ArrayList<T>(randomValues);
 		long radixNanos;
@@ -57,6 +69,16 @@ public class IntegerRadixSortTest extends TestCase {
 			IntegerRadixSort.getInstance().sort(radixResult);
 			radixNanos = System.nanoTime() - startNanos;
 			//System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" \u00B5s");
+		}
+
+		// Time new radix sort
+		List<T> newRadixResult = new ArrayList<T>(randomValues);
+		long newRadixNanos;
+		{
+			long startNanos = System.nanoTime();
+			IntegerRadixSortNew.getInstance().sort(newRadixResult);
+			newRadixNanos = System.nanoTime() - startNanos;
+			//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 		}
 
 		// Time Java sort
@@ -68,7 +90,7 @@ public class IntegerRadixSortTest extends TestCase {
 			javaNanos = System.nanoTime() - startNanos;
 			//System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" \u00B5s");
 		}
-		System.out.println(pass+"/"+testSize+": Speedup: "+BigDecimal.valueOf(javaNanos * 1000 / radixNanos, 3));
+		System.out.println(pass+"/"+testSize+": Speedup (Old/New): "+BigDecimal.valueOf(javaNanos * 1000 / radixNanos, 3) + " / " + BigDecimal.valueOf(javaNanos * 1000 / newRadixNanos, 3));
 
 		// TODO: Display speedup
 
@@ -76,7 +98,7 @@ public class IntegerRadixSortTest extends TestCase {
     }
 
     public void testPerformance() {
-        final int numTests = 10;
+        final int numTests = 9;
         final int endTestSize = 1000000;
         List<Integer> randomValues = new ArrayList<Integer>(endTestSize);
         for(int testSize = 1; testSize<=endTestSize; testSize *= 10) {

@@ -94,6 +94,10 @@ final public class SortStatistics {
         gets++;
     }
 
+    public void sortGetting(int increment) {
+        gets += increment;
+    }
+
     public long getGetCount() {
         return gets;
     }
@@ -102,7 +106,11 @@ final public class SortStatistics {
         sets++;
     }
 
-    public long getSetCount() {
+    public void sortSetting(int increment) {
+        sets += increment;
+    }
+
+	public long getSetCount() {
         return sets;
     }
 

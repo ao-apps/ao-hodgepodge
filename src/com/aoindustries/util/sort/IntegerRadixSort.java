@@ -24,7 +24,6 @@ package com.aoindustries.util.sort;
 
 import com.aoindustries.lang.NotImplementedException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.RandomAccess;
