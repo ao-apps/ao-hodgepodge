@@ -39,6 +39,8 @@ public class IntegerRadixSortTest extends TestCase {
 
 	private static final boolean GC_EACH_PASS = true;
 	private static final long GC_SLEEP_TIME = 100;
+	private static final boolean RANDOM_FULL = false;
+	private static final int RANDOM_RANGE = 0x10000;
 
     public IntegerRadixSortTest(String testName) {
         super(testName);
@@ -127,6 +129,8 @@ public class IntegerRadixSortTest extends TestCase {
 		);
 
 		assertEquals(javaResult, oldRadixResult);
+		assertEquals(javaResult, newRadixResult);
+		assertEquals(javaResult, expRadixResult);
     }
 
     public void testPerformance() {
@@ -139,7 +143,7 @@ public class IntegerRadixSortTest extends TestCase {
         List<Integer> randomValues = new ArrayList<Integer>(endTestSize);
         for(int testSize = 1; testSize<=endTestSize; testSize *= 2) {
             // Generate testSize random ints
-            while(randomValues.size()<testSize) randomValues.add(random.nextInt());
+            while(randomValues.size()<testSize) randomValues.add(RANDOM_FULL ? random.nextInt() : random.nextInt(RANDOM_RANGE));
 
 			for(int pass=1; pass<=numTests; pass++) {
 				doTestPerformance(randomValues, pass, testSize, totalOld, totalNew, totalExp, totalJava);
