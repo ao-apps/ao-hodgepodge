@@ -80,17 +80,6 @@ public class IntegerRadixSortTest extends TestCase {
 			//System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" \u00B5s");
 		}
 
-		// Time new radix sort
-		List<T> newRadixResult = new ArrayList<T>(randomValues);
-		long newRadixNanos;
-		{
-			long startNanos = System.nanoTime();
-			IntegerRadixSortNew.getInstance().sort(newRadixResult);
-			newRadixNanos = System.nanoTime() - startNanos;
-			totalNew[0] += newRadixNanos;
-			//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
-		}
-
 		// Time radix sort
 		List<T> oldRadixResult = new ArrayList<T>(randomValues);
 		long oldRadixNanos;
@@ -100,6 +89,17 @@ public class IntegerRadixSortTest extends TestCase {
 			oldRadixNanos = System.nanoTime() - startNanos;
 			totalOld[0] += oldRadixNanos;
 			//System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" \u00B5s");
+		}
+
+		// Time new radix sort
+		List<T> newRadixResult = new ArrayList<T>(randomValues);
+		long newRadixNanos;
+		{
+			long startNanos = System.nanoTime();
+			IntegerRadixSortNew.getInstance().sort(newRadixResult);
+			newRadixNanos = System.nanoTime() - startNanos;
+			totalNew[0] += newRadixNanos;
+			//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 		}
 
 		// Time Java sort
@@ -130,14 +130,14 @@ public class IntegerRadixSortTest extends TestCase {
     }
 
     public void testPerformance() {
-        final int numTests = 9;
-        final int endTestSize = 1000000;
+        final int numTests = 4;
+        final int endTestSize = 1048576;
 		long[] totalOld = new long[1];
 		long[] totalNew = new long[1];
 		long[] totalExp = new long[1];
 		long[] totalJava = new long[1];
         List<Integer> randomValues = new ArrayList<Integer>(endTestSize);
-        for(int testSize = 1; testSize<=endTestSize; testSize *= 10) {
+        for(int testSize = 1; testSize<=endTestSize; testSize *= 2) {
             // Generate testSize random ints
             while(randomValues.size()<testSize) randomValues.add(random.nextInt());
 
