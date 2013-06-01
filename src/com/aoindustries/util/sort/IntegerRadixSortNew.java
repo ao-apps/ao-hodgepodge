@@ -23,7 +23,6 @@
 package com.aoindustries.util.sort;
 
 import com.aoindustries.lang.NotImplementedException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.RandomAccess;
@@ -39,7 +38,9 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
 	private static final int PASS_MASK = PASS_SIZE - 1;
 
-    private static final IntegerRadixSortNew instance = new IntegerRadixSortNew();
+	private static final int START_QUEUE_LENGTH = 16;
+
+	private static final IntegerRadixSortNew instance = new IntegerRadixSortNew();
 
     public static IntegerRadixSortNew getInstance() {
         return instance;
@@ -54,9 +55,11 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		final int size = list.size();
 		final boolean useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
 		@SuppressWarnings("unchecked")
-		List<T>[] fromQueues = (List<T>[])new List<?>[PASS_SIZE];
+		T[][] fromQueues = (T[][])new Number[PASS_SIZE][];
+		int[] fromQueueLengths = new int[PASS_SIZE];
 		@SuppressWarnings("unchecked")
-		List<T>[] toQueues = (List<T>[])new List<?>[PASS_SIZE];
+		T[][] toQueues = (T[][])new Number[PASS_SIZE][];
+		int[] toQueueLengths = new int[PASS_SIZE];
 		//for(int i=0; i<PASS_SIZE; i++) {
 		//	fromQueues[i] = new ArrayList<T>();
 		//	toQueues[i] = new ArrayList<T>();
@@ -65,55 +68,88 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		if(useRandomAccess) {
 			for(int i=0;i<size;i++) {
 				T number = list.get(i);
-				int queueNum = number.intValue() & PASS_MASK;
-				List<T> fromQueue = fromQueues[queueNum];
-				if(fromQueue==null) fromQueues[queueNum] = fromQueue = new ArrayList<T>();
-				fromQueue.add(number);
+				int fromQueueNum = number.intValue() & PASS_MASK;
+				T[] fromQueue = fromQueues[fromQueueNum];
+				int fromQueueLength = fromQueueLengths[fromQueueNum];
+				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[START_QUEUE_LENGTH];
+				else if(fromQueueLength>=fromQueue.length) {
+					// Grow queue
+					T[] newQueue = (T[])new Number[fromQueueLength<<1];
+					System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
+					fromQueues[fromQueueNum] = fromQueue = newQueue;
+				}
+				fromQueue[fromQueueLength++] = number;
+				fromQueueLengths[fromQueueNum] = fromQueueLength;
 			}
 		} else {
 			for(T number : list) {
-				int queueNum = number.intValue() & PASS_MASK;
-				List<T> fromQueue = fromQueues[queueNum];
-				if(fromQueue==null) fromQueues[queueNum] = fromQueue = new ArrayList<T>();
-				fromQueue.add(number);
+				int fromQueueNum = number.intValue() & PASS_MASK;
+				T[] fromQueue = fromQueues[fromQueueNum];
+				int fromQueueLength = fromQueueLengths[fromQueueNum];
+				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[START_QUEUE_LENGTH];
+				else if(fromQueueLength>=fromQueue.length) {
+					// Grow queue
+					T[] newQueue = (T[])new Number[fromQueueLength<<1];
+					System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
+					fromQueues[fromQueueNum] = fromQueue = newQueue;
+				}
+				fromQueue[fromQueueLength++] = number;
+				fromQueueLengths[fromQueueNum] = fromQueueLength;
 			}
 		}
 		for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
-			for(int i=0; i<PASS_SIZE; i++) {
-				List<T> fromQueue = fromQueues[i];
+			for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
-					for(T number : fromQueue) {
-						int queueNum = (number.intValue() >>> shift) & PASS_MASK;
-						List<T> toQueue = toQueues[queueNum];
-						if(toQueue==null) toQueues[queueNum] = toQueue = new ArrayList<T>();
-						toQueue.add(number);
+					int length = fromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						T number = fromQueue[j];
+						int toQueueNum = (number.intValue() >>> shift) & PASS_MASK;
+						T[] toQueue = toQueues[toQueueNum];
+						int toQueueLength = toQueueLengths[toQueueNum];
+						if(toQueue==null) toQueues[toQueueNum] = toQueue = (T[])new Number[START_QUEUE_LENGTH];
+						else if(toQueueLength>=toQueue.length) {
+							// Grow queue
+							T[] newQueue = (T[])new Number[toQueueLength<<1];
+							System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
+							toQueues[toQueueNum] = toQueue = newQueue;
+						}
+						toQueue[toQueueLength++] = number;
+						toQueueLengths[toQueueNum] = toQueueLength;
 					}
-					fromQueue.clear();
+					fromQueueLengths[fromQueueNum] = 0;
 				}
 			}
 
 			// Swap from and to
-			List<T>[] temp = fromQueues;
+			T[][] temp = fromQueues;
 			fromQueues = toQueues;
 			toQueues = temp;
+			int[] tempLengths = fromQueueLengths;
+			fromQueueLengths = toQueueLengths;
+			toQueueLengths = tempLengths;
 		}
 		// Pick-up fromQueues and put into results, negative before positive to performed signed
 		final int midPoint = PASS_SIZE>>>1;
 		if(useRandomAccess) {
 			// Use indexed strategy
 			int outIndex = 0;
-			for(int i=midPoint; i<PASS_SIZE; i++) {
-				List<T> fromQueue = fromQueues[i];
+			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
-					for(T number : fromQueue) {
+					int length = fromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						T number = fromQueue[j];
 						list.set(outIndex++, number);
 					}
 				}
 			}
-			for(int i=0; i<midPoint; i++) {
-				List<T> fromQueue = fromQueues[i];
+			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
+				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
-					for(T number : fromQueue) {
+					int length = fromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						T number = fromQueue[j];
 						list.set(outIndex++, number);
 					}
 				}
@@ -121,19 +157,23 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		} else {
 			// Use iterator strategy
 			ListIterator<T> iterator = list.listIterator();
-			for(int i=midPoint; i<PASS_SIZE; i++) {
-				List<T> fromQueue = fromQueues[i];
+			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
-					for(T number : fromQueue) {
+					int length = fromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						T number = fromQueue[j];
 						iterator.next();
 						iterator.set(number);
 					}
 				}
 			}
-			for(int i=0; i<midPoint; i++) {
-				List<T> fromQueue = fromQueues[i];
+			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
+				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
-					for(T number : fromQueue) {
+					int length = fromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						T number = fromQueue[j];
 						iterator.next();
 						iterator.set(number);
 					}

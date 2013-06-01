@@ -51,7 +51,15 @@ public class IntegerRadixSortTest extends TestCase {
     private static final Random random = new SecureRandom();
 
 	@SuppressWarnings("unchecked")
-    private <T extends Number> void doTestPerformance(List<T> randomValues, int pass, int testSize) {
+    private <T extends Number> void doTestPerformance(
+		List<T> randomValues,
+		int pass,
+		int testSize,
+		long[] totalOld,
+		long[] totalNew,
+		long[] totalExp,
+		long[] totalJava
+	) {
 		if(GC_EACH_PASS) {
 			System.gc();
 			try {
@@ -61,6 +69,17 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 		}
 
+		// Time experimental radix sort
+		List<T> expRadixResult = new ArrayList<T>(randomValues);
+		long expRadixNanos;
+		{
+			long startNanos = System.nanoTime();
+			IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
+			expRadixNanos = System.nanoTime() - startNanos;
+			totalExp[0] += expRadixNanos;
+			//System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" \u00B5s");
+		}
+
 		// Time new radix sort
 		List<T> newRadixResult = new ArrayList<T>(randomValues);
 		long newRadixNanos;
@@ -68,16 +87,18 @@ public class IntegerRadixSortTest extends TestCase {
 			long startNanos = System.nanoTime();
 			IntegerRadixSortNew.getInstance().sort(newRadixResult);
 			newRadixNanos = System.nanoTime() - startNanos;
+			totalNew[0] += newRadixNanos;
 			//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 		}
 
 		// Time radix sort
-		List<T> radixResult = new ArrayList<T>(randomValues);
-		long radixNanos;
+		List<T> oldRadixResult = new ArrayList<T>(randomValues);
+		long oldRadixNanos;
 		{
 			long startNanos = System.nanoTime();
-			IntegerRadixSort.getInstance().sort(radixResult);
-			radixNanos = System.nanoTime() - startNanos;
+			IntegerRadixSort.getInstance().sort(oldRadixResult);
+			oldRadixNanos = System.nanoTime() - startNanos;
+			totalOld[0] += oldRadixNanos;
 			//System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" \u00B5s");
 		}
 
@@ -88,26 +109,50 @@ public class IntegerRadixSortTest extends TestCase {
 			long startNanos = System.nanoTime();
 			Collections.sort((List)javaResult);
 			javaNanos = System.nanoTime() - startNanos;
+			totalJava[0] += javaNanos;
 			//System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" \u00B5s");
 		}
-		System.out.println(pass+"/"+testSize+": Speedup (Old/New): "+BigDecimal.valueOf(javaNanos * 1000 / radixNanos, 3) + " / " + BigDecimal.valueOf(javaNanos * 1000 / newRadixNanos, 3));
 
-		// TODO: Display speedup
+		// Display speedup
+		System.out.println(
+			pass
+			+ "/"
+			+ testSize
+			+ ": Speedup (Old/New/Experimental): "
+			+ BigDecimal.valueOf(javaNanos * 1000 / oldRadixNanos, 3)
+			+ " / "
+			+ BigDecimal.valueOf(javaNanos * 1000 / newRadixNanos, 3)
+			+ " / "
+			+ BigDecimal.valueOf(javaNanos * 1000 / expRadixNanos, 3)
+		);
 
-		assertEquals(javaResult, radixResult);
+		assertEquals(javaResult, oldRadixResult);
     }
 
     public void testPerformance() {
         final int numTests = 9;
         final int endTestSize = 1000000;
+		long[] totalOld = new long[1];
+		long[] totalNew = new long[1];
+		long[] totalExp = new long[1];
+		long[] totalJava = new long[1];
         List<Integer> randomValues = new ArrayList<Integer>(endTestSize);
         for(int testSize = 1; testSize<=endTestSize; testSize *= 10) {
             // Generate testSize random ints
             while(randomValues.size()<testSize) randomValues.add(random.nextInt());
 
 			for(int pass=1; pass<=numTests; pass++) {
-				doTestPerformance(randomValues, pass, testSize);
+				doTestPerformance(randomValues, pass, testSize, totalOld, totalNew, totalExp, totalJava);
 			}
         }
+		// Display total speedup
+		System.out.println(
+			"Total Speedup (Old/New/Experimental): "
+			+ BigDecimal.valueOf(totalJava[0] * 1000 / totalOld[0], 3)
+			+ " / "
+			+ BigDecimal.valueOf(totalJava[0] * 1000 / totalNew[0], 3)
+			+ " / "
+			+ BigDecimal.valueOf(totalJava[0] * 1000 / totalExp[0], 3)
+		);
     }
 }

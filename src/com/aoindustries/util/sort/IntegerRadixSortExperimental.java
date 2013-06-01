@@ -43,7 +43,7 @@ final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
 
 	private static final boolean USE_SMALL_THREAD_LOCAL = true;
 
-	private static final boolean USE_LARGE_DELAYED_ALLOCATE = false;
+	private static final boolean USE_LARGE_DELAYED_ALLOCATE = true;
 
 	private static final boolean FORCE_LIST_ITERATOR = false;
 
@@ -97,48 +97,48 @@ final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
 		final boolean useRandomAccess = (list instanceof RandomAccess);
 		@SuppressWarnings("unchecked")
 		int[][] fromQueues = (USE_SMALL_THREAD_LOCAL ? IntegerRadixSortExperimental.fromQueues.get() : new int[PASS_SIZE][size]);
-		int[] fromQueueLenths = new int[PASS_SIZE];
+		int[] fromQueueLengths = new int[PASS_SIZE];
 		@SuppressWarnings("unchecked")
 		int[][] toQueues = (USE_SMALL_THREAD_LOCAL ? IntegerRadixSortExperimental.toQueues.get() : new int[PASS_SIZE][size]);
-		int[] toQueueLenths = new int[PASS_SIZE];
+		int[] toQueueLengths = new int[PASS_SIZE];
 		// Initial population of elements into fromQueues
 		if(USE_TO_ARRAY) {
 			for(int i=0;i<size;i++) {
 				int queueNum = array[i].intValue() & PASS_MASK;
-				fromQueues[queueNum][fromQueueLenths[queueNum]++] = i;
+				fromQueues[queueNum][fromQueueLengths[queueNum]++] = i;
 			}
 		} else if (useRandomAccess) {
 			for(int i=0;i<size;i++) {
 				int queueNum = list.get(i).intValue() & PASS_MASK;
-				fromQueues[queueNum][fromQueueLenths[queueNum]++] = i;
+				fromQueues[queueNum][fromQueueLengths[queueNum]++] = i;
 			}
 		} else {
 			int i = 0;
 			for(T number : list) {
 				int queueNum = number.intValue() & PASS_MASK;
-				fromQueues[queueNum][fromQueueLenths[queueNum]++] = i++;
+				fromQueues[queueNum][fromQueueLengths[queueNum]++] = i++;
 			}
 		}
 		for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
 			for(int i=0; i<PASS_SIZE; i++) {
 				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLenths[i];
+				int length = fromQueueLengths[i];
 				for(int j=0; j<length; j++) {
 					int index = fromQueue[j];
 					T number = USE_TO_ARRAY ? array[index] : list.get(index);
 					int queueNum = (number.intValue() >>> shift) & PASS_MASK;
-					toQueues[queueNum][toQueueLenths[queueNum]++] = index;
+					toQueues[queueNum][toQueueLengths[queueNum]++] = index;
 				}
-				fromQueueLenths[i] = 0;
+				fromQueueLengths[i] = 0;
 			}
 
 			// Swap from and to
 			int[][] tempQueues = fromQueues;
 			fromQueues = toQueues;
 			toQueues = tempQueues;
-			int[] tempLengths = fromQueueLenths;
-			fromQueueLenths = toQueueLenths;
-			toQueueLenths = tempLengths;
+			int[] tempLengths = fromQueueLengths;
+			fromQueueLengths = toQueueLengths;
+			toQueueLengths = tempLengths;
 		}
 		// Pick-up fromQueues and put into results, negative before positive to performed signed
 		final int midPoint = PASS_SIZE>>>1;
@@ -147,7 +147,7 @@ final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
 			int outIndex = 0;
 			for(int i=midPoint; i<PASS_SIZE; i++) {
 				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLenths[i];
+				int length = fromQueueLengths[i];
 				for(int j=0; j<length; j++) {
 					int index = fromQueue[j];
 					T number = USE_TO_ARRAY ? array[index] : list.get(index);
@@ -156,7 +156,7 @@ final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
 			}
 			for(int i=0; i<midPoint; i++) {
 				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLenths[i];
+				int length = fromQueueLengths[i];
 				for(int j=0; j<length; j++) {
 					int index = fromQueue[j];
 					T number = USE_TO_ARRAY ? array[index] : list.get(index);
@@ -168,7 +168,7 @@ final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
 			ListIterator<T> iterator = list.listIterator();
 			for(int i=midPoint; i<PASS_SIZE; i++) {
 				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLenths[i];
+				int length = fromQueueLengths[i];
 				for(int j=0; j<length; j++) {
 					int index = fromQueue[j];
 					T number = USE_TO_ARRAY ? array[index] : list.get(index);
@@ -178,7 +178,7 @@ final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
 			}
 			for(int i=0; i<midPoint; i++) {
 				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLenths[i];
+				int length = fromQueueLengths[i];
 				for(int j=0; j<length; j++) {
 					int index = fromQueue[j];
 					T number = USE_TO_ARRAY ? array[index] : list.get(index);
