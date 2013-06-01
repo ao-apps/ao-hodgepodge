@@ -34,9 +34,11 @@ import java.util.RandomAccess;
  */
 final public class IntegerRadixSort extends SortAlgorithm<Number> {
 
+	/*
 	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
 	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
 	private static final int PASS_MASK = PASS_SIZE - 1;
+	 */
 
 	private static final int START_QUEUE_LENGTH = 16;
 
@@ -49,11 +51,24 @@ final public class IntegerRadixSort extends SortAlgorithm<Number> {
     private IntegerRadixSort() {
     }
 
+	// TODO: Default queues to the average length of queues (or a little more/double?) to avoid resize on well distributed data?
 	@Override
     public <T extends Number> void sort(List<T> list, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
 		final int size = list.size();
 		final boolean useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
+		// Dynamically choose pass size
+		final int BITS_PER_PASS;
+		if(size <= 0x100) {
+			BITS_PER_PASS = 4;
+		} else if(size <= 0x10000) {
+			BITS_PER_PASS = 8;
+		} else {
+			BITS_PER_PASS = 16; // Must be power of two and less than or equal to 32
+		}
+		final int PASS_SIZE = 1 << BITS_PER_PASS;
+		final int PASS_MASK = PASS_SIZE - 1;
+
 		@SuppressWarnings("unchecked")
 		T[][] fromQueues = (T[][])new Number[PASS_SIZE][];
 		int[] fromQueueLengths = new int[PASS_SIZE];
@@ -65,10 +80,13 @@ final public class IntegerRadixSort extends SortAlgorithm<Number> {
 		//	toQueues[i] = new ArrayList<T>();
 		//}
 		// Initial population of elements into fromQueues
+		int bitsSeen = 0; // Set of all bits seen for small positive value shortcut (stopBit)
 		if(useRandomAccess) {
 			for(int i=0;i<size;i++) {
 				T number = list.get(i);
-				int fromQueueNum = number.intValue() & PASS_MASK;
+				int numInt = number.intValue();
+				bitsSeen |= numInt;
+				int fromQueueNum = numInt & PASS_MASK;
 				T[] fromQueue = fromQueues[fromQueueNum];
 				int fromQueueLength = fromQueueLengths[fromQueueNum];
 				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[START_QUEUE_LENGTH];
@@ -83,7 +101,9 @@ final public class IntegerRadixSort extends SortAlgorithm<Number> {
 			}
 		} else {
 			for(T number : list) {
-				int fromQueueNum = number.intValue() & PASS_MASK;
+				int numInt = number.intValue();
+				bitsSeen |= numInt;
+				int fromQueueNum = numInt & PASS_MASK;
 				T[] fromQueue = fromQueues[fromQueueNum];
 				int fromQueueLength = fromQueueLengths[fromQueueNum];
 				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[START_QUEUE_LENGTH];
@@ -97,7 +117,63 @@ final public class IntegerRadixSort extends SortAlgorithm<Number> {
 				fromQueueLengths[fromQueueNum] = fromQueueLength;
 			}
 		}
-		for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
+		// Short-cut number of passes for all positive values
+		final int stopBits;
+		final int midPoint;
+		if(BITS_PER_PASS==4) {
+			// 4 bits per pass
+			if((bitsSeen & 0xfffffff0)==0) {
+				stopBits = 4;
+				midPoint = 0;
+			} else if((bitsSeen & 0xffffff00)==0) {
+				stopBits = 8;
+				midPoint = 0;
+			} else if((bitsSeen & 0xfffff000)==0) {
+				stopBits = 12;
+				midPoint = 0;
+			} else if((bitsSeen & 0xffff0000)==0) {
+				stopBits = 16;
+				midPoint = 0;
+			} else if((bitsSeen & 0xfff00000)==0) {
+				stopBits = 20;
+				midPoint = 0;
+			} else if((bitsSeen & 0xff000000)==0) {
+				stopBits = 24;
+				midPoint = 0;
+			} else if((bitsSeen & 0xf0000000)==0) {
+				stopBits = 28;
+				midPoint = 0;
+			} else {
+				stopBits = 32;
+				midPoint = PASS_SIZE>>>1;
+			}
+		} else if(BITS_PER_PASS==8) {
+			// 8 bits per pass
+			if((bitsSeen & 0xffffff00)==0) {
+				stopBits = 8;
+				midPoint = 0;
+			} else if((bitsSeen & 0xffff0000)==0) {
+				stopBits = 16;
+				midPoint = 0;
+			} else if((bitsSeen & 0xff000000)==0) {
+				stopBits = 24;
+				midPoint = 0;
+			} else {
+				stopBits = 32;
+				midPoint = PASS_SIZE>>>1;
+			}
+		} else {
+			// 16 bits per pass
+			if((bitsSeen & 0xffff0000)==0) {
+				stopBits = 16;
+				midPoint = 0;
+			} else {
+				stopBits = 32;
+				midPoint = PASS_SIZE>>>1;
+			}
+		}
+
+		for(int shift=BITS_PER_PASS; shift<stopBits; shift += BITS_PER_PASS) {
 			for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
 				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
@@ -130,7 +206,6 @@ final public class IntegerRadixSort extends SortAlgorithm<Number> {
 			toQueueLengths = tempLengths;
 		}
 		// Pick-up fromQueues and put into results, negative before positive to performed signed
-		final int midPoint = PASS_SIZE>>>1;
 		if(useRandomAccess) {
 			// Use indexed strategy
 			int outIndex = 0;

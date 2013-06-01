@@ -39,7 +39,7 @@ public class IntegerRadixSortTest extends TestCase {
 
 	private static final boolean GC_EACH_PASS = true;
 	private static final long GC_SLEEP_TIME = 100;
-	private static final boolean RANDOM_FULL = false;
+	private static final boolean RANDOM_FULL = true;
 	private static final int RANDOM_RANGE = 0x10000;
 
     public IntegerRadixSortTest(String testName) {

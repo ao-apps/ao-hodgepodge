@@ -51,6 +51,7 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
     private IntegerRadixSortNew() {
     }
 
+	// TODO: Default queues to the average length of queues (or a little more/double?) to avoid resize on well distributed data?
 	@Override
     public <T extends Number> void sort(List<T> list, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
@@ -58,9 +59,9 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		final boolean useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
 		// Dynamically choose pass size
 		final int BITS_PER_PASS;
-		if(size <= 0x1000) {
+		if(size <= 0x100) {
 			BITS_PER_PASS = 4;
-		} else if(size <= 0x1000000) {
+		} else if(size <= 0x10000) {
 			BITS_PER_PASS = 8;
 		} else {
 			BITS_PER_PASS = 16; // Must be power of two and less than or equal to 32
