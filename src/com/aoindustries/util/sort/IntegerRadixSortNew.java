@@ -33,19 +33,19 @@ import java.util.RandomAccess;
  *
  * @author  AO Industries, Inc.
  */
-final public class IntegerRadixSort extends SortAlgorithm<Number> {
+final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 
 	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
 	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
 	private static final int PASS_MASK = PASS_SIZE - 1;
 
-    private static final IntegerRadixSort instance = new IntegerRadixSort();
+    private static final IntegerRadixSortNew instance = new IntegerRadixSortNew();
 
-    public static IntegerRadixSort getInstance() {
+    public static IntegerRadixSortNew getInstance() {
         return instance;
     }
 
-    private IntegerRadixSort() {
+    private IntegerRadixSortNew() {
     }
 
 	@Override

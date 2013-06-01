@@ -61,6 +61,16 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 		}
 
+		// Time new radix sort
+		List<T> newRadixResult = new ArrayList<T>(randomValues);
+		long newRadixNanos;
+		{
+			long startNanos = System.nanoTime();
+			IntegerRadixSortNew.getInstance().sort(newRadixResult);
+			newRadixNanos = System.nanoTime() - startNanos;
+			//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+		}
+
 		// Time radix sort
 		List<T> radixResult = new ArrayList<T>(randomValues);
 		long radixNanos;
@@ -69,16 +79,6 @@ public class IntegerRadixSortTest extends TestCase {
 			IntegerRadixSort.getInstance().sort(radixResult);
 			radixNanos = System.nanoTime() - startNanos;
 			//System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" \u00B5s");
-		}
-
-		// Time new radix sort
-		List<T> newRadixResult = new ArrayList<T>(randomValues);
-		long newRadixNanos;
-		{
-			long startNanos = System.nanoTime();
-			IntegerRadixSortExperimental.getInstance().sort(newRadixResult);
-			newRadixNanos = System.nanoTime() - startNanos;
-			//System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 		}
 
 		// Time Java sort
