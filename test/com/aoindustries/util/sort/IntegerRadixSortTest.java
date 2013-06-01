@@ -60,7 +60,10 @@ public class IntegerRadixSortTest extends TestCase {
 		long[] totalOld,
 		long[] totalNew,
 		long[] totalExp,
-		long[] totalJava
+		long[] totalJava,
+		long[] avgSumOld,
+		long[] avgSumNew,
+		long[] avgSumExp
 	) {
 		if(GC_EACH_PASS) {
 			System.gc();
@@ -82,17 +85,6 @@ public class IntegerRadixSortTest extends TestCase {
 			//System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" \u00B5s");
 		}
 
-		// Time radix sort
-		List<T> oldRadixResult = new ArrayList<T>(randomValues);
-		long oldRadixNanos;
-		{
-			long startNanos = System.nanoTime();
-			IntegerRadixSort.getInstance().sort(oldRadixResult);
-			oldRadixNanos = System.nanoTime() - startNanos;
-			totalOld[0] += oldRadixNanos;
-			//System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" \u00B5s");
-		}
-
 		// Time new radix sort
 		List<T> newRadixResult = new ArrayList<T>(randomValues);
 		long newRadixNanos;
@@ -102,6 +94,17 @@ public class IntegerRadixSortTest extends TestCase {
 			newRadixNanos = System.nanoTime() - startNanos;
 			totalNew[0] += newRadixNanos;
 			//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+		}
+
+		// Time radix sort
+		List<T> oldRadixResult = new ArrayList<T>(randomValues);
+		long oldRadixNanos;
+		{
+			long startNanos = System.nanoTime();
+			IntegerRadixSort.getInstance().sort(oldRadixResult);
+			oldRadixNanos = System.nanoTime() - startNanos;
+			totalOld[0] += oldRadixNanos;
+			//System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" \u00B5s");
 		}
 
 		// Time Java sort
@@ -115,17 +118,25 @@ public class IntegerRadixSortTest extends TestCase {
 			//System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" \u00B5s");
 		}
 
+		// Calculate scaled values
+		long scaledOld = javaNanos * 1000 / oldRadixNanos;
+		long scaledNew = javaNanos * 1000 / newRadixNanos;
+		long scaledExp = javaNanos * 1000 / expRadixNanos;
+		// Update average sums
+		avgSumOld[0] += scaledOld;
+		avgSumNew[0] += scaledNew;
+		avgSumExp[0] += scaledExp;
 		// Display speedup
 		System.out.println(
 			pass
 			+ "/"
 			+ testSize
 			+ ": Speedup (Old/New/Experimental): "
-			+ BigDecimal.valueOf(javaNanos * 1000 / oldRadixNanos, 3)
+			+ BigDecimal.valueOf(scaledOld, 3)
 			+ " / "
-			+ BigDecimal.valueOf(javaNanos * 1000 / newRadixNanos, 3)
+			+ BigDecimal.valueOf(scaledNew, 3)
 			+ " / "
-			+ BigDecimal.valueOf(javaNanos * 1000 / expRadixNanos, 3)
+			+ BigDecimal.valueOf(scaledExp, 3)
 		);
 
 		assertEquals(javaResult, oldRadixResult);
@@ -140,13 +151,18 @@ public class IntegerRadixSortTest extends TestCase {
 		long[] totalNew = new long[1];
 		long[] totalExp = new long[1];
 		long[] totalJava = new long[1];
+		long[] avgSumOld = new long[1];
+		long[] avgSumNew = new long[1];
+		long[] avgSumExp = new long[1];
         List<Integer> randomValues = new ArrayList<Integer>(endTestSize);
+		int tests = 0;
         for(int testSize = 1; testSize<=endTestSize; testSize *= 2) {
             // Generate testSize random ints
             while(randomValues.size()<testSize) randomValues.add(RANDOM_FULL ? random.nextInt() : random.nextInt(RANDOM_RANGE));
 
 			for(int pass=1; pass<=numTests; pass++) {
-				doTestPerformance(randomValues, pass, testSize, totalOld, totalNew, totalExp, totalJava);
+				tests++;
+				doTestPerformance(randomValues, pass, testSize, totalOld, totalNew, totalExp, totalJava, avgSumOld, avgSumNew, avgSumExp);
 			}
         }
 		// Display total speedup
@@ -157,6 +173,14 @@ public class IntegerRadixSortTest extends TestCase {
 			+ BigDecimal.valueOf(totalJava[0] * 1000 / totalNew[0], 3)
 			+ " / "
 			+ BigDecimal.valueOf(totalJava[0] * 1000 / totalExp[0], 3)
+		);
+		System.out.println(
+			"Average Speedup (Old/New/Experimental): "
+			+ BigDecimal.valueOf(avgSumOld[0] / tests, 3)
+			+ " / "
+			+ BigDecimal.valueOf(avgSumNew[0] / tests, 3)
+			+ " / "
+			+ BigDecimal.valueOf(avgSumExp[0] / tests, 3)
 		);
     }
 }

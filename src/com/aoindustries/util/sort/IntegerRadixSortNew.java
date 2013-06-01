@@ -34,6 +34,12 @@ import java.util.RandomAccess;
  */
 final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 
+	/*
+	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
+	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
+	private static final int PASS_MASK = PASS_SIZE - 1;
+	 */
+
 	private static final int START_QUEUE_LENGTH = 16;
 
 	private static final IntegerRadixSortNew instance = new IntegerRadixSortNew();
@@ -51,23 +57,23 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		final int size = list.size();
 		final boolean useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
 		// Dynamically choose pass size
-		final int bitsPerPass;
-		if(size <= 0x100) {
-			bitsPerPass = 4;
-		} else if(size <= 0x10000) {
-			bitsPerPass = 8;
+		final int BITS_PER_PASS;
+		if(size <= 0x1000) {
+			BITS_PER_PASS = 4;
+		} else if(size <= 0x1000000) {
+			BITS_PER_PASS = 8;
 		} else {
-			bitsPerPass = 16; // Must be power of two and less than or equal to 32
+			BITS_PER_PASS = 16; // Must be power of two and less than or equal to 32
 		}
-		final int passSize = 1 << bitsPerPass;
-		final int passMask = passSize - 1;
+		final int PASS_SIZE = 1 << BITS_PER_PASS;
+		final int PASS_MASK = PASS_SIZE - 1;
 
 		@SuppressWarnings("unchecked")
-		T[][] fromQueues = (T[][])new Number[passSize][];
-		int[] fromQueueLengths = new int[passSize];
+		T[][] fromQueues = (T[][])new Number[PASS_SIZE][];
+		int[] fromQueueLengths = new int[PASS_SIZE];
 		@SuppressWarnings("unchecked")
-		T[][] toQueues = (T[][])new Number[passSize][];
-		int[] toQueueLengths = new int[passSize];
+		T[][] toQueues = (T[][])new Number[PASS_SIZE][];
+		int[] toQueueLengths = new int[PASS_SIZE];
 		//for(int i=0; i<PASS_SIZE; i++) {
 		//	fromQueues[i] = new ArrayList<T>();
 		//	toQueues[i] = new ArrayList<T>();
@@ -79,7 +85,7 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 				T number = list.get(i);
 				int numInt = number.intValue();
 				bitsSeen |= numInt;
-				int fromQueueNum = numInt & passMask;
+				int fromQueueNum = numInt & PASS_MASK;
 				T[] fromQueue = fromQueues[fromQueueNum];
 				int fromQueueLength = fromQueueLengths[fromQueueNum];
 				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[START_QUEUE_LENGTH];
@@ -96,7 +102,7 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 			for(T number : list) {
 				int numInt = number.intValue();
 				bitsSeen |= numInt;
-				int fromQueueNum = numInt & passMask;
+				int fromQueueNum = numInt & PASS_MASK;
 				T[] fromQueue = fromQueues[fromQueueNum];
 				int fromQueueLength = fromQueueLengths[fromQueueNum];
 				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[START_QUEUE_LENGTH];
@@ -113,7 +119,7 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		// Short-cut number of passes for all positive values
 		final int stopBits;
 		final int midPoint;
-		if(bitsPerPass==4) {
+		if(BITS_PER_PASS==4) {
 			// 4 bits per pass
 			if((bitsSeen & 0xfffffff0)==0) {
 				stopBits = 4;
@@ -138,9 +144,9 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 				midPoint = 0;
 			} else {
 				stopBits = 32;
-				midPoint = passSize>>>1;
+				midPoint = PASS_SIZE>>>1;
 			}
-		} else if(bitsPerPass==8) {
+		} else if(BITS_PER_PASS==8) {
 			// 8 bits per pass
 			if((bitsSeen & 0xffffff00)==0) {
 				stopBits = 8;
@@ -153,7 +159,7 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 				midPoint = 0;
 			} else {
 				stopBits = 32;
-				midPoint = passSize>>>1;
+				midPoint = PASS_SIZE>>>1;
 			}
 		} else {
 			// 16 bits per pass
@@ -162,18 +168,18 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 				midPoint = 0;
 			} else {
 				stopBits = 32;
-				midPoint = passSize>>>1;
+				midPoint = PASS_SIZE>>>1;
 			}
 		}
 
-		for(int shift=bitsPerPass; shift<stopBits; shift += bitsPerPass) {
-			for(int fromQueueNum=0; fromQueueNum<passSize; fromQueueNum++) {
+		for(int shift=BITS_PER_PASS; shift<stopBits; shift += BITS_PER_PASS) {
+			for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
 				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
 					int length = fromQueueLengths[fromQueueNum];
 					for(int j=0; j<length; j++) {
 						T number = fromQueue[j];
-						int toQueueNum = (number.intValue() >>> shift) & passMask;
+						int toQueueNum = (number.intValue() >>> shift) & PASS_MASK;
 						T[] toQueue = toQueues[toQueueNum];
 						int toQueueLength = toQueueLengths[toQueueNum];
 						if(toQueue==null) toQueues[toQueueNum] = toQueue = (T[])new Number[START_QUEUE_LENGTH];
@@ -202,7 +208,7 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		if(useRandomAccess) {
 			// Use indexed strategy
 			int outIndex = 0;
-			for(int fromQueueNum=midPoint; fromQueueNum<passSize; fromQueueNum++) {
+			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
 				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
 					int length = fromQueueLengths[fromQueueNum];
@@ -225,7 +231,7 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		} else {
 			// Use iterator strategy
 			ListIterator<T> iterator = list.listIterator();
-			for(int fromQueueNum=midPoint; fromQueueNum<passSize; fromQueueNum++) {
+			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
 				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
 					int length = fromQueueLengths[fromQueueNum];
