@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,16 +22,16 @@
  */
 package com.aoindustries.util.sort;
 
-import com.aoindustries.sql.*;
-import com.aoindustries.util.*;
-import java.io.*;
+import com.aoindustries.sql.SQLUtility;
+import com.aoindustries.util.StringUtility;
+import java.io.PrintWriter;
 
 /**
  * Sorting statistics to help determine best algorithm for a specific task.
  *
  * @author  AO Industries, Inc.
  */
-public class SortStatistics {
+final public class SortStatistics {
 
     private long startTime;
     private int currentRecursion;

@@ -1,5 +1,3 @@
-package com.aoindustries.util.sort;
-
 /*
  * @(#)QubbleSortAlgorithm.java	1.0 95/06/26 Jim Boritz
  *
@@ -18,7 +16,10 @@ package com.aoindustries.util.sort;
  * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
  */
-import java.util.*;
+package com.aoindustries.util.sort;
+
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * An quick sort with buble sort speedup  demonstration algorithm
@@ -41,80 +42,30 @@ import java.util.*;
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/QubbleSortAlgorithm.java.html'>Jim Boritz' QubbleSortAlgorithm</a>.
  */
-public class QubbleSort extends SortAlgorithm {
+final public class QubbleSort extends SortAlgorithm<Object> {
 
-    protected QubbleSort() {
-    }
+	private static final QubbleSort instance = new QubbleSort();
 
-    public <T> void sort(List<T> list) {
-        sortStatic(list);
-    }
-    
-    public <T> void sort(T[] array) {
-        sortStatic(array);
+	public static QubbleSort getInstance() {
+		return instance;
+	}
+
+    private QubbleSort() {
     }
 
-    public <T> void sort(List<T> list, SortStatistics stats) {
-        sortStatic(list, stats);
-    }
-
-    public <T> void sort(T[] array, SortStatistics stats) {
-        sortStatic(array, stats);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator);
-    }
-    
-    public <T> void sort(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(list, comparator, stats);
-    }
-
-    public <T> void sort(T[] array, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(array, comparator, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list) {
-        sortStatic(list, null, null);
-    }
-    
-    public static <T> void sortStatic(T[] array) {
-        sortStatic(array, null, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, SortStatistics stats) {
-        sortStatic(list, null, stats);
-    }
-
-    public static <T> void sortStatic(T[] array, SortStatistics stats) {
-        sortStatic(array, null, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator, null);
-    }
-    
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator, SortStatistics stats) {
+    public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         sort(list, 0, list.size()-1, comparator, stats);
         if(stats!=null) stats.sortEnding();
     }
 
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator, SortStatistics stats) {
+    public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         sort(array, 0, array.length-1, comparator, stats);
         if(stats!=null) stats.sortEnding();
     }
 
-    private static <T> void sort(List<T> list, int lo0, int hi0, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void sort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
         int lo = lo0;
         int hi = hi0;
 
@@ -184,7 +135,7 @@ public class QubbleSort extends SortAlgorithm {
         if(stats!=null) stats.sortUnrecursing();
     }
 
-    private static <T> void sort(T[] array, int lo0, int hi0, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void sort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
         int lo = lo0;
         int hi = hi0;
 
@@ -254,7 +205,7 @@ public class QubbleSort extends SortAlgorithm {
         if(stats!=null) stats.sortUnrecursing();
     }
 
-    private static <T> void bsort(List<T> list, int lo, int hi, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void bsort(List<T> list, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
         for (int j=hi; j > lo; j--) {
             for (int i=lo; i < j; i++) {
                 T O1=get(list, i, stats);
@@ -267,7 +218,7 @@ public class QubbleSort extends SortAlgorithm {
         }
     }
 
-    private static <T> void bsort(T[] array, int lo, int hi, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void bsort(T[] array, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
         for (int j=hi; j > lo; j--) {
             for (int i=lo; i < j; i++) {
                 T O1=get(array, i, stats);

@@ -1,5 +1,3 @@
-package com.aoindustries.util.sort;
-
 /*
  * @(#)QSortAlgorithm.java	1.3   29 Feb 1996 James Gosling
  *
@@ -30,7 +28,10 @@ package com.aoindustries.util.sort;
  * SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF FITNESS FOR
  * HIGH RISK ACTIVITIES.
  */
-import java.util.*;
+package com.aoindustries.util.sort;
+
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * A quick sort demonstration algorithm
@@ -50,68 +51,19 @@ import java.util.*;
  * 2003-11-06 - Dan Armstrong - To avoid worst-case scenarios, if the quickSort recursion depth exceeds <code>(int)(10*Math.log(list.size()))</code>,
  *                              the algorithm will quit and a HeapSort will be performed.
  */
-public class FastQSort extends SortAlgorithm {
+final public class FastQSort extends SortAlgorithm<Object> {
 
-    protected FastQSort() {
-    }
+    private static final FastQSort instance = new FastQSort();
 
-    public <T> void sort(List<T> list) {
-        sortStatic(list);
-    }
-    
-    public <T> void sort(T[] array) {
-        sortStatic(array);
+    public static FastQSort getInstance() {
+        return instance;
     }
 
-    public <T> void sort(List<T> list, SortStatistics stats) {
-        sortStatic(list, stats);
+    private FastQSort() {
     }
 
-    public <T> void sort(T[] array, SortStatistics stats) {
-        sortStatic(array, stats);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator);
-    }
-    
-    public <T> void sort(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(list, comparator, stats);
-    }
-
-    public <T> void sort(T[] array, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(array, comparator, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list) {
-        sortStatic(list, null, null);
-    }
-    
-    public static <T> void sortStatic(T[] array) {
-        sortStatic(array, null, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, SortStatistics stats) {
-        sortStatic(list, null, stats);
-    }
-
-    public static <T> void sortStatic(T[] array, SortStatistics stats) {
-        sortStatic(array, null, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator, null);
-    }
-    
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator, SortStatistics stats) {
+	@Override
+    public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         int length=list.size();
         if(quickSort(list, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
@@ -119,12 +71,13 @@ public class FastQSort extends SortAlgorithm {
         } else {
             // If quickSort fails, do a more constant-time HeapSort on the remaining data
             if(stats!=null) stats.sortSwitchingAlgorithms();
-            HeapSort.sortStatic0(list, comparator, stats);
+            HeapSort.heapSort(list, comparator, stats);
         }
         if(stats!=null) stats.sortEnding();
     }
 
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator, SortStatistics stats) {
+	@Override
+    public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         int length=array.length;
         if(quickSort(array, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
@@ -132,7 +85,7 @@ public class FastQSort extends SortAlgorithm {
         } else {
             // If quickSort fails, do a more constant-time HeapSort on the remaining data
             if(stats!=null) stats.sortSwitchingAlgorithms();
-            HeapSort.sortStatic0(array, comparator, stats);
+            HeapSort.heapSort(array, comparator, stats);
         }
         if(stats!=null) stats.sortEnding();
     }
@@ -154,7 +107,7 @@ public class FastQSort extends SortAlgorithm {
      *
      * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
      */
-    private static <T> boolean quickSort(List<T> list, int l, int r, Comparator<T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
+    private static <T> boolean quickSort(List<T> list, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
         int M=4;
 
         if((r-l)>M) {
@@ -206,7 +159,7 @@ public class FastQSort extends SortAlgorithm {
      *
      * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
      */
-    private static <T> boolean quickSort(T[] array, int l, int r, Comparator<T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
+    private static <T> boolean quickSort(T[] array, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
         int M=4;
 
         if((r-l)>M) {
@@ -241,7 +194,7 @@ public class FastQSort extends SortAlgorithm {
         return true;
     } 
 
-    private static <T> void insertionSort(List<T> list, int lo0, int hi0, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void insertionSort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
         for(int i=lo0+1;i<=hi0;i++) {
             T v=get(list, i, stats);
             int j=i;
@@ -257,7 +210,7 @@ public class FastQSort extends SortAlgorithm {
         }
     }
 
-    private static <T> void insertionSort(T[] array, int lo0, int hi0, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void insertionSort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
         for(int i=lo0+1;i<=hi0;i++) {
             T v=get(array, i, stats);
             int j=i;

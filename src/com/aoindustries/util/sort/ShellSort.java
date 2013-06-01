@@ -1,5 +1,3 @@
-package com.aoindustries.util.sort;
-
 /*
  * @(#)ShellSortAlgorithm.java	1.1 2000/04/12 Jason Harrison
  *
@@ -18,8 +16,10 @@ package com.aoindustries.util.sort;
  * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
  */
+package com.aoindustries.util.sort;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * A shell sort demonstration algorithm
@@ -46,89 +46,39 @@ import java.util.*;
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/ShellSortAlgorithm.java.html'>Jason Harrison's ShellSortAlgorithm</a>.
  */
-public class ShellSort extends SortAlgorithm {
+final public class ShellSort extends SortAlgorithm<Object> {
 
-    protected ShellSort() {
-    }
+	private static final ShellSort instance = new ShellSort();
 
-    public <T> void sort(List<T> list) {
-        sortStatic(list);
-    }
-    
-    public <T> void sort(T[] array) {
-        sortStatic(array);
+	public static ShellSort getInstance() {
+		return instance;
+	}
+
+    private ShellSort() {
     }
 
-    public <T> void sort(List<T> list, SortStatistics stats) {
-        sortStatic(list, stats);
-    }
-
-    public <T> void sort(T[] array, SortStatistics stats) {
-        sortStatic(array, stats);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator);
-    }
-    
-    public <T> void sort(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(list, comparator, stats);
-    }
-
-    public <T> void sort(T[] array, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(array, comparator, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list) {
-        sortStatic(list, null, null);
-    }
-    
-    public static <T> void sortStatic(T[] array) {
-        sortStatic(array, null, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, SortStatistics stats) {
-        sortStatic(list, null, stats);
-    }
-
-    public static <T> void sortStatic(T[] array, SortStatistics stats) {
-        sortStatic(array, null, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator, null);
-    }
-    
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator, SortStatistics stats) {
+    public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
 
         int h=1;
 
         int length=list.size();
-        /* 
-         * find the largest h value possible 
+        /*
+         * find the largest h value possible
          */
         while ((h*3+1) < length) {
             h=3*h+1;
         }
 
-        /* 
-         * while h remains larger than 0 
+        /*
+         * while h remains larger than 0
          */
         while( h > 0 ) {
-            /* 
+            /*
              * for each set of elements (there are h sets)
              */
             for (int i = h - 1; i < length; i++) {
-                /* 
+                /*
                  * pick the last element in the set
                  */
                 T B = get(list, i, stats);
@@ -146,7 +96,7 @@ public class ShellSort extends SortAlgorithm {
                  */
                 set(list, j, B, stats);
             }
-            /* 
+            /*
              * all sets h-sorted, now decrease set size
              */
             h = h / 3;
@@ -155,28 +105,28 @@ public class ShellSort extends SortAlgorithm {
         if(stats!=null) stats.sortEnding();
     }
 
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator, SortStatistics stats) {
+    public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
 
         int h=1;
 
         int length=array.length;
-        /* 
-         * find the largest h value possible 
+        /*
+         * find the largest h value possible
          */
         while ((h*3+1) < length) {
             h=3*h+1;
         }
 
-        /* 
-         * while h remains larger than 0 
+        /*
+         * while h remains larger than 0
          */
         while( h > 0 ) {
-            /* 
+            /*
              * for each set of elements (there are h sets)
              */
             for (int i = h - 1; i < length; i++) {
-                /* 
+                /*
                  * pick the last element in the set
                  */
                 T B = get(array, i, stats);
@@ -194,7 +144,7 @@ public class ShellSort extends SortAlgorithm {
                  */
                 set(array, j, B, stats);
             }
-            /* 
+            /*
              * all sets h-sorted, now decrease set size
              */
             h = h / 3;

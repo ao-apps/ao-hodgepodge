@@ -1,5 +1,3 @@
-package com.aoindustries.util.sort;
-
 /*
  * @(#)HeapSortAlgorithm.java	1.0 95/06/23 Jason Harrison
  *
@@ -18,8 +16,10 @@ package com.aoindustries.util.sort;
  * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
  */
+package com.aoindustries.util.sort;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * A heap sort demonstration algorithm
@@ -30,80 +30,32 @@ import java.util.*;
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/HeapSortAlgorithm.java.html'>Jason Harrison's HeapSortAlgorithm</a>.
  */
-public class HeapSort extends SortAlgorithm {
+final public class HeapSort extends SortAlgorithm<Object> {
 
-    protected HeapSort() {
-    }
+	private static final HeapSort instance = new HeapSort();
 
-    public <T> void sort(List<T> list) {
-        sortStatic(list);
-    }
-    
-    public <T> void sort(T[] array) {
-        sortStatic(array);
+	public static HeapSort getInstance() {
+		return instance;
+	}
+
+    private HeapSort() {
     }
 
-    public <T> void sort(List<T> list, SortStatistics stats) {
-        sortStatic(list, stats);
-    }
-
-    public <T> void sort(T[] array, SortStatistics stats) {
-        sortStatic(array, stats);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator);
-    }
-    
-    public <T> void sort(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(list, comparator, stats);
-    }
-
-    public <T> void sort(T[] array, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(array, comparator, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list) {
-        sortStatic(list, null, null);
-    }
-    
-    public static <T> void sortStatic(T[] array) {
-        sortStatic(array, null, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, SortStatistics stats) {
-        sortStatic(list, null, stats);
-    }
-
-    public static <T> void sortStatic(T[] array, SortStatistics stats) {
-        sortStatic(array, null, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator, null);
-    }
-    
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator, SortStatistics stats) {
+	@Override
+    public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
-        sortStatic0(list, comparator, stats);
+        heapSort(list, comparator, stats);
         if(stats!=null) stats.sortEnding();
     }
 
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator, SortStatistics stats) {
+	@Override
+    public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
-        sortStatic0(array, comparator, stats);
+        heapSort(array, comparator, stats);
         if(stats!=null) stats.sortEnding();
     }
 
-    static <T> void sortStatic0(List<T> list, Comparator<T> comparator, SortStatistics stats) {
+    static <T> void heapSort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         int N=list.size();
         for (int k = N/2; k > 0; k--) {
             if(stats!=null) stats.sortRecursing();
@@ -119,7 +71,7 @@ public class HeapSort extends SortAlgorithm {
         } while (N > 1);
     }
 
-    static <T> void sortStatic0(T[] array, Comparator<T> comparator, SortStatistics stats) {
+    static <T> void heapSort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
         int N=array.length;
         for (int k = N/2; k > 0; k--) {
             if(stats!=null) stats.sortRecursing();
@@ -135,7 +87,7 @@ public class HeapSort extends SortAlgorithm {
         } while (N > 1);
     }
 
-    private static <T> void downheap(List<T> list, int k, int N, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void downheap(List<T> list, int k, int N, Comparator<? super T> comparator, SortStatistics stats) {
         T temp=get(list, k - 1, stats);
         while (k <= N/2) {
             int j = k + k;
@@ -155,7 +107,7 @@ public class HeapSort extends SortAlgorithm {
         set(list, k-1, temp, stats);;
     }
 
-    private static <T> void downheap(T[] array, int k, int N, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void downheap(T[] array, int k, int N, Comparator<? super T> comparator, SortStatistics stats) {
         T temp=get(array, k - 1, stats);
         while (k <= N/2) {
             int j = k + k;

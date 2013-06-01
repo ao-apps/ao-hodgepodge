@@ -1,5 +1,3 @@
-package com.aoindustries.util.sort;
-
 /*
  * @(#)EQSortAlgorithm.java	1.0 95/06/26 Jim Boritz
  *
@@ -18,7 +16,10 @@ package com.aoindustries.util.sort;
  * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
  */
-import java.util.*;
+package com.aoindustries.util.sort;
+
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * An enhanced quick sort demonstration algorithm
@@ -41,80 +42,32 @@ import java.util.*;
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/EQSortAlgorithm.java.html'>Jim Boritz' EQSortAlgorithm</a>.
  */
-public class EQSort extends SortAlgorithm {
+final public class EQSort extends SortAlgorithm<Object> {
 
-    protected EQSort() {
-    }
+    private static final EQSort instance = new EQSort();
 
-    public <T> void sort(List<T> list) {
-        sortStatic(list);
-    }
-    
-    public <T> void sort(T[] array) {
-        sortStatic(array);
+    public static EQSort getInstance() {
+        return instance;
     }
 
-    public <T> void sort(List<T> list, SortStatistics stats) {
-        sortStatic(list, stats);
+    private EQSort() {
     }
 
-    public <T> void sort(T[] array, SortStatistics stats) {
-        sortStatic(array, stats);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator);
-    }
-    
-    public <T> void sort(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator);
-    }
-
-    public <T> void sort(List<T> list, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(list, comparator, stats);
-    }
-
-    public <T> void sort(T[] array, Comparator<T> comparator, SortStatistics stats) {
-        sortStatic(array, comparator, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list) {
-        sortStatic(list, null, null);
-    }
-    
-    public static <T> void sortStatic(T[] array) {
-        sortStatic(array, null, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, SortStatistics stats) {
-        sortStatic(list, null, stats);
-    }
-
-    public static <T> void sortStatic(T[] array, SortStatistics stats) {
-        sortStatic(array, null, stats);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator) {
-        sortStatic(list, comparator, null);
-    }
-    
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator) {
-        sortStatic(array, comparator, null);
-    }
-
-    public static <T> void sortStatic(List<T> list, Comparator<T> comparator, SortStatistics stats) {
+	@Override
+    public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         sort(list, 0, list.size()-1, comparator, stats);
         if(stats!=null) stats.sortEnding();
     }
 
-    public static <T> void sortStatic(T[] array, Comparator<T> comparator, SortStatistics stats) {
+	@Override
+    public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         sort(array, 0, array.length-1, comparator, stats);
         if(stats!=null) stats.sortEnding();
     }
 
-    private static <T> void sort(List<T> list, int lo0, int hi0, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void sort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
         int lo = lo0;
         int hi = hi0;
         if ((hi-lo) <= 3) {
@@ -180,7 +133,7 @@ public class EQSort extends SortAlgorithm {
         if(stats!=null) stats.sortUnrecursing();
     }
 
-    private static <T> void sort(T[] array, int lo0, int hi0, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void sort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
         int lo = lo0;
         int hi = hi0;
         if ((hi-lo) <= 3) {
@@ -246,7 +199,7 @@ public class EQSort extends SortAlgorithm {
         if(stats!=null) stats.sortUnrecursing();
     }
 
-    private static <T> void brute(List<T> list, int lo, int hi, Comparator<T> comparator, SortStatistics stats) {
+    private static <T> void brute(List<T> list, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
         if ((hi-lo) == 1) {
             T Ohi=get(list, hi, stats);
             T Olo=get(list, lo, stats);
