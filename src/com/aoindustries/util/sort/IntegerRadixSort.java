@@ -78,16 +78,12 @@ final public class IntegerRadixSort extends SortAlgorithm<Number> {
 				fromQueue.add(number);
 			}
 		}
-		for(
-			int shift=BITS_PER_PASS, mask=PASS_MASK<<BITS_PER_PASS;
-			shift<32;
-			shift += BITS_PER_PASS, mask<<=BITS_PER_PASS
-		) {
+		for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
 			for(int i=0; i<PASS_SIZE; i++) {
 				List<T> fromQueue = fromQueues[i];
 				if(fromQueue!=null) {
 					for(T number : fromQueue) {
-						int queueNum = (number.intValue() & mask) >>> shift;
+						int queueNum = (number.intValue() >>> shift) & PASS_MASK;
 						List<T> toQueue = toQueues[queueNum];
 						if(toQueue==null) toQueues[queueNum] = toQueue = new ArrayList<T>();
 						toQueue.add(number);

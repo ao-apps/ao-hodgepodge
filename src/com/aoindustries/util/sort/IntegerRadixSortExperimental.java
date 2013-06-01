@@ -47,9 +47,9 @@ final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
 
 	private static final boolean FORCE_LIST_ITERATOR = false;
 
-	private static final boolean USE_TO_ARRAY = false;
+	private static final boolean USE_TO_ARRAY = true;
 
-	private static final int BITS_PER_PASS = 4; // TODO: Tune: 8 // Must be power of two and less than or equal to 32
+	private static final int BITS_PER_PASS = 8; // TODO: Tune: 8 // Must be power of two and less than or equal to 32
 	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
 	private static final int PASS_MASK = PASS_SIZE - 1;
 
