@@ -46,7 +46,7 @@ import java.util.List;
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/ShellSortAlgorithm.java.html'>Jason Harrison's ShellSortAlgorithm</a>.
  */
-final public class ShellSort extends SortAlgorithm<Object> {
+final public class ShellSort extends ComparisonSortAlgorithm<Object> {
 
 	private static final ShellSort instance = new ShellSort();
 

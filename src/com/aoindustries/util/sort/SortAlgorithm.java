@@ -23,7 +23,6 @@
 package com.aoindustries.util.sort;
 
 import com.aoindustries.io.FileList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -37,95 +36,16 @@ abstract public class SortAlgorithm<E> {
 	}
 
 	public <T extends E> void sort(List<T> list) {
-		sort(list, null, null);
+		sort(list, null);
 	}
 
     public <T extends E> void sort(T[] array) {
-        sort(array, null, null);
+        sort(array, null);
     }
 
-	public <T extends E> void sort(List<T> list, SortStatistics stats) {
-        sort(list, null, stats);
-	}
+	public abstract <T extends E> void sort(List<T> list, SortStatistics stats);
 
-    public <T extends E> void sort(T[] array, SortStatistics stats) {
-        sort(array, null, stats);
-    }
-
-	public <T extends E> void sort(List<T> list, Comparator<? super T> comparator) {
-        sort(list, comparator, null);
-	}
-
-    public <T extends E> void sort(T[] array, Comparator<? super T> comparator) {
-        sort(array, comparator, null);
-    }
-
-	public abstract <T extends E> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats);
-
-	public abstract <T extends E> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats);
-
-	@SuppressWarnings({"unchecked"})
-	protected static <T> int compare(List<T> list, int i, int j, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortInListComparing();
-
-		T O1=list.get(i);
-		T O2=list.get(j);
-
-		if(O1==null) {
-			if(O2==null) return 0;
-			else return -1;
-		} else {
-			if(O2==null) return 1;
-			else {
-				if(comparator!=null) return comparator.compare(O1, O2);
-				else if(O1 instanceof Comparable<?>) {
-					Comparable<? super T> comp1 = (Comparable<? super T>)O1;
-					return comp1.compareTo(O2);
-				} else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
-			}
-		}
-	}
-
-	@SuppressWarnings({"unchecked"})
-	protected static <T> int compare(T[] array, int i, int j, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortInListComparing();
-
-		T O1=array[i];
-		T O2=array[j];
-
-		if(O1==null) {
-			if(O2==null) return 0;
-			else return -1;
-		} else {
-			if(O2==null) return 1;
-			else {
-				if(comparator!=null) return comparator.compare(O1, O2);
-				else if(O1 instanceof Comparable<?>) {
-					Comparable<? super T> comp1 = (Comparable<? super T>)O1;
-					return comp1.compareTo(O2);
-				} else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
-			}
-		}
-	}
-
-	@SuppressWarnings({"unchecked"})
-	protected static <T> int compare(T O1, T O2, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortObjectComparing();
-
-		if(O1==null) {
-			if(O2==null) return 0;
-			else return -1;
-		} else {
-			if(O2==null) return 1;
-			else {
-				if(comparator!=null) return comparator.compare(O1, O2);
-				else if(O1 instanceof Comparable<?>) {
-					Comparable<? super T> comp1 = (Comparable<? super T>)O1;
-					return comp1.compareTo(O2);
-				} else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
-			}
-		}
-	}
+    public abstract <T extends E> void sort(T[] array, SortStatistics stats);
 
 	protected static <T> T get(List<T> list, int i, SortStatistics stats) {
 		if(stats!=null) stats.sortGetting();

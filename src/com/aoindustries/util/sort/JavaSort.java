@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-final public class JavaSort extends SortAlgorithm<Object> {
+final public class JavaSort extends ComparisonSortAlgorithm<Object> {
 
 	private static final JavaSort instance = new JavaSort();
 

@@ -51,7 +51,7 @@ import java.util.List;
  * 2003-11-06 - Dan Armstrong - To avoid worst-case scenarios, if the quickSort recursion depth exceeds <code>(int)(10*Math.log(list.size()))</code>,
  *                              the algorithm will quit and a HeapSort will be performed.
  */
-final public class FastQSort extends SortAlgorithm<Object> {
+final public class FastQSort extends ComparisonSortAlgorithm<Object> {
 
     private static final FastQSort instance = new FastQSort();
 

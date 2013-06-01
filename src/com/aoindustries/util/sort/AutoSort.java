@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.sort;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -31,7 +32,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-final public class AutoSort extends SortAlgorithm<Object> {
+final public class AutoSort extends ComparisonSortAlgorithm<Object> {
 
 	private static final int FAST_QSORT_THRESHOLD = 10000;
 
@@ -84,13 +85,19 @@ final public class AutoSort extends SortAlgorithm<Object> {
 		getRecommendedSortAlgorithm(array).sort(array, comparator, stats);
 	}
 
-	public static <T> SortAlgorithm<? super T> getRecommendedSortAlgorithm(List<T> list) {
+	public static <T> ComparisonSortAlgorithm<? super T> getRecommendedSortAlgorithm(List<T> list) {
 		if(list.size() >= FAST_QSORT_THRESHOLD) return FastQSort.getInstance();
 		return JavaSort.getInstance();
 	}
 
-	public static <T> SortAlgorithm<? super T> getRecommendedSortAlgorithm(T[] array) {
+	public static <T> ComparisonSortAlgorithm<? super T> getRecommendedSortAlgorithm(T[] array) {
 		if(array.length >= FAST_QSORT_THRESHOLD) return FastQSort.getInstance();
 		return JavaSort.getInstance();
+	}
+
+	// TODO: Remove temp test code
+	public static void main(String[] args) {
+		List<String> stringList = Collections.emptyList();
+		List<Integer> integerList = Collections.emptyList();
 	}
 }
