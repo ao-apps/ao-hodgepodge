@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,6 +23,7 @@
 package com.aoindustries.io;
 
 import com.aoindustries.util.BufferManager;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,7 +70,7 @@ final public class IoUtils {
             }
             return totalBytes;
         } finally {
-            BufferManager.release(buff);
+            BufferManager.release(buff, false);
         }
     }
 
@@ -92,7 +93,7 @@ final public class IoUtils {
             }
             return totalChars;
         } finally {
-            BufferManager.release(buff);
+            BufferManager.release(buff, false);
         }
     }
 
@@ -115,7 +116,7 @@ final public class IoUtils {
             }
             return totalChars;
         } finally {
-            BufferManager.release(buff);
+            BufferManager.release(buff, false);
         }
     }
 
@@ -138,7 +139,7 @@ final public class IoUtils {
             }
             return totalChars;
         } finally {
-            BufferManager.release(buff);
+            BufferManager.release(buff, false);
         }
     }
 
@@ -162,4 +163,48 @@ final public class IoUtils {
             len -= count;
         }
     }
+
+	/**
+	 * Reads an input stream fully (to end of stream), returning a byte[] of the content read.
+	 */
+	public static byte[] readFully(InputStream in) throws IOException {
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		IoUtils.copy(in, bout);
+		return bout.toByteArray();
+	}
+
+	/**
+	 * Reads a reader fully (to end of stream), returning a String of the content read.
+	 */
+	public static String readFully(Reader in) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		IoUtils.copy(in, sb);
+		return sb.toString();
+	}
+
+	/**
+	 * Compares the contents retrieved from an InputStream to the provided contents.
+	 *
+	 * @return true  when the contents exactly match
+	 */
+	public static boolean contentEquals(InputStream in, byte[] contents) throws IOException {
+		final int contentLen = contents.length;
+		final byte[] buff = BufferManager.getBytes();
+		try {
+			int readPos = 0;
+			while(readPos<contentLen) {
+				int bytesRemaining = contentLen - readPos;
+				int bytesRead = in.read(buff, 0, bytesRemaining > BufferManager.BUFFER_SIZE ? BufferManager.BUFFER_SIZE : bytesRemaining);
+				if(bytesRead==-1) return false; // End of file
+				int i=0;
+				while(i<bytesRead) {
+					if(buff[i++]!=contents[readPos++]) return false;
+				}
+			}
+			// Next read must be end of file - otherwise file content longer than contents.
+			return in.read()==-1;
+		} finally {
+			BufferManager.release(buff, false);
+		}
+	}
 }

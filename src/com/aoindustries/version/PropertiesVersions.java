@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.aoindustries.version;
 
-import com.aoindustries.io.LocalizedIOException;
+import com.aoindustries.util.PropertiesUtils;
 import static com.aoindustries.version.ApplicationResources.accessor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,16 +38,6 @@ import java.util.Properties;
  */
 public class PropertiesVersions {
 
-    private static Properties readProperties(Class<?> clazz, String resourceName) throws IOException {
-        InputStream in = clazz.getResourceAsStream(resourceName);
-        if(in==null) throw new LocalizedIOException(accessor, "PropertiesVersions.readProperties.resourceNotFound", resourceName);
-        try {
-            return readProperties(in);
-        } finally {
-            in.close();
-        }
-    }
-
     private static Properties readProperties(InputStream in) throws IOException {
         Properties props = new Properties();
         props.load(in);
@@ -59,8 +49,8 @@ public class PropertiesVersions {
     /**
      * Loads properties from the classpath.
      */
-    public PropertiesVersions(Class<?> clazz, String resourceName) throws IOException {
-        this(readProperties(clazz, resourceName));
+    public PropertiesVersions(Class<?> clazz, String resource) throws IOException {
+        this(PropertiesUtils.loadFromResource(clazz, resource));
     }
 
     /**

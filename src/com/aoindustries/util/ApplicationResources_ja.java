@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.version;
+package com.aoindustries.util;
 
 import com.aoindustries.util.i18n.EditableResourceBundle;
 import java.io.File;
@@ -41,7 +41,7 @@ public final class ApplicationResources_ja extends EditableResourceBundle {
         super(
             Locale.JAPANESE,
             ApplicationResources.bundleSet,
-            new File(System.getProperty("user.home")+"/common/aodev/cvswork/aocode-public/src/com/aoindustries/version/ApplicationResources_ja.properties")
+            new File(System.getProperty("user.home")+"/common/aodev/cvswork/aocode-public/src/com/aoindustries/util/ApplicationResources_ja.properties")
         );
     }
 }

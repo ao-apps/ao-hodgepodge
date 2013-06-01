@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,10 +20,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.version;
+package com.aoindustries.util;
 
+import com.aoindustries.util.i18n.ApplicationResourcesAccessor;
 import com.aoindustries.util.i18n.EditableResourceBundle;
+import com.aoindustries.util.i18n.EditableResourceBundleSet;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -32,16 +35,26 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-public final class ApplicationResources_ja extends EditableResourceBundle {
+public final class ApplicationResources extends EditableResourceBundle {
+
+    static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
+        ApplicationResources.class.getName(),
+        Arrays.asList(
+            Locale.ROOT,
+            Locale.JAPANESE
+        )
+    );
 
     /**
      * Do not use directly.
      */
-    public ApplicationResources_ja() {
+    public ApplicationResources() {
         super(
-            Locale.JAPANESE,
-            ApplicationResources.bundleSet,
-            new File(System.getProperty("user.home")+"/common/aodev/cvswork/aocode-public/src/com/aoindustries/version/ApplicationResources_ja.properties")
+            Locale.ROOT,
+            bundleSet,
+            new File(System.getProperty("user.home")+"/common/aodev/cvswork/aocode-public/src/com/aoindustries/util/ApplicationResources.properties")
         );
     }
+
+    static final ApplicationResourcesAccessor accessor = ApplicationResourcesAccessor.getInstance(bundleSet.getBaseName());
 }

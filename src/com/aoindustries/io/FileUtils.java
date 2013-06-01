@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.util.BufferManager;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -63,49 +62,18 @@ final public class FileUtils {
      * Compares the contents of a file to the provided array.
      */
     public static boolean contentEquals(File file, byte[] contents) throws IOException {
-        final int contentLen = contents.length;
         {
             final long length = file.length();
             if(length>Integer.MAX_VALUE) return false;
             // Be careful about file.length() returning zero on error - always read file for zero case - no shortcut.
-            if(contentLen>0 && length!=contentLen) return false;
+            if(length!=0 && length!=contents.length) return false;
         }
         final InputStream in = new FileInputStream(file);
         try {
-            final byte[] buff = BufferManager.getBytes();
-            try {
-                int readPos = 0;
-                while(readPos<contentLen) {
-                    int bytesRemaining = contentLen - readPos;
-                    int bytesRead = in.read(buff, 0, bytesRemaining > BufferManager.BUFFER_SIZE ? BufferManager.BUFFER_SIZE : bytesRemaining);
-                    if(bytesRead==-1) return false; // End of file
-                    int i=0;
-                    while(i<bytesRead) {
-                        if(buff[i++]!=contents[readPos++]) return false;
-                    }
-                }
-                // Next read must be end of file - otherwise file content longer than contents.
-                if(in.read()!=-1) return false;
-            } finally {
-                BufferManager.release(buff);
-            }
+			return IoUtils.contentEquals(in, contents);
         } finally {
             in.close();
         }
-        /*
-        int buffSize = length<BufferManager.BUFFER_SIZE ? (int)length : BufferManager.BUFFER_SIZE;
-        if(buffSize < 64) buffSize=64;
-        InputStream in = new BufferedInputStream(new FileInputStream(file), buffSize);
-        try {
-            for(int c=0; c<contents.length; c++) {
-                int b1 = in.read();
-                int b2 = contents[c] & 0xff;
-                if(b1!=b2) return false;
-            }
-        } finally {
-            in.close();
-        }*/
-        return true;
     }
 
     /**

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -60,7 +60,7 @@ public class BenchmarkCounterBlockDevice {
                         System.out.println(filename+" scanned in "+BigDecimal.valueOf(System.currentTimeMillis()-startTime, 3)+" seconds");
                     }
                 } finally {
-                    BufferManager.release(buff);
+                    BufferManager.release(buff, false);
                 }
             } else {
                 System.err.println("Usage: BenchmarkCounterBlockDevice filename [filename] [...]");

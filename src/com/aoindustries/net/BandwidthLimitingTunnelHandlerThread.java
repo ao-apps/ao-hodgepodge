@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -52,7 +52,7 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
     private Long bandwidth;
     private Socket listenSocket;
     private Socket connectSocket;
-    private Thread thread;
+    private volatile Thread thread;
 
     public BandwidthLimitingTunnelHandlerThread(
         boolean verbose,
@@ -64,10 +64,14 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
         this.bandwidth = bandwidth;
         this.listenSocket = listenSocket;
         this.connectSocket = connectSocket;
-        (this.thread=new Thread(this)).start();
     }
 
-    @Override
+	public void start() {
+		if(thread!=null) throw new IllegalStateException();
+        (this.thread = new Thread(this)).start();
+	}
+
+	@Override
     public void run() {
         try {
             long totalBytes = 0;
@@ -110,7 +114,7 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
                     out.close();
                 }
             } finally {
-                BufferManager.release(buff);
+                BufferManager.release(buff, false);
             }
             if(verbose) {
                 long endTime = System.currentTimeMillis();

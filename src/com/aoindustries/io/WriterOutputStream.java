@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -55,7 +55,7 @@ final public class WriterOutputStream extends OutputStream {
         synchronized(this) {
             out.close();
             if(buff!=null) {
-                BufferManager.release(buff);
+                BufferManager.release(buff, false);
                 buff=null;
             }
         }
@@ -89,7 +89,7 @@ final public class WriterOutputStream extends OutputStream {
     protected void finalize() throws Throwable {
         try {
             if(buff!=null) {
-                BufferManager.release(buff);
+                BufferManager.release(buff, false);
                 buff=null;
             }
         } finally {

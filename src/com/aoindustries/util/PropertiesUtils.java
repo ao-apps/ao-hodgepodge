@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,28 +20,36 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.version;
+package com.aoindustries.util;
 
-import com.aoindustries.util.i18n.EditableResourceBundle;
-import java.io.File;
-import java.util.Locale;
+import com.aoindustries.io.LocalizedIOException;
+import static com.aoindustries.util.ApplicationResources.accessor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
- * Provides a simplified interface for obtaining localized values from the ApplicationResources.properties files.
- * Is also an editable resource bundle.
- *
- * @author  AO Industries, Inc.
+ * Property utilities.
  */
-public final class ApplicationResources_ja extends EditableResourceBundle {
+final public class PropertiesUtils {
 
     /**
-     * Do not use directly.
+     * Make no instances.
      */
-    public ApplicationResources_ja() {
-        super(
-            Locale.JAPANESE,
-            ApplicationResources.bundleSet,
-            new File(System.getProperty("user.home")+"/common/aodev/cvswork/aocode-public/src/com/aoindustries/version/ApplicationResources_ja.properties")
-        );
-    }
+    private PropertiesUtils() {}
+
+	/**
+	 * Loads properties from a resource.
+	 */
+	public static Properties loadFromResource(Class<?> clazz, String resource) throws IOException {
+		Properties props = new Properties();
+		InputStream in = clazz.getResourceAsStream(resource);
+        if(in==null) throw new LocalizedIOException(accessor, "PropertiesUtils.readProperties.resourceNotFound", resource);
+		try {
+			props.load(in);
+		} finally {
+			in.close();
+		}
+		return props;
+	}
 }

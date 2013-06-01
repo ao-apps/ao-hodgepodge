@@ -59,7 +59,7 @@ public class BandwidthLimitingTunnelHandler {
         
         Socket connectSocket = new Socket(InetAddress.getByName(connect_address), connect_port);
 
-        new BandwidthLimitingTunnelHandlerUpstreamThread(verbose, upstream_bandwidth, socket, connectSocket);
-        new BandwidthLimitingTunnelHandlerDownstreamThread(verbose, downstream_bandwidth, socket, connectSocket);
+        new BandwidthLimitingTunnelHandlerUpstreamThread(verbose, upstream_bandwidth, socket, connectSocket).start();
+        new BandwidthLimitingTunnelHandlerDownstreamThread(verbose, downstream_bandwidth, socket, connectSocket).start();
     }
 }
