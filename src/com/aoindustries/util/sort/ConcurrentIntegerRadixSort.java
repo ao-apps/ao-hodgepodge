@@ -53,7 +53,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	/**
 	 * Concurrency controls.
 	 */
-	private static final int MIN_CONCURRENCY_SIZE = 1 << 5; // TODO: 1 << 16;
+	private static final int MIN_CONCURRENCY_SIZE = 1 << 16;
 	private static final int THREADS_PER_PROCESSOR = 2;
 	private static final int TASKS_PER_THREAD = 2;
 
