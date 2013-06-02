@@ -44,7 +44,7 @@ public class IntegerRadixSortTest extends TestCase {
 	private static final int MAX_PASSES = 1 << 20;
 
 	private static final boolean RANDOM_FULL = false;
-	private static final boolean RANDOM_NEGATIVE = true;
+	private static final boolean RANDOM_NEGATIVE = false;
 	private static final int RANDOM_RANGE = 0x1000000;
 	private static final int RANDOM_MULTIPLIER = 1; // 0x10000;
 
