@@ -51,7 +51,6 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
     private IntegerRadixSortNew() {
     }
 
-	// TODO: Default queues to the average length of queues (or a little more/double?) to avoid resize on well distributed data?
 	@Override
     public <T extends Number> void sort(List<T> list, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
@@ -70,7 +69,7 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		final int PASS_MASK = PASS_SIZE - 1;
 
 		// Determine the start queue length
-		int startQueueLength = size >>> BITS_PER_PASS;
+		int startQueueLength = size >>> (BITS_PER_PASS-1); // Double the average size to allow for somewhat uneven distribution before growing arrays
 		if(startQueueLength<MINIMUM_START_QUEUE_LENGTH) startQueueLength = MINIMUM_START_QUEUE_LENGTH;
 		if(startQueueLength>size) startQueueLength = size;
 
@@ -129,7 +128,6 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		//System.out.println("bitsSeen    = " + Integer.toString(bitsSeen, 16));
 		//System.out.println("bitsNotSeen = " + Integer.toString(bitsNotSeen, 16));
 
-		boolean didFirst = false; // TODO: May skip first pass if unconstructive (bits all equal)
 		int lastShiftUsed = 0;
 		for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
 			// Skip this bit range when all values have equal bits.  For example
@@ -171,56 +169,53 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 				//System.err.println("Skipping bit range: shift="+shift);
 			}
 		}
-		// If never did first, then all values are equal in the list - no sort need be performed
-		if(didFirst) {
-			// Pick-up fromQueues and put into results, negative before positive to performed signed
-			int midPoint = lastShiftUsed==32 ? (PASS_SIZE>>>1) : 0;
-			if(useRandomAccess) {
-				// Use indexed strategy
-				int outIndex = 0;
-				for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-					T[] fromQueue = fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							T number = fromQueue[j];
-							list.set(outIndex++, number);
-						}
+		// Pick-up fromQueues and put into results, negative before positive to performed signed
+		int midPoint = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+		if(useRandomAccess) {
+			// Use indexed strategy
+			int outIndex = 0;
+			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				T[] fromQueue = fromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					int length = fromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						T number = fromQueue[j];
+						list.set(outIndex++, number);
 					}
 				}
-				for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-					T[] fromQueue = fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							T number = fromQueue[j];
-							list.set(outIndex++, number);
-						}
+			}
+			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
+				T[] fromQueue = fromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					int length = fromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						T number = fromQueue[j];
+						list.set(outIndex++, number);
 					}
 				}
-			} else {
-				// Use iterator strategy
-				ListIterator<T> iterator = list.listIterator();
-				for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-					T[] fromQueue = fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							T number = fromQueue[j];
-							iterator.next();
-							iterator.set(number);
-						}
+			}
+		} else {
+			// Use iterator strategy
+			ListIterator<T> iterator = list.listIterator();
+			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				T[] fromQueue = fromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					int length = fromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						T number = fromQueue[j];
+						iterator.next();
+						iterator.set(number);
 					}
 				}
-				for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-					T[] fromQueue = fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							T number = fromQueue[j];
-							iterator.next();
-							iterator.set(number);
-						}
+			}
+			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
+				T[] fromQueue = fromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					int length = fromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						T number = fromQueue[j];
+						iterator.next();
+						iterator.set(number);
 					}
 				}
 			}

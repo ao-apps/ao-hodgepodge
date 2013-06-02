@@ -39,10 +39,10 @@ public class IntegerRadixSortTest extends TestCase {
 
 	private static final boolean GC_EACH_PASS = false;
 	private static final long GC_SLEEP_TIME = 100;
-	private static final boolean RANDOM_FULL = false;
-	private static final boolean RANDOM_NEGATIVE = true;
+	private static final boolean RANDOM_FULL = true;
+	private static final boolean RANDOM_NEGATIVE = false;
 	private static final int RANDOM_RANGE = 0x100;
-	private static final int RANDOM_MULTIPLIER = 0x100;
+	private static final int RANDOM_MULTIPLIER = 1; // 0x10000;
 
     public IntegerRadixSortTest(String testName) {
         super(testName);
