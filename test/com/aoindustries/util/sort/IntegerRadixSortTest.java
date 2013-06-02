@@ -23,7 +23,6 @@
 package com.aoindustries.util.sort;
 
 import com.aoindustries.util.IntArrayList;
-import com.aoindustries.util.IntList;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -124,10 +123,10 @@ public class IntegerRadixSortTest extends TestCase {
 			List<T> newRadixResult = new ArrayList<T>(randomValues);
 			{
 				long startNanos = System.nanoTime();
-				IntegerRadixSortNew.getInstance().sort(newRadixResult);
+				ConcurrentIntegerRadixSort.getInstance().sort(newRadixResult);
 				if(iteration>0) {
 					newRadixNanos += System.nanoTime() - startNanos;
-					//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+					//System.out.println(pass+"/"+testSize+": ConcurrentIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 				}
 			}
 
@@ -309,10 +308,10 @@ public class IntegerRadixSortTest extends TestCase {
 			System.arraycopy(randomValues, 0, newRadixResult, 0, randomValues.length);
 			{
 				long startNanos = System.nanoTime();
-				IntegerRadixSortNew.getInstance().sort(newRadixResult);
+				ConcurrentIntegerRadixSort.getInstance().sort(newRadixResult);
 				if(iteration>0) {
 					newRadixNanos += System.nanoTime() - startNanos;
-					//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+					//System.out.println(pass+"/"+testSize+": ConcurrentIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 				}
 			}
 
@@ -498,10 +497,10 @@ public class IntegerRadixSortTest extends TestCase {
 			System.arraycopy(randomValues, 0, newRadixResult, 0, randomValues.length);
 			{
 				long startNanos = System.nanoTime();
-				IntegerRadixSortNew.getInstance().sort(newRadixResult);
+				ConcurrentIntegerRadixSort.getInstance().sort(newRadixResult);
 				if(iteration>0) {
 					newRadixNanos += System.nanoTime() - startNanos;
-					//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+					//System.out.println(pass+"/"+testSize+": ConcurrentIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 				}
 			}
 
