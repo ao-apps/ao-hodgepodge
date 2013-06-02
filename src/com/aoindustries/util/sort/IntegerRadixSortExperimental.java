@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.sort;
 
-import com.aoindustries.lang.NotImplementedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,19 +39,16 @@ import java.util.RandomAccess;
  */
 final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 
-	private static final int LARGE_THRESHOLD = 16384; // TODO: Tune: 65536;
-
 	private static final boolean USE_SMALL_THREAD_LOCAL = true;
+	private static final int THREAD_LOCAL_PASS_SIZE = 256;
+	private static final int THREAD_LOCAL_QUEUE_SIZE = 8192;
 
-	private static final boolean USE_LARGE_DELAYED_ALLOCATE = true;
+	/**
+	 * When sorting lists less than this size, will use a different algorithm.
+	 */
+	private static final int MAX_JAVA_SORT_SIZE = 128;
 
-	private static final boolean FORCE_LIST_ITERATOR = false;
-
-	private static final boolean USE_TO_ARRAY = true;
-
-	private static final int BITS_PER_PASS = 8; // TODO: Tune: 8 // Must be power of two and less than or equal to 32
-	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
-	private static final int PASS_MASK = PASS_SIZE - 1;
+	private static final int MINIMUM_START_QUEUE_LENGTH = 16;
 
 	private static final IntegerRadixSortExperimental instance = new IntegerRadixSortExperimental();
 
@@ -65,232 +61,7 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 
 	@Override
     public <T extends Number> void sort(List<T> list, SortStatistics stats) {
-        if(stats!=null) stats.sortStarting();
-		final int size = list.size();
-		if(list.size()<LARGE_THRESHOLD) sortSmall(list, stats);
-		else sortLarge(list, stats);
-		if(stats!=null) stats.sortEnding();
-    }
-
-	// TODO: null-out when done, or just store indexes?
-	// TODO: Could be short[] for very small case
-	private static final ThreadLocal<int[][]> fromQueues = /* TODO !USE_SMALL_THREAD_LOCAL ? null :*/ new ThreadLocal<int[][]>() {
-		@Override
-		protected int[][] initialValue() {
-			return new int[PASS_SIZE][LARGE_THRESHOLD];
-		}
-	};
-	private static final ThreadLocal<int[][]> toQueues = /* TODO !USE_SMALL_THREAD_LOCAL ? null :*/ new ThreadLocal<int[][]>() {
-		@Override
-		protected int[][] initialValue() {
-			return new int[PASS_SIZE][LARGE_THRESHOLD];
-		}
-	};
-
-	private static <T extends Number> void sortSmall(List<T> list, SortStatistics stats) {
-		final int size = list.size();
-		final T[] array = USE_TO_ARRAY ? (T[])list.toArray(new Number[size]) : null;
-		if(stats!=null) {
-			// Each element is get once and set once
-			stats.sortGetting(size);
-			stats.sortSetting(size);
-		}
-		final boolean useRandomAccess = (list instanceof RandomAccess);
-		@SuppressWarnings("unchecked")
-		int[][] fromQueues = (USE_SMALL_THREAD_LOCAL ? IntegerRadixSortExperimental.fromQueues.get() : new int[PASS_SIZE][size]);
-		int[] fromQueueLengths = new int[PASS_SIZE];
-		@SuppressWarnings("unchecked")
-		int[][] toQueues = (USE_SMALL_THREAD_LOCAL ? IntegerRadixSortExperimental.toQueues.get() : new int[PASS_SIZE][size]);
-		int[] toQueueLengths = new int[PASS_SIZE];
-		// Initial population of elements into fromQueues
-		if(USE_TO_ARRAY) {
-			for(int i=0;i<size;i++) {
-				int queueNum = array[i].intValue() & PASS_MASK;
-				fromQueues[queueNum][fromQueueLengths[queueNum]++] = i;
-			}
-		} else if (useRandomAccess) {
-			for(int i=0;i<size;i++) {
-				int queueNum = list.get(i).intValue() & PASS_MASK;
-				fromQueues[queueNum][fromQueueLengths[queueNum]++] = i;
-			}
-		} else {
-			int i = 0;
-			for(T number : list) {
-				int queueNum = number.intValue() & PASS_MASK;
-				fromQueues[queueNum][fromQueueLengths[queueNum]++] = i++;
-			}
-		}
-		for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
-			for(int i=0; i<PASS_SIZE; i++) {
-				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLengths[i];
-				for(int j=0; j<length; j++) {
-					int index = fromQueue[j];
-					T number = USE_TO_ARRAY ? array[index] : list.get(index);
-					int queueNum = (number.intValue() >>> shift) & PASS_MASK;
-					toQueues[queueNum][toQueueLengths[queueNum]++] = index;
-				}
-				fromQueueLengths[i] = 0;
-			}
-
-			// Swap from and to
-			int[][] tempQueues = fromQueues;
-			fromQueues = toQueues;
-			toQueues = tempQueues;
-			int[] tempLengths = fromQueueLengths;
-			fromQueueLengths = toQueueLengths;
-			toQueueLengths = tempLengths;
-		}
-		// Pick-up fromQueues and put into results, negative before positive to performed signed
-		final int midPoint = PASS_SIZE>>>1;
-		if(!FORCE_LIST_ITERATOR && useRandomAccess) {
-			// Use indexed strategy
-			int outIndex = 0;
-			for(int i=midPoint; i<PASS_SIZE; i++) {
-				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLengths[i];
-				for(int j=0; j<length; j++) {
-					int index = fromQueue[j];
-					T number = USE_TO_ARRAY ? array[index] : list.get(index);
-					list.set(outIndex++, number);
-				}
-			}
-			for(int i=0; i<midPoint; i++) {
-				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLengths[i];
-				for(int j=0; j<length; j++) {
-					int index = fromQueue[j];
-					T number = USE_TO_ARRAY ? array[index] : list.get(index);
-					list.set(outIndex++, number);
-				}
-			}
-		} else {
-			// Use iterator strategy
-			ListIterator<T> iterator = list.listIterator();
-			for(int i=midPoint; i<PASS_SIZE; i++) {
-				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLengths[i];
-				for(int j=0; j<length; j++) {
-					int index = fromQueue[j];
-					T number = USE_TO_ARRAY ? array[index] : list.get(index);
-					iterator.next();
-					iterator.set(number);
-				}
-			}
-			for(int i=0; i<midPoint; i++) {
-				int[] fromQueue = fromQueues[i];
-				int length = fromQueueLengths[i];
-				for(int j=0; j<length; j++) {
-					int index = fromQueue[j];
-					T number = USE_TO_ARRAY ? array[index] : list.get(index);
-					iterator.next();
-					iterator.set(number);
-				}
-			}
-		}
-    }
-
-	private <T extends Number> void sortLarge(List<T> list, SortStatistics stats) {
-		final int size = list.size();
-		final boolean useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
-		@SuppressWarnings("unchecked")
-		List<T>[] fromQueues = (List<T>[])new List<?>[PASS_SIZE];
-		@SuppressWarnings("unchecked")
-		List<T>[] toQueues = (List<T>[])new List<?>[PASS_SIZE];
-		if(!USE_LARGE_DELAYED_ALLOCATE) {
-			for(int i=0; i<PASS_SIZE; i++) {
-				fromQueues[i] = new ArrayList<T>();
-				toQueues[i] = new ArrayList<T>();
-			}
-		}
-		// Initial population of elements into fromQueues
-		if(useRandomAccess) {
-			// Each element is get and set once
-			if(stats!=null) {
-				stats.sortGetting(size);
-				stats.sortSetting(size);
-			}
-			for(int i=0;i<size;i++) {
-				T number = list.get(i);
-				int queueNum = number.intValue() & PASS_MASK;
-				List<T> fromQueue = fromQueues[queueNum];
-				if(USE_LARGE_DELAYED_ALLOCATE && fromQueue==null) fromQueues[queueNum] = fromQueue = new ArrayList<T>();
-				fromQueue.add(number);
-			}
-		} else {
-			for(T number : list) {
-				if(stats!=null) {
-					stats.sortGetting();
-					stats.sortSetting();
-				}
-				int queueNum = number.intValue() & PASS_MASK;
-				List<T> fromQueue = fromQueues[queueNum];
-				if(USE_LARGE_DELAYED_ALLOCATE && fromQueue==null) fromQueues[queueNum] = fromQueue = new ArrayList<T>();
-				fromQueue.add(number);
-			}
-		}
-		for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
-			for(int i=0; i<PASS_SIZE; i++) {
-				List<T> fromQueue = fromQueues[i];
-				if(!USE_LARGE_DELAYED_ALLOCATE || fromQueue!=null) {
-					for(T number : fromQueue) {
-						int queueNum = (number.intValue() >>> shift) & PASS_MASK;
-						List<T> toQueue = toQueues[queueNum];
-						if(USE_LARGE_DELAYED_ALLOCATE && toQueue==null) toQueues[queueNum] = toQueue = new ArrayList<T>();
-						toQueue.add(number);
-					}
-					fromQueue.clear(); // TODO: Faster if leave elements inside (no null referencesm, just change count field)?
-				}
-			}
-
-			// Swap from and to
-			List<T>[] temp = fromQueues;
-			fromQueues = toQueues;
-			toQueues = temp;
-		}
-		// Pick-up fromQueues and put into results, negative before positive to performed signed
-		final int midPoint = PASS_SIZE>>>1;
-		if(!FORCE_LIST_ITERATOR && useRandomAccess) {
-			// Use indexed strategy
-			int outIndex = 0;
-			for(int i=midPoint; i<PASS_SIZE; i++) {
-				List<T> fromQueue = fromQueues[i];
-				if(!USE_LARGE_DELAYED_ALLOCATE || fromQueue!=null) {
-					for(T number : fromQueue) {
-						list.set(outIndex++, number);
-					}
-				}
-			}
-			for(int i=0; i<midPoint; i++) {
-				List<T> fromQueue = fromQueues[i];
-				if(!USE_LARGE_DELAYED_ALLOCATE || fromQueue!=null) {
-					for(T number : fromQueue) {
-						list.set(outIndex++, number);
-					}
-				}
-			}
-		} else {
-			// Use iterator strategy
-			ListIterator<T> iterator = list.listIterator();
-			for(int i=midPoint; i<PASS_SIZE; i++) {
-				List<T> fromQueue = fromQueues[i];
-				if(!USE_LARGE_DELAYED_ALLOCATE || fromQueue!=null) {
-					for(T number : fromQueue) {
-						iterator.next();
-						iterator.set(number);
-					}
-				}
-			}
-			for(int i=0; i<midPoint; i++) {
-				List<T> fromQueue = fromQueues[i];
-				if(!USE_LARGE_DELAYED_ALLOCATE || fromQueue!=null) {
-					for(T number : fromQueue) {
-						iterator.next();
-						iterator.set(number);
-					}
-				}
-			}
-		}
+		IntegerRadixSort.getInstance().sort(list, stats);
     }
 
 	@Override
@@ -298,8 +69,140 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 		IntegerRadixSort.getInstance().sort(array, stats);
     }
 
+	private static final ThreadLocal<int[][]> fromQueues = new ThreadLocal<int[][]>() {
+		@Override
+		protected int[][] initialValue() {
+			return new int[THREAD_LOCAL_PASS_SIZE][THREAD_LOCAL_QUEUE_SIZE];
+		}
+	};
+	private static final ThreadLocal<int[][]> toQueues = new ThreadLocal<int[][]>() {
+		@Override
+		protected int[][] initialValue() {
+			return new int[THREAD_LOCAL_PASS_SIZE][THREAD_LOCAL_QUEUE_SIZE];
+		}
+	};
+
 	@Override
     public void sort(int[] array, SortStatistics stats) {
-		IntegerRadixSort.getInstance().sort(array, stats);
+		if(stats!=null) stats.sortStarting();
+		final int size = array.length;
+		if(size <= MAX_JAVA_SORT_SIZE) {
+            if(stats!=null) stats.sortSwitchingAlgorithms();
+			Arrays.sort(array);
+		} else {
+			// Dynamically choose pass size
+			final int BITS_PER_PASS;
+			/* Small case now handled by Java sort
+			if(size <= 0x80) {
+				BITS_PER_PASS = 4;
+			} else*/ if(size < 0x80000) {
+				BITS_PER_PASS = 8;
+			} else {
+				BITS_PER_PASS = 16; // Must be power of two and less than or equal to 32
+			}
+			final int PASS_SIZE = 1 << BITS_PER_PASS;
+			final int PASS_MASK = PASS_SIZE - 1;
+
+			// Determine the start queue length
+			int startQueueLength = size >>> (BITS_PER_PASS-1); // Double the average size to allow for somewhat uneven distribution before growing arrays
+			if(startQueueLength<MINIMUM_START_QUEUE_LENGTH) startQueueLength = MINIMUM_START_QUEUE_LENGTH;
+			if(startQueueLength>size) startQueueLength = size;
+
+			int[][] fromQueues = USE_SMALL_THREAD_LOCAL && size<=THREAD_LOCAL_QUEUE_SIZE ? IntegerRadixSortExperimental.fromQueues.get() : new int[PASS_SIZE][];
+			int[] fromQueueLengths = new int[PASS_SIZE];
+			int[][] toQueues = USE_SMALL_THREAD_LOCAL && size<=THREAD_LOCAL_QUEUE_SIZE ? IntegerRadixSortExperimental.toQueues.get() : new int[PASS_SIZE][];
+			int[] toQueueLengths = new int[PASS_SIZE];
+			// Initial population of elements into fromQueues
+			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
+			int bitsNotSeen = 0;
+			if(stats!=null) {
+				// One get and one set for each element
+				stats.sortGetting(size);
+				stats.sortSetting(size);
+			}
+			for(int i=0;i<size;i++) {
+				int number = array[i];
+				bitsSeen |= number;
+				bitsNotSeen |= number ^ 0xffffffff;
+				int fromQueueNum = number & PASS_MASK;
+				int[] fromQueue = fromQueues[fromQueueNum];
+				int fromQueueLength = fromQueueLengths[fromQueueNum];
+				if(fromQueue==null) {
+					int[] newQueue = new int[startQueueLength];
+					fromQueues[fromQueueNum] = fromQueue = newQueue;
+				} else if(fromQueueLength>=fromQueue.length) {
+					// Grow queue
+					int[] newQueue = new int[fromQueueLength<<1];
+					System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
+					fromQueues[fromQueueNum] = fromQueue = newQueue;
+				}
+				fromQueue[fromQueueLength++] = number;
+				fromQueueLengths[fromQueueNum] = fromQueueLength;
+			}
+			bitsNotSeen ^= 0xffffffff;
+
+			int lastShiftUsed = 0;
+			for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
+				// Skip this bit range when all values have equal bits.  For example
+				// when going through the upper bits of lists of all smaller positive
+				// or negative numbers.
+				if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
+					lastShiftUsed = shift;
+					for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+						int[] fromQueue = fromQueues[fromQueueNum];
+						if(fromQueue!=null) {
+							int length = fromQueueLengths[fromQueueNum];
+							for(int j=0; j<length; j++) {
+								int number = fromQueue[j];
+								int toQueueNum = (number >>> shift) & PASS_MASK;
+								int[] toQueue = toQueues[toQueueNum];
+								int toQueueLength = toQueueLengths[toQueueNum];
+								if(toQueue==null) {
+									int[] newQueue = new int[startQueueLength];
+									toQueues[toQueueNum] = toQueue = newQueue;
+								} else if(toQueueLength>=toQueue.length) {
+									// Grow queue
+									int[] newQueue = new int[toQueueLength<<1];
+									System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
+									toQueues[toQueueNum] = toQueue = newQueue;
+								}
+								toQueue[toQueueLength++] = number;
+								toQueueLengths[toQueueNum] = toQueueLength;
+							}
+							fromQueueLengths[fromQueueNum] = 0;
+						}
+					}
+
+					// Swap from and to
+					int[][] temp = fromQueues;
+					fromQueues = toQueues;
+					toQueues = temp;
+					int[] tempLengths = fromQueueLengths;
+					fromQueueLengths = toQueueLengths;
+					toQueueLengths = tempLengths;
+				}
+			}
+			// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
+			int midPoint = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+			// Use indexed strategy
+			int outIndex = 0;
+			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				int[] fromQueue = fromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					int length = fromQueueLengths[fromQueueNum];
+					System.arraycopy(fromQueue, 0, array, outIndex, length);
+					outIndex += length;
+				}
+			}
+			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
+				int[] fromQueue = fromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					int length = fromQueueLengths[fromQueueNum];
+					System.arraycopy(fromQueue, 0, array, outIndex, length);
+					outIndex += length;
+				}
+			}
+		}
+		if(stats!=null) stats.sortEnding();
     }
 }
