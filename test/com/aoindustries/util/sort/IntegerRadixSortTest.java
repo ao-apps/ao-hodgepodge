@@ -602,7 +602,7 @@ public class IntegerRadixSortTest extends TestCase {
 		) {
 			// Generate testSize random ints
 			int[] randomValues = new int[testSize];
-			for(int i=0; i<testSize; i++) randomValues[i] = getRandomValue();
+			for(int i=0; i<testSize; i++) randomValues[i] = USE_SORTED ? i : getRandomValue();
 
 			tests++;
 			doTestIntArrayPerformance(
