@@ -353,18 +353,16 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
 					int length = fromQueueLengths[fromQueueNum];
-					for(int j=0; j<length; j++) {
-						array[outIndex++] = fromQueue[j];
-					}
+					System.arraycopy(fromQueue, 0, array, outIndex, length);
+					outIndex += length;
 				}
 			}
 			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
 				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
 					int length = fromQueueLengths[fromQueueNum];
-					for(int j=0; j<length; j++) {
-						array[outIndex++] = fromQueue[j];
-					}
+					System.arraycopy(fromQueue, 0, array, outIndex, length);
+					outIndex += length;
 				}
 			}
 		}
@@ -373,8 +371,120 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 
 	@Override
     public void sort(int[] array, SortStatistics stats) {
-        if(stats!=null) stats.sortStarting();
-		if(true) throw new NotImplementedException("TODO: Implement method");
-        if(stats!=null) stats.sortEnding();
+		if(stats!=null) stats.sortStarting();
+		final int size = array.length;
+		if(size <= MAX_JAVA_SORT_SIZE) {
+            if(stats!=null) stats.sortSwitchingAlgorithms();
+			Arrays.sort(array);
+		} else {
+			// Dynamically choose pass size
+			final int BITS_PER_PASS;
+			/* Small case now handled by Java sort
+			if(size <= 0x80) {
+				BITS_PER_PASS = 4;
+			} else*/ if(size < 0x80000) {
+				BITS_PER_PASS = 8;
+			} else {
+				BITS_PER_PASS = 16; // Must be power of two and less than or equal to 32
+			}
+			final int PASS_SIZE = 1 << BITS_PER_PASS;
+			final int PASS_MASK = PASS_SIZE - 1;
+
+			// Determine the start queue length
+			int startQueueLength = size >>> (BITS_PER_PASS-1); // Double the average size to allow for somewhat uneven distribution before growing arrays
+			if(startQueueLength<MINIMUM_START_QUEUE_LENGTH) startQueueLength = MINIMUM_START_QUEUE_LENGTH;
+			if(startQueueLength>size) startQueueLength = size;
+
+			int[][] fromQueues = new int[PASS_SIZE][];
+			int[] fromQueueLengths = new int[PASS_SIZE];
+			int[][] toQueues = new int[PASS_SIZE][];
+			int[] toQueueLengths = new int[PASS_SIZE];
+			// Initial population of elements into fromQueues
+			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
+			int bitsNotSeen = 0;
+			for(int i=0;i<size;i++) {
+				int number = array[i];
+				bitsSeen |= number;
+				bitsNotSeen |= number ^ 0xffffffff;
+				int fromQueueNum = number & PASS_MASK;
+				int[] fromQueue = fromQueues[fromQueueNum];
+				int fromQueueLength = fromQueueLengths[fromQueueNum];
+				if(fromQueue==null) {
+					int[] newQueue = new int[startQueueLength];
+					fromQueues[fromQueueNum] = fromQueue = newQueue;
+				} else if(fromQueueLength>=fromQueue.length) {
+					// Grow queue
+					int[] newQueue = new int[fromQueueLength<<1];
+					System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
+					fromQueues[fromQueueNum] = fromQueue = newQueue;
+				}
+				fromQueue[fromQueueLength++] = number;
+				fromQueueLengths[fromQueueNum] = fromQueueLength;
+			}
+			bitsNotSeen ^= 0xffffffff;
+
+			int lastShiftUsed = 0;
+			for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
+				// Skip this bit range when all values have equal bits.  For example
+				// when going through the upper bits of lists of all smaller positive
+				// or negative numbers.
+				if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
+					lastShiftUsed = shift;
+					for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+						int[] fromQueue = fromQueues[fromQueueNum];
+						if(fromQueue!=null) {
+							int length = fromQueueLengths[fromQueueNum];
+							for(int j=0; j<length; j++) {
+								int number = fromQueue[j];
+								int toQueueNum = (number >>> shift) & PASS_MASK;
+								int[] toQueue = toQueues[toQueueNum];
+								int toQueueLength = toQueueLengths[toQueueNum];
+								if(toQueue==null) {
+									int[] newQueue = new int[startQueueLength];
+									toQueues[toQueueNum] = toQueue = newQueue;
+								} else if(toQueueLength>=toQueue.length) {
+									// Grow queue
+									int[] newQueue = new int[toQueueLength<<1];
+									System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
+									toQueues[toQueueNum] = toQueue = newQueue;
+								}
+								toQueue[toQueueLength++] = number;
+								toQueueLengths[toQueueNum] = toQueueLength;
+							}
+							fromQueueLengths[fromQueueNum] = 0;
+						}
+					}
+
+					// Swap from and to
+					int[][] temp = fromQueues;
+					fromQueues = toQueues;
+					toQueues = temp;
+					int[] tempLengths = fromQueueLengths;
+					fromQueueLengths = toQueueLengths;
+					toQueueLengths = tempLengths;
+				}
+			}
+			// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
+			int midPoint = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+			// Use indexed strategy
+			int outIndex = 0;
+			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				int[] fromQueue = fromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					int length = fromQueueLengths[fromQueueNum];
+					System.arraycopy(fromQueue, 0, array, outIndex, length);
+					outIndex += length;
+				}
+			}
+			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
+				int[] fromQueue = fromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					int length = fromQueueLengths[fromQueueNum];
+					System.arraycopy(fromQueue, 0, array, outIndex, length);
+					outIndex += length;
+				}
+			}
+		}
+		if(stats!=null) stats.sortEnding();
     }
 }
