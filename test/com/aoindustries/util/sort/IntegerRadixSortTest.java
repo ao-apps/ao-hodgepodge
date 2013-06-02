@@ -43,12 +43,15 @@ public class IntegerRadixSortTest extends TestCase {
 	private static final boolean GC_EACH_PASS = false;
 	private static final long GC_SLEEP_TIME = 100;
 
+	private static final int START_TEST_SIZE = 1 << 8;
 	private static final int END_TEST_SIZE = 1 << 24;
-	private static final int MAX_PASSES = 1 << 20;
+	private static final int MAX_PASSES = (1 << 20) / START_TEST_SIZE;
+
+	private static final boolean USE_SORTED = true;
 
 	private static final boolean RANDOM_FULL = false;
-	private static final boolean RANDOM_NEGATIVE = false;
-	private static final int RANDOM_RANGE = 0x10000;
+	private static final boolean RANDOM_NEGATIVE = true;
+	private static final int RANDOM_RANGE = 0x100;
 	private static final int RANDOM_MULTIPLIER = 1; // 0x10000;
 
     public IntegerRadixSortTest(String testName) {
@@ -212,13 +215,13 @@ public class IntegerRadixSortTest extends TestCase {
         List<Integer> randomValues = new ArrayList<Integer>(END_TEST_SIZE);
 		int tests = 0;
 		for(
-			int testSize = 1, passes = MAX_PASSES;
+			int testSize = START_TEST_SIZE, passes = MAX_PASSES;
 			testSize<=END_TEST_SIZE;
 			testSize *= 2, passes /= 2
 		) {
 			// Generate testSize random ints
 			while(randomValues.size()>testSize) randomValues.remove(randomValues.size()-1);
-			while(randomValues.size()<testSize) randomValues.add(getRandomValue());
+			while(randomValues.size()<testSize) randomValues.add(USE_SORTED ? randomValues.size() : getRandomValue());
 
 			tests++;
 			doTestListPerformance(
@@ -403,13 +406,13 @@ public class IntegerRadixSortTest extends TestCase {
 		long[] avgSumExp = new long[1];
 		int tests = 0;
 		for(
-			int testSize = 1, passes = MAX_PASSES;
+			int testSize = START_TEST_SIZE, passes = MAX_PASSES;
 			testSize<=END_TEST_SIZE;
 			testSize *= 2, passes /= 2
 		) {
 			// Generate testSize random ints
 			Integer[] randomValues = new Integer[testSize];
-			for(int i=0; i<testSize; i++) randomValues[i] = getRandomValue();
+			for(int i=0; i<testSize; i++) randomValues[i] = USE_SORTED ? i : getRandomValue();
 
 			tests++;
 			doTestArrayPerformance(
@@ -593,7 +596,7 @@ public class IntegerRadixSortTest extends TestCase {
 		long[] avgSumExp = new long[1];
 		int tests = 0;
 		for(
-			int testSize = 1, passes = MAX_PASSES;
+			int testSize = START_TEST_SIZE, passes = MAX_PASSES;
 			testSize<=END_TEST_SIZE;
 			testSize *= 2, passes /= 2
 		) {

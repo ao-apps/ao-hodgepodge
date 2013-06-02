@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.sort;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,16 +32,9 @@ import java.util.List;
  */
 final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 
-	private static final boolean USE_SMALL_THREAD_LOCAL = true;
-	private static final int THREAD_LOCAL_PASS_SIZE = 256;
-	private static final int THREAD_LOCAL_QUEUE_SIZE = 8192;
-
-	/**
-	 * When sorting lists less than this size, will use a different algorithm.
-	 */
-	private static final int MAX_JAVA_SORT_SIZE = 128;
-
-	private static final int MINIMUM_START_QUEUE_LENGTH = 16;
+	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
+	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
+	private static final int PASS_MASK = PASS_SIZE - 1;
 
 	private static final IntegerRadixSortExperimental instance = new IntegerRadixSortExperimental();
 
@@ -63,140 +55,66 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 		IntegerRadixSort.getInstance().sort(array, stats);
     }
 
-	private static final ThreadLocal<int[][]> fromQueues = new ThreadLocal<int[][]>() {
-		@Override
-		protected int[][] initialValue() {
-			return new int[THREAD_LOCAL_PASS_SIZE][THREAD_LOCAL_QUEUE_SIZE];
-		}
-	};
-	private static final ThreadLocal<int[][]> toQueues = new ThreadLocal<int[][]>() {
-		@Override
-		protected int[][] initialValue() {
-			return new int[THREAD_LOCAL_PASS_SIZE][THREAD_LOCAL_QUEUE_SIZE];
-		}
-	};
-
 	@Override
     public void sort(int[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
-		final int size = array.length;
-		if(size <= MAX_JAVA_SORT_SIZE) {
-            if(stats!=null) stats.sortSwitchingAlgorithms();
-			Arrays.sort(array);
-		} else {
-			// Dynamically choose pass size
-			final int BITS_PER_PASS;
-			/* Small case now handled by Java sort
-			if(size <= 0x80) {
-				BITS_PER_PASS = 4;
-			} else*/ if(size < 0x80000) {
-				BITS_PER_PASS = 8;
-			} else {
-				BITS_PER_PASS = 16; // Must be power of two and less than or equal to 32
-			}
-			final int PASS_SIZE = 1 << BITS_PER_PASS;
-			final int PASS_MASK = PASS_SIZE - 1;
+		sort(array, 0, array.length, 32-BITS_PER_PASS);
+		if(stats!=null) stats.sortEnding();
+    }
 
-			// Determine the start queue length
-			int startQueueLength = size >>> (BITS_PER_PASS-1); // Double the average size to allow for somewhat uneven distribution before growing arrays
-			if(startQueueLength<MINIMUM_START_QUEUE_LENGTH) startQueueLength = MINIMUM_START_QUEUE_LENGTH;
-			if(startQueueLength>size) startQueueLength = size;
+	private static final int UNSIGNED_OFFSET = 0x80000000;
 
-			int[][] fromQueues = USE_SMALL_THREAD_LOCAL && size<=THREAD_LOCAL_QUEUE_SIZE ? IntegerRadixSortExperimental.fromQueues.get() : new int[PASS_SIZE][];
-			int[] fromQueueLengths = new int[PASS_SIZE];
-			int[][] toQueues = USE_SMALL_THREAD_LOCAL && size<=THREAD_LOCAL_QUEUE_SIZE ? IntegerRadixSortExperimental.toQueues.get() : new int[PASS_SIZE][];
-			int[] toQueueLengths = new int[PASS_SIZE];
-			// Initial population of elements into fromQueues
-			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
-			int bitsNotSeen = 0;
-			if(stats!=null) {
-				// One get and one set for each element
-				stats.sortGetting(size);
-				stats.sortSetting(size);
-			}
-			for(int i=0;i<size;i++) {
-				int number = array[i];
-				bitsSeen |= number;
-				bitsNotSeen |= number ^ 0xffffffff;
-				int fromQueueNum = number & PASS_MASK;
-				int[] fromQueue = fromQueues[fromQueueNum];
-				int fromQueueLength = fromQueueLengths[fromQueueNum];
-				if(fromQueue==null) {
-					int[] newQueue = new int[startQueueLength];
-					fromQueues[fromQueueNum] = fromQueue = newQueue;
-				} else if(fromQueueLength>=fromQueue.length) {
-					// Grow queue
-					int[] newQueue = new int[fromQueueLength<<1];
-					System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
-					fromQueues[fromQueueNum] = fromQueue = newQueue;
+	// From https://github.com/gorset/radix/blob/master/Radix.java
+	public static void sort(int[] array, int offset, int end, int shift) {
+		int[] last = new int[PASS_SIZE];
+		int[] pointer = new int[PASS_SIZE];
+
+		for (int x=offset; x<end; ++x) {
+			++last[((array[x]+UNSIGNED_OFFSET) >> shift) & PASS_MASK];
+		}
+
+		last[0] += offset;
+		pointer[0] = offset;
+		for (int x=1; x<PASS_SIZE; ++x) {
+			pointer[x] = last[x-1];
+			last[x] += last[x-1];
+		}
+
+		for (int x=0; x<PASS_SIZE; ++x) {
+			while (pointer[x] != last[x]) {
+				int value = array[pointer[x]];
+				int y = ((value+UNSIGNED_OFFSET) >> shift) & PASS_MASK;
+				while (x != y) {
+					int temp = array[pointer[y]];
+					array[pointer[y]++] = value;
+					value = temp;
+					y = ((value+UNSIGNED_OFFSET) >> shift) & PASS_MASK;
 				}
-				fromQueue[fromQueueLength++] = number;
-				fromQueueLengths[fromQueueNum] = fromQueueLength;
+				array[pointer[x]++] = value;
 			}
-			bitsNotSeen ^= 0xffffffff;
-
-			int lastShiftUsed = 0;
-			for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
-				// Skip this bit range when all values have equal bits.  For example
-				// when going through the upper bits of lists of all smaller positive
-				// or negative numbers.
-				if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
-					lastShiftUsed = shift;
-					for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-						int[] fromQueue = fromQueues[fromQueueNum];
-						if(fromQueue!=null) {
-							int length = fromQueueLengths[fromQueueNum];
-							for(int j=0; j<length; j++) {
-								int number = fromQueue[j];
-								int toQueueNum = (number >>> shift) & PASS_MASK;
-								int[] toQueue = toQueues[toQueueNum];
-								int toQueueLength = toQueueLengths[toQueueNum];
-								if(toQueue==null) {
-									int[] newQueue = new int[startQueueLength];
-									toQueues[toQueueNum] = toQueue = newQueue;
-								} else if(toQueueLength>=toQueue.length) {
-									// Grow queue
-									int[] newQueue = new int[toQueueLength<<1];
-									System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
-									toQueues[toQueueNum] = toQueue = newQueue;
-								}
-								toQueue[toQueueLength++] = number;
-								toQueueLengths[toQueueNum] = toQueueLength;
-							}
-							fromQueueLengths[fromQueueNum] = 0;
-						}
-					}
-
-					// Swap from and to
-					int[][] temp = fromQueues;
-					fromQueues = toQueues;
-					toQueues = temp;
-					int[] tempLengths = fromQueueLengths;
-					fromQueueLengths = toQueueLengths;
-					toQueueLengths = tempLengths;
-				}
-			}
-			// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
-			int midPoint = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
-			// Use indexed strategy
-			int outIndex = 0;
-			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-				int[] fromQueue = fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = fromQueueLengths[fromQueueNum];
-					System.arraycopy(fromQueue, 0, array, outIndex, length);
-					outIndex += length;
-				}
-			}
-			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-				int[] fromQueue = fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = fromQueueLengths[fromQueueNum];
-					System.arraycopy(fromQueue, 0, array, outIndex, length);
-					outIndex += length;
+		}
+		if (shift > 0) {
+			shift -= BITS_PER_PASS;
+			for (int x=0; x<PASS_SIZE; ++x) {
+				int size = x > 0 ? pointer[x] - pointer[x-1] : pointer[0] - offset;
+				if (size > 64) {
+					sort(array, pointer[x] - size, pointer[x], shift);
+				} else if (size > 1) {
+					insertionSort(array, pointer[x] - size, pointer[x]);
+					// Arrays.sort(array, pointer[x] - size, pointer[x]);
 				}
 			}
 		}
-		if(stats!=null) stats.sortEnding();
-    }
+	}
+
+	// From https://github.com/gorset/radix/blob/master/Radix.java
+	private static void insertionSort(int array[], int offset, int end) {
+		for (int x=offset; x<end; ++x) {
+			for (int y=x; y>offset && array[y-1]>array[y]; y--) {
+				int temp = array[y];
+				array[y] = array[y-1];
+				array[y-1] = temp;
+			}
+		}
+	}
 }
