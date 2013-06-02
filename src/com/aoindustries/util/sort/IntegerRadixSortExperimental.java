@@ -22,7 +22,16 @@
  */
 package com.aoindustries.util.sort;
 
+import com.aoindustries.util.AtomicSequence;
+import com.aoindustries.util.Sequence;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * A radix sort implementation for numeric data, sorting by its integer representation.
@@ -35,6 +44,19 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
 	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
 	private static final int PASS_MASK = PASS_SIZE - 1;
+
+	private static final boolean ENABLE_CONCURRENCY = true;
+	private static final int MIN_CONCURRENCY_SIZE = 1 << 10;
+
+	private static final ExecutorService executor = !ENABLE_CONCURRENCY ? null : Executors.newFixedThreadPool(
+		Runtime.getRuntime().availableProcessors(),
+		new ThreadFactory() {
+			private final Sequence idSequence = new AtomicSequence();
+			public Thread newThread(Runnable target) {
+				return new Thread(target, IntegerRadixSortExperimental.class.getName()+".executor: id=" + idSequence.getNextSequenceValue());
+			}
+		}
+	);
 
 	private static final IntegerRadixSortExperimental instance = new IntegerRadixSortExperimental();
 
@@ -58,16 +80,28 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 	@Override
     public void sort(int[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
-		sort(array, 0, array.length, 32-BITS_PER_PASS);
+		Queue<Future<?>> futures = ENABLE_CONCURRENCY ? new ConcurrentLinkedQueue<Future<?>>() : null;
+		sort(array, 0, array.length, 32-BITS_PER_PASS, futures);
+		if(ENABLE_CONCURRENCY) {
+			try {
+				while(!futures.isEmpty()) {
+					futures.remove().get();
+				}
+			} catch(InterruptedException e) {
+				throw new RuntimeException(e);
+			} catch(ExecutionException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		if(stats!=null) stats.sortEnding();
     }
 
 	private static final int UNSIGNED_OFFSET = 0x80000000;
 
 	// From https://github.com/gorset/radix/blob/master/Radix.java
-	public static void sort(int[] array, int offset, int end, int shift) {
+	public static void sort(final int[] array, int offset, int end, int shift, final Queue<Future<?>> futures) {
 		int[] last = new int[PASS_SIZE];
-		int[] pointer = new int[PASS_SIZE];
+		final int[] pointer = new int[PASS_SIZE];
 
 		for (int x=offset; x<end; ++x) {
 			++last[((array[x]+UNSIGNED_OFFSET) >> shift) & PASS_MASK];
@@ -94,11 +128,30 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 			}
 		}
 		if (shift > 0) {
+			// TODO: Additional criteria
 			shift -= BITS_PER_PASS;
 			for (int x=0; x<PASS_SIZE; ++x) {
-				int size = x > 0 ? pointer[x] - pointer[x-1] : pointer[0] - offset;
+				final int size = x > 0 ? (pointer[x] - pointer[x-1]) : (pointer[0] - offset);
 				if (size > 64) {
-					sort(array, pointer[x] - size, pointer[x], shift);
+					final int newOffset = pointer[x] - size;
+					final int newEnd = pointer[x];
+					if(
+						ENABLE_CONCURRENCY
+						&& (newEnd-newOffset) >= MIN_CONCURRENCY_SIZE
+					) {
+						final int finalShift = shift;
+						futures.add(
+							executor.submit(
+								new Runnable() {
+									public void run() {
+										sort(array, newOffset, newEnd, finalShift, futures);
+									}
+								}
+							)
+						);
+					} else {
+						sort(array, newOffset, newEnd, shift, futures);
+					}
 				} else if (size > 1) {
 					insertionSort(array, pointer[x] - size, pointer[x]);
 					// Arrays.sort(array, pointer[x] - size, pointer[x]);
