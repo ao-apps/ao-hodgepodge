@@ -40,7 +40,7 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 	private static final int PASS_MASK = PASS_SIZE - 1;
 	 */
 
-	private static final int START_QUEUE_LENGTH = 16;
+	private static final int MINIMUM_START_QUEUE_LENGTH = 16;
 
 	private static final IntegerRadixSortNew instance = new IntegerRadixSortNew();
 
@@ -59,15 +59,20 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		final boolean useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
 		// Dynamically choose pass size
 		final int BITS_PER_PASS;
-		if(size <= 0x100) {
+		if(size <= 0x80) {
 			BITS_PER_PASS = 4;
-		} else if(size <= 0x10000) {
+		} else if(size <= 0x20000) {
 			BITS_PER_PASS = 8;
 		} else {
 			BITS_PER_PASS = 16; // Must be power of two and less than or equal to 32
 		}
 		final int PASS_SIZE = 1 << BITS_PER_PASS;
 		final int PASS_MASK = PASS_SIZE - 1;
+
+		// Determine the start queue length
+		int startQueueLength = size >>> BITS_PER_PASS;
+		if(startQueueLength<MINIMUM_START_QUEUE_LENGTH) startQueueLength = MINIMUM_START_QUEUE_LENGTH;
+		if(startQueueLength>size) startQueueLength = size;
 
 		@SuppressWarnings("unchecked")
 		T[][] fromQueues = (T[][])new Number[PASS_SIZE][];
@@ -80,16 +85,18 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 		//	toQueues[i] = new ArrayList<T>();
 		//}
 		// Initial population of elements into fromQueues
-		int bitsSeen = 0; // Set of all bits seen for small positive value shortcut (stopBit)
+		int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
+		int bitsNotSeen = 0;
 		if(useRandomAccess) {
 			for(int i=0;i<size;i++) {
 				T number = list.get(i);
 				int numInt = number.intValue();
 				bitsSeen |= numInt;
+				bitsNotSeen |= numInt ^ 0xffffffff;
 				int fromQueueNum = numInt & PASS_MASK;
 				T[] fromQueue = fromQueues[fromQueueNum];
 				int fromQueueLength = fromQueueLengths[fromQueueNum];
-				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[START_QUEUE_LENGTH];
+				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[startQueueLength];
 				else if(fromQueueLength>=fromQueue.length) {
 					// Grow queue
 					T[] newQueue = (T[])new Number[fromQueueLength<<1];
@@ -103,10 +110,11 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 			for(T number : list) {
 				int numInt = number.intValue();
 				bitsSeen |= numInt;
+				bitsNotSeen |= (numInt ^ 0xffffffff);
 				int fromQueueNum = numInt & PASS_MASK;
 				T[] fromQueue = fromQueues[fromQueueNum];
 				int fromQueueLength = fromQueueLengths[fromQueueNum];
-				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[START_QUEUE_LENGTH];
+				if(fromQueue==null) fromQueues[fromQueueNum] = fromQueue = (T[])new Number[startQueueLength];
 				else if(fromQueueLength>=fromQueue.length) {
 					// Grow queue
 					T[] newQueue = (T[])new Number[fromQueueLength<<1];
@@ -117,140 +125,102 @@ final public class IntegerRadixSortNew extends SortAlgorithm<Number> {
 				fromQueueLengths[fromQueueNum] = fromQueueLength;
 			}
 		}
-		// Short-cut number of passes for all positive values
-		final int stopBits;
-		final int midPoint;
-		if(BITS_PER_PASS==4) {
-			// 4 bits per pass
-			if((bitsSeen & 0xfffffff0)==0) {
-				stopBits = 4;
-				midPoint = 0;
-			} else if((bitsSeen & 0xffffff00)==0) {
-				stopBits = 8;
-				midPoint = 0;
-			} else if((bitsSeen & 0xfffff000)==0) {
-				stopBits = 12;
-				midPoint = 0;
-			} else if((bitsSeen & 0xffff0000)==0) {
-				stopBits = 16;
-				midPoint = 0;
-			} else if((bitsSeen & 0xfff00000)==0) {
-				stopBits = 20;
-				midPoint = 0;
-			} else if((bitsSeen & 0xff000000)==0) {
-				stopBits = 24;
-				midPoint = 0;
-			} else if((bitsSeen & 0xf0000000)==0) {
-				stopBits = 28;
-				midPoint = 0;
-			} else {
-				stopBits = 32;
-				midPoint = PASS_SIZE>>>1;
-			}
-		} else if(BITS_PER_PASS==8) {
-			// 8 bits per pass
-			if((bitsSeen & 0xffffff00)==0) {
-				stopBits = 8;
-				midPoint = 0;
-			} else if((bitsSeen & 0xffff0000)==0) {
-				stopBits = 16;
-				midPoint = 0;
-			} else if((bitsSeen & 0xff000000)==0) {
-				stopBits = 24;
-				midPoint = 0;
-			} else {
-				stopBits = 32;
-				midPoint = PASS_SIZE>>>1;
-			}
-		} else {
-			// 16 bits per pass
-			if((bitsSeen & 0xffff0000)==0) {
-				stopBits = 16;
-				midPoint = 0;
-			} else {
-				stopBits = 32;
-				midPoint = PASS_SIZE>>>1;
-			}
-		}
+		bitsNotSeen ^= 0xffffffff;
+		//System.out.println("bitsSeen    = " + Integer.toString(bitsSeen, 16));
+		//System.out.println("bitsNotSeen = " + Integer.toString(bitsNotSeen, 16));
 
-		for(int shift=BITS_PER_PASS; shift<stopBits; shift += BITS_PER_PASS) {
-			for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-				T[] fromQueue = fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = fromQueueLengths[fromQueueNum];
-					for(int j=0; j<length; j++) {
-						T number = fromQueue[j];
-						int toQueueNum = (number.intValue() >>> shift) & PASS_MASK;
-						T[] toQueue = toQueues[toQueueNum];
-						int toQueueLength = toQueueLengths[toQueueNum];
-						if(toQueue==null) toQueues[toQueueNum] = toQueue = (T[])new Number[START_QUEUE_LENGTH];
-						else if(toQueueLength>=toQueue.length) {
-							// Grow queue
-							T[] newQueue = (T[])new Number[toQueueLength<<1];
-							System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
-							toQueues[toQueueNum] = toQueue = newQueue;
+		boolean didFirst = false; // TODO: May skip first pass if unconstructive (bits all equal)
+		int lastShiftUsed = 0;
+		for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
+			// Skip this bit range when all values have equal bits.  For example
+			// when going through the upper bits of lists of all smaller positive
+			// or negative numbers.
+			if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
+				lastShiftUsed = shift;
+				for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+					T[] fromQueue = fromQueues[fromQueueNum];
+					if(fromQueue!=null) {
+						int length = fromQueueLengths[fromQueueNum];
+						for(int j=0; j<length; j++) {
+							T number = fromQueue[j];
+							int toQueueNum = (number.intValue() >>> shift) & PASS_MASK;
+							T[] toQueue = toQueues[toQueueNum];
+							int toQueueLength = toQueueLengths[toQueueNum];
+							if(toQueue==null) toQueues[toQueueNum] = toQueue = (T[])new Number[startQueueLength];
+							else if(toQueueLength>=toQueue.length) {
+								// Grow queue
+								T[] newQueue = (T[])new Number[toQueueLength<<1];
+								System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
+								toQueues[toQueueNum] = toQueue = newQueue;
+							}
+							toQueue[toQueueLength++] = number;
+							toQueueLengths[toQueueNum] = toQueueLength;
 						}
-						toQueue[toQueueLength++] = number;
-						toQueueLengths[toQueueNum] = toQueueLength;
+						fromQueueLengths[fromQueueNum] = 0;
 					}
-					fromQueueLengths[fromQueueNum] = 0;
 				}
-			}
 
-			// Swap from and to
-			T[][] temp = fromQueues;
-			fromQueues = toQueues;
-			toQueues = temp;
-			int[] tempLengths = fromQueueLengths;
-			fromQueueLengths = toQueueLengths;
-			toQueueLengths = tempLengths;
+				// Swap from and to
+				T[][] temp = fromQueues;
+				fromQueues = toQueues;
+				toQueues = temp;
+				int[] tempLengths = fromQueueLengths;
+				fromQueueLengths = toQueueLengths;
+				toQueueLengths = tempLengths;
+			} else {
+				//System.err.println("Skipping bit range: shift="+shift);
+			}
 		}
-		// Pick-up fromQueues and put into results, negative before positive to performed signed
-		if(useRandomAccess) {
-			// Use indexed strategy
-			int outIndex = 0;
-			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-				T[] fromQueue = fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = fromQueueLengths[fromQueueNum];
-					for(int j=0; j<length; j++) {
-						T number = fromQueue[j];
-						list.set(outIndex++, number);
+		// If never did first, then all values are equal in the list - no sort need be performed
+		if(didFirst) {
+			// Pick-up fromQueues and put into results, negative before positive to performed signed
+			int midPoint = lastShiftUsed==32 ? (PASS_SIZE>>>1) : 0;
+			if(useRandomAccess) {
+				// Use indexed strategy
+				int outIndex = 0;
+				for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+					T[] fromQueue = fromQueues[fromQueueNum];
+					if(fromQueue!=null) {
+						int length = fromQueueLengths[fromQueueNum];
+						for(int j=0; j<length; j++) {
+							T number = fromQueue[j];
+							list.set(outIndex++, number);
+						}
 					}
 				}
-			}
-			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-				T[] fromQueue = fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = fromQueueLengths[fromQueueNum];
-					for(int j=0; j<length; j++) {
-						T number = fromQueue[j];
-						list.set(outIndex++, number);
+				for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
+					T[] fromQueue = fromQueues[fromQueueNum];
+					if(fromQueue!=null) {
+						int length = fromQueueLengths[fromQueueNum];
+						for(int j=0; j<length; j++) {
+							T number = fromQueue[j];
+							list.set(outIndex++, number);
+						}
 					}
 				}
-			}
-		} else {
-			// Use iterator strategy
-			ListIterator<T> iterator = list.listIterator();
-			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-				T[] fromQueue = fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = fromQueueLengths[fromQueueNum];
-					for(int j=0; j<length; j++) {
-						T number = fromQueue[j];
-						iterator.next();
-						iterator.set(number);
+			} else {
+				// Use iterator strategy
+				ListIterator<T> iterator = list.listIterator();
+				for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+					T[] fromQueue = fromQueues[fromQueueNum];
+					if(fromQueue!=null) {
+						int length = fromQueueLengths[fromQueueNum];
+						for(int j=0; j<length; j++) {
+							T number = fromQueue[j];
+							iterator.next();
+							iterator.set(number);
+						}
 					}
 				}
-			}
-			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-				T[] fromQueue = fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = fromQueueLengths[fromQueueNum];
-					for(int j=0; j<length; j++) {
-						T number = fromQueue[j];
-						iterator.next();
-						iterator.set(number);
+				for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
+					T[] fromQueue = fromQueues[fromQueueNum];
+					if(fromQueue!=null) {
+						int length = fromQueueLengths[fromQueueNum];
+						for(int j=0; j<length; j++) {
+							T number = fromQueue[j];
+							iterator.next();
+							iterator.set(number);
+						}
 					}
 				}
 			}
