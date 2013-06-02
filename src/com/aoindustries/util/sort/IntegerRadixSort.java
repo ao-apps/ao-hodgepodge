@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.sort;
 
-import com.aoindustries.lang.NotImplementedException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -99,6 +98,11 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
 			int bitsNotSeen = 0;
 			if(useRandomAccess) {
+	            if(stats!=null) {
+					// One get and one set for each element
+					stats.sortGetting(size);
+					stats.sortSetting(size);
+				}
 				for(int i=0;i<size;i++) {
 					T number = list.get(i);
 					int numInt = number.intValue();
@@ -123,6 +127,11 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				}
 			} else {
 				for(T number : list) {
+					if(stats!=null) {
+						// One get and one set for each element
+						stats.sortGetting();
+						stats.sortSetting();
+					}
 					int numInt = number.intValue();
 					bitsSeen |= numInt;
 					bitsNotSeen |= (numInt ^ 0xffffffff);
@@ -278,6 +287,11 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			// Initial population of elements into fromQueues
 			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
 			int bitsNotSeen = 0;
+			if(stats!=null) {
+				// One get and one set for each element
+				stats.sortGetting(size);
+				stats.sortSetting(size);
+			}
 			for(int i=0;i<size;i++) {
 				T number = array[i];
 				int numInt = number.intValue();
@@ -402,6 +416,11 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			// Initial population of elements into fromQueues
 			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
 			int bitsNotSeen = 0;
+			if(stats!=null) {
+				// One get and one set for each element
+				stats.sortGetting(size);
+				stats.sortSetting(size);
+			}
 			for(int i=0;i<size;i++) {
 				int number = array[i];
 				bitsSeen |= number;

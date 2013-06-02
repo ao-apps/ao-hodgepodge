@@ -24,6 +24,7 @@ package com.aoindustries.util.sort;
 
 import com.aoindustries.lang.NotImplementedException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.RandomAccess;
@@ -37,7 +38,7 @@ import java.util.RandomAccess;
  *
  * @author  AO Industries, Inc.
  */
-final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
+final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 
 	private static final int LARGE_THRESHOLD = 16384; // TODO: Tune: 65536;
 
@@ -53,7 +54,7 @@ final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
 	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
 	private static final int PASS_MASK = PASS_SIZE - 1;
 
-    private static final IntegerRadixSortExperimental instance = new IntegerRadixSortExperimental();
+	private static final IntegerRadixSortExperimental instance = new IntegerRadixSortExperimental();
 
     public static IntegerRadixSortExperimental getInstance() {
         return instance;
@@ -294,8 +295,11 @@ final public class IntegerRadixSortExperimental extends SortAlgorithm<Number> {
 
 	@Override
     public <T extends Number> void sort(T[] array, SortStatistics stats) {
-        if(stats!=null) stats.sortStarting();
-		if(true) throw new NotImplementedException("TODO: Implement method");
-        if(stats!=null) stats.sortEnding();
+		IntegerRadixSort.getInstance().sort(array, stats);
+    }
+
+	@Override
+    public void sort(int[] array, SortStatistics stats) {
+		IntegerRadixSort.getInstance().sort(array, stats);
     }
 }
