@@ -205,7 +205,7 @@ final public class QubbleSort extends ComparisonSortAlgorithm<Object> {
         if(stats!=null) stats.sortUnrecursing();
     }
 
-    private static <T> void bsort(List<T> list, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
+    static <T> void bsort(List<T> list, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
         for (int j=hi; j > lo; j--) {
             for (int i=lo; i < j; i++) {
                 T O1=get(list, i, stats);
@@ -218,7 +218,7 @@ final public class QubbleSort extends ComparisonSortAlgorithm<Object> {
         }
     }
 
-    private static <T> void bsort(T[] array, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
+    static <T> void bsort(T[] array, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
         for (int j=hi; j > lo; j--) {
             for (int i=lo; i < j; i++) {
                 T O1=get(array, i, stats);

@@ -39,9 +39,13 @@ public class IntegerRadixSortTest extends TestCase {
 
 	private static final boolean GC_EACH_PASS = false;
 	private static final long GC_SLEEP_TIME = 100;
-	private static final boolean RANDOM_FULL = true;
-	private static final boolean RANDOM_NEGATIVE = false;
-	private static final int RANDOM_RANGE = 0x100;
+
+	private static final int END_TEST_SIZE = 1 << 24;
+	private static final int MAX_PASSES = 1 << 20;
+
+	private static final boolean RANDOM_FULL = false;
+	private static final boolean RANDOM_NEGATIVE = true;
+	private static final int RANDOM_RANGE = 0x1000000;
 	private static final int RANDOM_MULTIPLIER = 1; // 0x10000;
 
     public IntegerRadixSortTest(String testName) {
@@ -71,7 +75,8 @@ public class IntegerRadixSortTest extends TestCase {
 		long newRadixNanos = 0;
 		long javaNanos = 0;
 		long oldRadixNanos = 0;
-		for(int iteration=1; iteration<=passes; iteration++) {
+		// Iteration 0 is the warm-up and is not counted
+		for(int iteration=0; iteration<=passes; iteration++) {
 			if(GC_EACH_PASS) {
 				System.gc();
 				try {
@@ -86,8 +91,10 @@ public class IntegerRadixSortTest extends TestCase {
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
-				expRadixNanos += System.nanoTime() - startNanos;
-				//System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" \u00B5s");
+				if(iteration>0) {
+					expRadixNanos += System.nanoTime() - startNanos;
+					//System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" \u00B5s");
+				}
 			}
 
 			if(GC_EACH_PASS) {
@@ -104,8 +111,10 @@ public class IntegerRadixSortTest extends TestCase {
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSortNew.getInstance().sort(newRadixResult);
-				newRadixNanos += System.nanoTime() - startNanos;
-				//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+				if(iteration>0) {
+					newRadixNanos += System.nanoTime() - startNanos;
+					//System.out.println(pass+"/"+testSize+": IntegerRadixSortNew in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+				}
 			}
 
 			if(GC_EACH_PASS) {
@@ -122,8 +131,10 @@ public class IntegerRadixSortTest extends TestCase {
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSort.getInstance().sort(oldRadixResult);
-				oldRadixNanos += System.nanoTime() - startNanos;
-				//System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" \u00B5s");
+				if(iteration>0) {
+					oldRadixNanos += System.nanoTime() - startNanos;
+					//System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" \u00B5s");
+				}
 			}
 
 			if(GC_EACH_PASS) {
@@ -140,8 +151,10 @@ public class IntegerRadixSortTest extends TestCase {
 			{
 				long startNanos = System.nanoTime();
 				Collections.sort((List)javaResult);
-				javaNanos += System.nanoTime() - startNanos;
-				//System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" \u00B5s");
+				if(iteration>0) {
+					javaNanos += System.nanoTime() - startNanos;
+					//System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" \u00B5s");
+				}
 			}
 
 			// Check results
@@ -176,7 +189,6 @@ public class IntegerRadixSortTest extends TestCase {
     }
 
     public void testPerformance() {
-        final int endTestSize = 1048576;
 		long[] totalOld = new long[1];
 		long[] totalNew = new long[1];
 		long[] totalExp = new long[1];
@@ -184,11 +196,11 @@ public class IntegerRadixSortTest extends TestCase {
 		long[] avgSumOld = new long[1];
 		long[] avgSumNew = new long[1];
 		long[] avgSumExp = new long[1];
-        List<Integer> randomValues = new ArrayList<Integer>(endTestSize);
+        List<Integer> randomValues = new ArrayList<Integer>(END_TEST_SIZE);
 		int tests = 0;
 		for(
-			int testSize = 1, passes = 1048576;
-			testSize<=endTestSize;
+			int testSize = 1, passes = MAX_PASSES;
+			testSize<=END_TEST_SIZE;
 			testSize *= 2, passes /= 2
 		) {
 			// Generate testSize random ints
@@ -202,7 +214,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			tests++;
-			doTestPerformance(randomValues, testSize, passes, totalOld, totalNew, totalExp, totalJava, avgSumOld, avgSumNew, avgSumExp);
+			doTestPerformance(randomValues, testSize, passes<1 ? 1 : passes, totalOld, totalNew, totalExp, totalJava, avgSumOld, avgSumNew, avgSumExp);
 		}
 		// Display total speedup
 		System.out.println(

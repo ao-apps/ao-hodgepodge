@@ -194,7 +194,7 @@ final public class FastQSort extends ComparisonSortAlgorithm<Object> {
         return true;
     } 
 
-    private static <T> void insertionSort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
+    static <T> void insertionSort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
         for(int i=lo0+1;i<=hi0;i++) {
             T v=get(list, i, stats);
             int j=i;
@@ -210,7 +210,7 @@ final public class FastQSort extends ComparisonSortAlgorithm<Object> {
         }
     }
 
-    private static <T> void insertionSort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
+    static <T> void insertionSort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
         for(int i=lo0+1;i<=hi0;i++) {
             T v=get(array, i, stats);
             int j=i;
