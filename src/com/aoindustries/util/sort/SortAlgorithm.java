@@ -57,14 +57,14 @@ abstract public class SortAlgorithm<E> {
 		return array[i];
 	}
 
-	protected static <T> T set(List<T> list, int i, T O, SortStatistics stats) {
+	protected static <T> void set(List<T> list, int i, T O, SortStatistics stats) {
 		if(stats!=null) stats.sortSetting();
-		return list.set(i, O);
+		list.set(i, O);
 	}
 
-	protected static <T> T set(T[] array, int i, T O, SortStatistics stats) {
+	protected static <T> void set(T[] array, int i, T O, SortStatistics stats) {
 		if(stats!=null) stats.sortSetting();
-		return array[i]=O;
+		array[i]=O;
 	}
 
 	protected static <T> void swap(List<T> list, int i, int j, SortStatistics stats) {
