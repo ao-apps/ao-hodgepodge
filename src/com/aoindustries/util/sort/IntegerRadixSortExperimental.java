@@ -41,12 +41,16 @@ import java.util.concurrent.ThreadFactory;
  */
 final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 
-	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
-	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
-	private static final int PASS_MASK = PASS_SIZE - 1;
+	private static final int FIRST_BITS_PER_PASS = 4; // Must be power of two and less than or equal to 32
+	//private static final int FIRST_PASS_SIZE = 1 << FIRST_BITS_PER_PASS;
+	//private static final int FIRST_PASS_MASK = FIRST_PASS_SIZE - 1;
+
+	private static final int R_BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
+	//private static final int R_PASS_SIZE = 1 << R_BITS_PER_PASS;
+	//private static final int R_PASS_MASK = R_PASS_SIZE - 1;
 
 	private static final boolean ENABLE_CONCURRENCY = true;
-	private static final int MIN_CONCURRENCY_SIZE = 1 << 10;
+	private static final int MIN_CONCURRENCY_SIZE = 1 << 9; // TODO: 1 << 16
 
 	private static final ExecutorService executor = !ENABLE_CONCURRENCY ? null : Executors.newFixedThreadPool(
 		Runtime.getRuntime().availableProcessors(),
@@ -80,9 +84,9 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 	@Override
     public void sort(int[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
-		Queue<Future<?>> futures = ENABLE_CONCURRENCY ? new ConcurrentLinkedQueue<Future<?>>() : null;
-		sort(array, 0, array.length, 32-BITS_PER_PASS, futures);
 		if(ENABLE_CONCURRENCY) {
+			Queue<Future<?>> futures = new ConcurrentLinkedQueue<Future<?>>();
+			sort(array, 0, array.length, 32-FIRST_BITS_PER_PASS, futures);
 			try {
 				while(!futures.isEmpty()) {
 					futures.remove().get();
@@ -92,6 +96,8 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 			} catch(ExecutionException e) {
 				throw new RuntimeException(e);
 			}
+		} else {
+			sort(array, 0, array.length, 32-R_BITS_PER_PASS, null);
 		}
 		if(stats!=null) stats.sortEnding();
     }
@@ -100,6 +106,15 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 
 	// From https://github.com/gorset/radix/blob/master/Radix.java
 	public static void sort(final int[] array, int offset, int end, int shift, final Queue<Future<?>> futures) {
+		final int BITS_PER_PASS;
+		if(ENABLE_CONCURRENCY && (shift + R_BITS_PER_PASS)==32) {
+			BITS_PER_PASS = FIRST_BITS_PER_PASS;
+		} else {
+			BITS_PER_PASS = R_BITS_PER_PASS;
+		}
+		final int PASS_SIZE = 1 << BITS_PER_PASS;
+		final int PASS_MASK = PASS_SIZE - 1;
+
 		int[] last = new int[PASS_SIZE];
 		final int[] pointer = new int[PASS_SIZE];
 
