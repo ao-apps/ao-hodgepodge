@@ -29,9 +29,6 @@ import java.util.List;
  * A radix sort implementation for numeric data, sorting by its integer representation.
  * TODO: Consider thread-local for the small sort space
  *
- * TODO: Consider http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html
- *                https://github.com/gorset/radix/blob/master/Radix.java
- *
  * @author  AO Industries, Inc.
  */
 final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {

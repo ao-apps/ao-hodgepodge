@@ -31,6 +31,10 @@ import java.util.RandomAccess;
 /**
  * A radix sort implementation for numeric data, sorting by its integer representation.
  *
+ * Although a very different implementation, this topic is discussed at
+ * {@link http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html}
+ * with source provided at {@link https://github.com/gorset/radix/blob/master/Radix.java}
+ *
  * @author  AO Industries, Inc.
  */
 final public class IntegerRadixSort extends IntegerSortAlgorithm {
