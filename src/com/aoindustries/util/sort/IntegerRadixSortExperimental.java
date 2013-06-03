@@ -24,6 +24,7 @@ package com.aoindustries.util.sort;
 
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.Sequence;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -40,6 +41,8 @@ import java.util.concurrent.ThreadFactory;
  * @author  AO Industries, Inc.
  */
 final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
+
+	private static final int MIN_RADIX_SORT_SIZE = 1 << 8;
 
 	private static final int FIRST_BITS_PER_PASS = 4; // Must be power of two and less than or equal to 32
 	//private static final int FIRST_PASS_SIZE = 1 << FIRST_BITS_PER_PASS;
@@ -84,20 +87,25 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 	@Override
     public void sort(int[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
-		if(ENABLE_CONCURRENCY) {
-			Queue<Future<?>> futures = new ConcurrentLinkedQueue<Future<?>>();
-			sort(array, 0, array.length, 32-FIRST_BITS_PER_PASS, futures);
-			try {
-				while(!futures.isEmpty()) {
-					futures.remove().get();
+			if(array.length < MIN_RADIX_SORT_SIZE) {
+				if(stats!=null) stats.sortSwitchingAlgorithms();
+				Arrays.sort(array);
+			} else {
+			if(ENABLE_CONCURRENCY) {
+				Queue<Future<?>> futures = new ConcurrentLinkedQueue<Future<?>>();
+				sort(array, 0, array.length, 32-FIRST_BITS_PER_PASS, futures);
+				try {
+					while(!futures.isEmpty()) {
+						futures.remove().get();
+					}
+				} catch(InterruptedException e) {
+					throw new RuntimeException(e);
+				} catch(ExecutionException e) {
+					throw new RuntimeException(e);
 				}
-			} catch(InterruptedException e) {
-				throw new RuntimeException(e);
-			} catch(ExecutionException e) {
-				throw new RuntimeException(e);
+			} else {
+				sort(array, 0, array.length, 32-R_BITS_PER_PASS, null);
 			}
-		} else {
-			sort(array, 0, array.length, 32-R_BITS_PER_PASS, null);
 		}
 		if(stats!=null) stats.sortEnding();
     }
