@@ -48,9 +48,9 @@ public class IntegerRadixSortTest extends TestCase {
 
 	private static final boolean USE_SORTED = false;
 
-	private static final boolean RANDOM_FULL = true;
-	private static final boolean RANDOM_NEGATIVE = true;
-	private static final int RANDOM_RANGE = 0x100;
+	private static final boolean RANDOM_FULL = false;
+	private static final boolean RANDOM_NEGATIVE = false;
+	private static final int RANDOM_RANGE = 0x10000;
 	private static final int RANDOM_MULTIPLIER = 1; // 0x10000;
 
     public IntegerRadixSortTest(String testName) {
@@ -477,6 +477,7 @@ public class IntegerRadixSortTest extends TestCase {
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
+				//Arrays.sort(expRadixResult);
 				if(iteration>0) {
 					expRadixNanos += System.nanoTime() - startNanos;
 					//System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" \u00B5s");
@@ -498,6 +499,7 @@ public class IntegerRadixSortTest extends TestCase {
 			{
 				long startNanos = System.nanoTime();
 				ConcurrentIntegerRadixSort.getInstance().sort(newRadixResult);
+				//Arrays.sort(newRadixResult);
 				if(iteration>0) {
 					newRadixNanos += System.nanoTime() - startNanos;
 					//System.out.println(pass+"/"+testSize+": ConcurrentIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
@@ -551,9 +553,9 @@ public class IntegerRadixSortTest extends TestCase {
 			List<Integer> oldRadixResultList = new IntArrayList(oldRadixResult);
 			List<Integer> newRadixResultList = new IntArrayList(newRadixResult);
 			List<Integer> expRadixResultList = new IntArrayList(expRadixResult);
-			assertEquals(javaResultList, oldRadixResultList);
-			assertEquals(javaResultList, newRadixResultList);
-			assertEquals(javaResultList, expRadixResultList);
+			assertEquals("oldRadixResultList", javaResultList, oldRadixResultList);
+			assertEquals("newRadixResultList", javaResultList, newRadixResultList);
+			assertEquals("expRadixResultList", javaResultList, expRadixResultList);
 		}
 
 		// Update total times

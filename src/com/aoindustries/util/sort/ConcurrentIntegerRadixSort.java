@@ -44,17 +44,15 @@ import java.util.concurrent.ThreadFactory;
  */
 final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 
-	/*
 	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
 	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
 	private static final int PASS_MASK = PASS_SIZE - 1;
-	 */
 
 	/**
 	 * When there are fewer than MIN_CONCURRENCY_SIZE elements,
 	 * the single-threaded implementation is used.
 	 */
-	private static final int MIN_CONCURRENCY_SIZE = 1 << 4; // TODO: Find break-even point
+	private static final int MIN_CONCURRENCY_SIZE = 1 << 2; // TODO: Find break-even point, might also depend on the number of processors
 
 	/**
 	 * Where there are fewer than MIN_CONCURRENCY_PROCESSORS available processors,
@@ -77,12 +75,30 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	 */
 	private static final int MINIMUM_START_QUEUE_LENGTH = 16;
 
+	/**
+	 * <p>
+	 * The call to Runtime.availableProcessors() is particularly expensive.  This simple
+	 * approach assumes that the number of available processors will not change over the
+	 * life span of the Java virtual machine.  This assumption, however, is not accurate
+	 * in all cases.  This should probably be replaced by a polling strategy to occasionally
+	 * check the new number of processors and adjust the executor service accordingly.
+	 * </p>
+	 * </p>
+	 * However, the sort should not be affected too adversely if it gets the number of processors
+	 * wrong.  If the number of processors is reduced, it just adds a few more context switches
+	 * due to extra threads.  If the number of processors is increased, the additional processors
+	 * will simply not be used.
+	 * </p>
+	 */
+	private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+
 	private static final ExecutorService defaultExecutor = Executors.newFixedThreadPool(
-		Runtime.getRuntime().availableProcessors() * THREADS_PER_PROCESSOR,
+		AVAILABLE_PROCESSORS * THREADS_PER_PROCESSOR,
 		new ThreadFactory() {
 			private final Sequence idSequence = new AtomicSequence();
 			public Thread newThread(Runnable target) {
-				return new Thread(target, ConcurrentIntegerRadixSort.class.getName()+".defaultExecutor: id=" + idSequence.getNextSequenceValue());
+				long id = idSequence.getNextSequenceValue();
+				return new Thread(target, ConcurrentIntegerRadixSort.class.getName()+".defaultExecutor: id=" + id);
 			}
 		}
 	);
@@ -134,26 +150,14 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	@Override
     public void sort(final int[] array, SortStatistics stats) {
 		final int size = array.length;
-		final int numProcessors = Runtime.getRuntime().availableProcessors();
-		if(size<MIN_CONCURRENCY_SIZE | numProcessors<MIN_CONCURRENCY_PROCESSORS) {
+		final int numProcessors = AVAILABLE_PROCESSORS;
+		if(size<MIN_CONCURRENCY_SIZE || numProcessors<MIN_CONCURRENCY_PROCESSORS) {
 			if(stats!=null) stats.sortSwitchingAlgorithms();
 			IntegerRadixSort.getInstance().sort(array, stats);
 		} else {
 			try {
 				// Use concurrency
 				if(stats!=null) stats.sortStarting();
-				// Dynamically choose pass size
-				final int BITS_PER_PASS;
-				/* Small case now handled by Java sort
-				if(size <= 0x80) {
-					BITS_PER_PASS = 4;
-				} else*/ if(size < 0x80000) {
-					BITS_PER_PASS = 8;
-				} else {
-					BITS_PER_PASS = 16; // Must be power of two and less than or equal to 32
-				}
-				final int PASS_SIZE = 1 << BITS_PER_PASS;
-				final int PASS_MASK = PASS_SIZE - 1;
 
 				// Determine the number of tasks to divide work between
 				final int numTasks = numProcessors * THREADS_PER_PROCESSOR * TASKS_PER_THREAD;
@@ -161,7 +165,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				// Determine the start queue length
 				final int startQueueLength;
 				{
-					int sql = size >>> (BITS_PER_PASS-1) / numTasks; // Double the average size to allow for somewhat uneven distribution before growing arrays
+					int sql = (size >>> (BITS_PER_PASS-1)) / numTasks; // Double the average size to allow for somewhat uneven distribution before growing arrays
 					if(sql<MINIMUM_START_QUEUE_LENGTH) sql = MINIMUM_START_QUEUE_LENGTH;
 					if(sql>size) sql = size;
 					startQueueLength = sql;
