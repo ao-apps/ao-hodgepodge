@@ -49,7 +49,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 	 * When sorting lists less than this size, will use a different algorithm.
 	 */
 	//private static final int MIN_JAVA_SHORT_SIZE = 6;
-	private static final int MIN_RADIX_SORT_SIZE = 2048;
+	private static final int MIN_RADIX_SORT_SIZE = 1 << 11;
 
 	/**
 	 * The minimum starting queue length (unless the size of the passed-in list is smaller)
