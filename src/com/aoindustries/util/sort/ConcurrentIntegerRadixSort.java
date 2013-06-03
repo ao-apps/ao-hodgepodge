@@ -46,9 +46,11 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 
 	private static final boolean USE_CONCURRENT_EXPORT = true;
 
+	/*
 	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
 	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
 	private static final int PASS_MASK = PASS_SIZE - 1;
+	 */
 
 	/**
 	 * When there are fewer than MIN_CONCURRENCY_SIZE elements,
@@ -164,6 +166,27 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				// Determine the number of tasks to divide work between
 				final int numTasks = numProcessors * THREADS_PER_PROCESSOR * TASKS_PER_THREAD;
 
+				// Determine size of division
+				final int sizePerTask;
+				{
+					int spt = size / numTasks;
+					if((spt*numTasks)<size) spt++; // Round-up instead of down
+					sizePerTask = spt;
+				}
+
+				// Dynamically choose pass size
+				final int BITS_PER_PASS;
+				/* Small case now handled by bubble sort and Java sort
+				if(sizePerTask <= 0x80) {
+					BITS_PER_PASS = 4;
+				} else*/ if(sizePerTask < 0x80000) {
+					BITS_PER_PASS = 8;
+				} else {
+					BITS_PER_PASS = 16; // Must be power of two and less than or equal to 32
+				}
+				final int PASS_SIZE = 1 << BITS_PER_PASS;
+				final int PASS_MASK = PASS_SIZE - 1;
+
 				// Determine the start queue length
 				final int startQueueLength;
 				{
@@ -183,14 +206,6 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 					// There will be only one get and one set for each element
 					stats.sortGetting(size);
 					stats.sortSetting(size);
-				}
-
-				// Determine size of division
-				final int sizePerTask;
-				{
-					int spt = size / numTasks;
-					if((spt*numTasks)<size) spt++; // Round-up instead of down
-					sizePerTask = spt;
 				}
 
 				// Perform each concurrently
