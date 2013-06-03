@@ -227,6 +227,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 			!= fromQueueEnd
 		);
 	}
+
 	@Override
     public void sort(final int[] array, SortStatistics stats) {
 		final int size = array.length;
