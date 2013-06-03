@@ -541,3 +541,7 @@ Switched test to START_TEST_SIZE=1:
 67108864: Speedup (Old/New/Experimental): 2.410 / 7.894 / 10.509
 Total Speedup (Old/New/Experimental): 2.412 / 6.940 / 9.461
 Average Speedup (Old/New/Experimental): 1.822 / 4.359 / 5.117
+
+
+Implemented Number[] version:
+

@@ -392,7 +392,7 @@ public class IntegerRadixSortTest extends TestCase {
 		);
     }
 
-    private void testArrayPerformance() {
+    public void testArrayPerformance() {
 		System.out.println("testArrayPerformance");
 		long[] totalOld = new long[1];
 		long[] totalNew = new long[1];
@@ -584,7 +584,7 @@ public class IntegerRadixSortTest extends TestCase {
 		);
     }
 
-    public void testIntArrayPerformance() {
+    private void testIntArrayPerformance() {
 		System.out.println("testIntArrayPerformance");
 		long[] totalOld = new long[1];
 		long[] totalNew = new long[1];
