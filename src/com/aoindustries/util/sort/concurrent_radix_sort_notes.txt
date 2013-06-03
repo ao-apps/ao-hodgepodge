@@ -508,3 +508,37 @@ Switched test to USE_SORTED=false, RANDOM_FULL=true (to match the majority of te
 67108864: Speedup (Old/New/Experimental): 1.394 / 5.181 / 6.331
 Total Speedup (Old/New/Experimental): 1.430 / 4.498 / 6.431
 Average Speedup (Old/New/Experimental): 1.305 / 3.848 / 4.745
+
+
+Switched test to START_TEST_SIZE=1:
+
+1: Speedup (Old/New/Experimental): 0.895 / 0.798 / 0.022
+2: Speedup (Old/New/Experimental): 0.900 / 0.907 / 0.030
+4: Speedup (Old/New/Experimental): 0.966 / 0.920 / 0.042
+8: Speedup (Old/New/Experimental): 0.978 / 0.925 / 0.077
+16: Speedup (Old/New/Experimental): 0.990 / 0.941 / 0.196
+32: Speedup (Old/New/Experimental): 0.978 / 0.957 / 0.326
+64: Speedup (Old/New/Experimental): 0.995 / 0.977 / 0.690
+128: Speedup (Old/New/Experimental): 0.999 / 0.986 / 1.148
+256: Speedup (Old/New/Experimental): 0.998 / 0.979 / 1.349
+512: Speedup (Old/New/Experimental): 0.995 / 0.991 / 1.551
+1024: Speedup (Old/New/Experimental): 0.997 / 0.993 / 1.604
+2048: Speedup (Old/New/Experimental): 1.599 / 1.588 / 2.676
+4096: Speedup (Old/New/Experimental): 2.077 / 2.062 / 3.284
+8192: Speedup (Old/New/Experimental): 2.468 / 2.346 / 1.932
+16384: Speedup (Old/New/Experimental): 2.854 / 2.744 / 3.206
+32768: Speedup (Old/New/Experimental): 2.980 / 2.885 / 5.073
+65536: Speedup (Old/New/Experimental): 2.485 / 3.603 / 8.747
+131072: Speedup (Old/New/Experimental): 2.399 / 5.078 / 7.101
+262144: Speedup (Old/New/Experimental): 2.548 / 6.608 / 6.778
+524288: Speedup (Old/New/Experimental): 2.230 / 9.516 / 9.607
+1048576: Speedup (Old/New/Experimental): 2.498 / 12.034 / 8.017
+2097152: Speedup (Old/New/Experimental): 2.677 / 10.297 / 8.943
+4194304: Speedup (Old/New/Experimental): 2.799 / 6.883 / 9.499
+8388608: Speedup (Old/New/Experimental): 2.444 / 12.374 / 11.971
+16777216: Speedup (Old/New/Experimental): 2.858 / 11.756 / 11.598
+33554432: Speedup (Old/New/Experimental): 2.429 / 6.846 / 12.130
+67108864: Speedup (Old/New/Experimental): 2.430 / 7.855 / 10.358
+Total Speedup (Old/New/Experimental): 2.431 / 6.884 / 4.142
+Average Speedup (Old/New/Experimental): 1.869 / 4.253 / 4.739
+

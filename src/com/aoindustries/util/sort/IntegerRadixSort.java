@@ -48,8 +48,8 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 	/**
 	 * When sorting lists less than this size, will use a different algorithm.
 	 */
-	private static final int MAX_BUBBLE_SORT_SIZE = 4;
-	private static final int MAX_JAVA_SORT_SIZE = 128;
+	//private static final int MIN_JAVA_SHORT_SIZE = 6;
+	private static final int MIN_RADIX_SORT_SIZE = 2048;
 
 	/**
 	 * The minimum starting queue length (unless the size of the passed-in list is smaller)
@@ -69,10 +69,10 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
     public <T extends Number> void sort(List<T> list, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 		final int size = list.size();
-		if(size <= MAX_BUBBLE_SORT_SIZE) {
+		/*if(size < MIN_JAVA_SHORT_SIZE) {
             if(stats!=null) stats.sortSwitchingAlgorithms();
 			QubbleSort.bsort(list, 0, size-1, null, stats);
-		} else if(size <= MAX_JAVA_SORT_SIZE) {
+		} else*/ if(size < MIN_RADIX_SORT_SIZE) {
             if(stats!=null) stats.sortSwitchingAlgorithms();
 			Collections.sort(list, null);
 		} else {
@@ -248,10 +248,10 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
     public <T extends Number> void sort(T[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 		final int size = array.length;
-		if(size <= MAX_BUBBLE_SORT_SIZE) {
+		/*if(size < MIN_JAVA_SHORT_SIZE) {
             if(stats!=null) stats.sortSwitchingAlgorithms();
 			QubbleSort.bsort(array, 0, size-1, null, stats);
-		} else if(size <= MAX_JAVA_SORT_SIZE) {
+		} else*/ if(size < MIN_RADIX_SORT_SIZE) {
             if(stats!=null) stats.sortSwitchingAlgorithms();
 			Arrays.sort(array, null);
 		} else {
@@ -378,7 +378,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
     public void sort(int[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 		final int size = array.length;
-		if(size <= MAX_JAVA_SORT_SIZE) {
+		if(size < MIN_RADIX_SORT_SIZE) {
             if(stats!=null) stats.sortSwitchingAlgorithms();
 			Arrays.sort(array);
 		} else {

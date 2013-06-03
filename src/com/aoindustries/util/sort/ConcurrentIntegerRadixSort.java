@@ -57,7 +57,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	 * When there are fewer than MIN_CONCURRENCY_SIZE elements,
 	 * the single-threaded implementation is used.
 	 */
-	private static final int MIN_CONCURRENCY_SIZE = 1 << 16; // TODO: Find break-even point, might also depend on the number of processors
+	private static final int MIN_CONCURRENCY_SIZE = 1 << 16; // This is the break-even point on a Core i7-2600k (shows as 8 processors, but has 4 cores), might depend on the number of processors
 
 	/**
 	 * Where there are fewer than MIN_CONCURRENCY_PROCESSORS available processors,
