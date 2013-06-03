@@ -106,7 +106,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			int bitsNotSeen = 0;
 			if(useRandomAccess) {
 	            if(stats!=null) {
-					// One get and one set for each element
+					// There will be only one get and one set for each element
 					stats.sortGetting(size);
 					stats.sortSetting(size);
 				}
@@ -295,7 +295,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
 			int bitsNotSeen = 0;
 			if(stats!=null) {
-				// One get and one set for each element
+				// There will be only one get and one set for each element
 				stats.sortGetting(size);
 				stats.sortSetting(size);
 			}
@@ -424,7 +424,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
 			int bitsNotSeen = 0;
 			if(stats!=null) {
-				// One get and one set for each element
+				// There will be only one get and one set for each element
 				stats.sortGetting(size);
 				stats.sortSetting(size);
 			}
