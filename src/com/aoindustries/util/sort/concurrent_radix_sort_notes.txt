@@ -543,5 +543,37 @@ Total Speedup (Old/New/Experimental): 2.412 / 6.940 / 9.461
 Average Speedup (Old/New/Experimental): 1.822 / 4.359 / 5.117
 
 
-Implemented Number[] version:
+Implemented T[] version:
 
+1: Speedup (Old/New/Experimental): 0.907 / 0.874 / 0.893
+2: Speedup (Old/New/Experimental): 0.915 / 0.880 / 0.904
+4: Speedup (Old/New/Experimental): 0.998 / 0.967 / 0.993
+8: Speedup (Old/New/Experimental): 0.983 / 0.988 / 0.983
+16: Speedup (Old/New/Experimental): 1.028 / 1.024 / 1.026
+32: Speedup (Old/New/Experimental): 0.993 / 0.994 / 0.991
+64: Speedup (Old/New/Experimental): 1.001 / 0.997 / 0.988
+128: Speedup (Old/New/Experimental): 1.005 / 1.002 / 1.000
+256: Speedup (Old/New/Experimental): 0.984 / 0.955 / 0.986
+512: Speedup (Old/New/Experimental): 1.024 / 1.019 / 0.982
+1024: Speedup (Old/New/Experimental): 0.987 / 0.977 / 0.997
+2048: Speedup (Old/New/Experimental): 1.700 / 1.674 / 1.672
+4096: Speedup (Old/New/Experimental): 2.266 / 2.228 / 2.262
+8192: Speedup (Old/New/Experimental): 2.519 / 2.467 / 2.426
+16384: Speedup (Old/New/Experimental): 2.615 / 2.613 / 2.608
+32768: Speedup (Old/New/Experimental): 2.919 / 2.886 / 2.794
+65536: Speedup (Old/New/Experimental): 1.675 / 3.735 / 2.911
+131072: Speedup (Old/New/Experimental): 1.410 / 4.167 / 1.838
+262144: Speedup (Old/New/Experimental): 1.415 / 4.747 / 1.340
+524288: Speedup (Old/New/Experimental): 1.402 / 6.127 / 1.398
+1048576: Speedup (Old/New/Experimental): 1.763 / 5.684 / 1.784
+2097152: Speedup (Old/New/Experimental): 0.713 / 7.735 / 1.582
+4194304: Speedup (Old/New/Experimental): 1.633 / 6.445 / 1.687
+8388608: Speedup (Old/New/Experimental): 2.262 / 7.664 / 2.280
+16777216: Speedup (Old/New/Experimental): 2.655 / 8.664 / 2.674
+33554432: Speedup (Old/New/Experimental): 1.937 / 3.215 / 2.035
+67108864: Speedup (Old/New/Experimental): 0.644 / 1.609 / 1.641
+Total Speedup (Old/New/Experimental): 0.968 / 2.327 / 1.854
+Average Speedup (Old/New/Experimental): 1.494 / 3.049 / 1.617
+
+
+TODO: Implement List<T> version:
