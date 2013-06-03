@@ -480,7 +480,6 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 					}
 				}
 				// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
-				// TODO: Concurrently put into results, computing beginning positions for each thread by adding up lengths
 				final int fromQueueStart = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
 				if(USE_CONCURRENT_EXPORT) {
 					// Get some final references for anonymous inner class

@@ -462,3 +462,49 @@ Average Speedup (Old/New/Experimental): 2.288 / 4.921 / 1.222
 
 Switched test to USE_SORTED=true, concurrency re-enabled on Experimental:
 
+256: Speedup (Old/New/Experimental): 0.498 / 0.501 / 0.347
+512: Speedup (Old/New/Experimental): 0.498 / 0.452 / 0.091
+1024: Speedup (Old/New/Experimental): 0.627 / 0.573 / 0.231
+2048: Speedup (Old/New/Experimental): 0.858 / 0.842 / 0.368
+4096: Speedup (Old/New/Experimental): 0.943 / 0.885 / 0.520
+8192: Speedup (Old/New/Experimental): 1.000 / 0.964 / 0.588
+16384: Speedup (Old/New/Experimental): 1.080 / 1.028 / 0.659
+32768: Speedup (Old/New/Experimental): 1.188 / 1.161 / 0.896
+65536: Speedup (Old/New/Experimental): 1.222 / 2.138 / 1.109
+131072: Speedup (Old/New/Experimental): 0.626 / 2.198 / 0.910
+262144: Speedup (Old/New/Experimental): 0.546 / 1.994 / 0.819
+524288: Speedup (Old/New/Experimental): 1.089 / 2.631 / 0.741
+1048576: Speedup (Old/New/Experimental): 0.954 / 3.260 / 0.988
+2097152: Speedup (Old/New/Experimental): 0.705 / 2.802 / 1.164
+4194304: Speedup (Old/New/Experimental): 0.662 / 2.673 / 1.646
+8388608: Speedup (Old/New/Experimental): 0.647 / 2.289 / 1.934
+16777216: Speedup (Old/New/Experimental): 0.593 / 2.054 / 2.089
+33554432: Speedup (Old/New/Experimental): 0.474 / 1.110 / 2.249
+67108864: Speedup (Old/New/Experimental): 0.441 / 1.095 / 2.367
+Total Speedup (Old/New/Experimental): 0.498 / 1.207 / 1.543
+Average Speedup (Old/New/Experimental): 0.771 / 1.613 / 1.037
+
+
+Switched test to USE_SORTED=false, RANDOM_FULL=true (to match the majority of tests above):
+
+256: Speedup (Old/New/Experimental): 0.257 / 0.251 / 0.826
+512: Speedup (Old/New/Experimental): 0.414 / 0.408 / 1.300
+1024: Speedup (Old/New/Experimental): 0.759 / 0.738 / 1.332
+2048: Speedup (Old/New/Experimental): 0.988 / 0.978 / 1.899
+4096: Speedup (Old/New/Experimental): 1.214 / 1.202 / 2.364
+8192: Speedup (Old/New/Experimental): 1.453 / 1.396 / 1.460
+16384: Speedup (Old/New/Experimental): 1.654 / 1.587 / 2.496
+32768: Speedup (Old/New/Experimental): 1.808 / 1.790 / 4.603
+65536: Speedup (Old/New/Experimental): 1.501 / 2.800 / 6.299
+131072: Speedup (Old/New/Experimental): 1.192 / 3.380 / 5.666
+262144: Speedup (Old/New/Experimental): 1.722 / 5.268 / 5.003
+524288: Speedup (Old/New/Experimental): 1.305 / 6.930 / 6.557
+1048576: Speedup (Old/New/Experimental): 1.425 / 8.142 / 6.570
+2097152: Speedup (Old/New/Experimental): 1.414 / 5.958 / 6.108
+4194304: Speedup (Old/New/Experimental): 1.488 / 8.701 / 7.176
+8388608: Speedup (Old/New/Experimental): 1.671 / 8.288 / 8.248
+16777216: Speedup (Old/New/Experimental): 1.688 / 5.772 / 7.726
+33554432: Speedup (Old/New/Experimental): 1.449 / 4.360 / 8.207
+67108864: Speedup (Old/New/Experimental): 1.394 / 5.181 / 6.331
+Total Speedup (Old/New/Experimental): 1.430 / 4.498 / 6.431
+Average Speedup (Old/New/Experimental): 1.305 / 3.848 / 4.745
