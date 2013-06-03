@@ -41,6 +41,13 @@ import java.util.concurrent.ThreadFactory;
  * {@link http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html}
  * with source provided at {@link https://github.com/gorset/radix/blob/master/Radix.java}
  *
+ * TODO: Might get better performance (due to cache locality of reference) by flattening
+ * the two-dimensional fixed dimensions of the arrays into a single dimension.
+ *
+ * TODO: Might also consider changing the row/column order of the multi-dimensional arrays
+ * to help cache interaction.  Might get better throughput when hit the cache wall where
+ * performance drops considerably.
+ *
  * @author  AO Industries, Inc.
  */
 final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
@@ -149,7 +156,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 
 	// <editor-fold defaultstate="collapsed" desc="List<T>">
 	@Override
-    public <T extends Number> void sort(List<T> list, SortStatistics stats) {
+    public <N extends Number> void sort(List<N> list, SortStatistics stats) {
 		// TODO: Implement concurrent version
 		if(stats!=null) stats.sortSwitchingAlgorithms();
 		IntegerRadixSort.getInstance().sort(list, stats);
@@ -157,33 +164,33 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	// </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="T[]">
-	private static <T extends Number> ImportStepResult importStep(
+	private static <N extends Number> ImportStepResult importStep(
 		final int PASS_MASK,
 		final int startQueueLength,
-		final T[][] taskFromQueues,
+		final N[][] taskFromQueues,
 		final int[] taskFromQueueLengths,
-		final T[] array,
+		final N[] array,
 		final int start,
 		final int end
 	) {
 		int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
 		int bitsNotSeen = 0;
 		for(int i=start; i<end; i++) {
-			T number = array[i];
+			N number = array[i];
 			int numInt = number.intValue();
 			bitsSeen |= numInt;
 			bitsNotSeen |= numInt ^ 0xffffffff;
 			int fromQueueNum = numInt & PASS_MASK;
-			T[] fromQueue = taskFromQueues[fromQueueNum];
+			N[] fromQueue = taskFromQueues[fromQueueNum];
 			int fromQueueLength = taskFromQueueLengths[fromQueueNum];
 			if(fromQueue==null) {
 				@SuppressWarnings("unchecked")
-				T[] newQueue = (T[])new Number[startQueueLength];
+				N[] newQueue = (N[])new Number[startQueueLength];
 				taskFromQueues[fromQueueNum] = fromQueue = newQueue;
 			} else if(fromQueueLength>=fromQueue.length) {
 				// Grow queue
 				@SuppressWarnings("unchecked")
-				T[] newQueue = (T[])new Number[fromQueueLength<<1];
+				N[] newQueue = (N[])new Number[fromQueueLength<<1];
 				System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
 				taskFromQueues[fromQueueNum] = fromQueue = newQueue;
 			}
@@ -199,39 +206,39 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	/**
 	 * Gather/scatter shared by both concurrent and single-threaded implementations
 	 */
-	private static <T extends Number> void gatherScatter(
+	private static <N extends Number> void gatherScatter(
 		final int numTasks,
 		final int PASS_MASK,
 		final int startQueueLength,
-		final T[][][] fromQueues,
+		final N[][][] fromQueues,
 		final int[][] fromQueueLengths,
-		final T[][][] toQueues,
+		final N[][][] toQueues,
 		final int[][] toQueueLengths,
 		final int shift,
 		final int fromQueueNum,
 		final int toTaskNum
 	) {
 		for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
-			final T[][] taskFromQueues = fromQueues[fromTaskNum];
-			T[] fromQueue = taskFromQueues[fromQueueNum];
+			final N[][] taskFromQueues = fromQueues[fromTaskNum];
+			N[] fromQueue = taskFromQueues[fromQueueNum];
 			if(fromQueue!=null) {
 				final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
-				final T[][] taskToQueues = toQueues[toTaskNum];
+				final N[][] taskToQueues = toQueues[toTaskNum];
 				final int[] taskToQueueLengths = toQueueLengths[toTaskNum];
 				int length = taskFromQueueLengths[fromQueueNum];
 				for(int j=0; j<length; j++) {
-					T number = fromQueue[j];
+					N number = fromQueue[j];
 					int toQueueNum = (number.intValue() >>> shift) & PASS_MASK;
-					T[] toQueue = taskToQueues[toQueueNum];
+					N[] toQueue = taskToQueues[toQueueNum];
 					int toQueueLength = taskToQueueLengths[toQueueNum];
 					if(toQueue==null) {
 						@SuppressWarnings("unchecked")
-						T[] newQueue = (T[])new Number[startQueueLength];
+						N[] newQueue = (N[])new Number[startQueueLength];
 						taskToQueues[toQueueNum] = toQueue = newQueue;
 					} else if(toQueueLength>=toQueue.length) {
 						// Grow queue
 						@SuppressWarnings("unchecked")
-						T[] newQueue = (T[])new Number[toQueueLength<<1];
+						N[] newQueue = (N[])new Number[toQueueLength<<1];
 						System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
 						taskToQueues[toQueueNum] = toQueue = newQueue;
 					}
@@ -246,21 +253,21 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	/**
 	 * Export shared by both concurrent and single-threaded implementations
 	 */
-	private static <T extends Number> void export(
+	private static <N extends Number> void export(
 		final int numTasks,
 		final int PASS_MASK,
-		final T[][][] fromQueues,
+		final N[][][] fromQueues,
 		final int[][] fromQueueLengths,
 		final int fromQueueStart,
 		final int fromQueueEnd,
-		final T[] outArray,
+		final N[] outArray,
 		int outIndex
 	) {
 		int fromQueueNum = fromQueueStart;
 		do {
 			for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
-				final T[][] taskFromQueues = fromQueues[fromTaskNum];
-				T[] fromQueue = taskFromQueues[fromQueueNum];
+				final N[][] taskFromQueues = fromQueues[fromTaskNum];
+				N[] fromQueue = taskFromQueues[fromQueueNum];
 				if(fromQueue!=null) {
 					final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
 					int length = taskFromQueueLengths[fromQueueNum];
@@ -275,7 +282,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	}
 
 	@Override
-    public <T extends Number> void sort(final T[] array, SortStatistics stats) {
+    public <N extends Number> void sort(final N[] array, SortStatistics stats) {
 		final int size = array.length;
 		final int numProcessors = AVAILABLE_PROCESSORS;
 		if(size<MIN_CONCURRENCY_SIZE || numProcessors<MIN_CONCURRENCY_PROCESSORS) {
@@ -325,10 +332,10 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				}
 
 				@SuppressWarnings("unchecked")
-				T[][][] fromQueues       = (T[][][])new Number[numTasks][PASS_SIZE][];
+				N[][][] fromQueues       = (N[][][])new Number[numTasks][PASS_SIZE][];
 				int[][] fromQueueLengths = new int[numTasks][PASS_SIZE];
 				@SuppressWarnings("unchecked")
-				T[][][] toQueues         = (T[][][])new Number[numTasks][PASS_SIZE][];
+				N[][][] toQueues         = (N[][][])new Number[numTasks][PASS_SIZE][];
 				int[][] toQueueLengths   = new int[numTasks][PASS_SIZE];
 
 				// Initial population of elements into fromQueues
@@ -351,7 +358,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 						if(taskEnd > size) taskEnd = size;
 						final int finalTaskStart = taskStart;
 						final int finalTaskEnd = taskEnd;
-						final T[][] taskFromQueues = fromQueues[fromTaskNum];
+						final N[][] taskFromQueues = fromQueues[fromTaskNum];
 						final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
 						importStepFutures.add(
 							executor.submit(
@@ -408,9 +415,9 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 
 						if(USE_CONCURRENT_GATHER_SCATTER) {
 							// Get some final references for anonymous inner class
-							final T[][][] finalFromQueues = fromQueues;
+							final N[][][] finalFromQueues = fromQueues;
 							final int[][] finalFromQueueLengths = fromQueueLengths;
-							final T[][][] finalToQueues = toQueues;
+							final N[][][] finalToQueues = toQueues;
 							final int[][] finalToQueueLengths = toQueueLengths;
 							final int finalShift = shift;
 							// Perform each concurrently with balanced concurrency
@@ -483,7 +490,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 						}
 
 						// Swap from and to
-						T[][][] temp = fromQueues;
+						N[][][] temp = fromQueues;
 						fromQueues = toQueues;
 						toQueues = temp;
 						int[][] tempLengths = fromQueueLengths;
@@ -495,7 +502,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				final int fromQueueStart = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
 				if(USE_CONCURRENT_EXPORT) {
 					// Get some final references for anonymous inner class
-					final T[][][] finalFromQueues = fromQueues;
+					final N[][][] finalFromQueues = fromQueues;
 					final int[][] finalFromQueueLengths = fromQueueLengths;
 					// Use indexed strategy with balanced concurrency
 					final int fromQueueLast = (fromQueueStart-1) & PASS_MASK;

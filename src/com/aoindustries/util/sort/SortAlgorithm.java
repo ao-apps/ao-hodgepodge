@@ -28,6 +28,8 @@ import java.util.List;
 /**
  * Generalized structure for sort algorithms.
  *
+ * TODO: Make SortAlgorithm an interface
+ *
  * @author  AO Industries, Inc.
  */
 abstract public class SortAlgorithm<E> {

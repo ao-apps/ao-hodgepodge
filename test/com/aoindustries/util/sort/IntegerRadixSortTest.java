@@ -48,7 +48,7 @@ public class IntegerRadixSortTest extends TestCase {
 
 	private static final boolean USE_SORTED = false;
 
-	private static final boolean RANDOM_FULL = false;
+	private static final boolean RANDOM_FULL = true;
 	private static final boolean RANDOM_NEGATIVE = false;
 	private static final int RANDOM_RANGE = 0x100;
 	private static final int RANDOM_MULTIPLIER = 1; // 0x10000;
@@ -72,8 +72,8 @@ public class IntegerRadixSortTest extends TestCase {
 	}
 
 	@SuppressWarnings("unchecked")
-    private <T extends Number> void doTestListPerformance(
-		List<T> randomValues,
+    private <N extends Number> void doTestListPerformance(
+		List<N> randomValues,
 		int testSize,
 		int passes,
 		long[] totalOld,
@@ -100,7 +100,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time experimental radix sort
-			List<T> expRadixResult = new ArrayList<T>(randomValues);
+			List<N> expRadixResult = new ArrayList<N>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
@@ -120,7 +120,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time new radix sort
-			List<T> newRadixResult = new ArrayList<T>(randomValues);
+			List<N> newRadixResult = new ArrayList<N>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				ConcurrentIntegerRadixSort.getInstance().sort(newRadixResult);
@@ -140,7 +140,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time radix sort
-			List<T> oldRadixResult = new ArrayList<T>(randomValues);
+			List<N> oldRadixResult = new ArrayList<N>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSort.getInstance().sort(oldRadixResult);
@@ -160,7 +160,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time Java sort
-			List<T> javaResult = new ArrayList<T>(randomValues);
+			List<N> javaResult = new ArrayList<N>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				Collections.sort(javaResult, null);
@@ -255,8 +255,8 @@ public class IntegerRadixSortTest extends TestCase {
     }
 
 	@SuppressWarnings("unchecked")
-    private <T extends Number> void doTestArrayPerformance(
-		T[] randomValues,
+    private <N extends Number> void doTestArrayPerformance(
+		N[] randomValues,
 		int testSize,
 		int passes,
 		long[] totalOld,
@@ -283,7 +283,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time experimental radix sort
-			T[] expRadixResult = (T[])new Number[randomValues.length];
+			N[] expRadixResult = (N[])new Number[randomValues.length];
 			System.arraycopy(randomValues, 0, expRadixResult, 0, randomValues.length);
 			{
 				long startNanos = System.nanoTime();
@@ -304,7 +304,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time new radix sort
-			T[] newRadixResult = (T[])new Number[randomValues.length];
+			N[] newRadixResult = (N[])new Number[randomValues.length];
 			System.arraycopy(randomValues, 0, newRadixResult, 0, randomValues.length);
 			{
 				long startNanos = System.nanoTime();
@@ -325,7 +325,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time radix sort
-			T[] oldRadixResult = (T[])new Number[randomValues.length];
+			N[] oldRadixResult = (N[])new Number[randomValues.length];
 			System.arraycopy(randomValues, 0, oldRadixResult, 0, randomValues.length);
 			{
 				long startNanos = System.nanoTime();
@@ -346,7 +346,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time Java sort
-			T[] javaResult = (T[])new Number[randomValues.length];
+			N[] javaResult = (N[])new Number[randomValues.length];
 			System.arraycopy(randomValues, 0, javaResult, 0, randomValues.length);
 			{
 				long startNanos = System.nanoTime();
@@ -358,10 +358,10 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Check results
-			List<T> javaResultList = Arrays.asList(javaResult);
-			List<T> oldRadixResultList = Arrays.asList(oldRadixResult);
-			List<T> newRadixResultList = Arrays.asList(newRadixResult);
-			List<T> expRadixResultList = Arrays.asList(expRadixResult);
+			List<N> javaResultList = Arrays.asList(javaResult);
+			List<N> oldRadixResultList = Arrays.asList(oldRadixResult);
+			List<N> newRadixResultList = Arrays.asList(newRadixResult);
+			List<N> expRadixResultList = Arrays.asList(expRadixResult);
 			assertEquals(javaResultList, oldRadixResultList);
 			assertEquals(javaResultList, newRadixResultList);
 			assertEquals(javaResultList, expRadixResultList);
@@ -584,7 +584,7 @@ public class IntegerRadixSortTest extends TestCase {
 		);
     }
 
-    private void testIntArrayPerformance() {
+    public void testIntArrayPerformance() {
 		System.out.println("testIntArrayPerformance");
 		long[] totalOld = new long[1];
 		long[] totalNew = new long[1];

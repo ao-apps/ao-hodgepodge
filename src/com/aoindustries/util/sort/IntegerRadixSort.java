@@ -71,7 +71,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 	}
 
 	@Override
-    public <T extends Number> void sort(List<T> list, SortStatistics stats) {
+    public <N extends Number> void sort(List<N> list, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 		final int size = list.size();
 		/*if(size < MIN_JAVA_SHORT_SIZE) {
@@ -79,7 +79,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			QubbleSort.bsort(list, 0, size-1, null, stats);
 		} else*/ if(size < MIN_RADIX_SORT_SIZE) {
             if(stats!=null) stats.sortSwitchingAlgorithms();
-			Collections.sort(list, null);
+			Collections.sort(list, IntValueComparator.getInstance());
 		} else {
 			final boolean useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
 			// Dynamically choose pass size
@@ -101,10 +101,10 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			if(startQueueLength>size) startQueueLength = size;
 
 			@SuppressWarnings("unchecked")
-			T[][] fromQueues = (T[][])new Number[PASS_SIZE][];
+			N[][] fromQueues = (N[][])new Number[PASS_SIZE][];
 			int[] fromQueueLengths = new int[PASS_SIZE];
 			@SuppressWarnings("unchecked")
-			T[][] toQueues = (T[][])new Number[PASS_SIZE][];
+			N[][] toQueues = (N[][])new Number[PASS_SIZE][];
 			int[] toQueueLengths = new int[PASS_SIZE];
 			// Initial population of elements into fromQueues
 			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
@@ -116,21 +116,21 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 					stats.sortSetting(size);
 				}
 				for(int i=0;i<size;i++) {
-					T number = list.get(i);
+					N number = list.get(i);
 					int numInt = number.intValue();
 					bitsSeen |= numInt;
 					bitsNotSeen |= numInt ^ 0xffffffff;
 					int fromQueueNum = numInt & PASS_MASK;
-					T[] fromQueue = fromQueues[fromQueueNum];
+					N[] fromQueue = fromQueues[fromQueueNum];
 					int fromQueueLength = fromQueueLengths[fromQueueNum];
 					if(fromQueue==null) {
 						@SuppressWarnings("unchecked")
-						T[] newQueue = (T[])new Number[startQueueLength];
+						N[] newQueue = (N[])new Number[startQueueLength];
 						fromQueues[fromQueueNum] = fromQueue = newQueue;
 					} else if(fromQueueLength>=fromQueue.length) {
 						// Grow queue
 						@SuppressWarnings("unchecked")
-						T[] newQueue = (T[])new Number[fromQueueLength<<1];
+						N[] newQueue = (N[])new Number[fromQueueLength<<1];
 						System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
 						fromQueues[fromQueueNum] = fromQueue = newQueue;
 					}
@@ -138,7 +138,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 					fromQueueLengths[fromQueueNum] = fromQueueLength;
 				}
 			} else {
-				for(T number : list) {
+				for(N number : list) {
 					if(stats!=null) {
 						// One get and one set for each element
 						stats.sortGetting();
@@ -148,16 +148,16 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 					bitsSeen |= numInt;
 					bitsNotSeen |= (numInt ^ 0xffffffff);
 					int fromQueueNum = numInt & PASS_MASK;
-					T[] fromQueue = fromQueues[fromQueueNum];
+					N[] fromQueue = fromQueues[fromQueueNum];
 					int fromQueueLength = fromQueueLengths[fromQueueNum];
 					if(fromQueue==null) {
 						@SuppressWarnings("unchecked")
-						T[] newQueue = (T[])new Number[startQueueLength];
+						N[] newQueue = (N[])new Number[startQueueLength];
 						fromQueues[fromQueueNum] = fromQueue = newQueue;
 					} else if(fromQueueLength>=fromQueue.length) {
 						// Grow queue
 						@SuppressWarnings("unchecked")
-						T[] newQueue = (T[])new Number[fromQueueLength<<1];
+						N[] newQueue = (N[])new Number[fromQueueLength<<1];
 						System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
 						fromQueues[fromQueueNum] = fromQueue = newQueue;
 					}
@@ -175,22 +175,22 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
 					lastShiftUsed = shift;
 					for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-						T[] fromQueue = fromQueues[fromQueueNum];
+						N[] fromQueue = fromQueues[fromQueueNum];
 						if(fromQueue!=null) {
 							int length = fromQueueLengths[fromQueueNum];
 							for(int j=0; j<length; j++) {
-								T number = fromQueue[j];
+								N number = fromQueue[j];
 								int toQueueNum = (number.intValue() >>> shift) & PASS_MASK;
-								T[] toQueue = toQueues[toQueueNum];
+								N[] toQueue = toQueues[toQueueNum];
 								int toQueueLength = toQueueLengths[toQueueNum];
 								if(toQueue==null) {
 									@SuppressWarnings("unchecked")
-									T[] newQueue = (T[])new Number[startQueueLength];
+									N[] newQueue = (N[])new Number[startQueueLength];
 									toQueues[toQueueNum] = toQueue = newQueue;
 								} else if(toQueueLength>=toQueue.length) {
 									// Grow queue
 									@SuppressWarnings("unchecked")
-									T[] newQueue = (T[])new Number[toQueueLength<<1];
+									N[] newQueue = (N[])new Number[toQueueLength<<1];
 									System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
 									toQueues[toQueueNum] = toQueue = newQueue;
 								}
@@ -202,7 +202,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 					}
 
 					// Swap from and to
-					T[][] temp = fromQueues;
+					N[][] temp = fromQueues;
 					fromQueues = toQueues;
 					toQueues = temp;
 					int[] tempLengths = fromQueueLengths;
@@ -217,7 +217,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				// Use indexed strategy
 				int outIndex = 0;
 				do {
-					T[] fromQueue = fromQueues[fromQueueNum];
+					N[] fromQueue = fromQueues[fromQueueNum];
 					if(fromQueue!=null) {
 						int length = fromQueueLengths[fromQueueNum];
 						for(int j=0; j<length; j++) {
@@ -230,9 +230,9 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				);
 			} else {
 				// Use iterator strategy
-				ListIterator<T> iterator = list.listIterator();
+				ListIterator<N> iterator = list.listIterator();
 				do {
-					T[] fromQueue = fromQueues[fromQueueNum];
+					N[] fromQueue = fromQueues[fromQueueNum];
 					if(fromQueue!=null) {
 						int length = fromQueueLengths[fromQueueNum];
 						for(int j=0; j<length; j++) {
@@ -250,7 +250,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
     }
 
 	@Override
-    public <T extends Number> void sort(T[] array, SortStatistics stats) {
+    public <N extends Number> void sort(N[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 		final int size = array.length;
 		/*if(size < MIN_JAVA_SHORT_SIZE) {
@@ -258,7 +258,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			QubbleSort.bsort(array, 0, size-1, null, stats);
 		} else*/ if(size < MIN_RADIX_SORT_SIZE) {
             if(stats!=null) stats.sortSwitchingAlgorithms();
-			Arrays.sort(array, null);
+			Arrays.sort(array, IntValueComparator.getInstance());
 		} else {
 			// Dynamically choose pass size
 			final int BITS_PER_PASS;
@@ -279,10 +279,10 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			if(startQueueLength>size) startQueueLength = size;
 
 			@SuppressWarnings("unchecked")
-			T[][] fromQueues = (T[][])new Number[PASS_SIZE][];
+			N[][] fromQueues = (N[][])new Number[PASS_SIZE][];
 			int[] fromQueueLengths = new int[PASS_SIZE];
 			@SuppressWarnings("unchecked")
-			T[][] toQueues = (T[][])new Number[PASS_SIZE][];
+			N[][] toQueues = (N[][])new Number[PASS_SIZE][];
 			int[] toQueueLengths = new int[PASS_SIZE];
 			// Initial population of elements into fromQueues
 			int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
@@ -293,21 +293,21 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				stats.sortSetting(size);
 			}
 			for(int i=0;i<size;i++) {
-				T number = array[i];
+				N number = array[i];
 				int numInt = number.intValue();
 				bitsSeen |= numInt;
 				bitsNotSeen |= numInt ^ 0xffffffff;
 				int fromQueueNum = numInt & PASS_MASK;
-				T[] fromQueue = fromQueues[fromQueueNum];
+				N[] fromQueue = fromQueues[fromQueueNum];
 				int fromQueueLength = fromQueueLengths[fromQueueNum];
 				if(fromQueue==null) {
 					@SuppressWarnings("unchecked")
-					T[] newQueue = (T[])new Number[startQueueLength];
+					N[] newQueue = (N[])new Number[startQueueLength];
 					fromQueues[fromQueueNum] = fromQueue = newQueue;
 				} else if(fromQueueLength>=fromQueue.length) {
 					// Grow queue
 					@SuppressWarnings("unchecked")
-					T[] newQueue = (T[])new Number[fromQueueLength<<1];
+					N[] newQueue = (N[])new Number[fromQueueLength<<1];
 					System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
 					fromQueues[fromQueueNum] = fromQueue = newQueue;
 				}
@@ -324,22 +324,22 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
 					lastShiftUsed = shift;
 					for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-						T[] fromQueue = fromQueues[fromQueueNum];
+						N[] fromQueue = fromQueues[fromQueueNum];
 						if(fromQueue!=null) {
 							int length = fromQueueLengths[fromQueueNum];
 							for(int j=0; j<length; j++) {
-								T number = fromQueue[j];
+								N number = fromQueue[j];
 								int toQueueNum = (number.intValue() >>> shift) & PASS_MASK;
-								T[] toQueue = toQueues[toQueueNum];
+								N[] toQueue = toQueues[toQueueNum];
 								int toQueueLength = toQueueLengths[toQueueNum];
 								if(toQueue==null) {
 									@SuppressWarnings("unchecked")
-									T[] newQueue = (T[])new Number[startQueueLength];
+									N[] newQueue = (N[])new Number[startQueueLength];
 									toQueues[toQueueNum] = toQueue = newQueue;
 								} else if(toQueueLength>=toQueue.length) {
 									// Grow queue
 									@SuppressWarnings("unchecked")
-									T[] newQueue = (T[])new Number[toQueueLength<<1];
+									N[] newQueue = (N[])new Number[toQueueLength<<1];
 									System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
 									toQueues[toQueueNum] = toQueue = newQueue;
 								}
@@ -351,7 +351,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 					}
 
 					// Swap from and to
-					T[][] temp = fromQueues;
+					N[][] temp = fromQueues;
 					fromQueues = toQueues;
 					toQueues = temp;
 					int[] tempLengths = fromQueueLengths;
@@ -365,7 +365,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			// Use indexed strategy
 			int outIndex = 0;
 			do {
-				T[] fromQueue = fromQueues[fromQueueNum];
+				N[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
 					int length = fromQueueLengths[fromQueueNum];
 					System.arraycopy(fromQueue, 0, array, outIndex, length);

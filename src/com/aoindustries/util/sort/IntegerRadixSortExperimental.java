@@ -80,12 +80,12 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 	}
 
 	@Override
-    public <T extends Number> void sort(List<T> list, SortStatistics stats) {
+    public <N extends Number> void sort(List<N> list, SortStatistics stats) {
 		IntegerRadixSort.getInstance().sort(list, stats);
     }
 
 	@Override
-    public <T extends Number> void sort(T[] array, SortStatistics stats) {
+    public <N extends Number> void sort(N[] array, SortStatistics stats) {
 		IntegerRadixSort.getInstance().sort(array, stats);
     }
 

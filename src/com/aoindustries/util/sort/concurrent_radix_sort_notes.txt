@@ -576,7 +576,7 @@ Total Speedup (Old/New/Experimental): 0.968 / 2.327 / 1.854
 Average Speedup (Old/New/Experimental): 1.494 / 3.049 / 1.617
 
 
-Tested with RANDOM_FULL=false (RANDOM_RANGE still 0x100):
+T[] with RANDOM_FULL=false (RANDOM_RANGE still 0x100):
 
 1: Speedup (Old/New/Experimental): 0.968 / 0.881 / 0.876
 2: Speedup (Old/New/Experimental): 1.039 / 0.999 / 1.050
@@ -607,6 +607,108 @@ Tested with RANDOM_FULL=false (RANDOM_RANGE still 0x100):
 67108864: Speedup (Old/New/Experimental): 2.904 / 23.612 / 4.514
 Total Speedup (Old/New/Experimental): 4.064 / 20.371 / 4.633
 Average Speedup (Old/New/Experimental): 5.596 / 14.029 / 6.300
+
+
+T[] with RANDOM_FULL=false (RANDOM_RANGE still 0x100)
+on 24-core server (NUMA, JDK 1.6.0_37 64-bit):
+
+1: Speedup (Old/New/Experimental): 0.988 / 0.969 / 0.978
+2: Speedup (Old/New/Experimental): 0.975 / 0.975 / 0.994
+4: Speedup (Old/New/Experimental): 0.982 / 0.972 / 0.982
+8: Speedup (Old/New/Experimental): 0.836 / 0.837 / 0.826
+16: Speedup (Old/New/Experimental): 0.979 / 0.973 / 0.963
+32: Speedup (Old/New/Experimental): 0.915 / 0.915 / 0.906
+64: Speedup (Old/New/Experimental): 1.019 / 1.016 / 0.987
+128: Speedup (Old/New/Experimental): 0.974 / 0.964 / 0.922
+256: Speedup (Old/New/Experimental): 0.919 / 0.897 / 0.875
+512: Speedup (Old/New/Experimental): 0.917 / 0.913 / 0.891
+1024: Speedup (Old/New/Experimental): 0.926 / 0.925 / 0.909
+2048: Speedup (Old/New/Experimental): 4.410 / 4.422 / 4.402
+4096: Speedup (Old/New/Experimental): 7.387 / 7.391 / 7.364
+8192: Speedup (Old/New/Experimental): 8.599 / 8.583 / 8.574
+16384: Speedup (Old/New/Experimental): 8.929 / 8.972 / 8.920
+32768: Speedup (Old/New/Experimental): 9.185 / 9.108 / 9.048
+65536: Speedup (Old/New/Experimental): 9.112 / 5.872 / 9.186
+131072: Speedup (Old/New/Experimental): 9.562 / 13.525 / 9.953
+262144: Speedup (Old/New/Experimental): 9.736 / 25.079 / 10.045
+524288: Speedup (Old/New/Experimental): 9.097 / 36.774 / 2.786
+1048576: Speedup (Old/New/Experimental): 8.428 / 51.681 / 8.442
+2097152: Speedup (Old/New/Experimental): 7.540 / 5.016 / 8.177
+4194304: Speedup (Old/New/Experimental): 7.580 / 74.774 / 7.549
+8388608: Speedup (Old/New/Experimental): 7.062 / 1.989 / 7.736
+16777216: Speedup (Old/New/Experimental): 7.199 / 79.224 / 1.701
+33554432: Speedup (Old/New/Experimental): 6.492 / 4.067 / 6.332
+67108864: Speedup (Old/New/Experimental): 6.666 / 3.528 / 6.034
+Total Speedup (Old/New/Experimental): 5.853 / 3.763 / 4.490
+Average Speedup (Old/New/Experimental): 5.089 / 12.976 / 4.684
+
+
+T[] with RANDOM_FULL=true
+on 24-core server (NUMA, JDK 1.6.0_37 64-bit):
+
+1: Speedup (Old/New/Experimental): 0.986 / 0.948 / 0.980
+2: Speedup (Old/New/Experimental): 0.995 / 0.965 / 0.998
+4: Speedup (Old/New/Experimental): 0.996 / 0.968 / 0.998
+8: Speedup (Old/New/Experimental): 0.846 / 0.827 / 0.841
+16: Speedup (Old/New/Experimental): 0.867 / 0.852 / 0.869
+32: Speedup (Old/New/Experimental): 0.902 / 0.888 / 0.885
+64: Speedup (Old/New/Experimental): 0.948 / 0.934 / 0.917
+128: Speedup (Old/New/Experimental): 0.942 / 0.926 / 0.851
+256: Speedup (Old/New/Experimental): 0.910 / 0.897 / 0.840
+512: Speedup (Old/New/Experimental): 0.924 / 0.917 / 0.883
+1024: Speedup (Old/New/Experimental): 0.894 / 0.891 / 0.878
+2048: Speedup (Old/New/Experimental): 1.484 / 1.484 / 1.467
+4096: Speedup (Old/New/Experimental): 1.848 / 1.850 / 1.829
+8192: Speedup (Old/New/Experimental): 1.850 / 1.843 / 1.855
+16384: Speedup (Old/New/Experimental): 1.917 / 1.937 / 1.899
+32768: Speedup (Old/New/Experimental): 2.006 / 2.059 / 2.055
+65536: Speedup (Old/New/Experimental): 2.240 / 2.751 / 2.126
+131072: Speedup (Old/New/Experimental): 1.773 / 5.792 / 1.747
+262144: Speedup (Old/New/Experimental): 1.179 / 6.596 / 1.371
+524288: Speedup (Old/New/Experimental): 1.545 / 12.475 / 1.937
+1048576: Speedup (Old/New/Experimental): 1.403 / 14.719 / 1.589
+2097152: Speedup (Old/New/Experimental): 1.636 / 20.410 / 1.470
+4194304: Speedup (Old/New/Experimental): 1.742 / 17.612 / 1.711
+8388608: Speedup (Old/New/Experimental): 1.840 / 1.988 / 2.003
+16777216: Speedup (Old/New/Experimental): 1.710 / 10.997 / 1.509
+33554432: Speedup (Old/New/Experimental): 1.942 / 3.812 / 1.660
+67108864: Speedup (Old/New/Experimental): 0.747 / 4.611 / 1.514
+Total Speedup (Old/New/Experimental): 1.018 / 4.176 / 1.560
+Average Speedup (Old/New/Experimental): 1.373 / 4.479 / 1.395
+
+
+int[] with RANDOM_FULL=true
+on 24-core server (NUMA, JDK 1.6.0_37 64-bit):
+
+1: Speedup (Old/New/Experimental): 0.978 / 0.960 / 0.986
+2: Speedup (Old/New/Experimental): 0.991 / 0.978 / 0.990
+4: Speedup (Old/New/Experimental): 0.992 / 0.982 / 1.000
+8: Speedup (Old/New/Experimental): 0.992 / 0.956 / 0.996
+16: Speedup (Old/New/Experimental): 0.993 / 0.990 / 0.998
+32: Speedup (Old/New/Experimental): 0.994 / 0.993 / 0.989
+64: Speedup (Old/New/Experimental): 0.995 / 0.995 / 0.995
+128: Speedup (Old/New/Experimental): 0.998 / 0.998 / 0.992
+256: Speedup (Old/New/Experimental): 0.996 / 0.966 / 1.938
+512: Speedup (Old/New/Experimental): 0.999 / 0.991 / 2.377
+1024: Speedup (Old/New/Experimental): 0.999 / 0.994 / 2.218
+2048: Speedup (Old/New/Experimental): 1.508 / 1.501 / 3.102
+4096: Speedup (Old/New/Experimental): 1.823 / 1.821 / 3.938
+8192: Speedup (Old/New/Experimental): 2.113 / 2.095 / 2.145
+16384: Speedup (Old/New/Experimental): 2.369 / 2.332 / 4.873
+32768: Speedup (Old/New/Experimental): 2.546 / 2.533 / 6.351
+65536: Speedup (Old/New/Experimental): 2.670 / 2.782 / 7.183
+131072: Speedup (Old/New/Experimental): 2.919 / 5.881 / 8.901
+262144: Speedup (Old/New/Experimental): 2.917 / 10.924 / 11.042
+524288: Speedup (Old/New/Experimental): 2.444 / 13.900 / 11.764
+1048576: Speedup (Old/New/Experimental): 1.809 / 18.186 / 12.633
+2097152: Speedup (Old/New/Experimental): 2.422 / 21.652 / 12.607
+4194304: Speedup (Old/New/Experimental): 2.200 / 17.318 / 14.639
+8388608: Speedup (Old/New/Experimental): 2.309 / 29.851 / 15.021
+16777216: Speedup (Old/New/Experimental): 2.559 / 26.090 / 13.243
+33554432: Speedup (Old/New/Experimental): 2.480 / 9.257 / 17.686
+67108864: Speedup (Old/New/Experimental): 2.004 / 21.362 / 11.500
+Total Speedup (Old/New/Experimental): 2.103 / 9.115 / 8.945
+Average Speedup (Old/New/Experimental): 1.778 / 7.344 / 6.337
 
 
 TODO: Implement List<T> version:

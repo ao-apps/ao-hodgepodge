@@ -28,7 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Sorting utilities.
+ * A sort algorithm using the standard Java sort methods.
  *
  * @author  AO Industries, Inc.
  */
