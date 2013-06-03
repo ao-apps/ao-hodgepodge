@@ -152,6 +152,42 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 		}
 	}
 
+	private static ImportStepResult importStep(
+		final int PASS_MASK,
+		final int startQueueLength,
+		final int[][] taskFromQueues,
+		final int[] taskFromQueueLengths,
+		final int[] array,
+		final int start,
+		final int end
+	) {
+		int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
+		int bitsNotSeen = 0;
+		for(int i=start; i<end; i++) {
+			int number = array[i];
+			bitsSeen |= number;
+			bitsNotSeen |= number ^ 0xffffffff;
+			int fromQueueNum = number & PASS_MASK;
+			int[] fromQueue = taskFromQueues[fromQueueNum];
+			int fromQueueLength = taskFromQueueLengths[fromQueueNum];
+			if(fromQueue==null) {
+				int[] newQueue = new int[startQueueLength];
+				taskFromQueues[fromQueueNum] = fromQueue = newQueue;
+			} else if(fromQueueLength>=fromQueue.length) {
+				// Grow queue
+				int[] newQueue = new int[fromQueueLength<<1];
+				System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
+				taskFromQueues[fromQueueNum] = fromQueue = newQueue;
+			}
+			fromQueue[fromQueueLength++] = number;
+			taskFromQueueLengths[fromQueueNum] = fromQueueLength;
+		}
+		return new ImportStepResult(
+			bitsSeen,
+			bitsNotSeen
+		);
+	}
+
 	/**
 	 * Gather/scatter shared by both concurrent and single-threaded implementations
 	 */
@@ -309,30 +345,14 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 							executor.submit(
 								new Callable<ImportStepResult>() {
 									public ImportStepResult call() {
-										int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
-										int bitsNotSeen = 0;
-										for(int i=finalTaskStart; i<finalTaskEnd; i++) {
-											int number = array[i];
-											bitsSeen |= number;
-											bitsNotSeen |= number ^ 0xffffffff;
-											int fromQueueNum = number & PASS_MASK;
-											int[] fromQueue = taskFromQueues[fromQueueNum];
-											int fromQueueLength = taskFromQueueLengths[fromQueueNum];
-											if(fromQueue==null) {
-												int[] newQueue = new int[startQueueLength];
-												taskFromQueues[fromQueueNum] = fromQueue = newQueue;
-											} else if(fromQueueLength>=fromQueue.length) {
-												// Grow queue
-												int[] newQueue = new int[fromQueueLength<<1];
-												System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
-												taskFromQueues[fromQueueNum] = fromQueue = newQueue;
-											}
-											fromQueue[fromQueueLength++] = number;
-											taskFromQueueLengths[fromQueueNum] = fromQueueLength;
-										}
-										return new ImportStepResult(
-											bitsSeen,
-											bitsNotSeen
+										return importStep(
+											PASS_MASK,
+											startQueueLength,
+											taskFromQueues,
+											taskFromQueueLengths,
+											array,
+											finalTaskStart,
+											finalTaskEnd
 										);
 									}
 								}
@@ -348,27 +368,17 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 					}
 				} else {
 					final int fromTaskNum = 0; // Task #0 for non concurrent import
-					final int[][] taskFromQueues = fromQueues[fromTaskNum];
-					final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
-					for(int i=0;i<size;i++) {
-						int number = array[i];
-						bitsSeen |= number;
-						bitsNotSeen |= number ^ 0xffffffff;
-						int fromQueueNum = number & PASS_MASK;
-						int[] fromQueue = taskFromQueues[fromQueueNum];
-						int fromQueueLength = taskFromQueueLengths[fromQueueNum];
-						if(fromQueue==null) {
-							int[] newQueue = new int[startQueueLength];
-							taskFromQueues[fromQueueNum] = fromQueue = newQueue;
-						} else if(fromQueueLength>=fromQueue.length) {
-							// Grow queue
-							int[] newQueue = new int[fromQueueLength<<1];
-							System.arraycopy(fromQueue, 0, newQueue, 0, fromQueueLength);
-							taskFromQueues[fromQueueNum] = fromQueue = newQueue;
-						}
-						fromQueue[fromQueueLength++] = number;
-						taskFromQueueLengths[fromQueueNum] = fromQueueLength;
-					}
+					ImportStepResult result = importStep(
+						PASS_MASK,
+						startQueueLength,
+						fromQueues[fromTaskNum],
+						fromQueueLengths[fromTaskNum],
+						array,
+						0,
+						size
+					);
+					bitsSeen |= result.bitsSeen;
+					bitsNotSeen |= result.bitsNotSeen;
 				}
 				bitsNotSeen ^= 0xffffffff;
 
