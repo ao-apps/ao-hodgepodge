@@ -46,9 +46,9 @@ public class IntegerRadixSortTest extends TestCase {
 	private static final int END_TEST_SIZE = 1 << 26;
 	private static final int MAX_PASSES = (1 << 20) / START_TEST_SIZE;
 
-	private static final boolean USE_SORTED = false;
+	private static final boolean USE_SORTED = true;
 
-	private static final boolean RANDOM_FULL = true;
+	private static final boolean RANDOM_FULL = false;
 	private static final boolean RANDOM_NEGATIVE = false;
 	private static final int RANDOM_RANGE = 0x100;
 	private static final int RANDOM_MULTIPLIER = 1; // 0x10000;

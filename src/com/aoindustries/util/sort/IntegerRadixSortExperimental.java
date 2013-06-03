@@ -49,7 +49,7 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 	//private static final int R_PASS_SIZE = 1 << R_BITS_PER_PASS;
 	//private static final int R_PASS_MASK = R_PASS_SIZE - 1;
 
-	private static final boolean ENABLE_CONCURRENCY = true; // Concurrent broken currently
+	private static final boolean ENABLE_CONCURRENCY = true; // TODO: Concurrent broken currently when test has many values in 0-255 range
 	private static final int MIN_CONCURRENCY_SIZE = 1 << 9; // TODO: 1 << 16
 
 	private static final ExecutorService executor = !ENABLE_CONCURRENCY ? null : Executors.newFixedThreadPool(

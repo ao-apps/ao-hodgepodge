@@ -412,5 +412,53 @@ Total Speedup (Old/New/Experimental): 1.365 / 2.335 / 6.393
 Average Speedup (Old/New/Experimental): 1.384 / 3.071 / 4.484
 
 
+Switched back to constant 8-bit mode:
 
-TODO: Revisit 8-bit/16-bit changeover setting once concurrent gather/scatter implemented
+256: Speedup (Old/New/Experimental): 0.206 / 0.219 / 0.724
+512: Speedup (Old/New/Experimental): 0.434 / 0.430 / 1.340
+1024: Speedup (Old/New/Experimental): 0.746 / 0.742 / 1.300
+2048: Speedup (Old/New/Experimental): 0.975 / 0.982 / 1.925
+4096: Speedup (Old/New/Experimental): 1.159 / 1.154 / 2.335
+8192: Speedup (Old/New/Experimental): 1.403 / 1.320 / 1.608
+16384: Speedup (Old/New/Experimental): 1.593 / 1.510 / 2.531
+32768: Speedup (Old/New/Experimental): 1.808 / 1.740 / 4.812
+65536: Speedup (Old/New/Experimental): 1.568 / 2.498 / 5.570
+131072: Speedup (Old/New/Experimental): 1.170 / 3.813 / 5.607
+262144: Speedup (Old/New/Experimental): 1.464 / 3.845 / 4.234
+524288: Speedup (Old/New/Experimental): 1.331 / 6.609 / 6.630
+1048576: Speedup (Old/New/Experimental): 1.375 / 7.099 / 6.937
+2097152: Speedup (Old/New/Experimental): 1.558 / 6.744 / 5.559
+4194304: Speedup (Old/New/Experimental): 1.651 / 4.247 / 7.759
+8388608: Speedup (Old/New/Experimental): 1.644 / 8.159 / 4.948
+16777216: Speedup (Old/New/Experimental): 1.505 / 7.684 / 8.474
+33554432: Speedup (Old/New/Experimental): 1.424 / 5.527 / 8.259
+67108864: Speedup (Old/New/Experimental): 1.415 / 5.064 / 6.773
+
+
+Switched test to only have numbers range 0-255, Experimental failed so disabled concurrency on it:
+
+256: Speedup (Old/New/Experimental): 0.537 / 0.422 / 0.401
+512: Speedup (Old/New/Experimental): 0.921 / 0.970 / 0.550
+1024: Speedup (Old/New/Experimental): 1.729 / 1.706 / 1.095
+2048: Speedup (Old/New/Experimental): 2.747 / 2.709 / 1.466
+4096: Speedup (Old/New/Experimental): 3.459 / 3.383 / 1.600
+8192: Speedup (Old/New/Experimental): 3.459 / 3.389 / 1.581
+16384: Speedup (Old/New/Experimental): 3.426 / 3.425 / 1.558
+32768: Speedup (Old/New/Experimental): 3.388 / 3.458 / 1.558
+65536: Speedup (Old/New/Experimental): 2.936 / 3.139 / 1.936
+131072: Speedup (Old/New/Experimental): 2.875 / 3.277 / 1.472
+262144: Speedup (Old/New/Experimental): 2.479 / 4.734 / 1.344
+524288: Speedup (Old/New/Experimental): 2.268 / 8.331 / 1.357
+1048576: Speedup (Old/New/Experimental): 1.814 / 8.436 / 1.251
+2097152: Speedup (Old/New/Experimental): 2.353 / 9.172 / 1.161
+4194304: Speedup (Old/New/Experimental): 2.341 / 8.703 / 1.013
+8388608: Speedup (Old/New/Experimental): 2.148 / 8.352 / 0.979
+16777216: Speedup (Old/New/Experimental): 2.024 / 8.090 / 0.986
+33554432: Speedup (Old/New/Experimental): 1.181 / 6.382 / 0.973
+67108864: Speedup (Old/New/Experimental): 1.393 / 5.439 / 0.953
+Total Speedup (Old/New/Experimental): 1.486 / 5.380 / 0.988
+Average Speedup (Old/New/Experimental): 2.288 / 4.921 / 1.222
+
+
+Switched test to USE_SORTED=true, concurrency re-enabled on Experimental:
+
