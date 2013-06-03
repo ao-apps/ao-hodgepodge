@@ -266,6 +266,8 @@ Trying to parallelize my algorithm:
 
 USE_SORTED; false
 RANDOM_FULL: true
+MIN_CONCURRENCY_SIZE: 1 << 16
+
 
 Concurrent import step:
 
