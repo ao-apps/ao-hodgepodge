@@ -65,6 +65,11 @@ final public class QubbleSort extends ComparisonSortAlgorithm<Object> {
         if(stats!=null) stats.sortEnding();
     }
 
+	@Override
+	public boolean isStable() {
+		return false; // Not really sure since based on quicksort, safer to say not stable.
+	}
+
     private static <T> void sort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
         int lo = lo0;
         int hi = hi0;

@@ -66,6 +66,11 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
     }
 
 	@Override
+	public boolean isStable() {
+		return true;
+	}
+
+	@Override
     public <T extends Number> void sort(List<T> list, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 		final int size = list.size();

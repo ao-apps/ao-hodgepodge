@@ -75,6 +75,11 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
     }
 
 	@Override
+	public boolean isStable() {
+		return true; // Since it only deals with primitives, this can be true, if ported to objects this may no longer be the case.
+	}
+
+	@Override
     public <T extends Number> void sort(List<T> list, SortStatistics stats) {
 		IntegerRadixSort.getInstance().sort(list, stats);
     }

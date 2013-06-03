@@ -35,6 +35,12 @@ abstract public class SortAlgorithm<E> {
 	protected SortAlgorithm() {
 	}
 
+	/**
+	 * Checks if this is a stable sort.  A stable sort will keep elements with
+	 * equal values in their same relative order.
+	 */
+	public abstract boolean isStable();
+
 	public <T extends E> void sort(List<T> list) {
 		sort(list, null);
 	}

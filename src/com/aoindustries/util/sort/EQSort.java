@@ -54,6 +54,11 @@ final public class EQSort extends ComparisonSortAlgorithm<Object> {
     }
 
 	@Override
+	public boolean isStable() {
+		return false; // Not really sure since based on quicksort, safer to say not stable.
+	}
+
+	@Override
     public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         sort(list, 0, list.size()-1, comparator, stats);

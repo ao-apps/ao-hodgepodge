@@ -131,6 +131,11 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 		this.executor = executor;
     }
 
+	@Override
+	public boolean isStable() {
+		return true;
+	}
+
 	// <editor-fold defaultstate="collapsed" desc="Shared">
 	private static final class ImportStepResult {
 		private final int bitsSeen;
@@ -142,7 +147,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	}
 	// </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="List<T>">
+	// <editor-fold defaultstate="collapsed" desc="List<T>">
 	@Override
     public <T extends Number> void sort(List<T> list, SortStatistics stats) {
 		// TODO: Implement concurrent version

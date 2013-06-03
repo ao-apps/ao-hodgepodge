@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.sort;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -43,6 +42,11 @@ final public class AutoSort extends ComparisonSortAlgorithm<Object> {
 	}
 
 	private AutoSort() {
+	}
+
+	@Override
+	public boolean isStable() {
+		return false;
 	}
 
 	@Override
@@ -93,11 +97,5 @@ final public class AutoSort extends ComparisonSortAlgorithm<Object> {
 	public static <T> ComparisonSortAlgorithm<? super T> getRecommendedSortAlgorithm(T[] array) {
 		if(array.length >= FAST_QSORT_THRESHOLD) return FastQSort.getInstance();
 		return JavaSort.getInstance();
-	}
-
-	// TODO: Remove temp test code
-	public static void main(String[] args) {
-		List<String> stringList = Collections.emptyList();
-		List<Integer> integerList = Collections.emptyList();
 	}
 }

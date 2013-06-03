@@ -95,7 +95,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -115,7 +115,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -135,7 +135,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -155,7 +155,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -163,7 +163,7 @@ public class IntegerRadixSortTest extends TestCase {
 			List<T> javaResult = new ArrayList<T>(randomValues);
 			{
 				long startNanos = System.nanoTime();
-				Collections.sort((List)javaResult);
+				Collections.sort(javaResult, null);
 				if(iteration>0) {
 					javaNanos += System.nanoTime() - startNanos;
 					//System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" \u00B5s");
@@ -278,7 +278,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -299,7 +299,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -320,7 +320,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -341,7 +341,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -467,7 +467,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -489,7 +489,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -511,7 +511,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 
@@ -533,7 +533,7 @@ public class IntegerRadixSortTest extends TestCase {
 				try {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 

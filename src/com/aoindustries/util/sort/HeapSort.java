@@ -42,6 +42,11 @@ final public class HeapSort extends ComparisonSortAlgorithm<Object> {
     }
 
 	@Override
+	public boolean isStable() {
+		return false;
+	}
+
+	@Override
     public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         heapSort(list, comparator, stats);
@@ -104,7 +109,7 @@ final public class HeapSort extends ComparisonSortAlgorithm<Object> {
                 k = j;
             }
         }
-        set(list, k-1, temp, stats);;
+        set(list, k-1, temp, stats);
     }
 
     private static <T> void downheap(T[] array, int k, int N, Comparator<? super T> comparator, SortStatistics stats) {
@@ -124,6 +129,6 @@ final public class HeapSort extends ComparisonSortAlgorithm<Object> {
                 k = j;
             }
         }
-        set(array, k-1, temp, stats);;
+        set(array, k-1, temp, stats);
     }
 }

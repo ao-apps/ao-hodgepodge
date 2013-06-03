@@ -44,6 +44,11 @@ final public class JavaSort extends ComparisonSortAlgorithm<Object> {
     }
 
 	@Override
+	public boolean isStable() {
+		return true;
+	}
+
+	@Override
     public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         Collections.sort(list, comparator);

@@ -57,6 +57,11 @@ final public class ShellSort extends ComparisonSortAlgorithm<Object> {
     private ShellSort() {
     }
 
+	@Override
+	public boolean isStable() {
+		return false;
+	}
+
     public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
 
