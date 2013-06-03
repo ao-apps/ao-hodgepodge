@@ -24,6 +24,7 @@ package com.aoindustries.util.sort;
 
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.Sequence;
+import com.aoindustries.util.concurrent.ConcurrentUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -221,7 +222,6 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 					final int finalTaskEnd = taskEnd;
 					final int[][] taskFromQueues = fromQueues[fromTaskNum];
 					final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
-					// TODO: Could perform the last one on the current thread, here and other places (and reduce size of executor service by one?)
 					importStepFutures.add(
 						executor.submit(
 							new Callable<ImportStepResult>() {
@@ -286,7 +286,6 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 							final int[] finalFromQueueLengths = fromQueueLengths;
 							final int[][] finalToQueues = toQueues;
 							final int[] finalToQueueLengths = toQueueLengths;
-							// TODO: Could perform the last one on the current thread, here and other places (and reduce size of executor service by one?)
 							gatherScatterFutures.add(
 								executor.submit(
 									new Runnable() {
@@ -320,9 +319,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 							);
 						}
 						// Wait for each gather/scatter task to complete
-						for(Future<?> gatherScatterFuture : gatherScatterFutures) {
-							gatherScatterFuture.get();
-						}
+						waitForAll(gatherScatterFuture);
 						 */
 						for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
 							for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
@@ -432,9 +429,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 						!= fromQueueStart
 					);
 					// Wait for each export task to complete
-					for(Future<?> gatherScatterFuture : runnableFutures) {
-						gatherScatterFuture.get();
-					}
+					ConcurrentUtils.waitForAll(runnableFutures);
 				} else {
 					// Use indexed strategy
 					int outIndex = 0;
