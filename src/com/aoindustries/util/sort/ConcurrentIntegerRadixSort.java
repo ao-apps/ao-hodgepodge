@@ -197,6 +197,36 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 		}
 	}
 
+	/**
+	 * Export shared by both concurrent and single-threaded implementations
+	 */
+	private static void export(
+		final int numTasks,
+		final int PASS_MASK,
+		final int[][][] fromQueues,
+		final int[][] fromQueueLengths,
+		final int fromQueueStart,
+		final int fromQueueEnd,
+		final int[] outArray,
+		int outIndex
+	) {
+		int fromQueueNum = fromQueueStart;
+		do {
+			for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+				final int[][] taskFromQueues = fromQueues[fromTaskNum];
+				int[] fromQueue = taskFromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
+					int length = taskFromQueueLengths[fromQueueNum];
+					System.arraycopy(fromQueue, 0, outArray, outIndex, length);
+					outIndex += length;
+				}
+			}
+		} while(
+			(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+			!= fromQueueEnd
+		);
+	}
 	@Override
     public void sort(final int[] array, SortStatistics stats) {
 		final int size = array.length;
@@ -441,13 +471,16 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
 				// TODO: Concurrently put into results, computing beginning positions for each thread by adding up lengths
 				final int fromQueueStart = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
-				int fromQueueNum = fromQueueStart;
 				if(USE_CONCURRENT_EXPORT) {
+					// Get some final references for anonymous inner class
+					final int[][][] finalFromQueues = fromQueues;
+					final int[][] finalFromQueueLengths = fromQueueLengths;
 					// Use indexed strategy with balanced concurrency
 					final int fromQueueLast = (fromQueueStart-1) & PASS_MASK;
 					int taskFromQueueStart = fromQueueStart;
 					int taskOutIndex = 0;
 					int taskTotalLength = 0;
+					int fromQueueNum = fromQueueStart;
 					do {
 						for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
 							taskTotalLength += fromQueueLengths[fromTaskNum][fromQueueNum];
@@ -459,8 +492,6 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 								|| fromQueueNum==fromQueueLast // or is last task
 							)
 						) {
-							final int[][][] finalFromQueues = fromQueues;
-							final int[][] finalFromQueueLengths = fromQueueLengths;
 							final int finalTaskFromQueueStart = taskFromQueueStart;
 							final int finalTaskOutIndex = taskOutIndex;
 							final int taskFromQueueEnd = (fromQueueNum + 1) & PASS_MASK;
@@ -470,22 +501,15 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 									new Runnable() {
 										@Override
 										public void run() {
-											int exportQueueNum = finalTaskFromQueueStart;
-											int outIndex = finalTaskOutIndex;
-											do {
-												for(int exportTaskNum=0; exportTaskNum<numTasks; exportTaskNum++) {
-													final int[][] taskFromQueues = finalFromQueues[exportTaskNum];
-													int[] fromQueue = taskFromQueues[exportQueueNum];
-													if(fromQueue!=null) {
-														final int[] taskFromQueueLengths = finalFromQueueLengths[exportTaskNum];
-														int length = taskFromQueueLengths[exportQueueNum];
-														System.arraycopy(fromQueue, 0, array, outIndex, length);
-														outIndex += length;
-													}
-												}
-											} while(
-												(exportQueueNum = (exportQueueNum + 1) & PASS_MASK)
-												!= taskFromQueueEnd
+											export(
+												numTasks,
+												PASS_MASK,
+												finalFromQueues,
+												finalFromQueueLengths,
+												finalTaskFromQueueStart,
+												taskFromQueueEnd,
+												array,
+												finalTaskOutIndex
 											);
 										}
 									}
@@ -505,22 +529,16 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 					ConcurrentUtils.waitForAll(runnableFutures);
 					// This is the last stage, not needed: runnableFutures.clear()
 				} else {
-					// Use indexed strategy
-					int outIndex = 0;
-					do {
-						for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
-							final int[][] taskFromQueues = fromQueues[fromTaskNum];
-							int[] fromQueue = taskFromQueues[fromQueueNum];
-							if(fromQueue!=null) {
-								final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
-								int length = taskFromQueueLengths[fromQueueNum];
-								System.arraycopy(fromQueue, 0, array, outIndex, length);
-								outIndex += length;
-							}
-						}
-					} while(
-						(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-						!= fromQueueStart
+					// Use indexed strategy, single-threaded
+					export(
+						numTasks,
+						PASS_MASK,
+						fromQueues,
+						fromQueueLengths,
+						fromQueueStart,
+						fromQueueStart,
+						array,
+						0
 					);
 				}
 				if(stats!=null) stats.sortEnding();
