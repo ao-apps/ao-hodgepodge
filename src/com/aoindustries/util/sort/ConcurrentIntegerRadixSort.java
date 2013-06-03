@@ -51,31 +51,63 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	 */
 
 	/**
-	 * Concurrency controls.
+	 * When there are fewer than MIN_CONCURRENCY_SIZE elements,
+	 * the single-threaded implementation is used.
 	 */
 	private static final int MIN_CONCURRENCY_SIZE = 1 << 16;
-	private static final int THREADS_PER_PROCESSOR = 2;
+
+	/**
+	 * Where there are fewer than MIN_CONCURRENCY_PROCESSORS available processors,
+	 * the single-threaded implementation is used.
+	 */
+	private static final int MIN_CONCURRENCY_PROCESSORS = 2;
+
+	/**
+	 * The number of threads that will be in the thread pool per available processor.
+	 */
+	private static final int THREADS_PER_PROCESSOR = 1;
+
+	/**
+	 * The number of tasks that will be submitted to the thread pool per thread.
+	 */
 	private static final int TASKS_PER_THREAD = 2;
 
+	/**
+	 * The minimum starting queue length (unless the size of the passed-in list is smaller)
+	 */
 	private static final int MINIMUM_START_QUEUE_LENGTH = 16;
 
-	private static final ExecutorService executor = Executors.newFixedThreadPool(
+	private static final ExecutorService defaultExecutor = Executors.newFixedThreadPool(
 		Runtime.getRuntime().availableProcessors() * THREADS_PER_PROCESSOR,
 		new ThreadFactory() {
 			private final Sequence idSequence = new AtomicSequence();
 			public Thread newThread(Runnable target) {
-				return new Thread(target, ConcurrentIntegerRadixSort.class.getName()+".executor: id=" + idSequence.getNextSequenceValue());
+				return new Thread(target, ConcurrentIntegerRadixSort.class.getName()+".defaultExecutor: id=" + idSequence.getNextSequenceValue());
 			}
 		}
 	);
 
-	private static final ConcurrentIntegerRadixSort instance = new ConcurrentIntegerRadixSort();
+	private static final ConcurrentIntegerRadixSort defaultInstance = new ConcurrentIntegerRadixSort(defaultExecutor);
 
+	/**
+	 * Gets the default ConcurrentIntegerRadixSort using the default executor
+	 * service.  The default executor services scales the number of threads to
+	 * be in proportion to the number of available processors.
+	 */
     public static ConcurrentIntegerRadixSort getInstance() {
-        return instance;
+        return defaultInstance;
     }
 
-    private ConcurrentIntegerRadixSort() {
+	/**
+	 * Gets a ConcurrentIntegerRadixSort that uses the provided ExecutorService.
+	 */
+	public static ConcurrentIntegerRadixSort getInstance(ExecutorService executor) {
+		return new ConcurrentIntegerRadixSort(executor);
+	}
+
+	private final ExecutorService executor;
+    private ConcurrentIntegerRadixSort(ExecutorService executor) {
+		this.executor = executor;
     }
 
 	@Override
@@ -102,7 +134,8 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	@Override
     public void sort(final int[] array, SortStatistics stats) {
 		final int size = array.length;
-		if(size<MIN_CONCURRENCY_SIZE) {
+		final int numProcessors = Runtime.getRuntime().availableProcessors();
+		if(size<MIN_CONCURRENCY_SIZE | numProcessors<MIN_CONCURRENCY_PROCESSORS) {
 			if(stats!=null) stats.sortSwitchingAlgorithms();
 			IntegerRadixSort.getInstance().sort(array, stats);
 		} else {
@@ -142,18 +175,18 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				}
 
 				// Determine size of division
-				final int numTasks = Runtime.getRuntime().availableProcessors() * THREADS_PER_PROCESSOR * TASKS_PER_THREAD;
-				final int sizePerThread;
+				final int numTasks = numProcessors * THREADS_PER_PROCESSOR * TASKS_PER_THREAD;
+				final int sizePerTask;
 				{
 					int spt = size / numTasks;
 					if((spt*numTasks)<size) spt++; // Round-up instead of down
-					sizePerThread = spt;
+					sizePerTask = spt;
 				}
 
 				// Perform each concurrently
 				final List<Future<ImportStepResult>> importStepFutures = new ArrayList<Future<ImportStepResult>>(numTasks);
-				for(int threadStart=0; threadStart<size; threadStart+=sizePerThread) {
-					final int finalThreadStart = threadStart;
+				for(int taskStart=0; taskStart<size; taskStart+=sizePerTask) {
+					final int finalTaskEnd = taskStart;
 					final int[][] finalFromQueues = fromQueues;
 					final int[] finalFromQueueLengths = fromQueueLengths;
 					// TODO: Could perform the last one on the current thread, here and other places
@@ -163,9 +196,9 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 								public ImportStepResult call() {
 									int bitsSeen = 0; // Set of all bits seen for to skip bit ranges that won't sort
 									int bitsNotSeen = 0;
-									int threadEnd = finalThreadStart + sizePerThread;
-									if(threadEnd > size) threadEnd = size;
-									for(int i=finalThreadStart; i<threadEnd; i++) {
+									int taskEnd = finalTaskEnd + sizePerTask;
+									if(taskEnd > size) taskEnd = size;
+									for(int i=finalTaskEnd; i<taskEnd; i++) {
 										int number = array[i];
 										bitsSeen |= number;
 										bitsNotSeen |= number ^ 0xffffffff;
@@ -204,11 +237,11 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				bitsNotSeen ^= 0xffffffff;
 
 				// Determine size of division of per-pass steps
-				final int passSizePerThread;
+				final int passSizePerTask;
 				{
 					int pspt = PASS_SIZE / numTasks;
 					if((pspt*numTasks)<PASS_SIZE) pspt++; // Round-up instead of down
-					passSizePerThread = pspt;
+					passSizePerTask = pspt;
 				}
 
 				// Gather/scatter stage
@@ -219,11 +252,13 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 					// or negative numbers.
 					if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
 						lastShiftUsed = shift;
+
 						// Perform each concurrently
+						/*
 						final List<Future<?>> gatherScatterFutures = new ArrayList<Future<?>>(numTasks);
-						for(int threadStart=0; threadStart<PASS_SIZE; threadStart+=passSizePerThread) {
+						for(int taskStart=0; taskStart<PASS_SIZE; taskStart+=passSizePerTask) {
 							final int finalShift = shift;
-							final int finalThreadStart = threadStart;
+							final int finalTaskStart = taskStart;
 							final int[][] finalFromQueues = fromQueues;
 							final int[] finalFromQueueLengths = fromQueueLengths;
 							final int[][] finalToQueues = toQueues;
@@ -233,9 +268,9 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 								executor.submit(
 									new Runnable() {
 										public void run() {
-											int threadEnd = finalThreadStart + passSizePerThread;
-											if(threadEnd > PASS_SIZE) threadEnd = PASS_SIZE;
-											for(int fromQueueNum=finalThreadStart; fromQueueNum<threadEnd; fromQueueNum++) {
+											int taskEnd = finalTaskStart + passSizePerTask;
+											if(taskEnd > PASS_SIZE) taskEnd = PASS_SIZE;
+											for(int fromQueueNum=finalTaskStart; fromQueueNum<taskEnd; fromQueueNum++) {
 												int[] fromQueue = finalFromQueues[fromQueueNum];
 												int length = finalFromQueueLengths[fromQueueNum];
 												for(int j=0; j<length; j++) {
@@ -265,6 +300,26 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 						for(Future<?> gatherScatterFuture : gatherScatterFutures) {
 							gatherScatterFuture.get();
 						}
+						 */
+						for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+							final int[] fromQueue = fromQueues[fromQueueNum];
+							final int length = fromQueueLengths[fromQueueNum];
+							for(int j=0; j<length; j++) {
+								int number = fromQueue[j];
+								int toQueueNum = (number >>> shift) & PASS_MASK;
+								int[] toQueue = toQueues[toQueueNum];
+								int toQueueLength = toQueueLengths[toQueueNum];
+								if(toQueueLength>=toQueue.length) {
+									// Grow queue
+									int[] newQueue = new int[toQueueLength<<1];
+									System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
+									toQueues[toQueueNum] = toQueue = newQueue;
+								}
+								toQueue[toQueueLength++] = number;
+								toQueueLengths[toQueueNum] = toQueueLength;
+							}
+							fromQueueLengths[fromQueueNum] = 0;
+						}
 
 						// Swap from and to
 						int[][] temp = fromQueues;
@@ -276,6 +331,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 					}
 				}
 				// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
+				// TODO: Concurrently put into results, computing beginning positions for each thread by adding up lengths
 				int midPoint = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
 				// Use indexed strategy
 				int outIndex = 0;

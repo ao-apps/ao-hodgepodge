@@ -51,6 +51,9 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 	private static final int MAX_BUBBLE_SORT_SIZE = 4;
 	private static final int MAX_JAVA_SORT_SIZE = 128;
 
+	/**
+	 * The minimum starting queue length (unless the size of the passed-in list is smaller)
+	 */
 	private static final int MINIMUM_START_QUEUE_LENGTH = 16;
 
 	private static final IntegerRadixSort instance = new IntegerRadixSort();
