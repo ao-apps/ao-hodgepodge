@@ -1,4 +1,11 @@
+Benchmark:
+
+cd /home/o/orion/projects/aoprod/aocode-public
+java -Xmx4096m -server -classpath /opt/netbeans-6.9.1/java/modules/ext/junit-3.8.2.jar:build/classes:build/test/classes junit.textui.TestRunner com.aoindustries.util.sort.IntegerRadixSortTest
+
+
 Experimental: 8-bit:
+
 256: Speedup (Old/Experimental): 0.208 / 1.036
 512: Speedup (Old/Experimental): 0.388 / 1.972
 1024: Speedup (Old/Experimental): 0.747 / 2.946
@@ -23,6 +30,7 @@ Average Speedup (Old/Experimental): 1.527 / 3.696
 
 
 Experimental: 6-bit:
+
 256: Speedup (Old/Experimental): 0.216 / 0.698
 512: Speedup (Old/Experimental): 0.419 / 1.413
 1024: Speedup (Old/Experimental): 0.834 / 2.035
@@ -47,6 +55,7 @@ Average Speedup (Old/Experimental): 1.457 / 3.659
 
 
 Experimental: 4-bit:
+
 256: Speedup (Old/Experimental): 0.211 / 1.019
 512: Speedup (Old/Experimental): 0.420 / 1.691
 1024: Speedup (Old/Experimental): 0.856 / 1.804
@@ -71,6 +80,7 @@ Average Speedup (Old/Experimental): 1.462 / 4.325
 
 
 Experimental: 3-bit:
+
 256: Speedup (Old/Experimental): 0.234 / 0.846
 512: Speedup (Old/Experimental): 0.378 / 1.214
 1024: Speedup (Old/Experimental): 0.829 / 1.368
@@ -95,6 +105,7 @@ Average Speedup (Old/Experimental): 1.510 / 3.589
 
 
 Experimental: 2-bit:
+
 256: Speedup (Old/Experimental): 0.201 / 0.838
 512: Speedup (Old/Experimental): 0.485 / 1.326
 1024: Speedup (Old/Experimental): 0.794 / 1.288
@@ -119,6 +130,7 @@ Average Speedup (Old/Experimental): 1.377 / 2.960
 
 
 Experimental: 2-bit, 8-bit:
+
 256: Speedup (Old/Experimental): 0.201 / 0.653
 512: Speedup (Old/Experimental): 0.373 / 0.799
 1024: Speedup (Old/Experimental): 0.820 / 0.968
@@ -143,6 +155,7 @@ Average Speedup (Old/Experimental): 1.359 / 3.532
 
 
 Experimental: 2-bit, 2-bit, 2-bit, 2-bit, 8-bit...:
+
 256: Speedup (Old/Experimental): 0.229 / 0.574
 512: Speedup (Old/Experimental): 0.340 / 0.845
 1024: Speedup (Old/Experimental): 0.758 / 1.664
@@ -167,6 +180,7 @@ Average Speedup (Old/Experimental): 1.370 / 3.327
 
 
 Experimental: 4-bit, 4-bit, 8-bit..., 2^10 min:
+
 256: Speedup (Old/Experimental): 0.185 / 0.621
 512: Speedup (Old/Experimental): 0.429 / 1.393
 1024: Speedup (Old/Experimental): 0.692 / 1.303
@@ -191,6 +205,7 @@ Average Speedup (Old/Experimental): 1.361 / 4.435
 
 
 Experimental: 4-bit, 4-bit, 8-bit..., 2^9 min:
+
 256: Speedup (Old/Experimental): 0.202 / 0.742
 512: Speedup (Old/Experimental): 0.405 / 1.300
 1024: Speedup (Old/Experimental): 0.811 / 1.363
@@ -215,6 +230,7 @@ Average Speedup (Old/Experimental): 1.369 / 4.633
 
 
 Experimental: 4-bit, 4-bit, 8-bit..., 2^8 min:
+
 256: Speedup (Old/Experimental): 0.196 / 0.818
 512: Speedup (Old/Experimental): 0.328 / 1.212
 1024: Speedup (Old/Experimental): 0.776 / 1.296
@@ -239,6 +255,7 @@ Average Speedup (Old/Experimental): 1.332 / 4.435
 
 
 Experimental: 4-bit, 4-bit, 8-bit..., 2^7 min:
+
 256: Speedup (Old/Experimental): 0.193 / 0.704
 512: Speedup (Old/Experimental): 0.338 / 1.066
 1024: Speedup (Old/Experimental): 0.817 / 1.183
@@ -271,27 +288,55 @@ MIN_CONCURRENCY_SIZE: 1 << 16
 
 Concurrent import step:
 
-256: Speedup (Old/New/Experimental): 0.233 / 0.223 / 0.728
-512: Speedup (Old/New/Experimental): 0.457 / 0.446 / 1.326
-1024: Speedup (Old/New/Experimental): 0.853 / 0.844 / 1.276
-2048: Speedup (Old/New/Experimental): 1.136 / 1.137 / 1.838
-4096: Speedup (Old/New/Experimental): 1.317 / 1.301 / 2.235
-8192: Speedup (Old/New/Experimental): 1.655 / 1.575 / 1.177
-16384: Speedup (Old/New/Experimental): 1.763 / 1.669 / 2.582
-32768: Speedup (Old/New/Experimental): 1.865 / 1.869 / 3.911
-65536: Speedup (Old/New/Experimental): 1.587 / 1.360 / 5.686
-131072: Speedup (Old/New/Experimental): 1.553 / 1.097 / 4.151
-262144: Speedup (Old/New/Experimental): 1.974 / 0.999 / 4.535
-524288: Speedup (Old/New/Experimental): 1.499 / 1.130 / 4.344
-1048576: Speedup (Old/New/Experimental): 1.540 / 1.845 / 6.827
-2097152: Speedup (Old/New/Experimental): 1.633 / 1.851 / 4.748
-4194304: Speedup (Old/New/Experimental): 1.660 / 2.241 / 7.256
-8388608: Speedup (Old/New/Experimental): 1.440 / 2.217 / 7.475
-16777216: Speedup (Old/New/Experimental): 1.540 / 2.222 / 7.389
-33554432: Speedup (Old/New/Experimental): 1.340 / 1.977 / 7.989
-67108864: Speedup (Old/New/Experimental): 1.249 / 1.877 / 6.488
-Total Speedup (Old/New/Experimental): 1.321 / 1.878 / 6.320
-Average Speedup (Old/New/Experimental): 1.383 / 1.467 / 4.313
+256: Speedup (Old/New/Experimental): 0.232 / 0.212 / 0.676
+512: Speedup (Old/New/Experimental): 0.388 / 0.378 / 1.086
+1024: Speedup (Old/New/Experimental): 0.749 / 0.743 / 1.178
+2048: Speedup (Old/New/Experimental): 0.987 / 0.998 / 1.699
+4096: Speedup (Old/New/Experimental): 1.194 / 1.161 / 2.069
+8192: Speedup (Old/New/Experimental): 1.348 / 1.330 / 1.304
+16384: Speedup (Old/New/Experimental): 1.591 / 1.608 / 2.879
+32768: Speedup (Old/New/Experimental): 1.646 / 1.568 / 3.849
+65536: Speedup (Old/New/Experimental): 1.754 / 1.390 / 6.224
+131072: Speedup (Old/New/Experimental): 1.651 / 1.409 / 5.194
+262144: Speedup (Old/New/Experimental): 2.032 / 1.617 / 4.387
+524288: Speedup (Old/New/Experimental): 1.383 / 1.992 / 6.606
+1048576: Speedup (Old/New/Experimental): 1.495 / 2.466 / 4.522
+2097152: Speedup (Old/New/Experimental): 1.727 / 2.720 / 4.944
+4194304: Speedup (Old/New/Experimental): 1.631 / 2.267 / 6.228
+8388608: Speedup (Old/New/Experimental): 1.664 / 2.327 / 7.494
+16777216: Speedup (Old/New/Experimental): 1.662 / 1.990 / 8.077
+33554432: Speedup (Old/New/Experimental): 1.464 / 1.512 / 7.708
+67108864: Speedup (Old/New/Experimental): 1.169 / 1.318 / 6.406
+Total Speedup (Old/New/Experimental): 1.314 / 1.470 / 6.250
+Average Speedup (Old/New/Experimental): 1.356 / 1.526 / 4.343
+
+
+Current export step:
+256: Speedup (Old/New/Experimental): 0.234 / 0.228 / 0.754
+512: Speedup (Old/New/Experimental): 0.428 / 0.424 / 1.294
+1024: Speedup (Old/New/Experimental): 0.755 / 0.748 / 1.323
+2048: Speedup (Old/New/Experimental): 1.049 / 1.035 / 1.907
+4096: Speedup (Old/New/Experimental): 1.298 / 1.233 / 2.374
+8192: Speedup (Old/New/Experimental): 1.542 / 1.449 / 1.335
+16384: Speedup (Old/New/Experimental): 1.715 / 1.690 / 2.272
+32768: Speedup (Old/New/Experimental): 1.745 / 1.771 / 4.002
+65536: Speedup (Old/New/Experimental): 1.554 / 1.140 / 5.324
+131072: Speedup (Old/New/Experimental): 1.784 / 1.436 / 5.155
+262144: Speedup (Old/New/Experimental): 2.181 / 1.743 / 3.745
+524288: Speedup (Old/New/Experimental): 1.528 / 2.234 / 6.519
+1048576: Speedup (Old/New/Experimental): 1.573 / 1.835 / 4.579
+2097152: Speedup (Old/New/Experimental): 1.525 / 2.503 / 4.734
+4194304: Speedup (Old/New/Experimental): 1.650 / 2.333 / 4.690
+8388608: Speedup (Old/New/Experimental): 1.646 / 2.373 / 8.264
+16777216: Speedup (Old/New/Experimental): 1.699 / 1.827 / 7.951
+33554432: Speedup (Old/New/Experimental): 1.507 / 1.674 / 7.839
+67108864: Speedup (Old/New/Experimental): 1.262 / 1.389 / 6.505
+Total Speedup (Old/New/Experimental): 1.383 / 1.537 / 6.318
+Average Speedup (Old/New/Experimental): 1.403 / 1.529 / 4.240
+
+
+Switched back to dynamic 8-bit/16-bit mode:
+
 
 
 Concurrent gather/scatter step:
