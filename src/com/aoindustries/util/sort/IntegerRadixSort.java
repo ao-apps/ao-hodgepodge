@@ -206,11 +206,12 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				}
 			}
 			// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
-			int midPoint = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+			final int fromQueueStart = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+			int fromQueueNum = fromQueueStart;
 			if(useRandomAccess) {
 				// Use indexed strategy
 				int outIndex = 0;
-				for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				do {
 					T[] fromQueue = fromQueues[fromQueueNum];
 					if(fromQueue!=null) {
 						int length = fromQueueLengths[fromQueueNum];
@@ -218,20 +219,14 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 							list.set(outIndex++, fromQueue[j]);
 						}
 					}
-				}
-				for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-					T[] fromQueue = fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							list.set(outIndex++, fromQueue[j]);
-						}
-					}
-				}
+				} while(
+					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+					!= fromQueueStart
+				);
 			} else {
 				// Use iterator strategy
 				ListIterator<T> iterator = list.listIterator();
-				for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				do {
 					T[] fromQueue = fromQueues[fromQueueNum];
 					if(fromQueue!=null) {
 						int length = fromQueueLengths[fromQueueNum];
@@ -240,17 +235,10 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 							iterator.set(fromQueue[j]);
 						}
 					}
-				}
-				for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-					T[] fromQueue = fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							iterator.next();
-							iterator.set(fromQueue[j]);
-						}
-					}
-				}
+				} while(
+					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+					!= fromQueueStart
+				);
 			}
 		}
 		if(stats!=null) stats.sortEnding();
@@ -367,25 +355,21 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				}
 			}
 			// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
-			int midPoint = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+			final int fromQueueStart = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+			int fromQueueNum = fromQueueStart;
 			// Use indexed strategy
 			int outIndex = 0;
-			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+			do {
 				T[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
 					int length = fromQueueLengths[fromQueueNum];
 					System.arraycopy(fromQueue, 0, array, outIndex, length);
 					outIndex += length;
 				}
-			}
-			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-				T[] fromQueue = fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = fromQueueLengths[fromQueueNum];
-					System.arraycopy(fromQueue, 0, array, outIndex, length);
-					outIndex += length;
-				}
-			}
+			} while(
+				(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+				!= fromQueueStart
+			);
 		}
 		if(stats!=null) stats.sortEnding();
     }
@@ -491,25 +475,21 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 				}
 			}
 			// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
-			int midPoint = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+			final int fromQueueStart = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+			int fromQueueNum = fromQueueStart;
 			// Use indexed strategy
 			int outIndex = 0;
-			for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+			do {
 				int[] fromQueue = fromQueues[fromQueueNum];
 				if(fromQueue!=null) {
 					int length = fromQueueLengths[fromQueueNum];
 					System.arraycopy(fromQueue, 0, array, outIndex, length);
 					outIndex += length;
 				}
-			}
-			for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-				int[] fromQueue = fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = fromQueueLengths[fromQueueNum];
-					System.arraycopy(fromQueue, 0, array, outIndex, length);
-					outIndex += length;
-				}
-			}
+			} while(
+				(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+				!= fromQueueStart
+			);
 		}
 		if(stats!=null) stats.sortEnding();
     }

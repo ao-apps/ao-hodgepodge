@@ -264,6 +264,8 @@ Average Speedup (Old/Experimental): 1.419 / 4.604
 
 Trying to parallelize my algorithm:
 
+USE_SORTED; false
+RANDOM_FULL: true
 
 Concurrent import step:
 

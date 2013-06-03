@@ -52,7 +52,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	 * When there are fewer than MIN_CONCURRENCY_SIZE elements,
 	 * the single-threaded implementation is used.
 	 */
-	private static final int MIN_CONCURRENCY_SIZE = 1 << 2; // TODO: Find break-even point, might also depend on the number of processors
+	private static final int MIN_CONCURRENCY_SIZE = 1 << 16; // TODO: Find break-even point, might also depend on the number of processors
 
 	/**
 	 * Where there are fewer than MIN_CONCURRENCY_PROCESSORS available processors,
@@ -350,10 +350,11 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				}
 				// Pick-up fromQueues and put into results, negative before positive to performed as signed integers
 				// TODO: Concurrently put into results, computing beginning positions for each thread by adding up lengths
-				int midPoint = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+				final int fromQueueStart = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
+				int fromQueueNum = fromQueueStart;
 				// Use indexed strategy
 				int outIndex = 0;
-				for(int fromQueueNum=midPoint; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+				do {
 					for(int taskNum=0; taskNum<numTasks; taskNum++) {
 						final int[][] taskFromQueues = fromQueues[taskNum];
 						int[] fromQueue = taskFromQueues[fromQueueNum];
@@ -364,19 +365,10 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 							outIndex += length;
 						}
 					}
-				}
-				for(int fromQueueNum=0; fromQueueNum<midPoint; fromQueueNum++) {
-					for(int taskNum=0; taskNum<numTasks; taskNum++) {
-						final int[][] taskFromQueues = fromQueues[taskNum];
-						int[] fromQueue = taskFromQueues[fromQueueNum];
-						if(fromQueue!=null) {
-							final int[] taskFromQueueLengths = fromQueueLengths[taskNum];
-							int length = taskFromQueueLengths[fromQueueNum];
-							System.arraycopy(fromQueue, 0, array, outIndex, length);
-							outIndex += length;
-						}
-					}
-				}
+				} while(
+					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+					!= fromQueueStart
+				);
 				if(stats!=null) stats.sortEnding();
 			} catch(InterruptedException e) {
 				throw new RuntimeException(e);
