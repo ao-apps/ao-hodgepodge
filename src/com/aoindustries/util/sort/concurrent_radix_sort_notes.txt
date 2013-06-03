@@ -576,4 +576,37 @@ Total Speedup (Old/New/Experimental): 0.968 / 2.327 / 1.854
 Average Speedup (Old/New/Experimental): 1.494 / 3.049 / 1.617
 
 
+Tested with RANDOM_FULL=false (RANDOM_RANGE still 0x100):
+
+1: Speedup (Old/New/Experimental): 0.968 / 0.881 / 0.876
+2: Speedup (Old/New/Experimental): 1.039 / 0.999 / 1.050
+4: Speedup (Old/New/Experimental): 0.972 / 0.946 / 0.960
+8: Speedup (Old/New/Experimental): 0.987 / 0.978 / 0.943
+16: Speedup (Old/New/Experimental): 0.997 / 0.984 / 0.994
+32: Speedup (Old/New/Experimental): 0.997 / 0.990 / 0.992
+64: Speedup (Old/New/Experimental): 0.996 / 0.962 / 0.994
+128: Speedup (Old/New/Experimental): 0.998 / 0.999 / 0.998
+256: Speedup (Old/New/Experimental): 1.002 / 0.998 / 0.999
+512: Speedup (Old/New/Experimental): 1.019 / 1.018 / 1.018
+1024: Speedup (Old/New/Experimental): 1.000 / 0.998 / 1.000
+2048: Speedup (Old/New/Experimental): 6.346 / 6.273 / 6.241
+4096: Speedup (Old/New/Experimental): 9.894 / 9.810 / 8.990
+8192: Speedup (Old/New/Experimental): 11.482 / 11.630 / 11.340
+16384: Speedup (Old/New/Experimental): 10.869 / 12.095 / 12.169
+32768: Speedup (Old/New/Experimental): 12.146 / 12.314 / 12.427
+65536: Speedup (Old/New/Experimental): 10.609 / 10.747 / 14.458
+131072: Speedup (Old/New/Experimental): 9.021 / 16.997 / 14.028
+262144: Speedup (Old/New/Experimental): 6.133 / 21.887 / 12.119
+524288: Speedup (Old/New/Experimental): 5.772 / 29.922 / 9.877
+1048576: Speedup (Old/New/Experimental): 9.158 / 34.526 / 11.535
+2097152: Speedup (Old/New/Experimental): 10.384 / 42.971 / 10.356
+4194304: Speedup (Old/New/Experimental): 9.888 / 16.131 / 8.565
+8388608: Speedup (Old/New/Experimental): 9.972 / 40.077 / 9.910
+16777216: Speedup (Old/New/Experimental): 7.189 / 33.870 / 1.829
+33554432: Speedup (Old/New/Experimental): 8.357 / 45.190 / 10.924
+67108864: Speedup (Old/New/Experimental): 2.904 / 23.612 / 4.514
+Total Speedup (Old/New/Experimental): 4.064 / 20.371 / 4.633
+Average Speedup (Old/New/Experimental): 5.596 / 14.029 / 6.300
+
+
 TODO: Implement List<T> version:
