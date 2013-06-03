@@ -194,16 +194,16 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				// Perform each concurrently
 				final List<Future<ImportStepResult>> importStepFutures = new ArrayList<Future<ImportStepResult>>(numTasks);
 				for(
-					int taskStart=0, taskNum=0;
+					int taskStart=0, fromTaskNum=0;
 					taskStart<size;
-					taskStart+=sizePerTask, taskNum++
+					taskStart+=sizePerTask, fromTaskNum++
 				) {
 					int taskEnd = taskStart + sizePerTask;
 					if(taskEnd > size) taskEnd = size;
 					final int finalTaskStart = taskStart;
 					final int finalTaskEnd = taskEnd;
-					final int[][] taskFromQueues = fromQueues[taskNum];
-					final int[] taskFromQueueLengths = fromQueueLengths[taskNum];
+					final int[][] taskFromQueues = fromQueues[fromTaskNum];
+					final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
 					// TODO: Could perform the last one on the current thread, here and other places (and reduce size of executor service by one?)
 					importStepFutures.add(
 						executor.submit(
@@ -308,13 +308,14 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 						}
 						 */
 						for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-							for(int taskNum=0; taskNum<numTasks; taskNum++) {
-								final int[][] taskFromQueues = fromQueues[taskNum];
+							for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+								final int[][] taskFromQueues = fromQueues[fromTaskNum];
 								int[] fromQueue = taskFromQueues[fromQueueNum];
 								if(fromQueue!=null) {
-									final int[] taskFromQueueLengths = fromQueueLengths[taskNum];
-									final int[][] taskToQueues = toQueues[taskNum];
-									final int[] taskToQueueLengths = toQueueLengths[taskNum];
+									final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
+									final int toTaskNum = 0; // TODO: Will be different during concurrency
+									final int[][] taskToQueues = toQueues[toTaskNum];
+									final int[] taskToQueueLengths = toQueueLengths[toTaskNum];
 									int length = taskFromQueueLengths[fromQueueNum];
 									for(int j=0; j<length; j++) {
 										int number = fromQueue[j];
