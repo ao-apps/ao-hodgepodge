@@ -174,18 +174,6 @@ public class IntArrayList extends AbstractList<Integer>
 	 * @return  <code>true</code> if the specified element is present;
 	 *                <code>false</code> otherwise.
 	 */
-	public boolean contains(Number elem) {
-		if (elem == null) return false;
-		return contains(elem.intValue());
-	}
-
-	/**
-	 * Returns <tt>true</tt> if this list contains the specified element.
-	 *
-	 * @param elem element whose presence in this List is to be tested.
-	 * @return  <code>true</code> if the specified element is present;
-	 *                <code>false</code> otherwise.
-	 */
 	public boolean contains(int elem) {
 		return indexOf(elem) >= 0;
 	}
@@ -203,20 +191,6 @@ public class IntArrayList extends AbstractList<Integer>
 		if (elem == null) return -1;
 		if (elem instanceof Number) return indexOf(((Number)elem).intValue());
 		return -1;
-	}
-
-	/**
-	 * Searches for the first occurrence of the given argument, testing
-	 * for equality using the <tt>equals</tt> method.
-	 *
-	 * @param   elem   an object.
-	 * @return  the index of the first occurrence of the argument in this
-	 *          list; returns <tt>-1</tt> if the object is not found.
-	 * @see     Object#equals(Object)
-	 */
-	public int indexOf(Number elem) {
-		if (elem == null) return -1;
-		return indexOf(elem.intValue());
 	}
 
 	/**
@@ -247,19 +221,6 @@ public class IntArrayList extends AbstractList<Integer>
 		if (elem == null) return -1;
 		if (elem instanceof Number) return lastIndexOf(((Number)elem).intValue());
 		return -1;
-	}
-
-	/**
-	 * Returns the index of the last occurrence of the specified object in
-	 * this list.
-	 *
-	 * @param   elem   the desired element.
-	 * @return  the index of the last occurrence of the specified object in
-	 *          this list; returns -1 if the object is not found.
-	 */
-	public int lastIndexOf(Number elem) {
-		if (elem == null) return -1;
-		return lastIndexOf(elem.intValue());
 	}
 
 	/**
@@ -527,23 +488,6 @@ public class IntArrayList extends AbstractList<Integer>
 	 */
 	public boolean remove(Object o) {
 		if (o != null && (o instanceof Number)) return removeByValue(((Number)o).intValue());
-		return false;
-	}
-
-	/**
-	 * Removes a single instance of the specified element from this
-	 * list, if it is present (optional operation).  More formally,
-	 * removes an element <tt>e</tt> such that <tt>(o==null ? e==null :
-	 * o.equals(e))</tt>, if the list contains one or more such
-	 * elements.  Returns <tt>true</tt> if the list contained the
-	 * specified element (or equivalently, if the list changed as a
-	 * result of the call).<p>
-	 *
-	 * @param o element to be removed from this list, if present.
-	 * @return <tt>true</tt> if the list contained the specified element.
-	 */
-	public boolean removeByValue(Number o) {
-		if (o != null) return removeByValue(o.intValue());
 		return false;
 	}
 

@@ -715,11 +715,4 @@ TODO: Implement List<T> version:
 
 
 
-contains(Number)
-indexOf(Number)
-lastIndexOf(Number)
-remove(Number) (and make removeByValue)
-
-new intermediate abstract class/interface NumberCollection?
-
 addAll and other constructors take "Number"?
