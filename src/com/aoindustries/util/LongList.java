@@ -25,7 +25,7 @@ package com.aoindustries.util;
 import java.util.List;
 
 /**
- * An ArrayList that stores things using <code>long[]</code> instead of <code>Object[]</code>.  null values are not supported.
+ * A List that stores things using <code>long[]</code> instead of <code>Object[]</code>.  null values are not supported.
  *
  * @see  java.util.ArrayList
  */
@@ -41,5 +41,5 @@ public interface LongList extends LongCollection, List<Long> {
 
     void add(int index, long element);
 
-    long removeLong(int index);
+    long removeAtIndex(int index);
 }

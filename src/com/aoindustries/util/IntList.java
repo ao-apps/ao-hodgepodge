@@ -25,7 +25,7 @@ package com.aoindustries.util;
 import java.util.List;
 
 /**
- * An ArrayList that stores things using <code>int[]</code> instead of <code>Object[]</code>.  null values are not supported.
+ * A List that stores things using <code>int[]</code> instead of <code>Object[]</code>.  null values are not supported.
  *
  * @see  List
  */
@@ -41,5 +41,5 @@ public interface IntList extends IntCollection, List<Integer> {
 
     void add(int index, int element);
 
-    int removeInt(int index);
+    int removeAtIndex(int index);
 }
