@@ -154,7 +154,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	}
 	// </editor-fold>
 
-	// <editor-fold defaultstate="collapsed" desc="List<T>">
+	// <editor-fold defaultstate="collapsed" desc="List<N>">
 	@Override
     public <N extends Number> void sort(List<N> list, SortStatistics stats) {
 		// TODO: Implement concurrent version
@@ -163,7 +163,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
     }
 	// </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="T[]">
+    // <editor-fold defaultstate="collapsed" desc="N[]">
 	private static <N extends Number> ImportStepResult importStep(
 		final int PASS_MASK,
 		final int startQueueLength,
