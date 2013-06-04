@@ -189,9 +189,9 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 		 * @param  number  The number to add
 		 * @return  the <code>int</code> value of the number added
 		 */
-		final int addToQueue(N number) {
+		final int addToQueue(int shift, N number) {
 			int numInt = number.intValue();
-			int toQueueNum = numInt & PASS_MASK;
+			int toQueueNum = (numInt >>> shift) & PASS_MASK;
 			N[] toQueue = toQueues[toQueueNum];
 			int toQueueLength = toQueueLengths[toQueueNum];
 			if(toQueue==null) {
@@ -232,7 +232,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 						if(fromQueue!=null) {
 							int length = fromQueueLengths[fromQueueNum];
 							for(int j=0; j<length; j++) {
-								addToQueue(fromQueue[j]);
+								addToQueue(shift, fromQueue[j]);
 							}
 							fromQueueLengths[fromQueueNum] = 0;
 						}
@@ -263,13 +263,13 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 		final void importData() {
 			if(useRandomAccess) {
 				for(int i=0;i<size;i++) {
-					int numInt = addToQueue(list.get(i));
+					int numInt = addToQueue(0, list.get(i));
 					bitsSeen |= numInt;
 					bitsNotSeen |= numInt ^ 0xffffffff;
 				}
 			} else {
 				for(N number : list) {
-					int numInt = addToQueue(number);
+					int numInt = addToQueue(0, number);
 					bitsSeen |= numInt;
 					bitsNotSeen |= (numInt ^ 0xffffffff);
 				}
@@ -316,20 +316,24 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 
 	@Override
     public <N extends Number> void sort(List<N> list, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
-		final int size = list.size();
-		if(size < MIN_RADIX_SORT_SIZE) {
-            if(stats!=null) stats.sortSwitchingAlgorithms();
-			Collections.sort(list, IntValueComparator.getInstance());
+		if(list instanceof IntList) {
+			sort((IntList)list);
 		} else {
-			if(stats!=null) {
-				// One get and one set for each element
-				stats.sortGetting(size);
-				stats.sortSetting(size);
+			if(stats!=null) stats.sortStarting();
+			final int size = list.size();
+			if(size < MIN_RADIX_SORT_SIZE) {
+				if(stats!=null) stats.sortSwitchingAlgorithms();
+				Collections.sort(list, IntValueComparator.getInstance());
+			} else {
+				if(stats!=null) {
+					// One get and one set for each element
+					stats.sortGetting(size);
+					stats.sortSetting(size);
+				}
+				new NumberListSorter<N>(list).sort();
 			}
-			new NumberListSorter<N>(list).sort();
+			if(stats!=null) stats.sortEnding();
 		}
-		if(stats!=null) stats.sortEnding();
     }
 	// </editor-fold>
 
@@ -346,7 +350,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 		@Override
 		final void importData() {
 			for(int i=0;i<size;i++) {
-				int numInt = addToQueue(array[i]);
+				int numInt = addToQueue(0, array[i]);
 				bitsSeen |= numInt;
 				bitsNotSeen |= numInt ^ 0xffffffff;
 			}
@@ -408,8 +412,8 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 		 * @param  number  The number to add
 		 * @return  the <code>int</code> value of the number added
 		 */
-		final int addToQueue(int number) {
-			int toQueueNum = number & PASS_MASK;
+		final int addToQueue(int shift, int number) {
+			int toQueueNum = (number >>> shift) & PASS_MASK;
 			int[] toQueue = toQueues[toQueueNum];
 			int toQueueLength = toQueueLengths[toQueueNum];
 			if(toQueue==null) {
@@ -448,7 +452,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 						if(fromQueue!=null) {
 							int length = fromQueueLengths[fromQueueNum];
 							for(int j=0; j<length; j++) {
-								addToQueue(fromQueue[j]);
+								addToQueue(shift, fromQueue[j]);
 							}
 							fromQueueLengths[fromQueueNum] = 0;
 						}
@@ -479,13 +483,13 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 		final void importData() {
 			if(useRandomAccess) {
 				for(int i=0;i<size;i++) {
-					int numInt = addToQueue(list.getInt(i));
+					int numInt = addToQueue(0, list.getInt(i));
 					bitsSeen |= numInt;
 					bitsNotSeen |= numInt ^ 0xffffffff;
 				}
 			} else {
 				for(Integer number : list) {
-					int numInt = addToQueue(number);
+					int numInt = addToQueue(0, number);
 					bitsSeen |= numInt;
 					bitsNotSeen |= (numInt ^ 0xffffffff);
 				}
@@ -562,7 +566,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 		@Override
 		final void importData() {
 			for(int i=0;i<size;i++) {
-				int number = addToQueue(array[i]);
+				int number = addToQueue(0, array[i]);
 				bitsSeen |= number;
 				bitsNotSeen |= number ^ 0xffffffff;
 			}

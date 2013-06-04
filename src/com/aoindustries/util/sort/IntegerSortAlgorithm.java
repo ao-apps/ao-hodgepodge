@@ -35,6 +35,10 @@ abstract public class IntegerSortAlgorithm extends SortAlgorithm<Number> {
 	protected IntegerSortAlgorithm() {
 	}
 
+    public void sort(IntList list) {
+        sort(list, null);
+    }
+
     public void sort(int[] array) {
         sort(array, null);
     }
