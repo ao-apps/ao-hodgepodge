@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.sort;
 
+import com.aoindustries.lang.RuntimeUtils;
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.Sequence;
@@ -57,7 +58,7 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
 	private static final int MIN_CONCURRENCY_SIZE = 1 << 9; // TODO: 1 << 16
 
 	private static final ExecutorService executor = !ENABLE_CONCURRENCY ? null : Executors.newFixedThreadPool(
-		Runtime.getRuntime().availableProcessors(),
+		RuntimeUtils.getAvailableProcessors(),
 		new ThreadFactory() {
 			private final Sequence idSequence = new AtomicSequence();
 			public Thread newThread(Runnable target) {

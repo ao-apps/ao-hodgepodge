@@ -36,7 +36,7 @@ import java.util.RandomAccess;
  * {@link http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html}
  * with source provided at {@link https://github.com/gorset/radix/blob/master/Radix.java}
  *
- * TODO: Add sort of IntList
+ * TODO: Integrate concurrent implementation into this codebase.
  *
  * @author  AO Industries, Inc.
  */

@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.sort;
 
+import com.aoindustries.lang.RuntimeUtils;
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.Sequence;
@@ -74,39 +75,16 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	private static final int MIN_CONCURRENCY_PROCESSORS = 2;
 
 	/**
-	 * The number of threads that will be in the thread pool per available processor.
+	 * The number of tasks that will be submitted to the thread pool per processor.
 	 */
-	private static final int THREADS_PER_PROCESSOR = 1;
-
-	/**
-	 * The number of tasks that will be submitted to the thread pool per thread.
-	 */
-	private static final int TASKS_PER_THREAD = 2;
+	private static final int TASKS_PER_PROCESSOR = 2;
 
 	/**
 	 * The minimum starting queue length (unless the size of the passed-in list is smaller)
 	 */
 	private static final int MINIMUM_START_QUEUE_LENGTH = 16;
 
-	/**
-	 * <p>
-	 * The call to Runtime.availableProcessors() is particularly expensive.  This simple
-	 * approach assumes that the number of available processors will not change over the
-	 * life span of the Java virtual machine.  This assumption, however, is not accurate
-	 * in all cases.  This should probably be replaced by a polling strategy to occasionally
-	 * check the new number of processors and adjust the executor service accordingly.
-	 * </p>
-	 * </p>
-	 * However, the sort should not be affected too adversely if it gets the number of processors
-	 * wrong.  If the number of processors is reduced, it just adds a few more context switches
-	 * due to extra threads.  If the number of processors is increased, the additional processors
-	 * will simply not be used.
-	 * </p>
-	 */
-	private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
-
-	private static final ExecutorService defaultExecutor = Executors.newFixedThreadPool(
-		AVAILABLE_PROCESSORS * THREADS_PER_PROCESSOR,
+	private static final ExecutorService defaultExecutor = Executors.newCachedThreadPool(
 		new ThreadFactory() {
 			private final Sequence idSequence = new AtomicSequence();
 			public Thread newThread(Runnable target) {
@@ -285,8 +263,11 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	@Override
     public <N extends Number> void sort(final N[] array, SortStatistics stats) {
 		final int size = array.length;
-		final int numProcessors = AVAILABLE_PROCESSORS;
-		if(size<MIN_CONCURRENCY_SIZE || numProcessors<MIN_CONCURRENCY_PROCESSORS) {
+		final int numProcessors;
+		if(
+			size<MIN_CONCURRENCY_SIZE
+			|| (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
+		) {
 			if(stats!=null) stats.sortSwitchingAlgorithms();
 			IntegerRadixSort.getInstance().sort(array, stats);
 		} else {
@@ -295,7 +276,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				if(stats!=null) stats.sortStarting();
 
 				// Determine the number of tasks to divide work between
-				final int numTasks = numProcessors * THREADS_PER_PROCESSOR * TASKS_PER_THREAD;
+				final int numTasks = numProcessors * TASKS_PER_PROCESSOR;
 
 				// Determine size of division
 				final int sizePerTask;
@@ -706,8 +687,11 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 	@Override
     public void sort(final int[] array, SortStatistics stats) {
 		final int size = array.length;
-		final int numProcessors = AVAILABLE_PROCESSORS;
-		if(size<MIN_CONCURRENCY_SIZE || numProcessors<MIN_CONCURRENCY_PROCESSORS) {
+		final int numProcessors;
+		if(
+			size<MIN_CONCURRENCY_SIZE
+			|| (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
+		) {
 			if(stats!=null) stats.sortSwitchingAlgorithms();
 			IntegerRadixSort.getInstance().sort(array, stats);
 		} else {
@@ -716,7 +700,7 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 				if(stats!=null) stats.sortStarting();
 
 				// Determine the number of tasks to divide work between
-				final int numTasks = numProcessors * THREADS_PER_PROCESSOR * TASKS_PER_THREAD;
+				final int numTasks = numProcessors * TASKS_PER_PROCESSOR;
 
 				// Determine size of division
 				final int sizePerTask;

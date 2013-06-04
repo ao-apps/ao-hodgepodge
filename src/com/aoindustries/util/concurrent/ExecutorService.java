@@ -24,6 +24,7 @@ package com.aoindustries.util.concurrent;
 
 import com.aoindustries.lang.DisposedException;
 import com.aoindustries.lang.Disposable;
+import com.aoindustries.lang.RuntimeUtils;
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.Sequence;
 import java.util.ArrayList;
@@ -210,7 +211,7 @@ final public class ExecutorService implements Disposable {
             if(activeCount<1) throw new IllegalStateException();
             if(perProcessorExecutorService==null) {
                 java.util.concurrent.ExecutorService newExecutorService = Executors.newFixedThreadPool(
-                    Runtime.getRuntime().availableProcessors() * THREADS_PER_PROCESSOR,
+                    RuntimeUtils.getAvailableProcessors() * THREADS_PER_PROCESSOR,
                     perProcessorThreadFactory
                 );
                 Thread newShutdownHook = new ExecutorServiceShutdownHook(
