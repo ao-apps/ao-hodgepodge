@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.sort;
 
+import com.aoindustries.util.IntList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -460,6 +461,92 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			return lastShiftUsed;
 		}
 	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="IntList">
+	static class IntListSorter extends IntSorter {
+
+		private final IntList list;
+		private final boolean useRandomAccess;
+
+		IntListSorter(IntList list) {
+			super(list.size());
+			this.list = list;
+			this.useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
+		}
+
+		@Override
+		final void importData() {
+			if(useRandomAccess) {
+				for(int i=0;i<size;i++) {
+					int numInt = addToQueue(list.getInt(i));
+					bitsSeen |= numInt;
+					bitsNotSeen |= numInt ^ 0xffffffff;
+				}
+			} else {
+				for(Integer number : list) {
+					int numInt = addToQueue(number);
+					bitsSeen |= numInt;
+					bitsNotSeen |= (numInt ^ 0xffffffff);
+				}
+			}
+		}
+
+		@Override
+		final void exportData(final int fromQueueStart) {
+			int fromQueueNum = fromQueueStart;
+			if(useRandomAccess) {
+				// Use indexed strategy
+				int outIndex = 0;
+				do {
+					int[] fromQueue = fromQueues[fromQueueNum];
+					if(fromQueue!=null) {
+						int length = fromQueueLengths[fromQueueNum];
+						for(int j=0; j<length; j++) {
+							list.set(outIndex++, fromQueue[j]);
+						}
+					}
+				} while(
+					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+					!= fromQueueStart
+				);
+			} else {
+				// Use iterator strategy
+				ListIterator<Integer> iterator = list.listIterator();
+				do {
+					int[] fromQueue = fromQueues[fromQueueNum];
+					if(fromQueue!=null) {
+						int length = fromQueueLengths[fromQueueNum];
+						for(int j=0; j<length; j++) {
+							iterator.next();
+							iterator.set(fromQueue[j]);
+						}
+					}
+				} while(
+					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+					!= fromQueueStart
+				);
+			}
+		}
+	}
+
+	@Override
+    public void sort(IntList list, SortStatistics stats) {
+		if(stats!=null) stats.sortStarting();
+		final int size = list.size();
+		if(size < MIN_RADIX_SORT_SIZE) {
+            if(stats!=null) stats.sortSwitchingAlgorithms();
+			Collections.sort(list, IntValueComparator.getInstance());
+		} else {
+			if(stats!=null) {
+				// One get and one set for each element
+				stats.sortGetting(size);
+				stats.sortSetting(size);
+			}
+			new IntListSorter(list).sort();
+		}
+		if(stats!=null) stats.sortEnding();
+    }
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="int[]">

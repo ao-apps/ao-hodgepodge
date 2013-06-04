@@ -23,6 +23,7 @@
 package com.aoindustries.util.sort;
 
 import com.aoindustries.util.AtomicSequence;
+import com.aoindustries.util.IntList;
 import com.aoindustries.util.Sequence;
 import com.aoindustries.util.concurrent.ConcurrentUtils;
 import java.util.ArrayList;
@@ -580,6 +581,15 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
     }
 	// </editor-fold>
 
+	// <editor-fold defaultstate="collapsed" desc="IntList">
+	@Override
+    public void sort(IntList list, SortStatistics stats) {
+		// TODO: Implement concurrent version
+		if(stats!=null) stats.sortSwitchingAlgorithms();
+		IntegerRadixSort.getInstance().sort(list, stats);
+    }
+	// </editor-fold>
+
 	// <editor-fold defaultstate="collapsed" desc="int[]">
 	private static ImportStepResult importStep(
 		final int PASS_MASK,
@@ -988,4 +998,5 @@ final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
 			}
 		}
     }
+	// </editor-fold>
 }

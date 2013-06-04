@@ -22,6 +22,9 @@
  */
 package com.aoindustries.util.sort;
 
+import com.aoindustries.io.FileList;
+import com.aoindustries.util.IntList;
+
 /**
  * A sort implementation that sorts int[] primitives as was as integer representation of numeric objects.
  *
@@ -36,16 +39,39 @@ abstract public class IntegerSortAlgorithm extends SortAlgorithm<Number> {
         sort(array, null);
     }
 
-    public abstract void sort(int[] array, SortStatistics stats);
+	public abstract void sort(IntList list, SortStatistics stats);
+
+	public abstract void sort(int[] array, SortStatistics stats);
+
+	protected static int get(IntList list, int i, SortStatistics stats) {
+		if(stats!=null) stats.sortGetting();
+		return list.getInt(i);
+	}
 
 	protected static int get(int[] array, int i, SortStatistics stats) {
 		if(stats!=null) stats.sortGetting();
 		return array[i];
 	}
 
+	protected static void set(IntList list, int i, int value, SortStatistics stats) {
+		if(stats!=null) stats.sortSetting();
+		list.set(i, value);
+	}
+
 	protected static void set(int[] array, int i, int value, SortStatistics stats) {
 		if(stats!=null) stats.sortSetting();
 		array[i]=value;
+	}
+
+	protected static void swap(IntList list, int i, int j, SortStatistics stats) {
+		if(stats!=null) stats.sortSwapping();
+
+		if(list instanceof FileList<?>) ((FileList<?>)list).swap(i, j);
+		else {
+			int T=list.getInt(i);
+			list.set(i, list.getInt(j));
+			list.set(j, T);
+		}
 	}
 
 	protected static void swap(int[] array, int i, int j, SortStatistics stats) {

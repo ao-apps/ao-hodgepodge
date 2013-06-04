@@ -23,6 +23,7 @@
 package com.aoindustries.util.sort;
 
 import com.aoindustries.util.AtomicSequence;
+import com.aoindustries.util.IntList;
 import com.aoindustries.util.Sequence;
 import java.util.Arrays;
 import java.util.List;
@@ -88,6 +89,11 @@ final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
     public <N extends Number> void sort(N[] array, SortStatistics stats) {
 		IntegerRadixSort.getInstance().sort(array, stats);
     }
+
+	@Override
+    public void sort(IntList list, SortStatistics stats) {
+		IntegerRadixSort.getInstance().sort(list, stats);
+	}
 
 	@Override
     public void sort(int[] array, SortStatistics stats) {
