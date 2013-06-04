@@ -42,11 +42,9 @@ import java.util.RandomAccess;
  */
 final public class IntegerRadixSort extends IntegerSortAlgorithm {
 
-	/*
 	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
 	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
 	private static final int PASS_MASK = PASS_SIZE - 1;
-	 */
 
 	/**
 	 * When sorting lists less than this size, will use a different algorithm.
@@ -78,9 +76,11 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 		protected final int size;
 
 		// Must be power of two and less than or equal to 32
+		/*
 		protected final int BITS_PER_PASS;
 		protected final int PASS_SIZE;
 		protected final int PASS_MASK;
+		 */
 
 		protected final int startQueueLength;
 
@@ -101,6 +101,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			this.size = size;
 
 			// Dynamically choose pass size
+			/*
 			if(size < 0x80000) {
 				this.BITS_PER_PASS = 8;
 			} else {
@@ -108,6 +109,7 @@ final public class IntegerRadixSort extends IntegerSortAlgorithm {
 			}
 			this.PASS_SIZE = 1 << BITS_PER_PASS;
 			this.PASS_MASK = PASS_SIZE - 1;
+			 */
 
 			// Determine the start queue length
 			{

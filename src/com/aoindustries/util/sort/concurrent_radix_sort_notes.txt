@@ -711,4 +711,44 @@ Total Speedup (Old/New/Experimental): 2.103 / 9.115 / 8.945
 Average Speedup (Old/New/Experimental): 1.778 / 7.344 / 6.337
 
 
+int[] with RANDOM_FULL=true (back to 8-core), fixed 8-bit size:
+
+1: Speedup (Old/New/Experimental): 0.942 / 0.884 / 0.911
+2: Speedup (Old/New/Experimental): 0.916 / 0.863 / 0.881
+4: Speedup (Old/New/Experimental): 1.025 / 0.940 / 1.007
+8: Speedup (Old/New/Experimental): 0.951 / 0.921 / 0.998
+16: Speedup (Old/New/Experimental): 0.975 / 0.959 / 0.982
+32: Speedup (Old/New/Experimental): 0.983 / 0.982 / 0.993
+64: Speedup (Old/New/Experimental): 1.037 / 1.021 / 1.038
+128: Speedup (Old/New/Experimental): 0.858 / 0.901 / 0.934
+256: Speedup (Old/New/Experimental): 0.991 / 0.971 / 0.883
+512: Speedup (Old/New/Experimental): 0.959 / 0.966 / 2.053
+1024: Speedup (Old/New/Experimental): 1.011 / 0.987 / 1.923
+2048: Speedup (Old/New/Experimental): 1.795 / 1.770 / 2.599
+4096: Speedup (Old/New/Experimental): 2.215 / 2.259 / 3.263
+8192: Speedup (Old/New/Experimental): 2.667 / 2.454 / 2.166
+16384: Speedup (Old/New/Experimental): 2.853 / 2.671 / 4.032
+32768: Speedup (Old/New/Experimental): 2.766 / 2.703 / 6.994
+65536: Speedup (Old/New/Experimental): 2.681 / 2.792 / 7.937
+131072: Speedup (Old/New/Experimental): 2.849 / 2.608 / 7.402
+262144: Speedup (Old/New/Experimental): 2.508 / 4.783 / 7.956
+524288: Speedup (Old/New/Experimental): 3.446 / 6.960 / 10.212
+1048576: Speedup (Old/New/Experimental): 2.974 / 8.347 / 10.136
+2097152: Speedup (Old/New/Experimental): 3.029 / 4.995 / 8.298
+4194304: Speedup (Old/New/Experimental): 2.705 / 7.255 / 12.021
+8388608: Speedup (Old/New/Experimental): 1.994 / 11.484 / 11.739
+16777216: Speedup (Old/New/Experimental): 2.124 / 11.455 / 12.267
+33554432: Speedup (Old/New/Experimental): 1.706 / 6.643 / 12.108
+67108864: Speedup (Old/New/Experimental): 1.623 / 7.802 / 10.217
+Total Speedup (Old/New/Experimental): 1.756 / 6.650 / 9.326
+Average Speedup (Old/New/Experimental): 1.873 / 3.606 / 5.257
+
+
+Integrated concurrent implementation into IntegerRadixSort, switching over at size of 65536:
+
+TODO
+
+
+
+
 TODO: Implement List<T> version:
