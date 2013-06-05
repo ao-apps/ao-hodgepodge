@@ -58,7 +58,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author  AO Industries, Inc.
  */
-final public class IntegerRadixSort extends IntegerSortAlgorithm {
+final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
 	private static final int PASS_SIZE     = 1 << BITS_PER_PASS;

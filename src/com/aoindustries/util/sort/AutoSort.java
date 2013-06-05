@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-final public class AutoSort extends ComparisonSortAlgorithm<Object> {
+final public class AutoSort extends BaseComparisonSortAlgorithm<Object> {
 
 	private static final int FAST_QSORT_THRESHOLD = 10000;
 

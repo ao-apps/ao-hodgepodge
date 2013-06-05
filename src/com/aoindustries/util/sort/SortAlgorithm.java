@@ -22,75 +22,26 @@
  */
 package com.aoindustries.util.sort;
 
-import com.aoindustries.io.FileList;
 import java.util.List;
 
 /**
  * Generalized structure for sort algorithms.
  *
- * TODO: Make SortAlgorithm an interface
- *
  * @author  AO Industries, Inc.
  */
-abstract public class SortAlgorithm<E> {
-
-	protected SortAlgorithm() {
-	}
+public interface SortAlgorithm<E> {
 
 	/**
 	 * Checks if this is a stable sort.  A stable sort will keep elements with
 	 * equal values in their same relative order.
 	 */
-	public abstract boolean isStable();
+	boolean isStable();
 
-	public <T extends E> void sort(List<T> list) {
-		sort(list, null);
-	}
+	<T extends E> void sort(List<T> list);
 
-    public <T extends E> void sort(T[] array) {
-        sort(array, null);
-    }
+    <T extends E> void sort(T[] array);
 
-	public abstract <T extends E> void sort(List<T> list, SortStatistics stats);
+	<T extends E> void sort(List<T> list, SortStatistics stats);
 
-    public abstract <T extends E> void sort(T[] array, SortStatistics stats);
-
-	protected static <T> T get(List<T> list, int i, SortStatistics stats) {
-		if(stats!=null) stats.sortGetting();
-		return list.get(i);
-	}
-
-	protected static <T> T get(T[] array, int i, SortStatistics stats) {
-		if(stats!=null) stats.sortGetting();
-		return array[i];
-	}
-
-	protected static <T> void set(List<T> list, int i, T O, SortStatistics stats) {
-		if(stats!=null) stats.sortSetting();
-		list.set(i, O);
-	}
-
-	protected static <T> void set(T[] array, int i, T O, SortStatistics stats) {
-		if(stats!=null) stats.sortSetting();
-		array[i]=O;
-	}
-
-	protected static <T> void swap(List<T> list, int i, int j, SortStatistics stats) {
-		if(stats!=null) stats.sortSwapping();
-
-		if(list instanceof FileList<?>) ((FileList<?>)list).swap(i, j);
-		else {
-			T T=list.get(i);
-			list.set(i, list.get(j));
-			list.set(j, T);
-		}
-	}
-
-	protected static <T> void swap(T[] array, int i, int j, SortStatistics stats) {
-		if(stats!=null) stats.sortSwapping();
-
-		T T=array[i];
-		array[i]=array[j];
-		array[j]=T;
-	}
+    <T extends E> void sort(T[] array, SortStatistics stats);
 }

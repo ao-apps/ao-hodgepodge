@@ -42,7 +42,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author  AO Industries, Inc.
  */
-final public class IntegerRadixSortExperimental extends IntegerSortAlgorithm {
+final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm {
 
 	private static final int MIN_RADIX_SORT_SIZE = 1 << 8;
 

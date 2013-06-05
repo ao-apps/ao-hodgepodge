@@ -42,7 +42,7 @@ import java.util.List;
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/EQSortAlgorithm.java.html'>Jim Boritz' EQSortAlgorithm</a>.
  */
-final public class EQSort extends ComparisonSortAlgorithm<Object> {
+final public class EQSort extends BaseComparisonSortAlgorithm<Object> {
 
     private static final EQSort instance = new EQSort();
 

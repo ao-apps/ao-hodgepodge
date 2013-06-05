@@ -42,7 +42,7 @@ import java.util.List;
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/QubbleSortAlgorithm.java.html'>Jim Boritz' QubbleSortAlgorithm</a>.
  */
-final public class QubbleSort extends ComparisonSortAlgorithm<Object> {
+final public class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
 
 	private static final QubbleSort instance = new QubbleSort();
 

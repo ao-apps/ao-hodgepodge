@@ -44,7 +44,7 @@ public class IntegerRadixSortTest extends TestCase {
 	private static final long GC_SLEEP_TIME = 100;
 
 	private static final int START_TEST_SIZE = 1; // << 8;
-	private static final int END_TEST_SIZE = 1 << 26;
+	private static final int END_TEST_SIZE = 1 << 20; // << 26;
 	private static final int MAX_PASSES = (1 << 20) / START_TEST_SIZE;
 
 	private static final boolean USE_SORTED = false;

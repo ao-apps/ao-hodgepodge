@@ -30,7 +30,7 @@ import java.util.List;
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/HeapSortAlgorithm.java.html'>Jason Harrison's HeapSortAlgorithm</a>.
  */
-final public class HeapSort extends ComparisonSortAlgorithm<Object> {
+final public class HeapSort extends BaseComparisonSortAlgorithm<Object> {
 
 	private static final HeapSort instance = new HeapSort();
 
