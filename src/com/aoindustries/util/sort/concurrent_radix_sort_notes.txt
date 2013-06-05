@@ -754,3 +754,24 @@ TODO
 TODO: Implement List<T> version:
 
 
+
+
+
+					radixSort(
+						size,
+						new SingleTaskNumberRadixTable<N>(size),
+						new NumberListSource<N>(size, list),
+						null
+					);
+				} else {
+					radixSort(
+						size,
+						new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
+						new NumberListSource<N>(size, list),
+						executor
+					);
+
+
+
+
+

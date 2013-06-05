@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.sort;
 
-import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.lang.RuntimeUtils;
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.IntList;
@@ -35,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.RandomAccess;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,15 +56,13 @@ import java.util.concurrent.ThreadFactory;
  * order of the multi-dimensional arrays to help cache interaction.  Might get
  * better throughput when hit the cache wall where performance drops considerably.
  *
- * TODO: Integrate concurrent implementation into this codebase.
- *
  * @author  AO Industries, Inc.
  */
 final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 
 	private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
-	private static final int PASS_SIZE = 1 << BITS_PER_PASS;
-	private static final int PASS_MASK = PASS_SIZE - 1;
+	private static final int PASS_SIZE     = 1 << BITS_PER_PASS;
+	private static final int PASS_MASK     = PASS_SIZE - 1;
 
 	/**
 	 * When sorting lists less than this size, will use a different algorithm.
@@ -75,11 +73,6 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 	 * The minimum starting queue length (unless the size of the passed-in list is smaller)
 	 */
 	private static final int MINIMUM_START_QUEUE_LENGTH = 16;
-
-	// Concurrency debug settings
-	private static final boolean USE_CONCURRENT_IMPORT = true;
-	private static final boolean USE_CONCURRENT_GATHER_SCATTER = true;
-	private static final boolean USE_CONCURRENT_EXPORT = true;
 
 	/**
 	 * When there are fewer than MIN_CONCURRENCY_SIZE elements,
@@ -179,177 +172,26 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 		abstract void swapQueues();
 
 		/**
-		 * Performs the gather/scatter stage of the sort
-		 *
-		 * @return  lastShiftUsed  The last shift value performed in a pass
-		 */
-		abstract int gatherScatter(int bitsSeen, int bitsNotSeen);
-	}
-
-	abstract static class SingleThreadedRadixTable extends RadixTable {
-
-		int[] fromQueueLengths;
-		int[] toQueueLengths;
-
-		SingleThreadedRadixTable(int size) {
-			super(size, 1);
-			this.fromQueueLengths = new int[PASS_SIZE];
-			this.toQueueLengths   = new int[PASS_SIZE];
-		}
-
-		@Override
-		void swapQueues() {
-			int[] tempLengths = fromQueueLengths;
-			fromQueueLengths = toQueueLengths;
-			toQueueLengths = tempLengths;
-		}
-	}
-
-	abstract static class ConcurrentRadixTable extends RadixTable {
-
-		final ExecutorService executor;
-
-		int[][] fromQueueLengths;
-		int[][] toQueueLengths;
-
-		/**
-		 * The size of division of work (number of elements per task).
-		 */
-		final int sizePerTask;
-
-		// The same futures list is used by multiple stages below
-		final List<Future<?>> runnableFutures;
-
-		ConcurrentRadixTable(int size, int numProcessors, ExecutorService executor) {
-			super(size, numProcessors * TASKS_PER_PROCESSOR);
-			this.executor         = executor;
-			this.fromQueueLengths = new int[numTasks][PASS_SIZE];
-			this.toQueueLengths   = new int[numTasks][PASS_SIZE];
-			{
-				int spt = size / numTasks;
-				if((spt*numTasks)<size) spt++; // Round-up instead of down
-				this.sizePerTask = spt;
-			}
-			this.runnableFutures  = new ArrayList<Future<?>>(numTasks);
-		}
-
-		@Override
-		void swapQueues() {
-			int[][] tempLengths = fromQueueLengths;
-			fromQueueLengths = toQueueLengths;
-			toQueueLengths = tempLengths;
-		}
-
-		@Override
-		final int gatherScatter(int bitsSeen, int bitsNotSeen) {
-			try {
-				int lastShiftUsed = 0;
-				for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
-					// Skip this bit range when all values have equal bits.  For example
-					// when going through the upper bits of lists of all smaller positive
-					// or negative numbers.
-					if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
-						lastShiftUsed = shift;
-
-						if(USE_CONCURRENT_GATHER_SCATTER) {
-							// Get some final values for anonymous inner class
-							final int finalShift = shift;
-							// Perform each concurrently with balanced concurrency
-							int toTaskNum = 0;
-							int taskFromQueueStart = 0;
-							int taskTotalLength = 0;
-							for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-								for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
-									taskTotalLength += fromQueueLengths[fromTaskNum][fromQueueNum];
-								}
-								if(
-									taskTotalLength>0 // Skip no output, such as all handle in previous tasks
-									&& (
-										taskTotalLength >= sizePerTask // Found fair share (or more)
-										|| fromQueueNum==PASS_MASK // or is last task
-									)
-								) {
-									final int finalToTaskNum = toTaskNum;
-									final int finalTaskFromQueueStart = taskFromQueueStart;
-									final int taskFromQueueEnd = fromQueueNum + 1;
-									// Gather/scatter concurrent
-									runnableFutures.add(
-										executor.submit(
-											new Runnable() {
-												@Override
-												public void run() {
-													for(int fromQueueNum=finalTaskFromQueueStart; fromQueueNum<taskFromQueueEnd; fromQueueNum++) {
-														gatherScatter(
-															finalShift,
-															fromQueueNum,
-															finalToTaskNum
-														);
-													}
-												}
-											}
-										)
-									);
-
-									// Reset to next task
-									toTaskNum++;
-									taskFromQueueStart = taskFromQueueEnd;
-									taskTotalLength = 0;
-								}
-							}
-							// Wait for each gather/scatter task to complete
-							ConcurrentUtils.waitForAll(runnableFutures);
-							if(USE_CONCURRENT_EXPORT) runnableFutures.clear(); // Clear when not last concurrent step
-						} else {
-							for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-								gatherScatter(
-									shift,
-									fromQueueNum,
-									0 // Task #0 for non concurrent gather/scatter
-								);
-							}
-						}
-
-						// Swap from and to
-						swapQueues();
-					}
-				}
-				return lastShiftUsed;
-			} catch(InterruptedException e) {
-				throw new WrappedException(e);
-			} catch(ExecutionException e) {
-				throw new WrappedException(e);
-			}
-		}
-
-		/**
 		 * Gather/scatter for a single task.
 		 */
-		abstract void gatherScatter(
-			final int shift,
-			final int fromQueueNum,
-			final int toTaskNum
-		);
+		abstract void gatherScatter(int shift, int fromQueueNum, int toTaskNum);
+
+		/**
+		 * Gets the number of elements in the fromQueue
+		 */
+		abstract int getFromQueueLength(int fromTaskNum, int fromQueueNum);
 	}
 
-	static class SingleThreadedNumberRadixTable<N extends Number> extends SingleThreadedRadixTable {
+	abstract static class NumberRadixTable<N extends Number> extends RadixTable {
 
-		N[][] fromQueues;
-		N[][] toQueues;
-
-		@SuppressWarnings("unchecked")
-		SingleThreadedNumberRadixTable(int size) {
-			super(size);
-			this.fromQueues = (N[][])new Number[PASS_SIZE][];
-			this.toQueues   = (N[][])new Number[PASS_SIZE][];
+		NumberRadixTable(int size, int numTasks) {
+			super(size, numTasks);
 		}
 
-		@Override
-		final void swapQueues() {
-			super.swapQueues();
-			N[][] temp = fromQueues;
-			fromQueues = toQueues;
-			toQueues = temp;
-		}
+		/**
+		 * Gets the elements in the fromQueue
+		 */
+		abstract N[] getFromQueue(int fromTaskNum, int fromQueueNum);
 
 		/**
 		 * Adds a number to the toQueue.
@@ -357,7 +199,83 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 		 * @param  number  The number to add
 		 * @return  the <code>int</code> value of the number added
 		 */
-		final int addToQueue(int shift, N number) {
+		abstract int addToQueue(int shift, N number, int toTaskNum);
+	}
+
+	abstract static class IntRadixTable extends RadixTable {
+
+		IntRadixTable(int size, int numTasks) {
+			super(size, numTasks);
+		}
+
+		/**
+		 * Gets the elements in the fromQueue
+		 */
+		abstract int[] getFromQueue(int fromTaskNum, int fromQueueNum);
+
+		/**
+		 * Adds a number to the toQueue.
+		 *
+		 * @param  number  The number to add
+		 * @return  the <code>int</code> value of the number added
+		 */
+		abstract int addToQueue(int shift, int number, int toTaskNum);
+	}
+
+	static class SingleTaskNumberRadixTable<N extends Number> extends NumberRadixTable<N> {
+
+		N[][] fromQueues;
+		int[] fromQueueLengths;
+		N[][] toQueues;
+		int[] toQueueLengths;
+
+		@SuppressWarnings("unchecked")
+		SingleTaskNumberRadixTable(int size) {
+			super(size, 1);
+			this.fromQueues       = (N[][])new Number[PASS_SIZE][];
+			this.fromQueueLengths = new int[PASS_SIZE];
+			this.toQueues         = (N[][])new Number[PASS_SIZE][];
+			this.toQueueLengths   = new int[PASS_SIZE];
+		}
+
+		@Override
+		final void swapQueues() {
+			N[][] temp = fromQueues;
+			fromQueues = toQueues;
+			toQueues = temp;
+			int[] tempLengths = fromQueueLengths;
+			fromQueueLengths = toQueueLengths;
+			toQueueLengths = tempLengths;
+		}
+
+		@Override
+		final void gatherScatter(int shift, int fromQueueNum, int toTaskNum) {
+			assert toTaskNum==0;
+			N[] fromQueue = fromQueues[fromQueueNum];
+			if(fromQueue!=null) {
+				int length = fromQueueLengths[fromQueueNum];
+				for(int j=0; j<length; j++) {
+					addToQueue(shift, fromQueue[j], 0);
+				}
+				fromQueueLengths[fromQueueNum] = 0;
+			}
+		}
+
+		@Override
+		final int getFromQueueLength(int fromTaskNum, int fromQueueNum) {
+			assert fromTaskNum==0;
+			return fromQueueLengths[fromQueueNum];
+		}
+
+		@Override
+		final N[] getFromQueue(int fromTaskNum, int fromQueueNum) {
+			assert fromTaskNum==0;
+			return fromQueues[fromQueueNum];
+		}
+
+		@Override
+		final int addToQueue(int shift, N number, int toTaskNum) {
+			assert toTaskNum==0;
 			int numInt = number.intValue();
 			int toQueueNum = (numInt >>> shift) & PASS_MASK;
 			N[] toQueue = toQueues[toQueueNum];
@@ -377,63 +295,63 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 			toQueueLengths[toQueueNum] = toQueueLength;
 			return numInt;
 		}
-
-		@Override
-		final int gatherScatter(int bitsSeen, int bitsNotSeen) {
-			int lastShiftUsed = 0;
-			for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
-				// Skip this bit range when all values have equal bits.  For example
-				// when going through the upper bits of lists of all smaller positive
-				// or negative numbers.
-				if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
-					lastShiftUsed = shift;
-					for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-						N[] fromQueue = fromQueues[fromQueueNum];
-						if(fromQueue!=null) {
-							int length = fromQueueLengths[fromQueueNum];
-							for(int j=0; j<length; j++) {
-								addToQueue(shift, fromQueue[j]);
-							}
-							fromQueueLengths[fromQueueNum] = 0;
-						}
-					}
-
-					// Swap from and to
-					swapQueues();
-				}
-			}
-			return lastShiftUsed;
-		}
 	}
 
-	static class ConcurrentNumberRadixTable<N extends Number> extends ConcurrentRadixTable {
+	static class MultiTaskNumberRadixTable<N extends Number> extends NumberRadixTable<N> {
 
 		N[][][] fromQueues;
+		int[][] fromQueueLengths;
 		N[][][] toQueues;
+		int[][] toQueueLengths;
 
 		@SuppressWarnings("unchecked")
-		ConcurrentNumberRadixTable(int size, int numProcessors, ExecutorService executor) {
-			super(size, numProcessors, executor);
-			this.fromQueues = (N[][][])new Number[numTasks][PASS_SIZE][];
-			this.toQueues   = (N[][][])new Number[numTasks][PASS_SIZE][];
+		MultiTaskNumberRadixTable(int size, int numTasks) {
+			super(size, numTasks);
+			this.fromQueues       = (N[][][])new Number[numTasks][PASS_SIZE][];
+			this.fromQueueLengths = new int[numTasks][PASS_SIZE];
+			this.toQueues         = (N[][][])new Number[numTasks][PASS_SIZE][];
+			this.toQueueLengths   = new int[numTasks][PASS_SIZE];
 		}
 
 		@Override
 		final void swapQueues() {
-			super.swapQueues();
 			N[][][] temp = fromQueues;
 			fromQueues = toQueues;
 			toQueues = temp;
+			int[][] tempLengths = fromQueueLengths;
+			fromQueueLengths = toQueueLengths;
+			toQueueLengths = tempLengths;
 		}
 
-		/**
-		 * Adds a number to the toQueue.
-		 *
-		 * @param  number  The number to add
-		 *
-		 * @return  the <code>int</code> value of the number added
-		 */
-		final int addToQueue(int shift, N number, N[][] taskToQueues, int[] taskToQueueLengths) {
+		@Override
+		final void gatherScatter(int shift, int fromQueueNum, int toTaskNum) {
+			for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+				final N[][] taskFromQueues = fromQueues[fromTaskNum];
+				N[] fromQueue = taskFromQueues[fromQueueNum];
+				if(fromQueue!=null) {
+					final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
+					final N[][] taskToQueues = toQueues[toTaskNum];
+					final int[] taskToQueueLengths = toQueueLengths[toTaskNum];
+					int length = taskFromQueueLengths[fromQueueNum];
+					for(int j=0; j<length; j++) {
+						addToQueue(shift, fromQueue[j], taskToQueues, taskToQueueLengths);
+					}
+					taskFromQueueLengths[fromQueueNum] = 0;
+				}
+			}
+		}
+
+		@Override
+		final int getFromQueueLength(int fromTaskNum, int fromQueueNum) {
+			return fromQueueLengths[fromTaskNum][fromQueueNum];
+		}
+
+		@Override
+		final N[] getFromQueue(int fromTaskNum, int fromQueueNum) {
+			return fromQueues[fromTaskNum][fromQueueNum];
+		}
+
+		private int addToQueue(int shift, N number, N[][] taskToQueues, int[] taskToQueueLengths) {
 			int numInt = number.intValue();
 			int toQueueNum = (numInt >>> shift) & PASS_MASK;
 			N[] toQueue = taskToQueues[toQueueNum];
@@ -454,55 +372,69 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 			return numInt;
 		}
 
-		@Override
-		void gatherScatter(
-			int shift,
-			int fromQueueNum,
-			int toTaskNum
-		) {
-			for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
-				final N[][] taskFromQueues = fromQueues[fromTaskNum];
-				N[] fromQueue = taskFromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					final int[] taskFromQueueLengths = fromQueueLengths[fromTaskNum];
-					final N[][] taskToQueues = toQueues[toTaskNum];
-					final int[] taskToQueueLengths = toQueueLengths[toTaskNum];
-					int length = taskFromQueueLengths[fromQueueNum];
-					for(int j=0; j<length; j++) {
-						addToQueue(shift, fromQueue[j], taskToQueues, taskToQueueLengths);
-					}
-					taskFromQueueLengths[fromQueueNum] = 0;
-				}
-			}
+		final int addToQueue(int shift, N number, int toTaskNum) {
+			return addToQueue(
+				shift,
+				number,
+				toQueues[toTaskNum],
+				toQueueLengths[toTaskNum]
+			);
 		}
 	}
 
-	static class SingleThreadedIntRadixTable extends SingleThreadedRadixTable {
+	static class SingleTaskIntRadixTable extends IntRadixTable {
 
 		int[][] fromQueues;
+		int[] fromQueueLengths;
 		int[][] toQueues;
+		int[] toQueueLengths;
 
-		SingleThreadedIntRadixTable(int size) {
-			super(size);
-			this.fromQueues = new int[PASS_SIZE][];
-			this.toQueues   = new int[PASS_SIZE][];
+		SingleTaskIntRadixTable(int size) {
+			super(size, 1);
+			this.fromQueues       = new int[PASS_SIZE][];
+			this.fromQueueLengths = new int[PASS_SIZE];
+			this.toQueues         = new int[PASS_SIZE][];
+			this.toQueueLengths   = new int[PASS_SIZE];
 		}
 
 		@Override
 		final void swapQueues() {
-			super.swapQueues();
 			int[][] temp = fromQueues;
 			fromQueues = toQueues;
 			toQueues = temp;
+			int[] tempLengths = fromQueueLengths;
+			fromQueueLengths = toQueueLengths;
+			toQueueLengths = tempLengths;
 		}
 
-		/**
-		 * Adds a number to the toQueue.
-		 *
-		 * @param  number  The number to add
-		 * @return  the <code>int</code> value of the number added
-		 */
-		final int addToQueue(int shift, int number) {
+		@Override
+		final void gatherScatter(int shift, int fromQueueNum, int toTaskNum) {
+			assert toTaskNum==0;
+			int[] fromQueue = fromQueues[fromQueueNum];
+			if(fromQueue!=null) {
+				int length = fromQueueLengths[fromQueueNum];
+				for(int j=0; j<length; j++) {
+					addToQueue(shift, fromQueue[j], 0);
+				}
+				fromQueueLengths[fromQueueNum] = 0;
+			}
+		}
+
+		@Override
+		final int getFromQueueLength(int fromTaskNum, int fromQueueNum) {
+			assert fromTaskNum==0;
+			return fromQueueLengths[fromQueueNum];
+		}
+
+		@Override
+		final int[] getFromQueue(int fromTaskNum, int fromQueueNum) {
+			assert fromTaskNum==0;
+			return fromQueues[fromQueueNum];
+		}
+
+		@Override
+		final int addToQueue(int shift, int number, int toTaskNum) {
+			assert toTaskNum==0;
 			int toQueueNum = (number >>> shift) & PASS_MASK;
 			int[] toQueue = toQueues[toQueueNum];
 			int toQueueLength = toQueueLengths[toQueueNum];
@@ -519,62 +451,34 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 			toQueueLengths[toQueueNum] = toQueueLength;
 			return number;
 		}
-
-		@Override
-		final int gatherScatter(int bitsSeen, int bitsNotSeen) {
-			int lastShiftUsed = 0;
-			for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
-				// Skip this bit range when all values have equal bits.  For example
-				// when going through the upper bits of lists of all smaller positive
-				// or negative numbers.
-				if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
-					lastShiftUsed = shift;
-					for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-						int[] fromQueue = fromQueues[fromQueueNum];
-						if(fromQueue!=null) {
-							int length = fromQueueLengths[fromQueueNum];
-							for(int j=0; j<length; j++) {
-								addToQueue(shift, fromQueue[j]);
-							}
-							fromQueueLengths[fromQueueNum] = 0;
-						}
-					}
-
-					// Swap from and to
-					swapQueues();
-				}
-			}
-			return lastShiftUsed;
-		}
 	}
 
-	static class ConcurrentIntRadixTable extends ConcurrentRadixTable {
+	static class MultiTaskIntRadixTable extends IntRadixTable {
 
 		int[][][] fromQueues;
+		int[][] fromQueueLengths;
 		int[][][] toQueues;
+		int[][] toQueueLengths;
 
-		ConcurrentIntRadixTable(int size, int numProcessors, ExecutorService executor) {
-			super(size, numProcessors, executor);
-			this.fromQueues = new int[numTasks][PASS_SIZE][];
-			this.toQueues   = new int[numTasks][PASS_SIZE][];
+		MultiTaskIntRadixTable(int size, int numTasks) {
+			super(size, numTasks);
+			this.fromQueues       = new int[numTasks][PASS_SIZE][];
+			this.fromQueueLengths = new int[numTasks][PASS_SIZE];
+			this.toQueues         = new int[numTasks][PASS_SIZE][];
+			this.toQueueLengths   = new int[numTasks][PASS_SIZE];
 		}
 
 		@Override
 		final void swapQueues() {
-			super.swapQueues();
 			int[][][] temp = fromQueues;
 			fromQueues = toQueues;
 			toQueues = temp;
+			int[][] tempLengths = fromQueueLengths;
+			fromQueueLengths = toQueueLengths;
+			toQueueLengths = tempLengths;
 		}
 
-		/**
-		 * Adds a number to the toQueue.
-		 *
-		 * @param  number  The number to add
-		 *
-		 * @return  the <code>int</code> value of the number added
-		 */
-		final int addToQueue(int shift, int number, int[][] taskToQueues, int[] taskToQueueLengths) {
+		private int addToQueue(int shift, int number, int[][] taskToQueues, int[] taskToQueueLengths) {
 			int toQueueNum = (number >>> shift) & PASS_MASK;
 			int[] toQueue = taskToQueues[toQueueNum];
 			int toQueueLength = taskToQueueLengths[toQueueNum];
@@ -593,11 +497,7 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 		}
 
 		@Override
-		void gatherScatter(
-			int shift,
-			int fromQueueNum,
-			int toTaskNum
-		) {
+		final void gatherScatter(int shift, int fromQueueNum, int toTaskNum) {
 			for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
 				final int[][] taskFromQueues = fromQueues[fromTaskNum];
 				int[] fromQueue = taskFromQueues[fromQueueNum];
@@ -613,183 +513,371 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 				}
 			}
 		}
+
+		@Override
+		final int getFromQueueLength(int fromTaskNum, int fromQueueNum) {
+			return fromQueueLengths[fromTaskNum][fromQueueNum];
+		}
+
+		@Override
+		final int[] getFromQueue(int fromTaskNum, int fromQueueNum) {
+			return fromQueues[fromTaskNum][fromQueueNum];
+		}
+
+		final int addToQueue(int shift, int number, int toTaskNum) {
+			return addToQueue(
+				shift,
+				number,
+				toQueues[toTaskNum],
+				toQueueLengths[toTaskNum]
+			);
+		}
 	}
 	// </editor-fold>
 
-	// <editor-fold defaultstate="collapsed" desc="Sorter">
-	abstract static class Sorter {
+	// <editor-fold defaultstate="collapsed" desc="Source">
+	abstract static class Source<T extends RadixTable> {
 
-		final int size;
-
-		// Must be power of two and less than or equal to 32
-		/*
-		final int BITS_PER_PASS;
-		final int PASS_SIZE;
-		final int PASS_MASK;
-		 */
+		Source() {
+		}
 
 		/**
-		 * Set of all bits seen to skip bit ranges that won't sort.
+		 * Checks if this data source supports random access.
 		 */
-		int bitsSeen;
+		abstract boolean useRandomAccess();
+
+		static final class ImportDataResult {
+			final int bitsSeen;
+			final int bitsNotSeen;
+			ImportDataResult(int bitsSeen, int bitsNotSeen) {
+				this.bitsSeen = bitsSeen;
+				this.bitsNotSeen = bitsNotSeen;
+			}
+		}
 
 		/**
-		 * Set of all bits not seen to skip bit ranges that won't sort.
+		 * Imports one range of the data to the provided task in the table.
 		 */
-		int bitsNotSeen;
+		abstract ImportDataResult importData(T table, int start, int end, int toTaskNum);
 
-		Sorter(int size) {
-			this.size = size;
+		/**
+		 * Pick-up fromQueues and put into results, started at the provided queue.
+		 */
+		abstract void exportData(T table, int fromQueueStart, int fromQueueEnd, int start);
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="radixSort">
+	static <T extends RadixTable> void radixSort(
+		final int size,
+		final T table,
+		final Source<? super T> source,
+		final ExecutorService executor
+	) {
+		try {
+			final int numTasks = table.numTasks;
 
 			// Dynamically choose pass size
 			/*
+			// Must be power of two and less than or equal to 32
+			final int BITS_PER_PASS;
 			if(size < 0x80000) {
-				this.BITS_PER_PASS = 8;
+				BITS_PER_PASS = 8;
 			} else {
-				this.BITS_PER_PASS = 16;
+				BITS_PER_PASS = 16;
 			}
-			this.PASS_SIZE = 1 << BITS_PER_PASS;
-			this.PASS_MASK = PASS_SIZE - 1;
+			final int PASS_SIZE = 1 << BITS_PER_PASS;
+			final int PASS_MASK = PASS_SIZE - 1;
 			 */
-		}
 
-		final void sort() {
-			RadixTable table = getRadixTable();
+			// The same futures list is used by multiple stages below
+			final List<Future<?>> runnableFutures;
 
-			// Import from source into toQueues, updating bitsSeen and bitsNotSeen
-			bitsSeen = 0;
-			bitsNotSeen = 0;
-			importData();
+			// The size of division of work (number of elements per task).
+			final int sizePerTask;
+
+			if(executor==null) {
+				assert numTasks==1 : "Must have an executor when numTasks != 1";
+				runnableFutures = null;
+				sizePerTask = size;
+			} else {
+				assert numTasks>=2 : "Must not have an executor when numTasks < 2";
+				runnableFutures = new ArrayList<Future<?>>(numTasks);
+				int spt = size / numTasks;
+				if((spt*numTasks)<size) spt++; // Round-up instead of down
+				sizePerTask = spt;
+			}
+
+			// Set of all bits seen to skip bit ranges that won't sort.
+			int bitsSeen = 0;
+
+			// Set of all bits not seen to skip bit ranges that won't sort.
+			int bitsNotSeen = 0;
+
+			// May only use concurrent import for random access sources
+			if(executor!=null && source.useRandomAccess()) {
+				// Perform concurrent import
+				final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<Future<Source.ImportDataResult>>(numTasks);
+				for(
+					int taskStart=0, toTaskNum=0;
+					taskStart<size;
+					taskStart+=sizePerTask, toTaskNum++
+				) {
+					int taskEnd = taskStart + sizePerTask;
+					if(taskEnd > size) taskEnd = size;
+
+					final int finalTaskStart = taskStart;
+					final int finalTaskEnd   = taskEnd;
+					final int finalToTaskNum = toTaskNum;
+					importStepFutures.add(
+						executor.submit(
+							new Callable<Source.ImportDataResult>() {
+								public Source.ImportDataResult call() {
+									return source.importData(table, finalTaskStart, finalTaskEnd, finalToTaskNum);
+								}
+							}
+						)
+					);
+				}
+
+				// Combine results
+				for(Future<Source.ImportDataResult> importStepFuture : importStepFutures) {
+					Source.ImportDataResult result = importStepFuture.get();
+					bitsSeen |= result.bitsSeen;
+					bitsNotSeen |= result.bitsNotSeen;
+				}
+			} else {
+				// Single-threaded import
+				Source.ImportDataResult result = source.importData(table, 0, size, 0);
+				bitsSeen |= result.bitsSeen;
+				bitsNotSeen |= result.bitsNotSeen;
+			}
 			bitsNotSeen ^= 0xffffffff;
 
 			// Swap toQueues and fromQueues
 			table.swapQueues();
 
 			// Perform gather/scatter iterations
-			int lastShiftUsed = table.gatherScatter(bitsSeen, bitsNotSeen);
+			int lastShiftUsed = 0;
+			for(int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
+				// Skip this bit range when all values have equal bits.  For example
+				// when going through the upper bits of lists of all smaller positive
+				// or negative numbers.
+				if(((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
+					lastShiftUsed = shift;
+					if(executor!=null) {
+						// Get some final values for anonymous inner class
+						final int finalShift = shift;
+						// Perform each concurrently with balanced concurrency
+						int toTaskNum = 0;
+						int taskFromQueueStart = 0;
+						int taskTotalLength = 0;
+						for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+							for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+								taskTotalLength += table.getFromQueueLength(fromTaskNum, fromQueueNum);
+							}
+							if(
+								taskTotalLength>0 // Skip no output, such as all handle in previous tasks
+								&& (
+									taskTotalLength >= sizePerTask // Found fair share (or more)
+									|| fromQueueNum==PASS_MASK // or is last task
+								)
+							) {
+								final int finalToTaskNum = toTaskNum;
+								final int finalTaskFromQueueStart = taskFromQueueStart;
+								final int taskFromQueueEnd = fromQueueNum + 1;
+								// Gather/scatter concurrent
+								runnableFutures.add(
+									executor.submit(
+										new Runnable() {
+											@Override
+											public void run() {
+												for(int fromQueueNum=finalTaskFromQueueStart; fromQueueNum<taskFromQueueEnd; fromQueueNum++) {
+													table.gatherScatter(
+														finalShift,
+														fromQueueNum,
+														finalToTaskNum
+													);
+												}
+											}
+										}
+									)
+								);
+
+								// Reset to next task
+								toTaskNum++;
+								taskFromQueueStart = taskFromQueueEnd;
+								taskTotalLength = 0;
+							}
+						}
+						// Wait for each gather/scatter task to complete
+						ConcurrentUtils.waitForAll(runnableFutures);
+						runnableFutures.clear();
+					} else {
+						for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+							table.gatherScatter(shift, fromQueueNum, 0);
+						}
+					}
+
+					// Swap from and to
+					table.swapQueues();
+				}
+			}
 
 			// Negative before positive to perform as signed integers
 			int fromQueueStart = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
 
 			// Put results back into source
-			exportData(fromQueueStart);
-		}
-
-		/**
-		 * Gets the RadixTable for this sort.
-		 */
-		abstract RadixTable getRadixTable();
-
-		/**
-		 * Initial population of elements into toQueues,
-		 * updating bitsSeen and bitsNotSeen.
-		 */
-		abstract void importData();
-
-		/**
-		 * Pick-up fromQueues and put into results, started at the provided queue.
-		 */
-		abstract void exportData(int fromQueueStart);
-	}
-	// </editor-fold>
-
-	// <editor-fold defaultstate="collapsed" desc="SingleThreadedNumberSorter">
-	abstract static class SingleThreadedNumberSorter<N extends Number> extends Sorter {
-
-		final SingleThreadedNumberRadixTable<N> table;
-
-		@SuppressWarnings("unchecked")
-		SingleThreadedNumberSorter(int size) {
-			super(size);
-			this.table = new SingleThreadedNumberRadixTable<N>(size);
-		}
-
-		@Override
-		SingleThreadedNumberRadixTable<N> getRadixTable() {
-			return table;
-		}
-	}
-	// </editor-fold>
-
-	// <editor-fold defaultstate="collapsed" desc="ConcurrentNumberSorter">
-	abstract static class ConcurrentNumberSorter<N extends Number> extends Sorter {
-
-		final ConcurrentNumberRadixTable<N> table;
-
-		ConcurrentNumberSorter(int size, int numProcessors, ExecutorService executor) {
-			super(size);
-			this.table = new ConcurrentNumberRadixTable<N>(size, numProcessors, executor);
-		}
-
-		@Override
-		ConcurrentNumberRadixTable<N> getRadixTable() {
-			return table;
-		}
-	}
-	// </editor-fold>
-
-	// <editor-fold defaultstate="collapsed" desc="List<N>">
-	static class SingleThreadedNumberListSorter<N extends Number> extends SingleThreadedNumberSorter<N> {
-
-		private final List<N> list;
-		private final boolean useRandomAccess;
-
-		SingleThreadedNumberListSorter(List<N> list) {
-			super(list.size());
-			this.list = list;
-			this.useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
-		}
-
-		@Override
-		final void importData() {
-			if(useRandomAccess) {
-				for(int i=0;i<size;i++) {
-					int numInt = table.addToQueue(0, list.get(i));
-					bitsSeen |= numInt;
-					bitsNotSeen |= numInt ^ 0xffffffff;
-				}
-			} else {
-				for(N number : list) {
-					int numInt = table.addToQueue(0, number);
-					bitsSeen |= numInt;
-					bitsNotSeen |= (numInt ^ 0xffffffff);
-				}
-			}
-		}
-
-		@Override
-		final void exportData(final int fromQueueStart) {
-			int fromQueueNum = fromQueueStart;
-			if(useRandomAccess) {
-				// Use indexed strategy
-				int outIndex = 0;
+			if(executor!=null) {
+				// Use indexed strategy with balanced concurrency
+				final int fromQueueLast = (fromQueueStart-1) & PASS_MASK;
+				int taskFromQueueStart = fromQueueStart;
+				int taskOutIndex = 0;
+				int taskTotalLength = 0;
+				int fromQueueNum = fromQueueStart;
 				do {
-					N[] fromQueue = table.fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = table.fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							list.set(outIndex++, fromQueue[j]);
-						}
+					for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+						taskTotalLength += table.getFromQueueLength(fromTaskNum, fromQueueNum);
+					}
+					if(
+						taskTotalLength>0 // Skip no output, such as all handle in previous tasks
+						&& (
+							taskTotalLength >= sizePerTask // Found fair share (or more)
+							|| fromQueueNum==fromQueueLast // or is last task
+						)
+					) {
+						final int finalTaskFromQueueStart = taskFromQueueStart;
+						final int finalTaskOutIndex = taskOutIndex;
+						final int finalTaskFromQueueEnd = (fromQueueNum + 1) & PASS_MASK;
+						// Queue concurrent
+						runnableFutures.add(
+							executor.submit(
+								new Runnable() {
+									@Override
+									public void run() {
+										source.exportData(
+											table,
+											finalTaskFromQueueStart,
+											finalTaskFromQueueEnd,
+											finalTaskOutIndex
+										);
+									}
+								}
+							)
+						);
+
+						// Reset to next task
+						taskFromQueueStart = finalTaskFromQueueEnd;
+						taskOutIndex      += taskTotalLength;
+						taskTotalLength    = 0;
 					}
 				} while(
 					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
 					!= fromQueueStart
 				);
+				// Wait for each export task to complete
+				ConcurrentUtils.waitForAll(runnableFutures);
+				// This is the last stage, not needed: runnableFutures.clear()
 			} else {
-				// Use iterator strategy
-				ListIterator<N> iterator = list.listIterator();
+				// Use indexed strategy, single-threaded
+				source.exportData(
+					table,
+					fromQueueStart,
+					fromQueueStart,
+					0
+				);
+			}
+		} catch(InterruptedException e) {
+			throw new WrappedException(e);
+		} catch(ExecutionException e) {
+			throw new WrappedException(e);
+		}
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="List<N>">
+	static class NumberListSource<N extends Number> extends Source<NumberRadixTable<N>> {
+
+		private final int size;
+		private final List<N> list;
+		private final boolean useRandomAccess;
+
+		NumberListSource(int size, List<N> list) {
+			this.size            = size;
+			this.list            = list;
+			this.useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
+		}
+
+		@Override
+		final boolean useRandomAccess() {
+			return useRandomAccess;
+		}
+
+		@Override
+		final ImportDataResult importData(NumberRadixTable<N> table, int start, int end, int toTaskNum) {
+			int bSeen = 0;
+			int bNotSeen = 0;
+			if(useRandomAccess) {
+				for(int i=start;i<end;i++) {
+					int numInt = table.addToQueue(0, list.get(i), toTaskNum);
+					bSeen |= numInt;
+					bNotSeen |= numInt ^ 0xffffffff;
+				}
+			} else {
+				assert start == 0 && end == size : "Must import all in a single pass for iterator method";
+				for(N number : list) {
+					int numInt = table.addToQueue(0, number, toTaskNum);
+					bSeen |= numInt;
+					bNotSeen |= (numInt ^ 0xffffffff);
+				}
+			}
+			return new ImportDataResult(bSeen, bNotSeen);
+		}
+
+		@Override
+		final void exportData(
+			final NumberRadixTable<N> table,
+			final int fromQueueStart,
+			final int fromQueueEnd,
+			final int start
+		) {
+			final int numTasks = table.numTasks;
+			int fromQueueNum = fromQueueStart;
+			if(useRandomAccess) {
+				// Use indexed strategy
+				int outIndex = start;
 				do {
-					N[] fromQueue = table.fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = table.fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							iterator.next();
-							iterator.set(fromQueue[j]);
+					for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+						N[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
+						if(fromQueue!=null) {
+							int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
+							for(int j=0; j<length; j++) {
+								list.set(outIndex++, fromQueue[j]);
+							}
 						}
 					}
 				} while(
 					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-					!= fromQueueStart
+					!= fromQueueEnd
+				);
+			} else {
+				// Use iterator strategy
+				assert start == 0 : "Must import all in a single pass for iterator method";
+				ListIterator<N> iterator = list.listIterator();
+				do {
+					for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+						N[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
+						if(fromQueue!=null) {
+							int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
+							for(int j=0; j<length; j++) {
+								iterator.next();
+								iterator.set(fromQueue[j]);
+							}
+						}
+					}
+				} while(
+					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+					!= fromQueueEnd
 				);
 			}
 		}
@@ -817,10 +905,19 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 					|| size < MIN_CONCURRENCY_SIZE
 					|| (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
 				) {
-					new SingleThreadedNumberListSorter<N>(list).sort();
+					radixSort(
+						size,
+						new SingleTaskNumberRadixTable<N>(size),
+						new NumberListSource<N>(size, list),
+						null
+					);
 				} else {
-					// TODO: new ConcurrentNumberListSorter<N>(list, numProcessors).sort();
-					throw new NotImplementedException("TODO: Implement concurrent version");
+					radixSort(
+						size,
+						new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
+						new NumberListSource<N>(size, list),
+						executor
+					);
 				}
 			}
 			if(stats!=null) stats.sortEnding();
@@ -829,39 +926,56 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="N[]">
-	static class SingleThreadedNumberArraySorter<N extends Number> extends SingleThreadedNumberSorter<N> {
+	static class NumberArraySource<N extends Number> extends Source<NumberRadixTable<N>> {
 
+		private final int size;
 		private final N[] array;
 
-		SingleThreadedNumberArraySorter(N[] array) {
-			super(array.length);
+		NumberArraySource(int size, N[] array) {
+			this.size  = size;
 			this.array = array;
 		}
 
 		@Override
-		final void importData() {
-			for(int i=0;i<size;i++) {
-				int numInt = table.addToQueue(0, array[i]);
-				bitsSeen |= numInt;
-				bitsNotSeen |= numInt ^ 0xffffffff;
-			}
+		final boolean useRandomAccess() {
+			return true;
 		}
 
 		@Override
-		final void exportData(final int fromQueueStart) {
+		final ImportDataResult importData(NumberRadixTable<N> table, int start, int end, int toTaskNum) {
+			int bSeen = 0;
+			int bNotSeen = 0;
+			for(int i=start;i<end;i++) {
+				int numInt = table.addToQueue(0, array[i], toTaskNum);
+				bSeen |= numInt;
+				bNotSeen |= numInt ^ 0xffffffff;
+			}
+			return new ImportDataResult(bSeen, bNotSeen);
+		}
+
+		@Override
+		final void exportData(
+			final NumberRadixTable<N> table,
+			final int fromQueueStart,
+			final int fromQueueEnd,
+			final int start
+		) {
+			final int numTasks = table.numTasks;
 			int fromQueueNum = fromQueueStart;
 			// Use indexed strategy
-			int outIndex = 0;
+			int outIndex = start;
 			do {
-				N[] fromQueue = table.fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = table.fromQueueLengths[fromQueueNum];
-					System.arraycopy(fromQueue, 0, array, outIndex, length);
-					outIndex += length;
+				for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+					N[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
+					if(fromQueue!=null) {
+						int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
+						System.arraycopy(fromQueue, 0, array, outIndex, length);
+						outIndex += length;
+					}
 				}
 			} while(
 				(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-				!= fromQueueStart
+				!= fromQueueEnd
 			);
 		}
 	}
@@ -885,113 +999,108 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 				|| size < MIN_CONCURRENCY_SIZE
 				|| (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
 			) {
-				new SingleThreadedNumberArraySorter<N>(array).sort();
+				radixSort(
+					size,
+					new SingleTaskNumberRadixTable<N>(size),
+					new NumberArraySource<N>(size, array),
+					null
+				);
 			} else {
-				// TODO: new ConcurrentNumberArraySorter<N>(array, numProcessors).sort();
-				throw new NotImplementedException("TODO: Implement concurrent version");
+				radixSort(
+					size,
+					new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
+					new NumberArraySource<N>(size, array),
+					executor
+				);
 			}
 		}
 		if(stats!=null) stats.sortEnding();
     }
 	// </editor-fold>
 
-	// <editor-fold defaultstate="collapsed" desc="SingleThreadedIntSorter">
-	abstract static class SingleThreadedIntSorter extends Sorter {
-
-		final SingleThreadedIntRadixTable table;
-
-		@SuppressWarnings("unchecked")
-		SingleThreadedIntSorter(int size) {
-			super(size);
-			this.table = new SingleThreadedIntRadixTable(size);
-		}
-
-		@Override
-		SingleThreadedIntRadixTable getRadixTable() {
-			return table;
-		}
-	}
-	// </editor-fold>
-
-	// <editor-fold defaultstate="collapsed" desc="ConcurrentIntSorter">
-	abstract static class ConcurrentIntSorter extends Sorter {
-
-		final ConcurrentIntRadixTable table;
-
-		ConcurrentIntSorter(int size, int numProcessors, ExecutorService executor) {
-			super(size);
-			this.table = new ConcurrentIntRadixTable(size, numProcessors, executor);
-		}
-
-		@Override
-		ConcurrentIntRadixTable getRadixTable() {
-			return table;
-		}
-	}
-	// </editor-fold>
-
 	// <editor-fold defaultstate="collapsed" desc="IntList">
-	static class SingleThreadedIntListSorter extends SingleThreadedIntSorter {
+	static class IntListSource extends Source<IntRadixTable> {
 
+		private final int size;
 		private final IntList list;
 		private final boolean useRandomAccess;
 
-		SingleThreadedIntListSorter(IntList list) {
-			super(list.size());
-			this.list = list;
+		IntListSource(int size, IntList list) {
+			this.size            = size;
+			this.list            = list;
 			this.useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
 		}
 
 		@Override
-		final void importData() {
-			if(useRandomAccess) {
-				for(int i=0;i<size;i++) {
-					int numInt = table.addToQueue(0, list.getInt(i));
-					bitsSeen |= numInt;
-					bitsNotSeen |= numInt ^ 0xffffffff;
-				}
-			} else {
-				for(Integer number : list) {
-					int numInt = table.addToQueue(0, number);
-					bitsSeen |= numInt;
-					bitsNotSeen |= (numInt ^ 0xffffffff);
-				}
-			}
+		final boolean useRandomAccess() {
+			return useRandomAccess;
 		}
 
 		@Override
-		final void exportData(final int fromQueueStart) {
+		final ImportDataResult importData(IntRadixTable table, int start, int end, int toTaskNum) {
+			int bSeen = 0;
+			int bNotSeen = 0;
+			if(useRandomAccess) {
+				for(int i=start;i<end;i++) {
+					int numInt = table.addToQueue(0, list.getInt(i), toTaskNum);
+					bSeen |= numInt;
+					bNotSeen |= numInt ^ 0xffffffff;
+				}
+			} else {
+				assert start == 0 && end == size : "Must import all in a single pass for iterator method";
+				for(int number : list) {
+					int numInt = table.addToQueue(0, number, toTaskNum);
+					bSeen |= numInt;
+					bNotSeen |= (numInt ^ 0xffffffff);
+				}
+			}
+			return new ImportDataResult(bSeen, bNotSeen);
+		}
+
+		@Override
+		final void exportData(
+			final IntRadixTable table,
+			final int fromQueueStart,
+			final int fromQueueEnd,
+			final int start
+		) {
+			final int numTasks = table.numTasks;
 			int fromQueueNum = fromQueueStart;
 			if(useRandomAccess) {
 				// Use indexed strategy
-				int outIndex = 0;
+				int outIndex = start;
 				do {
-					int[] fromQueue = table.fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = table.fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							list.set(outIndex++, fromQueue[j]);
+					for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+						int[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
+						if(fromQueue!=null) {
+							int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
+							for(int j=0; j<length; j++) {
+								list.set(outIndex++, fromQueue[j]);
+							}
 						}
 					}
 				} while(
 					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-					!= fromQueueStart
+					!= fromQueueEnd
 				);
 			} else {
 				// Use iterator strategy
+				assert start == 0 : "Must import all in a single pass for iterator method";
 				ListIterator<Integer> iterator = list.listIterator();
 				do {
-					int[] fromQueue = table.fromQueues[fromQueueNum];
-					if(fromQueue!=null) {
-						int length = table.fromQueueLengths[fromQueueNum];
-						for(int j=0; j<length; j++) {
-							iterator.next();
-							iterator.set(fromQueue[j]);
+					for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+						int[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
+						if(fromQueue!=null) {
+							int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
+							for(int j=0; j<length; j++) {
+								iterator.next();
+								iterator.set(fromQueue[j]);
+							}
 						}
 					}
 				} while(
 					(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-					!= fromQueueStart
+					!= fromQueueEnd
 				);
 			}
 		}
@@ -1016,10 +1125,19 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 				|| size < MIN_CONCURRENCY_SIZE
 				|| (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
 			) {
-				new SingleThreadedIntListSorter(list).sort();
+				radixSort(
+					size,
+					new SingleTaskIntRadixTable(size),
+					new IntListSource(size, list),
+					null
+				);
 			} else {
-				// TODO: new ConcurrentIntListSorter(list, numProcessors).sort();
-				throw new NotImplementedException("TODO: Implement concurrent version");
+				radixSort(
+					size,
+					new MultiTaskIntRadixTable(size, numProcessors * TASKS_PER_PROCESSOR),
+					new IntListSource(size, list),
+					executor
+				);
 			}
 		}
 		if(stats!=null) stats.sortEnding();
@@ -1027,39 +1145,56 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="int[]">
-	static class SingleThreadedIntArraySorter extends SingleThreadedIntSorter {
+	static class IntArraySource extends Source<IntRadixTable> {
 
+		private final int size;
 		private final int[] array;
 
-		SingleThreadedIntArraySorter(int[] array) {
-			super(array.length);
+		IntArraySource(int size, int[] array) {
+			this.size  = size;
 			this.array = array;
 		}
 
 		@Override
-		final void importData() {
-			for(int i=0;i<size;i++) {
-				int number = table.addToQueue(0, array[i]);
-				bitsSeen |= number;
-				bitsNotSeen |= number ^ 0xffffffff;
-			}
+		final boolean useRandomAccess() {
+			return true;
 		}
 
 		@Override
-		final void exportData(final int fromQueueStart) {
+		final ImportDataResult importData(IntRadixTable table, int start, int end, int toTaskNum) {
+			int bSeen = 0;
+			int bNotSeen = 0;
+			for(int i=start;i<end;i++) {
+				int numInt = table.addToQueue(0, array[i], toTaskNum);
+				bSeen |= numInt;
+				bNotSeen |= numInt ^ 0xffffffff;
+			}
+			return new ImportDataResult(bSeen, bNotSeen);
+		}
+
+		@Override
+		final void exportData(
+			final IntRadixTable table,
+			final int fromQueueStart,
+			final int fromQueueEnd,
+			final int start
+		) {
+			final int numTasks = table.numTasks;
 			int fromQueueNum = fromQueueStart;
 			// Use indexed strategy
-			int outIndex = 0;
+			int outIndex = start;
 			do {
-				int[] fromQueue = table.fromQueues[fromQueueNum];
-				if(fromQueue!=null) {
-					int length = table.fromQueueLengths[fromQueueNum];
-					System.arraycopy(fromQueue, 0, array, outIndex, length);
-					outIndex += length;
+				for(int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+					int[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
+					if(fromQueue!=null) {
+						int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
+						System.arraycopy(fromQueue, 0, array, outIndex, length);
+						outIndex += length;
+					}
 				}
 			} while(
 				(fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-				!= fromQueueStart
+				!= fromQueueEnd
 			);
 		}
 	}
@@ -1083,10 +1218,19 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 				|| size < MIN_CONCURRENCY_SIZE
 				|| (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
 			) {
-				new SingleThreadedIntArraySorter(array).sort();
+				radixSort(
+					size,
+					new SingleTaskIntRadixTable(size),
+					new IntArraySource(size, array),
+					null
+				);
 			} else {
-				// TODO: new ConcurrentIntArraySorter(array, numProcessors).sort();
-				throw new NotImplementedException("TODO: Implement concurrent version");
+				radixSort(
+					size,
+					new MultiTaskIntRadixTable(size, numProcessors * TASKS_PER_PROCESSOR),
+					new IntArraySource(size, array),
+					executor
+				);
 			}
 		}
 		if(stats!=null) stats.sortEnding();
