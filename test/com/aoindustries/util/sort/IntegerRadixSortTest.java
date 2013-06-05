@@ -124,10 +124,10 @@ public class IntegerRadixSortTest extends TestCase {
 			List<N> newRadixResult = new ArrayList<N>(randomValues);
 			{
 				long startNanos = System.nanoTime();
-				ConcurrentIntegerRadixSort.getInstance().sort(newRadixResult);
+				NewIntegerRadixSort.getInstance().sort(newRadixResult);
 				if(iteration>0) {
 					newRadixNanos += System.nanoTime() - startNanos;
-					//System.out.println(pass+"/"+testSize+": ConcurrentIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+					//System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 				}
 			}
 
@@ -309,10 +309,10 @@ public class IntegerRadixSortTest extends TestCase {
 			System.arraycopy(randomValues, 0, newRadixResult, 0, randomValues.length);
 			{
 				long startNanos = System.nanoTime();
-				ConcurrentIntegerRadixSort.getInstance().sort(newRadixResult);
+				NewIntegerRadixSort.getInstance().sort(newRadixResult);
 				if(iteration>0) {
 					newRadixNanos += System.nanoTime() - startNanos;
-					//System.out.println(pass+"/"+testSize+": ConcurrentIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+					//System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 				}
 			}
 
@@ -496,10 +496,10 @@ public class IntegerRadixSortTest extends TestCase {
 			IntList newRadixResult = new IntArrayList(randomValues);
 			{
 				long startNanos = System.nanoTime();
-				ConcurrentIntegerRadixSort.getInstance().sort(newRadixResult);
+				NewIntegerRadixSort.getInstance().sort(newRadixResult);
 				if(iteration>0) {
 					newRadixNanos += System.nanoTime() - startNanos;
-					//System.out.println(pass+"/"+testSize+": ConcurrentIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+					//System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 				}
 			}
 
@@ -681,11 +681,11 @@ public class IntegerRadixSortTest extends TestCase {
 			System.arraycopy(randomValues, 0, newRadixResult, 0, randomValues.length);
 			{
 				long startNanos = System.nanoTime();
-				ConcurrentIntegerRadixSort.getInstance().sort(newRadixResult);
+				NewIntegerRadixSort.getInstance().sort(newRadixResult);
 				//Arrays.sort(newRadixResult);
 				if(iteration>0) {
 					newRadixNanos += System.nanoTime() - startNanos;
-					//System.out.println(pass+"/"+testSize+": ConcurrentIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
+					//System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" \u00B5s");
 				}
 			}
 

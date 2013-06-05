@@ -43,13 +43,6 @@ import java.util.concurrent.ThreadFactory;
  * {@link http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html}
  * with source provided at {@link https://github.com/gorset/radix/blob/master/Radix.java}
  *
- * TODO: Might get better performance (due to cache locality of reference) by flattening
- * the two-dimensional fixed dimensions of the arrays into a single dimension.
- *
- * TODO: Might also consider changing the row/column order of the multi-dimensional arrays
- * to help cache interaction.  Might get better throughput when hit the cache wall where
- * performance drops considerably.
- *
  * @author  AO Industries, Inc.
  */
 final public class ConcurrentIntegerRadixSort extends IntegerSortAlgorithm {
