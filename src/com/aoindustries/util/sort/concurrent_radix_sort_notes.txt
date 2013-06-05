@@ -746,32 +746,40 @@ Average Speedup (Old/New/Experimental): 1.873 / 3.606 / 5.257
 
 Integrated concurrent implementation into IntegerRadixSort, switching over at size of 65536:
 
-TODO
+1: Speedup (Old/New/Experimental): 0.944 / 0.940 / 0.906
+2: Speedup (Old/New/Experimental): 0.908 / 0.892 / 0.870
+4: Speedup (Old/New/Experimental): 1.016 / 0.986 / 0.976
+8: Speedup (Old/New/Experimental): 1.009 / 1.009 / 0.937
+16: Speedup (Old/New/Experimental): 1.001 / 0.985 / 0.946
+32: Speedup (Old/New/Experimental): 0.993 / 0.984 / 0.951
+64: Speedup (Old/New/Experimental): 1.003 / 1.000 / 0.965
+128: Speedup (Old/New/Experimental): 1.000 / 0.997 / 0.961
+256: Speedup (Old/New/Experimental): 0.992 / 0.978 / 0.863
+512: Speedup (Old/New/Experimental): 0.994 / 0.989 / 1.880
+1024: Speedup (Old/New/Experimental): 0.996 / 0.994 / 1.876
+2048: Speedup (Old/New/Experimental): 1.775 / 1.772 / 2.545
+4096: Speedup (Old/New/Experimental): 2.475 / 2.749 / 3.211
+8192: Speedup (Old/New/Experimental): 2.645 / 2.804 / 1.914
+16384: Speedup (Old/New/Experimental): 2.873 / 3.317 / 4.078
+32768: Speedup (Old/New/Experimental): 2.940 / 3.517 / 8.279
+65536: Speedup (Old/New/Experimental): 3.460 / 2.974 / 7.087
+131072: Speedup (Old/New/Experimental): 2.761 / 3.477 / 7.636
+262144: Speedup (Old/New/Experimental): 3.216 / 4.609 / 6.702
+524288: Speedup (Old/New/Experimental): 3.279 / 6.375 / 6.828
+1048576: Speedup (Old/New/Experimental): 2.432 / 10.219 / 7.232
+2097152: Speedup (Old/New/Experimental): 2.582 / 9.782 / 7.154
+4194304: Speedup (Old/New/Experimental): 2.904 / 13.463 / 10.726
+8388608: Speedup (Old/New/Experimental): 2.588 / 13.068 / 11.349
+16777216: Speedup (Old/New/Experimental): 2.729 / 10.634 / 12.305
+33554432: Speedup (Old/New/Experimental): 1.641 / 9.050 / 12.210
+67108864: Speedup (Old/New/Experimental): 1.609 / 7.780 / 10.129
+Total Speedup (Old/New/Experimental): 1.790 / 7.372 / 9.178
+Average Speedup (Old/New/Experimental): 1.954 / 4.309 / 4.870
 
 
 
 
 TODO: Implement List<T> version:
-
-
-
-
-
-					radixSort(
-						size,
-						new SingleTaskNumberRadixTable<N>(size),
-						new NumberListSource<N>(size, list),
-						null
-					);
-				} else {
-					radixSort(
-						size,
-						new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
-						new NumberListSource<N>(size, list),
-						executor
-					);
-
-
 
 
 

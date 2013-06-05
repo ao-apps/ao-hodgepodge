@@ -727,8 +727,8 @@ final public class NewIntegerRadixSort extends IntegerSortAlgorithm {
 			// Negative before positive to perform as signed integers
 			int fromQueueStart = (lastShiftUsed+BITS_PER_PASS)==32 ? (PASS_SIZE>>>1) : 0;
 
-			// Put results back into source
-			if(executor!=null) {
+			// May only use concurrent export for random access sources
+			if(executor!=null && source.useRandomAccess()) {
 				// Use indexed strategy with balanced concurrency
 				final int fromQueueLast = (fromQueueStart-1) & PASS_MASK;
 				int taskFromQueueStart = fromQueueStart;
