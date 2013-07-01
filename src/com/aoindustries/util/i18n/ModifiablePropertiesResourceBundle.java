@@ -24,6 +24,7 @@ package com.aoindustries.util.i18n;
 
 import com.aoindustries.encoding.MediaException;
 import com.aoindustries.encoding.MediaType;
+import com.aoindustries.io.FileUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -370,9 +371,9 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
                 out.close();
             }
             if(!tmpFile.renameTo(sourceFile)) {
-                // Try delete then rename for Windows
-                if(!sourceFile.delete()) throw new IOException("Unable to delete \""+sourceFile+'"');
-                if(!tmpFile.renameTo(sourceFile)) throw new IOException("Unable to rename \""+tmpFile+"\" to \""+sourceFile+'"');
+                // Try deleteRecursive then rename for Windows
+                FileUtils.delete(sourceFile);
+				FileUtils.rename(tmpFile, sourceFile);
             }
         } catch(IOException err) {
             throw new RuntimeException(err);

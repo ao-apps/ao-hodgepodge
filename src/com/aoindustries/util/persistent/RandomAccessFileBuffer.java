@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -123,7 +124,7 @@ public class RandomAccessFileBuffer extends AbstractPersistentBuffer {
     public void close() throws IOException {
         closed = true;
         raf.close();
-        if(tempFile!=null && tempFile.exists() && !tempFile.delete()) throw new IOException("Unable to delete temp file: "+tempFile);
+        if(tempFile!=null && tempFile.exists()) FileUtils.delete(tempFile);
     }
 
     // @NotThreadSafe

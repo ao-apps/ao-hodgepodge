@@ -235,7 +235,7 @@ public class ParallelDelete {
                                             }
                                         }
                                     }
-                                    if(!dryRun && !deleteme.delete()) throw new IOException("Unable to delete: "+deleteme.getPath());
+                                    if(!dryRun) FileUtils.delete(deleteme);
                                 } catch(IOException err) {
                                     synchronized(deleteException) {
                                         deleteException[0] = err;

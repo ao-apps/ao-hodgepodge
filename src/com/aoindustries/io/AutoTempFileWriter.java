@@ -224,7 +224,7 @@ public class AutoTempFileWriter extends Writer {
         sb = null;
         close();
         if(tempFile!=null) {
-            if(!tempFile.delete()) throw new IOException("Unable to delete: "+tempFile);
+            FileUtils.delete(tempFile);
             tempFile = null;
         }
     }

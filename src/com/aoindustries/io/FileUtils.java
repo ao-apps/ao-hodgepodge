@@ -43,19 +43,26 @@ final public class FileUtils {
      */
     private FileUtils() {}
 
-    /**
+	/**
+	 * Deletes the provided file, throwing IOException if unsuccessful.
+	 */
+	public static void delete(File file) throws IOException {
+        if(!file.delete()) throw new IOException("Unable to delete: " + file);
+	}
+
+	/**
      * Recursively deletes the provided file, being careful to not follow symbolic links (but there are still unavoidable race conditions).
      */
-    public static void delete(File file) throws IOException {
+    public static void deleteRecursive(File file) throws IOException {
         if(
             file.isDirectory()
             // Don't recursively travel across symbolic links (still a race condition here, though)
             && file.getCanonicalPath().equals(file.getAbsolutePath())
         ) {
             File afile[] = file.listFiles();
-            if(afile != null) for(File f : afile) delete(f);
+            if(afile != null) for(File f : afile) deleteRecursive(f);
         }
-        if(!file.delete()) throw new IOException("Unable to delete: " + file);
+		delete(file);
     }
 
     /**
@@ -116,7 +123,7 @@ final public class FileUtils {
     public static File createTempDirectory(String prefix, String suffix, File directory) throws IOException {
         while(true) {
             File tempFile = File.createTempFile(prefix, suffix, directory);
-            if(!tempFile.delete()) throw new IOException(tempFile.getPath());
+            delete(tempFile);
             // Check result of mkdir to catch race condition
             if(tempFile.mkdir()) return tempFile;
         }
@@ -145,7 +152,7 @@ final public class FileUtils {
             successful = true;
             return tmpFile;
         } finally {
-            if(!successful) tmpFile.delete();
+            if(!successful) delete(tmpFile);
         }
     }
 
@@ -236,7 +243,7 @@ final public class FileUtils {
      * Gets a File for a URL, retrieving the contents into a temporary file if needed.
      * Assumes URL is UTF-8 encoded.
      *
-     * @param  deleteOnExit  when <code>true</code>, any newly created temp file will be flagged for delete of exit
+     * @param  deleteOnExit  when <code>true</code>, any newly created temp file will be flagged for deleteRecursive of exit
      */
     public static File getFile(URL url, boolean deleteOnExit) throws IOException {
         if("file".equalsIgnoreCase(url.getProtocol())) {
@@ -264,7 +271,14 @@ final public class FileUtils {
             successful = true;
             return file;
         } finally {
-            if(!successful) file.delete();
+            if(!successful) delete(file);
         }
     }
+
+	/**
+	 * Renames one file to another, throwing IOException when unsuccessful.
+	 */
+	public static void rename(File from, File to) throws IOException {
+		if(!from.renameTo(to)) throw new IOException("Unable to rename \""+from+"\" to \""+to+'"');
+	}
 }

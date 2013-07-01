@@ -516,7 +516,7 @@ public class UnixFile {
 	 * @see  java.io.File#delete
 	 */
 	final public void delete() throws IOException {
-		if (!getFile().delete()) throw new IOException("Unable to delete file: " + path);
+		FileUtils.delete(getFile());
 	}
 
 	/**
@@ -525,7 +525,7 @@ public class UnixFile {
 	 * Due to a race conditition, this method will follow symbolic links.  Please use
 	 * <code>secureDeleteRecursive</code> instead.
 	 *
-	 * @see  java.io.File#delete
+	 * @see  java.io.File#deleteRecursive
 	 */
 	final public void deleteRecursive() throws IOException {
 		deleteRecursive(this);
@@ -548,7 +548,7 @@ public class UnixFile {
 			}
 			file.delete();
 		} catch(FileNotFoundException err) {
-			// OK if it was deleted while we're trying to delete it
+			// OK if it was deleted while we're trying to deleteRecursive it
 		} catch(IOException err) {
 			System.err.println("Error recursively delete: "+file.path);
 			throw err;
@@ -621,7 +621,7 @@ public class UnixFile {
 	 * will recursively have its permissions reset, scans for symlinks, and deletes performed in such a way all
 	 * race conditions are avoided.  Finally, the parent directory permissions that were modified will be restored.
 	 *
-	 * @see  java.io.File#delete
+	 * @see  java.io.File#deleteRecursive
 	 */
 	final public void secureDeleteRecursive() throws IOException {
 		List<SecuredDirectory> parentsChanged=new ArrayList<SecuredDirectory>();
@@ -1431,7 +1431,7 @@ public class UnixFile {
 	 * @see File#renameTo(File)
 	 */
 	final public void renameTo(UnixFile uf) throws IOException {
-		if(!getFile().renameTo(uf.getFile())) throw new IOException("Unable to rename "+path+" to "+uf.path);
+		FileUtils.rename(getFile(), uf.getFile());
 	}
 
 	@Override

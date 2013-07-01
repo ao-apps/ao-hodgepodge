@@ -275,7 +275,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
     
     public void close() throws IOException {
         frf.close();
-        if(file.exists() && !file.delete()) throw new IOException("Unable to delete file: "+file.getPath());
+        if(file.exists()) FileUtils.delete(file);
     }
 
     public static File getTempFile(String prefix, String extension) throws IOException {

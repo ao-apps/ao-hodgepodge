@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
 import com.aoindustries.lang.NotImplementedException;
 import java.io.File;
@@ -352,7 +353,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 if(oldFile.exists()) {
                     throw new IOException("file, newFile, and oldFile all exist");
                 } else {
-                    if(!newFile.renameTo(oldFile)) throw new IOException("Unable to rename "+newFile+" to "+oldFile);
+                    FileUtils.rename(newFile, oldFile);
                 }
             } else {
                 if(oldFile.exists()) {
@@ -364,7 +365,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         } else {
             if(newFile.exists()) {
                 if(oldFile.exists()) {
-                    if(!newFile.renameTo(file)) throw new IOException("Unable to rename "+newFile+" to "+file);
+                    FileUtils.rename(newFile, file);
                 } else {
                     throw new IOException("newFile exists without either file or oldFile");
                 }
@@ -428,7 +429,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
         if(PersistentCollections.ASSERT) assert Thread.holdsLock(cacheLock);
         if(!currentWriteCache.isEmpty()) {
             if(protectionLevel==ProtectionLevel.READ_ONLY) throw new IOException("protectionLevel==ProtectionLevel.READ_ONLY");
-            if(!oldFile.renameTo(newFile)) throw new IOException("Unable to rename "+oldFile+" to "+newFile);
+            FileUtils.rename(oldFile, newFile);
             RandomAccessFile newRaf = new RandomAccessFile(newFile, "rw");
             try {
                 long oldLength = newRaf.length();
@@ -454,13 +455,13 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
                 newRaf.close();
             }
             raf.close();
-            if(!file.renameTo(oldFile)) throw new IOException("Unable to rename "+file+" to "+oldFile);
+            FileUtils.rename(file, oldFile);
             // Swap caches
             oldWriteCache.clear();
             SortedMap<Long,byte[]> temp = currentWriteCache;
             currentWriteCache = oldWriteCache;
             oldWriteCache = temp;
-            if(!newFile.renameTo(file)) throw new IOException("Unable to rename "+newFile+" to "+file);
+            FileUtils.rename(newFile, file);
             if(!isClosing) raf = new RandomAccessFile(file, "r"); // Read-only during normal operation because using write caches
             clearFirstWriteTime();
         } else {
