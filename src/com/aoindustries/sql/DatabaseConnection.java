@@ -769,7 +769,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     public void commit() throws SQLException {
         Connection c=_conn;
-        if(c!=null) c.commit();
+        if(c!=null && !c.getAutoCommit()) c.commit();
     }
 
     public boolean isClosed() throws SQLException {
@@ -790,7 +790,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         try {
             if(_conn!=null && !_conn.isClosed()) {
                 rolledBack=true;
-                _conn.rollback();
+                if(!_conn.getAutoCommit()) _conn.rollback();
             }
         } catch(SQLException err) {
             database.getLogger().logp(Level.SEVERE, DatabaseConnection.class.getName(), "rollback", null, err);
@@ -803,7 +803,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         try {
             if(_conn!=null && !_conn.isClosed()) {
                 rolledBack=true;
-                _conn.rollback();
+                if(!_conn.getAutoCommit()) _conn.rollback();
                 _conn.close();
             }
         } catch(SQLException err) {
