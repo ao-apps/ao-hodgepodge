@@ -212,7 +212,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         conn.clearWarnings();
 
         // Autocommit will always be turned on, regardless what a previous transaction might have done
-        if(conn.getAutoCommit()==false) {
+        if(!conn.getAutoCommit()) {
             if(Thread.interrupted()) throw new SQLException("Thread interrupted");
             conn.setAutoCommit(true);
         }
