@@ -169,6 +169,18 @@ final public class FileUtils {
     }
 
     /**
+     * Makes a directory and all of its parents.  The directory must not already exist.
+     *
+     * @return  The directory itself.
+     *
+     * @exception  IOException  if mkdirs fails.
+     */
+    public static File mkdirs(File directory) throws IOException {
+        if(!directory.mkdirs()) throw new IOException("Unable to create directory or any of its parents: "+directory.getPath());
+        return directory;
+    }
+
+	/**
      * Ensures that the file is a directory.
      *
      * @return  The directory itself.
