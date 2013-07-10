@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -172,85 +172,78 @@ public abstract class QueryReport implements Report {
         try {
             try {
                 beforeQuery(parameterValues, conn);
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-                try {
-                    /**
-                     * Substitute any parameters with the values provided.
-                     */
-                    Object[] sqlParams = new Object[params.length];
-                    for(int i=0; i<params.length; i++) {
-                        Object param = params[i];
-                        if(param instanceof Parameter) {
-                            // Replace placeholder with value
-                            Parameter reportParam = (Parameter)param;
-                            String paramName = reportParam.getName();
-                            param = parameterValues.get(paramName);
-                            if(param==null) throw new IllegalArgumentException("Parameter required: " + paramName);
-                        }
-                        sqlParams[i] = param;
-                    }
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+					try {
+						/**
+						 * Substitute any parameters with the values provided.
+						 */
+						Object[] sqlParams = new Object[params.length];
+						for(int i=0; i<params.length; i++) {
+							Object param = params[i];
+							if(param instanceof Parameter) {
+								// Replace placeholder with value
+								Parameter reportParam = (Parameter)param;
+								String paramName = reportParam.getName();
+								param = parameterValues.get(paramName);
+								if(param==null) throw new IllegalArgumentException("Parameter required: " + paramName);
+							}
+							sqlParams[i] = param;
+						}
 
-                    DatabaseConnection.setParams(pstmt, sqlParams);
-                    ResultSet results = pstmt.executeQuery();
-                    try {
-                        ResultSetMetaData meta = results.getMetaData();
-                        int numColumns = meta.getColumnCount();
-                        List<QueryColumn> columns = new ArrayList<QueryColumn>();
-                        for(int columnIndex=1; columnIndex<=numColumns; columnIndex++) {
-                            final Alignment alignment;
-                            switch(meta.getColumnType(columnIndex)) {
-                                case Types.BIGINT :
-                                case Types.DECIMAL :
-                                case Types.DOUBLE :
-                                case Types.FLOAT :
-                                case Types.INTEGER :
-                                case Types.NUMERIC :
-                                case Types.REAL :
-                                case Types.SMALLINT :
-                                case Types.TINYINT :
-                                    alignment = Alignment.right;
-                                    break;
-                                case Types.BOOLEAN :
-                                case Types.BIT :
-                                    alignment = Alignment.center;
-                                    break;
-                                default :
-                                    alignment = Alignment.left;
-                            }
-                            columns.add(new QueryColumn(this, meta.getColumnName(columnIndex), alignment));
-                        }
-                        List<List<Object>> tableData = new ArrayList<List<Object>>();
-                        while(results.next()) {
-                            List<Object> row = new ArrayList<Object>(numColumns);
-                            for(int columnIndex=1; columnIndex<=numColumns; columnIndex++) {
-                                // Convert arrays to lists
-                                Object value = results.getObject(columnIndex);
-                                if(value instanceof Array) {
-                                    List<Object> values = new ArrayList<Object>();
-                                    ResultSet arrayResults = ((Array)value).getResultSet();
-                                    try {
-                                        while(arrayResults.next()) values.add(arrayResults.getObject(2));
-                                    } finally {
-                                        arrayResults.close();
-                                    }
-                                    value = AoCollections.optimalUnmodifiableList(values);
-                                }
-                                row.add(value);
-                            }
-                            tableData.add(Collections.unmodifiableList(row));
-                        }
-                        return new ReportResult(
-                            Collections.unmodifiableList(columns),
-                            Collections.unmodifiableList(tableData)
-                        );
-                    } finally {
-                        results.close();
-                    }
-                } catch(SQLException e) {
-                    throw new WrappedSQLException(e, pstmt);
-                } finally {
-                    pstmt.close();
-                }
+						DatabaseConnection.setParams(pstmt, sqlParams);
+						try (ResultSet results = pstmt.executeQuery()) {
+							ResultSetMetaData meta = results.getMetaData();
+							int numColumns = meta.getColumnCount();
+							List<QueryColumn> columns = new ArrayList<>();
+							for(int columnIndex=1; columnIndex<=numColumns; columnIndex++) {
+								final Alignment alignment;
+								switch(meta.getColumnType(columnIndex)) {
+									case Types.BIGINT :
+									case Types.DECIMAL :
+									case Types.DOUBLE :
+									case Types.FLOAT :
+									case Types.INTEGER :
+									case Types.NUMERIC :
+									case Types.REAL :
+									case Types.SMALLINT :
+									case Types.TINYINT :
+										alignment = Alignment.right;
+										break;
+									case Types.BOOLEAN :
+									case Types.BIT :
+										alignment = Alignment.center;
+										break;
+									default :
+										alignment = Alignment.left;
+								}
+								columns.add(new QueryColumn(this, meta.getColumnName(columnIndex), alignment));
+							}
+							List<List<Object>> tableData = new ArrayList<>();
+							while(results.next()) {
+								List<Object> row = new ArrayList<>(numColumns);
+								for(int columnIndex=1; columnIndex<=numColumns; columnIndex++) {
+									// Convert arrays to lists
+									Object value = results.getObject(columnIndex);
+									if(value instanceof Array) {
+										List<Object> values = new ArrayList<>();
+										try (ResultSet arrayResults = ((Array)value).getResultSet()) {
+											while(arrayResults.next()) values.add(arrayResults.getObject(2));
+										}
+										value = AoCollections.optimalUnmodifiableList(values);
+									}
+									row.add(value);
+								}
+								tableData.add(Collections.unmodifiableList(row));
+							}
+							return new ReportResult(
+								Collections.unmodifiableList(columns),
+								Collections.unmodifiableList(tableData)
+							);
+						}
+					} catch(SQLException e) {
+						throw new WrappedSQLException(e, pstmt);
+					}
+				}
             } finally {
                 afterQuery(parameterValues, conn);
             }

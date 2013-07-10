@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -62,9 +62,9 @@ public final class CronDaemon {
      */
     private static CronDaemon runningDaemon;
 
-    private static final List<CronJob> cronJobs=new ArrayList<CronJob>();
-    private static final List<Logger> loggers=new ArrayList<Logger>();
-    private static final List<CronDaemonThread> runningJobs=new ArrayList<CronDaemonThread>();
+    private static final List<CronJob> cronJobs=new ArrayList<>();
+    private static final List<Logger> loggers=new ArrayList<>();
+    private static final List<CronDaemonThread> runningJobs=new ArrayList<>();
     
     /**
      * Adds a <code>CronJob</code> to the list of jobs.  If the job is already
@@ -126,86 +126,86 @@ public final class CronDaemon {
 
                     @Override
                     public void run() {
-                        while(true) {
-                            final Calendar cal=Calendar.getInstance();
-                            int lastMinute = Integer.MIN_VALUE;
-                            int lastHour = Integer.MIN_VALUE;
-                            int lastDayOfMonth = Integer.MIN_VALUE;
-                            int lastMonth = Integer.MIN_VALUE;
-                            int lastDayOfWeek = Integer.MIN_VALUE;
-                            int lastYear = Integer.MIN_VALUE;
-                            synchronized(cronJobs) {
-                                if(runningDaemon!=CronDaemon.this) break;
-                            }
-                            try {
-                                // Get the new minute
-                                cal.setTimeInMillis(System.currentTimeMillis());
-                                int minute=cal.get(Calendar.MINUTE);
-                                int hour=cal.get(Calendar.HOUR_OF_DAY);
-                                int dayOfMonth=cal.get(Calendar.DAY_OF_MONTH);
-                                int month=cal.get(Calendar.MONTH);
-                                int dayOfWeek=cal.get(Calendar.DAY_OF_WEEK);
-                                int year = cal.get(Calendar.YEAR);
+						final Calendar cal=Calendar.getInstance();
+						int lastMinute = Integer.MIN_VALUE;
+						int lastHour = Integer.MIN_VALUE;
+						int lastDayOfMonth = Integer.MIN_VALUE;
+						int lastMonth = Integer.MIN_VALUE;
+						int lastDayOfWeek = Integer.MIN_VALUE;
+						int lastYear = Integer.MIN_VALUE;
+						while(true) {
+							synchronized(cronJobs) {
+								if(runningDaemon!=CronDaemon.this) break;
+							}
+							try {
+								// Get the new minute
+								cal.setTimeInMillis(System.currentTimeMillis());
+								int minute=cal.get(Calendar.MINUTE);
+								int hour=cal.get(Calendar.HOUR_OF_DAY);
+								int dayOfMonth=cal.get(Calendar.DAY_OF_MONTH);
+								int month=cal.get(Calendar.MONTH);
+								int dayOfWeek=cal.get(Calendar.DAY_OF_WEEK);
+								int year = cal.get(Calendar.YEAR);
 
-                                long sleepTime;
-                                // If the minute hasn't changed, then system sleep is not very precise, sleep another second
-                                if(
-                                    minute==lastMinute
-                                    && hour==lastHour
-                                    && dayOfMonth==lastDayOfMonth
-                                    && month==lastMonth
-                                    && dayOfWeek==lastDayOfWeek
-                                    && year==lastYear
-                                ) {
-                                    sleepTime = 1000;
-                                } else {
-                                    synchronized(cronJobs) {
-                                        for(int i=0, size=cronJobs.size(); i<size; i++) {
-                                            CronJob job=cronJobs.get(i);
-                                            try {
-                                                if(job.getCronJobSchedule().isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek, year)) {
-                                                    runJob(job, loggers.get(i), minute, hour, dayOfMonth, month, dayOfWeek, year);
-                                                }
-                                            } catch(ThreadDeath TD) {
-                                                throw TD;
-                                            } catch(Throwable T) {
-                                                loggers.get(i).log(Level.SEVERE, "cron_job.name="+job.getCronJobName(), T);
-                                            }
-                                        }
-                                    }
-                                    // Record last minute to avoid possible repeat on imprecise timers.
-                                    lastMinute = minute;
-                                    lastHour = hour;
-                                    lastDayOfMonth = dayOfMonth;
-                                    lastMonth = month;
-                                    lastDayOfWeek = dayOfWeek;
-                                    lastYear = year;
-                                    // Find the time until the next minute starts.
-                                    cal.add(Calendar.MINUTE, 1);
-                                    cal.set(Calendar.SECOND, 0);
-                                    cal.set(Calendar.MILLISECOND, 0);
-                                    sleepTime = cal.getTimeInMillis() - System.currentTimeMillis();
-                                }
-                                if(sleepTime>0) {
-                                    // Be careful of system time changes
-                                    if(sleepTime > MAX_SLEEP_TIME) sleepTime = MAX_SLEEP_TIME;
-                                    try {
-                                        Thread.sleep(sleepTime);
-                                    } catch(InterruptedException err) {
-                                        logger.log(Level.WARNING, null, err);
-                                    }
-                                }
-                            } catch(ThreadDeath TD) {
-                                throw TD;
-                            } catch(Throwable T) {
-                                logger.log(Level.SEVERE, null, T);
-                                try {
-                                    Thread.sleep(30000);
-                                } catch(InterruptedException err) {
-                                    logger.log(Level.WARNING, null, err);
-                                }
-                            }
-                        }
+								long sleepTime;
+								// If the minute hasn't changed, then system sleep is not very precise, sleep another second
+								if(
+									minute==lastMinute
+									&& hour==lastHour
+									&& dayOfMonth==lastDayOfMonth
+									&& month==lastMonth
+									&& dayOfWeek==lastDayOfWeek
+									&& year==lastYear
+								) {
+									sleepTime = 1000;
+								} else {
+									synchronized(cronJobs) {
+										for(int i=0, size=cronJobs.size(); i<size; i++) {
+											CronJob job=cronJobs.get(i);
+											try {
+												if(job.getCronJobSchedule().isCronJobScheduled(minute, hour, dayOfMonth, month, dayOfWeek, year)) {
+													runJob(job, loggers.get(i), minute, hour, dayOfMonth, month, dayOfWeek, year);
+												}
+											} catch(ThreadDeath TD) {
+												throw TD;
+											} catch(Throwable T) {
+												loggers.get(i).log(Level.SEVERE, "cron_job.name="+job.getCronJobName(), T);
+											}
+										}
+									}
+									// Record last minute to avoid possible repeat on imprecise timers.
+									lastMinute = minute;
+									lastHour = hour;
+									lastDayOfMonth = dayOfMonth;
+									lastMonth = month;
+									lastDayOfWeek = dayOfWeek;
+									lastYear = year;
+									// Find the time until the next minute starts.
+									cal.add(Calendar.MINUTE, 1);
+									cal.set(Calendar.SECOND, 0);
+									cal.set(Calendar.MILLISECOND, 0);
+									sleepTime = cal.getTimeInMillis() - System.currentTimeMillis();
+								}
+								if(sleepTime>0) {
+									// Be careful of system time changes
+									if(sleepTime > MAX_SLEEP_TIME) sleepTime = MAX_SLEEP_TIME;
+									try {
+										Thread.sleep(sleepTime);
+									} catch(InterruptedException err) {
+										logger.log(Level.WARNING, null, err);
+									}
+								}
+							} catch(ThreadDeath TD) {
+								throw TD;
+							} catch(Throwable T) {
+								logger.log(Level.SEVERE, null, T);
+								try {
+									Thread.sleep(30000);
+								} catch(InterruptedException err) {
+									logger.log(Level.WARNING, null, err);
+								}
+							}
+						}
                     }
                 },
                 CronDaemon.class.getName()

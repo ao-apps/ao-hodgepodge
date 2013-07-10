@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -566,7 +566,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             }
 
             // Get the set of all allocated ids (except the meta data id).
-            Map<Long,Boolean> allocatedIds = new HashMap<Long,Boolean>();
+            Map<Long,Boolean> allocatedIds = new HashMap<>();
             while(ids.hasNext()) allocatedIds.put(ids.next(), false);
 
             // _head is the correct value

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -345,7 +345,7 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
     public Set<? extends R> getOrderedRows(Iterable<? extends K> keys) throws NoRowException, SQLException {
         Iterator<? extends K> iter = keys.iterator();
         if(!iter.hasNext()) return Collections.emptySet();
-        Set<R> results = new LinkedHashSet<R>();
+        Set<R> results = new LinkedHashSet<>();
         do {
             results.add(get(iter.next()));
         } while(iter.hasNext());
@@ -359,7 +359,7 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
     public SortedSet<? extends R> getRows(Iterable<? extends K> keys) throws NoRowException, SQLException {
         Iterator<? extends K> iter = keys.iterator();
         if(!iter.hasNext()) return AoCollections.emptySortedSet();
-        SortedSet<R> results = new TreeSet<R>();
+        SortedSet<R> results = new TreeSet<>();
         do {
             results.add(get(iter.next()));
         } while(iter.hasNext());

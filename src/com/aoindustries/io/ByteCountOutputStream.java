@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,16 +41,19 @@ public class ByteCountOutputStream extends FilterOutputStream {
         super(out);
     }
 
+	@Override
     public void write(int b) throws IOException {
 	out.write(b);
         count++;
     }
 
+	@Override
     public void write(byte b[]) throws IOException {
 	out.write(b, 0, b.length);
         count+=b.length;
     }
 
+	@Override
     public void write(byte b[], int off, int len) throws IOException {
         out.write(b, off, len);
         count+=len;

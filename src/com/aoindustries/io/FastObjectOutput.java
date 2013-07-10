@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public class FastObjectOutput implements ObjectOutput {
 
-    private static final ThreadLocal<FastObjectOutput> threadFastObjectOutput = new ThreadLocal<FastObjectOutput>();
+    private static final ThreadLocal<FastObjectOutput> threadFastObjectOutput = new ThreadLocal<>();
 
     /**
      * Gets the wrapper for the provided ObjectOutput, creating if needed.
@@ -173,7 +173,7 @@ public class FastObjectOutput implements ObjectOutput {
                     if(nextClassId<MAP_ARRAY_LENGTH) {
                         classesArray[nextClassId] = clazz;
                     } else {
-                        if(classesMap==null) classesMap = new HashMap<Class<?>,Integer>();
+                        if(classesMap==null) classesMap = new HashMap<>();
                         classesMap.put(clazz, nextClassId);
                     }
                     nextClassId++;
@@ -231,7 +231,7 @@ public class FastObjectOutput implements ObjectOutput {
                     if(nextStringId<MAP_ARRAY_LENGTH) {
                         stringsArray[nextStringId] = value;
                     } else {
-                        if(stringsMap==null) stringsMap = new HashMap<String,Integer>();
+                        if(stringsMap==null) stringsMap = new HashMap<>();
                         stringsMap.put(value, nextStringId);
                     }
                     nextStringId++;

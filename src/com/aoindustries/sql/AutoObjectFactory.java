@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -59,7 +59,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
         }
     }
 
-    private static final ConcurrentMap<Class<?>,Method> valueOfIntMethods = new ConcurrentHashMap<Class<?>,Method>();
+    private static final ConcurrentMap<Class<?>,Method> valueOfIntMethods = new ConcurrentHashMap<>();
 
     /**
      * Gets the <code>valueOf(int)</code> for the provided class or <code>null</code> if doesn't
@@ -82,7 +82,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
         return existing==notExists ? null : existing;
     }
 
-    private static final ConcurrentMap<Class<?>,Method> valueOfStringMethods = new ConcurrentHashMap<Class<?>,Method>();
+    private static final ConcurrentMap<Class<?>,Method> valueOfStringMethods = new ConcurrentHashMap<>();
 
     /**
      * Gets the <code>valueOf(String)</code> for the provided class or <code>null</code> if doesn't
@@ -205,7 +205,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                                     String value = result.getString(c);
                                     params[i] = result.wasNull() ? null : valueOfStringMethod.invoke(null, value);
                                 } else {
-                                    if(warnings==null) warnings = new ArrayList<String>();
+                                    if(warnings==null) warnings = new ArrayList<>();
                                     warnings.add("Unexpected parameter class: "+paramType.getName());
                                     continue CONSTRUCTORS;
                                 }

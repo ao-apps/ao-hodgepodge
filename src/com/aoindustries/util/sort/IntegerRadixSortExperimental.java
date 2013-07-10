@@ -61,6 +61,7 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 		RuntimeUtils.getAvailableProcessors(),
 		new ThreadFactory() {
 			private final Sequence idSequence = new AtomicSequence();
+			@Override
 			public Thread newThread(Runnable target) {
 				return new Thread(target, IntegerRadixSortExperimental.class.getName()+".executor: id=" + idSequence.getNextSequenceValue());
 			}
@@ -104,7 +105,7 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 				Arrays.sort(array);
 			} else {
 			if(ENABLE_CONCURRENCY) {
-				Queue<Future<?>> futures = new ConcurrentLinkedQueue<Future<?>>();
+				Queue<Future<?>> futures = new ConcurrentLinkedQueue<>();
 				sort(array, 0, array.length, 32-FIRST_BITS_PER_PASS, futures);
 				try {
 					while(!futures.isEmpty()) {
@@ -178,6 +179,7 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 						futures.add(
 							executor.submit(
 								new Runnable() {
+									@Override
 									public void run() {
 										sort(array, newOffset, newEnd, finalShift, futures);
 									}

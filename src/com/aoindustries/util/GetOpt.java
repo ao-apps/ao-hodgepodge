@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -144,7 +144,7 @@ public class GetOpt {
      * The "--" will be included in the arguments returned.
      */
     public static List<String> getArguments(String[] args) {
-        List<String> arguments = new ArrayList<String>(args.length);
+        List<String> arguments = new ArrayList<>(args.length);
         int c = 0;
         for(; c<args.length; c++) {
             String arg = args[c];

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -109,27 +109,27 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     /**
      * All queries are performed on the concurrent map.
      */
-    private final Map<String,String> valueMap = new ConcurrentHashMap<String,String>();
+    private final Map<String,String> valueMap = new ConcurrentHashMap<>();
 
     /**
      * All validated queries are performed on this concurrent map.
      */
-    private final Map<String,Long> validatedMap = new ConcurrentHashMap<String,Long>();
+    private final Map<String,Long> validatedMap = new ConcurrentHashMap<>();
 
     /**
      * All modified queries are performed on this concurrent map.
      */
-    private final Map<String,Long> modifiedMap = new ConcurrentHashMap<String,Long>();
+    private final Map<String,Long> modifiedMap = new ConcurrentHashMap<>();
 
     /**
      * All type queries are performed on this concurrent map.
      */
-    private final Map<String,MediaType> mediaTypeMap = new ConcurrentHashMap<String,MediaType>();
+    private final Map<String,MediaType> mediaTypeMap = new ConcurrentHashMap<>();
 
     /**
      * All isBlockElement queries are performed on this concurrent map.
      */
-    private final Map<String,Boolean> isBlockElementMap = new ConcurrentHashMap<String,Boolean>();
+    private final Map<String,Boolean> isBlockElementMap = new ConcurrentHashMap<>();
 
     /**
      * The properties file is only used for updates.
@@ -151,7 +151,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         private boolean isCommentLine = false;
         private StringBuilder currentComment = new StringBuilder();
 
-        private List<String> comments = new ArrayList<String>();
+        private List<String> comments = new ArrayList<>();
 
         /**
          * Adds buffered comment to comments if non-empty.
@@ -347,7 +347,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
                 private static final long serialVersionUID = 6953022173340009928L;
                 @Override
                 public Enumeration<Object> keys() {
-                    SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ENGLISH));
+                    SortedSet<Object> sortedSet = new TreeSet<>(Collator.getInstance(Locale.ENGLISH));
                     Enumeration<Object> e = super.keys();
                     while(e.hasMoreElements()) sortedSet.add(e.nextElement());
                     return Collections.enumeration(sortedSet);

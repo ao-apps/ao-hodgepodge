@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -125,7 +125,7 @@ public class AoCollections {
     }
 
     public static <T> SortedSet<T> singletonSortedSet(T o) {
-        return new SingletonSortedSet<T>(o);
+        return new SingletonSortedSet<>(o);
     }
 
     private static class SingletonSortedSet<E> extends AbstractSet<E> implements SortedSet<E>, Serializable {
@@ -207,8 +207,8 @@ public class AoCollections {
 
         // List
         Collections.singletonList(null).getClass(),
-        Collections.unmodifiableList(new ArrayList<Object>(0)).getClass(), // RandomAccess
-        Collections.unmodifiableList(new LinkedList<Object>()).getClass(), // Sequential
+        Collections.unmodifiableList(new ArrayList<>(0)).getClass(), // RandomAccess
+        Collections.unmodifiableList(new LinkedList<>()).getClass(), // Sequential
 
         // Set
         Collections.singleton(null).getClass(),
@@ -250,13 +250,13 @@ public class AoCollections {
         //Class<?> clazz = collection.getClass();
         //for(int i=0, len=unmodifiableCollectionClasses.length; i<len; i++) if(unmodifiableCollectionClasses[i]==clazz) return collection;
         if(size==1) return Collections.singletonList(collection.iterator().next());
-        return Collections.unmodifiableCollection(new ArrayList<T>(collection));
+        return Collections.unmodifiableCollection(new ArrayList<>(collection));
     }
 
     private static final Class<?>[] unmodifiableListClasses = {
         Collections.singletonList(null).getClass(),
-        Collections.unmodifiableList(new ArrayList<Object>(0)).getClass(), // RandomAccess
-        Collections.unmodifiableList(new LinkedList<Object>()).getClass() // Sequential
+        Collections.unmodifiableList(new ArrayList<>(0)).getClass(), // RandomAccess
+        Collections.unmodifiableList(new LinkedList<>()).getClass() // Sequential
     };
 
     /**
@@ -287,7 +287,7 @@ public class AoCollections {
         //Class<?> clazz = collection.getClass();
         //for(int i=0, len=unmodifiableListClasses.length; i<len; i++) if(unmodifiableListClasses[i]==clazz) return (List<T>)collection;
         if(size==1) return Collections.singletonList(collection.iterator().next());
-        return Collections.unmodifiableList(new ArrayList<T>(collection));
+        return Collections.unmodifiableList(new ArrayList<>(collection));
     }
 
     private static final Class<?>[] unmodifiableSetClasses = {
@@ -332,7 +332,7 @@ public class AoCollections {
         //Class<?> clazz = collection.getClass();
         //for(int i=0, len=unmodifiableSetClasses.length; i<len; i++) if(unmodifiableSetClasses[i]==clazz) return (Set<T>)collection;
         if(size==1) return Collections.singleton(collection.iterator().next());
-        return Collections.unmodifiableSet(new LinkedHashSet<T>(collection));
+        return Collections.unmodifiableSet(new LinkedHashSet<>(collection));
     }
 
     private static final Class<?>[] unmodifiableSortedSetClasses = {
@@ -371,9 +371,9 @@ public class AoCollections {
         if(size==1) return singletonSortedSet(collection.iterator().next());
         SortedSet<T> copy;
         if(collection instanceof SortedSet<?>) {
-            copy = new TreeSet<T>((SortedSet<T>)collection);
+            copy = new TreeSet<>((SortedSet<T>)collection);
         } else {
-            copy = new TreeSet<T>(collection);
+            copy = new TreeSet<>(collection);
         }
         return Collections.unmodifiableSortedSet(copy);
     }
@@ -385,7 +385,7 @@ public class AoCollections {
         Collections.unmodifiableMap(Collections.emptyMap()).getClass(),
 
         // SortedMap
-        Collections.unmodifiableSortedMap(new TreeMap<Object,Object>()).getClass()
+        Collections.unmodifiableSortedMap(new TreeMap<>()).getClass()
     };
 
     /**
@@ -423,11 +423,11 @@ public class AoCollections {
             Map.Entry<? extends K,? extends V> entry = map.entrySet().iterator().next();
             return Collections.singletonMap(entry.getKey(), entry.getValue());
         }
-        return Collections.unmodifiableMap(new LinkedHashMap<K,V>(map));
+        return Collections.unmodifiableMap(new LinkedHashMap<>(map));
     }
 
     private static final Class<?>[] unmodifiableSortedMapClasses = {
-        Collections.unmodifiableSortedMap(new TreeMap<Object,Object>()).getClass()
+        Collections.unmodifiableSortedMap(new TreeMap<>()).getClass()
     };
 
     /**
@@ -466,9 +466,9 @@ public class AoCollections {
         // TODO: }
         SortedMap<K,V> copy;
         if(map instanceof SortedMap<?,?>) {
-            copy = new TreeMap<K,V>((SortedMap<K,V>)map);
+            copy = new TreeMap<>((SortedMap<K,V>)map);
         } else {
-            copy = new TreeMap<K,V>(map);
+            copy = new TreeMap<>(map);
         }
         return Collections.unmodifiableSortedMap(copy);
     }
@@ -535,7 +535,7 @@ public class AoCollections {
      * Gets an unmodifiable iterator for a single object.
      */
     public static <E> Iterator<E> singletonIterator(E value) {
-        return new SingletonIterator<E>(value);
+        return new SingletonIterator<>(value);
     }
 
     static class UnmodifiableIterator<E> implements Iterator<E> {
@@ -573,7 +573,7 @@ public class AoCollections {
             || (iter instanceof SingletonIterator<?>)
             || (iter==EmptyIterator.instance)
         ) return iter;
-        return new UnmodifiableIterator<E>(iter);
+        return new UnmodifiableIterator<>(iter);
     }
 
     /*
@@ -641,6 +641,6 @@ public class AoCollections {
      * Does not support null elements.
      */
     public static <E> PeekIterator<E> peekIterator(Iterator<? extends E> iter) {
-        return new PeekIterator<E>(iter);
+        return new PeekIterator<>(iter);
     }
 }

@@ -62,6 +62,7 @@ final public class ShellSort extends BaseComparisonSortAlgorithm<Object> {
 		return false;
 	}
 
+	@Override
     public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
 
@@ -110,6 +111,7 @@ final public class ShellSort extends BaseComparisonSortAlgorithm<Object> {
         if(stats!=null) stats.sortEnding();
     }
 
+	@Override
     public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
 

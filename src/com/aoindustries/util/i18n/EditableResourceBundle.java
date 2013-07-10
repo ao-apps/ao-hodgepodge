@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -134,12 +134,12 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
     static class LookupValue {
         final long id = lookupIdGenerator.get().getNextSequenceValue();
-        final List<Long> ids = new ArrayList<Long>();
+        final List<Long> ids = new ArrayList<>();
 
         /**
          * The set of locales that were queried.
          */
-        final Map<Locale,LookupLocaleValue> locales = new HashMap<Locale,LookupLocaleValue>();
+        final Map<Locale,LookupLocaleValue> locales = new HashMap<>();
 
         LookupValue() {}
     }
@@ -147,12 +147,12 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
     private static final ThreadLocal<Map<LookupKey,LookupValue>> requestLookups = new ThreadLocal<Map<LookupKey,LookupValue>>() {
         @Override
         protected Map<LookupKey,LookupValue> initialValue() {
-            return new HashMap<LookupKey,LookupValue>();
+            return new HashMap<>();
         }
     };
 
-    private static final ThreadLocal<String> setValueUrl = new ThreadLocal<String>();
-    private static final ThreadLocal<String> setMediaTypeUrl = new ThreadLocal<String>();
+    private static final ThreadLocal<String> setValueUrl = new ThreadLocal<>();
+    private static final ThreadLocal<String> setMediaTypeUrl = new ThreadLocal<>();
 
     /**
      * Any page that allows the editing of resources must set this at the beginning of the request.
@@ -200,7 +200,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         resetRequest(false, null, null, false);
         if(!lookups.isEmpty()) {
             // Sort by lookupValue.id to present the information in the same order as first seen in the request
-            List<LookupKey> lookupKeys = new ArrayList<LookupKey>(lookups.keySet());
+            List<LookupKey> lookupKeys = new ArrayList<>(lookups.keySet());
             Collections.sort(
                 lookupKeys,
                 new Comparator<LookupKey>() {
@@ -212,7 +212,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
             );
             if(setValueUrl!=null) {
                 // Get the set of all locales
-                SortedSet<Locale> allLocales = new TreeSet<Locale>(LocaleComparator.getInstance());
+                SortedSet<Locale> allLocales = new TreeSet<>(LocaleComparator.getInstance());
                 for(LookupKey lookupKey : lookupKeys) allLocales.addAll(lookupKey.bundleSet.getLocales());
 
                 out.append("<div style='position:fixed; bottom:0px; left:50%; width:300px; margin-left:-150px; text-align:center'>\n");

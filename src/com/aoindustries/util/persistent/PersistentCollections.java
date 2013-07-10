@@ -456,7 +456,7 @@ public class PersistentCollections {
 			if(componentType==Character.class) return (Serializer<E>)new CharArraySerializer();
 		}
 		// Default Java serialization
-		return new ObjectSerializer<E>(type);
+		return new ObjectSerializer<>(type);
 	}
 
 	/**

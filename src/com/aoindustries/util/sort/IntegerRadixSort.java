@@ -94,6 +94,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	private static final ExecutorService defaultExecutor = Executors.newCachedThreadPool(
 		new ThreadFactory() {
 			private final Sequence idSequence = new AtomicSequence();
+			@Override
 			public Thread newThread(Runnable target) {
 				long id = idSequence.getNextSequenceValue();
 				return new Thread(target, IntegerRadixSort.class.getName()+".defaultExecutor: id=" + id);
@@ -372,6 +373,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 			return numInt;
 		}
 
+		@Override
 		final int addToQueue(int shift, N number, int toTaskNum) {
 			return addToQueue(
 				shift,
@@ -524,6 +526,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 			return fromQueues[fromTaskNum][fromQueueNum];
 		}
 
+		@Override
 		final int addToQueue(int shift, int number, int toTaskNum) {
 			return addToQueue(
 				shift,
@@ -602,7 +605,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				sizePerTask = size;
 			} else {
 				assert numTasks>=2 : "Must not have an executor when numTasks < 2";
-				runnableFutures = new ArrayList<Future<?>>(numTasks);
+				runnableFutures = new ArrayList<>(numTasks);
 				int spt = size / numTasks;
 				if((spt*numTasks)<size) spt++; // Round-up instead of down
 				sizePerTask = spt;
@@ -617,7 +620,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 			// May only use concurrent import for random access sources
 			if(executor!=null && source.useRandomAccess()) {
 				// Perform concurrent import
-				final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<Future<Source.ImportDataResult>>(numTasks);
+				final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<>(numTasks);
 				for(
 					int taskStart=0, toTaskNum=0;
 					taskStart<size;
@@ -632,6 +635,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					importStepFutures.add(
 						executor.submit(
 							new Callable<Source.ImportDataResult>() {
+								@Override
 								public Source.ImportDataResult call() {
 									return source.importData(table, finalTaskStart, finalTaskEnd, finalToTaskNum);
 								}
@@ -908,14 +912,14 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					radixSort(
 						size,
 						new SingleTaskNumberRadixTable<N>(size),
-						new NumberListSource<N>(size, list),
+						new NumberListSource<>(size, list),
 						null
 					);
 				} else {
 					radixSort(
 						size,
 						new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
-						new NumberListSource<N>(size, list),
+						new NumberListSource<>(size, list),
 						executor
 					);
 				}
@@ -1002,14 +1006,14 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				radixSort(
 					size,
 					new SingleTaskNumberRadixTable<N>(size),
-					new NumberArraySource<N>(size, array),
+					new NumberArraySource<>(size, array),
 					null
 				);
 			} else {
 				radixSort(
 					size,
 					new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
-					new NumberArraySource<N>(size, array),
+					new NumberArraySource<>(size, array),
 					executor
 				);
 			}

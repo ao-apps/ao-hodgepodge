@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -140,6 +140,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *
 	 * @return  the number of elements in this list.
 	 */
+	@Override
 	public int size() {
 		return size;
 	}
@@ -150,6 +151,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @return  <tt>true</tt> if this list has no elements;
 	 *          <tt>false</tt> otherwise.
 	 */
+	@Override
 	public boolean isEmpty() {
 		return size == 0;
 	}
@@ -161,6 +163,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @return  <code>true</code> if the specified element is present;
 	 *                <code>false</code> otherwise.
 	 */
+	@Override
 	public boolean contains(Object elem) {
 		if (elem == null) return false;
 		if (elem instanceof Number) return contains(((Number)elem).longValue());
@@ -174,6 +177,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @return  <code>true</code> if the specified element is present;
 	 *                <code>false</code> otherwise.
 	 */
+	@Override
 	public boolean contains(long elem) {
 		return indexOf(elem) >= 0;
 	}
@@ -187,6 +191,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *          list; returns <tt>-1</tt> if the object is not found.
 	 * @see     Object#equals(Object)
 	 */
+	@Override
 	public int indexOf(Object elem) {
 		if (elem == null) return -1;
 		if (elem instanceof Number) return indexOf(((Number)elem).longValue());
@@ -202,6 +207,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *          list; returns <tt>-1</tt> if the object is not found.
 	 * @see     Object#equals(Object)
 	 */
+	@Override
 	public int indexOf(long elem) {
 		for (int i = 0; i < size; i++)
 			if (elem==elementData[i])
@@ -217,6 +223,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @return  the index of the last occurrence of the specified object in
 	 *          this list; returns -1 if the object is not found.
 	 */
+	@Override
 	public int lastIndexOf(Object elem) {
 		if (elem == null) return -1;
 		if (elem instanceof Number) return lastIndexOf(((Number)elem).longValue());
@@ -231,6 +238,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @return  the index of the last occurrence of the specified object in
 	 *          this list; returns -1 if the object is not found.
 	 */
+	@Override
 	public int lastIndexOf(long elem) {
 		for (int i = size-1; i >= 0; i--)
 			if (elem==elementData[i])
@@ -244,6 +252,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *
 	 * @return  a clone of this <tt>ArrayList</tt> instance.
 	 */
+	@Override
 	public Object clone() {
 		try {
 			LongArrayList v = (LongArrayList) super.clone();
@@ -264,6 +273,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @return an array containing all of the elements in this list
 	 *                in the correct order.
 	 */
+	@Override
 	public Object[] toArray() {
 		Object[] result = new Object[size];
 		for(int c=0;c<size;c++) result[c] = Long.valueOf(elementData[c]);
@@ -277,6 +287,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @return an array containing all of the elements in this list
 	 *                in the correct order.
 	 */
+	@Override
 	public long[] toArrayLong() {
 		long[] result = new long[size];
 		System.arraycopy(elementData, 0, result, 0, size);
@@ -305,6 +316,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *         of the runtime type of every element in this list.
 	 */
 	@SuppressWarnings({"unchecked"})
+	@Override
 	public <T> T[] toArray(T[] a) {
 		if (a.length < size)
 			a = (T[])java.lang.reflect.Array.
@@ -325,6 +337,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @throws    IndexOutOfBoundsException if index is out of range <tt>(index
 	 *                   &lt; 0 || index &gt;= size())</tt>.
 	 */
+	@Override
 	public Long get(int index) {
 		RangeCheck(index);
 
@@ -339,6 +352,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @throws    IndexOutOfBoundsException if index is out of range <tt>(index
 	 *                   &lt; 0 || index &gt;= size())</tt>.
 	 */
+	@Override
 	public long getLong(int index) {
 		RangeCheck(index);
 
@@ -355,6 +369,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @throws    IndexOutOfBoundsException if index out of range
 	 *                  <tt>(index &lt; 0 || index &gt;= size())</tt>.
 	 */
+	@Override
 	public Long set(int index, Long element) {
 		return Long.valueOf(set(index,element.longValue()));
 	}
@@ -369,6 +384,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @throws    IndexOutOfBoundsException if index out of range
 	 *                  <tt>(index &lt; 0 || index &gt;= size())</tt>.
 	 */
+	@Override
 	public long set(int index, long element) {
 		RangeCheck(index);
 
@@ -383,6 +399,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param o element to be appended to this list.
 	 * @return <tt>true</tt> (as per the general contract of Collection.add).
 	 */
+	@Override
 	public boolean add(Long o) {
 		return add(o.longValue());
 	}
@@ -393,6 +410,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param o element to be appended to this list.
 	 * @return <tt>true</tt> (as per the general contract of Collection.add).
 	 */
+	@Override
 	public boolean add(long o) {
 		ensureCapacity(size + 1);  // Increments modCount!!
 		elementData[size++] = o;
@@ -409,6 +427,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @throws    IndexOutOfBoundsException if index is out of range
 	 *                  <tt>(index &lt; 0 || index &gt; size())</tt>.
 	 */
+	@Override
 	public void add(int index, Long element) {
 		add(index, element.longValue());
 	}
@@ -423,6 +442,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @throws    IndexOutOfBoundsException if index is out of range
 	 *                  <tt>(index &lt; 0 || index &gt; size())</tt>.
 	 */
+	@Override
 	public void add(int index, long element) {
 		if (index > size || index < 0)
 			throw new IndexOutOfBoundsException(
@@ -445,6 +465,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @throws    IndexOutOfBoundsException if index out of range <tt>(index
 	 *                   &lt; 0 || index &gt;= size())</tt>.
 	 */
+	@Override
 	public Long remove(int index) {
 		return Long.valueOf(removeAtIndex(index));
 	}
@@ -459,6 +480,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @throws    IndexOutOfBoundsException if index out of range <tt>(index
 	 *                   &lt; 0 || index &gt;= size())</tt>.
 	 */
+	@Override
 	public long removeAtIndex(int index) {
 		RangeCheck(index);
 
@@ -486,6 +508,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param o element to be removed from this list, if present.
 	 * @return <tt>true</tt> if the list contained the specified element.
 	 */
+	@Override
 	public boolean remove(Object o) {
 		if (o != null && (o instanceof Number)) return removeByValue(((Number)o).longValue());
 		return false;
@@ -503,6 +526,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param value element to be removed from this list, if present.
 	 * @return <tt>true</tt> if the list contained the specified element.
 	 */
+	@Override
 	public boolean removeByValue(long value) {
 		for (int index = 0; index < size; index++)
 			if (value==elementData[index]) {
@@ -529,6 +553,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * Removes all of the elements from this list.  The list will
 	 * be empty after this call returns.
 	 */
+	@Override
 	public void clear() {
 		modCount++;
 
@@ -552,6 +577,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @return <tt>true</tt> if this list changed as a result of the call.
 	 * @throws    NullPointerException if the specified collection is null.
 	 */
+	@Override
 	public boolean addAll(Collection<? extends Long> c) {
 		int numNew = c.size();
 		ensureCapacity(size + numNew);  // Increments modCount
@@ -576,6 +602,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *                  &lt; 0 || index &gt; size())</tt>.
 	 * @throws    NullPointerException if the specified Collection is null.
 	 */
+	@Override
 	public boolean addAll(int index, Collection<? extends Long> c) {
 		if (index > size || index < 0)
 			throw new IndexOutOfBoundsException(
@@ -606,6 +633,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param fromIndex index of first element to be removed.
 	 * @param toIndex index after last element to be removed.
 	 */
+	@Override
 	protected void removeRange(int fromIndex, int toIndex) {
 		modCount++;
 		int numMoved = size - toIndex;

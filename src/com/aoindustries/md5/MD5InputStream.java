@@ -1,6 +1,5 @@
-package com.aoindustries.md5;
 /* 
- * $Header: /home/orion/common/aoprod/cvsroot/aocode-public/module/src/com/aoindustries/md5/MD5InputStream.java,v 1.1 2006/05/22 00:51:15 orion Exp $
+ * $Header: /home/orion/common/aoprod/cvsroot/aocode-public/module/src/com/aoindustries/md5/MD5InputStream.java,v 1.2 2013/07/10 20:30:28 orion Exp $
  *
  * MD5InputStream, a subclass of FilterInputStream implementing MD5
  * functionality on a stream.
@@ -26,6 +25,9 @@ package com.aoindustries.md5;
  * and the MD5 class.
  *
  * $Log: MD5InputStream.java,v $
+ * Revision 1.2  2013/07/10 20:30:28  orion
+ * Java 1.7 now.
+ *
  * Revision 1.1  2006/05/22 00:51:15  orion
  * Current production version
  *
@@ -63,66 +65,70 @@ package com.aoindustries.md5;
  * Initial revision
  *
  */
+package com.aoindustries.md5;
 
-import java.io.*;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * MD5InputStream is a subclass of FilterInputStream adding MD5
  * hashing of the read input.
  *
- * @version	$Revision: 1.1 $
+ * @version	$Revision: 1.2 $
  * @author	Santeri Paavolainen <santtu@cs.hut.fi>
  */
-
 public class MD5InputStream extends FilterInputStream {
-  /**
-   * MD5 context
-   */
-  final private MD5 md5;
-  
-  /**
-   * Creates a MD5InputStream
-   * @param in	The input stream
-   */
-  public MD5InputStream (InputStream in) {
-    super(in);
 
-    md5 = new MD5();
-  }
+	/**
+	 * MD5 context
+	 */
+	final private MD5 md5;
 
-  /**
-   * Read a byte of data. 
-   * @see java.io.FilterInputStream
-   */
-  public int read() throws IOException {
-    int c = in.read();
-    if (c == -1) return -1;
+	/**
+	 * Creates a MD5InputStream
+	 * @param in	The input stream
+	 */
+	public MD5InputStream (InputStream in) {
+		super(in);
 
-    md5.Update(c);
+		md5 = new MD5();
+	}
 
-    return c;
-  }
+	/**
+	 * Read a byte of data. 
+	 * @see java.io.FilterInputStream
+	 */
+	@Override
+	public int read() throws IOException {
+		int c = in.read();
+		if (c == -1) return -1;
 
-  /**
-   * Reads into an array of bytes.
-   */
-  public int read (byte bytes[], int offset, int length) throws IOException {
-    int	r;
-    
-    if ((r = in.read(bytes, offset, length)) == -1) return -1;
+		md5.Update(c);
 
-    md5.Update(bytes, offset, r);
+		return c;
+	}
 
-    return r;
-  }
+	/**
+	 * Reads into an array of bytes.
+	 */
+	@Override
+	public int read (byte bytes[], int offset, int length) throws IOException {
+		int	r;
 
-  /**
-   * Returns array of bytes representing hash of the stream as
-   * finalized for the current state. 
-   * @see MD5#Final()
-   */
+		if ((r = in.read(bytes, offset, length)) == -1) return -1;
 
-  public byte [] hash () {
-    return md5.Final();
-  }
+		md5.Update(bytes, offset, r);
+
+		return r;
+	}
+
+	/**
+	 * Returns array of bytes representing hash of the stream as
+	 * finalized for the current state. 
+	 * @see MD5#Final()
+	 */
+	public byte [] hash () {
+		return md5.Final();
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -63,7 +63,7 @@ abstract public class ShellInterpreter implements Runnable {
 
     private ShellInterpreter parent;
 
-    private final List<ShellInterpreter> jobs=new ArrayList<ShellInterpreter>();
+    private final List<ShellInterpreter> jobs=new ArrayList<>();
 
     protected String status="Running";
 
@@ -261,6 +261,7 @@ abstract public class ShellInterpreter implements Runnable {
      * If arguments were provided, executes that command.  Otherwise,
      * reads from <code>in</code> until end of file or <code>exit</code>.
      */
+	@Override
     final public void run() {
         try {
             if(args.length>0) handleCommand(args);
@@ -294,7 +295,7 @@ abstract public class ShellInterpreter implements Runnable {
             handleCommandImpl(args);
         } else {
             // The arguments that have been read so far
-            List<String> arguments=new ArrayList<String>();
+            List<String> arguments=new ArrayList<>();
 
             // The argument that is being read.
             StringBuilder argument=new StringBuilder();

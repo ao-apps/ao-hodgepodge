@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -167,7 +167,7 @@ public class ErrorPrinter {
             appendln("    Exceptions", out);
             if(thrown==null) appendln("        No exceptions", out);
             else {
-                List<Throwable> closed = new ArrayList<Throwable>();
+                List<Throwable> closed = new ArrayList<>();
                 closed.add(thrown);
                 printThrowables(thrown, out, 8, closed);
             }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -485,7 +485,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                 ResultSet results=pstmt.executeQuery();
                 try {
                     Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
-                    List<T> list=new ArrayList<T>();
+                    List<T> list=new ArrayList<>();
                     while(results.next()) list.add(constructor.newInstance(results));
                     return AoCollections.optimalUnmodifiableList(list);
                 } finally {
@@ -526,7 +526,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
             ResultSet results=pstmt.executeQuery();
             try {
-                List<T> list=new ArrayList<T>();
+                List<T> list=new ArrayList<>();
                 while(results.next()) list.add(objectFactory.createObject(results));
                 return AoCollections.optimalUnmodifiableList(list);
             } finally {
@@ -640,7 +640,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             setParams(pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
-                List<Short> list = new ArrayList<Short>();
+                List<Short> list = new ArrayList<>();
                 while(results.next()) list.add(results.getShort(1));
                 return AoCollections.optimalUnmodifiableList(list);
             } finally {
@@ -715,7 +715,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             setParams(pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
-                List<String> list = new ArrayList<String>();
+                List<String> list = new ArrayList<>();
                 while(results.next()) list.add(results.getString(1));
                 return AoCollections.optimalUnmodifiableList(list);
             } finally {

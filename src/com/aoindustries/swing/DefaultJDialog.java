@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -62,6 +62,7 @@ public class DefaultJDialog extends JDialog implements WindowListener, Component
         );
     }
 
+	@Override
     public void windowClosing(WindowEvent e) {
         Object source=e.getSource();
         if(source==this) closeWindow();
@@ -72,27 +73,35 @@ public class DefaultJDialog extends JDialog implements WindowListener, Component
         dispose();
     }
 
+	@Override
     public void windowOpened(WindowEvent e) {
     }
 
+	@Override
     public void windowClosed(WindowEvent e) {
     }
 
+	@Override
     public void windowIconified(WindowEvent e) {
     }
 
+	@Override
     public void windowDeiconified(WindowEvent e) {
     }
 
+	@Override
     public void windowActivated(WindowEvent e) {
     }
 
+	@Override
     public void windowDeactivated(WindowEvent e) {
     }
     
+	@Override
     public void componentShown(ComponentEvent e) {
     }
 
+	@Override
     public void componentResized(ComponentEvent e) {
         checkMin();
     }
@@ -103,9 +112,11 @@ public class DefaultJDialog extends JDialog implements WindowListener, Component
         if(width<minWidth || height<minHeight) setSize(Math.max(width, minWidth), Math.max(height, minHeight));
     }
 
+	@Override
     public void componentMoved(ComponentEvent e) {
     }
 
+	@Override
     public void componentHidden(ComponentEvent e) {
     }
     

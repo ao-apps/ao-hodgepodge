@@ -55,14 +55,14 @@ final public class BufferManager {
     private static final ThreadLocal<List<byte[]>> bytes = new ThreadLocal<List<byte[]>>() {
         @Override
         public List<byte[]> initialValue() {
-            return new ArrayList<byte[]>(MAXIMUM_BUFFERS_PER_THREAD);
+            return new ArrayList<>(MAXIMUM_BUFFERS_PER_THREAD);
         }
     };
 
     private static final ThreadLocal<List<char[]>> chars = new ThreadLocal<List<char[]>>() {
         @Override
         public List<char[]> initialValue() {
-            return new ArrayList<char[]>(MAXIMUM_BUFFERS_PER_THREAD);
+            return new ArrayList<>(MAXIMUM_BUFFERS_PER_THREAD);
         }
     };
 

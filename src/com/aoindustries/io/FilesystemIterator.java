@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -132,23 +132,23 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
                 if(currentDirectories==null) {
                     if(startPath.length()==0) {
                         // Starting at root will include the starting directory itself
-                        (currentDirectories=new Stack<String>()).push("");
-                        (currentLists=new Stack<String[]>()).push(getFilesystemRoots());
+                        (currentDirectories=new Stack<>()).push("");
+                        (currentLists=new Stack<>()).push(getFilesystemRoots());
                     } else {
                         if(isFilesystemRoot(startPath)) {
                             // Starting from a root, has no parent
-                            (currentDirectories=new Stack<String>()).push("");
-                            (currentLists=new Stack<String[]>()).push(new String[] {startPath});
+                            (currentDirectories=new Stack<>()).push("");
+                            (currentLists=new Stack<>()).push(new String[] {startPath});
                         } else {
                             // Starting at non root will include the starting directory itself
                             File startPathFile = new File(startPath);
                             String parent = startPathFile.getParent();
                             String name = startPathFile.getName();
-                            (currentDirectories=new Stack<String>()).push(parent);
-                            (currentLists=new Stack<String[]>()).push(new String[] {name});
+                            (currentDirectories=new Stack<>()).push(parent);
+                            (currentLists=new Stack<>()).push(new String[] {name});
                         }
                     }
-                    (currentIndexes=new Stack<Integer>()).push(Integer.valueOf(0));
+                    (currentIndexes=new Stack<>()).push(Integer.valueOf(0));
                 }
                 String currentDirectory=null;
                 String[] currentList=null;
@@ -315,7 +315,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
      */
     protected String[] getFilesystemRoots() throws IOException {
         File[] fileRoots=File.listRoots();
-        List<String> tempRoots=new ArrayList<String>(fileRoots.length);
+        List<String> tempRoots=new ArrayList<>(fileRoots.length);
         for(int c=0;c<fileRoots.length;c++) {
             String root=fileRoots[c].getPath();
             // Only add if this root is used for at least one backup setting
@@ -446,7 +446,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
         String[] results = new String[list.length];
 
         // First build a list of all filenames that already have ? in them
-        Set<String> questionFiles = new HashSet<String>();
+        Set<String> questionFiles = new HashSet<>();
         for(String filename : list) {
             if(filename.indexOf('?')!=-1) questionFiles.add(filename);
         }
@@ -496,10 +496,12 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
             next = filesystemIterator.getNextFile();
         }
 
+		@Override
         public boolean hasNext() {
             return next!=null;
         }
 
+		@Override
         public String next() {
             try {
                 if(next==null) throw new NoSuchElementException();
@@ -511,6 +513,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
             }
         }
 
+		@Override
         public void remove() {
             throw new UnsupportedOperationException("Not supported.");
         }
@@ -544,6 +547,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
         return isSorted;
     }
 
+	@Override
     public int compareTo(FilesystemIterator other) {
         return startPath.compareTo(other.startPath);
     }

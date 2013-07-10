@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -72,7 +72,7 @@ public class Catalog {
     public SortedMap<String,Schema> getSchemas() throws SQLException {
         synchronized(getSchemasLock) {
             if(getSchemasCache==null) {
-                SortedMap<String,Schema> newSchemas = new TreeMap<String,Schema>(DatabaseMetaData.getCollator());
+                SortedMap<String,Schema> newSchemas = new TreeMap<>(DatabaseMetaData.getCollator());
                 ResultSet results = metaData.getMetaData().getSchemas();
                 try {
                     ResultSetMetaData resultsMeta = results.getMetaData();
@@ -124,7 +124,7 @@ public class Catalog {
 
             @Override
             public Set<Table> getVertices() throws SQLException {
-                Set<Table> vertices = new LinkedHashSet<Table>();
+                Set<Table> vertices = new LinkedHashSet<>();
                 for(Schema schema : getSchemas().values()) {
                     for(Table table : schema.getTables().values()) {
                         if(tableTypes==null || tableTypes.contains(table.getTableType())) vertices.add(table);
@@ -136,13 +136,13 @@ public class Catalog {
             @Override
             public Set<Edge<Table>> getEdgesFrom(Table from) throws SQLException {
                 Set<? extends Table> tos = from.getImportedTables();
-                Set<Edge<Table>> edges = new LinkedHashSet<Edge<Table>>(tos.size()*4/3+1);
+                Set<Edge<Table>> edges = new LinkedHashSet<>(tos.size()*4/3+1);
                 for(Table to : tos) {
                     if(
                         tableTypes==null
                         || tableTypes.contains(from.getTableType())
                         || tableTypes.contains(to.getTableType())
-                    ) edges.add(new Edge<Table>(from, to));
+                    ) edges.add(new Edge<>(from, to));
                 }
                 return AoCollections.optimalUnmodifiableSet(edges);
             }
@@ -150,13 +150,13 @@ public class Catalog {
             @Override
             public Set<Edge<Table>> getEdgesTo(Table to) throws SQLException {
                 Set<? extends Table> froms = to.getExportedTables();
-                Set<Edge<Table>> edges = new LinkedHashSet<Edge<Table>>(froms.size()*4/3+1);
+                Set<Edge<Table>> edges = new LinkedHashSet<>(froms.size()*4/3+1);
                 for(Table from : froms) {
                     if(
                         tableTypes==null
                         || tableTypes.contains(from.getTableType())
                         || tableTypes.contains(to.getTableType())
-                    ) edges.add(new Edge<Table>(from, to));
+                    ) edges.add(new Edge<>(from, to));
                 }
                 return AoCollections.optimalUnmodifiableSet(edges);
             }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -42,7 +42,7 @@ public class WrappedExceptions extends RuntimeException {
      */
     private static final List<Throwable> getUniqueCauses(Throwable ... causes) {
         int len = causes.length;
-        List<Throwable> uniqueCauses = new ArrayList<Throwable>(len);
+        List<Throwable> uniqueCauses = new ArrayList<>(len);
         for(Throwable cause : causes) {
             if(cause!=null && !uniqueCauses.contains(cause)) uniqueCauses.add(cause);
         }

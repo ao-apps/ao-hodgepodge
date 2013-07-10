@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -53,10 +53,10 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
     public List<V> sortGraph() throws CycleException, EX {
         Set<V> vertices = graph.getVertices();
         final int size = vertices.size();
-        Set<V> visited = new HashSet<V>(size*4/3+1);
-        LinkedHashSet<V> sequence = new LinkedHashSet<V>();
+        Set<V> visited = new HashSet<>(size*4/3+1);
+        LinkedHashSet<V> sequence = new LinkedHashSet<>();
         //L ← Empty list that will contain the sorted nodes
-        List<V> L = new ArrayList<V>(size);
+        List<V> L = new ArrayList<>(size);
         //S ← Set of all nodes with no incoming edges
         //for each node n in S do
         for(V n : vertices) {
@@ -82,7 +82,7 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
                 V m = isForward ? e.getTo() : e.getFrom();
                 //            visit(m)
                 if(!sequence.add(m)) {
-                    List<V> vertices = new ArrayList<V>();
+                    List<V> vertices = new ArrayList<>();
                     boolean found = false;
                     for(V seq : sequence) {
                         if(!found && seq.equals(m)) found = true;

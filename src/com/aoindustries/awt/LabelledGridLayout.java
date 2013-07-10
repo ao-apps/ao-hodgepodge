@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,11 @@
  */
 package com.aoindustries.awt;
 
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.LayoutManager;
 
 /**
  * Used to layout components in a grid.  Each element in the
@@ -75,6 +79,7 @@ public class LabelledGridLayout implements LayoutManager {
         this.stretchComponents = stretchComponents;
     }
 
+	@Override
     public void addLayoutComponent(String place, Component component) {
     }
 
@@ -123,6 +128,7 @@ public class LabelledGridLayout implements LayoutManager {
      * and the number of components is not evenly divisible
      * by the number of cols or rows.
      */
+	@Override
     public void layoutContainer(Container parent) {
         synchronized (parent.getTreeLock()) {
             Insets insets=parent.getInsets();
@@ -182,8 +188,8 @@ public class LabelledGridLayout implements LayoutManager {
                         // yend = lasty+cellHeight;
                     }
 
-                    int actualWidth=labelD.width;
-                    if(actualWidth>availableWidth) actualWidth=availableWidth;
+                    //int actualWidth=labelD.width;
+                    //if(actualWidth>availableWidth) actualWidth=availableWidth;
                     label.setBounds(
                         lastx+insets.left,
                         lasty+insets.top,
@@ -195,7 +201,7 @@ public class LabelledGridLayout implements LayoutManager {
                     availableWidth=cellWidth-cgap-labelWidths[x];
                     if(availableWidth<0) availableWidth=0;
                     // Reshape the component
-                    actualWidth=componentD.width;
+                    int actualWidth=componentD.width;
                     if(actualWidth>availableWidth) actualWidth=availableWidth;
                     component.setBounds(
                         lastx+labelWidths[x]+cgap+insets.left,
@@ -211,14 +217,17 @@ public class LabelledGridLayout implements LayoutManager {
         }
     }
 
+	@Override
     public Dimension minimumLayoutSize(Container parent) {
         return getLayoutSize(parent, true);
     }
 
+	@Override
     public Dimension preferredLayoutSize(Container parent) {
         return getLayoutSize(parent, false);
     }
 
+	@Override
     public void removeLayoutComponent(Component component) {
     }
 }

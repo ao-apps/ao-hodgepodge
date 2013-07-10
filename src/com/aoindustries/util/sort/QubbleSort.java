@@ -53,12 +53,14 @@ final public class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     private QubbleSort() {
     }
 
+	@Override
     public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         sort(list, 0, list.size()-1, comparator, stats);
         if(stats!=null) stats.sortEnding();
     }
 
+	@Override
     public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
         if(stats!=null) stats.sortStarting();
         sort(array, 0, array.length-1, comparator, stats);

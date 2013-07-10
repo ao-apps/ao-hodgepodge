@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -46,7 +46,7 @@ public class EditableResourceBundleSet {
      */
     private final SortedSet<Locale> locales;
 
-    private final Map<Locale,EditableResourceBundle> bundles = new ConcurrentHashMap<Locale, EditableResourceBundle>();
+    private final Map<Locale,EditableResourceBundle> bundles = new ConcurrentHashMap<>();
 
     /**
      * @param baseName the base name of the default locale's bundle.
@@ -54,7 +54,7 @@ public class EditableResourceBundleSet {
      */
     public EditableResourceBundleSet(String baseName, Collection<Locale> locales) {
         // The locales are sorted by language, country, then variant.
-        SortedSet<Locale> modifiableSet = new TreeSet<Locale>(LocaleComparator.getInstance());
+        SortedSet<Locale> modifiableSet = new TreeSet<>(LocaleComparator.getInstance());
         modifiableSet.addAll(locales);
         this.baseName = baseName;
         this.locales = AoCollections.optimalUnmodifiableSortedSet(modifiableSet);

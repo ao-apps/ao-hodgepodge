@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -77,7 +77,7 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
         PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
         try {
             final int numAdd = 1000000;
-            List<Long> ids = new ArrayList<Long>(numAdd);
+            List<Long> ids = new ArrayList<>(numAdd);
             long startNanos = System.nanoTime();
             for(int c=0;c<numAdd;c++) ids.add(blockBuffer.allocate(1));
             long endNanos = System.nanoTime();
@@ -97,7 +97,7 @@ public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
             for(int c=0;c<100;c++) {
                 // Remove random items
                 int numRemove = random.nextInt(Math.min(10000, ids.size()));
-                List<Long> removeList = new ArrayList<Long>(numRemove);
+                List<Long> removeList = new ArrayList<>(numRemove);
                 for(int d=0;d<numRemove;d++) {
                     int index = random.nextInt(ids.size());
                     removeList.add(ids.get(index));

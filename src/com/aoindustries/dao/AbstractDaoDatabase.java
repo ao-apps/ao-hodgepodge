@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -70,7 +70,7 @@ abstract public class AbstractDaoDatabase implements DaoDatabase {
      * underlying database.  This way, nothing funny will happen if master/slave databases
      * are switched mid-transaction.
      */
-    protected final ThreadLocal<Database> transactionDatabase = new ThreadLocal<Database>();
+    protected final ThreadLocal<Database> transactionDatabase = new ThreadLocal<>();
 
     protected <V> V executeTransaction(DatabaseCallable<V> callable) throws SQLException {
         Database database = transactionDatabase.get();

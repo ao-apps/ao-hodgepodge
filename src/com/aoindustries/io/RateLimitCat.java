@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -153,7 +153,7 @@ final public class RateLimitCat {
             Boolean progressParam = GetOpt.getOpt(args, "progress", Boolean.TYPE);
             boolean progress = progressParam!=null ? progressParam.booleanValue() : false;
             List<String> sourcePaths = GetOpt.getArguments(args);
-            List<File> sourceFiles = new ArrayList<File>(sourcePaths.size()+1);
+            List<File> sourceFiles = new ArrayList<>(sourcePaths.size()+1);
             boolean allowStdin = true;
             boolean hasError = false;
             for(String sourcePath : sourcePaths) {

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,7 +41,7 @@ public class ApplicationResourcesAccessor implements Serializable {
 
     private static final long serialVersionUID = -8735217773587095120L;
 
-    private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<String,ApplicationResourcesAccessor>();
+    private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<>();
 
     public static ApplicationResourcesAccessor getInstance(String baseName) {
         ApplicationResourcesAccessor existing = accessors.get(baseName);

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012  AO Industries, Inc.
+ * Copyright (C) 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -70,8 +70,8 @@ public class FindReplaceProxy {
                 final int listenPort = Integer.parseInt(args[1]);
                 final int connectPort = Integer.parseInt(args[3]);
 
-                List<FindReplace> inFindReplaces = new ArrayList<FindReplace>();
-                List<FindReplace> outFindReplaces = new ArrayList<FindReplace>();
+                List<FindReplace> inFindReplaces = new ArrayList<>();
+                List<FindReplace> outFindReplaces = new ArrayList<>();
                 for(int pos=4; pos<args.length; pos+=3) {
                     String find = args[pos];
                     String replace = args[pos+1];

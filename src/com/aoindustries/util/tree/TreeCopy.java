@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -58,12 +58,12 @@ public class TreeCopy<E> implements Tree<E> {
             rootNodes = Collections.emptyList();
         } else if(size==1) {
             // Single root
-            Node<E> nodeCopy = new NodeCopy<E>(sourceRootNodes.get(0));
+            Node<E> nodeCopy = new NodeCopy<>(sourceRootNodes.get(0));
             rootNodes = Collections.singletonList(nodeCopy);
         } else {
             // Multiple roots
-            List<Node<E>> newRootNodes = new ArrayList<Node<E>>(size);
-            for(Node<E> rootNode : sourceRootNodes) newRootNodes.add(new NodeCopy<E>(rootNode));
+            List<Node<E>> newRootNodes = new ArrayList<>(size);
+            for(Node<E> rootNode : sourceRootNodes) newRootNodes.add(new NodeCopy<>(rootNode));
             rootNodes = Collections.unmodifiableList(newRootNodes);
         }
     }
@@ -72,7 +72,7 @@ public class TreeCopy<E> implements Tree<E> {
         List<Node<E>> sourceRootNodes = source.getRootNodes();
 
         // Apply filter
-        List<Node<E>> filteredRootNodes = new ArrayList<Node<E>>(sourceRootNodes.size());
+        List<Node<E>> filteredRootNodes = new ArrayList<>(sourceRootNodes.size());
         for(Node<E> sourceRootNode : sourceRootNodes) if(!nodeFilter.isNodeFiltered(sourceRootNode)) filteredRootNodes.add(sourceRootNode);
 
         int size = filteredRootNodes.size();
@@ -81,12 +81,12 @@ public class TreeCopy<E> implements Tree<E> {
             rootNodes = Collections.emptyList();
         } else if(size==1) {
             // Single root
-            Node<E> nodeCopy = new NodeCopy<E>(filteredRootNodes.get(0), nodeFilter);
+            Node<E> nodeCopy = new NodeCopy<>(filteredRootNodes.get(0), nodeFilter);
             rootNodes = Collections.singletonList(nodeCopy);
         } else {
             // Multiple roots
-            List<Node<E>> newRootNodes = new ArrayList<Node<E>>(size);
-            for(Node<E> rootNode : filteredRootNodes) newRootNodes.add(new NodeCopy<E>(rootNode, nodeFilter));
+            List<Node<E>> newRootNodes = new ArrayList<>(size);
+            for(Node<E> rootNode : filteredRootNodes) newRootNodes.add(new NodeCopy<>(rootNode, nodeFilter));
             rootNodes = Collections.unmodifiableList(newRootNodes);
         }
     }
@@ -94,6 +94,7 @@ public class TreeCopy<E> implements Tree<E> {
     /**
      * Gets the list of root nodes.
      */
+	@Override
     public List<Node<E>> getRootNodes() {
         return rootNodes;
     }

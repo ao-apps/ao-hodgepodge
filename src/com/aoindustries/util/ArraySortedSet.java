@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -63,33 +63,33 @@ public class ArraySortedSet<E> extends AbstractSet<E> implements SortedSet<E>, S
 
     public ArraySortedSet() {
         this.comparator = null;
-        this.elements = new ArrayList<E>();
+        this.elements = new ArrayList<>();
     }
 
     public ArraySortedSet(int initialCapacity) {
         this.comparator = null;
-        this.elements = new ArrayList<E>(initialCapacity);
+        this.elements = new ArrayList<>(initialCapacity);
     }
 
     public ArraySortedSet(Comparator<? super E> comparator) {
         this.comparator = comparator;
-        this.elements = new ArrayList<E>();
+        this.elements = new ArrayList<>();
     }
 
     public ArraySortedSet(Comparator<? super E> comparator, int initialCapacity) {
         this.comparator = comparator;
-        this.elements = new ArrayList<E>(initialCapacity);
+        this.elements = new ArrayList<>(initialCapacity);
     }
 
     public ArraySortedSet(Collection<? extends E> c) {
         this.comparator = null;
-        this.elements = new ArrayList<E>(c.size());
+        this.elements = new ArrayList<>(c.size());
         addAll(c);
     }
 
     public ArraySortedSet(SortedSet<E> s) {
         this.comparator = s.comparator();
-        this.elements = new ArrayList<E>(s);
+        this.elements = new ArrayList<>(s);
     }
 
     @SuppressWarnings("unchecked")

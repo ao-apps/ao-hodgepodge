@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -88,15 +88,12 @@ public class Schema {
     public SortedMap<String,Table> getTables() throws SQLException {
         synchronized(getTablesLock) {
             if(getTablesCache==null) {
-                SortedMap<String,Table> newTables = new TreeMap<String,Table>(DatabaseMetaData.getCollator());
-                ResultSet results = catalog.getMetaData().getMetaData().getTables(catalog.getName(), name, null, null);
-                try {
+                SortedMap<String,Table> newTables = new TreeMap<>(DatabaseMetaData.getCollator());
+                try (ResultSet results = catalog.getMetaData().getMetaData().getTables(catalog.getName(), name, null, null)) {
                     while(results.next()) {
                         Table newTable = new Table(this, results.getString("TABLE_NAME"), results.getString("TABLE_TYPE"));
                         if(newTables.put(newTable.getName(), newTable)!=null) throw new AssertionError("Duplicate table: "+newTable);
                     }
-                } finally {
-                    results.close();
                 }
                 getTablesCache = AoCollections.optimalUnmodifiableSortedMap(newTables);
             }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,9 +43,9 @@ import java.util.TreeSet;
  */
 abstract public class TableCacheTable<K extends Comparable<? super K>,R extends Row<K,? extends R>> extends AbstractTable<K,R> {
 
-    protected final ThreadLocal<Set<? extends R>> unsortedRowsCache = new ThreadLocal<Set<? extends R>>();
+    protected final ThreadLocal<Set<? extends R>> unsortedRowsCache = new ThreadLocal<>();
 
-    private final ThreadLocal<SortedSet<? extends R>> sortedRowsCache = new ThreadLocal<SortedSet<? extends R>>();
+    private final ThreadLocal<SortedSet<? extends R>> sortedRowsCache = new ThreadLocal<>();
 
     private final ThreadLocal<Boolean> rowCachedLoaded = new ThreadLocal<Boolean>() {
         @Override
@@ -57,7 +57,7 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
     private final ThreadLocal<Map<K,R>> rowCache = new ThreadLocal<Map<K,R>>() {
         @Override
         protected Map<K,R> initialValue() {
-            return new HashMap<K,R>();
+            return new HashMap<>();
         }
     };
 
@@ -115,7 +115,7 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
     public SortedSet<? extends R> getRows() throws SQLException {
         SortedSet<? extends R> rows = sortedRowsCache.get();
         if(rows==null) {
-            rows = Collections.unmodifiableSortedSet(new TreeSet<R>(getUnsortedRows()));
+            rows = Collections.unmodifiableSortedSet(new TreeSet<>(getUnsortedRows()));
             sortedRowsCache.set(rows);
         }
         return rows;

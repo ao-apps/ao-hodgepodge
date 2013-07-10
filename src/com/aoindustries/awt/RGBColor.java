@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,9 +22,11 @@
  */
 package com.aoindustries.awt;
 
-import com.aoindustries.util.*;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Gets color integers provided color names.  Supports the standard Unix
@@ -66,11 +68,8 @@ final public class RGBColor {
 	// Load the colors if not already done
 	if (colors == null) {
             // Load the colors
-            colors = new HashMap<String,Integer>();
-
-            // Try to read the RGB file
-            BufferedReader in = new BufferedReader(new InputStreamReader(RGBColor.class.getResourceAsStream("rgb.txt")));
-            try {
+            colors = new HashMap<>();
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(RGBColor.class.getResourceAsStream("rgb.txt")))) {
                 String line;
                 while ((line = in.readLine()) != null) {
                     int len = line.length();
@@ -88,15 +87,11 @@ final public class RGBColor {
                                     )
                                 );
                             } catch (NumberFormatException err) {
-                                IOException ioErr=new IOException("Unable to parse line: "+line);
-                                ioErr.initCause(err);
-                                throw ioErr;
+                                throw new IOException("Unable to parse line: "+line, err);
                             }
                         }
                     }
                 }
-            } finally {
-                in.close();
             }
 	}
 

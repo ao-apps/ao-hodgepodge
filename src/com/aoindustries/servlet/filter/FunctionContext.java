@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,9 +37,9 @@ public class FunctionContext implements Filter {
 
     private static final String INIT_ERROR_MESSAGE = "Function context not initialized.  Please install FunctionContext filter to web.xml";
 
-    private static final ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<ServletContext>();
-    private static final ThreadLocal<HttpServletRequest> requestTL = new ThreadLocal<HttpServletRequest>();
-    private static final ThreadLocal<HttpServletResponse> responseTL = new ThreadLocal<HttpServletResponse>();
+    private static final ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<>();
+    private static final ThreadLocal<HttpServletRequest> requestTL = new ThreadLocal<>();
+    private static final ThreadLocal<HttpServletResponse> responseTL = new ThreadLocal<>();
 
     public static ServletContext getServletContext() {
         ServletContext servletContext = servletContextTL.get();

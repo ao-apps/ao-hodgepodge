@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -55,13 +55,13 @@ public class UnionSet<E> extends AbstractSet<E> {
     /**
      * Will never contain any empty sets.
      */
-    private final List<Set<? extends E>> added = new ArrayList<Set<? extends E>>();
+    private final List<Set<? extends E>> added = new ArrayList<>();
 
     public UnionSet() {
     }
 
     public UnionSet(Collection<? extends E> c) {
-        combined = new HashSet<E>(c.size()*4/3+1);
+        combined = new HashSet<>(c.size()*4/3+1);
     	addAll(c);
     }
 
@@ -75,7 +75,7 @@ public class UnionSet<E> extends AbstractSet<E> {
                 // Avoid rehash at the expense of possibly allocating more than needed when there are duplicates
                 int totalSize = 0;
                 for(Set<? extends E> set : added) totalSize += set.size();
-                combined = new HashSet<E>(totalSize*4/3+1);
+                combined = new HashSet<>(totalSize*4/3+1);
             }
             for(Set<? extends E> set : added) combined.addAll(set);
             added.clear();
@@ -146,7 +146,7 @@ public class UnionSet<E> extends AbstractSet<E> {
 
     @Override
     public boolean add(E e) {
-        if(combined==null) combined = new HashSet<E>();
+        if(combined==null) combined = new HashSet<>();
         return combined.add(e);
     }
 
@@ -175,7 +175,7 @@ public class UnionSet<E> extends AbstractSet<E> {
         if(c.isEmpty()) return false;
         combine();
         if(combined==null) {
-            combined = new HashSet<E>(c);
+            combined = new HashSet<>(c);
             return true;
         } else {
             return combined.addAll(c);
@@ -190,7 +190,7 @@ public class UnionSet<E> extends AbstractSet<E> {
      */
     public void addAll(Set<? extends E> set) {
         if(set.size()<=MAXIMUM_COMBINE_SIZE) {
-            if(combined==null) combined = new HashSet<E>(set);
+            if(combined==null) combined = new HashSet<>(set);
             else combined.addAll(set);
         } else {
             added.add(set);
@@ -203,7 +203,7 @@ public class UnionSet<E> extends AbstractSet<E> {
     @Override
     public boolean retainAll(Collection<?> c) {
         combine();
-        if(combined==null) combined = new HashSet<E>();
+        if(combined==null) combined = new HashSet<>();
         return combined.retainAll(c);
     }
 
@@ -213,7 +213,7 @@ public class UnionSet<E> extends AbstractSet<E> {
     @Override
     public boolean removeAll(Collection<?> c) {
         combine();
-        if(combined==null) combined = new HashSet<E>();
+        if(combined==null) combined = new HashSet<>();
         return combined.removeAll(c);
     }
 

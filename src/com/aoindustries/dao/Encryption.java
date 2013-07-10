@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -52,15 +52,15 @@ public class Encryption {
      * Performs a one-way hash of the plaintext value using SHA-1.
      *
      * @exception  WrappedException  if any problem occurs.
+	 * 
+	 * TODO: Use salted algorithm, update database of stored passwords as passwords are validated
      */
     public static String hash(String plaintext) throws WrappedException {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             md.update(plaintext.getBytes("UTF-8"));
             return hexEncode(md.digest());
-        } catch(NoSuchAlgorithmException err) {
-            throw new WrappedException(err);
-        } catch(UnsupportedEncodingException err) {
+        } catch(NoSuchAlgorithmException | UnsupportedEncodingException err) {
             throw new WrappedException(err);
         }
     }

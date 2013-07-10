@@ -187,13 +187,13 @@ public class Benchmark {
             numberFormat.setMaximumFractionDigits(3);
             int numPasses = Integer.parseInt(args[0]);
             int numFiles = args.length-1;
-            List<List<List<Double>>> throughputs = new ArrayList<List<List<Double>>>(numFiles);
-            List<List<List<Double>>> seekRates = new ArrayList<List<List<Double>>>(numFiles);
+            List<List<List<Double>>> throughputs = new ArrayList<>(numFiles);
+            List<List<List<Double>>> seekRates = new ArrayList<>(numFiles);
             for(int c=0; c<numFiles; c++) {
-                List<List<Double>> fileThroughputs = new ArrayList<List<Double>>(blockSizes.length);
+                List<List<Double>> fileThroughputs = new ArrayList<>(blockSizes.length);
                 for(int d=0; d<blockSizes.length; d++) fileThroughputs.add(new ArrayList<Double>(numPasses));
                 throughputs.add(fileThroughputs);
-                List<List<Double>> fileSeekRates = new ArrayList<List<Double>>(concurrencies.length);
+                List<List<Double>> fileSeekRates = new ArrayList<>(concurrencies.length);
                 for(int d=0; d<concurrencies.length; d++) fileSeekRates.add(new ArrayList<Double>(numPasses));
                 seekRates.add(fileSeekRates);
             }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -91,7 +91,7 @@ public class DatabaseMetaData {
     public SortedMap<String,Catalog> getCatalogs() throws SQLException {
         synchronized(getCatalogsLock) {
             if(getCatalogsCache==null) {
-                SortedMap<String,Catalog> newCatalogs = new TreeMap<String,Catalog>(englishCollator);
+                SortedMap<String,Catalog> newCatalogs = new TreeMap<>(englishCollator);
                 ResultSet results = metaData.getCatalogs();
                 try {
                     while(results.next()) {

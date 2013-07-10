@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -56,7 +56,7 @@ abstract public class AbstractRow<K extends Comparable<? super K>,R extends Abst
      */
     @Override
     public boolean equals(Object o) {
-        if(o==null) return false;
+		if(!(o instanceof AbstractRow<?,?>)) return false;
         if(!clazz.isInstance(o)) return false;
         AbstractRow<K,? extends R> other = clazz.cast(o);
         if(database!=other.database) return false;

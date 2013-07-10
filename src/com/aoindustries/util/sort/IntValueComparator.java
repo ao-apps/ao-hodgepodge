@@ -40,6 +40,7 @@ final public class IntValueComparator implements Comparator<Number> {
     private IntValueComparator() {
     }
 
+	@Override
 	public int compare(Number o1, Number o2) {
 		int i1 = o1.intValue();
 		int i2 = o2.intValue();

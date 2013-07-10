@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -40,6 +40,7 @@ public class MultiFileInputStream extends InputStream {
         this.files=files;
     }
 
+	@Override
     synchronized public int available() throws IOException {
         if(in==null) {
             if(nextFile>=files.length) return 0;
@@ -48,6 +49,7 @@ public class MultiFileInputStream extends InputStream {
         return in.available();
     }
 
+	@Override
     synchronized public void close() throws IOException {
         if(nextFile<files.length) nextFile=files.length;
         FileInputStream tempIn=in;
@@ -57,6 +59,7 @@ public class MultiFileInputStream extends InputStream {
         }
     }
 
+	@Override
     synchronized public void mark(int readlimit) {
         try {
             if(in==null) {
@@ -72,6 +75,7 @@ public class MultiFileInputStream extends InputStream {
         }
     }
 
+	@Override
     synchronized public boolean markSupported() {
         try {
             if(in==null) {
@@ -84,6 +88,7 @@ public class MultiFileInputStream extends InputStream {
         }
     }
 
+	@Override
     synchronized public int read() throws IOException {
         if(in==null) {
             if(nextFile>=files.length) return -1;
@@ -103,6 +108,7 @@ public class MultiFileInputStream extends InputStream {
         return value;
     }
     
+	@Override
     synchronized public int read(byte[] buff) throws IOException {
         if(buff.length>0) {
             if(in==null) {
@@ -125,6 +131,7 @@ public class MultiFileInputStream extends InputStream {
         return 0;
     }
     
+	@Override
     synchronized public int read(byte[] buff, int off, int len) throws IOException {
         if(len>0) {
             if(in==null) {
@@ -147,6 +154,7 @@ public class MultiFileInputStream extends InputStream {
         return 0;
     }
 
+	@Override
     synchronized public void reset() throws IOException {
         if(in==null) {
             if(nextFile>=files.length) {
@@ -158,6 +166,7 @@ public class MultiFileInputStream extends InputStream {
         in.reset();
     }
 
+	@Override
     synchronized public long skip(long n) throws IOException {
         if(n>0) {
             if(in==null) {

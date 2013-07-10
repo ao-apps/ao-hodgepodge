@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -94,7 +94,7 @@ final public class Profiler {
     /**
      * Caches profile method names.
      */
-    private static final SortedArrayList<PrivateMethodProfile> methodProfileCache=new SortedArrayList<PrivateMethodProfile>();
+    private static final SortedArrayList<PrivateMethodProfile> methodProfileCache=new SortedArrayList<>();
 
     private static long methodCount=0;
     private static int concurrency=0;
@@ -217,7 +217,7 @@ final public class Profiler {
      */
     public synchronized static List<MethodProfile> getMethodProfiles() {
         int size=methodProfileCache.size();
-        List<MethodProfile> mps = new ArrayList<MethodProfile>(size);
+        List<MethodProfile> mps = new ArrayList<>(size);
         for(int c=0;c<size;c++) mps.add(new MethodProfile(methodProfileCache.get(c)));
         return mps;
     }

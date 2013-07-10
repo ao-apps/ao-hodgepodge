@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -50,20 +50,20 @@ public class ArraySetTest extends TestCase {
 
     private void doTestPerformance() {
         final int endTestSize = 1000000;
-        Set<Integer> randomValues = new HashSet<Integer>(endTestSize);
+        Set<Integer> randomValues = new HashSet<>(endTestSize);
         for(int testSize = 1; testSize<=endTestSize; testSize *= 10) {
             // Generate testSize random ints
             while(randomValues.size()<testSize) randomValues.add(random.nextInt());
-            List<Integer> randomList = new ArrayList<Integer>(randomValues);
+            List<Integer> randomList = new ArrayList<>(randomValues);
             // Time new
             long startNanos = System.nanoTime();
-            HashSet<Integer> hashSet = new HashSet<Integer>(randomList);
+            HashSet<Integer> hashSet = new HashSet<>(randomList);
             long timeNanos = System.nanoTime() - startNanos;
             System.out.println(testSize+": Created HashSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             startNanos = System.nanoTime();
-            ArrayList<Integer> list = new ArrayList<Integer>(randomList);
+            ArrayList<Integer> list = new ArrayList<>(randomList);
             java.util.Collections.sort(list, HashCodeComparator.getInstance());
-            ArraySet<Integer> arraySet = new ArraySet<Integer>(list);
+            ArraySet<Integer> arraySet = new ArraySet<>(list);
             timeNanos = System.nanoTime() - startNanos;
             System.out.println(testSize+": Created ArraySet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             // Test contains

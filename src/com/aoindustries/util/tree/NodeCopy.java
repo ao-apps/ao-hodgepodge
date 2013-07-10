@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -53,12 +53,12 @@ public class NodeCopy<E> implements Node<E> {
                 children = Collections.emptyList();
             } else if(size==1) {
                 // One child
-                Node<E> nodeCopy = new NodeCopy<E>(nodeChildren.get(0));
+                Node<E> nodeCopy = new NodeCopy<>(nodeChildren.get(0));
                 children = Collections.singletonList(nodeCopy);
             } else {
                 // Multiple children
-                List<Node<E>> childrenCopy = new ArrayList<Node<E>>(size);
-                for(Node<E> child : nodeChildren) childrenCopy.add(new NodeCopy<E>(child));
+                List<Node<E>> childrenCopy = new ArrayList<>(size);
+                for(Node<E> child : nodeChildren) childrenCopy.add(new NodeCopy<>(child));
                 children = Collections.unmodifiableList(childrenCopy);
             }
         }
@@ -72,7 +72,7 @@ public class NodeCopy<E> implements Node<E> {
             children = null;
         } else {
             // Apply filter
-            List<Node<E>> filteredChildren = new ArrayList<Node<E>>(nodeChildren.size());
+            List<Node<E>> filteredChildren = new ArrayList<>(nodeChildren.size());
             for(Node<E> child : nodeChildren) if(!nodeFilter.isNodeFiltered(child)) filteredChildren.add(child);
 
             int size = filteredChildren.size();
@@ -81,12 +81,12 @@ public class NodeCopy<E> implements Node<E> {
                 children = Collections.emptyList();
             } else if(size==1) {
                 // One child
-                Node<E> nodeCopy = new NodeCopy<E>(filteredChildren.get(0), nodeFilter);
+                Node<E> nodeCopy = new NodeCopy<>(filteredChildren.get(0), nodeFilter);
                 children = Collections.singletonList(nodeCopy);
             } else {
                 // Multiple children
-                List<Node<E>> childrenCopy = new ArrayList<Node<E>>(size);
-                for(Node<E> child : filteredChildren) childrenCopy.add(new NodeCopy<E>(child, nodeFilter));
+                List<Node<E>> childrenCopy = new ArrayList<>(size);
+                for(Node<E> child : filteredChildren) childrenCopy.add(new NodeCopy<>(child, nodeFilter));
                 children = Collections.unmodifiableList(childrenCopy);
             }
         }

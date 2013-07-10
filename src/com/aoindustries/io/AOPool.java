@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -122,6 +122,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
         /**
          * Older connections are sorted lower.
          */
+		@Override
         public int compareTo(PooledConnection<C> o) {
             if(id<o.id) return -1;
             if(id>o.id) return 1;
@@ -188,7 +189,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
     private final ThreadLocal<List<PooledConnection<C>>> currentThreadConnections = new ThreadLocal<List<PooledConnection<C>>>() {
         @Override
         public List<PooledConnection<C>> initialValue() {
-            return new ArrayList<PooledConnection<C>>();
+            return new ArrayList<>();
         }
     };
 
@@ -213,9 +214,9 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
         this.maxConnectionAge = maxConnectionAge;
         if(logger==null) throw new IllegalArgumentException("logger is null");
         this.logger = logger;
-        allConnections = new ArrayList<PooledConnection<C>>(poolSize);
-        availableConnections = new PriorityQueue<PooledConnection<C>>(poolSize);
-        busyConnections = new HashSet<PooledConnection<C>>(poolSize*4/3+1);
+        allConnections = new ArrayList<>(poolSize);
+        availableConnections = new PriorityQueue<>(poolSize);
+        busyConnections = new HashSet<>(poolSize*4/3+1);
         start();
     }
 
@@ -230,7 +231,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
             // Prevent any new connections
             isClosed = true;
             // Find any connections that are available and open
-            connsToClose = new ArrayList<C>(availableConnections.size());
+            connsToClose = new ArrayList<>(availableConnections.size());
             for(PooledConnection<C> availableConnection : availableConnections) {
                 synchronized(availableConnection) {
                     C conn = availableConnection.connection;
@@ -347,7 +348,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
                     // Nothing available, is there room to make a new connection?
                     if(allConnections.size()<poolSize) {
                         // Create a new one
-                        pooledConnection = new PooledConnection<C>();
+                        pooledConnection = new PooledConnection<>();
                         allConnections.add(pooledConnection);
                         busyConnections.add(pooledConnection);
                     } else {
@@ -766,7 +767,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
                     if(isClosed) return;
                     // Find any connections that are available and been idle too long
                     int maxIdle = maxIdleTime;
-                    connsToClose = new ArrayList<C>(availableConnections.size());
+                    connsToClose = new ArrayList<>(availableConnections.size());
                     for(PooledConnection<C> availableConnection : availableConnections) {
                         synchronized(availableConnection) {
                             C conn = availableConnection.connection;
