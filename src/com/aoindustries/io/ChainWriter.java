@@ -29,6 +29,7 @@ import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.Sequence;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -43,7 +44,7 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-final public class ChainWriter implements Appendable {
+final public class ChainWriter implements Appendable, Closeable {
 
     // <editor-fold defaultstate="collapsed" desc="PrintWriter wrapping">
     private final PrintWriter out;
@@ -112,9 +113,9 @@ final public class ChainWriter implements Appendable {
     }
 
     /** Close the stream. */
-    public ChainWriter close() {
+	@Override
+    public void close() {
         out.close();
-        return this;
     }
 
     /** Write a single character. */
