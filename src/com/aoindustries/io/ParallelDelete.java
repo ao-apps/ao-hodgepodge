@@ -164,8 +164,13 @@ public class ParallelDelete {
                 if(!directory.exists()) throw new IOException("Directory not found: "+directory.getPath());
                 if(!directory.isDirectory()) throw new IOException("Not a directory: "+directory.getPath());
                 String path = directory.getCanonicalPath();
-                Map<String,FilesystemIteratorRule> rules = Collections.singletonMap(path, FilesystemIteratorRule.OK);
-                FilesystemIterator iterator = new FilesystemIterator(rules, prefixRules, path, false, true);
+                FilesystemIterator iterator = new FilesystemIterator(
+					Collections.singletonMap(path, FilesystemIteratorRule.OK),
+					prefixRules,
+					path,
+					false,
+					true
+				);
                 File nextFile = iterator.getNextFile();
                 if(nextFile!=null) {
                     String relPath = getRelativePath(nextFile, iterator);

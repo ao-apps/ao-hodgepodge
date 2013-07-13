@@ -22,6 +22,8 @@
  */
 package com.aoindustries.lang;
 
+import java.util.Objects;
+
 /**
  * Utilities that help when working with objects.
  *
@@ -37,16 +39,26 @@ public final class ObjectUtils {
 
     /**
      * Gets the hashCode for an object or <code>0</code> when <code>null</code>.
+	 * 
+	 * @see Objects#hashCode(java.lang.Object) as of Java 1.7
+	 * 
+	 * @deprecated  use Objects#hashCode(Object) as of Java 1.7
      */
+	@Deprecated
     public static int hashCode(Object obj) {
-        return obj==null ? 0 : obj.hashCode();
+		return Objects.hashCode(obj);
     }
 
     /**
      * Compares the equality of two objects, including their null states.
+	 * 
+	 * @see Objects#equals(java.lang.Object, java.lang.Object) as of Java 1.7
+	 * 
+	 * @deprecated  use Objects#equals(Object, Object) as of Java 1.7
      */
+	@Deprecated
     public static boolean equals(Object obj1, Object obj2) {
-        return obj1==null ? obj2==null : obj1.equals(obj2);
+		return Objects.equals(obj1, obj2);
     }
 
     /**
