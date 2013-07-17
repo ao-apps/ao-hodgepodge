@@ -69,8 +69,7 @@ public class Benchmark {
                 long bytesRead = 0;
                 long startTime = System.currentTimeMillis();
                 try {
-                    FileInputStream in = new FileInputStream(file);
-                    try {
+                    try (FileInputStream in = new FileInputStream(file)) {
                         while(bytesRead<MAX_READ_BYTES) {
                             long bytesLeft = MAX_READ_BYTES - bytesRead;
                             int len = bytesLeft < blockSize ? (int)bytesLeft : blockSize;
@@ -78,8 +77,6 @@ public class Benchmark {
                             if(ret==-1) break;
                             bytesRead += ret;
                         }
-                    } finally {
-                        in.close();
                     }
                 } catch(IOException err) {
                     ErrorPrinter.printStackTraces(err);
