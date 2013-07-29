@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,39 +22,39 @@
  */
 package com.aoindustries.io;
 
-import java.io.*;
+import java.io.OutputStream;
 
 /**
  * Discards all data.
  */
 public final class NullOutputStream extends OutputStream {
 
-    private static final NullOutputStream instance = new NullOutputStream();
+	private static final NullOutputStream instance = new NullOutputStream();
 
-    public static NullOutputStream getInstance() {
-        return instance;
-    }
+	public static NullOutputStream getInstance() {
+		return instance;
+	}
 
-    private NullOutputStream() {
-    }
+	private NullOutputStream() {
+	}
 
-    @Override
-    public void close() {
-    }
-    
-    @Override
-    public void flush() {
-    }
-    
-    @Override
-    public void write(byte[] b) {
-    }
-    
-    @Override
-    public void write(byte[] b, int off, int len) {
-    }
-    
-    @Override
-    public void write(int b) {
-    }
+	@Override
+	public void close() {
+	}
+
+	@Override
+	public void flush() {
+	}
+
+	@Override
+	public void write(byte[] b) {
+	}
+
+	@Override
+	public void write(byte[] b, int off, int len) {
+	}
+
+	@Override
+	public void write(int b) {
+	}
 }
