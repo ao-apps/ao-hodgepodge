@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.i18n.servlet;
 
+import com.aoindustries.util.i18n.Locales;
 import com.aoindustries.util.i18n.ModifiableResourceBundle;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -69,7 +70,7 @@ public class SetResourceBundleValue extends HttpServlet {
         // Must have the required role
         if("*".equals(role) || request.isUserInRole(role)) {
             String baseName = getUTF8Parameter(request, "baseName");
-            Locale locale = new Locale(getUTF8Parameter(request, "locale")); // TODO: Parse country and variant, too.
+            Locale locale = Locales.parseLocale(getUTF8Parameter(request, "locale"));
             String key = getUTF8Parameter(request, "key");
             String value = getUTF8Parameter(request, "value");
             //for(int c=0;c<value.length();c++) System.out.println(Integer.toHexString(value.charAt(c)));

@@ -29,11 +29,73 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author  AO Industries, Inc.
  */
-public class LocaleUtil {
+public class Locales {
 
-    private LocaleUtil() {}
+    private Locales() {}
     
-    private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>();
+	/**
+	 * Some locale constants not provided directly by Java, along with those provided by Java.
+	 */
+	public static final Locale
+		/** Root locale */
+		ROOT = Locale.ROOT,
+		/** Languages */
+		ARABIC = parseLocale("ar"),
+		BULGARIAN = parseLocale("bg"),
+		CATALAN = parseLocale("ca"),
+		CZECH = parseLocale("cs"),
+		DANISH = parseLocale("da"),
+		GERMAN = Locale.GERMAN,
+		GREEK = parseLocale("el"),
+		ENGLISH = Locale.ENGLISH,
+		SPANISH = parseLocale("es"),
+		ESTONIAN = parseLocale("et"),
+		PERSIAN = parseLocale("fa"),
+		FINNISH = parseLocale("fi"),
+		FRENCH = Locale.FRENCH,
+		HINDI = parseLocale("hi"),
+		CROATIAN = parseLocale("hr"),
+		HUNGARIAN = parseLocale("hu"),
+		// INDONESIAN is now "id" - this matches Java's backward compatibility
+		INDONESIAN = parseLocale("in"),
+		ICELANDIC = parseLocale("is"),
+		ITALIAN = Locale.ITALIAN,
+		JAPANESE = Locale.JAPANESE,
+		KOREAN = Locale.KOREAN,
+		// HEBREW is now "he" - this matches Java's backward compatibility
+		HEBREW = parseLocale("iw"),
+		LITHUANIAN = parseLocale("lt"),
+		LATVIAN = parseLocale("lv"),
+		DUTCH = parseLocale("nl"),
+		NORWEGIAN = parseLocale("no"),
+		POLISH = parseLocale("pl"),
+		PORTUGUESE = parseLocale("pt"),
+		ROMANIAN = parseLocale("ro"),
+		RUSSIAN = parseLocale("ru"),
+		SLOVAK = parseLocale("sk"),
+		SLOVENIAN = parseLocale("sl"),
+		SERBIAN = parseLocale("sr"),
+		SWEDISH = parseLocale("sv"),
+		TURKISH = parseLocale("tr"),
+		CHINESE = Locale.CHINESE,
+		SIMPLIFIED_CHINESE = Locale.SIMPLIFIED_CHINESE,
+		TRADITIONAL_CHINESE = Locale.TRADITIONAL_CHINESE,
+		/** Countries */
+		FRANCE = Locale.FRANCE,
+		GERMANY = Locale.GERMANY,
+		ITALY = Locale.ITALY,
+		JAPAN = Locale.JAPAN,
+		KOREA = Locale.KOREA,
+		CHINA = Locale.SIMPLIFIED_CHINESE,
+		PRC = Locale.SIMPLIFIED_CHINESE,
+		TAIWAN = Locale.TRADITIONAL_CHINESE,
+		UK = Locale.UK,
+		US = Locale.US,
+		CANADA = Locale.CANADA,
+		CANADA_FRENCH = Locale.CANADA_FRENCH
+	;
+
+	private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>();
 
     /**
      * Parses locales from their <code>toString</code> representation.  Caches
@@ -61,7 +123,7 @@ public class LocaleUtil {
     /**
      * Determines if the provided locale should be displayed from right to left.
      */
-    public static final boolean isRightToLeft(Locale locale) {
+    public static boolean isRightToLeft(Locale locale) {
         String language = locale.getLanguage();
         return
             "ar".equals(language)    // arabic

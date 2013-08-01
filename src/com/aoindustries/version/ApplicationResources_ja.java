@@ -23,8 +23,8 @@
 package com.aoindustries.version;
 
 import com.aoindustries.util.i18n.EditableResourceBundle;
+import com.aoindustries.util.i18n.Locales;
 import java.io.File;
-import java.util.Locale;
 
 /**
  * Provides a simplified interface for obtaining localized values from the ApplicationResources.properties files.
@@ -39,7 +39,7 @@ public final class ApplicationResources_ja extends EditableResourceBundle {
      */
     public ApplicationResources_ja() {
         super(
-            Locale.JAPANESE,
+            Locales.JAPANESE,
             ApplicationResources.bundleSet,
             new File(System.getProperty("user.home")+"/common/aodev/cvswork/aocode-public/src/com/aoindustries/version/ApplicationResources_ja.properties")
         );

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,19 +31,19 @@ import junit.framework.TestSuite;
 /**
  * @author  AO Industries, Inc.
  */
-public class LocaleUtilTest extends TestCase {
+public class LocalesTest extends TestCase {
 
-    public LocaleUtilTest(String testName) {
+    public LocalesTest(String testName) {
         super(testName);
     }
 
     public static Test suite() {
-        return new TestSuite(LocaleUtilTest.class);
+        return new TestSuite(LocalesTest.class);
     }
 
     public void testParseLocale() throws IOException {
         for(Locale locale : Locale.getAvailableLocales()) {
-            Locale parsed = LocaleUtil.parseLocale(locale.toString());
+            Locale parsed = Locales.parseLocale(locale.toString());
             // System.out.println(locale+"->"+parsed);
             assertEquals(locale, parsed);
         }
