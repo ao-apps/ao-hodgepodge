@@ -33,7 +33,7 @@ public class LocaleUtil {
 
     private LocaleUtil() {}
     
-    private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>();
 
     /**
      * Parses locales from their <code>toString</code> representation.  Caches

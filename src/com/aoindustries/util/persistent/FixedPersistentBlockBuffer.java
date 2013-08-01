@@ -152,7 +152,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
     }
 
     private long lowestFreeId = 0; // One direction scan used before knownFreeIds is populated
-    private final SortedSet<Long> knownFreeIds = new TreeSet<>();
+    private final SortedSet<Long> knownFreeIds = new TreeSet<Long>();
 
     /**
      * Allocates a block.

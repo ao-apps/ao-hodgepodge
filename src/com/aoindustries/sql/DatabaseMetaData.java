@@ -43,7 +43,7 @@ public class DatabaseMetaData {
     /**
      * Gets the collator used for result ordering.
      */
-    public static final Collator getCollator() {
+    public static Collator getCollator() {
         return englishCollator;
     }
 
@@ -91,7 +91,7 @@ public class DatabaseMetaData {
     public SortedMap<String,Catalog> getCatalogs() throws SQLException {
         synchronized(getCatalogsLock) {
             if(getCatalogsCache==null) {
-                SortedMap<String,Catalog> newCatalogs = new TreeMap<>(englishCollator);
+                SortedMap<String,Catalog> newCatalogs = new TreeMap<String,Catalog>(englishCollator);
                 ResultSet results = metaData.getCatalogs();
                 try {
                     while(results.next()) {

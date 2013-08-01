@@ -172,7 +172,8 @@ public abstract class QueryReport implements Report {
         try {
             try {
                 beforeQuery(parameterValues, conn);
-                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+                try {
 					try {
 						/**
 						 * Substitute any parameters with the values provided.
@@ -191,10 +192,11 @@ public abstract class QueryReport implements Report {
 						}
 
 						DatabaseConnection.setParams(pstmt, sqlParams);
-						try (ResultSet results = pstmt.executeQuery()) {
+						ResultSet results = pstmt.executeQuery();
+						try {
 							ResultSetMetaData meta = results.getMetaData();
 							int numColumns = meta.getColumnCount();
-							List<QueryColumn> columns = new ArrayList<>();
+							List<QueryColumn> columns = new ArrayList<QueryColumn>();
 							for(int columnIndex=1; columnIndex<=numColumns; columnIndex++) {
 								final Alignment alignment;
 								switch(meta.getColumnType(columnIndex)) {
@@ -218,16 +220,19 @@ public abstract class QueryReport implements Report {
 								}
 								columns.add(new QueryColumn(this, meta.getColumnName(columnIndex), alignment));
 							}
-							List<List<Object>> tableData = new ArrayList<>();
+							List<List<Object>> tableData = new ArrayList<List<Object>>();
 							while(results.next()) {
-								List<Object> row = new ArrayList<>(numColumns);
+								List<Object> row = new ArrayList<Object>(numColumns);
 								for(int columnIndex=1; columnIndex<=numColumns; columnIndex++) {
 									// Convert arrays to lists
 									Object value = results.getObject(columnIndex);
 									if(value instanceof Array) {
-										List<Object> values = new ArrayList<>();
-										try (ResultSet arrayResults = ((Array)value).getResultSet()) {
+										List<Object> values = new ArrayList<Object>();
+										ResultSet arrayResults = ((Array)value).getResultSet();
+										try {
 											while(arrayResults.next()) values.add(arrayResults.getObject(2));
+										} finally {
+											arrayResults.close();
 										}
 										value = AoCollections.optimalUnmodifiableList(values);
 									}
@@ -239,10 +244,14 @@ public abstract class QueryReport implements Report {
 								Collections.unmodifiableList(columns),
 								Collections.unmodifiableList(tableData)
 							);
+						} finally {
+							results.close();
 						}
 					} catch(SQLException e) {
 						throw new WrappedSQLException(e, pstmt);
 					}
+				} finally {
+					pstmt.close();
 				}
             } finally {
                 afterQuery(parameterValues, conn);

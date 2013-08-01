@@ -50,7 +50,7 @@ public class Index {
         this.name = name;
         this.type = type;
         if(columns.isEmpty()) throw new IllegalArgumentException("columns.isEmpty()");
-        this.columns = AoCollections.optimalUnmodifiableList(new ArrayList<>(columns));
+        this.columns = AoCollections.optimalUnmodifiableList(new ArrayList<Column>(columns));
     }
 
     @Override

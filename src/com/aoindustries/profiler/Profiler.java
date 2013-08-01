@@ -94,7 +94,7 @@ final public class Profiler {
     /**
      * Caches profile method names.
      */
-    private static final SortedArrayList<PrivateMethodProfile> methodProfileCache=new SortedArrayList<>();
+    private static final SortedArrayList<PrivateMethodProfile> methodProfileCache=new SortedArrayList<PrivateMethodProfile>();
 
     private static long methodCount=0;
     private static int concurrency=0;
@@ -217,7 +217,7 @@ final public class Profiler {
      */
     public synchronized static List<MethodProfile> getMethodProfiles() {
         int size=methodProfileCache.size();
-        List<MethodProfile> mps = new ArrayList<>(size);
+        List<MethodProfile> mps = new ArrayList<MethodProfile>(size);
         for(int c=0;c<size;c++) mps.add(new MethodProfile(methodProfileCache.get(c)));
         return mps;
     }

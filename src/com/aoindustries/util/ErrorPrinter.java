@@ -167,7 +167,7 @@ public class ErrorPrinter {
             appendln("    Exceptions", out);
             if(thrown==null) appendln("        No exceptions", out);
             else {
-                List<Throwable> closed = new ArrayList<>();
+                List<Throwable> closed = new ArrayList<Throwable>();
                 closed.add(thrown);
                 printThrowables(thrown, out, 8, closed);
             }

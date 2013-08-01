@@ -115,7 +115,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
      * entry will be <code>SECTOR_SIZE</code> in length, even if at the end of the
      * capacity.
      */
-    private final Map<Long,byte[]> writeCache = new HashMap<>();
+    private final Map<Long,byte[]> writeCache = new HashMap<Long,byte[]>();
 
     /**
      * Creates a read-write test buffer with protection level <code>NONE</code>.
@@ -137,7 +137,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
                 if(!writeCache.isEmpty()) {
                     long capacity = wrapped.capacity();
                     // Write current write cache in a partial state
-                    List<Long> sectors = new ArrayList<>(writeCache.keySet());
+                    List<Long> sectors = new ArrayList<Long>(writeCache.keySet());
                     Collections.shuffle(sectors, random);
                     int numToWrite = random.nextInt(sectors.size());
                     for(int c=0; c<numToWrite; c++) {

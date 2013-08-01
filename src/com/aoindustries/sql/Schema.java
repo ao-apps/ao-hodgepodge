@@ -88,13 +88,16 @@ public class Schema {
     public SortedMap<String,Table> getTables() throws SQLException {
         synchronized(getTablesLock) {
             if(getTablesCache==null) {
-                SortedMap<String,Table> newTables = new TreeMap<>(DatabaseMetaData.getCollator());
-                try (ResultSet results = catalog.getMetaData().getMetaData().getTables(catalog.getName(), name, null, null)) {
+                SortedMap<String,Table> newTables = new TreeMap<String,Table>(DatabaseMetaData.getCollator());
+				ResultSet results = catalog.getMetaData().getMetaData().getTables(catalog.getName(), name, null, null);
+                try {
                     while(results.next()) {
                         Table newTable = new Table(this, results.getString("TABLE_NAME"), results.getString("TABLE_TYPE"));
                         if(newTables.put(newTable.getName(), newTable)!=null) throw new AssertionError("Duplicate table: "+newTable);
                     }
-                }
+                } finally {
+					results.close();
+				}
                 getTablesCache = AoCollections.optimalUnmodifiableSortedMap(newTables);
             }
             return getTablesCache;

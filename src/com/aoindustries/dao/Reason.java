@@ -38,7 +38,7 @@ public abstract class Reason implements Comparable<Reason> {
         if(newReason!=null) {
             int size = reasons.size();
             if(size==0) {
-                reasons = new ArrayList<>();
+                reasons = new ArrayList<Reason>();
                 reasons.add(newReason);
             } else {
                 boolean needAdd = true;

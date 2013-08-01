@@ -122,7 +122,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
         }
     }
 
-    private static final ConcurrentMap<String,Object> driversLoaded = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String,Object> driversLoaded = new ConcurrentHashMap<String,Object>();
 
     /**
      * Loads a driver at most once.

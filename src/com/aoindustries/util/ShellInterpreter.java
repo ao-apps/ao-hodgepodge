@@ -63,7 +63,7 @@ abstract public class ShellInterpreter implements Runnable {
 
     private ShellInterpreter parent;
 
-    private final List<ShellInterpreter> jobs=new ArrayList<>();
+    private final List<ShellInterpreter> jobs=new ArrayList<ShellInterpreter>();
 
     protected String status="Running";
 
@@ -295,7 +295,7 @@ abstract public class ShellInterpreter implements Runnable {
             handleCommandImpl(args);
         } else {
             // The arguments that have been read so far
-            List<String> arguments=new ArrayList<>();
+            List<String> arguments=new ArrayList<String>();
 
             // The argument that is being read.
             StringBuilder argument=new StringBuilder();

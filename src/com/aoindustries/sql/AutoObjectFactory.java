@@ -59,7 +59,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
         }
     }
 
-    private static final ConcurrentMap<Class<?>,Method> valueOfIntMethods = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>,Method> valueOfIntMethods = new ConcurrentHashMap<Class<?>,Method>();
 
     /**
      * Gets the <code>valueOf(int)</code> for the provided class or <code>null</code> if doesn't
@@ -82,7 +82,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
         return existing==notExists ? null : existing;
     }
 
-    private static final ConcurrentMap<Class<?>,Method> valueOfStringMethods = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>,Method> valueOfStringMethods = new ConcurrentHashMap<Class<?>,Method>();
 
     /**
      * Gets the <code>valueOf(String)</code> for the provided class or <code>null</code> if doesn't
@@ -205,7 +205,7 @@ public class AutoObjectFactory<T> implements ObjectFactory<T> {
                                     String value = result.getString(c);
                                     params[i] = result.wasNull() ? null : valueOfStringMethod.invoke(null, value);
                                 } else {
-                                    if(warnings==null) warnings = new ArrayList<>();
+                                    if(warnings==null) warnings = new ArrayList<String>();
                                     warnings.add("Unexpected parameter class: "+paramType.getName());
                                     continue CONSTRUCTORS;
                                 }

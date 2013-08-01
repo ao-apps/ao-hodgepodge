@@ -345,7 +345,7 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
     public Set<? extends R> getOrderedRows(Iterable<? extends K> keys) throws NoRowException, SQLException {
         Iterator<? extends K> iter = keys.iterator();
         if(!iter.hasNext()) return Collections.emptySet();
-        Set<R> results = new LinkedHashSet<>();
+        Set<R> results = new LinkedHashSet<R>();
         do {
             results.add(get(iter.next()));
         } while(iter.hasNext());
@@ -359,7 +359,7 @@ abstract public class AbstractTable<K extends Comparable<? super K>,R extends Ro
     public SortedSet<? extends R> getRows(Iterable<? extends K> keys) throws NoRowException, SQLException {
         Iterator<? extends K> iter = keys.iterator();
         if(!iter.hasNext()) return AoCollections.emptySortedSet();
-        SortedSet<R> results = new TreeSet<>();
+        SortedSet<R> results = new TreeSet<R>();
         do {
             results.add(get(iter.next()));
         } while(iter.hasNext());

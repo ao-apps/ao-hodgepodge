@@ -109,27 +109,27 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     /**
      * All queries are performed on the concurrent map.
      */
-    private final Map<String,String> valueMap = new ConcurrentHashMap<>();
+    private final Map<String,String> valueMap = new ConcurrentHashMap<String,String>();
 
     /**
      * All validated queries are performed on this concurrent map.
      */
-    private final Map<String,Long> validatedMap = new ConcurrentHashMap<>();
+    private final Map<String,Long> validatedMap = new ConcurrentHashMap<String,Long>();
 
     /**
      * All modified queries are performed on this concurrent map.
      */
-    private final Map<String,Long> modifiedMap = new ConcurrentHashMap<>();
+    private final Map<String,Long> modifiedMap = new ConcurrentHashMap<String,Long>();
 
     /**
      * All type queries are performed on this concurrent map.
      */
-    private final Map<String,MediaType> mediaTypeMap = new ConcurrentHashMap<>();
+    private final Map<String,MediaType> mediaTypeMap = new ConcurrentHashMap<String,MediaType>();
 
     /**
      * All isBlockElement queries are performed on this concurrent map.
      */
-    private final Map<String,Boolean> isBlockElementMap = new ConcurrentHashMap<>();
+    private final Map<String,Boolean> isBlockElementMap = new ConcurrentHashMap<String,Boolean>();
 
     /**
      * The properties file is only used for updates.
@@ -151,7 +151,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         private boolean isCommentLine = false;
         private StringBuilder currentComment = new StringBuilder();
 
-        private List<String> comments = new ArrayList<>();
+        private List<String> comments = new ArrayList<String>();
 
         /**
          * Adds buffered comment to comments if non-empty.
@@ -347,7 +347,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
                 private static final long serialVersionUID = 6953022173340009928L;
                 @Override
                 public Enumeration<Object> keys() {
-                    SortedSet<Object> sortedSet = new TreeSet<>(Collator.getInstance(Locale.ENGLISH));
+                    SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ENGLISH));
                     Enumeration<Object> e = super.keys();
                     while(e.hasMoreElements()) sortedSet.add(e.nextElement());
                     return Collections.enumeration(sortedSet);
@@ -355,7 +355,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             };
             writer.putAll(properties);
             File tmpFile = File.createTempFile("ApplicationResources", null, sourceFile.getParentFile());
-            OutputStream out = out = new BufferedOutputStream(new FileOutputStream(tmpFile));
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile));
             try {
                 // Write any comments from when file was read
                 if(sourceFileComments!=null) {

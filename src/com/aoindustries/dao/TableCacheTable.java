@@ -43,9 +43,9 @@ import java.util.TreeSet;
  */
 abstract public class TableCacheTable<K extends Comparable<? super K>,R extends Row<K,? extends R>> extends AbstractTable<K,R> {
 
-    protected final ThreadLocal<Set<? extends R>> unsortedRowsCache = new ThreadLocal<>();
+    protected final ThreadLocal<Set<? extends R>> unsortedRowsCache = new ThreadLocal<Set<? extends R>>();
 
-    private final ThreadLocal<SortedSet<? extends R>> sortedRowsCache = new ThreadLocal<>();
+    private final ThreadLocal<SortedSet<? extends R>> sortedRowsCache = new ThreadLocal<SortedSet<? extends R>>();
 
     private final ThreadLocal<Boolean> rowCachedLoaded = new ThreadLocal<Boolean>() {
         @Override
@@ -57,7 +57,7 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
     private final ThreadLocal<Map<K,R>> rowCache = new ThreadLocal<Map<K,R>>() {
         @Override
         protected Map<K,R> initialValue() {
-            return new HashMap<>();
+            return new HashMap<K,R>();
         }
     };
 
@@ -115,7 +115,7 @@ abstract public class TableCacheTable<K extends Comparable<? super K>,R extends 
     public SortedSet<? extends R> getRows() throws SQLException {
         SortedSet<? extends R> rows = sortedRowsCache.get();
         if(rows==null) {
-            rows = Collections.unmodifiableSortedSet(new TreeSet<>(getUnsortedRows()));
+            rows = Collections.unmodifiableSortedSet(new TreeSet<R>(getUnsortedRows()));
             sortedRowsCache.set(rows);
         }
         return rows;

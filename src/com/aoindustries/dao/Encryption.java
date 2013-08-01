@@ -60,7 +60,9 @@ public class Encryption {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             md.update(plaintext.getBytes("UTF-8"));
             return hexEncode(md.digest());
-        } catch(NoSuchAlgorithmException | UnsupportedEncodingException err) {
+        } catch(NoSuchAlgorithmException err) {
+            throw new WrappedException(err);
+        } catch(UnsupportedEncodingException err) {
             throw new WrappedException(err);
         }
     }

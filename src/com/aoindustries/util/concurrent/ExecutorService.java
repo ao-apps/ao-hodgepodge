@@ -75,7 +75,7 @@ final public class ExecutorService implements Disposable {
      * Keeps track of which threads are running from the per-processor executor.
      * TRUE if from per-processor, FALSE if from unbounded, or null if from neither.
      */
-    private static final ThreadLocal<Boolean> isPerProcessor = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> isPerProcessor = new ThreadLocal<Boolean>();
 
     /**
      * Persist threads are named with these prefixes.
@@ -256,7 +256,7 @@ final public class ExecutorService implements Disposable {
      * may be completed or canceled during dispose.
      */
     private long nextIncompleteFutureId = 1;
-    private final Map<Long,Future<?>> incompleteFutures = new HashMap<>();
+    private final Map<Long,Future<?>> incompleteFutures = new HashMap<Long,Future<?>>();
 
     class IncompleteFuture<V> implements Future<V> {
 
@@ -328,7 +328,7 @@ final public class ExecutorService implements Disposable {
                 }
             }
         );
-        Future<T> incompleteFuture = new IncompleteFuture<>(incompleteFutureId, future);
+        Future<T> incompleteFuture = new IncompleteFuture<T>(incompleteFutureId, future);
         incompleteFutures.put(incompleteFutureId, incompleteFuture);
         return incompleteFuture;
     }
@@ -359,7 +359,7 @@ final public class ExecutorService implements Disposable {
             },
             (Object)null
         );
-        Future<Object> future = new IncompleteFuture<>(incompleteFutureId, submitted);
+        Future<Object> future = new IncompleteFuture<Object>(incompleteFutureId, submitted);
         incompleteFutures.put(incompleteFutureId, future);
         return future;
     }
@@ -538,7 +538,7 @@ final public class ExecutorService implements Disposable {
     private <T> Future<T> submit(java.util.concurrent.ExecutorService executor, Callable<T> task, long delay) {
         assert Thread.holdsLock(privateLock);
         final Long incompleteFutureId = nextIncompleteFutureId++;
-        final IncompleteCallableTimerTask<T> timerTask = new IncompleteCallableTimerTask<>(incompleteFutureId, executor, task);
+        final IncompleteCallableTimerTask<T> timerTask = new IncompleteCallableTimerTask<T>(incompleteFutureId, executor, task);
         getTimer().schedule(timerTask, delay);
         incompleteFutures.put(incompleteFutureId, timerTask);
         return timerTask;
@@ -756,7 +756,7 @@ final public class ExecutorService implements Disposable {
                     incompleteFutures.clear();
                 } else {
                     // Build list of tasks that should be waited for.
-                    waitFutures = new ArrayList<>(incompleteFutures.values());
+                    waitFutures = new ArrayList<Future<?>>(incompleteFutures.values());
                     incompleteFutures.clear();
                 }
             } else {
@@ -774,7 +774,11 @@ final public class ExecutorService implements Disposable {
                 if(nanosRemaining>=0) {
                     try {
                         future.get(nanosRemaining, TimeUnit.NANOSECONDS);
-                    } catch(CancellationException | ExecutionException | InterruptedException e) {
+                    } catch(CancellationException e) {
+                        // OK on shutdown
+                    } catch(ExecutionException e) {
+                        // OK on shutdown
+                    } catch(InterruptedException e) {
                         // OK on shutdown
                     } catch(TimeoutException e) {
                         // Cancel after timeout

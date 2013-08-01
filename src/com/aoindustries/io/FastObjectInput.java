@@ -44,7 +44,7 @@ import java.util.List;
  */
 public class FastObjectInput implements ObjectInput {
 
-    private static final ThreadLocal<FastObjectInput> threadFastObjectInput = new ThreadLocal<>();
+    private static final ThreadLocal<FastObjectInput> threadFastObjectInput = new ThreadLocal<FastObjectInput>();
 
     /**
      * Gets the wrapper for the provided ObjectOutput, creating if needed.
@@ -80,8 +80,8 @@ public class FastObjectInput implements ObjectInput {
     /**
      * A mapping of generated IDs to classes.
      */
-    private final List<Class<?>> classesById = new ArrayList<>();
-    private final List<Long> serialVersionUIDsById = new ArrayList<>();
+    private final List<Class<?>> classesById = new ArrayList<Class<?>>();
+    private final List<Long> serialVersionUIDsById = new ArrayList<Long>();
     private int nextClassId = 0;
 
     private Class<?> lastClass = null;
@@ -90,7 +90,7 @@ public class FastObjectInput implements ObjectInput {
     /**
      * A mapping of generated IDs to strings.
      */
-    private final List<String> stringsById = new ArrayList<>();
+    private final List<String> stringsById = new ArrayList<String>();
     private int nextStringId = 0;
 
     private String lastString = null;

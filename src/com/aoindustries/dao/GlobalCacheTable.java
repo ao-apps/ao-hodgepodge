@@ -54,7 +54,7 @@ abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends
 
     private final Object rowCacheLock = new Object();
     private boolean rowCacheLoaded = false;
-    private final Map<K,R> rowCache = new HashMap<>();
+    private final Map<K,R> rowCache = new HashMap<K,R>();
 
     protected GlobalCacheTable(Class<K> keyClass, Class<R> rowClass, DaoDatabase database) {
         super(keyClass, rowClass, database);
@@ -106,7 +106,7 @@ abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends
         synchronized(sortedRowsCacheLock) {
             SortedSet<? extends R> rows = sortedRowsCache;
             if(rows==null) {
-                rows = Collections.unmodifiableSortedSet(new TreeSet<>(getUnsortedRows()));
+                rows = Collections.unmodifiableSortedSet(new TreeSet<R>(getUnsortedRows()));
                 sortedRowsCache = rows;
             }
             return rows;

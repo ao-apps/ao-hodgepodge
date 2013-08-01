@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public class FastObjectOutput implements ObjectOutput {
 
-    private static final ThreadLocal<FastObjectOutput> threadFastObjectOutput = new ThreadLocal<>();
+    private static final ThreadLocal<FastObjectOutput> threadFastObjectOutput = new ThreadLocal<FastObjectOutput>();
 
     /**
      * Gets the wrapper for the provided ObjectOutput, creating if needed.
@@ -173,7 +173,7 @@ public class FastObjectOutput implements ObjectOutput {
                     if(nextClassId<MAP_ARRAY_LENGTH) {
                         classesArray[nextClassId] = clazz;
                     } else {
-                        if(classesMap==null) classesMap = new HashMap<>();
+                        if(classesMap==null) classesMap = new HashMap<Class<?>,Integer>();
                         classesMap.put(clazz, nextClassId);
                     }
                     nextClassId++;
@@ -231,7 +231,7 @@ public class FastObjectOutput implements ObjectOutput {
                     if(nextStringId<MAP_ARRAY_LENGTH) {
                         stringsArray[nextStringId] = value;
                     } else {
-                        if(stringsMap==null) stringsMap = new HashMap<>();
+                        if(stringsMap==null) stringsMap = new HashMap<String,Integer>();
                         stringsMap.put(value, nextStringId);
                     }
                     nextStringId++;

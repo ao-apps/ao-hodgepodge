@@ -81,7 +81,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
     /**
      * Tracks free space on a per power-of-two basis.
      */
-    private final List<SortedSet<Long>> freeSpaceMaps = new ArrayList<>(64);
+    private final List<SortedSet<Long>> freeSpaceMaps = new ArrayList<SortedSet<Long>>(64);
 
     /**
      * Keeps track of modification counts to try to detect concurrent modifications.
@@ -299,7 +299,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
             //pbuffer.barrier(false); // Not required because if this write fails either side will still be consistent?
         }
         SortedSet<Long> fsm = freeSpaceMaps.get(blockSizeBits);
-        if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<>());
+        if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
         if(!fsm.add(id)) throw new AssertionError("Free space map already contains entry: "+id);
         //System.out.println("DEBUG: Added to fsm: fsm["+blockSizeBits+"].size()="+fsm.size());
     }
@@ -346,7 +346,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
                 pbuffer.put(nextId, (byte)blockSizeBits);
                 if(recursionDepth==0) barrier(false); // When splitting, the right side must have appropriate size headers before left side is updated
             }
-            if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<>());
+            if(fsm==null) freeSpaceMaps.set(blockSizeBits, fsm = new TreeSet<Long>());
             fsm.add(nextId);
             if(PersistentCollections.ASSERT) assert pbuffer.get(biggerAvailableId)!=(byte)blockSizeBits;
             pbuffer.put(biggerAvailableId, (byte)blockSizeBits);

@@ -125,7 +125,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
                             // synchronizingNode already contains the right node
                         } else {
                             // Otherwise, insert in the current index
-                            synchronizingNode = new SynchronizingMutableTreeNode<>(value);
+                            synchronizingNode = new SynchronizingMutableTreeNode<E>(value);
                             treeModel.insertNodeInto(synchronizingNode, this, index);
                         }
                     }

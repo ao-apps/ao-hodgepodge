@@ -566,7 +566,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
             }
 
             // Get the set of all allocated ids (except the meta data id).
-            Map<Long,Boolean> allocatedIds = new HashMap<>();
+            Map<Long,Boolean> allocatedIds = new HashMap<Long,Boolean>();
             while(ids.hasNext()) allocatedIds.put(ids.next(), false);
 
             // _head is the correct value

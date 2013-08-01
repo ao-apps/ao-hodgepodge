@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.lang.reflect.Methods;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -308,28 +309,65 @@ public class PostgresqlConnectionWrapper implements Connection {
         return conn.createStruct(typeName, attributes);
     }
 
-	@Override
+	// Java 1.7: @Override
 	public int getNetworkTimeout() throws SQLException {
-		return conn.getNetworkTimeout();
+		return Methods.invoke(
+			Integer.TYPE,
+			conn,
+			"getNetworkTimeout"
+		);
+		// Java 1.7: return conn.getNetworkTimeout();
 	}
 
-	@Override
+	// Java 1.7: @Override
 	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-		conn.setNetworkTimeout(executor, milliseconds);
+		Methods.invoke(
+			Void.class,
+			conn,
+			"setNetworkTimeout",
+			new Class[] {
+				Executor.class,
+				Integer.TYPE
+			},
+			new Object[] {
+				executor,
+				milliseconds
+			}
+		);
+		// Java 1.7: conn.setNetworkTimeout(executor, milliseconds);
 	}
 
-	@Override
+	// Java 1.7: @Override
 	public void setSchema(String schema) throws SQLException {
-		conn.setSchema(schema);
+		Methods.invoke(
+			Void.class,
+			conn,
+			"setSchema",
+			String.class,
+			schema
+		);
+		// Java 1.7: conn.setSchema(schema);
 	}
 
-	@Override
+	// Java 1.7: @Override
 	public String getSchema() throws SQLException {
-		return conn.getSchema();
+		return Methods.invoke(
+			String.class,
+			conn,
+			"getSchema"
+		);
+		// Java 1.7: return conn.getSchema();
 	}
 
-	@Override
+	// Java 1.7: @Override
 	public void abort(Executor executor) throws SQLException {
-		conn.abort(executor);
+		Methods.invoke(
+			Void.class,
+			conn,
+			"abort",
+			Executor.class,
+			executor
+		);
+		// Java 1.7: conn.abort(executor);
 	}
 }

@@ -121,14 +121,19 @@ public class ParallelUnpack {
                         } finally {
                             SS.close();
                         }
-                        try (
-							OutputStream out = socket.getOutputStream();
-							InputStream in = socket.getInputStream()
-						) {
-							parallelUnpack(path, in, verboseOutput, dryRun, force);
-							out.write(PackProtocol.END);
-							out.flush();
-                        }
+						OutputStream out = socket.getOutputStream();
+						try {
+							InputStream in = socket.getInputStream();
+							try {
+								parallelUnpack(path, in, verboseOutput, dryRun, force);
+								out.write(PackProtocol.END);
+								out.flush();
+							} finally {
+								in.close();
+							}
+						} finally {
+							out.close();
+						}
                     } finally {
                         if(socket!=null) socket.close();
                     }
@@ -180,7 +185,7 @@ public class ParallelUnpack {
             verboseThreadRun = null;
             verboseThread = null;
         } else {
-            verboseQueue = new ArrayBlockingQueue<>(VERBOSE_QUEUE_SIZE);
+            verboseQueue = new ArrayBlockingQueue<String>(VERBOSE_QUEUE_SIZE);
             verboseThreadRun = new boolean[] {true};
             verboseThread = new Thread("ParallelUnpack - Verbose Thread") {
                 @Override
@@ -219,9 +224,9 @@ public class ParallelUnpack {
             final byte[] buffer = PackProtocol.BUFFER_SIZE == BufferManager.BUFFER_SIZE ? BufferManager.getBytes() : new byte[PackProtocol.BUFFER_SIZE];
             try {
                 // Hard link management
-                final Map<Long,PathAndCount> linkPathAndCounts = new HashMap<>();
+                final Map<Long,PathAndCount> linkPathAndCounts = new HashMap<Long,PathAndCount>();
                 // Directory modify time management
-                final Map<String,Stack<PathAndModifyTime>> directoryModifyTimes = new HashMap<>();
+                final Map<String,Stack<PathAndModifyTime>> directoryModifyTimes = new HashMap<String,Stack<PathAndModifyTime>>();
                 try {
                     // Main loop
                     while(true) {
@@ -335,7 +340,7 @@ public class ParallelUnpack {
                                     uf.mkdir().chown(uid, gid).setMode(mode);
                                 }
                             }
-                            if(mtimeStack==null) directoryModifyTimes.put(subtreeRoot, mtimeStack = new Stack<>());
+                            if(mtimeStack==null) directoryModifyTimes.put(subtreeRoot, mtimeStack = new Stack<PathAndModifyTime>());
                             mtimeStack.push(new PathAndModifyTime(packPath+'/', modifyTime));
                         } else if(type==PackProtocol.SYMLINK) {
                             int uid = compressedIn.readInt();

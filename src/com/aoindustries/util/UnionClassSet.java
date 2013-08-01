@@ -59,7 +59,7 @@ public class UnionClassSet<E> extends AbstractSet<E> {
     /**
      * Will never contain any empty sets.
      */
-    private final Map<Class<?>, Set<? extends E>> added = new LinkedHashMap<>();
+    private final Map<Class<?>, Set<? extends E>> added = new LinkedHashMap<Class<?>, Set<? extends E>>();
 
     public UnionClassSet() {
     }

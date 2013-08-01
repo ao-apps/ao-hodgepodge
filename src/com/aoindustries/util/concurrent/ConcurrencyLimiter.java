@@ -44,7 +44,7 @@ final public class ConcurrencyLimiter<K,R> {
 		private Throwable throwable;
 	}
 
-	private final Map<K,ResultsCache<R>> executeSerializedStatus = new HashMap<>();
+	private final Map<K,ResultsCache<R>> executeSerializedStatus = new HashMap<K,ResultsCache<R>>();
 
 	public ConcurrencyLimiter() {
 	}
@@ -74,7 +74,7 @@ final public class ConcurrencyLimiter<K,R> {
 			// Look for any existing entry for this key
 			ResultsCache<R>resultsCacheT = executeSerializedStatus.get(key);
 			if(resultsCacheT==null) {
-				executeSerializedStatus.put(key, resultsCacheT = new ResultsCache<>());
+				executeSerializedStatus.put(key, resultsCacheT = new ResultsCache<R>());
 			}
 			resultsCache = resultsCacheT;
 			isFirstThread = resultsCache.threadCount==0;

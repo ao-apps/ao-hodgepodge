@@ -58,7 +58,7 @@ abstract public class BlockBufferTestParent extends TestCase {
         tempFile.deleteOnExit();
         PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
         try {
-            Set<Long> allocatedIds = new HashSet<>();
+            Set<Long> allocatedIds = new HashSet<Long>();
             for(int c=0;c<100;c++) {
                 if(((c+1)%10)==0) System.out.println(getClass()+": testAllocateDeallocate: Test loop "+(c+1)+" of 100");
                 // Allocate some blocks, must not return duplicate ids.
@@ -69,7 +69,7 @@ abstract public class BlockBufferTestParent extends TestCase {
 
                 // Iterate the block ids.  Each must be allocated.  All allocated must
                 // be returned once and only once.
-                Set<Long> notReturnedIds = new HashSet<>(allocatedIds);
+                Set<Long> notReturnedIds = new HashSet<Long>(allocatedIds);
                 Iterator<Long> iter = blockBuffer.iterateBlockIds();
                 while(iter.hasNext()) {
                     Long id = iter.next();
@@ -78,7 +78,7 @@ abstract public class BlockBufferTestParent extends TestCase {
                 assertTrue(notReturnedIds.isEmpty());
 
                 // Randomly deallocate 900 of the entries
-                List<Long> ids = new ArrayList<>(allocatedIds);
+                List<Long> ids = new ArrayList<Long>(allocatedIds);
                 Collections.shuffle(ids, random);
                 for(int d=0;d<500;d++) {
                     long id = ids.get(d);
@@ -146,8 +146,8 @@ abstract public class BlockBufferTestParent extends TestCase {
         File tempFile = File.createTempFile("BlockBufferTestParent", null);
         tempFile.deleteOnExit();
         try {
-            SortedSet<Long> allocatedIds = new TreeSet<>();
-            SortedSet<Long> partialIds = new TreeSet<>(); // The ids that are added in this batch
+            SortedSet<Long> allocatedIds = new TreeSet<Long>();
+            SortedSet<Long> partialIds = new TreeSet<Long>(); // The ids that are added in this batch
             final int iterations = 100;
             for(int c=0;c<iterations;c++) {
                 long startNanos = System.nanoTime();
@@ -178,7 +178,7 @@ abstract public class BlockBufferTestParent extends TestCase {
                 // With failure or not, the allocation should be consistent
                 PersistentBlockBuffer recoveredBlockBuffer = getBlockBuffer(getBuffer(tempFile, protectionLevel));
                 try {
-                    SortedSet<Long> recoveredIds = new TreeSet<>();
+                    SortedSet<Long> recoveredIds = new TreeSet<Long>();
                     Iterator<Long> ids = recoveredBlockBuffer.iterateBlockIds();
                     while(ids.hasNext()) {
                         long recoveredId = ids.next();
@@ -191,7 +191,7 @@ abstract public class BlockBufferTestParent extends TestCase {
                 }
                 // Deallocate some with similar check as allocation above
                 if(!allocatedIds.isEmpty()) {
-                    List<Long> randomizedIds = new ArrayList<>(allocatedIds);
+                    List<Long> randomizedIds = new ArrayList<Long>(allocatedIds);
                     Collections.sort(randomizedIds);
                     partialIds.clear();
                     try {
@@ -223,7 +223,7 @@ abstract public class BlockBufferTestParent extends TestCase {
                 // With failure or not, the allocation should be consistent
                 recoveredBlockBuffer = getBlockBuffer(getBuffer(tempFile, protectionLevel));
                 try {
-                    SortedSet<Long> recoveredIds = new TreeSet<>();
+                    SortedSet<Long> recoveredIds = new TreeSet<Long>();
                     Iterator<Long> ids = recoveredBlockBuffer.iterateBlockIds();
                     while(ids.hasNext()) {
                         long recoveredId = ids.next();

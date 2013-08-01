@@ -46,7 +46,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
 
     private boolean isClosed = false;
     private long capacity = 0L;
-    private Map<Long,byte[]> buffers = new HashMap<>();
+    private Map<Long,byte[]> buffers = new HashMap<Long,byte[]>();
 
     /**
      * Creates a read-write test buffer with protection level <code>NONE</code>.

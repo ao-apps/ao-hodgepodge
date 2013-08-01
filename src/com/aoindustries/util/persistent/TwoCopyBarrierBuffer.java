@@ -139,7 +139,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 
     private static final Timer asynchronousCommitTimer = new Timer("TwoCopyBarrierBuffer.asynchronousCommitTimer");
 
-    private static final Set<TwoCopyBarrierBuffer> shutdownBuffers = new HashSet<>();
+    private static final Set<TwoCopyBarrierBuffer> shutdownBuffers = new HashSet<TwoCopyBarrierBuffer>();
 
     /**
      * TODO: Is there a way we can combine the force calls between all buffers?
@@ -157,7 +157,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
             // Get a snapshot of all buffers
             List<TwoCopyBarrierBuffer> toClose;
             synchronized(shutdownBuffers) {
-                toClose = new ArrayList<>(shutdownBuffers);
+                toClose = new ArrayList<TwoCopyBarrierBuffer>(shutdownBuffers);
                 shutdownBuffers.clear();
             }
             if(!toClose.isEmpty()) {
@@ -248,10 +248,10 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
      */
     private SortedMap<Long,byte[]>
         // Changes since the current (most up-to-date) file was last updated
-        currentWriteCache = new TreeMap<>(),
+        currentWriteCache = new TreeMap<Long,byte[]>(),
         // Changes since the old (previous version) file was last updated.  This
         // is a superset of <code>currentWriteCache</code>.
-        oldWriteCache = new TreeMap<>()
+        oldWriteCache = new TreeMap<Long,byte[]>()
     ;
     private long capacity; // The underlying storage is not extended until commit time.
     private RandomAccessFile raf; // Reads on non-cached data are read from here (this is the current file) - this is read-only

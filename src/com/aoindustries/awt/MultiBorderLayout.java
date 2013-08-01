@@ -62,32 +62,22 @@ public class MultiBorderLayout extends BorderLayout {
 	public void addLayoutComponent(Component component, Object name) {
 		synchronized (component.getTreeLock()) {
 			if (name == null) name = CENTER;
-			switch (name.toString()) {
-				case CENTER:
-					center = component;
-					break;
-				case NORTH:
-					if (northComponents == null)
-						northComponents = new ArrayList<>();
-					northComponents.add(component);
-					break;
-				case SOUTH:
-					if (southComponents == null)
-						southComponents = new ArrayList<>();
-					southComponents.add(component);
-					break;
-				case EAST:
-					if (eastComponents == null)
-						eastComponents = new ArrayList<>();
-					eastComponents.add(component);
-					break;
-				case WEST:
-					if (westComponents == null)
-						westComponents = new ArrayList<>();
-					westComponents.add(component);
-					break;
-				default:
-					throw new IllegalArgumentException("cannot add to layout: unknown constraint: " + name);
+			if(CENTER.equals(name)) {
+				center = component;
+			} else if(NORTH.equals(name)) {
+				if (northComponents == null) northComponents = new ArrayList<Component>();
+				northComponents.add(component);
+			} else if(SOUTH.equals(name)) {
+				if (southComponents == null) southComponents = new ArrayList<Component>();
+				southComponents.add(component);
+			} else if(EAST.equals(name)) {
+				if (eastComponents == null) eastComponents = new ArrayList<Component>();
+				eastComponents.add(component);
+			} else if(WEST.equals(name)) {
+				if (westComponents == null) westComponents = new ArrayList<Component>();
+				westComponents.add(component);
+			} else {
+				throw new IllegalArgumentException("cannot add to layout: unknown constraint: " + name);
 			}
 		}
 	}

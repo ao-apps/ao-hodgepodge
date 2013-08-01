@@ -144,7 +144,7 @@ public class GetOpt {
      * The "--" will be included in the arguments returned.
      */
     public static List<String> getArguments(String[] args) {
-        List<String> arguments = new ArrayList<>(args.length);
+        List<String> arguments = new ArrayList<String>(args.length);
         int c = 0;
         for(; c<args.length; c++) {
             String arg = args[c];

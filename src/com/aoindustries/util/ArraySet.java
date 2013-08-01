@@ -103,7 +103,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
      */
     @Deprecated
     public ArraySet() {
-        this.elements = new ArrayList<>();
+        this.elements = new ArrayList<E>();
     }
 
     /**
@@ -111,7 +111,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
      */
     @Deprecated
     public ArraySet(int initialCapacity) {
-        this.elements = new ArrayList<>(initialCapacity);
+        this.elements = new ArrayList<E>(initialCapacity);
     }
 
     /**
@@ -128,7 +128,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
      */
     @Deprecated
     public ArraySet(Collection<? extends E> c) {
-        this.elements = new ArrayList<>(c.size());
+        this.elements = new ArrayList<E>(c.size());
         addAll(c);
     }
 

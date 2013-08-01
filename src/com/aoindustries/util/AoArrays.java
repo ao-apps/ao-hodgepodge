@@ -168,7 +168,7 @@ public class AoArrays {
             return results;
         } else {
             // 3+ collections, use priority queue
-            PriorityQueue<AoCollections.PeekIterator<? extends V>> pq = new PriorityQueue<>(
+            PriorityQueue<AoCollections.PeekIterator<? extends V>> pq = new PriorityQueue<AoCollections.PeekIterator<? extends V>>(
                 numCollections,
                 new Comparator<AoCollections.PeekIterator<? extends V>>() {
                     @Override

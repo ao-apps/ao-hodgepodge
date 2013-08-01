@@ -49,7 +49,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class MessageFormatFactory {
 
-    private static final ConcurrentMap<Locale,ConcurrentMap<String,UnmodifiableMessageFormat>> cache = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Locale,ConcurrentMap<String,UnmodifiableMessageFormat>> cache = new ConcurrentHashMap<Locale,ConcurrentMap<String,UnmodifiableMessageFormat>>();
 
     /**
      * Gets a message format for the provided format in the current thread locale.
@@ -70,7 +70,7 @@ public class MessageFormatFactory {
     public static UnmodifiableMessageFormat getMessageFormat(String pattern, Locale locale) {
         ConcurrentMap<String,UnmodifiableMessageFormat> localeCache = cache.get(locale);
         if(localeCache==null) {
-            localeCache = new ConcurrentHashMap<>();
+            localeCache = new ConcurrentHashMap<String,UnmodifiableMessageFormat>();
             ConcurrentMap<String,UnmodifiableMessageFormat> existing = cache.putIfAbsent(locale, localeCache);
             if(existing!=null) localeCache = existing;
         }

@@ -53,10 +53,10 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
     public List<V> sortGraph() throws CycleException, EX {
         Set<V> vertices = graph.getVertices();
         final int size = vertices.size();
-        Set<V> visited = new HashSet<>(size*4/3+1);
-        LinkedHashSet<V> sequence = new LinkedHashSet<>();
+        Set<V> visited = new HashSet<V>(size*4/3+1);
+        LinkedHashSet<V> sequence = new LinkedHashSet<V>();
         //L ← Empty list that will contain the sorted nodes
-        List<V> L = new ArrayList<>(size);
+        List<V> L = new ArrayList<V>(size);
         //S ← Set of all nodes with no incoming edges
         //for each node n in S do
         for(V n : vertices) {
@@ -82,7 +82,7 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
                 V m = isForward ? e.getTo() : e.getFrom();
                 //            visit(m)
                 if(!sequence.add(m)) {
-                    List<V> vertices = new ArrayList<>();
+                    List<V> vertices = new ArrayList<V>();
                     boolean found = false;
                     for(V seq : sequence) {
                         if(!found && seq.equals(m)) found = true;

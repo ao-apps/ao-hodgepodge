@@ -111,7 +111,9 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
 		public E getSingleton(Object target) {
 			try {
 				return (E)method.invoke(target, NO_PARAMS);
-			} catch(IllegalAccessException | InvocationTargetException exc) {
+			} catch(IllegalAccessException exc) {
+				throw new RuntimeException(target+"."+method+"()", exc);
+			} catch(InvocationTargetException exc) {
 				throw new RuntimeException(target+"."+method+"()", exc);
 			}
 		}
@@ -264,12 +266,12 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
 					} else {
 						// Add currentValue / currentSet to previous
 						if(currentSingleton!=null) {
-							if(previousSingletons==null) previousSingletons = new ArrayList<>();
+							if(previousSingletons==null) previousSingletons = new ArrayList<E>();
 							previousSingletons.add(currentSingleton);
 							currentSingleton = null;
 						}
 						if(currentSet!=null) {
-							if(previousSets==null) previousSets = new ArrayList<>();
+							if(previousSets==null) previousSets = new ArrayList<Set<? extends E>>();
 							previousSets.add(currentSet);
 							currentSet = null;
 						}

@@ -57,7 +57,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
     private final File tempFile;
     private final RandomAccessFile raf;
     private final FileChannel channel;
-    private final List<MappedByteBuffer> mappedBuffers = new ArrayList<>();
+    private final List<MappedByteBuffer> mappedBuffers = new ArrayList<MappedByteBuffer>();
     private final List<Boolean> modifiedBuffers;
     private boolean closed;
 
@@ -116,7 +116,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
         channel = raf.getChannel();
         // Lock the file
         channel.lock(0L, Long.MAX_VALUE, protectionLevel==ProtectionLevel.READ_ONLY);
-        if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) modifiedBuffers = new ArrayList<>();
+        if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) modifiedBuffers = new ArrayList<Boolean>();
         else modifiedBuffers = null;
         fillMappedBuffers();
     }

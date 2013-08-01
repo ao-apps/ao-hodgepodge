@@ -50,18 +50,18 @@ public class ArraySortedSetTest extends TestCase {
 
     private void doTestPerformance() {
         final int endTestSize = 1000000;
-        SortedSet<Integer> randomValues = new TreeSet<>();
+        SortedSet<Integer> randomValues = new TreeSet<Integer>();
         for(int testSize = 1; testSize<=endTestSize; testSize *= 10) {
             // Generate testSize random ints
             while(randomValues.size()<testSize) randomValues.add(random.nextInt());
-            List<Integer> randomList = new ArrayList<>(randomValues);
+            List<Integer> randomList = new ArrayList<Integer>(randomValues);
             // Time new
             long startNanos = System.nanoTime();
-            TreeSet<Integer> treeSet = new TreeSet<>(randomValues);
+            TreeSet<Integer> treeSet = new TreeSet<Integer>(randomValues);
             long timeNanos = System.nanoTime() - startNanos;
             System.out.println(testSize+": Created TreeSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             startNanos = System.nanoTime();
-            ArraySortedSet<Integer> arraySortedSet = new ArraySortedSet<>(randomValues);
+            ArraySortedSet<Integer> arraySortedSet = new ArraySortedSet<Integer>(randomValues);
             timeNanos = System.nanoTime() - startNanos;
             System.out.println(testSize+": Created ArraySortedSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
             // Test contains

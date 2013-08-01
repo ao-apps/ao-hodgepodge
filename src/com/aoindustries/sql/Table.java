@@ -107,7 +107,7 @@ public class Table {
     public SortedMap<String,Column> getColumnMap() throws SQLException {
         synchronized(getColumnMapLock) {
             if(getColumnMapCache==null) {
-                SortedMap<String,Column> newColumnMap = new TreeMap<>(DatabaseMetaData.getCollator());
+                SortedMap<String,Column> newColumnMap = new TreeMap<String,Column>(DatabaseMetaData.getCollator());
                 ResultSet results = schema.getCatalog().getMetaData().getMetaData().getColumns(schema.getCatalog().getName(), schema.getName(), name, null);
                 try {
                     while(results.next()) {
@@ -160,7 +160,7 @@ public class Table {
         synchronized(getColumnsLock) {
             if(getColumnsCache==null) {
                 SortedMap<String,Column> columnMap = getColumnMap();
-                List<Column> newColumns = new ArrayList<>(columnMap.size());
+                List<Column> newColumns = new ArrayList<Column>(columnMap.size());
                 for(int i=0; i<columnMap.size(); i++) newColumns.add(null);
                 for(Column column : columnMap.values()) {
                     int ordinalPosition = column.getOrdinalPosition();
@@ -199,7 +199,7 @@ public class Table {
         synchronized(getPrimaryKeyLock) {
             if(!getPrimaryKeyCached) {
                 String pkName = null;
-                List<Column> columns = new AutoGrowArrayList<>();
+                List<Column> columns = new AutoGrowArrayList<Column>();
                 ResultSet results = schema.getCatalog().getMetaData().getMetaData().getPrimaryKeys(schema.getCatalog().getName(), schema.getName(), name);
                 try {
                     while(results.next()) {
@@ -242,7 +242,7 @@ public class Table {
     public Set<? extends Table> getImportedTables() throws SQLException {
         synchronized(getImportedTablesLock) {
             if(getImportedTablesCache==null) {
-                Set<Table> newImportedTables = new LinkedHashSet<>();
+                Set<Table> newImportedTables = new LinkedHashSet<Table>();
                 Catalog catalog = schema.getCatalog();
                 DatabaseMetaData metaData = catalog.getMetaData();
                 ResultSet results = schema.getCatalog().getMetaData().getMetaData().getImportedKeys(schema.getCatalog().getName(), schema.getName(), name);
@@ -276,7 +276,7 @@ public class Table {
     public Set<? extends Table> getExportedTables() throws SQLException {
         synchronized(getExportedTablesLock) {
             if(getExportedTablesCache==null) {
-                Set<Table> newExportedTables = new LinkedHashSet<>();
+                Set<Table> newExportedTables = new LinkedHashSet<Table>();
                 Catalog catalog = schema.getCatalog();
                 DatabaseMetaData metaData = catalog.getMetaData();
                 ResultSet results = schema.getCatalog().getMetaData().getMetaData().getExportedKeys(schema.getCatalog().getName(), schema.getName(), name);

@@ -168,7 +168,7 @@ public class ZipUtils {
         if(!sourcePrefix.isEmpty() && !sourcePrefix.endsWith("/")) sourcePrefix = sourcePrefix+"/";
         ZipFile zipFile = new ZipFile(sourceFile);
         try {
-            SortedMap<File,Long> directoryModifyTimes = new TreeMap<>(reverseFileComparator);
+            SortedMap<File,Long> directoryModifyTimes = new TreeMap<File,Long>(reverseFileComparator);
 
             // Pass one: create directories and files
             Enumeration<? extends ZipEntry> entries = zipFile.entries();

@@ -46,7 +46,7 @@ public class ErrorPrinterFormatter extends Formatter {
     }
 
     public void format(LogRecord record, Appendable out) {
-        List<Object> extraInfo = new ArrayList<>(9); // At most 9 elements added below
+        List<Object> extraInfo = new ArrayList<Object>(9); // At most 9 elements added below
         String loggerName = record.getLoggerName();
         if(loggerName!=null) extraInfo.add("record.loggerName="+loggerName);
         extraInfo.add("record.level="+record.getLevel());

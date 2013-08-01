@@ -40,7 +40,7 @@ public class MultiFileOutputStream extends OutputStream {
     private final String suffix;
     private final long fileSize;
 
-    private List<File> files=new ArrayList<>();
+    private List<File> files=new ArrayList<File>();
     private FileOutputStream out=null;
     private long bytesOut=0;
 

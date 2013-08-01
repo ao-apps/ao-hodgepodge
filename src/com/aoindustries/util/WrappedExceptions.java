@@ -42,7 +42,7 @@ public class WrappedExceptions extends RuntimeException {
      */
     private static final List<Throwable> getUniqueCauses(Throwable ... causes) {
         int len = causes.length;
-        List<Throwable> uniqueCauses = new ArrayList<>(len);
+        List<Throwable> uniqueCauses = new ArrayList<Throwable>(len);
         for(Throwable cause : causes) {
             if(cause!=null && !uniqueCauses.contains(cause)) uniqueCauses.add(cause);
         }

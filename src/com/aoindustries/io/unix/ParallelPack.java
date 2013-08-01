@@ -96,7 +96,7 @@ public class ParallelPack {
 			System.err.println("\t--\tEnd options, all additional arguments will be interpreted as paths");
 			System.exit(1);
 		} else {
-			List<UnixFile> directories = new ArrayList<>(args.length);
+			List<UnixFile> directories = new ArrayList<UnixFile>(args.length);
 			PrintStream verboseOutput = null;
 			boolean compress = false;
 			String host = null;
@@ -119,15 +119,24 @@ public class ParallelPack {
 			}
 			try {
 				if(host!=null) {
-					try (
-						Socket socket = new Socket(host, port);
+					Socket socket = new Socket(host, port);
+					try {
 						OutputStream out = socket.getOutputStream();
-						InputStream in = socket.getInputStream()
-					) {
-						parallelPack(directories, out, verboseOutput, compress);
-						int resp = in.read();
-						if(resp==-1) throw new EOFException("End of file while reading completion confirmation");
-						if(resp!=PackProtocol.END) throw new IOException("Unexpected value while reading completion confirmation");
+						try {
+							InputStream in = socket.getInputStream();
+							try {
+								parallelPack(directories, out, verboseOutput, compress);
+								int resp = in.read();
+								if(resp==-1) throw new EOFException("End of file while reading completion confirmation");
+								if(resp!=PackProtocol.END) throw new IOException("Unexpected value while reading completion confirmation");
+							} finally {
+								in.close();
+							}
+						} finally {
+							out.close();
+						}
+					} finally {
+						socket.close();
 					}
 				} else {
 					// System.out
@@ -170,7 +179,7 @@ public class ParallelPack {
 		// The set of next files is kept in key order so that it can scale with O(n*log(n)) for larger numbers of directories
 		// as opposed to O(n^2) for a list.  This is similar to the fix for AWStats logresolvemerge provided by Dan Armstrong
 		// a couple of years ago.
-		final Map<String,List<FilesystemIteratorAndSlot>> nextFiles = new TreeMap<>(
+		final Map<String,List<FilesystemIteratorAndSlot>> nextFiles = new TreeMap<String,List<FilesystemIteratorAndSlot>>(
 			new Comparator<String>() {
 				@Override
 				public int compare(String S1, String S2) {
@@ -197,7 +206,7 @@ public class ParallelPack {
 				if(nextFile!=null) {
 					String relPath = getRelativePath(nextFile, iterator);
 					List<FilesystemIteratorAndSlot> list = nextFiles.get(relPath);
-					if(list==null) nextFiles.put(relPath, list = new ArrayList<>(numDirectories));
+					if(list==null) nextFiles.put(relPath, list = new ArrayList<FilesystemIteratorAndSlot>(numDirectories));
 					list.add(new FilesystemIteratorAndSlot(iterator, nextSlot++));
 					if(nextSlot>62) nextSlot = 0;
 				}
@@ -212,7 +221,7 @@ public class ParallelPack {
 			verboseThreadRun = null;
 			verboseThread = null;
 		} else {
-			verboseQueue = new ArrayBlockingQueue<>(VERBOSE_QUEUE_SIZE);
+			verboseQueue = new ArrayBlockingQueue<String>(VERBOSE_QUEUE_SIZE);
 			verboseThreadRun = new boolean[] {true};
 			verboseThread = new Thread("ParallelPack - Verbose Thread") {
 				@Override
@@ -237,7 +246,7 @@ public class ParallelPack {
 			// Hard link management
 			long nextLinkId = 1; // LinkID of 0 is reserved for no link
 			// This is a mapping from device->inode->linkId
-			Map<Long,Map<Long,LinkAndCount>> deviceInodeIdMap = new HashMap<>();
+			Map<Long,Map<Long,LinkAndCount>> deviceInodeIdMap = new HashMap<Long,Map<Long,LinkAndCount>>();
 
 			CompressedDataOutputStream compressedOut = new CompressedDataOutputStream(out);
 			try {
@@ -303,7 +312,7 @@ public class ParallelPack {
 									Long device = stat.getDevice();
 									Long inode = stat.getInode();
 									Map<Long,LinkAndCount> inodeMap = deviceInodeIdMap.get(device);
-									if(inodeMap==null) deviceInodeIdMap.put(device, inodeMap = new HashMap<>());
+									if(inodeMap==null) deviceInodeIdMap.put(device, inodeMap = new HashMap<Long, LinkAndCount>());
 									LinkAndCount linkAndCount = inodeMap.get(inode);
 									if(linkAndCount!=null) {
 										// Already sent, send the link ID and decrement our count
@@ -367,7 +376,7 @@ public class ParallelPack {
 							if(nextFile!=null) {
 								String newRelPath = getRelativePath(nextFile, iterator);
 								List<FilesystemIteratorAndSlot> list = nextFiles.get(newRelPath);
-								if(list==null) nextFiles.put(newRelPath, list = new ArrayList<>(numDirectories));
+								if(list==null) nextFiles.put(newRelPath, list = new ArrayList<FilesystemIteratorAndSlot>(numDirectories));
 								list.add(iteratorAndSlot);
 							}
 						}
@@ -400,7 +409,8 @@ public class ParallelPack {
 	}
 
 	private static void writeFile(UnixFile uf, DataOutput out, byte[] buffer) throws IOException {
-		try (InputStream in = new FileInputStream(uf.getFile())) {
+		InputStream in = new FileInputStream(uf.getFile());
+		try {
 			int ret;
 			while((ret=in.read(buffer, 0, PackProtocol.BUFFER_SIZE))!=-1) {
 				if(ret<0 || ret>Short.MAX_VALUE) throw new IOException("ret out of range: "+ret);
@@ -408,6 +418,8 @@ public class ParallelPack {
 				out.write(buffer, 0, ret);
 			}
 			out.writeShort(-1);
+		} finally {
+			in.close();
 		}
 	}
 

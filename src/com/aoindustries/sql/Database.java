@@ -886,7 +886,7 @@ public class Database extends AbstractDatabaseAccess {
         }
     }
 
-    private final ThreadLocal<DatabaseConnection> transactionConnection = new ThreadLocal<>();
+    private final ThreadLocal<DatabaseConnection> transactionConnection = new ThreadLocal<DatabaseConnection>();
 
     /**
      * Checks if currently in a transaction.

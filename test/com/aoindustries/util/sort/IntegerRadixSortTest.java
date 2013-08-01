@@ -101,7 +101,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time experimental radix sort
-			List<N> expRadixResult = new ArrayList<>(randomValues);
+			List<N> expRadixResult = new ArrayList<N>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
@@ -143,7 +143,7 @@ public class IntegerRadixSortTest extends TestCase {
 			 */
 
 			// Time radix sort
-			List<N> oldRadixResult = new ArrayList<>(randomValues);
+			List<N> oldRadixResult = new ArrayList<N>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSort.getInstance().sort(oldRadixResult);
@@ -163,7 +163,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time Java sort
-			List<N> javaResult = new ArrayList<>(randomValues);
+			List<N> javaResult = new ArrayList<N>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				Collections.sort(javaResult, null);
@@ -213,7 +213,7 @@ public class IntegerRadixSortTest extends TestCase {
 		long[] avgSumOld = new long[1];
 		//long[] avgSumNew = new long[1];
 		long[] avgSumExp = new long[1];
-        List<Integer> randomValues = new ArrayList<>(END_TEST_SIZE);
+        List<Integer> randomValues = new ArrayList<Integer>(END_TEST_SIZE);
 		int tests = 0;
 		for(
 			int testSize = START_TEST_SIZE, passes = MAX_PASSES;

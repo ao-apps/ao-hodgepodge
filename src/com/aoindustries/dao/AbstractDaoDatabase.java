@@ -70,7 +70,7 @@ abstract public class AbstractDaoDatabase implements DaoDatabase {
      * underlying database.  This way, nothing funny will happen if master/slave databases
      * are switched mid-transaction.
      */
-    protected final ThreadLocal<Database> transactionDatabase = new ThreadLocal<>();
+    protected final ThreadLocal<Database> transactionDatabase = new ThreadLocal<Database>();
 
     protected <V> V executeTransaction(DatabaseCallable<V> callable) throws SQLException {
         Database database = transactionDatabase.get();

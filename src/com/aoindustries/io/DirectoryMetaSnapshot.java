@@ -94,7 +94,7 @@ final public class DirectoryMetaSnapshot {
 			startPath
 		);
 		final String expectedStart = startPath + File.separatorChar;
-		SortedMap<String,FileMetaSnapshot> newFiles = new TreeMap<>();
+		SortedMap<String,FileMetaSnapshot> newFiles = new TreeMap<String,FileMetaSnapshot>();
 		File file;
 		while((file=iter.getNextFile())!=null) {
 			if(file.isFile()) {

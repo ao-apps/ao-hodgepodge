@@ -332,16 +332,21 @@ public class UnixFile {
 		if(size!=otherStat.getSize()) return false;
 		int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
 		if(buffSize<64) buffSize=64;
-		try (
-			InputStream in1 = new BufferedInputStream(new FileInputStream(getFile()), buffSize);
-			InputStream in2 = new BufferedInputStream(new FileInputStream(otherUF.getFile()), buffSize)
-		) {
-			while(true) {
-				int b1=in1.read();
-				int b2=in2.read();
-				if(b1!=b2) return false;
-				if(b1==-1) break;
+		InputStream in1 = new BufferedInputStream(new FileInputStream(getFile()), buffSize);
+		try {
+			InputStream in2 = new BufferedInputStream(new FileInputStream(otherUF.getFile()), buffSize);
+			try {
+				while(true) {
+					int b1=in1.read();
+					int b2=in2.read();
+					if(b1!=b2) return false;
+					if(b1==-1) break;
+				}
+			} finally {
+				in2.close();
 			}
+		} finally {
+			in1.close();
 		}
 		return true;
 	}
@@ -371,16 +376,21 @@ public class UnixFile {
 		if(size!=otherStat.getSize()) return false;
 		int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
 		if(buffSize<64) buffSize=64;
-		try (
-			InputStream in1 = new BufferedInputStream(getSecureInputStream(), buffSize);
-			InputStream in2 = new BufferedInputStream(otherUF.getSecureInputStream(), buffSize)
-		) {
-			while(true) {
-				int b1=in1.read();
-				int b2=in2.read();
-				if(b1!=b2) return false;
-				if(b1==-1) break;
+		InputStream in1 = new BufferedInputStream(getSecureInputStream(), buffSize);
+		try {
+			InputStream in2 = new BufferedInputStream(otherUF.getSecureInputStream(), buffSize);
+			try {
+				while(true) {
+					int b1=in1.read();
+					int b2=in2.read();
+					if(b1!=b2) return false;
+					if(b1==-1) break;
+				}
+			} finally {
+				in2.close();
 			}
+		} finally {
+			in1.close();
 		}
 		return true;
 	}
@@ -397,12 +407,15 @@ public class UnixFile {
 		if(size!=otherFile.length) return false;
 		int buffSize=size<BufferManager.BUFFER_SIZE?(int)size:BufferManager.BUFFER_SIZE;
 		if(buffSize<64) buffSize=64;
-		try (InputStream in1 = new BufferedInputStream(getSecureInputStream(), buffSize)) {
+		InputStream in1 = new BufferedInputStream(getSecureInputStream(), buffSize);
+		try {
 			for(int c=0;c<otherFile.length;c++) {
 				int b1=in1.read();
 				int b2=otherFile[c]&0xff;
 				if(b1!=b2) return false;
 			}
+		} finally {
+			in1.close();
 		}
 		return true;
 	}
@@ -433,12 +446,17 @@ public class UnixFile {
 			if(oExists) otherUF.delete();
 			otherUF.mkfifo(mode).chown(stat.getUid(), stat.getGid());
 		} else if(isRegularFile(mode)) {
-			try (
-				InputStream in = new FileInputStream(getFile());
-				OutputStream out = new FileOutputStream(otherUF.getFile())
-			) {
-				otherUF.setMode(mode).chown(stat.getUid(), stat.getGid());
-				IoUtils.copy(in, out);
+			InputStream in = new FileInputStream(getFile());
+			try {
+				OutputStream out = new FileOutputStream(otherUF.getFile());
+				try {
+					otherUF.setMode(mode).chown(stat.getUid(), stat.getGid());
+					IoUtils.copy(in, out);
+				} finally {
+					out.close();
+				}
+			} finally {
+				in.close();
 			}
 		} else if(isSocket(mode)) throw new IOException("Unable to copy socket: "+path);
 		else if(isSymLink(mode)) {
@@ -552,7 +570,7 @@ public class UnixFile {
 
 	final public void secureParents(List<SecuredDirectory> parentsChanged) throws IOException {
 		// Build a stack of all parents
-		Stack<UnixFile> parents=new Stack<>();
+		Stack<UnixFile> parents=new Stack<UnixFile>();
 		{
 			UnixFile parent=getParent();
 			while(!parent.isRootDirectory()) {
@@ -606,7 +624,7 @@ public class UnixFile {
 	 * @see  java.io.File#deleteRecursive
 	 */
 	final public void secureDeleteRecursive() throws IOException {
-		List<SecuredDirectory> parentsChanged=new ArrayList<>();
+		List<SecuredDirectory> parentsChanged=new ArrayList<SecuredDirectory>();
 		try {
 			secureParents(parentsChanged);
 			secureDeleteRecursive(this);
@@ -873,7 +891,7 @@ public class UnixFile {
 	 * changes and ensuring that no symbolic links are anywhere in the path.
 	 */
 	final public FileInputStream getSecureInputStream() throws IOException {
-		List<SecuredDirectory> parentsChanged=new ArrayList<>();
+		List<SecuredDirectory> parentsChanged=new ArrayList<SecuredDirectory>();
 		try {
 			secureParents(parentsChanged);
 
@@ -895,7 +913,7 @@ public class UnixFile {
 	 *       is the possibility that permissions may not be restored if the JVM is shutdown at that moment.
 	 */
 	final public FileOutputStream getSecureOutputStream(int uid, int gid, long mode, boolean overwrite) throws IOException {
-		List<SecuredDirectory> parentsChanged=new ArrayList<>();
+		List<SecuredDirectory> parentsChanged=new ArrayList<SecuredDirectory>();
 		try {
 			secureParents(parentsChanged);
 
@@ -921,7 +939,7 @@ public class UnixFile {
 	 * changes and ensuring that no symbolic links are anywhere in the path.
 	 */
 	final public RandomAccessFile getSecureRandomAccessFile(String mode) throws IOException {
-		List<SecuredDirectory> parentsChanged=new ArrayList<>();
+		List<SecuredDirectory> parentsChanged=new ArrayList<SecuredDirectory>();
 		try {
 			secureParents(parentsChanged);
 
@@ -1217,7 +1235,7 @@ public class UnixFile {
 		if(makeParents) {
 			Stat stat = new Stat();
 			UnixFile dir=getParent();
-			Stack<UnixFile> neededParents=new Stack<>();
+			Stack<UnixFile> neededParents=new Stack<UnixFile>();
 			while(!dir.isRootDirectory() && !dir.getStat(stat).exists()) {
 				neededParents.push(dir);
 				dir=dir.getParent();
@@ -1240,7 +1258,7 @@ public class UnixFile {
 		if(makeParents) {
 			Stat stat = new Stat();
 			UnixFile dir=getParent();
-			Stack<UnixFile> neededParents=new Stack<>();
+			Stack<UnixFile> neededParents=new Stack<UnixFile>();
 			while(!dir.isRootDirectory() && !dir.getStat(stat).exists()) {
 				neededParents.push(dir);
 				dir=dir.getParent();
