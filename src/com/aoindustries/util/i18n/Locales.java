@@ -33,6 +33,43 @@ public class Locales {
 
     private Locales() {}
     
+	private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>();
+
+    /**
+     * Parses locales from their <code>toString</code> representation.  Caches
+     * locales for faster lookups.
+     */
+    public static Locale parseLocale(String locale) {
+        Locale l = locales.get(locale);
+        if(l==null) {
+            int pos = locale.indexOf('_');
+            if(pos==-1) l = new Locale(locale);
+            else {
+                int pos2 = locale.indexOf('_', pos+1);
+                if(pos2==-1) {
+                    l = new Locale(locale.substring(0, pos), locale.substring(pos+1));
+                } else {
+                    l = new Locale(locale.substring(0, pos), locale.substring(pos+1, pos2), locale.substring(pos2+1));
+                }
+            }
+            Locale existing = locales.putIfAbsent(locale, l);
+            if(existing!=null) l = existing;
+        }
+        return l;
+    }
+
+    /**
+     * Determines if the provided locale should be displayed from right to left.
+     */
+    public static boolean isRightToLeft(Locale locale) {
+        String language = locale.getLanguage();
+        return
+            "ar".equals(language)    // arabic
+            || "iw".equals(language) // hebrew
+            || "fa".equals(language) // persian
+        ;
+    }
+
 	/**
 	 * Some locale constants not provided directly by Java, along with those provided by Java.
 	 */
@@ -94,41 +131,4 @@ public class Locales {
 		CANADA = Locale.CANADA,
 		CANADA_FRENCH = Locale.CANADA_FRENCH
 	;
-
-	private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>();
-
-    /**
-     * Parses locales from their <code>toString</code> representation.  Caches
-     * locales for faster lookups.
-     */
-    public static Locale parseLocale(String locale) {
-        Locale l = locales.get(locale);
-        if(l==null) {
-            int pos = locale.indexOf('_');
-            if(pos==-1) l = new Locale(locale);
-            else {
-                int pos2 = locale.indexOf('_', pos+1);
-                if(pos2==-1) {
-                    l = new Locale(locale.substring(0, pos), locale.substring(pos+1));
-                } else {
-                    l = new Locale(locale.substring(0, pos), locale.substring(pos+1, pos2), locale.substring(pos2+1));
-                }
-            }
-            Locale existing = locales.putIfAbsent(locale, l);
-            if(existing!=null) l = existing;
-        }
-        return l;
-    }
-
-    /**
-     * Determines if the provided locale should be displayed from right to left.
-     */
-    public static boolean isRightToLeft(Locale locale) {
-        String language = locale.getLanguage();
-        return
-            "ar".equals(language)    // arabic
-            || "iw".equals(language) // hebrew
-            || "fa".equals(language) // persian
-        ;
-    }
 }
