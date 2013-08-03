@@ -26,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -99,7 +100,7 @@ final public class RGBColor {
 		}
 
 		// Look in the color hash first
-		name = name.toLowerCase();
+		name = name.toLowerCase(Locale.ENGLISH);
 		Integer I = colors.get(name);
 		if (I != null) return I.intValue();
 
