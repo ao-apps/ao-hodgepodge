@@ -636,11 +636,14 @@ public class AoCollections {
             return value;
         }
     }
-    /**
+
+	/**
      * Wraps the provided iterator, allowing peek of first element.
      * Does not support null elements.
      */
     public static <E> PeekIterator<E> peekIterator(Iterator<? extends E> iter) {
         return new PeekIterator<E>(iter);
     }
+	
+	
 }

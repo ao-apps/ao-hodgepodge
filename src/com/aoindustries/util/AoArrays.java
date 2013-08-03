@@ -99,7 +99,7 @@ public class AoArrays {
     /**
      * Merges multiple already-sorted collections into one big array.
      *
-     * Worst-cast Complexity:
+     * Worst-case Complexity:
      * 
      *     0 collections: constant
      *
