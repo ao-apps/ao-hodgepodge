@@ -26,10 +26,13 @@ import com.aoindustries.util.AoCollections.PeekIterator;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
+import java.util.Set;
 // import org.checkthread.annotations.ThreadSafe;
 
 /**
@@ -194,4 +197,130 @@ public class AoArrays {
             return results;
         }
     }
+	
+	/**
+	 * Gets an unmodifiable set view with the contents of a backing array.
+	 * <p>
+	 * Contains is implemented sequentially and is thus O(n).  As a result, this
+	 * is best used for very small sets.
+	 * </p>
+	 * <p>
+	 * In order to have correct set semantics, the array must have unique values
+	 * as determined by the element equals methods.  This is not checked, however,
+	 * and passing in an array with duplicate values will result in duplicate
+	 * values on iteration and a size that doesn't match the number of unique values.
+	 * </p>
+	 */
+    // TODO: Java 7: @SafeVarargs
+	public static <E> Set<E> asUnmodifiableSet(final E... array) {
+		if(array.length==0) return Collections.emptySet();
+		return new Set<E>() {
+			@Override
+			public int size() {
+				return array.length;
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return array.length==0;
+			}
+
+			@Override
+			public boolean contains(Object o) {
+				if(o==null) {
+					for(E elem : array) {
+						if(elem==null) return true;
+					}
+				} else {
+					for(E elem : array) {
+						if(o.equals(elem)) return true;
+					}
+				}
+				return false;
+			}
+
+			@Override
+			public Iterator<E> iterator() {
+				return new Iterator<E>() {
+					int pos = 0;
+					@Override
+					public boolean hasNext() {
+						return pos<array.length;
+					}
+
+					@Override
+					public E next() throws NoSuchElementException {
+						if(pos < array.length) return array[pos++];
+						throw new NoSuchElementException();
+					}
+
+					@Override
+					public void remove() throws UnsupportedOperationException {
+						throw new UnsupportedOperationException();
+					}
+				};
+			}
+
+			@Override
+			public Object[] toArray() {
+				int len = array.length;
+				Object[] resultArray = new Object[len];
+				System.arraycopy(array, 0, resultArray, 0, len);
+				return resultArray;
+			}
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public <T> T[] toArray(T[] resultArray) {
+				int len = array.length;
+				resultArray =
+					resultArray.length >= len
+					? resultArray
+					: (T[])java.lang.reflect.Array.newInstance(resultArray.getClass().getComponentType(), len)
+				;
+				System.arraycopy(array, 0, resultArray, 0, len);
+				// Null terminate
+				if(resultArray.length > len) resultArray[len] = null;
+				return resultArray;
+			}
+
+			@Override
+			public boolean add(E e) throws UnsupportedOperationException {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean remove(Object o) throws UnsupportedOperationException {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean containsAll(Collection<?> c) {
+				for(Object e : c) {
+					if(!contains(e)) return false;
+				}
+				return true;
+			}
+
+			@Override
+			public boolean addAll(Collection<? extends E> c) throws UnsupportedOperationException {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean retainAll(Collection<?> c) throws UnsupportedOperationException {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean removeAll(Collection<?> c) throws UnsupportedOperationException {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void clear() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
 }
