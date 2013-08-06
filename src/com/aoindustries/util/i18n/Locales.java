@@ -32,33 +32,45 @@ import java.util.concurrent.ConcurrentMap;
 public class Locales {
 
     private Locales() {}
-    
-	private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>();
 
-    /**
-     * Parses locales from their <code>toString</code> representation.  Caches
-     * locales for faster lookups.
-     */
-    public static Locale parseLocale(String locale) {
-        Locale l = locales.get(locale);
-        if(l==null) {
-            int pos = locale.indexOf('_');
-            if(pos==-1) l = new Locale(locale);
-            else {
-                int pos2 = locale.indexOf('_', pos+1);
-                if(pos2==-1) {
-                    l = new Locale(locale.substring(0, pos), locale.substring(pos+1));
-                } else {
-                    l = new Locale(locale.substring(0, pos), locale.substring(pos+1, pos2), locale.substring(pos2+1));
-                }
-            }
-            Locale existing = locales.putIfAbsent(locale, l);
-            if(existing!=null) l = existing;
-        }
-        return l;
-    }
+	// Was getting NullPointerException on class init, trying cache in separate class.
+	// It might have been due to memory exhausted in Tomcat, but this won't hurt.
+	private static class LocaleCache {
 
-    /**
+		private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>();
+
+		/**
+		 * Parses locales from their <code>toString</code> representation.  Caches
+		 * locales for faster lookups.
+		 */
+		private static Locale parseLocale(String locale) {
+			Locale l = locales.get(locale);
+			if(l==null) {
+				int pos = locale.indexOf('_');
+				if(pos==-1) l = new Locale(locale);
+				else {
+					int pos2 = locale.indexOf('_', pos+1);
+					if(pos2==-1) {
+						l = new Locale(locale.substring(0, pos), locale.substring(pos+1));
+					} else {
+						l = new Locale(locale.substring(0, pos), locale.substring(pos+1, pos2), locale.substring(pos2+1));
+					}
+				}
+				Locale existing = locales.putIfAbsent(locale, l);
+				if(existing!=null) l = existing;
+			}
+			return l;
+		}
+
+		private LocaleCache() {
+		}
+	}
+
+	public static Locale parseLocale(String locale) {
+		return LocaleCache.parseLocale(locale);
+	}
+
+	/**
      * Determines if the provided locale should be displayed from right to left.
      */
     public static boolean isRightToLeft(Locale locale) {
