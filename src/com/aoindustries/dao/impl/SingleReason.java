@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,13 +20,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.dao;
+package com.aoindustries.dao.impl;
 
+import com.aoindustries.dao.Reason;
 import com.aoindustries.util.i18n.ThreadLocale;
 import java.text.Collator;
 
 public final class SingleReason
-	extends Reason
+	extends AbstractReason
 {
 
     private final String reason;
@@ -45,7 +46,7 @@ public final class SingleReason
     }
 
     @Override
-    SingleReason merge(Reason other) {
+    public SingleReason merge(Reason other) {
         if(!(other instanceof SingleReason)) return null;
         SingleReason otherSingleReason = (SingleReason)other;
         // Must have the same reason

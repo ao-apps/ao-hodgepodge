@@ -20,9 +20,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.dao;
+package com.aoindustries.dao.impl;
 
-abstract public class AbstractRow<K extends Comparable<? super K>,R extends AbstractRow<K,? extends R> & Comparable<? super R>>
+import com.aoindustries.dao.DaoDatabase;
+import com.aoindustries.dao.Row;
+
+abstract public class AbstractRow<
+	K extends Comparable<? super K>,
+	R extends AbstractRow<K,? extends R> & Comparable<? super R>
+>
 	implements Row<K,R>
 {
 

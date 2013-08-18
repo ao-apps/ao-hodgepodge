@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,7 +31,10 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
-public interface Table<K extends Comparable<? super K>,R extends Row<K,? extends R>>
+public interface Table<
+	K extends Comparable<? super K>,
+	R extends Row<K,? extends R>
+>
 	extends Collection<R>
 {
 

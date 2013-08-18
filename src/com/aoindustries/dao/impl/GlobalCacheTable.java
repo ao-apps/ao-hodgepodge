@@ -20,8 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.dao;
+package com.aoindustries.dao.impl;
 
+import com.aoindustries.dao.DaoDatabase;
+import com.aoindustries.dao.Row;
 import com.aoindustries.sql.NoRowException;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -44,7 +46,10 @@ import java.util.TreeSet;
  * TODO: Coordinate invalidation between PHP and Java
  * TODO: Once both done, more aggressively use global caches for better remote database performance
  */
-abstract public class GlobalCacheTable<K extends Comparable<? super K>,R extends Row<K,? extends R>>
+abstract public class GlobalCacheTable<
+	K extends Comparable<? super K>,
+	R extends Row<K,? extends R>
+>
 	extends AbstractTable<K,R>
 {
 

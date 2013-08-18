@@ -22,40 +22,20 @@
  */
 package com.aoindustries.dao;
 
-import java.text.Collator;
-
 /**
  * A compound key with two columns.
  *
  * @author  AO Industries, Inc.
  */
-public class Tuple2<C1 extends Comparable<? super C1>,C2 extends Comparable<C2>>
-	extends AbstractTuple<Tuple2<C1,C2>>
-	implements Comparable<Tuple2<C1,C2>>
+public interface Tuple2<
+	C1 extends Comparable<? super C1>,
+	C2 extends Comparable<? super C2>,
+	T extends Tuple2<C1,C2,T> & Comparable<? super T>
+>
+	extends Tuple<T>
 {
 
-	private final C1 column1;
-	private final C2 column2;
-
-	public Tuple2(Collator collator, C1 column1, C2 column2) {
-		super(collator);
-		this.column1 = column1;
-		this.column2 = column2;
-    }
-
-	@Override
-	public Comparable<?>[] getColumns() {
-		return new Comparable<?>[] {
-			column1,
-			column2
-		};
-	}
+	C1 getColumn1();
 	
-	public C1 getColumn1() {
-		return column1;
-	}
-	
-	public C2 getColumn2() {
-		return column2;
-	}
+	C2 getColumn2();
 }

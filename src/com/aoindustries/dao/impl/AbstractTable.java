@@ -20,8 +20,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.dao;
+package com.aoindustries.dao.impl;
 
+import com.aoindustries.dao.DaoDatabase;
+import com.aoindustries.dao.Row;
+import com.aoindustries.dao.Table;
 import com.aoindustries.sql.NoRowException;
 import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.WrappedException;
@@ -38,7 +41,10 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-abstract public class AbstractTable<K extends Comparable<? super K>,R extends Row<K,? extends R>>
+abstract public class AbstractTable<
+	K extends Comparable<? super K>,
+	R extends Row<K,? extends R>
+>
 	implements Table<K,R>
 {
 

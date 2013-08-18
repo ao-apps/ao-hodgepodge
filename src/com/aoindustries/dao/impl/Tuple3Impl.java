@@ -20,47 +20,60 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.dao;
+package com.aoindustries.dao.impl;
+
+import com.aoindustries.dao.AbstractTuple;
+import com.aoindustries.dao.Tuple3;
+import java.text.Collator;
 
 /**
- * Allows sets of columns to be used as multi-column keys.
+ * A compound key with three columns.
  *
  * @author  AO Industries, Inc.
  */
-public interface Tuple<
-	T extends Tuple<T> & Comparable<? super T>
-> {
+public class Tuple3Impl<
+	C1 extends Comparable<? super C1>,
+	C2 extends Comparable<? super C2>,
+	C3 extends Comparable<? super C3>
+>
+	extends AbstractTuple<Tuple3Impl<C1,C2,C3>>
+	implements
+		Tuple3<C1,C2,C3,Tuple3Impl<C1,C2,C3>>,
+		Comparable<Tuple3Impl<C1,C2,C3>>
+{
 
-	/**
-	 * Gets an array of all column values.
-	 */
-	Comparable<?>[] getColumns();
+	private final C1 column1;
+	private final C2 column2;
+	private final C3 column3;
 
-	/**
-	 * Based on the column values (column1,column2,...)
-	 */
+	public Tuple3Impl(Collator collator, C1 column1, C2 column2, C3 column3) {
+		super(collator);
+		this.column1 = column1;
+		this.column2 = column2;
+		this.column3 = column3;
+    }
+
 	@Override
-	String toString();
-
-	/**
-	 * The equals is based on equal column values.
-	 */
+	public Comparable<?>[] getColumns() {
+		return new Comparable<?>[] {
+			column1,
+			column2,
+			column3
+		};
+	}
+	
 	@Override
-	boolean equals(Object obj);
-
-	/**
-	 * The hashCode is based on the column values.
-	 */
+	public C1 getColumn1() {
+		return column1;
+	}
+	
 	@Override
-	int hashCode();
-
-    /**
-     * The default ordering is based on column value comparisons.  If both values
-     * are Strings, will use the database collator.
-	 *
-	 * If one tuple has few columns than the other, and all the values are equal,
-	 * the tuple with fewer columns is considered to be first.
-     */
-    // @Override
-    int compareTo(T o);
+	public C2 getColumn2() {
+		return column2;
+	}
+	
+	@Override
+	public C3 getColumn3() {
+		return column3;
+	}
 }

@@ -20,8 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.dao;
+package com.aoindustries.dao.impl;
 
+import com.aoindustries.dao.DaoDatabase;
+import com.aoindustries.dao.Row;
 import com.aoindustries.sql.NoRowException;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -32,15 +34,32 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Caches results on a per-row basis.
+ * Caches results by querying the entire table upon first use.  The cache is
+ * per-request and per-user.
+ * <ol>
+ *   <li>All rows are loaded and stored unsorted</li>
+ *   <li>allRowsLoaded is called, given unsorted rows</li>
+ *   <li>Map is built upon first call to get(K)</li>
+ *   <li>Rows are sorted upon first call to getRows</li>
+ * </ol>
  */
-abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Row<K,? extends R>>
+abstract public class TableCacheTable<
+	K extends Comparable<? super K>,
+	R extends Row<K,? extends R>
+>
 	extends AbstractTable<K,R>
 {
 
     protected final ThreadLocal<Set<? extends R>> unsortedRowsCache = new ThreadLocal<Set<? extends R>>();
 
     private final ThreadLocal<SortedSet<? extends R>> sortedRowsCache = new ThreadLocal<SortedSet<? extends R>>();
+
+    private final ThreadLocal<Boolean> rowCachedLoaded = new ThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return Boolean.FALSE;
+        }
+    };
 
     private final ThreadLocal<Map<K,R>> rowCache = new ThreadLocal<Map<K,R>>() {
         @Override
@@ -49,13 +68,14 @@ abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Ro
         }
     };
 
-    protected RowCacheTable(Class<K> keyClass, Class<R> rowClass, DaoDatabase database) {
+    protected TableCacheTable(Class<K> keyClass, Class<R> rowClass, DaoDatabase database) {
         super(keyClass, rowClass, database);
     }
 
     private void clearCaches0() {
         unsortedRowsCache.remove();
         sortedRowsCache.remove();
+        rowCachedLoaded.set(Boolean.FALSE);
         rowCache.get().clear();
     }
 
@@ -82,12 +102,6 @@ abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Ro
         Set<? extends R> rows = unsortedRowsCache.get();
         if(rows==null) {
             rows = Collections.unmodifiableSet(getRowsNoCache());
-
-            // Populate rowCache fully
-            Map<K,R> cache = rowCache.get();
-            cache.clear();
-            for(R row : rows) if(cache.put(canonicalize(row.getKey()), row)!=null) throw new SQLException("Duplicate key: "+row.getKey());
-
             allRowsLoaded(rows);
             unsortedRowsCache.set(rows);
         }
@@ -96,7 +110,7 @@ abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Ro
 
     /**
      * Called when all rows have been loaded at once.  This allows for subclasses
-     * to populate any views or caches in a more efficient manner than row-by-row.
+     * to populate any views or caches.
      *
      * This default implementation does nothing.
      */
@@ -115,38 +129,18 @@ abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Ro
     }
 
     @Override
-    public R get(final K key) throws NoRowException, SQLException {
-        final K canonicalKey = canonicalize(key);
+    public R get(K key) throws NoRowException, SQLException {
         Map<K,R> cache = rowCache.get();
-        if(cache.containsKey(canonicalKey)) {
-            R row = cache.get(canonicalKey);
-            if(row==null) throw new NoRowException(getName()+" not found: "+key);
-            return row;
+        if(!rowCachedLoaded.get()) {
+            // Load all rows in a single query
+            cache.clear();
+            for(R row : getUnsortedRows()) if(cache.put(canonicalize(row.getKey()), row)!=null) throw new SQLException("Duplicate key: "+row.getKey());
+            rowCachedLoaded.set(Boolean.TRUE);
         }
-
-        // Doesn't exist when all rows have been loaded
-        if(unsortedRowsCache.get()!=null) throw new NoRowException(getName()+" not found: "+key);
-
-        // Try single row query - cache hits and misses
-        try {
-            R row = getNoCache(canonicalKey);
-            addToCache(canonicalKey, row);
-            return row;
-        } catch(NoRowException err) {
-            cache.put(canonicalKey, null);
-            throw new NoRowException(getName()+" not found: "+key, err);
-        }
+        R row = cache.get(canonicalize(key));
+        if(row==null) throw new NoRowException(getName()+" not found: "+key);
+        return row;
     }
-
-    /**
-     * Adds a single object to the cache.
-     */
-    protected void addToCache(K canonicalKey, R row) {
-        assert canonicalize(row.getKey()).equals(canonicalKey);
-        rowCache.get().put(canonicalKey, row);
-    }
-
-    abstract protected R getNoCache(K canonicalKey) throws NoRowException, SQLException;
 
     abstract protected Set<? extends R> getRowsNoCache() throws SQLException;
 }

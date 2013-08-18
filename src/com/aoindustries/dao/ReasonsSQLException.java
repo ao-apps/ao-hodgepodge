@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,16 +29,16 @@ public class ReasonsSQLException
 	extends SQLException
 {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
-    private final List<Reason> reasons;
+    private final List<? extends Reason> reasons;
 
-    public ReasonsSQLException(String message, List<Reason> reasons) {
+    public ReasonsSQLException(String message, List<? extends Reason> reasons) {
         super(message);
         this.reasons = reasons;
     }
 
-    public List<Reason> getReasons() {
+    public List<? extends Reason> getReasons() {
         return reasons;
     }
 }

@@ -22,47 +22,23 @@
  */
 package com.aoindustries.dao;
 
-import java.text.Collator;
-
 /**
  * A compound key with three columns.
  *
  * @author  AO Industries, Inc.
  */
-public class Tuple3<C1 extends Comparable<? super C1>,C2 extends Comparable<C2>,C3 extends Comparable<C3>>
-	extends AbstractTuple<Tuple3<C1,C2,C3>>
-	implements Comparable<Tuple3<C1,C2,C3>>
+public interface Tuple3<
+	C1 extends Comparable<? super C1>,
+	C2 extends Comparable<? super C2>,
+	C3 extends Comparable<? super C3>,
+	T extends Tuple3<C1,C2,C3,T> & Comparable<? super T>
+>
+	extends Tuple<T>
 {
 
-	private final C1 column1;
-	private final C2 column2;
-	private final C3 column3;
-
-	public Tuple3(Collator collator, C1 column1, C2 column2, C3 column3) {
-		super(collator);
-		this.column1 = column1;
-		this.column2 = column2;
-		this.column3 = column3;
-    }
-
-	@Override
-	public Comparable<?>[] getColumns() {
-		return new Comparable<?>[] {
-			column1,
-			column2,
-			column3
-		};
-	}
+	C1 getColumn1();
 	
-	public C1 getColumn1() {
-		return column1;
-	}
+	C2 getColumn2();
 	
-	public C2 getColumn2() {
-		return column2;
-	}
-	
-	public C3 getColumn3() {
-		return column3;
-	}
+	C3 getColumn3();
 }

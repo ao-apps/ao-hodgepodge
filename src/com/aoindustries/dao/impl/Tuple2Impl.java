@@ -20,20 +20,51 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.dao;
+package com.aoindustries.dao.impl;
+
+import com.aoindustries.dao.AbstractTuple;
+import com.aoindustries.dao.Tuple2;
+import java.text.Collator;
 
 /**
- * A compound key with any number of columns of the same type.
+ * A compound key with two columns.
  *
  * @author  AO Industries, Inc.
  */
-public interface TupleN<
-	C extends Comparable<? super C>,
-	T extends TupleN<C,T> & Comparable<? super T>
+public class Tuple2Impl<
+	C1 extends Comparable<? super C1>,
+	C2 extends Comparable<? super C2>
 >
-	extends Tuple<T>
+	extends AbstractTuple<Tuple2Impl<C1,C2>>
+	implements
+		Tuple2<C1,C2,Tuple2Impl<C1,C2>>,
+		Comparable<Tuple2Impl<C1,C2>>
 {
 
+	private final C1 column1;
+	private final C2 column2;
+
+	public Tuple2Impl(Collator collator, C1 column1, C2 column2) {
+		super(collator);
+		this.column1 = column1;
+		this.column2 = column2;
+    }
+
 	@Override
-	C[] getColumns();
+	public Comparable<?>[] getColumns() {
+		return new Comparable<?>[] {
+			column1,
+			column2
+		};
+	}
+	
+	@Override
+	public C1 getColumn1() {
+		return column1;
+	}
+	
+	@Override
+	public C2 getColumn2() {
+		return column2;
+	}
 }

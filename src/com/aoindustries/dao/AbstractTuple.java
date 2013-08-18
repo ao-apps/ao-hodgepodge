@@ -30,7 +30,9 @@ import java.util.Arrays;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class AbstractTuple<T extends AbstractTuple<T> & Comparable<? super T>>
+abstract public class AbstractTuple<
+	T extends AbstractTuple<T> & Comparable<? super T>
+>
 	implements Tuple<T>
 {
 
