@@ -40,7 +40,7 @@ final public class UnmodifiableTimestamp extends Timestamp {
 	 * If the wrapped timestamp is already unmodifiable, returns it.
 	 * Otherwise returns a new timestamp with the same value.
 	 */
-	public static UnmodifiableTimestamp wrap(Timestamp other) {
+	public static UnmodifiableTimestamp valueOf(Timestamp other) {
 		if(other==null) return null;
 		if(other instanceof UnmodifiableTimestamp) return (UnmodifiableTimestamp)other;
 		return new UnmodifiableTimestamp(other.getTime(), other.getNanos());
