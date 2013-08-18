@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,7 +33,25 @@ final public class UnmodifiableTimestamp extends Timestamp {
 
     private static final long serialVersionUID = 1L;
 
-    public UnmodifiableTimestamp(long time) {
+	/**
+	 * Creates a new UnmodifiableTimestamp from a Timestamp.
+	 * 
+	 * If the wrapped timestamp is null, returns null.
+	 * If the wrapped timestamp is already unmodifiable, returns it.
+	 * Otherwise returns a new timestamp with the same value.
+	 */
+	public static UnmodifiableTimestamp wrap(Timestamp other) {
+		if(other==null) return null;
+		if(other instanceof UnmodifiableTimestamp) return (UnmodifiableTimestamp)other;
+		return new UnmodifiableTimestamp(other.getTime(), other.getNanos());
+	}
+
+	public UnmodifiableTimestamp(long time, int nanos) {
+		super(time);
+		super.setNanos(nanos);
+    }
+
+	public UnmodifiableTimestamp(long time) {
         super(time);
     }
 
