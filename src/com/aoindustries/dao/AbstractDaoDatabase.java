@@ -34,7 +34,9 @@ import java.util.Map;
 /**
  * A base implementation of <code>DaoDatabase</code>.
  */
-abstract public class AbstractDaoDatabase implements DaoDatabase {
+abstract public class AbstractDaoDatabase
+	implements DaoDatabase
+{
 
     /**
      * A single Collator for shared use.

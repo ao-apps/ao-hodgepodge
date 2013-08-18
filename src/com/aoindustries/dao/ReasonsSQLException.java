@@ -25,7 +25,9 @@ package com.aoindustries.dao;
 import java.sql.SQLException;
 import java.util.List;
 
-public class ReasonsSQLException extends SQLException {
+public class ReasonsSQLException
+	extends SQLException
+{
 
     private static final long serialVersionUID = 1L;
 

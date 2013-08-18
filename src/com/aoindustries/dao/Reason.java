@@ -26,7 +26,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class Reason implements Comparable<Reason> {
+public abstract class Reason
+	implements Comparable<Reason>
+{
 
     /**
      * Merges a single reason, if not null.

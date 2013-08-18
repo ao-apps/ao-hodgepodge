@@ -34,7 +34,9 @@ import java.util.TreeSet;
 /**
  * Caches results on a per-row basis.
  */
-abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Row<K,? extends R>> extends AbstractTable<K,R> {
+abstract public class RowCacheTable<K extends Comparable<? super K>,R extends Row<K,? extends R>>
+	extends AbstractTable<K,R>
+{
 
     protected final ThreadLocal<Set<? extends R>> unsortedRowsCache = new ThreadLocal<Set<? extends R>>();
 

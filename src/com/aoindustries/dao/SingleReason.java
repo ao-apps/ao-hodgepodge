@@ -25,7 +25,9 @@ package com.aoindustries.dao;
 import com.aoindustries.util.i18n.ThreadLocale;
 import java.text.Collator;
 
-public final class SingleReason extends Reason {
+public final class SingleReason
+	extends Reason
+{
 
     private final String reason;
 

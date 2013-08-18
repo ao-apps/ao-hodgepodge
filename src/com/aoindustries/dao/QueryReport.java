@@ -42,7 +42,9 @@ import java.util.Map;
 /**
  * A report that is obtained from a SQL query database.
  */
-public abstract class QueryReport implements Report {
+public abstract class QueryReport
+	implements Report
+{
 
     public static class QueryColumn implements Report.Column {
 

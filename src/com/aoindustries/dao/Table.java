@@ -31,7 +31,9 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
-public interface Table<K extends Comparable<? super K>,R extends Row<K,? extends R>> extends Collection<R> {
+public interface Table<K extends Comparable<? super K>,R extends Row<K,? extends R>>
+	extends Collection<R>
+{
 
     /**
      * Gets the database this table is part of.

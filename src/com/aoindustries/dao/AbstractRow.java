@@ -22,7 +22,9 @@
  */
 package com.aoindustries.dao;
 
-abstract public class AbstractRow<K extends Comparable<? super K>,R extends AbstractRow<K,? extends R> & Comparable<? super R>> implements Row<K,R> {
+abstract public class AbstractRow<K extends Comparable<? super K>,R extends AbstractRow<K,? extends R> & Comparable<? super R>>
+	implements Row<K,R>
+{
 
     private final DaoDatabase database;
     private final Class<R> clazz;

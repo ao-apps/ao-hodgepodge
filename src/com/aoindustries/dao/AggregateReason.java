@@ -25,7 +25,9 @@ package com.aoindustries.dao;
 import com.aoindustries.util.i18n.ThreadLocale;
 import java.text.Collator;
 
-public final class AggregateReason extends Reason {
+public final class AggregateReason
+	extends Reason
+{
 
     private final int count;
     private final String singularPrefix;
