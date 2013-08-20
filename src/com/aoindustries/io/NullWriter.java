@@ -22,7 +22,7 @@
  */
 package com.aoindustries.io;
 
-import java.io.*;
+import java.io.Writer;
 
 /**
  * Discards all data.
