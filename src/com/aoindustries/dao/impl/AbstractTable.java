@@ -297,7 +297,7 @@ abstract public class AbstractTable<
 
     @Override
     @SuppressWarnings("unchecked")
-    public Iterator<R> getIterator() throws SQLException {
+    public Iterator<? extends R> getIterator() throws SQLException {
         return (Iterator<R>)getRows().iterator();
     }
 
@@ -305,21 +305,22 @@ abstract public class AbstractTable<
      * Iterates the rows in sorted order.
      */
     @Override
+	@SuppressWarnings("unchecked")
     public Iterator<R> iterator() {
         try {
-            return getIterator();
+            return (Iterator<R>)getIterator();
         } catch(SQLException err) {
             throw new WrappedException(err);
         }
     }
 
     @Override
-    public Map<K,R> getMap() {
+    public Map<K,? extends R> getMap() {
         return map;
     }
 
     @Override
-    public SortedMap<K,R> getSortedMap() {
+    public SortedMap<K,? extends R> getSortedMap() {
         return sortedMap;
     }
 

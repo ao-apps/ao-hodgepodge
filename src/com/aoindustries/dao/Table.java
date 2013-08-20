@@ -75,7 +75,7 @@ public interface Table<
      * @see #getRows() Different calls may return different results, for
      *                 snapshot-like behavior see getRows.
      */
-    Iterator<R> getIterator() throws SQLException;
+    Iterator<? extends R> getIterator() throws SQLException;
 
     /**
      * @see  #getIterator()
@@ -86,12 +86,12 @@ public interface Table<
     /**
      * Gets a map view of this table.
      */
-    Map<K,R> getMap();
+    Map<K,? extends R> getMap();
 
     /**
      * Gets a sorted map view of this table.
      */
-    SortedMap<K,R> getSortedMap();
+    SortedMap<K,? extends R> getSortedMap();
 
     /**
      * Gets the table name.
