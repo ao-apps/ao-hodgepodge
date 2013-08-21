@@ -194,7 +194,7 @@ public abstract class QueryReport
 							sqlParams[i] = param;
 						}
 
-						DatabaseConnection.setParams(pstmt, sqlParams);
+						DatabaseConnection.setParams(conn, pstmt, sqlParams);
 						ResultSet results = pstmt.executeQuery();
 						try {
 							ResultSetMetaData meta = results.getMetaData();

@@ -159,7 +159,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         return c;
     }
 
-    protected static void setParam(PreparedStatement pstmt, int pos, Object param) throws SQLException {
+    protected static void setParam(Connection conn, PreparedStatement pstmt, int pos, Object param) throws SQLException {
         if(param==null) pstmt.setNull(pos, Types.VARCHAR);
         else if(param instanceof Null) pstmt.setNull(pos, ((Null)param).getType());
         else if(param instanceof Array) pstmt.setArray(pos, (Array)param);
@@ -191,7 +191,9 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             (param instanceof SQLData)
             || (param instanceof Struct)
         ) pstmt.setObject(pos, param);
-        else {
+		else if(param instanceof String[]) {
+			pstmt.setArray(pos, conn.createArrayOf("text", (String[])param));
+		} else {
             // Defaults to string with object.toString only when the class has a valueOf(String) method that will reconstitute it in AutoObjectFactory
             Class<?> clazz = param.getClass();
             if(AutoObjectFactory.getValueOfStringMethod(clazz)!=null) pstmt.setString(pos, param.toString());
@@ -199,16 +201,17 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         }
     }
 
-    public static void setParams(PreparedStatement pstmt, Object ... params) throws SQLException {
+    public static void setParams(Connection conn, PreparedStatement pstmt, Object ... params) throws SQLException {
         int pos=1;
-        for(Object param : params) setParam(pstmt, pos++, param);
+        for(Object param : params) setParam(conn, pstmt, pos++, param);
     }
 
     @Override
     public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+		Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -232,9 +235,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+		Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -258,9 +262,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+		Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -284,9 +289,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+		Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -315,7 +321,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
             pstmt.setFetchSize(FETCH_SIZE);
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 IntList V=new IntArrayList();
@@ -333,9 +339,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public int executeIntQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+		Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -364,7 +371,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
             pstmt.setFetchSize(FETCH_SIZE);
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 LongList V=new LongArrayList();
@@ -382,9 +389,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public long executeLongQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+		Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -409,11 +417,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     @Override
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
-
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
             try {
-                setParams(pstmt, params);
+                setParams(conn, pstmt, params);
                 ResultSet results=pstmt.executeQuery();
                 try {
                     if(results.next()) {
@@ -456,11 +463,9 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     @Override
     public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException {
         Connection conn = getConnection(isolationLevel, readOnly);
-
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
-
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -490,7 +495,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         try {
             pstmt.setFetchSize(FETCH_SIZE);
             try {
-                setParams(pstmt, params);
+                setParams(conn, pstmt, params);
                 ResultSet results=pstmt.executeQuery();
                 try {
                     Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
@@ -531,8 +536,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
             pstmt.setFetchSize(FETCH_SIZE);
-            setParams(pstmt, params);
-
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 List<T> list=new ArrayList<T>();
@@ -556,7 +560,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         try {
             pstmt.setFetchSize(FETCH_SIZE);
             try {
-                setParams(pstmt, params);
+                setParams(conn, pstmt, params);
                 ResultSet results=pstmt.executeQuery();
                 try {
                     Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
@@ -599,7 +603,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
             pstmt.setFetchSize(FETCH_SIZE);
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 while(results.next()) {
@@ -624,8 +628,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
             pstmt.setFetchSize(FETCH_SIZE);
-            setParams(pstmt, params);
-
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 while(results.next()) resultSetHandler.handleResultSet(results);
@@ -646,7 +649,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
             pstmt.setFetchSize(FETCH_SIZE);
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 List<Short> list = new ArrayList<Short>();
@@ -664,9 +667,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public short executeShortQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+		Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -690,9 +694,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+		Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -721,7 +726,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
             pstmt.setFetchSize(FETCH_SIZE);
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 List<String> list = new ArrayList<String>();
@@ -739,9 +744,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        PreparedStatement pstmt = getConnection(isolationLevel, readOnly).prepareStatement(sql);
+		Connection conn = getConnection(isolationLevel, readOnly);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
                 if(results.next()) {
@@ -765,9 +771,10 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
 
     @Override
     public int executeUpdate(String sql, Object ... params) throws SQLException {
-        PreparedStatement pstmt = getConnection(Connection.TRANSACTION_READ_COMMITTED, false).prepareStatement(sql);
+		Connection conn = getConnection(Connection.TRANSACTION_READ_COMMITTED, false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            setParams(pstmt, params);
+            setParams(conn, pstmt, params);
             return pstmt.executeUpdate();
         } catch(SQLException err) {
             throw new WrappedSQLException(err, pstmt);
