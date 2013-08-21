@@ -27,6 +27,8 @@ import com.aoindustries.util.IntArrayList;
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.LongArrayList;
 import com.aoindustries.util.LongList;
+import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -37,12 +39,15 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.RowId;
 import java.sql.SQLData;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -169,16 +174,20 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
         else if(param instanceof Double) pstmt.setDouble(pos, (Double)param);
         else if(param instanceof Float) pstmt.setFloat(pos, (Float)param);
         else if(param instanceof Integer) pstmt.setInt(pos, (Integer)param);
+        else if(param instanceof InputStream) pstmt.setBinaryStream(pos, (InputStream)param);
         else if(param instanceof Long) pstmt.setLong(pos, (Long)param);
+        else if(param instanceof NClob) pstmt.setNClob(pos, (NClob)param);
+        else if(param instanceof Reader) pstmt.setCharacterStream(pos, (Reader)param);
         else if(param instanceof Ref) pstmt.setRef(pos, (Ref)param);
+        else if(param instanceof RowId) pstmt.setRowId(pos, (RowId)param);
         else if(param instanceof Short) pstmt.setShort(pos, (Short)param);
+        else if(param instanceof SQLXML) pstmt.setSQLXML(pos, (SQLXML)param);
         else if(param instanceof String) pstmt.setString(pos, (String)param);
         else if(param instanceof Time) pstmt.setTime(pos, (Time)param);
         else if(param instanceof Timestamp) pstmt.setTimestamp(pos, (Timestamp)param);
         else if(param instanceof URL) pstmt.setURL(pos, (URL)param);
         else if(param instanceof Enum) pstmt.setString(pos, ((Enum)param).name());
         else if(
-            // Note: Several more added in Java 1.6
             (param instanceof SQLData)
             || (param instanceof Struct)
         ) pstmt.setObject(pos, param);
