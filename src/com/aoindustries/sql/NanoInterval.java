@@ -27,7 +27,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * Encapsulates a time span in nanoseconds.
+ * Encapsulates an interval in nanoseconds.
  *
  * @author  AO Industries, Inc.
  */
