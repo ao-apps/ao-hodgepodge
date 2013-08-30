@@ -37,7 +37,7 @@ public class Locales {
 	// It might have been due to memory exhausted in Tomcat, but this won't hurt.
 	private static class LocaleCache {
 
-		private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>();
+		private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>(16, 0.75f, 1);
 
 		/**
 		 * Parses locales from their <code>toString</code> representation.  Caches
