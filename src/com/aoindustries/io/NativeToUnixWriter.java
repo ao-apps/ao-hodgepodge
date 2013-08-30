@@ -32,6 +32,12 @@ import java.io.Writer;
 final public class NativeToUnixWriter {
 
 	/**
+	 * Make no instances.
+	 */
+	private NativeToUnixWriter() {
+	}
+
+	/**
 	 * The end of line character for Unix.
 	 */
 	private static final String UNIX_EOL = "\n";
@@ -45,9 +51,9 @@ final public class NativeToUnixWriter {
 	 * Gets an instance of the Writer that performs the conversion.
 	 * The implementation may be optimized for common platforms.
 	 */
-	public Writer getInstance(Writer out) {
+	public static Writer getInstance(Writer out) {
 		// Already in Unix format, no conversion necessary
-		if(UNIX_EOL.equals(EOL)) return WriterFacade.getInstance(out);
+		if(UNIX_EOL.equals(EOL)) return out;
 		// Use FindReplaceWriter
 		return new FindReplaceWriter(out, EOL, UNIX_EOL);
 	}
