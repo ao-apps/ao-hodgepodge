@@ -83,7 +83,19 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     private static final String MEDIATYPE_SUFFIX = ".ModifiableResourceBundle.mediaType";
     private static final String ISBLOCKELEMENT_SUFFIX = ".ModifiableResourceBundle.isBlockElement";
 
-    /**
+	/**
+	 * Checks if a key is used for tracking status.
+	 */
+	public static boolean isTrackingKey(String key) {
+		return
+			key.endsWith(VALIDATED_SUFFIX)
+			|| key.endsWith(MODIFIED_SUFFIX)
+			|| key.endsWith(MEDIATYPE_SUFFIX)
+			|| key.endsWith(ISBLOCKELEMENT_SUFFIX)
+		;
+	}
+
+	/**
      * <p>
      * If this sourceFile exists, the properties will be read from that file,
      * otherwise it will fall back to <code>Class.getResourceAsStream</code>.
