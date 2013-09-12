@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.i18n.servlet;
 
+import com.aoindustries.util.i18n.EditableResourceBundle;
 import com.aoindustries.util.i18n.Locales;
 import com.aoindustries.util.i18n.ModifiableResourceBundle;
 import java.io.IOException;
@@ -80,7 +81,15 @@ public class SetResourceBundleValue extends HttpServlet {
             ResourceBundle resourceBundle = ResourceBundle.getBundle(baseName, locale);
             if(!resourceBundle.getLocale().equals(locale)) throw new AssertionError("resourceBundle.locale!=locale");
             if(!(resourceBundle instanceof ModifiableResourceBundle)) throw new AssertionError("resourceBundle is not a ModifiableResourceBundle");
-            ((ModifiableResourceBundle)resourceBundle).setString(key, value, modified);
+			if(value.isEmpty()) {
+	            ((ModifiableResourceBundle)resourceBundle).removeKey(key);
+			} else {
+	            ((ModifiableResourceBundle)resourceBundle).setString(
+					key,
+					EditableResourceBundle.EMPTY_DISPLAY.equals(value) ? "" : value,
+					modified
+				);
+			}
 
             // Set request parameters
             PrintWriter out = response.getWriter();

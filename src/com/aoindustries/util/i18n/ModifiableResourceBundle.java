@@ -40,6 +40,21 @@ abstract public class ModifiableResourceBundle extends ResourceBundle {
     }
 
     /**
+     * Removes a string.
+     */
+    public final void removeKey(String key) {
+        if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
+        handleRemoveKey(key);
+    }
+
+    /**
+     * This will only be called on modifiable bundles.
+     *
+     * @see #isModifiable()
+     */
+    protected abstract void handleRemoveKey(String key);
+
+	/**
      * @see #setObject(java.lang.String, java.lang.Object, boolean)
      */
     public final void setString(String key, String value, boolean modified) {

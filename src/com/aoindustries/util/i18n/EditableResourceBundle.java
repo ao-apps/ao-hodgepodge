@@ -52,7 +52,12 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
     public static final String VISIBILITY_COOKIE_NAME = "EditableResourceBundleEditorVisibility";
 
-    private static final ThreadLocal<Boolean> canEditResources = new ThreadLocal<Boolean>() {
+	/**
+	 * Value used for empty strings, to avoid ambiguity.  Other submitted empty will be removed.
+	 */
+	public static final String EMPTY_DISPLAY = "[BLANK]";
+
+	private static final ThreadLocal<Boolean> canEditResources = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
             return Boolean.FALSE;
@@ -187,7 +192,13 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         printEditableResourceBundleLookups(out, 4, true);
     }
 
-    /**
+	private static String convertEmpty(String value) {
+		if(value==null) return null;
+		if(value.isEmpty()) return EMPTY_DISPLAY;
+		return value;
+	}
+
+	/**
      * Prints the resource bundle lookup editor.  This should be called at the end of a request,
      * just before the body tag is closed.
      *
@@ -317,7 +328,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                         if(bundleSet.getLocales().contains(locale)) {
                             // Value allowed
                             out.append('"');
-                            String value = bundleSet.getResourceBundle(locale).getValue(lookupKey.key);
+                            String value = convertEmpty(bundleSet.getResourceBundle(locale).getValue(lookupKey.key));
                             if(value!=null) TextInJavaScriptEncoder.encodeTextInJavaScript(value, out);
                             out.append('"');
                         } else {
@@ -600,7 +611,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                             // White: is validated
                             String backgroundColor;
                             EditableResourceBundle localeBundle = bundleSet.getResourceBundle(locale);
-                            String currentValue = localeBundle.getValue(key);
+                            String currentValue = convertEmpty(localeBundle.getValue(key));
                             if(currentValue==null) backgroundColor = "#ffc0c0"; // Missing
                             else {
                                 // Find the most recently updated item

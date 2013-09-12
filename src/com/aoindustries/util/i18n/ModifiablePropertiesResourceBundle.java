@@ -393,6 +393,25 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     }
 
     @Override
+    protected void handleRemoveKey(String key) {
+        checkKey(key);
+        // Updates are serialized
+        synchronized(properties) {
+            properties.remove(key);
+            properties.remove(key + VALIDATED_SUFFIX);
+            properties.remove(key + MODIFIED_SUFFIX);
+			properties.remove(key + MEDIATYPE_SUFFIX);
+			properties.remove(key + ISBLOCKELEMENT_SUFFIX);
+            saveProperties();
+            valueMap.remove(key);
+            validatedMap.remove(key);
+            modifiedMap.remove(key);
+            mediaTypeMap.remove(key);
+            isBlockElementMap.remove(key);
+        }
+    }
+
+	@Override
     protected void handleSetObject(String key, Object value, boolean modified) {
         checkKey(key);
         // Updates are serialized
