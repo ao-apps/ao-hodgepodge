@@ -22,9 +22,11 @@
  */
 package com.aoindustries.util;
 
+import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.util.AoCollections.PeekIterator;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -352,4 +354,328 @@ public class AoArrays {
 		if(len==1) return Collections.singleton(array[0]);
 		return new UnmodifiableArraySet<E>(array);
 	}
+
+	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (Object[])">
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static <E> int indexOf(E[] array, E element) {
+		return indexOf(array, element, 0);
+	}
+
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static <E> int indexOf(E[] array, E element, int fromIndex) {
+		for(int i=fromIndex, len=array.length; i<len; i++) {
+			if(ObjectUtils.equals(array[i], element)) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static <E> int lastIndexOf(E[] array, E element) {
+		return lastIndexOf(array, element, array.length-1);
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static <E> int lastIndexOf(E[] array, E element, int fromIndex) {
+		for(int i=fromIndex; i>=0; i--) {
+			if(ObjectUtils.equals(array[i], element)) return i;
+		}
+		return -1;
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (Enum[])">
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static <E extends Enum<E>> int indexOf(E[] array, E element) {
+		return indexOf(array, element, 0);
+	}
+
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static <E extends Enum<E>> int indexOf(E[] array, E element, int fromIndex) {
+		for(int i=fromIndex, len=array.length; i<len; i++) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static <E extends Enum<E>> int lastIndexOf(E[] array, E element) {
+		return lastIndexOf(array, element, array.length-1);
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static <E extends Enum<E>> int lastIndexOf(E[] array, E element, int fromIndex) {
+		for(int i=fromIndex; i>=0; i--) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (byte[])">
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(byte[] array, byte element) {
+		return indexOf(array, element, 0);
+	}
+
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(byte[] array, byte element, int fromIndex) {
+		for(int i=fromIndex, len=array.length; i<len; i++) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(byte[] array, byte element) {
+		return lastIndexOf(array, element, array.length-1);
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(byte[] array, byte element, int fromIndex) {
+		for(int i=fromIndex; i>=0; i--) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (short[])">
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(short[] array, short element) {
+		return indexOf(array, element, 0);
+	}
+
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(short[] array, short element, int fromIndex) {
+		for(int i=fromIndex, len=array.length; i<len; i++) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(short[] array, short element) {
+		return lastIndexOf(array, element, array.length-1);
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(short[] array, short element, int fromIndex) {
+		for(int i=fromIndex; i>=0; i--) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (int[])">
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(int[] array, int element) {
+		return indexOf(array, element, 0);
+	}
+
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(int[] array, int element, int fromIndex) {
+		for(int i=fromIndex, len=array.length; i<len; i++) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(int[] array, int element) {
+		return lastIndexOf(array, element, array.length-1);
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(int[] array, int element, int fromIndex) {
+		for(int i=fromIndex; i>=0; i--) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (long[])">
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(long[] array, long element) {
+		return indexOf(array, element, 0);
+	}
+
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(long[] array, long element, int fromIndex) {
+		for(int i=fromIndex, len=array.length; i<len; i++) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(long[] array, long element) {
+		return lastIndexOf(array, element, array.length-1);
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(long[] array, long element, int fromIndex) {
+		for(int i=fromIndex; i>=0; i--) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (float[])">
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(float[] array, float element) {
+		return indexOf(array, element, 0);
+	}
+
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(float[] array, float element, int fromIndex) {
+		for(int i=fromIndex, len=array.length; i<len; i++) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(float[] array, float element) {
+		return lastIndexOf(array, element, array.length-1);
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(float[] array, float element, int fromIndex) {
+		for(int i=fromIndex; i>=0; i--) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (double[])">
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(double[] array, double element) {
+		return indexOf(array, element, 0);
+	}
+
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(double[] array, double element, int fromIndex) {
+		for(int i=fromIndex, len=array.length; i<len; i++) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(double[] array, double element) {
+		return lastIndexOf(array, element, array.length-1);
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(double[] array, double element, int fromIndex) {
+		for(int i=fromIndex; i>=0; i--) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (char[])">
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(char[] array, char element) {
+		return indexOf(array, element, 0);
+	}
+
+	/**
+	 * Finds the first index of an element or <code>-1</code> if not found.
+	 */
+	public static int indexOf(char[] array, char element, int fromIndex) {
+		for(int i=fromIndex, len=array.length; i<len; i++) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(char[] array, char element) {
+		return lastIndexOf(array, element, array.length-1);
+	}
+
+	/**
+	 * Finds the last index of an element or <code>-1</code> if not found.
+	 */
+	public static int lastIndexOf(char[] array, char element, int fromIndex) {
+		for(int i=fromIndex; i>=0; i--) {
+			if(array[i] == element) return i;
+		}
+		return -1;
+	}
+	// </editor-fold>
 }
