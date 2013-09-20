@@ -216,7 +216,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     BigDecimal b=results.getBigDecimal(1);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return b;
                 }
                 if(rowRequired) throw new NoRowException();
@@ -243,7 +243,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     boolean b=results.getBoolean(1);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return b;
                 }
                 if(rowRequired) throw new NoRowException();
@@ -270,7 +270,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     byte[] b=results.getBytes(1);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return b;
                 }
                 if(rowRequired) throw new NoRowException();
@@ -297,7 +297,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     java.sql.Date D=results.getDate(1);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return D;
                 }
                 if(rowRequired) throw new NoRowException();
@@ -347,7 +347,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     int i=results.getInt(1);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return i;
                 }
                 if(rowRequired) throw new NoRowException();
@@ -397,7 +397,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     long l=results.getLong(1);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return l;
                 }
                 if(rowRequired) throw new NoRowException();
@@ -426,7 +426,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                     if(results.next()) {
                         Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
                         T object = constructor.newInstance(results);
-                        if(results.next()) throw new SQLException("More than one row returned.");
+                        if(results.next()) throw new ExtraRowException();
                         return object;
                     }
                     if(rowRequired) throw new NoRowException();
@@ -470,7 +470,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     T object = objectFactory.createObject(results);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return object;
                 }
                 if(rowRequired) throw new NoRowException();
@@ -675,7 +675,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     short s=results.getShort(1);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return s;
                 }
                 if(rowRequired) throw new NoRowException();
@@ -702,7 +702,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     String S=results.getString(1);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return S;
                 }
                 if(rowRequired) throw new NoRowException();
@@ -752,7 +752,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             try {
                 if(results.next()) {
                     Timestamp T=results.getTimestamp(1);
-                    if(results.next()) throw new SQLException("More than one row returned.");
+                    if(results.next()) throw new ExtraRowException();
                     return T;
                 }
                 if(rowRequired) throw new NoRowException();
