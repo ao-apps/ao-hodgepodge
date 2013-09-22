@@ -26,7 +26,6 @@ import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.util.AoCollections.PeekIterator;
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -222,11 +221,11 @@ public class AoArrays {
 
 		@Override
 		public boolean contains(Object o) {
-			final E[] array = this.array;
-			final int len = array.length;
+			final E[] a = this.array;
+			final int len = a.length;
 			if(o==null) {
 				for(int i=0; i<len; i++) {
-					if(array[i]==null) return true;
+					if(a[i]==null) return true;
 				}
 			} else {
 				/* 278 ms * /
@@ -238,7 +237,7 @@ public class AoArrays {
 				/* 205 ms */
 				int i=len-1;
 				while(i>=0) {
-					if(o.equals(array[i--])) return true;
+					if(o.equals(a[i--])) return true;
 				}
 				/* */
 				/* 275 ms * /
