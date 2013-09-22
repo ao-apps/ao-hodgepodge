@@ -22,6 +22,7 @@
  */
 package com.aoindustries.encoding;
 
+import com.aoindustries.util.EncodingUtils;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -108,11 +109,20 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
     }
     // </editor-fold>
 
-    protected JavaScriptInXhtmlEncoder(Writer out) {
+	private MediaType type = MediaType.JAVASCRIPT;
+
+	protected JavaScriptInXhtmlEncoder(Writer out) {
         super(out);
     }
 
-    @Override
+	public void setType(MediaType type) {
+		if(
+			type != MediaType.JAVASCRIPT
+		) throw new IllegalArgumentException();
+		this.type = type;
+	}
+
+	@Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.JAVASCRIPT
@@ -127,7 +137,9 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public void writePrefix() throws IOException {
-        out.write("<script type=\"text/javascript\">\n"
+        out.write("<script type=\"");
+		EncodingUtils.encodeXmlAttribute(type.getMediaType(), out);
+		out.write("\">\n"
                 + "  // <![CDATA[\n");
     }
 
