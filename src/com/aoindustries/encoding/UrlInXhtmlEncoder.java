@@ -44,7 +44,7 @@ public class UrlInXhtmlEncoder extends MediaEncoder {
      */
     private final StringBuilderWriter buffer = new StringBuilderWriter(128);
 
-    protected UrlInXhtmlEncoder(Writer out, HttpServletResponse response) {
+    public UrlInXhtmlEncoder(Writer out, HttpServletResponse response) {
         super(out);
         this.originalOut = out;
         this.response = response;

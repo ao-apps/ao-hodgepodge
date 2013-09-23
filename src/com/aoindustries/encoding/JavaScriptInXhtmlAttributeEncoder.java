@@ -107,7 +107,7 @@ public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
     }
     // </editor-fold>
 
-    protected JavaScriptInXhtmlAttributeEncoder(Writer out) {
+    public JavaScriptInXhtmlAttributeEncoder(Writer out) {
         super(out);
     }
 

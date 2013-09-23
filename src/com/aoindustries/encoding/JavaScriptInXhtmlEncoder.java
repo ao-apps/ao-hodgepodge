@@ -113,7 +113,7 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
 
 	private MediaType type = MediaType.JAVASCRIPT;
 
-	protected JavaScriptInXhtmlEncoder(Writer out) {
+	public JavaScriptInXhtmlEncoder(Writer out) {
         super(out);
     }
 

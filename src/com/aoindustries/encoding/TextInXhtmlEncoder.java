@@ -196,7 +196,7 @@ public class TextInXhtmlEncoder extends MediaEncoder {
     private boolean makeNbsp = false;
     private final EncodingState encodingState = new EncodingState();
 
-    protected TextInXhtmlEncoder(Writer out) {
+    public TextInXhtmlEncoder(Writer out) {
         super(out);
     }
 

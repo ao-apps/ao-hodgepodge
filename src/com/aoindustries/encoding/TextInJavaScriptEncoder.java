@@ -112,7 +112,7 @@ public class TextInJavaScriptEncoder extends MediaEncoder {
     }
     // </editor-fold>
 
-    protected TextInJavaScriptEncoder(Writer out) {
+    public TextInJavaScriptEncoder(Writer out) {
         super(out);
     }
 

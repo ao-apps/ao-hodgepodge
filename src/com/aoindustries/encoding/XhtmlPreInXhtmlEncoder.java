@@ -33,7 +33,7 @@ import java.io.Writer;
  */
 public class XhtmlPreInXhtmlEncoder extends MediaEncoder {
 
-    protected XhtmlPreInXhtmlEncoder(Writer out) {
+    public XhtmlPreInXhtmlEncoder(Writer out) {
         super(out);
     }
 

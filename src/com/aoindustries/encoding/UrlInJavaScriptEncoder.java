@@ -43,7 +43,7 @@ public class UrlInJavaScriptEncoder extends MediaEncoder {
      */
     private final StringBuilderWriter buffer = new StringBuilderWriter(128);
 
-    protected UrlInJavaScriptEncoder(Writer out, HttpServletResponse response) {
+    public UrlInJavaScriptEncoder(Writer out, HttpServletResponse response) {
         super(out);
         this.originalOut = out;
         this.response = response;

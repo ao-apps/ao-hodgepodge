@@ -32,7 +32,7 @@ import java.io.Writer;
  */
 public class TextInXhtmlPreEncoder extends TextInXhtmlEncoder {
 
-    protected TextInXhtmlPreEncoder(Writer out) {
+    public TextInXhtmlPreEncoder(Writer out) {
         super(out);
     }
 

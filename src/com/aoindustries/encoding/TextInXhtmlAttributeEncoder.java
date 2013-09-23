@@ -109,7 +109,7 @@ public class TextInXhtmlAttributeEncoder extends MediaEncoder {
     }
     // </editor-fold>
 
-    protected TextInXhtmlAttributeEncoder(Writer out) {
+    public TextInXhtmlAttributeEncoder(Writer out) {
         super(out);
     }
 
