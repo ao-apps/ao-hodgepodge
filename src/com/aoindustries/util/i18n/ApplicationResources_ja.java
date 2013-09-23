@@ -39,7 +39,7 @@ public final class ApplicationResources_ja extends EditableResourceBundle {
         super(
             Locales.JAPANESE,
             ApplicationResources.bundleSet,
-            new File(System.getProperty("user.home")+"/common/aodev/cvswork/aocode-public/src/com/aoindustries/util/i18n/ApplicationResources_ja.properties")
+            new File(System.getProperty("user.home")+"/common/aoprod/cvswork/aocode-public/src/com/aoindustries/util/i18n/ApplicationResources_ja.properties")
         );
     }
 }
