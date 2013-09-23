@@ -63,26 +63,28 @@ public class TextInJavaScriptEncoder extends MediaEncoder {
     }
 
     public static void encodeTextInJavaScript(CharSequence S, Appendable out) throws IOException {
-        if(S==null) S = "null";
-        encodeTextInJavaScript(S, 0, S.length(), out);
+        if(S!=null) {
+	        encodeTextInJavaScript(S, 0, S.length(), out);
+		}
     }
 
     public static void encodeTextInJavaScript(CharSequence S, int start, int end, Appendable out) throws IOException {
-        if(S==null) S = "null";
-        int toPrint = 0;
-        for (int c = start; c < end; c++) {
-            String escaped = getEscapedCharacter(S.charAt(c));
-            if(escaped!=null) {
-                if(toPrint>0) {
-                    out.append(S, c-toPrint, c);
-                    toPrint=0;
-                }
-                out.append(escaped);
-            } else {
-                toPrint++;
-            }
-        }
-        if(toPrint>0) out.append(S, end-toPrint, end);
+        if(S!=null) {
+			int toPrint = 0;
+			for (int c = start; c < end; c++) {
+				String escaped = getEscapedCharacter(S.charAt(c));
+				if(escaped!=null) {
+					if(toPrint>0) {
+						out.append(S, c-toPrint, c);
+						toPrint=0;
+					}
+					out.append(escaped);
+				} else {
+					toPrint++;
+				}
+			}
+			if(toPrint>0) out.append(S, end-toPrint, end);
+		}
     }
 
     public static void encodeTextInJavaScript(char[] cbuf, int start, int len, Writer out) throws IOException {
@@ -150,13 +152,13 @@ public class TextInJavaScriptEncoder extends MediaEncoder {
 
     @Override
     public TextInJavaScriptEncoder append(CharSequence csq) throws IOException {
-        encodeTextInJavaScript(csq, out);
+        encodeTextInJavaScript(csq==null ? "null" : csq, out);
         return this;
     }
 
     @Override
     public TextInJavaScriptEncoder append(CharSequence csq, int start, int end) throws IOException {
-        encodeTextInJavaScript(csq, start, end, out);
+        encodeTextInJavaScript(csq==null ? "null" : csq, start, end, out);
         return this;
     }
 

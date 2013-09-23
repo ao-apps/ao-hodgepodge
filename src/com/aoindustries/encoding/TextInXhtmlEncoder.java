@@ -56,8 +56,8 @@ public class TextInXhtmlEncoder extends MediaEncoder {
             case '\n':
                 if(makeBr) return "<br />\n";
                 return null;
-            case ' ':
-                return null;
+            // case ' ':
+            //    return null;
             default:
                 // Cause error if any text character cannot be converted to XHTML
                 XhtmlValidator.checkCharacter(c);
@@ -99,8 +99,9 @@ public class TextInXhtmlEncoder extends MediaEncoder {
     }
 
     public static void encodeTextInXhtml(CharSequence S, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
-        if(S==null) S = "null";
-        encodeTextInXhtml(S, 0, S.length(), out, makeBr, makeNbsp, encodingState);
+        if(S!=null) {
+	        encodeTextInXhtml(S, 0, S.length(), out, makeBr, makeNbsp, encodingState);
+		}
     }
 
     public static void encodeTextInXhtml(CharSequence S, int start, int end, Appendable out) throws IOException {
@@ -108,36 +109,37 @@ public class TextInXhtmlEncoder extends MediaEncoder {
     }
 
     public static void encodeTextInXhtml(CharSequence S, int start, int end, Appendable out, boolean makeBr, boolean makeNbsp, EncodingState encodingState) throws IOException {
-        if(S==null) S = "null";
-        int toPrint = 0;
-        if(makeNbsp) {
-            for (int c = start; c < end; c++) {
-                String escaped = getEscapedCharacterMakeNbps(S.charAt(c), makeBr, encodingState);
-                if(escaped!=null) {
-                    if(toPrint>0) {
-                        out.append(S, c-toPrint, c);
-                        toPrint=0;
-                    }
-                    out.append(escaped);
-                } else {
-                    toPrint++;
-                }
-            }
-        } else {
-            for (int c = start; c < end; c++) {
-                String escaped = getEscapedCharacter(S.charAt(c), makeBr);
-                if(escaped!=null) {
-                    if(toPrint>0) {
-                        out.append(S, c-toPrint, c);
-                        toPrint=0;
-                    }
-                    out.append(escaped);
-                } else {
-                    toPrint++;
-                }
-            }
-        }
-        if(toPrint>0) out.append(S, end-toPrint, end);
+        if(S!=null) {
+			int toPrint = 0;
+			if(makeNbsp) {
+				for (int c = start; c < end; c++) {
+					String escaped = getEscapedCharacterMakeNbps(S.charAt(c), makeBr, encodingState);
+					if(escaped!=null) {
+						if(toPrint>0) {
+							out.append(S, c-toPrint, c);
+							toPrint=0;
+						}
+						out.append(escaped);
+					} else {
+						toPrint++;
+					}
+				}
+			} else {
+				for (int c = start; c < end; c++) {
+					String escaped = getEscapedCharacter(S.charAt(c), makeBr);
+					if(escaped!=null) {
+						if(toPrint>0) {
+							out.append(S, c-toPrint, c);
+							toPrint=0;
+						}
+						out.append(escaped);
+					} else {
+						toPrint++;
+					}
+				}
+			}
+			if(toPrint>0) out.append(S, end-toPrint, end);
+		}
     }
 
     public static void encodeTextInXhtml(char[] cbuf, int start, int len, Writer out) throws IOException {
@@ -261,13 +263,13 @@ public class TextInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public TextInXhtmlEncoder append(CharSequence csq) throws IOException {
-        encodeTextInXhtml(csq, out, makeBr, makeNbsp, encodingState);
+        encodeTextInXhtml(csq==null ? "null" : csq, out, makeBr, makeNbsp, encodingState);
         return this;
     }
 
     @Override
     public TextInXhtmlEncoder append(CharSequence csq, int start, int end) throws IOException {
-        encodeTextInXhtml(csq, start, end, out, makeBr, makeNbsp, encodingState);
+        encodeTextInXhtml(csq==null ? "null" : csq, start, end, out, makeBr, makeNbsp, encodingState);
         return this;
     }
 

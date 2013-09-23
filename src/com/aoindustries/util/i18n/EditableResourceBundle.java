@@ -329,7 +329,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                             // Value allowed
                             out.append('"');
                             String value = convertEmpty(bundleSet.getResourceBundle(locale).getValue(lookupKey.key));
-                            if(value!=null) TextInJavaScriptEncoder.encodeTextInJavaScript(value, out);
+                            TextInJavaScriptEncoder.encodeTextInJavaScript(value, out);
                             out.append('"');
                         } else {
                             // null means not allowed

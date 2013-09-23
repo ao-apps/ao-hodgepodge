@@ -62,26 +62,28 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
     }
 
     public static void encodeJavaScriptInXhtml(CharSequence S, Appendable out) throws IOException {
-        if(S==null) S = "null";
-        encodeJavaScriptInXhtml(S, 0, S.length(), out);
+        if(S!=null) {
+	        encodeJavaScriptInXhtml(S, 0, S.length(), out);
+		}
     }
 
     public static void encodeJavaScriptInXhtml(CharSequence S, int start, int end, Appendable out) throws IOException {
-        if(S==null) S = "null";
-        int toPrint = 0;
-        for (int c = start; c < end; c++) {
-            String escaped = getEscapedCharacter(S.charAt(c));
-            if(escaped!=null) {
-                if(toPrint>0) {
-                    out.append(S, c-toPrint, c);
-                    toPrint=0;
-                }
-                out.append(escaped);
-            } else {
-                toPrint++;
-            }
-        }
-        if(toPrint>0) out.append(S, end-toPrint, end);
+        if(S!=null) {
+			int toPrint = 0;
+			for (int c = start; c < end; c++) {
+				String escaped = getEscapedCharacter(S.charAt(c));
+				if(escaped!=null) {
+					if(toPrint>0) {
+						out.append(S, c-toPrint, c);
+						toPrint=0;
+					}
+					out.append(escaped);
+				} else {
+					toPrint++;
+				}
+			}
+			if(toPrint>0) out.append(S, end-toPrint, end);
+		}
     }
 
     public static void encodeJavaScriptInXhtml(char[] cbuf, int start, int len, Writer out) throws IOException {
@@ -161,13 +163,13 @@ public class JavaScriptInXhtmlEncoder extends MediaEncoder {
 
     @Override
     public JavaScriptInXhtmlEncoder append(CharSequence csq) throws IOException {
-        encodeJavaScriptInXhtml(csq, out);
+        encodeJavaScriptInXhtml(csq==null ? "null" : csq, out);
         return this;
     }
 
     @Override
     public JavaScriptInXhtmlEncoder append(CharSequence csq, int start, int end) throws IOException {
-        encodeJavaScriptInXhtml(csq, start, end, out);
+        encodeJavaScriptInXhtml(csq==null ? "null" : csq, start, end, out);
         return this;
     }
 

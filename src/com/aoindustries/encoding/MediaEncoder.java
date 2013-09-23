@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -70,6 +70,7 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
                 switch(containerType) {
                     case JAVASCRIPT: encoder = new TextInJavaScriptEncoder(out); break;
                     case XHTML: encoder = new TextInXhtmlEncoder(out); break;
+                    case XHTML_ATTRIBUTE: encoder = new TextInXhtmlAttributeEncoder(out); break;
                     case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out); break;
                     default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
@@ -85,6 +86,13 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
             case XHTML:
                 switch(containerType) {
                     case TEXT: encoder = null; break; // No conversion necessary
+                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                }
+                break;
+            case XHTML_ATTRIBUTE:
+                switch(containerType) {
+                    case TEXT: encoder = null; break; // No conversion necessary
+                    case XHTML: encoder = null; break; // No conversion necessary, any valid attribute is also valid XHTML
                     default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;

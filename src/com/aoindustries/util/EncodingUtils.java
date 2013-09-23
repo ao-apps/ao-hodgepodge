@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util;
 
+import com.aoindustries.encoding.TextInXhtmlAttributeEncoder;
 import java.io.IOException;
 
 /**
@@ -47,86 +48,12 @@ public final class EncodingUtils {
      * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
      *
      * @see  #encodeXml(CharSequence, Appendable)
+	 * 
+	 * @deprecated  Use TextInXhtmlAttributeEncoder instead.
      */
+	@Deprecated
     public static void encodeXmlAttribute(CharSequence S, Appendable out) throws IOException {
-        if (S != null) {
-            int len = S.length();
-            int toPrint = 0;
-            for (int c = 0; c < len; c++) {
-                char ch = S.charAt(c);
-                switch(ch) {
-                    case '<':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("&lt;");
-                        break;
-                    case '>':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("&gt;");
-                        break;
-                    case '&':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("&amp;");
-                        break;
-                    case '\'':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("&#39;");
-                        break;
-                    case '"':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("&quot;");
-                        break;
-                    case '\t':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("&#x9;");
-                        break;
-                    case '\r':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("&#xD;");
-                        break;
-                    case '\n':
-                        if(toPrint>0) {
-                            out.append(S, c-toPrint, c);
-                            toPrint=0;
-                        }
-                        out.append("&#xA;");
-                        break;
-                    default:
-                        if(ch<' ') {
-                            if(toPrint>0) {
-                                out.append(S, c-toPrint, c);
-                                toPrint=0;
-                            }
-                            // skip the character
-                        } else {
-                            toPrint++;
-                        }
-                }
-            }
-            if(toPrint>0) {
-                out.append(S, len-toPrint, len);
-            }
-        }
+		TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute(S, out);
     }
 
     /**

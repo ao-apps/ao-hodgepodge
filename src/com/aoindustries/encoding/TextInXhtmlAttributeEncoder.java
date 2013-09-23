@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,44 +26,46 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Encode JavaScript into an XHTML attribute.  This does not add any quotes or
- * tags.
- *
+ * Encodes arbitrary data into an XHTML attribute.  Minimal conversion is performed, just
+ * encoding of necessary values and throwing an IOException when any character
+ * is found that cannot be converted to XHTML entities.
+ * 
  * @author  AO Industries, Inc.
  */
-public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
+public class TextInXhtmlAttributeEncoder extends MediaEncoder {
 
     // <editor-fold defaultstate="collapsed" desc="Static Utility Methods">
     /**
      * Encodes a single character and returns its String representation
-     * or null if no modification is necessary.  Any character that is
-     * not valid in XHTML is encoded to JavaScript \\uxxxx escapes.
-     * " and ' are changed to XHTML entities.
+     * or null if no modification is necessary.
+     *
+     * @see XhtmlMediaValidator#checkCharacter(char)
      */
-    private static String getEscapedCharacter(char ch) {
-        switch(ch) {
-            // These characters are allowed in JavaScript but need encoded for XHTML
+    private static String getEscapedCharacter(char c) throws IOException {
+        switch(c) {
             case '<': return "&lt;";
             case '>': return "&gt;";
             case '&': return "&amp;";
-            case '"': return "&quot;";
             case '\'': return "&#39;";
+            case '"': return "&quot;";
+            case '\t': return "&#x9;";
             case '\r': return "&#xD;";
             case '\n': return "&#xA;";
-            case '\t': return "&#x9;";
+            // case ' ': return null;
             default:
-                // Escape using JavaScript unicode escape when needed
-                return NewEncodingUtils.getJavaScriptUnicodeEscapeString(ch);
+                // Cause error if any text character cannot be converted to XHTML
+                XhtmlValidator.checkCharacter(c);
+                return null;
         }
     }
 
-    public static void encodeJavaScriptInXhtmlAttribute(CharSequence S, Appendable out) throws IOException {
+    public static void encodeTextInXhtmlAttribute(CharSequence S, Appendable out) throws IOException {
         if(S!=null) {
-	        encodeJavaScriptInXhtmlAttribute(S, 0, S.length(), out);
+	        encodeTextInXhtmlAttribute(S, 0, S.length(), out);
 		}
     }
 
-    public static void encodeJavaScriptInXhtmlAttribute(CharSequence S, int start, int end, Appendable out) throws IOException {
+    public static void encodeTextInXhtmlAttribute(CharSequence S, int start, int end, Appendable out) throws IOException {
         if(S!=null) {
 			int toPrint = 0;
 			for (int c = start; c < end; c++) {
@@ -82,79 +84,80 @@ public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
 		}
     }
 
-    public static void encodeJavaScriptInXhtmlAttribute(char[] cbuf, int start, int len, Writer out) throws IOException {
+    public static void encodeTextInXhtmlAttribute(char[] cbuf, int start, int len, Writer out) throws IOException {
         int end = start+len;
         int toPrint = 0;
-        for (int c = start; c < end; c++) {
-            String escaped = getEscapedCharacter(cbuf[c]);
-            if(escaped!=null) {
-                if(toPrint>0) {
-                    out.write(cbuf, c-toPrint, toPrint);
-                    toPrint=0;
-                }
-                out.append(escaped);
-            } else {
-                toPrint++;
-            }
-        }
+		for (int c = start; c < end; c++) {
+			String escaped = getEscapedCharacter(cbuf[c]);
+			if(escaped!=null) {
+				if(toPrint>0) {
+					out.write(cbuf, c-toPrint, toPrint);
+					toPrint=0;
+				}
+				out.append(escaped);
+			} else {
+				toPrint++;
+			}
+		}
         if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
     }
 
-    public static void encodeJavaScriptInXhtmlAttribute(char ch, Appendable out) throws IOException {
+    public static void encodeTextInXhtmlAttribute(char ch, Appendable out) throws IOException {
         String escaped = getEscapedCharacter(ch);
         if(escaped!=null) out.append(escaped);
         else out.append(ch);
     }
     // </editor-fold>
 
-    protected JavaScriptInXhtmlAttributeEncoder(Writer out) {
+    protected TextInXhtmlAttributeEncoder(Writer out) {
         super(out);
     }
 
     @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
-            inputType==MediaType.JAVASCRIPT
-            || inputType==MediaType.TEXT  // No validation required
+            inputType==MediaType.TEXT
         ;
     }
 
     @Override
     public MediaType getValidMediaOutputType() {
-        return MediaType.XHTML;
+        return MediaType.XHTML_ATTRIBUTE;
     }
 
     @Override
     public void write(int c) throws IOException {
-        encodeJavaScriptInXhtmlAttribute((char)c, out);
+        String escaped = getEscapedCharacter((char) c);
+        if(escaped!=null) out.write(escaped);
+        else out.write(c);
     }
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        encodeJavaScriptInXhtmlAttribute(cbuf, off, len, out);
+        encodeTextInXhtmlAttribute(cbuf, off, len, out);
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
         if(str==null) throw new IllegalArgumentException("str is null");
-        encodeJavaScriptInXhtmlAttribute(str, off, off+len, out);
+        encodeTextInXhtmlAttribute(str, off, off+len, out);
     }
 
     @Override
-    public JavaScriptInXhtmlAttributeEncoder append(CharSequence csq) throws IOException {
-        encodeJavaScriptInXhtmlAttribute(csq==null ? "null" : csq, out);
+    public TextInXhtmlAttributeEncoder append(CharSequence csq) throws IOException {
+        encodeTextInXhtmlAttribute(csq==null ? "null" : csq, out);
         return this;
     }
 
     @Override
-    public JavaScriptInXhtmlAttributeEncoder append(CharSequence csq, int start, int end) throws IOException {
-        encodeJavaScriptInXhtmlAttribute(csq==null ? "null" : csq, start, end, out);
+    public TextInXhtmlAttributeEncoder append(CharSequence csq, int start, int end) throws IOException {
+        encodeTextInXhtmlAttribute(csq==null ? "null" : csq, start, end, out);
         return this;
     }
 
     @Override
-    public JavaScriptInXhtmlAttributeEncoder append(char c) throws IOException {
-        encodeJavaScriptInXhtmlAttribute(c, out);
+    public TextInXhtmlAttributeEncoder append(char c) throws IOException {
+        encodeTextInXhtmlAttribute(c, out);
         return this;
     }
 }
