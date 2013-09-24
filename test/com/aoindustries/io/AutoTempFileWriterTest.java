@@ -65,7 +65,6 @@ public class AutoTempFileWriterTest extends TestCase {
             System.out.println("Wrote " + writer.getLength()+" characters in " + BigDecimal.valueOf(endTime - startTime, 6)+" ms");
         } finally {
             writer.close();
-			writer.delete();
         }
     }
 

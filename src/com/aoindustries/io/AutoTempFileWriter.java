@@ -53,7 +53,7 @@ public class AutoTempFileWriter extends Writer {
 
     private static final Logger logger = Logger.getLogger(AutoTempFileWriter.class.getName());
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private final int tempFileThreshold;
 
@@ -353,20 +353,6 @@ public class AutoTempFileWriter extends Writer {
 					in.close();
 				}
 			}
-        }
-    }
-
-    /**
-     * Deletes the internal buffers.  This object should not be used after this call.
-	 * When using reference counting, this is called when referenceCount becomes zero.
-     */
-    public void delete() throws IOException {
-		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): delete()");
-        sb = null;
-        close();
-        if(tempFile!=null) {
-            tempFile.delete();
-            tempFile = null;
         }
     }
 
