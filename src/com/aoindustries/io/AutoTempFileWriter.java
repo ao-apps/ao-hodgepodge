@@ -29,7 +29,6 @@ import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.WrappedException;
 import com.aoindustries.util.persistent.PersistentCollections;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,7 +53,7 @@ public class AutoTempFileWriter extends Writer {
 
     private static final Logger logger = Logger.getLogger(AutoTempFileWriter.class.getName());
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 
 	private final int tempFileThreshold;
 
@@ -64,7 +63,7 @@ public class AutoTempFileWriter extends Writer {
 
 	private boolean isClosed = false;
 	// The temp file is in UTF16-BE encoding
-    private File tempFile;
+    private TempFile tempFile;
     private Writer fileWriter;
 
 	// Set to true the first time this is trimmed
@@ -80,11 +79,10 @@ public class AutoTempFileWriter extends Writer {
 
     private void switchIfNeeded(long newLength) throws IOException {
         if(sb!=null && newLength>=tempFileThreshold) {
-            tempFile = File.createTempFile("AutoTempFileWriter", null/*, new File("/dev/shm")*/);
-            tempFile.deleteOnExit();
+            tempFile = new TempFile("AutoTempFileWriter"/*, null, new File("/dev/shm")*/);
 			if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): Switching to temp file: " + tempFile);
             if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
-            fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile), Charsets.UTF_16BE));
+            fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile.getFile()), Charsets.UTF_16BE));
             fileWriter.write(sb.toString());
             sb = null;
         }
@@ -226,7 +224,7 @@ public class AutoTempFileWriter extends Writer {
                 if(length>Integer.MAX_VALUE) throw new RuntimeException("Buffer too large to convert to String: length="+length);
                 StringBuilder toStringResult = new StringBuilder((int)length);
                 flush();
-                Reader in = new InputStreamReader(new FileInputStream(tempFile), Charsets.UTF_16BE);
+                Reader in = new InputStreamReader(new FileInputStream(tempFile.getFile()), Charsets.UTF_16BE);
                 try {
                     IoUtils.copy(in, toStringResult);
                     if(toStringResult.length()!=length) throw new AssertionError("toStringResult.length()!=length: "+toStringResult.length()+"!="+length);
@@ -293,7 +291,7 @@ public class AutoTempFileWriter extends Writer {
 			// TODO: If copying to another AutoTempFileWriter, we have a chance here for disk-to-disk block level copying instead of going through all the conversions.
             flush();
 			if(trimmed) {
-				RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
+				RandomAccessFile raf = new RandomAccessFile(tempFile.getFile(), "r");
 				try {
 					long start = 0;
 					long end = raf.length();
@@ -347,7 +345,7 @@ public class AutoTempFileWriter extends Writer {
 					raf.close();
 				}
 			} else {
-				Reader in = new InputStreamReader(new FileInputStream(tempFile), Charsets.UTF_16BE);
+				Reader in = new InputStreamReader(new FileInputStream(tempFile.getFile()), Charsets.UTF_16BE);
 				try {
 					long totalRead = IoUtils.copy(in, out);
 					if(totalRead!=length) throw new AssertionError("totalRead!=length: "+totalRead+"!="+length);
@@ -367,21 +365,8 @@ public class AutoTempFileWriter extends Writer {
         sb = null;
         close();
         if(tempFile!=null) {
-            FileUtils.delete(tempFile);
+            tempFile.delete();
             tempFile = null;
-        }
-    }
-
-	/*
-	 * Deletes any underlying temp file on garbage collection.
-	 */
-    @Override
-    protected void finalize() throws Throwable {
-		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): finalize()");
-        try {
-            delete();
-        } finally {
-            super.finalize();
         }
     }
 
