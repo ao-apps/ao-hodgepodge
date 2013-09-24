@@ -111,11 +111,10 @@ final public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
     }
     // </editor-fold>
 
-	private static final JavaScriptInXhtmlAttributeEncoder instance = new JavaScriptInXhtmlAttributeEncoder();
-
-	public static JavaScriptInXhtmlAttributeEncoder getInstance() {
-		return instance;
-	}
+	/**
+	 * Singleton instance intended for static import.
+	 */
+	public static final JavaScriptInXhtmlAttributeEncoder javaScriptInXhtmlAttributeEncoder = new JavaScriptInXhtmlAttributeEncoder();
 
     @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {

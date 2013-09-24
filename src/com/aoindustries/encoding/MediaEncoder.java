@@ -60,17 +60,17 @@ abstract public class MediaEncoder implements ValidMediaFilter {
                 switch(containerType) {
                     case JAVASCRIPT :      return null;
                     case TEXT :            return null;
-                    case XHTML :           encoder = JavaScriptInXhtmlEncoder.getInstance(); break;
-                    case XHTML_ATTRIBUTE : encoder = JavaScriptInXhtmlAttributeEncoder.getInstance(); break;
+                    case XHTML :           encoder = JavaScriptInXhtmlEncoder.javaScriptInXhtmlEncoder; break;
+                    case XHTML_ATTRIBUTE : encoder = JavaScriptInXhtmlAttributeEncoder.javaScriptInXhtmlAttributeEncoder; break;
 					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case TEXT:
                 switch(containerType) {
-                    case JAVASCRIPT :      encoder = TextInJavaScriptEncoder.getInstance(); break;
+                    case JAVASCRIPT :      encoder = TextInJavaScriptEncoder.textInJavaScriptEncoder; break;
                     case TEXT :            return null;
-                    case XHTML :           encoder = TextInXhtmlEncoder.getInstance(); break;
-                    case XHTML_ATTRIBUTE : encoder = TextInXhtmlAttributeEncoder.getInstance(); break;
+                    case XHTML :           encoder = TextInXhtmlEncoder.textInXhtmlEncoder; break;
+                    case XHTML_ATTRIBUTE : encoder = TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder; break;
 					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;

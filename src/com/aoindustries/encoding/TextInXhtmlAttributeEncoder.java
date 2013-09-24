@@ -113,11 +113,10 @@ public class TextInXhtmlAttributeEncoder extends MediaEncoder {
     }
     // </editor-fold>
 
-	private static final TextInXhtmlAttributeEncoder instance = new TextInXhtmlAttributeEncoder();
-
-	public static TextInXhtmlAttributeEncoder getInstance() {
-		return instance;
-	}
+	/**
+	 * Singleton instance intended for static import.
+	 */
+	public static final TextInXhtmlAttributeEncoder textInXhtmlAttributeEncoder = new TextInXhtmlAttributeEncoder();
 
 	private TextInXhtmlAttributeEncoder() {
     }

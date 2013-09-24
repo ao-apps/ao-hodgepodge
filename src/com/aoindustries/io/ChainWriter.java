@@ -25,7 +25,8 @@ package com.aoindustries.io;
 import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute;
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
 import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
-import com.aoindustries.encoding.TextInXhtmlAttributeEncoder;
+import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
+import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import com.aoindustries.encoding.TextInXhtmlEncoder;
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.EncodingUtils;
@@ -427,9 +428,6 @@ final public class ChainWriter implements Appendable, Closeable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Encoding Methods">
-	private static final TextInXhtmlAttributeEncoder textInXhtmlAttributeEncoder = TextInXhtmlAttributeEncoder.getInstance();
-	private static final TextInXhtmlEncoder textInXhtmlEncoder = TextInXhtmlEncoder.getInstance();
-
 	/**
      * @see  TextInXhtmlAttributeEncoder
      *

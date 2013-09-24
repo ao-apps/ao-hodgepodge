@@ -45,7 +45,7 @@ public final class ReferenceUtils {
 	 * Acquires a reference count.
 	 */
 	public static <V extends ReferenceCount<E>,E extends Exception> V acquire(V value) throws E {
-		value.incReferenceCount();
+		if(value!=null) value.incReferenceCount();
 		return value;
 	}
 
@@ -71,28 +71,30 @@ public final class ReferenceUtils {
 	 * @return  Always returns null
 	 */
 	public static <V extends ReferenceCount<E>,E extends Exception> V release(V value) throws E {
-		value.decReferenceCount();
+		if(value!=null) value.decReferenceCount();
 		return null;
 	}
 
 	/**
 	 * Replaces one value with another.
-	 * If the oldValue is a ReferenceCount, decrements its reference count.
 	 * If the newValue is a ReferenceCount, increments its reference count.
+	 * If the oldValue is a ReferenceCount, decrements its reference count.
 	 */
 	public static <V> V replace(V oldValue, V newValue) throws ReferenceException {
+		acquire(newValue);
 		release(oldValue);
-		return acquire(newValue);
+		return newValue;
 	}
 
 	/**
 	 * Replaces one value with another.
-	 * Decrements its reference count for oldValue.
 	 * Increments its reference count for newValue.
+	 * Decrements its reference count for oldValue.
 	 */
 	public static <V extends ReferenceCount<E>,E extends Exception> V replace(V oldValue, V newValue) throws E {
+		acquire(newValue);
 		release(oldValue);
-		return acquire(newValue);
+		return newValue;
 	}
 
 	/**

@@ -115,11 +115,10 @@ final public class JavaScriptInXhtmlEncoder extends MediaEncoder {
     }
     // </editor-fold>
 
-	private static final JavaScriptInXhtmlEncoder instance = new JavaScriptInXhtmlEncoder();
-
-	public static JavaScriptInXhtmlEncoder getInstance() {
-		return instance;
-	}
+	/**
+	 * Singleton instance intended for static import.
+	 */
+	public static final JavaScriptInXhtmlEncoder javaScriptInXhtmlEncoder = new JavaScriptInXhtmlEncoder();
 
 	private JavaScriptInXhtmlEncoder() {
     }

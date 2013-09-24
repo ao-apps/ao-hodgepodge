@@ -116,11 +116,10 @@ final public class TextInJavaScriptEncoder extends MediaEncoder {
     }
     // </editor-fold>
 
-	private static final TextInJavaScriptEncoder instance = new TextInJavaScriptEncoder();
-
-	public static TextInJavaScriptEncoder getInstance() {
-		return instance;
-	}
+	/**
+	 * Singleton instance intended for static import.
+	 */
+	public static final TextInJavaScriptEncoder textInJavaScriptEncoder = new TextInJavaScriptEncoder();
 
 	private TextInJavaScriptEncoder() {
     }
