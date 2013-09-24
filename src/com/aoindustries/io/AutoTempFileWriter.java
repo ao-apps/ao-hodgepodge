@@ -74,7 +74,8 @@ public class AutoTempFileWriter
 	// Set to true the first time this is trimmed
 	private boolean trimmed = false;
 
-	private int referenceCount = 1;
+	// Reference count starts at zero
+	private int referenceCount = 0;
 
 	public AutoTempFileWriter(int initialCapacity, int tempFileThreshold) {
         if(tempFileThreshold<=initialCapacity) throw new IllegalArgumentException("tempFileThreshold must be > initialCapacity");
@@ -395,8 +396,7 @@ public class AutoTempFileWriter
 	*/
 
 	@Override
-	public void incReferenceCount() throws IllegalStateException {
-		if(referenceCount==0) throw new IllegalStateException();
+	public void incReferenceCount() {
 		// Catch overflow
 		if(referenceCount==Integer.MAX_VALUE) throw new ArithmeticException();
 		referenceCount++;

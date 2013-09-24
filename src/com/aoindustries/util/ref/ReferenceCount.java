@@ -33,10 +33,8 @@ public interface ReferenceCount<E extends Exception> {
 
 	/**
 	 * Increments the reference count.
-	 *
-	 * @throws IllegalStateException if count already zero
 	 */
-	void incReferenceCount() throws IllegalStateException;
+	void incReferenceCount();
 
 	/**
 	 * Decrements the reference count.

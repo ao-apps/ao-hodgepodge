@@ -33,11 +33,19 @@ public final class ReferenceUtils {
 	public static <V> V acquire(V value) throws ReferenceException {
 		if(value instanceof ReferenceCount<?>) {
 			try {
-				((ReferenceCount<?>)value).incReferenceCount();
+				acquire((ReferenceCount<?>)value);
 			} catch(Exception e) {
 				throw new ReferenceException(e);
 			}
 		}
+		return value;
+	}
+
+	/**
+	 * Acquires a reference count.
+	 */
+	public static <V extends ReferenceCount<E>,E extends Exception> V acquire(V value) throws E {
+		value.incReferenceCount();
 		return value;
 	}
 
@@ -49,7 +57,7 @@ public final class ReferenceUtils {
 	public static <V> V release(V value) throws ReferenceException {
 		if(value instanceof ReferenceCount<?>) {
 			try {
-				((ReferenceCount<?>)value).decReferenceCount();
+				release((ReferenceCount<?>)value);
 			} catch(Exception e) {
 				throw new ReferenceException(e);
 			}
@@ -58,11 +66,31 @@ public final class ReferenceUtils {
 	}
 
 	/**
+	 * Decrements a reference count.
+	 *
+	 * @return  Always returns null
+	 */
+	public static <V extends ReferenceCount<E>,E extends Exception> V release(V value) throws E {
+		value.decReferenceCount();
+		return null;
+	}
+
+	/**
 	 * Replaces one value with another.
 	 * If the oldValue is a ReferenceCount, decrements its reference count.
 	 * If the newValue is a ReferenceCount, increments its reference count.
 	 */
-	public static <V> V replace(Object oldValue, V newValue) throws ReferenceException {
+	public static <V> V replace(V oldValue, V newValue) throws ReferenceException {
+		release(oldValue);
+		return acquire(newValue);
+	}
+
+	/**
+	 * Replaces one value with another.
+	 * Decrements its reference count for oldValue.
+	 * Increments its reference count for newValue.
+	 */
+	public static <V extends ReferenceCount<E>,E extends Exception> V replace(V oldValue, V newValue) throws E {
 		release(oldValue);
 		return acquire(newValue);
 	}
