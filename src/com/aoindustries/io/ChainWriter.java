@@ -22,10 +22,11 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder;
+import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute;
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
+import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
+import com.aoindustries.encoding.TextInXhtmlAttributeEncoder;
 import com.aoindustries.encoding.TextInXhtmlEncoder;
-import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.Sequence;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Locale;
 
@@ -425,33 +427,41 @@ final public class ChainWriter implements Appendable, Closeable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Encoding Methods">
-    /**
-     * @see  EncodingUtils#encodeXmlAttribute(String, Appendable)
+	private static final TextInXhtmlAttributeEncoder textInXhtmlAttributeEncoder = TextInXhtmlAttributeEncoder.getInstance();
+	private static final TextInXhtmlEncoder textInXhtmlEncoder = TextInXhtmlEncoder.getInstance();
+
+	/**
+     * @see  TextInXhtmlAttributeEncoder
      *
-     * @param S the string to be escaped
+     * @param  value  the value to be encoded
      */
     public ChainWriter encodeXmlAttribute(Object value) throws IOException {
-        EncodingUtils.encodeXmlAttribute(ObjectUtils.toString(value), out);
+		Coercion.toString(value, textInXhtmlAttributeEncoder, out);
         return this;
     }
 
-    /**
-     * @see  EncodingUtils#encodeXml(String, Appendable)
+	/**
+     * @see  TextInXhtmlEncoder
      *
-     * @param S the string to be escaped
+     * @param  value  the value to be encoded
      */
-    public ChainWriter encodeXhtml(String S) throws IOException {
-        TextInXhtmlEncoder.encodeTextInXhtml(S, out);
+    public ChainWriter encodeXhtml(Object value) throws IOException {
+		Coercion.toString(value, textInXhtmlEncoder, out);
         return this;
     }
 
     /**
      * Escapes HTML for displaying in browsers and writes to the internal <code>PrintWriter</code>.
+	 * Has makeBr and makeNbsp enabled.
      *
      * @param S the string to be escaped.
+	 *
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  #encodeXhtml(java.lang.Object)
      */
+	@Deprecated
     public ChainWriter encodeHtml(Object value) throws IOException {
-        EncodingUtils.encodeHtml(ObjectUtils.toString(value), true, true, out);
+        EncodingUtils.encodeHtml(Coercion.toString(value), true, true, out);
         return this;
     }
 
@@ -460,9 +470,13 @@ final public class ChainWriter implements Appendable, Closeable {
      *
      * @param S the string to be escaped.
      * @param make_br  will write &lt;BR&gt; tags for every newline character
+	 *
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  #encodeXhtml(java.lang.Object)
      */
+	@Deprecated
     public ChainWriter encodeHtml(Object value, boolean make_br, boolean make_nbsp) throws IOException {
-        EncodingUtils.encodeHtml(ObjectUtils.toString(value), make_br, make_nbsp, out);
+        EncodingUtils.encodeHtml(Coercion.toString(value), make_br, make_nbsp, out);
         return this;
     }
 
@@ -473,20 +487,17 @@ final public class ChainWriter implements Appendable, Closeable {
      */
     @Deprecated
     public ChainWriter encodeJavaScriptString(String S) throws IOException {
-        TextInJavaScriptEncoder.encodeTextInJavaScript(S, out);
+        encodeTextInJavaScript(S, out);
         return this;
     }
 
-    /**
-     * @see EncodingUtils#encodeJavaScriptStringInXml(java.lang.String, Appendable)
-     */
     public ChainWriter encodeJavaScriptStringInXml(Object value) throws IOException {
-        String text = ObjectUtils.toString(value);
+        String text = Coercion.toString(value);
         // Escape for javascript
         StringBuilder javascript = new StringBuilder(text.length());
-        TextInJavaScriptEncoder.encodeTextInJavaScript(text, javascript);
+        encodeTextInJavaScript(text, javascript);
         // Encode for XML attribute
-        JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute(javascript, out);
+        encodeJavaScriptInXhtmlAttribute(javascript, out);
         return this;
     }
 
@@ -561,9 +572,9 @@ final public class ChainWriter implements Appendable, Closeable {
                 + "  img.src=\"");
         // Escape for javascript
         StringBuilder javascript = new StringBuilder(url.length());
-        TextInJavaScriptEncoder.encodeTextInJavaScript(url, javascript);
+        encodeTextInJavaScript(url, javascript);
         // Encode for XML attribute
-        JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute(javascript, out);
+        encodeJavaScriptInXhtmlAttribute(javascript, out);
         out.append("\";\n"
                 + "</script>");
     }

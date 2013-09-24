@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,7 +31,7 @@ import java.io.Writer;
  *
  * @author  AO Industries, Inc.
  */
-public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
+final public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
 
     // <editor-fold defaultstate="collapsed" desc="Static Utility Methods">
     /**
@@ -57,32 +57,17 @@ public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
         }
     }
 
-    public static void encodeJavaScriptInXhtmlAttribute(CharSequence S, Appendable out) throws IOException {
-        if(S!=null) {
-	        encodeJavaScriptInXhtmlAttribute(S, 0, S.length(), out);
-		}
+    public static void encodeJavaScriptInXhtmlAttribute(char ch, Appendable out) throws IOException {
+        String escaped = getEscapedCharacter(ch);
+        if(escaped!=null) out.append(escaped);
+        else out.append(ch);
     }
 
-    public static void encodeJavaScriptInXhtmlAttribute(CharSequence S, int start, int end, Appendable out) throws IOException {
-        if(S!=null) {
-			int toPrint = 0;
-			for (int c = start; c < end; c++) {
-				String escaped = getEscapedCharacter(S.charAt(c));
-				if(escaped!=null) {
-					if(toPrint>0) {
-						out.append(S, c-toPrint, c);
-						toPrint=0;
-					}
-					out.append(escaped);
-				} else {
-					toPrint++;
-				}
-			}
-			if(toPrint>0) out.append(S, end-toPrint, end);
-		}
-    }
+    public static void encodeJavaScriptInXhtmlAttribute(char[] cbuf, Writer out) throws IOException {
+		encodeJavaScriptInXhtmlAttribute(cbuf, 0, cbuf.length, out);
+	}
 
-    public static void encodeJavaScriptInXhtmlAttribute(char[] cbuf, int start, int len, Writer out) throws IOException {
+	public static void encodeJavaScriptInXhtmlAttribute(char[] cbuf, int start, int len, Writer out) throws IOException {
         int end = start+len;
         int toPrint = 0;
         for (int c = start; c < end; c++) {
@@ -100,16 +85,37 @@ public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
         if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
     }
 
-    public static void encodeJavaScriptInXhtmlAttribute(char ch, Appendable out) throws IOException {
-        String escaped = getEscapedCharacter(ch);
-        if(escaped!=null) out.append(escaped);
-        else out.append(ch);
+	public static void encodeJavaScriptInXhtmlAttribute(CharSequence S, Appendable out) throws IOException {
+        if(S!=null) {
+	        encodeJavaScriptInXhtmlAttribute(S, 0, S.length(), out);
+		}
+    }
+
+	public static void encodeJavaScriptInXhtmlAttribute(CharSequence S, int start, int end, Appendable out) throws IOException {
+        if(S!=null) {
+			int toPrint = 0;
+			for (int c = start; c < end; c++) {
+				String escaped = getEscapedCharacter(S.charAt(c));
+				if(escaped!=null) {
+					if(toPrint>0) {
+						out.append(S, c-toPrint, c);
+						toPrint=0;
+					}
+					out.append(escaped);
+				} else {
+					toPrint++;
+				}
+			}
+			if(toPrint>0) out.append(S, end-toPrint, end);
+		}
     }
     // </editor-fold>
 
-    public JavaScriptInXhtmlAttributeEncoder(Writer out) {
-        super(out);
-    }
+	private static final JavaScriptInXhtmlAttributeEncoder instance = new JavaScriptInXhtmlAttributeEncoder();
+
+	public static JavaScriptInXhtmlAttributeEncoder getInstance() {
+		return instance;
+	}
 
     @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
@@ -121,40 +127,51 @@ public class JavaScriptInXhtmlAttributeEncoder extends MediaEncoder {
 
     @Override
     public MediaType getValidMediaOutputType() {
-        return MediaType.XHTML;
+        return MediaType.XHTML_ATTRIBUTE;
     }
 
     @Override
-    public void write(int c) throws IOException {
+    public void write(int c, Writer out) throws IOException {
         encodeJavaScriptInXhtmlAttribute((char)c, out);
     }
 
-    @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
+	@Override
+    public void write(char cbuf[], Writer out) throws IOException {
+        encodeJavaScriptInXhtmlAttribute(cbuf, out);
+	}
+
+	@Override
+    public void write(char[] cbuf, int off, int len, Writer out) throws IOException {
         encodeJavaScriptInXhtmlAttribute(cbuf, off, len, out);
     }
 
-    @Override
-    public void write(String str, int off, int len) throws IOException {
+	@Override
+    public void write(String str, Writer out) throws IOException {
+        if(str==null) throw new IllegalArgumentException("str is null");
+        encodeJavaScriptInXhtmlAttribute(str, out);
+	}
+
+	@Override
+    public void write(String str, int off, int len, Writer out) throws IOException {
         if(str==null) throw new IllegalArgumentException("str is null");
         encodeJavaScriptInXhtmlAttribute(str, off, off+len, out);
     }
 
     @Override
-    public JavaScriptInXhtmlAttributeEncoder append(CharSequence csq) throws IOException {
+    public JavaScriptInXhtmlAttributeEncoder append(char c, Appendable out) throws IOException {
+        encodeJavaScriptInXhtmlAttribute(c, out);
+        return this;
+    }
+
+	@Override
+    public JavaScriptInXhtmlAttributeEncoder append(CharSequence csq, Appendable out) throws IOException {
         encodeJavaScriptInXhtmlAttribute(csq==null ? "null" : csq, out);
         return this;
     }
 
     @Override
-    public JavaScriptInXhtmlAttributeEncoder append(CharSequence csq, int start, int end) throws IOException {
+    public JavaScriptInXhtmlAttributeEncoder append(CharSequence csq, int start, int end, Appendable out) throws IOException {
         encodeJavaScriptInXhtmlAttribute(csq==null ? "null" : csq, start, end, out);
-        return this;
-    }
-
-    @Override
-    public JavaScriptInXhtmlAttributeEncoder append(char c) throws IOException {
-        encodeJavaScriptInXhtmlAttribute(c, out);
         return this;
     }
 }

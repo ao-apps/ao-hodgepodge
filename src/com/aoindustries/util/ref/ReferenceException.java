@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,24 +20,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.encoding;
-
-import java.io.Writer;
+package com.aoindustries.util.ref;
 
 /**
- * Same encoding as <code>TextInXhtmlEncoder</code>, but with an output type
- * of <code>application/xhtml+xml+pre</code>.
- * 
- * @author  AO Industries, Inc.
+ * An exception that occurs during reference management.
  */
-public class TextInXhtmlPreEncoder extends TextInXhtmlEncoder {
+public class ReferenceException extends RuntimeException {
 
-    public TextInXhtmlPreEncoder(Writer out) {
-        super(out);
-    }
+	private static final long serialVersionUID = 1L;
 
-    @Override
-    public MediaType getValidMediaOutputType() {
-        return MediaType.XHTML_PRE;
-    }
+	public ReferenceException(Throwable cause) {
+		super(cause);
+	}
 }

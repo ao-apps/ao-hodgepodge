@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,9 @@
  */
 package com.aoindustries.encoding;
 
+import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute;
+import static com.aoindustries.encoding.JavaScriptInXhtmlEncoder.encodeJavaScriptInXhtml;
+import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
 import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -74,14 +77,14 @@ public class NewEncodingUtils {
 
     public static void encodeTextInJavaScriptInXhtml(String text, Appendable out) throws IOException {
         StringBuilder javascript = new StringBuilder(text.length());
-        TextInJavaScriptEncoder.encodeTextInJavaScript(text, javascript);
-        JavaScriptInXhtmlEncoder.encodeJavaScriptInXhtml(javascript, out);
+        encodeTextInJavaScript(text, javascript);
+        encodeJavaScriptInXhtml(javascript, out);
     }
 
     public static void encodeTextInJavaScriptInXhtmlAttribute(String text, Appendable out) throws IOException {
         StringBuilder javascript = new StringBuilder(text.length());
-        TextInJavaScriptEncoder.encodeTextInJavaScript(text, javascript);
-        JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute(javascript, out);
+        encodeTextInJavaScript(text, javascript);
+        encodeJavaScriptInXhtmlAttribute(javascript, out);
     }
 
     public static String getTextInJavaScriptInXhtmlAttribute(String text) throws IOException {

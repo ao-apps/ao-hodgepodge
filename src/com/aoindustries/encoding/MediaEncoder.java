@@ -22,7 +22,6 @@
  */
 package com.aoindustries.encoding;
 
-import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
 import javax.servlet.http.HttpServletResponse;
@@ -38,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class MediaEncoder extends FilterWriter implements ValidMediaFilter {
+abstract public class MediaEncoder implements ValidMediaFilter {
 
     /**
      * Gets the media encoder for the requested types or <code>null</code> if
@@ -47,74 +46,68 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
      * If no encoder is returned, it is necessary to use a separate validator
      * if character validation is required.
      *
+	 * @param  response  Only required when contentType is MediaType.URL
+	 *
      * @return the encoder or <code>null</code> if no encoding is necessary
      *
      * @exception MediaException when unable to encode the content into the container
      *                           either because it is impossible or not yet implemented.
      */
-    public static MediaEncoder getMediaEncoder(HttpServletResponse response, MediaType contentType, MediaType containerType, Writer out) throws MediaException {
-        // If the types match then no conversion is necessary
-        if(contentType==containerType) return null;
+    public static MediaEncoder getInstance(HttpServletResponse response, MediaType contentType, MediaType containerType) throws MediaException {
         final MediaEncoder encoder;
         switch(contentType) {
-            case JAVASCRIPT:
+            case JAVASCRIPT :
                 switch(containerType) {
-                    case TEXT: encoder = null; break; // No conversion necessary
-                    case XHTML : encoder = new JavaScriptInXhtmlEncoder(out); break;
-                    case XHTML_ATTRIBUTE : encoder = new JavaScriptInXhtmlAttributeEncoder(out); break;
-                    case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out); break; // Just treat as text
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    case JAVASCRIPT :      return null;
+                    case TEXT :            return null;
+                    case XHTML :           encoder = JavaScriptInXhtmlEncoder.getInstance(); break;
+                    case XHTML_ATTRIBUTE : encoder = JavaScriptInXhtmlAttributeEncoder.getInstance(); break;
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
             case TEXT:
                 switch(containerType) {
-                    case JAVASCRIPT: encoder = new TextInJavaScriptEncoder(out); break;
-                    case XHTML: encoder = new TextInXhtmlEncoder(out); break;
-                    case XHTML_ATTRIBUTE: encoder = new TextInXhtmlAttributeEncoder(out); break;
-                    case XHTML_PRE: encoder = new TextInXhtmlPreEncoder(out); break;
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    case JAVASCRIPT :      encoder = TextInJavaScriptEncoder.getInstance(); break;
+                    case TEXT :            return null;
+                    case XHTML :           encoder = TextInXhtmlEncoder.getInstance(); break;
+                    case XHTML_ATTRIBUTE : encoder = TextInXhtmlAttributeEncoder.getInstance(); break;
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
-            case URL:
+            case URL :
                 switch(containerType) {
-                    case JAVASCRIPT: encoder = new UrlInJavaScriptEncoder(out, response); break;
-                    case TEXT: encoder = null; break; // No conversion necessary
-                    case XHTML: encoder = new UrlInXhtmlEncoder(out, response); break;
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    case JAVASCRIPT :      encoder = new UrlInJavaScriptEncoder(response); break;
+                    case TEXT :            return null;
+                    case URL :             return null;
+                    case XHTML :           encoder = new UrlInXhtmlEncoder(response); break;
+                    case XHTML_ATTRIBUTE : encoder = new UrlInXhtmlAttributeEncoder(response); break;
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
                 break;
-            case XHTML:
+            case XHTML :
                 switch(containerType) {
-                    case TEXT: encoder = null; break; // No conversion necessary
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    case TEXT :            return null;
+                    case XHTML :           return null;
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
-                break;
-            case XHTML_ATTRIBUTE:
+                //break;
+            case XHTML_ATTRIBUTE :
                 switch(containerType) {
-                    case TEXT: encoder = null; break; // No conversion necessary
-                    case XHTML: encoder = null; break; // No conversion necessary, any valid attribute is also valid XHTML
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                    case TEXT :            return null;
+                    case XHTML :           return null;
+                    case XHTML_ATTRIBUTE : return null;
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
                 }
-                break;
-            case XHTML_PRE:
-                switch(containerType) {
-                    case TEXT: encoder = null; break; // No conversion necessary
-                    case XHTML: encoder = new XhtmlPreInXhtmlEncoder(out); break;
-                    default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
-                }
-                break;
-            default: throw new MediaException(ApplicationResources.accessor.getMessage("MediaEncoder.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+                //break;
+			default : throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
         }
-        if(encoder!=null) {
-            // Make sure types match - bug catching
-            assert encoder.getValidMediaOutputType()==containerType : "encoder.getValidMediaOutputType()!=containerType: "+encoder.getValidMediaOutputType()+"!="+containerType;
-            assert encoder.isValidatingMediaInputType(contentType) : "encoder="+encoder.getClass().getName()+" is not a validator for contentType="+contentType;
-        }
+		// Make sure types match - bug catching
+		assert encoder.getValidMediaOutputType()==containerType : "encoder.getValidMediaOutputType()!=containerType: "+encoder.getValidMediaOutputType()+"!="+containerType;
+		assert encoder.isValidatingMediaInputType(contentType) : "encoder="+encoder.getClass().getName()+" is not a validator for contentType="+contentType;
         return encoder;
     }
 
-    protected MediaEncoder(Writer out) {
-        super(out);
+    protected MediaEncoder() {
     }
 
     /**
@@ -125,41 +118,24 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
      * This default implementation does nothing.
      * </p>
      */
-    public void writePrefix() throws IOException {
+    public void writePrefix(Appendable out) throws IOException {
     }
 
-    /**
-     * The default implementation of this append method in Writer converts
-     * to a String for backward-compatibility.  This passes the append directly
-     * to the wrapped Writer.
-     */
-    @Override
-    public MediaEncoder append(CharSequence csq) throws IOException {
-        out.append(csq);
-        return this;
-    }
+    abstract public void write(int c, Writer out) throws IOException;
+	
+    abstract public void write(char cbuf[], Writer out) throws IOException;
 
-    /**
-     * The default implementation of this append method in Writer converts
-     * to a String for backward-compatibility.  This passes the append directly
-     * to the wrapped Writer.
-     */
-    @Override
-    public MediaEncoder append(CharSequence csq, int start, int end) throws IOException {
-        out.append(csq, start, end);
-        return this;
-    }
+	abstract public void write(char cbuf[], int off, int len, Writer out) throws IOException;
 
-    /**
-     * The default implementation of this append method in Writer calls
-     * the write(int) method for backward-compatibility.  This passes the
-     * append directly to the wrapped Writer.
-     */
-    @Override
-    public MediaEncoder append(char c) throws IOException {
-        out.append(c);
-        return this;
-    }
+    abstract public void write(String str, Writer out) throws IOException;
+
+	abstract public void write(String str, int off, int len, Writer out) throws IOException;
+
+    abstract public MediaEncoder append(char c, Appendable out) throws IOException;
+
+	abstract public MediaEncoder append(CharSequence csq, Appendable out) throws IOException;
+
+    abstract public MediaEncoder append(CharSequence csq, int start, int end, Appendable out) throws IOException;
 
     /**
      * <p>
@@ -172,6 +148,6 @@ abstract public class MediaEncoder extends FilterWriter implements ValidMediaFil
      * This default implementation does nothing.
      * </p>
      */
-    public void writeSuffix() throws IOException {
+    public void writeSuffix(Appendable out) throws IOException {
     }
 }

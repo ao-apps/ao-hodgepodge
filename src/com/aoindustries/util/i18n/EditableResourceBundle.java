@@ -23,7 +23,7 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.encoding.MediaType;
-import com.aoindustries.encoding.TextInJavaScriptEncoder;
+import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.Sequence;
 import com.aoindustries.util.UnsynchronizedSequence;
@@ -329,7 +329,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                             // Value allowed
                             out.append('"');
                             String value = convertEmpty(bundleSet.getResourceBundle(locale).getValue(lookupKey.key));
-                            TextInJavaScriptEncoder.encodeTextInJavaScript(value, out);
+                            encodeTextInJavaScript(value, out);
                             out.append('"');
                         } else {
                             // null means not allowed
@@ -346,7 +346,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     if(didOne1) out.append(',');
                     else didOne1 = true;
                     out.append("\n        \"");
-                    TextInJavaScriptEncoder.encodeTextInJavaScript(lookupKey.bundleSet.getBaseName(), out);
+                    encodeTextInJavaScript(lookupKey.bundleSet.getBaseName(), out);
                     out.append('"');
                 }
                 out.append("\n  ];\n"
@@ -357,7 +357,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     if(didOne1) out.append(',');
                     else didOne1 = true;
                     out.append("\n        \"");
-                    TextInJavaScriptEncoder.encodeTextInJavaScript(locale.toString(), out);
+                    encodeTextInJavaScript(locale.toString(), out);
                     out.append('"');
                 }
                 out.append("\n  ];\n"
@@ -368,7 +368,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     if(didOne1) out.append(',');
                     else didOne1 = true;
                     out.append("\n        \"");
-                    TextInJavaScriptEncoder.encodeTextInJavaScript(lookupKey.key, out);
+                    encodeTextInJavaScript(lookupKey.key, out);
                     out.append('"');
                 }
                 out.append("\n  ];\n"
@@ -662,7 +662,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                                 + " onchange=\"EditableResourceBundleEditorMediaTypeOnChange(").append(Integer.toString(i-1)).append(", this);\""
                             + ">\n");
                     for(MediaType mt : MediaType.values()) {
-                        if(mt==mediaType || (mt!=MediaType.JAVASCRIPT && mt!=MediaType.XHTML_PRE)) {
+                        if(mt==mediaType || mt!=MediaType.JAVASCRIPT) {
                             if(mt==MediaType.XHTML) {
                                 // Special treatment for block/inline settings
                                 out.append("            <option");
@@ -881,7 +881,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                     modifiedValue = SB.toString();
                     break;
                 case TEXT :
-                case XHTML_PRE :
                     // <#< and >#> used to cause XHTML parse errors if text value not properly encoded
                     modifiedValue = invalidated ? ("<<<"+lookupValue.id+"<"+value+">"+lookupValue.id+">>>") : myModifyAllText ? ("<"+lookupValue.id+"<"+value+">"+lookupValue.id+">") : value;
                     break;

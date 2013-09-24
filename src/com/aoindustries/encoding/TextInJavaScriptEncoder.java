@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,13 +27,13 @@ import java.io.Writer;
 
 /**
  * Encodes arbitrary text into a JavaScript string.  The static utility
- * methods to not add the quotes.  When used as a MediaEncoder, the text is
+ * methods to not add the quotes.  When used as a MediaWriter, the text is
  * automatically surrounded by double quotes.  Any binary data is encoded with
  * \\uxxxx escapes.
  *
  * @author  AO Industries, Inc.
  */
-public class TextInJavaScriptEncoder extends MediaEncoder {
+final public class TextInJavaScriptEncoder extends MediaEncoder {
 
     // <editor-fold defaultstate="collapsed" desc="Static Utility Methods">
     /**
@@ -62,7 +62,35 @@ public class TextInJavaScriptEncoder extends MediaEncoder {
         }
     }
 
-    public static void encodeTextInJavaScript(CharSequence S, Appendable out) throws IOException {
+    public static void encodeTextInJavaScript(char ch, Appendable out) throws IOException {
+        String escaped = getEscapedCharacter(ch);
+        if(escaped!=null) out.append(escaped);
+        else out.append(ch);
+    }
+
+    public static void encodeTextInJavaScript(char[] cbuf, Writer out) throws IOException {
+		encodeTextInJavaScript(cbuf, 0, cbuf.length, out);
+	}
+
+    public static void encodeTextInJavaScript(char[] cbuf, int start, int len, Writer out) throws IOException {
+        int end = start+len;
+        int toPrint = 0;
+        for (int c = start; c < end; c++) {
+            String escaped = getEscapedCharacter(cbuf[c]);
+            if(escaped!=null) {
+                if(toPrint>0) {
+                    out.write(cbuf, c-toPrint, toPrint);
+                    toPrint=0;
+                }
+                out.append(escaped);
+            } else {
+                toPrint++;
+            }
+        }
+        if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
+    }
+
+	public static void encodeTextInJavaScript(CharSequence S, Appendable out) throws IOException {
         if(S!=null) {
 	        encodeTextInJavaScript(S, 0, S.length(), out);
 		}
@@ -86,41 +114,21 @@ public class TextInJavaScriptEncoder extends MediaEncoder {
 			if(toPrint>0) out.append(S, end-toPrint, end);
 		}
     }
-
-    public static void encodeTextInJavaScript(char[] cbuf, int start, int len, Writer out) throws IOException {
-        int end = start+len;
-        int toPrint = 0;
-        for (int c = start; c < end; c++) {
-            String escaped = getEscapedCharacter(cbuf[c]);
-            if(escaped!=null) {
-                if(toPrint>0) {
-                    out.write(cbuf, c-toPrint, toPrint);
-                    toPrint=0;
-                }
-                out.append(escaped);
-            } else {
-                toPrint++;
-            }
-        }
-        if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
-    }
-
-    public static void encodeTextInJavaScript(char ch, Appendable out) throws IOException {
-        String escaped = getEscapedCharacter(ch);
-        if(escaped!=null) out.append(escaped);
-        else out.append(ch);
-    }
     // </editor-fold>
 
-    public TextInJavaScriptEncoder(Writer out) {
-        super(out);
+	private static final TextInJavaScriptEncoder instance = new TextInJavaScriptEncoder();
+
+	public static TextInJavaScriptEncoder getInstance() {
+		return instance;
+	}
+
+	private TextInJavaScriptEncoder() {
     }
 
     @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
             inputType==MediaType.TEXT
-            //|| inputType==MediaType.JAVASCRIPT  // No validation required
         ;
     }
 
@@ -130,46 +138,57 @@ public class TextInJavaScriptEncoder extends MediaEncoder {
     }
 
     @Override
-    public void writePrefix() throws IOException {
-        out.write('"');
+    public void writePrefix(Appendable out) throws IOException {
+        out.append('"');
     }
 
     @Override
-    public void write(int c) throws IOException {
+    public void write(int c, Writer out) throws IOException {
         encodeTextInJavaScript((char)c, out);
     }
 
-    @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
+	@Override
+    public void write(char cbuf[], Writer out) throws IOException {
+        encodeTextInJavaScript(cbuf, out);
+	}
+
+	@Override
+    public void write(char[] cbuf, int off, int len, Writer out) throws IOException {
         encodeTextInJavaScript(cbuf, off, len, out);
     }
 
-    @Override
-    public void write(String str, int off, int len) throws IOException {
+	@Override
+    public void write(String str, Writer out) throws IOException {
+        if(str==null) throw new IllegalArgumentException("str is null");
+        encodeTextInJavaScript(str, out);
+	}
+
+	@Override
+    public void write(String str, int off, int len, Writer out) throws IOException {
         if(str==null) throw new IllegalArgumentException("str is null");
         encodeTextInJavaScript(str, off, off+len, out);
     }
 
     @Override
-    public TextInJavaScriptEncoder append(CharSequence csq) throws IOException {
+    public TextInJavaScriptEncoder append(char c, Appendable out) throws IOException {
+        encodeTextInJavaScript(c, out);
+        return this;
+    }
+
+	@Override
+    public TextInJavaScriptEncoder append(CharSequence csq, Appendable out) throws IOException {
         encodeTextInJavaScript(csq==null ? "null" : csq, out);
         return this;
     }
 
     @Override
-    public TextInJavaScriptEncoder append(CharSequence csq, int start, int end) throws IOException {
+    public TextInJavaScriptEncoder append(CharSequence csq, int start, int end, Appendable out) throws IOException {
         encodeTextInJavaScript(csq==null ? "null" : csq, start, end, out);
         return this;
     }
 
     @Override
-    public TextInJavaScriptEncoder append(char c) throws IOException {
-        encodeTextInJavaScript(c, out);
-        return this;
-    }
-
-    @Override
-    public void writeSuffix() throws IOException {
-        out.write('"');
+    public void writeSuffix(Appendable out) throws IOException {
+        out.append('"');
     }
 }

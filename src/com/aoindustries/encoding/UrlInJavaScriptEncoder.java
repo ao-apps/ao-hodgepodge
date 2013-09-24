@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,9 +22,8 @@
  */
 package com.aoindustries.encoding;
 
-import com.aoindustries.io.StringBuilderWriter;
+import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
 import java.io.IOException;
-import java.io.Writer;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -33,22 +32,13 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author  AO Industries, Inc.
  */
-public class UrlInJavaScriptEncoder extends MediaEncoder {
+public class UrlInJavaScriptEncoder extends BufferedEncoder {
 
-    private final Writer originalOut;
     private final HttpServletResponse response;
 
-    /**
-     * Buffers all contents to pass to the HttpServletResponse.encodeURL method.
-     */
-    private final StringBuilderWriter buffer = new StringBuilderWriter(128);
-
-    public UrlInJavaScriptEncoder(Writer out, HttpServletResponse response) {
-        super(out);
-        this.originalOut = out;
+	public UrlInJavaScriptEncoder(HttpServletResponse response) {
+		super(128);
         this.response = response;
-        // Replace out to write to a validated buffer instead
-        this.out = new UrlValidator(buffer);
     }
 
     @Override
@@ -65,20 +55,20 @@ public class UrlInJavaScriptEncoder extends MediaEncoder {
     }
 
     @Override
-    public void writePrefix() throws IOException {
-        originalOut.write('"');
+    public void writePrefix(Appendable out) throws IOException {
+        out.append('"');
     }
 
-    @Override
-    public void writeSuffix() throws IOException {
-        TextInJavaScriptEncoder.encodeTextInJavaScript(
+	@Override
+    protected void writeSuffix(StringBuilder buffer, Appendable out) throws IOException {
+        encodeTextInJavaScript(
             response.encodeURL(
                 NewEncodingUtils.encodeUrlPath(
                     buffer.toString()
                 )
             ),
-            originalOut
+            out
         );
-        originalOut.write('"');
+        out.append('"');
     }
 }

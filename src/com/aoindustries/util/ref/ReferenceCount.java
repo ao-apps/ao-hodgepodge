@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,30 +20,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.encoding;
-
-import java.io.Writer;
+package com.aoindustries.util.ref;
 
 /**
- * No validation is performed on text.
+ * Any object that maintains a reference count to know when to release its
+ * heavyweight resources.
  *
- * @author  AO Industries, Inc.
+ * Objects start with a reference count of one.  When they are decremented to
+ * zero, the cleanup will be performed.
  */
-public class TextValidator extends MediaValidator {
+public interface ReferenceCount<E extends Exception> {
 
-    protected TextValidator(Writer out) {
-        super(out);
-    }
+	/**
+	 * Increments the reference count.
+	 *
+	 * @throws IllegalStateException if count already zero
+	 */
+	void incReferenceCount() throws IllegalStateException;
 
-    @Override
-    public boolean isValidatingMediaInputType(MediaType inputType) {
-        return
-            inputType==MediaType.TEXT
-        ;
-    }
-
-    @Override
-    public MediaType getValidMediaOutputType() {
-        return MediaType.TEXT;
-    }
+	/**
+	 * Decrements the reference count.
+	 * Performs cleanup when decremented to zero.
+	 *
+	 * @throws IllegalStateException if count already zero
+	 */
+	void decReferenceCount() throws IllegalStateException, E;
 }

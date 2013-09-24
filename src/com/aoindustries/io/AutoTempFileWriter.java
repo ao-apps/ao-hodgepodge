@@ -22,6 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.encoding.MediaEncoder;
+import com.aoindustries.encoding.MediaWriter;
 import com.aoindustries.nio.charset.Charsets;
 import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.ref.ReferenceCount;
@@ -54,7 +56,9 @@ public class AutoTempFileWriter
 
     private static final Logger logger = Logger.getLogger(AutoTempFileWriter.class.getName());
 
-    private final int tempFileThreshold;
+	private static final boolean DEBUG = false;
+
+	private final int tempFileThreshold;
 
     private long length;
 
@@ -75,12 +79,14 @@ public class AutoTempFileWriter
         this.tempFileThreshold = tempFileThreshold;
         length = 0;
         sb = new StringBuilder(initialCapacity);
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): new: " + referenceCount);
     }
 
     private void switchIfNeeded(long newLength) throws IOException {
         if(sb!=null && newLength>=tempFileThreshold) {
             tempFile = File.createTempFile("AutoTempFileWriter", null/*, new File("/dev/shm")*/);
             tempFile.deleteOnExit();
+			if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): Switching to temp file: " + tempFile);
             if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
             fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile), Charsets.UTF_16BE));
             fileWriter.write(sb.toString());
@@ -90,6 +96,7 @@ public class AutoTempFileWriter
 
     @Override
     public void write(int c) throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(int)");
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length+1;
         switchIfNeeded(newLength);
@@ -100,6 +107,7 @@ public class AutoTempFileWriter
 
     @Override
     public void write(char cbuf[]) throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(char[])");
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length+cbuf.length;
         switchIfNeeded(newLength);
@@ -110,6 +118,7 @@ public class AutoTempFileWriter
 
     @Override
     public void write(char cbuf[], int off, int len) throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(char[],int,int)");
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length+len;
         switchIfNeeded(newLength);
@@ -120,6 +129,7 @@ public class AutoTempFileWriter
 
     @Override
     public void write(String str) throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(String)");
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length+str.length();
         switchIfNeeded(newLength);
@@ -130,6 +140,7 @@ public class AutoTempFileWriter
 
     @Override
     public void write(String str, int off, int len) throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(String,int,int)");
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length+len;
         switchIfNeeded(newLength);
@@ -140,6 +151,7 @@ public class AutoTempFileWriter
 
     @Override
     public AutoTempFileWriter append(CharSequence csq) throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): append(CharSequence)");
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length+csq.length();
         switchIfNeeded(newLength);
@@ -151,6 +163,7 @@ public class AutoTempFileWriter
 
     @Override
     public AutoTempFileWriter append(CharSequence csq, int start, int end) throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): append(CharSequence,int,int)");
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length+(end-start);
         switchIfNeeded(newLength);
@@ -162,6 +175,7 @@ public class AutoTempFileWriter
 
     @Override
     public AutoTempFileWriter append(char c) throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): append(char)");
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length+1;
         switchIfNeeded(newLength);
@@ -173,11 +187,13 @@ public class AutoTempFileWriter
 
     @Override
     public void flush() throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): flush()");
         if(fileWriter!=null) fileWriter.flush();
     }
 
     @Override
     public void close() throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): close()");
         if(fileWriter!=null) {
             fileWriter.close();
             fileWriter = null;
@@ -187,6 +203,7 @@ public class AutoTempFileWriter
 
     /**
      * Gets the current length of the buffer in characters.
+	 * This is the full buffer, containing all whitespace even when trim flag has been set.
      */
     public long getLength() {
         return length;
@@ -203,6 +220,7 @@ public class AutoTempFileWriter
      */
     @Override
     public String toString() {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): toString()");
 		String str;
         if(sb!=null) {
             str = sb.toString();
@@ -228,10 +246,39 @@ public class AutoTempFileWriter
 		return str;
     }
 
-    /**
+	/**
+	 * Writes the captured body to the provided writer with the given encoding.
+	 * 
+	 * @param  encoder  if null, no encoding is performed - write through
+	 */
+    public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): writeTo(MediaEncoder,Writer)");
+		if(encoder==null) {
+			writeTo(out);
+		} else {
+			if(sb!=null) {
+				String str = sb.toString();
+				if(trimmed) str = str.trim();
+				encoder.write(str, out);
+			} else {
+				writeTo(new MediaWriter(encoder, out));
+			}
+		}
+	}
+
+	/**
      * Writes the captured body to the provided writer.
      */
     public void writeTo(Writer out) throws IOException {
+		if(DEBUG) {
+			if(out instanceof AutoTempFileWriter) {
+				System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): writeTo(AutoTempFileWriter)");
+			} else if(out instanceof MediaWriter) {
+				System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): writeTo(MediaWriter)");
+			} else {
+				System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): writeTo(Writer)");
+			}
+		}
         if(sb!=null) {
 			String str = sb.toString();
 			if(trimmed) str = str.trim();
@@ -310,6 +357,7 @@ public class AutoTempFileWriter
 	 * When using reference counting, this is called when referenceCount becomes zero.
      */
     public void delete() throws IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): delete()");
         sb = null;
         close();
         if(tempFile!=null) {
@@ -320,6 +368,7 @@ public class AutoTempFileWriter
 
     @Override
     protected void finalize() throws Throwable {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): finalize()");
         try {
             delete();
         } finally {
@@ -333,6 +382,7 @@ public class AutoTempFileWriter
 		// Catch overflow
 		if(referenceCount==Integer.MAX_VALUE) throw new ArithmeticException();
 		referenceCount++;
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): inc: " + referenceCount);
 	}
 
 	@Override
@@ -341,12 +391,16 @@ public class AutoTempFileWriter
 		if(--referenceCount == 0) {
 			delete();
 		}
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): dec: " + referenceCount);
 	}
 	
 	/**
 	 * Trims the contents of this writer.
+	 * Returns this.
 	 */
-	public void trim() {
+	public AutoTempFileWriter trim() {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): trim()");
 		trimmed = true;
+		return this;
 	}
 }

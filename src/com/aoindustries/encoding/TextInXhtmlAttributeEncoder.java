@@ -54,12 +54,40 @@ public class TextInXhtmlAttributeEncoder extends MediaEncoder {
             // case ' ': return null;
             default:
                 // Cause error if any text character cannot be converted to XHTML
-                XhtmlValidator.checkCharacter(c);
+                XhtmlAttributeValidator.checkCharacter(c);
                 return null;
         }
     }
 
-    public static void encodeTextInXhtmlAttribute(CharSequence S, Appendable out) throws IOException {
+    public static void encodeTextInXhtmlAttribute(char ch, Appendable out) throws IOException {
+        String escaped = getEscapedCharacter(ch);
+        if(escaped!=null) out.append(escaped);
+        else out.append(ch);
+    }
+
+	public static void encodeTextInXhtmlAttribute(char[] cbuf, Writer out) throws IOException {
+		encodeTextInXhtmlAttribute(cbuf, 0, cbuf.length, out);
+	}
+
+    public static void encodeTextInXhtmlAttribute(char[] cbuf, int start, int len, Writer out) throws IOException {
+        int end = start+len;
+        int toPrint = 0;
+		for (int c = start; c < end; c++) {
+			String escaped = getEscapedCharacter(cbuf[c]);
+			if(escaped!=null) {
+				if(toPrint>0) {
+					out.write(cbuf, c-toPrint, toPrint);
+					toPrint=0;
+				}
+				out.append(escaped);
+			} else {
+				toPrint++;
+			}
+		}
+        if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
+    }
+
+	public static void encodeTextInXhtmlAttribute(CharSequence S, Appendable out) throws IOException {
         if(S!=null) {
 	        encodeTextInXhtmlAttribute(S, 0, S.length(), out);
 		}
@@ -83,34 +111,15 @@ public class TextInXhtmlAttributeEncoder extends MediaEncoder {
 			if(toPrint>0) out.append(S, end-toPrint, end);
 		}
     }
-
-    public static void encodeTextInXhtmlAttribute(char[] cbuf, int start, int len, Writer out) throws IOException {
-        int end = start+len;
-        int toPrint = 0;
-		for (int c = start; c < end; c++) {
-			String escaped = getEscapedCharacter(cbuf[c]);
-			if(escaped!=null) {
-				if(toPrint>0) {
-					out.write(cbuf, c-toPrint, toPrint);
-					toPrint=0;
-				}
-				out.append(escaped);
-			} else {
-				toPrint++;
-			}
-		}
-        if(toPrint>0) out.write(cbuf, end-toPrint, toPrint);
-    }
-
-    public static void encodeTextInXhtmlAttribute(char ch, Appendable out) throws IOException {
-        String escaped = getEscapedCharacter(ch);
-        if(escaped!=null) out.append(escaped);
-        else out.append(ch);
-    }
     // </editor-fold>
 
-    public TextInXhtmlAttributeEncoder(Writer out) {
-        super(out);
+	private static final TextInXhtmlAttributeEncoder instance = new TextInXhtmlAttributeEncoder();
+
+	public static TextInXhtmlAttributeEncoder getInstance() {
+		return instance;
+	}
+
+	private TextInXhtmlAttributeEncoder() {
     }
 
     @Override
@@ -126,38 +135,47 @@ public class TextInXhtmlAttributeEncoder extends MediaEncoder {
     }
 
     @Override
-    public void write(int c) throws IOException {
-        String escaped = getEscapedCharacter((char) c);
-        if(escaped!=null) out.write(escaped);
-        else out.write(c);
+    public void write(int c, Writer out) throws IOException {
+        encodeTextInXhtmlAttribute((char)c, out);
     }
 
-    @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
+	@Override
+    public void write(char cbuf[], Writer out) throws IOException {
+        encodeTextInXhtmlAttribute(cbuf, out);
+	}
+
+	@Override
+    public void write(char[] cbuf, int off, int len, Writer out) throws IOException {
         encodeTextInXhtmlAttribute(cbuf, off, len, out);
     }
 
-    @Override
-    public void write(String str, int off, int len) throws IOException {
+	@Override
+    public void write(String str, Writer out) throws IOException {
+        if(str==null) throw new IllegalArgumentException("str is null");
+        encodeTextInXhtmlAttribute(str, out);
+	}
+
+	@Override
+    public void write(String str, int off, int len, Writer out) throws IOException {
         if(str==null) throw new IllegalArgumentException("str is null");
         encodeTextInXhtmlAttribute(str, off, off+len, out);
     }
 
     @Override
-    public TextInXhtmlAttributeEncoder append(CharSequence csq) throws IOException {
+    public TextInXhtmlAttributeEncoder append(char c, Appendable out) throws IOException {
+        encodeTextInXhtmlAttribute(c, out);
+        return this;
+    }
+
+	@Override
+    public TextInXhtmlAttributeEncoder append(CharSequence csq, Appendable out) throws IOException {
         encodeTextInXhtmlAttribute(csq==null ? "null" : csq, out);
         return this;
     }
 
     @Override
-    public TextInXhtmlAttributeEncoder append(CharSequence csq, int start, int end) throws IOException {
+    public TextInXhtmlAttributeEncoder append(CharSequence csq, int start, int end, Appendable out) throws IOException {
         encodeTextInXhtmlAttribute(csq==null ? "null" : csq, start, end, out);
-        return this;
-    }
-
-    @Override
-    public TextInXhtmlAttributeEncoder append(char c) throws IOException {
-        encodeTextInXhtmlAttribute(c, out);
         return this;
     }
 }

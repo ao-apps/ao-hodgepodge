@@ -64,19 +64,6 @@ public enum MediaType {
     },
 
     /**
-     * A preformatted element within a (X)HTML document, such as the <code>pre</code>
-     * or <code>textarea</code> tags. (<code>application/xhtml+xml+pre</code>).  This is
-     * a non-standard media type and is only used during internal conversions.  The
-     * final output should not be this type.
-     */
-    XHTML_PRE("application/xhtml+xml+pre") {
-        @Override
-        boolean isUsedFor(String contentType) {
-            return "application/xhtml+xml+pre".equalsIgnoreCase(contentType);
-        }
-    },
-
-    /**
      * An HTML document (<code>text/html</code>).
      */
     // HTML("text/html"),

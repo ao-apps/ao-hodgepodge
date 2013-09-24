@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,10 +22,8 @@
  */
 package com.aoindustries.encoding;
 
-import com.aoindustries.io.StringBuilderWriter;
-import com.aoindustries.util.EncodingUtils;
+import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import java.io.IOException;
-import java.io.Writer;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -34,22 +32,13 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author  AO Industries, Inc.
  */
-public class UrlInXhtmlEncoder extends MediaEncoder {
+public class UrlInXhtmlEncoder extends BufferedEncoder {
 
-    private final Writer originalOut;
     private final HttpServletResponse response;
 
-    /**
-     * Buffers all contents to pass to the HttpServletResponse.encodeURL method.
-     */
-    private final StringBuilderWriter buffer = new StringBuilderWriter(128);
-
-    public UrlInXhtmlEncoder(Writer out, HttpServletResponse response) {
-        super(out);
-        this.originalOut = out;
+    public UrlInXhtmlEncoder(HttpServletResponse response) {
+        super(128);
         this.response = response;
-        // Replace out to write to a validated buffer instead
-        this.out = new UrlValidator(buffer);
     }
 
     @Override
@@ -66,14 +55,14 @@ public class UrlInXhtmlEncoder extends MediaEncoder {
     }
 
     @Override
-    public void writeSuffix() throws IOException {
-        EncodingUtils.encodeXmlAttribute(
+    protected void writeSuffix(StringBuilder buffer, Appendable out) throws IOException {
+        encodeTextInXhtml(
             response.encodeURL(
                 NewEncodingUtils.encodeUrlPath(
                     buffer.toString()
                 )
             ),
-            originalOut
+            out
         );
     }
 }

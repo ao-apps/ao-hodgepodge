@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,28 +22,47 @@
  */
 package com.aoindustries.encoding;
 
-import java.io.Writer;
+import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * No validation is performed on text.
+ * Encodes a URL into an XHTML attribute.  It uses HttpServletRequest.encodeURL to
+ * rewrite the URL as needed.
  *
  * @author  AO Industries, Inc.
  */
-public class TextValidator extends MediaValidator {
+public class UrlInXhtmlAttributeEncoder extends BufferedEncoder {
 
-    protected TextValidator(Writer out) {
-        super(out);
+    private final HttpServletResponse response;
+
+    public UrlInXhtmlAttributeEncoder(HttpServletResponse response) {
+        super(128);
+        this.response = response;
     }
 
     @Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
         return
-            inputType==MediaType.TEXT
+            inputType==MediaType.URL
+            || inputType==MediaType.TEXT        // No validation required
         ;
     }
 
     @Override
     public MediaType getValidMediaOutputType() {
-        return MediaType.TEXT;
+        return MediaType.XHTML_ATTRIBUTE;
+    }
+
+    @Override
+    protected void writeSuffix(StringBuilder buffer, Appendable out) throws IOException {
+        encodeTextInXhtmlAttribute(
+            response.encodeURL(
+                NewEncodingUtils.encodeUrlPath(
+                    buffer.toString()
+                )
+            ),
+            out
+        );
     }
 }

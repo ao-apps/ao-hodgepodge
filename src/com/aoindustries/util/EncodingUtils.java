@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,14 +22,21 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.encoding.TextInXhtmlAttributeEncoder;
+import com.aoindustries.encoding.NewEncodingUtils;
+import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
+import com.aoindustries.encoding.TextInXhtmlEncoder;
 import java.io.IOException;
 
 /**
  * Provides encoding and escaping for various type of data.
  *
  * @author  AO Industries, Inc.
+ * 
+ * @deprecated  Use new encoding package instead.
+ *
+ * @see  NewEncodingUtils
  */
+@Deprecated
 public final class EncodingUtils {
 
     private EncodingUtils() {
@@ -40,33 +47,25 @@ public final class EncodingUtils {
 
     // <editor-fold defaultstate="collapsed" desc="XML Attributes">
     /**
-     * Escapes for use in a XML attribute and writes to the provided <code>Appendable</code>.
-     * Any characters less than 0x1f that are not \t, \r, or \n are completely filtered.
-     *
-     * TODO: Make a new TextInXhtmlAttributeEncoder and move this method there.
-     *
-     * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
-     *
-     * @see  #encodeXml(CharSequence, Appendable)
-	 * 
+     * @see  TextInXhtmlAttributeEncoder
+	 *
 	 * @deprecated  Use TextInXhtmlAttributeEncoder instead.
      */
 	@Deprecated
     public static void encodeXmlAttribute(CharSequence S, Appendable out) throws IOException {
-		TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute(S, out);
+		encodeTextInXhtmlAttribute(S, out);
     }
 
     /**
-     * @see #encodeXmlAttribute(CharSequence, Appendable)
-     *
-     * @param S the string to be escaped.
-     *
-     * @return if S is null then null otherwise value escaped
+     * @see  TextInXhtmlAttributeEncoder
+	 *
+	 * @deprecated  Use TextInXhtmlAttributeEncoder instead.
      */
+	@Deprecated
     public static String encodeXmlAttribute(CharSequence S) throws IOException {
         if(S==null) return null;
         StringBuilder result = new StringBuilder(S.length());
-        encodeXmlAttribute(S, result);
+		encodeTextInXhtmlAttribute(S, result);
         return result.toString();
     }
     // </editor-fold>
@@ -77,7 +76,11 @@ public final class EncodingUtils {
      * In addition to the standard XML Body encoding, it turns newlines into &lt;br /&gt;, tabs to &amp;#x9;, and spaces to &amp;#160;
      *
      * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
+	 *
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  TextInXhtmlEncoder
      */
+	@Deprecated
     public static void encodeHtml(CharSequence S, Appendable out) throws IOException {
         encodeHtml(S, true, true, out);
     }
@@ -87,14 +90,20 @@ public final class EncodingUtils {
      * In addition to the standard XML Body encoding, it turns newlines into &lt;br /&gt; and spaces to &amp;#160;
      *
      * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
+	 *
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  TextInXhtmlEncoder
      */
+	@Deprecated
     public static void encodeHtml(CharSequence S, int start, int end, Appendable out) throws IOException {
         encodeHtml(S, start, end, true, true, out);
     }
 
     /**
-     * @see #encodeHtml(CharSequence, Appendable)
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  TextInXhtmlEncoder
      */
+	@Deprecated
     public static String encodeHtml(CharSequence S) throws IOException {
         if(S==null) return null;
         StringBuilder result = new StringBuilder(S.length());
@@ -103,15 +112,19 @@ public final class EncodingUtils {
     }
 
     /**
-     * @see #encodeHtml(CharSequence, Appendable)
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  TextInXhtmlEncoder
      */
+	@Deprecated
     public static void encodeHtml(char ch, Appendable out) throws IOException {
         encodeHtml(ch, true, true, out);
     }
 
     /**
-     * @see #encodeHtml(java.lang.CharSequence, int, int, boolean, boolean, java.lang.Appendable)
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  TextInXhtmlEncoder
      */
+	@Deprecated
     public static void encodeHtml(CharSequence S, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
         if(S!=null) encodeHtml(S, 0, S.length(), make_br, make_nbsp, out);
     }
@@ -124,7 +137,11 @@ public final class EncodingUtils {
      * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
      * @param make_br  will write &lt;br /&gt; tags for every newline character
      * @param make_nbsp  will write &amp;#160; for a space when another space follows
+	 *
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  TextInXhtmlEncoder
      */
+	@Deprecated
     public static void encodeHtml(CharSequence S, int start, int end, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
         if (S != null) {
             int toPrint = 0;
@@ -207,12 +224,14 @@ public final class EncodingUtils {
     }
 
     /**
-     * @see #encodeHtml(CharSequence, boolean, boolean, Appendable)
-     *
      * @param S the string to be escaped.
      *
      * @return if S is null then null otherwise value escaped
+	 *
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  TextInXhtmlEncoder
      */
+	@Deprecated
     public static String encodeHtml(CharSequence S, boolean make_br, boolean make_nbsp) throws IOException {
         if(S==null) return null;
         StringBuilder result = new StringBuilder(S.length());
@@ -221,8 +240,10 @@ public final class EncodingUtils {
     }
 
     /**
-     * @see #encodeHtml(CharSequence, boolean, boolean, Appendable)
+	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
+	 * @see  TextInXhtmlEncoder
      */
+	@Deprecated
     public static void encodeHtml(char ch, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
         switch(ch) {
             // Standard XML escapes
