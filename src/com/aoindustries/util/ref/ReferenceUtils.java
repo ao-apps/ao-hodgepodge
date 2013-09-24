@@ -28,26 +28,25 @@ package com.aoindustries.util.ref;
 public final class ReferenceUtils {
 
 	/**
-	 * Replaces one value with another.
-	 * If the oldValue is a ReferenceCount, decrements its reference count.
-	 * If the newValue is a ReferenceCount, increments its reference count.
+	 * Acquires a reference count if the value is a ReferenceCount.
 	 */
-	public static Object replace(Object oldValue, Object newValue) throws ReferenceException {
-		release(oldValue);
-		if(newValue instanceof ReferenceCount<?>) {
+	public static <V> V acquire(V value) throws ReferenceException {
+		if(value instanceof ReferenceCount<?>) {
 			try {
-				((ReferenceCount<?>)newValue).incReferenceCount();
+				((ReferenceCount<?>)value).incReferenceCount();
 			} catch(Exception e) {
 				throw new ReferenceException(e);
 			}
 		}
-		return newValue;
+		return value;
 	}
 
 	/**
 	 * Decrements a reference count if the value is a ReferenceCount.
+	 *
+	 * @return  Always returns null
 	 */
-	public static void release(Object value) throws ReferenceException {
+	public static <V> V release(V value) throws ReferenceException {
 		if(value instanceof ReferenceCount<?>) {
 			try {
 				((ReferenceCount<?>)value).decReferenceCount();
@@ -55,6 +54,17 @@ public final class ReferenceUtils {
 				throw new ReferenceException(e);
 			}
 		}
+		return null;
+	}
+
+	/**
+	 * Replaces one value with another.
+	 * If the oldValue is a ReferenceCount, decrements its reference count.
+	 * If the newValue is a ReferenceCount, increments its reference count.
+	 */
+	public static <V> V replace(Object oldValue, V newValue) throws ReferenceException {
+		release(oldValue);
+		return acquire(newValue);
 	}
 
 	/**

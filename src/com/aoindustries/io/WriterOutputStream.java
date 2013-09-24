@@ -85,6 +85,10 @@ final public class WriterOutputStream extends OutputStream {
         out.write(b);
     }
 
+	/*
+	 * It isn't important to release buff with newer implementation.
+	 * Removing finalize to save garbage collector work.
+	 *
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -96,4 +100,5 @@ final public class WriterOutputStream extends OutputStream {
             super.finalize();
         }
     }
+	*/
 }
