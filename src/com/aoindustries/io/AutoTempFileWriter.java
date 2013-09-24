@@ -26,7 +26,6 @@ import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.MediaWriter;
 import com.aoindustries.nio.charset.Charsets;
 import com.aoindustries.util.BufferManager;
-import com.aoindustries.util.ref.ReferenceCount;
 import com.aoindustries.util.WrappedException;
 import com.aoindustries.util.persistent.PersistentCollections;
 import java.io.BufferedWriter;
@@ -51,10 +50,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
-public class AutoTempFileWriter
-	extends Writer
-	implements ReferenceCount<IOException>
-{
+public class AutoTempFileWriter extends Writer {
 
     private static final Logger logger = Logger.getLogger(AutoTempFileWriter.class.getName());
 
@@ -74,15 +70,12 @@ public class AutoTempFileWriter
 	// Set to true the first time this is trimmed
 	private boolean trimmed = false;
 
-	// Reference count starts at zero
-	private int referenceCount = 0;
-
 	public AutoTempFileWriter(int initialCapacity, int tempFileThreshold) {
         if(tempFileThreshold<=initialCapacity) throw new IllegalArgumentException("tempFileThreshold must be > initialCapacity");
         this.tempFileThreshold = tempFileThreshold;
         length = 0;
         sb = new StringBuilder(initialCapacity);
-		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): new: " + referenceCount);
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): new");
     }
 
     private void switchIfNeeded(long newLength) throws IOException {
@@ -380,10 +373,8 @@ public class AutoTempFileWriter
     }
 
 	/*
-	 * Code should not rely on finalization for cleanup.
-	 * Documented necessity of calling <code>delete()</code> or using reference counting.
-	 * Removing finalizer to save garbage collector work.
-	 *
+	 * Deletes any underlying temp file on garbage collection.
+	 */
     @Override
     protected void finalize() throws Throwable {
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): finalize()");
@@ -393,25 +384,7 @@ public class AutoTempFileWriter
             super.finalize();
         }
     }
-	*/
 
-	@Override
-	public void incReferenceCount() {
-		// Catch overflow
-		if(referenceCount==Integer.MAX_VALUE) throw new ArithmeticException();
-		referenceCount++;
-		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): inc: " + referenceCount);
-	}
-
-	@Override
-	public void decReferenceCount() throws IllegalStateException, IOException {
-		if(referenceCount==0) throw new IllegalStateException();
-		if(--referenceCount == 0) {
-			delete();
-		}
-		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): dec: " + referenceCount);
-	}
-	
 	/**
 	 * Trims the contents of this writer.
 	 * Returns this.

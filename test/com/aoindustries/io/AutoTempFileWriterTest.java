@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.util.ref.ReferenceUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import junit.framework.Test;
@@ -57,7 +56,7 @@ public class AutoTempFileWriterTest extends TestCase {
 
     private void doBenchmark() throws IOException {
         long startTime = System.nanoTime();
-        AutoTempFileWriter writer = ReferenceUtils.acquire(new AutoTempFileWriter(32, 4 * 1024 * 1024));
+        AutoTempFileWriter writer = new AutoTempFileWriter(32, 4 * 1024 * 1024);
         try {
             for(int i=0; i<10000; i++) {
                 for(char[] str : strings) writer.write(str);
@@ -66,7 +65,7 @@ public class AutoTempFileWriterTest extends TestCase {
             System.out.println("Wrote " + writer.getLength()+" characters in " + BigDecimal.valueOf(endTime - startTime, 6)+" ms");
         } finally {
             writer.close();
-			writer = ReferenceUtils.release(writer);
+			writer.delete();
         }
     }
 
