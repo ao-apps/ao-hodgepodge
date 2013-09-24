@@ -47,7 +47,7 @@ public final class Coercion  {
 	/**
 	 * Coerces an object to a String representation, supporting streaming for specialized types.
 	 */
-	public static void toString(Object value, Writer out) throws IOException {
+	public static void write(Object value, Writer out) throws IOException {
 		if(value instanceof String) {
 			// If A is a string, then the result is A.
 			out.write((String)value);
@@ -70,9 +70,9 @@ public final class Coercion  {
 	 * 
 	 * @param  encoder  if null, no encoding is performed - write through
 	 */
-	public static void toString(Object value, MediaEncoder encoder, Writer out) throws IOException {
+	public static void write(Object value, MediaEncoder encoder, Writer out) throws IOException {
 		if(encoder==null) {
-			toString(value, out);
+			write(value, out);
 		} else {
 			if(value instanceof String) {
 				// If A is a string, then the result is A.

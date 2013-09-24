@@ -434,7 +434,7 @@ final public class ChainWriter implements Appendable, Closeable {
      * @param  value  the value to be encoded
      */
     public ChainWriter encodeXmlAttribute(Object value) throws IOException {
-		Coercion.toString(value, textInXhtmlAttributeEncoder, out);
+		Coercion.write(value, textInXhtmlAttributeEncoder, out);
         return this;
     }
 
@@ -444,7 +444,7 @@ final public class ChainWriter implements Appendable, Closeable {
      * @param  value  the value to be encoded
      */
     public ChainWriter encodeXhtml(Object value) throws IOException {
-		Coercion.toString(value, textInXhtmlEncoder, out);
+		Coercion.write(value, textInXhtmlEncoder, out);
         return this;
     }
 
