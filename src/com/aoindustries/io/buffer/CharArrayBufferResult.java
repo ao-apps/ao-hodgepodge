@@ -23,7 +23,6 @@
 package com.aoindustries.io.buffer;
 
 import com.aoindustries.encoding.MediaEncoder;
-import com.aoindustries.encoding.MediaWriter;
 import com.aoindustries.io.AoCharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -70,13 +69,16 @@ public class CharArrayBufferResult implements BufferResult {
 
 	@Override
     public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
-		buffer.writeTo(
-			encoder!=null
-				? new MediaWriter(encoder, out)
-				: out,
-			start,
-			end - start
-		);
+		if(encoder==null) {
+			writeTo(out);
+		} else {
+			encoder.write(
+				buffer.getInternalCharArray(),
+				start,
+				end - start,
+				out
+			);
+		}
 	}
 
 	@Override

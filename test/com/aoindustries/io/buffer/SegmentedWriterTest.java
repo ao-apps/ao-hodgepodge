@@ -23,7 +23,6 @@
 package com.aoindustries.io.buffer;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

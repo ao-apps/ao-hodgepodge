@@ -73,7 +73,7 @@ public class TextInXhtmlEncoder extends MediaEncoder {
 					out.write(cbuf, c-toPrint, toPrint);
 					toPrint=0;
 				}
-				out.append(escaped);
+				out.write(escaped);
 			} else {
 				toPrint++;
 			}
