@@ -50,6 +50,11 @@ public class SegmentedWriter extends BufferWriter {
 
     private static final Logger logger = Logger.getLogger(SegmentedWriter.class.getName());
 
+	/**
+	 * The number of starting elements in segment arrays.
+	 */
+	private static final int START_LEN = 16;
+
 	private static final byte[] EMPTY_BYTES = new byte[0];
 	private static final Object[] EMPTY_OBJECTS = new Object[0];
 
@@ -169,14 +174,19 @@ public class SegmentedWriter extends BufferWriter {
 		int len = segmentValues.length;
 		if(segmentCount==len) {
 			// Need to grow
-			int newLen = len<<1; // Double capacity
-			if(newLen<16) newLen = 16;
-			byte[] newTypes = new byte[newLen];
-			System.arraycopy(segmentTypes, 0, newTypes, 0, len);
-			Object[] newValues = new Object[newLen];
-			System.arraycopy(segmentValues, 0, newValues, 0, len);
-			this.segmentTypes = newTypes;
-			this.segmentValues = newValues;
+			if(len==0) {
+				this.segmentTypes = new byte[START_LEN];
+				this.segmentValues = new Object[START_LEN];
+			} else {
+				// Double capacity and copy
+				int newLen = len<<1;
+				byte[] newTypes = new byte[newLen];
+				System.arraycopy(segmentTypes, 0, newTypes, 0, len);
+				Object[] newValues = new Object[newLen];
+				System.arraycopy(segmentValues, 0, newValues, 0, len);
+				this.segmentTypes = newTypes;
+				this.segmentValues = newValues;
+			}
 		}
 		segmentTypes[segmentCount] = type;
 		segmentValues[segmentCount++] = value;

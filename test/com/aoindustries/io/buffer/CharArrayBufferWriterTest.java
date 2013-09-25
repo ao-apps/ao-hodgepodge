@@ -41,6 +41,7 @@ public class CharArrayBufferWriterTest extends BufferWriterTest {
         return suite;
     }
 
+	/*
     private static final char[][] strings = {
         "Editeur : Mining Essential".toCharArray(),
         "Langues : français, allemand, anglais, espagnol, portugais, italien, néerlandais, norvégien, suédois, arabe, hébreu, polonais, russe, turc, chinois, coréen, japonais, hindi, persan et grec.".toCharArray(),
@@ -72,7 +73,7 @@ public class CharArrayBufferWriterTest extends BufferWriterTest {
             doBenchmark();
         }
     }
-	
+	*/
 	public void testBenchmarkSimulate() throws IOException {
 		benchmarkSimulate(
 			new BufferWriterFactory() {

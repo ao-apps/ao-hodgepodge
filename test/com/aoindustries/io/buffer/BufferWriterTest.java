@@ -24,6 +24,7 @@ package com.aoindustries.io.buffer;
 
 import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.javaScriptInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -46,7 +47,7 @@ abstract public class BufferWriterTest extends TestCase {
 	}
 
 	public static void benchmarkSimulate(BufferWriterFactory factory) throws IOException {
-		Writer out = new FileWriter(new File("/dev/null"));
+		Writer out = new BufferedWriter(new FileWriter(new File("/dev/null")));
 		try {
 			final int loops = 1000;
 			for(int i=1; i<=10; i++) {
