@@ -45,9 +45,9 @@ public class LoggingWriter extends BufferWriter {
 	private final Writer log;
 
 	public LoggingWriter(BufferWriter wrapped, Writer log) throws IOException {
-		log.write("BufferedWriter writer");
+		log.write("BufferWriter writer");
 		log.write(Long.toString(id));
-		log.write(" = new BufferedWriterImpl();\n");
+		log.write(" = factory.newBufferWriter();\n");
 		log.flush();
 		this.wrapped = wrapped;
 		this.log = log;
@@ -72,7 +72,9 @@ public class LoggingWriter extends BufferWriter {
 			log.write(hex);
 			log.write('\'');
 		} else {
+			log.write('\'');
 			log.write(ch);
+			log.write('\'');
 		}
 	}
 
@@ -122,11 +124,12 @@ public class LoggingWriter extends BufferWriter {
 		log.write("writer");
 		log.write(Long.toString(id));
 		log.write(".write(new char[] {");
-		for(int i=0; i<cbuf.length; i++) {
+		for(int i=0, end=cbuf.length; i<end; i++) {
+			if((i%50)==0) log.write("\n    ");
 			if(i>0) log.write(',');
 			log(cbuf[i]);
 		}
-		log.write("});\n");
+		log.write("\n});\n");
 		log.flush();
 		wrapped.write(cbuf);
     }
@@ -136,11 +139,12 @@ public class LoggingWriter extends BufferWriter {
 		log.write("writer");
 		log.write(Long.toString(id));
 		log.write(".write(new char[] {");
-		for(int i=0; i<cbuf.length; i++) {
+		for(int i=0, end=off+len; i<end; i++) {
+			if((i%50)==0) log.write("\n    ");
 			if(i>0) log.write(',');
 			log(cbuf[i]);
 		}
-		log.write("}, ");
+		log.write("\n}, ");
 		log.write(Integer.toString(off));
 		log.write(", ");
 		log.write(Integer.toString(len));
@@ -262,9 +266,11 @@ public class LoggingWriter extends BufferWriter {
 	public LoggingResult getResult() throws IllegalStateException, IOException {
 		if(result==null) {
 			result = new LoggingResult(wrapped.getResult(), log);
-			log.write("BufferedResult result");
+			log.write("BufferResult result");
 			log.write(Long.toString(result.id));
-			log.write(" = writer.getResult();\n");
+			log.write(" = writer");
+			log.write(Long.toString(id));
+			log.write(".getResult();\n");
 			log.flush();
 		}
 		return result;

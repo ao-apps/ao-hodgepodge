@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012  AO Industries, Inc.
+ * Copyright (C) 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,20 +25,19 @@ package com.aoindustries.io.buffer;
 import java.io.IOException;
 import java.math.BigDecimal;
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
  * @author  AO Industries, Inc.
  */
-public class AutoTempFileWriterTest extends TestCase {
+public class CharArrayBufferWriterTest extends BufferWriterTest {
 
-    public AutoTempFileWriterTest(String testName) {
+    public CharArrayBufferWriterTest(String testName) {
         super(testName);
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(AutoTempFileWriterTest.class);
+        TestSuite suite = new TestSuite(CharArrayBufferWriterTest.class);
         return suite;
     }
 
@@ -73,4 +72,20 @@ public class AutoTempFileWriterTest extends TestCase {
             doBenchmark();
         }
     }
+	
+	public void testBenchmarkSimulate() throws IOException {
+		benchmarkSimulate(
+			new BufferWriterFactory() {
+				@Override
+				public String getName() {
+					return CharArrayBufferWriter.class.getName();
+				}
+
+				@Override
+				public BufferWriter newBufferWriter() {
+					return new CharArrayBufferWriter(32, 4 * 1024 * 1024);
+				}
+			}
+		);
+	}
 }

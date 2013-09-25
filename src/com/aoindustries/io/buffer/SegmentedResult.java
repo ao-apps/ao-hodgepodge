@@ -179,8 +179,8 @@ public class SegmentedResult implements BufferResult {
     @Override
     public String toString() {
 		if(toStringCache==null) {
-			if(start!=0) throw new NotImplementedException("TODO: Handle start offset");
-			if(end!=length) throw new NotImplementedException("TODO: Handle end offset");
+			// TODO: if(start!=0) throw new NotImplementedException("TODO: Handle start offset");
+			// TODO: if(end!=length) throw new NotImplementedException("TODO: Handle end offset");
 			if(segmentCount==1) {
 				toStringCache = toString(0);
 			} else {
@@ -201,8 +201,8 @@ public class SegmentedResult implements BufferResult {
 		if(encoder==null) {
 			writeTo(out);
 		} else {
-			if(start!=0) throw new NotImplementedException("TODO: Handle start offset");
-			if(end!=length) throw new NotImplementedException("TODO: Handle end offset");
+			// TODO: if(start!=0) throw new NotImplementedException("TODO: Handle start offset");
+			// TODO: if(end!=length) throw new NotImplementedException("TODO: Handle end offset");
 			// TODO: If copying to another SegmentedWriter, we have a chance here to share segment list (current the StringBuilder)
 			for(int i=0; i<segmentCount; i++) {
 				writeSegment(i, encoder, out);

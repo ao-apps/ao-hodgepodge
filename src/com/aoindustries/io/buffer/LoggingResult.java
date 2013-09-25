@@ -22,7 +22,9 @@
  */
 package com.aoindustries.io.buffer;
 
+import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.javaScriptInXhtmlAttributeEncoder;
 import com.aoindustries.encoding.MediaEncoder;
+import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.Sequence;
 import com.aoindustries.util.WrappedException;
@@ -77,9 +79,12 @@ public class LoggingResult implements BufferResult {
 		log.write(Long.toString(id));
 		log.write(".writeTo(");
 		if(encoder==null) log.write("null");
+		else if(encoder==javaScriptInXhtmlAttributeEncoder) log.write("javaScriptInXhtmlAttributeEncoder");
+		else if(encoder==textInXhtmlAttributeEncoder) log.write("textInXhtmlAttributeEncoder");
 		else log.write(encoder.getClass().getName());
 		log.write(", ");
-		log.write(out.getClass().getName());
+		//log.write(out.getClass().getName());
+		log.write("nullOut");
 		log.write(");\n");
 		log.flush();
 		wrapped.writeTo(encoder, out);
@@ -90,7 +95,8 @@ public class LoggingResult implements BufferResult {
 		log.write("result");
 		log.write(Long.toString(id));
 		log.write(".writeTo(");
-		log.write(out.getClass().getName());
+		//log.write(out.getClass().getName());
+		log.write("nullOut");
 		log.write(");\n");
 		log.flush();
 		wrapped.writeTo(out);
@@ -99,7 +105,7 @@ public class LoggingResult implements BufferResult {
 	@Override
 	public LoggingResult trim() throws IOException {
 		LoggingResult result = new LoggingResult(wrapped.trim(), log);
-		log.write("BufferedResult result");
+		log.write("BufferResult result");
 		log.write(Long.toString(result.id));
 		log.write(" = result");
 		log.write(Long.toString(id));
