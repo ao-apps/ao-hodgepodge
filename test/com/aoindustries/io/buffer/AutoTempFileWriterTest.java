@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.io.buffer;
 
 import java.io.IOException;
 import java.math.BigDecimal;

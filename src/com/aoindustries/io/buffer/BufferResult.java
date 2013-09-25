@@ -20,65 +20,51 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.io.buffer;
 
 import com.aoindustries.encoding.MediaEncoder;
 import java.io.IOException;
 import java.io.Writer;
 
 /**
- * A buffered writer that may be trimmed, converted to String, and written to another
- * writer.
+ * The result from completion of a buffered writer.  Only available after a
+ * buffered writer has been closed.
+ * 
+ * @see  AoBufferedWriter
  *
  * @author  AO Industries, Inc.
  */
-abstract public class AoBufferedWriter extends Writer {
-
-	protected AoBufferedWriter() {
-    }
+public interface BufferResult {
 
     /**
-     * Gets the number of characters in this writer.
-	 * If this is a substring of the writer, returns the number of characters in the substring.
-	 * Once closed, this length will not be modified.
+     * Gets the number of characters in this view of the buffer.
      */
-    abstract public long getLength();
+    long getLength();
 
     /**
      * Gets the captured data as a string.  For larger amounts of data, it is
 	 * much more efficient to call the <code>writeTo</code> method.
      *
-	 * Calling toString before closed will return a short message (like type and length).
-	 * Once closed, toString will return all the buffered data.
-	 *
      * @see  #writeTo(java.io.Writer)
 	 * @see  #trim()
      */
     @Override
-    abstract public String toString();
+    String toString();
 
 	/**
 	 * Writes the captured body to the provided writer with the given encoding.
 	 * 
 	 * @param  encoder  if null, no encoding is performed - write through
-	 * 
-	 * @exception  IllegalStateException if not closed
 	 */
-    abstract public void writeTo(MediaEncoder encoder, Writer out) throws IllegalStateException, IOException;
+    void writeTo(MediaEncoder encoder, Writer out) throws IOException;
 
 	/**
      * Writes the captured body to the provided writer.
-	 * 
-	 * @exception  IllegalStateException if not closed
      */
-    abstract public void writeTo(Writer out) throws IllegalStateException, IOException;
+    void writeTo(Writer out) throws IOException;
 
 	/**
-	 * Trims the contents of this writer, returning the instance that represents this writer trimmed.
-	 *
-	 * The buffer must be closed.
-	 * 
-	 * @exception  IllegalStateException  if not closed
+	 * Trims the contents of this result, returning the instance that represents this result trimmed.
 	 */
-	abstract public AoBufferedWriter trim() throws IllegalStateException, IOException;
+	BufferResult trim() throws IOException;
 }

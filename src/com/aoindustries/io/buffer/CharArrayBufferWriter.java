@@ -20,14 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.io.buffer;
 
-import com.aoindustries.encoding.MediaEncoder;
-import com.aoindustries.encoding.MediaWriter;
-import com.aoindustries.lang.NotImplementedException;
 import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.channels.ClosedChannelException;
 
 /**
@@ -37,7 +33,7 @@ import java.nio.channels.ClosedChannelException;
  *
  * @author  AO Industries, Inc.
  */
-public class CharArrayBufferedWriter extends AoBufferedWriter {
+public class CharArrayBufferWriter extends BufferWriter {
 
 	/**
 	 * The buffer used to capture data before switching to file-backed storage.
@@ -51,7 +47,7 @@ public class CharArrayBufferedWriter extends AoBufferedWriter {
 	 */
 	private boolean isClosed = false;
 
-	public CharArrayBufferedWriter(int initialSize) {
+	public CharArrayBufferWriter(int initialSize) {
         this.buffer = new CharArrayWriter(initialSize);
     }
 
@@ -86,21 +82,21 @@ public class CharArrayBufferedWriter extends AoBufferedWriter {
     }
 
     @Override
-    public CharArrayBufferedWriter append(CharSequence csq) throws IOException {
+    public CharArrayBufferWriter append(CharSequence csq) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
         buffer.append(csq);
         return this;
     }
 
     @Override
-    public CharArrayBufferedWriter append(CharSequence csq, int start, int end) throws IOException {
+    public CharArrayBufferWriter append(CharSequence csq, int start, int end) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
         buffer.append(csq, start, end);
         return this;
     }
 
     @Override
-    public CharArrayBufferedWriter append(char c) throws IOException {
+    public CharArrayBufferWriter append(char c) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
         buffer.append(c);
         return this;
@@ -122,38 +118,24 @@ public class CharArrayBufferedWriter extends AoBufferedWriter {
         return buffer.size();
     }
 
-	// When this is closed, the string representation is stored after first use.
-	private String toStringCache;
-
     @Override
     public String toString() {
-		if(!isClosed) {
-			// When buffering, do not convert to strings
-			return "CharArrayBufferedWriter(length=" + buffer.size() + ")";
-		} else {
-			if(toStringCache==null) toStringCache = buffer.toString();
-			return toStringCache;
+		return "CharArrayBufferWriter(length=" + buffer.size() + ")";
+    }
+
+	// The result is cached after first created
+	private BufferResult result;
+
+	@Override
+	public BufferResult getResult() throws IllegalStateException {
+		if(!isClosed) throw new IllegalStateException();
+		if(result==null) {
+			result =
+				buffer.size()==0
+				? EmptyResult.getInstance()
+				: new CharArrayBufferResult(buffer)
+			;
 		}
-    }
-
-	@Override
-    public void writeTo(MediaEncoder encoder, Writer out) throws IllegalStateException, IOException {
-		writeTo(
-			encoder!=null
-				? new MediaWriter(encoder, out)
-				: out
-		);
-	}
-
-	@Override
-    public void writeTo(Writer out) throws IllegalStateException, IOException {
-		if(!isClosed) throw new IllegalStateException();
-		buffer.writeTo(out);
-    }
-
-	@Override
-	public CharArrayBufferedWriter trim() throws IllegalStateException, IOException {
-		if(!isClosed) throw new IllegalStateException();
-		throw new NotImplementedException("TODO");
+		return result;
 	}
 }

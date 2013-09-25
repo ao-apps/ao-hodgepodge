@@ -20,10 +20,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.io.buffer;
 
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.MediaWriter;
+import com.aoindustries.io.TempFile;
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.nio.charset.Charsets;
 import com.aoindustries.util.BufferManager;
@@ -40,213 +41,42 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Buffers all writes while switching to a temp file when the
- * threshold is reached.
- *
- * Manipulations (like trim) may be performed on the buffer only after it is closed.
- *
- * For efficiency, the buffer should write it's contents to a Writer via <code>writeTo</code>
- * (with optional encoder).  If writing to another segmented buffer, the segments will be
- * shared between the two instances.
+ * {@inheritDoc}
  *
  * This class is not thread safe.
- * 
- * @see  AutoTempFileWriter  This draws heavily from experienced gained in <code>AutoTempFileWriter</code>, but with the addition of segments.
  *
  * @author  AO Industries, Inc.
  */
-public class SegmentedBufferedWriter extends AoBufferedWriter {
+public class SegmentedResult implements BufferResult {
 
-    private static final Logger logger = Logger.getLogger(SegmentedBufferedWriter.class.getName());
-
-	private static final boolean DEBUG = true;
+    private static final Logger logger = Logger.getLogger(SegmentedResult.class.getName());
 
 	/**
-	 * This debug flag forces all operations to be on temp files.
+	 * @see  SegmentedWriter#segmentTypes
 	 */
-	private static final boolean DEBUG_FILE = false;
-
-	private static final byte[] EMPTY_BYTES = new byte[0];
-	private static final Object[] EMPTY_OBJECTS = new Object[0];
+	private final byte[] segmentTypes;
+	private final Object[] segmentValues;
+	private final int segmentCount;
 
 	/**
-	 * The set of internal types supported.
+	 * @see  SegmentedWriter#tempFile
 	 */
-	private static final byte
-		TYPE_STRING = 1,
-		TYPE_CHAR_NEWLINE = 2,
-		TYPE_CHAR_QUOTE = 3,
-		TYPE_CHAR_APOS = 4,
-		TYPE_CHAR_OTHER = 5
-	;
-
-	private static String toString(byte type, Object value) {
-		switch(type) {
-			case TYPE_STRING :
-				return (String)value;
-			case TYPE_CHAR_NEWLINE :
-				return "\n";
-			case TYPE_CHAR_QUOTE :
-				return "\"";
-			case TYPE_CHAR_APOS :
-				return "'";
-			case TYPE_CHAR_OTHER :
-				return String.valueOf(((Character)value).charValue());
-			default :
-				throw new AssertionError();
-		}
-	}
-
-	private static void append(byte type, Object value, StringBuilder buffer) {
-		switch(type) {
-			case TYPE_STRING :
-				buffer.append((String)value);
-				break;
-			case TYPE_CHAR_NEWLINE :
-				buffer.append('\n');
-				break;
-			case TYPE_CHAR_QUOTE :
-				buffer.append('"');
-				break;
-			case TYPE_CHAR_APOS :
-				buffer.append('\'');
-				break;
-			case TYPE_CHAR_OTHER :
-				buffer.append(((Character)value).charValue());
-				break;
-			default :
-				throw new AssertionError();
-		}
-	}
-
-	private static void writeSegment(byte type, Object value, Writer out) throws IOException {
-		switch(type) {
-			case TYPE_STRING :
-				out.write((String)value);
-				break;
-			case TYPE_CHAR_NEWLINE :
-				out.write('\n');
-				break;
-			case TYPE_CHAR_QUOTE :
-				out.write('"');
-				break;
-			case TYPE_CHAR_APOS :
-				out.write('\'');
-				break;
-			case TYPE_CHAR_OTHER :
-				out.write(((Character)value).charValue());
-				break;
-			default :
-				throw new AssertionError();
-		}
-	}
-
-	private static void writeSegment(byte type, Object value, MediaEncoder encoder, Writer out) throws IOException {
-		switch(type) {
-			case TYPE_STRING :
-				encoder.write((String)value, out);
-				break;
-			case TYPE_CHAR_NEWLINE :
-				encoder.write('\n', out);
-				break;
-			case TYPE_CHAR_QUOTE :
-				encoder.write('"', out);
-				break;
-			case TYPE_CHAR_APOS :
-				encoder.write('\'', out);
-				break;
-			case TYPE_CHAR_OTHER :
-				encoder.write(((Character)value).charValue(), out);
-				break;
-			default :
-				throw new AssertionError();
-		}
-	}
-
-	/**
-	 * Gets the length of a segment.
-	 */
-	private static int getLength(byte type, Object value) {
-		switch(type) {
-			case TYPE_STRING :
-				return ((String)value).length();
-			case TYPE_CHAR_NEWLINE :
-				return 1;
-			case TYPE_CHAR_QUOTE :
-				return 1;
-			case TYPE_CHAR_APOS :
-				return 1;
-			case TYPE_CHAR_OTHER :
-				return 1;
-			default :
-				throw new AssertionError();
-		}
-	}
-
-	/**
-	 * Gets the character at the given index in a segment.
-	 */
-	private static char charAt(byte type, Object value, int index) {
-		switch(type) {
-			case TYPE_STRING :
-				return ((String)value).charAt(index);
-			case TYPE_CHAR_NEWLINE :
-				return '\n';
-			case TYPE_CHAR_QUOTE :
-				return '"';
-			case TYPE_CHAR_APOS :
-				return '\'';
-			case TYPE_CHAR_OTHER :
-				return ((Character)value).charValue();
-			default :
-				throw new AssertionError();
-		}
-	}
-
-	private final int tempFileThreshold;
-
-	/**
-	 * The length of the writer is the sum of the length of all its segments.
-	 * Once closed, this length will not be modified.
-	 */
-    private long length;
-
-	/**
-	 * The set of segments are maintained in an array.
-	 * Once closed, these arrays will not be modified.
-	 */
-	private byte[] segmentTypes;
-	private Object[] segmentValues;
-	private int segmentCount;
-
-	/**
-	 * Once closed, no further information may be written.
-	 * Manipulations are only active once closed.
-	 */
-	private boolean isClosed;
-
-	// The temp file is in UTF16-BE encoding
-    private TempFile tempFile;
-    private Writer fileWriter;
+    private final TempFile tempFile;
 
 	/**
 	 * When segments are trimmed (or other types of substring operations), they
 	 * share the underlying segment data.  This is similar to the pre Java 1.7
 	 * implementation of String.substring.
-	 * 
-	 * These values are only used after the buffer is closed, since the buffer
-	 * must be closed before any manipulation is allowed.
 	 */
 	private final long start;
 	private final int startSegmentIndex;
 	private final int startSegmentStart;
-	// The end values are set on close or by the substring constructor
-	private long end;
-	private int endSegmentIndex;
-	private int endSegmentEnd;
+	private final long end;
+	private final int endSegmentIndex;
+	private final int endSegmentEnd;
 
-	public SegmentedBufferedWriter(int tempFileThreshold) {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): new");
+	protected SegmentedResult(
+	) {
         this.tempFileThreshold = DEBUG_FILE ? 1 : tempFileThreshold;
         this.length = 0;
 		this.segmentTypes = EMPTY_BYTES;
@@ -268,8 +98,8 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 	/**
 	 * Constructor that makes a substring of the buffer, sharing the underlying storage.
 	 */
-	private SegmentedBufferedWriter(
-		SegmentedBufferedWriter original,
+	private SegmentedResult(
+		SegmentedResult original,
 		long start,
 		int startSegmentIndex,
 		int startSegmentStart,
@@ -277,7 +107,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 		int endSegmentIndex,
 		int endSegmentEnd
 	) {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): new substring");
         this.tempFileThreshold = original.tempFileThreshold;
         this.length = original.length;
 		this.segmentTypes = original.segmentTypes;
@@ -301,7 +130,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 		final Object[] segs = this.segmentValues;
         if(segs!=null && newLength>=tempFileThreshold) {
             tempFile = new TempFile("SegmentedBufferedWriter"/*, null, new File("/dev/shm")*/);
-			if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): Switching to temp file: " + tempFile);
             if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
             fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile.getFile()), Charsets.UTF_16BE));
 			// Write all segments to file
@@ -339,7 +167,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 
 	@Override
     public void write(int c) throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): write(int): " + (char)c);
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length + 1;
         switchIfNeeded(newLength);
@@ -366,7 +193,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 
     @Override
     public void write(char cbuf[]) throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): write(char[]): " + String.copyValueOf(cbuf));
 		final int len = cbuf.length;
 		if(len>0) {
 			if(len==1) {
@@ -390,7 +216,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 
     @Override
     public void write(char cbuf[], int off, int len) throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): write(char[],int,int): " + String.copyValueOf(cbuf, off, len));
 		if(len>0) {
 			if(len==1) {
 				write(cbuf[off]);
@@ -413,7 +238,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 
     @Override
     public void write(String str) throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): write(String): " + str);
 		final int len = str.length();
 		if(len>0) {
 			if(isClosed) throw new ClosedChannelException();
@@ -447,7 +271,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): write(String,int,int): " + str.substring(off, off+len));
 		if(len>0) {
 			if(isClosed) throw new ClosedChannelException();
 			long newLength = length + len;
@@ -479,8 +302,7 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
     }
 
     @Override
-    public SegmentedBufferedWriter append(CharSequence csq) throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): append(CharSequence): " + csq);
+    public SegmentedResult append(CharSequence csq) throws IOException {
 		if(csq==null) {
 			write("null");
 		} else {
@@ -518,8 +340,7 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
     }
 
     @Override
-    public SegmentedBufferedWriter append(CharSequence csq, int start, int end) throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): append(CharSequence,int,int): " + csq.subSequence(start, end));
+    public SegmentedResult append(CharSequence csq, int start, int end) throws IOException {
 		if(csq==null) {
 			write("null");
 		} else {
@@ -557,8 +378,7 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
     }
 
     @Override
-    public SegmentedBufferedWriter append(char c) throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): append(char): " + c);
+    public SegmentedResult append(char c) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length + 1;
         switchIfNeeded(newLength);
@@ -585,13 +405,11 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 
     @Override
     public void flush() throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): flush()");
         if(fileWriter!=null) fileWriter.flush();
     }
 
     @Override
     public void close() throws IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): close(): length=" + length + ", segmentCount=" + segmentCount);
         if(fileWriter!=null) {
             fileWriter.close();
             fileWriter = null;
@@ -624,7 +442,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 
     @Override
     public String toString() {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): toString()");
 		if(!isClosed) {
 			// When buffering, do not convert to strings
 			return "SegmentedBufferedWriter(length=" + length + ")";
@@ -704,15 +521,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 
 	@Override
     public void writeTo(MediaEncoder encoder, Writer out) throws IllegalStateException, IOException {
-		if(DEBUG) {
-			if(out instanceof SegmentedBufferedWriter) {
-				System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): writeTo(MediaEncoder,SegmentedBufferedWriter)");
-			} else if(out instanceof MediaWriter) {
-				System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): writeTo(MediaEncoder,MediaWriter)");
-			} else {
-				System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): writeTo(MediaEncoder,Writer)");
-			}
-		}
 		if(encoder==null) {
 			writeTo(out);
 		} else {
@@ -735,15 +543,6 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 
 	@Override
     public void writeTo(Writer out) throws IllegalStateException, IOException {
-		if(DEBUG) {
-			if(out instanceof SegmentedBufferedWriter) {
-				System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): writeTo(SegmentedBufferedWriter)");
-			} else if(out instanceof MediaWriter) {
-				System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): writeTo(MediaWriter)");
-			} else {
-				System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): writeTo(Writer)");
-			}
-		}
 		if(!isClosed) throw new IllegalStateException();
 		final Object[] values = this.segmentValues;
         if(values!=null) {
@@ -806,8 +605,7 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
     }
 
 	@Override
-	public SegmentedBufferedWriter trim() throws IllegalStateException, IOException {
-		if(DEBUG) System.err.println("DEBUG: SegmentedBufferedWriter(" + System.identityHashCode(this) + "): trim()");
+	public SegmentedResult trim() throws IllegalStateException, IOException {
 		if(!isClosed) throw new IllegalStateException();
 		final Object[] values = this.segmentValues;
 		if(values!=null) {
@@ -876,7 +674,7 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 				return this;
 			} else {
 				// Otherwise, return new substring
-				return new SegmentedBufferedWriter(
+				return new SegmentedResult(
 					this,
 					newStart,
 					newStartSegmentIndex,
@@ -918,7 +716,7 @@ public class SegmentedBufferedWriter extends AoBufferedWriter {
 					return this;
 				} else {
 					// Otherwise, return new substring
-					return new SegmentedBufferedWriter(
+					return new SegmentedResult(
 						this,
 						newStart,
 						0,

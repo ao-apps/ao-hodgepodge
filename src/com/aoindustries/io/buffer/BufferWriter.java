@@ -20,51 +20,41 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.io.buffer;
 
-import com.aoindustries.encoding.MediaEncoder;
 import java.io.IOException;
 import java.io.Writer;
 
 /**
- * The result from completion of a buffered writer.  Only available after a
- * buffered writer has been closed.
- * 
- * @see  AoBufferedWriter
+ * A buffered writer with results that may be trimmed, converted to String, and written to another
+ * writer.
  *
  * @author  AO Industries, Inc.
  */
-public interface AoBufferedResult {
+abstract public class BufferWriter extends Writer {
+
+	protected BufferWriter() {
+    }
 
     /**
-     * Gets the number of characters in this view of the buffer.
+     * Gets the number of characters in this buffer.
+	 * Once closed, this length will not be modified.
      */
-    long getLength();
+    abstract public long getLength();
 
     /**
-     * Gets the captured data as a string.  For larger amounts of data, it is
-	 * much more efficient to call the <code>writeTo</code> method.
-     *
-     * @see  #writeTo(java.io.Writer)
-	 * @see  #trim()
+	 * Gets a short message (like type and length).
+	 *
+	 * @see  #getResult()  To get access to the buffered content.
      */
     @Override
-    String toString();
+    abstract public String toString();
 
 	/**
-	 * Writes the captured body to the provided writer with the given encoding.
-	 * 
-	 * @param  encoder  if null, no encoding is performed - write through
+	 * Gets the result from this buffer.
+	 * The buffer must be closed.
+	 *
+	 * @exception  IllegalStateException if not closed
 	 */
-    void writeTo(MediaEncoder encoder, Writer out) throws IOException;
-
-	/**
-     * Writes the captured body to the provided writer.
-     */
-    void writeTo(Writer out) throws IOException;
-
-	/**
-	 * Trims the contents of this result, returning the instance that represents this result trimmed.
-	 */
-	AoBufferedResult trim() throws IOException;
+    abstract public BufferResult getResult() throws IllegalStateException, IOException;
 }

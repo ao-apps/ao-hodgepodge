@@ -23,6 +23,7 @@
 package com.aoindustries.io;
 
 import com.aoindustries.encoding.MediaEncoder;
+import com.aoindustries.io.buffer.BufferResult;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -54,9 +55,9 @@ public final class Coercion  {
 		} else if(value == null) {
 			// Otherwise, if A is null, then the result is "".
 			// Write nothing
-		} else if(value instanceof AoBufferedWriter) {
-			// Avoid intermediate String from AoBufferedWriter
-			((AoBufferedWriter)value).writeTo(out);
+		} else if(value instanceof BufferResult) {
+			// Avoid intermediate String from BufferResult
+			((BufferResult)value).writeTo(out);
 		} else {
 			// Otherwise, if A.toString() throws an exception, then raise an error
 			String str = value.toString();
@@ -80,9 +81,9 @@ public final class Coercion  {
 			} else if(value == null) {
 				// Otherwise, if A is null, then the result is "".
 				// Write nothing
-			} else if(value instanceof AoBufferedWriter) {
-				// Avoid intermediate String from AutoTempFileWriter
-				((AoBufferedWriter)value).writeTo(encoder, out);
+			} else if(value instanceof BufferResult) {
+				// Avoid intermediate String from BufferResult
+				((BufferResult)value).writeTo(encoder, out);
 			} else {
 				// Otherwise, if A.toString() throws an exception, then raise an error
 				String str = value.toString();
