@@ -24,17 +24,16 @@ package com.aoindustries.io;
 
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.MediaWriter;
+import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.nio.charset.Charsets;
-import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.WrappedException;
-import com.aoindustries.util.persistent.PersistentCollections;
 import java.io.BufferedWriter;
+import java.io.CharArrayWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.channels.ClosedChannelException;
@@ -43,13 +42,20 @@ import java.util.logging.Logger;
 
 /**
  * Writes to a StringBuilder then switches to a temp file when the
- * threshold is reached.  This class is not thread safe.
+ * threshold is reached.
  *
- * @see  #delete()  Must call delete when done with the buffer (or use reference counting if sharing instance)
+ * Manipulations (like trim) may be performed on the buffer only after it is closed.
+ *
+ * For efficiency, the buffer should write it's contents to a Writer via <code>writeTo</code>
+ * (with optional encoder).
+ *
+ * This class is not thread safe.
+ *
+ * @see  SegmentedBufferedWriter  for a possibly more efficient implementation.
  *
  * @author  AO Industries, Inc.
  */
-public class AutoTempFileWriter extends Writer {
+public class AutoTempFileWriter extends AoBufferedWriter {
 
     private static final Logger logger = Logger.getLogger(AutoTempFileWriter.class.getName());
 
@@ -57,34 +63,45 @@ public class AutoTempFileWriter extends Writer {
 
 	private final int tempFileThreshold;
 
+	/**
+	 * The length of the writer is the sum of the data written to the buffer.
+	 * Once closed, this length will not be modified.
+	 */
     private long length;
 
-    private StringBuilder sb;
+	/**
+	 * The buffer used to capture data before switching to file-backed storage.
+	 * Once closed, this buffer will not be modified.
+	 */
+    private CharArrayWriter buffer;
 
+	/**
+	 * Once closed, no further information may be written.
+	 * Manipulations are only active once closed.
+	 */
 	private boolean isClosed = false;
+
 	// The temp file is in UTF16-BE encoding
     private TempFile tempFile;
     private Writer fileWriter;
 
-	// Set to true the first time this is trimmed
-	private boolean trimmed = false;
-
-	public AutoTempFileWriter(int initialCapacity, int tempFileThreshold) {
-        if(tempFileThreshold<=initialCapacity) throw new IllegalArgumentException("tempFileThreshold must be > initialCapacity");
+	public AutoTempFileWriter(int initialSize, int tempFileThreshold) {
+        if(tempFileThreshold<=initialSize) throw new IllegalArgumentException("tempFileThreshold must be > initialSize");
         this.tempFileThreshold = tempFileThreshold;
-        length = 0;
-        sb = new StringBuilder(initialCapacity);
+        this.length = 0;
+        this.buffer = new CharArrayWriter(initialSize);
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): new");
     }
 
     private void switchIfNeeded(long newLength) throws IOException {
-        if(sb!=null && newLength>=tempFileThreshold) {
+        if(buffer!=null && newLength>=tempFileThreshold) {
             tempFile = new TempFile("AutoTempFileWriter"/*, null, new File("/dev/shm")*/);
 			if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): Switching to temp file: " + tempFile);
             if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
             fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile.getFile()), Charsets.UTF_16BE));
-            fileWriter.write(sb.toString());
-            sb = null;
+			// Write buffer to file
+			buffer.writeTo(fileWriter);
+            buffer = null;
         }
     }
 
@@ -92,10 +109,9 @@ public class AutoTempFileWriter extends Writer {
     public void write(int c) throws IOException {
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(int): " + (char)c);
 		if(isClosed) throw new ClosedChannelException();
-        long newLength = length+1;
+        long newLength = length + 1;
         switchIfNeeded(newLength);
-        if(sb!=null) sb.append((char)c);
-        else fileWriter.write(c);
+        (buffer!=null ? buffer : fileWriter).write(c);
         length = newLength;
     }
 
@@ -103,10 +119,9 @@ public class AutoTempFileWriter extends Writer {
     public void write(char cbuf[]) throws IOException {
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(char[]): " + String.copyValueOf(cbuf));
 		if(isClosed) throw new ClosedChannelException();
-        long newLength = length+cbuf.length;
+        long newLength = length + cbuf.length;
         switchIfNeeded(newLength);
-        if(sb!=null) sb.append(cbuf);
-        else fileWriter.write(cbuf);
+        (buffer!=null ? buffer : fileWriter).write(cbuf);
         length = newLength;
     }
 
@@ -114,10 +129,9 @@ public class AutoTempFileWriter extends Writer {
     public void write(char cbuf[], int off, int len) throws IOException {
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(char[],int,int): " + String.copyValueOf(cbuf, off, len));
 		if(isClosed) throw new ClosedChannelException();
-        long newLength = length+len;
+        long newLength = length + len;
         switchIfNeeded(newLength);
-        if(sb!=null) sb.append(cbuf, off, len);
-        else fileWriter.write(cbuf, off, len);
+        (buffer!=null ? buffer : fileWriter).write(cbuf, off, len);
         length = newLength;
     }
 
@@ -125,10 +139,9 @@ public class AutoTempFileWriter extends Writer {
     public void write(String str) throws IOException {
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(String): " + str);
 		if(isClosed) throw new ClosedChannelException();
-        long newLength = length+str.length();
+        long newLength = length + str.length();
         switchIfNeeded(newLength);
-        if(sb!=null) sb.append(str);
-        else fileWriter.write(str);
+        (buffer!=null ? buffer : fileWriter).write(str);
         length = newLength;
     }
 
@@ -136,10 +149,9 @@ public class AutoTempFileWriter extends Writer {
     public void write(String str, int off, int len) throws IOException {
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): write(String,int,int): " + str.substring(off, off+len));
 		if(isClosed) throw new ClosedChannelException();
-        long newLength = length+len;
+        long newLength = length + len;
         switchIfNeeded(newLength);
-        if(sb!=null) sb.append(str, off, off+len);
-        else fileWriter.write(str, off, len);
+        (buffer!=null ? buffer : fileWriter).write(str, off, len);
         length = newLength;
     }
 
@@ -147,10 +159,9 @@ public class AutoTempFileWriter extends Writer {
     public AutoTempFileWriter append(CharSequence csq) throws IOException {
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): append(CharSequence): " + csq);
 		if(isClosed) throw new ClosedChannelException();
-        long newLength = length+csq.length();
+        long newLength = length + csq.length();
         switchIfNeeded(newLength);
-        if(sb!=null) sb.append(csq);
-        else fileWriter.append(csq);
+        (buffer!=null ? buffer : fileWriter).append(csq);
         length = newLength;
         return this;
     }
@@ -159,10 +170,9 @@ public class AutoTempFileWriter extends Writer {
     public AutoTempFileWriter append(CharSequence csq, int start, int end) throws IOException {
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): append(CharSequence,int,int): " + csq.subSequence(start, end));
 		if(isClosed) throw new ClosedChannelException();
-        long newLength = length+(end-start);
+        long newLength = length + (end-start);
         switchIfNeeded(newLength);
-        if(sb!=null) sb.append(csq, start, end);
-        else fileWriter.append(csq, start, end);
+        (buffer!=null ? buffer : fileWriter).append(csq, start, end);
         length = newLength;
         return this;
     }
@@ -173,8 +183,7 @@ public class AutoTempFileWriter extends Writer {
 		if(isClosed) throw new ClosedChannelException();
         long newLength = length+1;
         switchIfNeeded(newLength);
-        if(sb!=null) sb.append(c);
-        else fileWriter.append(c);
+        (buffer!=null ? buffer : fileWriter).append(c);
         length = newLength;
         return this;
     }
@@ -187,7 +196,7 @@ public class AutoTempFileWriter extends Writer {
 
     @Override
     public void close() throws IOException {
-		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): close()");
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): close(): length=" + length);
         if(fileWriter!=null) {
             fileWriter.close();
             fileWriter = null;
@@ -195,57 +204,48 @@ public class AutoTempFileWriter extends Writer {
 		isClosed = true;
     }
 
-    /**
-     * Gets the current length of the buffer in characters.
-	 * This is the full buffer, containing all whitespace even when trim flag has been set.
-     */
+	@Override
     public long getLength() {
         return length;
     }
 
-    /**
-     * Gets the captured body as a string.  For larger amounts of data, especially when
-     * in excess of <code>tempFileThreshold</code>, it is much more efficient to call
-     * the <code>writeTo</code> method.
-     *
-     * @see  #tempFileThreshold
-     * @see  #writeTo(java.io.Writer)
-	 * @see  #trim()
-     */
+	// When this is closed, the string representation is stored after first use.
+	private String toStringCache;
+
     @Override
     public String toString() {
 		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): toString()");
-		String str;
-        if(sb!=null) {
-            str = sb.toString();
-        } else {
-            try {
-                logger.info("Creating String from temp file - benefits of AutoTempFileWriter negated.");
-                if(length>Integer.MAX_VALUE) throw new RuntimeException("Buffer too large to convert to String: length="+length);
-                StringBuilder toStringResult = new StringBuilder((int)length);
-                flush();
-                Reader in = new InputStreamReader(new FileInputStream(tempFile.getFile()), Charsets.UTF_16BE);
-                try {
-                    IoUtils.copy(in, toStringResult);
-                    if(toStringResult.length()!=length) throw new AssertionError("toStringResult.length()!=length: "+toStringResult.length()+"!="+length);
-                } finally {
-                    in.close();
-                }
-                str = toStringResult.toString();
-            } catch(IOException err) {
-                throw new WrappedException(err);
-            }
-        }
-		if(trimmed) str = str.trim();
-		return str;
+		if(!isClosed) {
+			// When buffering, do not convert to strings
+			return "AutoTempFileWriter(length=" + length + ")";
+		} else {
+			if(toStringCache==null) {
+				if(buffer!=null) {
+					toStringCache = buffer.toString();
+				} else {
+					try {
+						logger.info("Creating String from temp file - benefits of AutoTempFileWriter negated.");
+						if(length>Integer.MAX_VALUE) throw new RuntimeException("Buffer too large to convert to String: length="+length);
+						StringBuilder sb = new StringBuilder((int)length);
+						Reader in = new InputStreamReader(new FileInputStream(tempFile.getFile()), Charsets.UTF_16BE);
+						try {
+							IoUtils.copy(in, sb);
+						} finally {
+							in.close();
+						}
+						assert sb.length()==length : "sb.length()!=length: "+sb.length()+"!="+length;
+						toStringCache = sb.toString();
+					} catch(IOException err) {
+						throw new WrappedException(err);
+					}
+				}
+			}
+			return toStringCache;
+		}
     }
 
-	/**
-	 * Writes the captured body to the provided writer with the given encoding.
-	 * 
-	 * @param  encoder  if null, no encoding is performed - write through
-	 */
-    public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
+	@Override
+    public void writeTo(MediaEncoder encoder, Writer out) throws IllegalStateException, IOException {
 		if(DEBUG) {
 			if(out instanceof AutoTempFileWriter) {
 				System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): writeTo(MediaEncoder,AutoTempFileWriter)");
@@ -258,21 +258,18 @@ public class AutoTempFileWriter extends Writer {
 		if(encoder==null) {
 			writeTo(out);
 		} else {
-			if(sb!=null) {
+			if(!isClosed) throw new IllegalStateException();
+			if(buffer!=null) {
 				// TODO: If copying to another AutoTempFileWriter, we have a chance here to share segment list (current the StringBuilder)
-				String str = sb.toString();
-				if(trimmed) str = str.trim();
-				encoder.write(str, out);
+				buffer.writeTo(new MediaWriter(encoder, out));
 			} else {
 				writeTo(new MediaWriter(encoder, out));
 			}
 		}
 	}
 
-	/**
-     * Writes the captured body to the provided writer.
-     */
-    public void writeTo(Writer out) throws IOException {
+	@Override
+    public void writeTo(Writer out) throws IllegalStateException, IOException {
 		if(DEBUG) {
 			if(out instanceof AutoTempFileWriter) {
 				System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): writeTo(AutoTempFileWriter)");
@@ -282,20 +279,33 @@ public class AutoTempFileWriter extends Writer {
 				System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): writeTo(Writer)");
 			}
 		}
-        if(sb!=null) {
+		if(!isClosed) throw new IllegalStateException();
+        if(buffer!=null) {
 			// TODO: If copying to another AutoTempFileWriter, we have a chance here to share segment list (current the StringBuilder)
-			String str = sb.toString();
-			if(trimmed) str = str.trim();
-            out.write(str);
+			buffer.writeTo(out);
         } else {
 			// TODO: If copying to another AutoTempFileWriter, we have a chance here for disk-to-disk block level copying instead of going through all the conversions.
-            flush();
-			if(trimmed) {
+			Reader in = new InputStreamReader(new FileInputStream(tempFile.getFile()), Charsets.UTF_16BE);
+			try {
+				long totalRead = IoUtils.copy(in, out);
+				assert totalRead==length : "totalRead!=length: "+totalRead+"!="+length;
+			} finally {
+				in.close();
+			}
+        }
+    }
+
+	@Override
+	public AutoTempFileWriter trim() throws IllegalStateException, IOException {
+		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): trim()");
+		if(!isClosed) throw new IllegalStateException();
+		throw new NotImplementedException("TODO");
+		/*
 				RandomAccessFile raf = new RandomAccessFile(tempFile.getFile(), "r");
 				try {
 					long start = 0;
 					long end = raf.length();
-					if(end!=(length*2)) throw new AssertionError("end!=(length*2): "+end+"!=("+length+"*2)");
+					assert end==(length*2)) : "end!=(length*2): "+end+"!=("+length+"*2)";
 					// Skip past the beginning whitespace characters
 					raf.seek(0);
 					while(start<end) {
@@ -344,25 +354,6 @@ public class AutoTempFileWriter extends Writer {
 				} finally {
 					raf.close();
 				}
-			} else {
-				Reader in = new InputStreamReader(new FileInputStream(tempFile.getFile()), Charsets.UTF_16BE);
-				try {
-					long totalRead = IoUtils.copy(in, out);
-					if(totalRead!=length) throw new AssertionError("totalRead!=length: "+totalRead+"!="+length);
-				} finally {
-					in.close();
-				}
-			}
-        }
-    }
-
-	/**
-	 * Trims the contents of this writer.
-	 * Returns this.
-	 */
-	public AutoTempFileWriter trim() {
-		if(DEBUG) System.err.println("DEBUG: AutoTempFileWriter(" + System.identityHashCode(this) + "): trim()");
-		trimmed = true;
-		return this;
+		*/
 	}
 }

@@ -54,9 +54,9 @@ public final class Coercion  {
 		} else if(value == null) {
 			// Otherwise, if A is null, then the result is "".
 			// Write nothing
-		} else if(value instanceof AutoTempFileWriter) {
-			// Avoid intermediate String from AutoTempFileWriter
-			((AutoTempFileWriter)value).writeTo(out);
+		} else if(value instanceof AoBufferedWriter) {
+			// Avoid intermediate String from AoBufferedWriter
+			((AoBufferedWriter)value).writeTo(out);
 		} else {
 			// Otherwise, if A.toString() throws an exception, then raise an error
 			String str = value.toString();
@@ -80,9 +80,9 @@ public final class Coercion  {
 			} else if(value == null) {
 				// Otherwise, if A is null, then the result is "".
 				// Write nothing
-			} else if(value instanceof AutoTempFileWriter) {
+			} else if(value instanceof AoBufferedWriter) {
 				// Avoid intermediate String from AutoTempFileWriter
-				((AutoTempFileWriter)value).writeTo(encoder, out);
+				((AoBufferedWriter)value).writeTo(encoder, out);
 			} else {
 				// Otherwise, if A.toString() throws an exception, then raise an error
 				String str = value.toString();
