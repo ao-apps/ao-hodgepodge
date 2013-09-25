@@ -24,8 +24,7 @@ package com.aoindustries.io.buffer;
 
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.MediaWriter;
-import com.aoindustries.lang.NotImplementedException;
-import java.io.CharArrayWriter;
+import com.aoindustries.io.AoCharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -41,41 +40,85 @@ public class CharArrayBufferResult implements BufferResult {
 	/**
 	 * @see  CharArrayBufferWriter#buffer
 	 */
-    private final CharArrayWriter buffer;
+    private final AoCharArrayWriter buffer;
 
-	protected CharArrayBufferResult(CharArrayWriter buffer) {
+	private final int start;
+	private final int end;
+
+	protected CharArrayBufferResult(
+		AoCharArrayWriter buffer,
+		int start,
+		int end
+	) {
 		this.buffer = buffer;
+		this.start = start;
+		this.end = end;
     }
 
 	@Override
     public long getLength() {
-        return buffer.size();
+        return end - start;
     }
 
 	private String toStringCache;
 
     @Override
     public String toString() {
-		if(toStringCache==null) toStringCache = buffer.toString();
+		if(toStringCache==null) toStringCache = buffer.toString(start, end - start);
 		return toStringCache;
     }
 
 	@Override
     public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
-		writeTo(
+		buffer.writeTo(
 			encoder!=null
 				? new MediaWriter(encoder, out)
-				: out
+				: out,
+			start,
+			end - start
 		);
 	}
 
 	@Override
     public void writeTo(Writer out) throws IOException {
-		buffer.writeTo(out);
+		buffer.writeTo(out, start, end - start);
     }
 
 	@Override
-	public CharArrayBufferResult trim() throws IOException {
-		throw new NotImplementedException("TODO");
+	public BufferResult trim() throws IOException {
+		int newStart = this.start;
+		final char[] buf = buffer.getInternalCharArray();
+		// Skip past the beginning whitespace characters
+		while(newStart<end) {
+			char ch = buf[newStart];
+			if(ch>' ') break;
+			newStart++;
+		}
+		// Skip past the ending whitespace characters
+		int newEnd = end;
+		while(newEnd>newStart) {
+			char ch = buf[newEnd-1];
+			if(ch>' ') break;
+			newEnd--;
+		}
+		// Keep this object if already trimmed
+		if(
+			start==newStart
+			&& end==newEnd
+		) {
+			return this;
+		} else {
+			// Check if empty
+			if(newStart==newEnd) {
+				return EmptyResult.getInstance();
+			} else {
+				// Otherwise, return new substring
+				return new CharArrayBufferResult(
+					buffer,
+					newStart,
+					newEnd
+				);
+			}
+		}
 	}
 }

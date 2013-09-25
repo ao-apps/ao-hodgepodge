@@ -32,9 +32,9 @@ import java.io.IOException;
  *
  * @author  AO Industries, Inc.
  */
-public class BetterByteArrayInputStream extends ByteArrayInputStream {
+public class AoByteArrayInputStream extends ByteArrayInputStream {
 
-    public BetterByteArrayInputStream(byte[] buf) {
+    public AoByteArrayInputStream(byte[] buf) {
         super(buf);
     }
 

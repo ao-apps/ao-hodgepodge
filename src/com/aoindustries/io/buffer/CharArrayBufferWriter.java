@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,24 +22,44 @@
  */
 package com.aoindustries.io.buffer;
 
-import java.io.CharArrayWriter;
+import com.aoindustries.io.AoCharArrayWriter;
+import com.aoindustries.io.TempFile;
+import com.aoindustries.nio.charset.Charsets;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.channels.ClosedChannelException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * A simple implementation of BufferedWriter internally based on CharArrayWriter.
+ * Writes to a CharArrayBuffer then switches to a temp file when the threshold is reached.
  *
  * This class is not thread safe.
+ *
+ * @see  SegmentedBufferedWriter  for a possibly more efficient implementation.
  *
  * @author  AO Industries, Inc.
  */
 public class CharArrayBufferWriter extends BufferWriter {
 
+    private static final Logger logger = Logger.getLogger(CharArrayBufferWriter.class.getName());
+
+	private final int tempFileThreshold;
+
+	/**
+	 * The length of the writer is the sum of the data written to the buffer.
+	 * Once closed, this length will not be modified.
+	 */
+    private long length;
+
 	/**
 	 * The buffer used to capture data before switching to file-backed storage.
 	 * Once closed, this buffer will not be modified.
 	 */
-    private CharArrayWriter buffer;
+    private AoCharArrayWriter buffer;
 
 	/**
 	 * Once closed, no further information may be written.
@@ -47,80 +67,125 @@ public class CharArrayBufferWriter extends BufferWriter {
 	 */
 	private boolean isClosed = false;
 
-	public CharArrayBufferWriter(int initialSize) {
-        this.buffer = new CharArrayWriter(initialSize);
+	// The temp file is in UTF16-BE encoding
+    private TempFile tempFile;
+    private Writer fileWriter;
+
+	public CharArrayBufferWriter(int initialSize, int tempFileThreshold) {
+        if(tempFileThreshold<=initialSize) throw new IllegalArgumentException("tempFileThreshold must be > initialSize");
+        this.tempFileThreshold = tempFileThreshold;
+        this.length = 0;
+        this.buffer = new AoCharArrayWriter(initialSize);
+    }
+
+    private void switchIfNeeded(long newLength) throws IOException {
+        if(buffer!=null && newLength>=tempFileThreshold) {
+            tempFile = new TempFile("CharArrayBufferWriter"/*, null, new File("/dev/shm")*/);
+            if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
+            fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile.getFile()), Charsets.UTF_16BE));
+			// Write buffer to file
+			buffer.writeTo(fileWriter);
+            buffer = null;
+        }
     }
 
     @Override
     public void write(int c) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(c);
+        long newLength = length + 1;
+        switchIfNeeded(newLength);
+        (buffer!=null ? buffer : fileWriter).write(c);
+        length = newLength;
     }
 
     @Override
     public void write(char cbuf[]) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(cbuf);
+        long newLength = length + cbuf.length;
+        switchIfNeeded(newLength);
+        (buffer!=null ? buffer : fileWriter).write(cbuf);
+        length = newLength;
     }
 
     @Override
     public void write(char cbuf[], int off, int len) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(cbuf, off, len);
+        long newLength = length + len;
+        switchIfNeeded(newLength);
+        (buffer!=null ? buffer : fileWriter).write(cbuf, off, len);
+        length = newLength;
     }
 
     @Override
     public void write(String str) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(str);
+        long newLength = length + str.length();
+        switchIfNeeded(newLength);
+        (buffer!=null ? buffer : fileWriter).write(str);
+        length = newLength;
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(str, off, len);
+        long newLength = length + len;
+        switchIfNeeded(newLength);
+        (buffer!=null ? buffer : fileWriter).write(str, off, len);
+        length = newLength;
     }
 
     @Override
     public CharArrayBufferWriter append(CharSequence csq) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.append(csq);
+        long newLength = length + csq.length();
+        switchIfNeeded(newLength);
+        (buffer!=null ? buffer : fileWriter).append(csq);
+        length = newLength;
         return this;
     }
 
     @Override
     public CharArrayBufferWriter append(CharSequence csq, int start, int end) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.append(csq, start, end);
+        long newLength = length + (end-start);
+        switchIfNeeded(newLength);
+        (buffer!=null ? buffer : fileWriter).append(csq, start, end);
+        length = newLength;
         return this;
     }
 
     @Override
     public CharArrayBufferWriter append(char c) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.append(c);
+        long newLength = length+1;
+        switchIfNeeded(newLength);
+        (buffer!=null ? buffer : fileWriter).append(c);
+        length = newLength;
         return this;
     }
 
     @Override
     public void flush() throws IOException {
-		buffer.flush();
+        if(fileWriter!=null) fileWriter.flush();
     }
 
     @Override
     public void close() throws IOException {
-		buffer.close();
+        if(fileWriter!=null) {
+            fileWriter.close();
+            fileWriter = null;
+		}
 		isClosed = true;
     }
 
 	@Override
     public long getLength() {
-        return buffer.size();
+        return length;
     }
 
     @Override
     public String toString() {
-		return "CharArrayBufferWriter(length=" + buffer.size() + ")";
+		return "CharArrayBufferWriter(length=" + length + ")";
     }
 
 	// The result is cached after first created
@@ -130,11 +195,16 @@ public class CharArrayBufferWriter extends BufferWriter {
 	public BufferResult getResult() throws IllegalStateException {
 		if(!isClosed) throw new IllegalStateException();
 		if(result==null) {
-			result =
-				buffer.size()==0
-				? EmptyResult.getInstance()
-				: new CharArrayBufferResult(buffer)
-			;
+			if(length==0) {
+				result = EmptyResult.getInstance();
+			} else if(buffer!=null) {
+				assert length == buffer.size();
+				result = new CharArrayBufferResult(buffer, 0, buffer.size());
+			} else if(tempFile!=null) {
+				result = new TempFileResult(tempFile, 0, length);
+			} else {
+				throw new AssertionError();
+			}
 		}
 		return result;
 	}

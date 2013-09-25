@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,30 +22,46 @@
  */
 package com.aoindustries.io;
 
-import java.io.*;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
- * Provides direct access to the internal <code>byte[]</code>
+ * Provides direct access to the internal <code>char[]</code>
  *
  * @author  AO Industries, Inc.
  */
-public class BetterByteArrayOutputStream extends ByteArrayOutputStream {
+public class AoCharArrayWriter extends CharArrayWriter {
 
-    public BetterByteArrayOutputStream() {
+    public AoCharArrayWriter() {
         super();
     }
 
-    public BetterByteArrayOutputStream(int size) {
-        super(size);
+    public AoCharArrayWriter(int initialSize) {
+        super(initialSize);
     }
 
-    public byte[] getInternalByteArray() {
+    public char[] getInternalCharArray() {
         return this.buf;
     }
-    
-    public void writeTo(RandomAccessFile raf) throws IOException {
-        synchronized(this) {
-            raf.write(buf, 0, count);
+	
+    /**
+     * Converts a portion of the input data to a string.
+	 *
+     * @return the string.
+     */
+    public String toString(int off, int len) {
+        synchronized(lock) {
+            return new String(buf, off, len);
+        }
+    }
+
+	/**
+     * Writes a portion of the contents of the buffer to another character stream.
+     */
+    public void writeTo(Writer out, int off, int len) throws IOException {
+        synchronized(lock) {
+            out.write(buf, off, len);
         }
     }
 }

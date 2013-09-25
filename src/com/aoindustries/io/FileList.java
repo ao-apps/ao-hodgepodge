@@ -47,9 +47,9 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
     final private FixedRecordFile frf;
     final private FileListObjectFactory<T> objectFactory;
 
-    final private BetterByteArrayInputStream inBuffer;
+    final private AoByteArrayInputStream inBuffer;
     final private DataInputStream dataInBuffer;
-    final private BetterByteArrayOutputStream outBuffer;
+    final private AoByteArrayOutputStream outBuffer;
     final private DataOutputStream dataOutBuffer;
 
     public FileList(
@@ -64,9 +64,9 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
         this.frf=new FixedRecordFile(file, "rw", objectLength+1);
         this.objectFactory=objectFactory;
 
-        this.inBuffer=new BetterByteArrayInputStream(new byte[objectLength+1]);
+        this.inBuffer=new AoByteArrayInputStream(new byte[objectLength+1]);
         this.dataInBuffer=new DataInputStream(inBuffer);
-        this.outBuffer=new BetterByteArrayOutputStream(objectLength+1);
+        this.outBuffer=new AoByteArrayOutputStream(objectLength+1);
         this.dataOutBuffer=new DataOutputStream(outBuffer);
     }
 

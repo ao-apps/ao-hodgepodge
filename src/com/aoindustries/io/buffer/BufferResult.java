@@ -39,7 +39,7 @@ public interface BufferResult {
     /**
      * Gets the number of characters in this view of the buffer.
      */
-    long getLength();
+    long getLength() throws IOException;
 
     /**
      * Gets the captured data as a string.  For larger amounts of data, it is

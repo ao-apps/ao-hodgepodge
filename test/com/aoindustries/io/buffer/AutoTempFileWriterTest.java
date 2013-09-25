@@ -56,7 +56,7 @@ public class AutoTempFileWriterTest extends TestCase {
 
     private void doBenchmark() throws IOException {
         long startTime = System.nanoTime();
-        AutoTempFileWriter writer = new AutoTempFileWriter(32, 4 * 1024 * 1024);
+        CharArrayBufferWriter writer = new CharArrayBufferWriter(32, 4 * 1024 * 1024);
         try {
             for(int i=0; i<10000; i++) {
                 for(char[] str : strings) writer.write(str);

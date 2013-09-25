@@ -159,7 +159,7 @@ public class TempFileResult implements BufferResult {
     }
 
 	@Override
-	public TempFileResult trim() throws IOException {
+	public BufferResult trim() throws IOException {
 		// Trim from temp file
 		RandomAccessFile raf = new RandomAccessFile(tempFile.getFile(), "r");
 		try {
@@ -173,7 +173,7 @@ public class TempFileResult implements BufferResult {
 			}
 			// Skip past the ending whitespace characters
 			long newEnd = end;
-			while(end>newStart) {
+			while(newEnd>newStart) {
 				raf.seek((newEnd-1)<<1);
 				char ch = raf.readChar();
 				if(ch>' ') break;
@@ -186,12 +186,17 @@ public class TempFileResult implements BufferResult {
 			) {
 				return this;
 			} else {
-				// Otherwise, return new substring
-				return new TempFileResult(
-					tempFile,
-					newStart,
-					newEnd
-				);
+				// Check if empty
+				if(newStart==newEnd) {
+					return EmptyResult.getInstance();
+				} else {
+					// Otherwise, return new substring
+					return new TempFileResult(
+						tempFile,
+						newStart,
+						newEnd
+					);
+				}
 			}
 		} finally {
 			raf.close();

@@ -23,38 +23,25 @@
 package com.aoindustries.io.buffer;
 
 import java.io.IOException;
-import java.io.Writer;
+import java.math.BigDecimal;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
- * A buffered writer with results that may be trimmed, converted to String, and written to another
- * writer.
- *
  * @author  AO Industries, Inc.
  */
-abstract public class BufferWriter extends Writer {
+abstract public class BufferWriterTest extends TestCase {
 
-	protected BufferWriter() {
+    public BufferWriterTest(String testName) {
+        super(testName);
     }
 
-    /**
-     * Gets the number of characters in this buffer.
-	 * Once closed, this length will not be modified.
-     */
-    abstract public long getLength() throws IOException;
-
-    /**
-	 * Gets a short message (like type and length).
-	 *
-	 * @see  #getResult()  To get access to the buffered content.
-     */
-    @Override
-    abstract public String toString();
-
 	/**
-	 * Gets the result from this buffer.
-	 * The buffer must be closed.
+	 * Performs the same set of calls that were performed in JSP request for:
 	 *
-	 * @exception  IllegalStateException if not closed
+	 * http://localhost:11156/essential-mining.com/purchase/domains.jsp?cartIndex=2&ui.lang=en&cookie%3AshoppingCart=jPAbu2Xc1JKVicbIGilVSW
 	 */
-    abstract public BufferResult getResult() throws IllegalStateException, IOException;
+	public static void simulateCalls(BufferWriter writer) {
+	}
 }
