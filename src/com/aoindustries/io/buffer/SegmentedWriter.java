@@ -56,6 +56,7 @@ public class SegmentedWriter extends BufferWriter {
 	private static final int START_LEN = 16;
 
 	private static final byte[] EMPTY_BYTES = new byte[0];
+	private static final int[] EMPTY_INTS = new int[0];
 	private static final Object[] EMPTY_OBJECTS = new Object[0];
 
 	/**
@@ -69,43 +70,34 @@ public class SegmentedWriter extends BufferWriter {
 		TYPE_CHAR_OTHER = 5
 	;
 
-	static void writeSegment(byte type, Object value, Writer out) throws IOException {
+	/**
+	 * Appends the segment with the given offset and length to the given writer.
+	 */
+	static void writeSegment(byte type, Object value, int off, int len, Writer out) throws IOException {
 		switch(type) {
 			case TYPE_STRING :
-				out.write((String)value);
+				out.write((String)value, off, len);
 				break;
 			case TYPE_CHAR_NEWLINE :
+				assert off==0;
+				assert len==1;
 				out.write('\n');
 				break;
 			case TYPE_CHAR_QUOTE :
+				assert off==0;
+				assert len==1;
 				out.write('"');
 				break;
 			case TYPE_CHAR_APOS :
+				assert off==0;
+				assert len==1;
 				out.write('\'');
 				break;
 			case TYPE_CHAR_OTHER :
+				assert off==0;
+				assert len==1;
 				out.write(((Character)value).charValue());
 				break;
-			default :
-				throw new AssertionError();
-		}
-	}
-
-	/**
-	 * Gets the length of a segment.
-	 */
-	static int getLength(byte type, Object value) {
-		switch(type) {
-			case SegmentedWriter.TYPE_STRING :
-				return ((String)value).length();
-			case SegmentedWriter.TYPE_CHAR_NEWLINE :
-				return 1;
-			case SegmentedWriter.TYPE_CHAR_QUOTE :
-				return 1;
-			case SegmentedWriter.TYPE_CHAR_APOS :
-				return 1;
-			case SegmentedWriter.TYPE_CHAR_OTHER :
-				return 1;
 			default :
 				throw new AssertionError();
 		}
@@ -125,6 +117,8 @@ public class SegmentedWriter extends BufferWriter {
 	 */
 	private byte[] segmentTypes;
 	private Object[] segmentValues;
+	private int[] segmentOffsets;
+	private int[] segmentLengths;
 	private int segmentCount;
 
 	/**
@@ -142,6 +136,8 @@ public class SegmentedWriter extends BufferWriter {
         this.length = 0;
 		this.segmentTypes = EMPTY_BYTES;
 		this.segmentValues = EMPTY_OBJECTS;
+		this.segmentOffsets = EMPTY_INTS;
+		this.segmentLengths = EMPTY_INTS;
 		this.segmentCount = 0;
 		this.isClosed = false;
 		this.tempFile = null;
@@ -149,19 +145,23 @@ public class SegmentedWriter extends BufferWriter {
     }
 
 	private void switchIfNeeded(long newLength) throws IOException {
-		final Object[] segs = this.segmentValues;
-        if(segs!=null && newLength>=tempFileThreshold) {
+		final Object[] sValues = this.segmentValues;
+        if(sValues!=null && newLength>=tempFileThreshold) {
             tempFile = new TempFile("SegmentedWriter"/*, null, new File("/dev/shm")*/);
             if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
             fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile.getFile()), Charsets.UTF_16BE));
 			// Write all segments to file
-			final byte[] segTypes = this.segmentTypes;
+			final byte[] sTypes = this.segmentTypes;
+			final int[] sOffsets = this.segmentOffsets;
+			final int[] sLengths = this.segmentLengths;
 			Writer out = fileWriter;
 			for(int i=0, count=segmentCount; i<count; i++) {
-				writeSegment(segTypes[i], segs[i], out);
+				writeSegment(sTypes[i], sValues[i], sOffsets[i], sLengths[i], out);
 			}
 			this.segmentTypes = null;
             this.segmentValues = null;
+			this.segmentOffsets = null;
+			this.segmentLengths = null;
 			this.segmentCount = 0;
         }
     }
@@ -169,27 +169,38 @@ public class SegmentedWriter extends BufferWriter {
 	/**
 	 * Makes sure the segments have room for one more element.
 	 */
-	private void addSegment(byte type, Object value) {
+	private void addSegment(byte type, Object value, int off, int len) {
 		assert !isClosed;
-		int len = segmentValues.length;
-		if(segmentCount==len) {
+		assert len>0 : "Empty segments should never be added";
+		final int arraylen = segmentValues.length;
+		if(segmentCount==arraylen) {
 			// Need to grow
-			if(len==0) {
+			if(arraylen==0) {
 				this.segmentTypes = new byte[START_LEN];
 				this.segmentValues = new Object[START_LEN];
+				this.segmentOffsets = new int[START_LEN];
+				this.segmentLengths = new int[START_LEN];
 			} else {
 				// Double capacity and copy
-				int newLen = len<<1;
+				int newLen = arraylen<<1;
 				byte[] newTypes = new byte[newLen];
-				System.arraycopy(segmentTypes, 0, newTypes, 0, len);
-				Object[] newValues = new Object[newLen];
-				System.arraycopy(segmentValues, 0, newValues, 0, len);
+				System.arraycopy(segmentTypes, 0, newTypes, 0, arraylen);
 				this.segmentTypes = newTypes;
+				Object[] newValues = new Object[newLen];
+				System.arraycopy(segmentValues, 0, newValues, 0, arraylen);
 				this.segmentValues = newValues;
+				int[] newOffsets = new int[newLen];
+				System.arraycopy(segmentOffsets, 0, newOffsets, 0, arraylen);
+				this.segmentOffsets = newOffsets;
+				int[] newLengths = new int[newLen];
+				System.arraycopy(segmentLengths, 0, newLengths, 0, arraylen);
+				this.segmentLengths = newLengths;
 			}
 		}
 		segmentTypes[segmentCount] = type;
-		segmentValues[segmentCount++] = value;
+		segmentValues[segmentCount] = value;
+		segmentOffsets[segmentCount] = off;
+		segmentLengths[segmentCount++] = len;
 	}
 
 	@Override
@@ -201,16 +212,16 @@ public class SegmentedWriter extends BufferWriter {
 			char ch = (char)c;
 			switch(ch) {
 				case '\n' :
-					addSegment(TYPE_CHAR_NEWLINE, null);
+					addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
 					break;
 				case '\'' :
-					addSegment(TYPE_CHAR_APOS, null);
+					addSegment(TYPE_CHAR_APOS, null, 0, 1);
 					break;
 				case '"' :
-					addSegment(TYPE_CHAR_QUOTE, null);
+					addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
 					break;
 				default :
-					addSegment(TYPE_CHAR_OTHER, Character.valueOf(ch));
+					addSegment(TYPE_CHAR_OTHER, Character.valueOf(ch), 0, 1);
 			}
 		} else {
 	        fileWriter.write(c);
@@ -231,10 +242,12 @@ public class SegmentedWriter extends BufferWriter {
 				if(segmentValues!=null) {
 					addSegment(
 						TYPE_STRING,
-						String.copyValueOf(cbuf)
+						new String(cbuf),
+						0,
+						len
 					);
 				} else {
-					fileWriter.write(cbuf);
+					fileWriter.write(cbuf, 0, len);
 				}
 				length = newLength;
 			}
@@ -253,7 +266,9 @@ public class SegmentedWriter extends BufferWriter {
 				if(segmentValues!=null) {
 					addSegment(
 						TYPE_STRING,
-						String.copyValueOf(cbuf, off, len)
+						new String(cbuf, off, len),
+						0,
+						len
 					);
 				} else {
 					fileWriter.write(cbuf, off, len);
@@ -275,22 +290,22 @@ public class SegmentedWriter extends BufferWriter {
 					// Prefer character shortcuts
 					switch(str.charAt(0)) {
 						case '\n' :
-							addSegment(TYPE_CHAR_NEWLINE, null);
+							addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
 							break;
 						case '\'' :
-							addSegment(TYPE_CHAR_APOS, null);
+							addSegment(TYPE_CHAR_APOS, null, 0, 1);
 							break;
 						case '"' :
-							addSegment(TYPE_CHAR_QUOTE, null);
+							addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
 							break;
 						default :
-							addSegment(TYPE_STRING, str);
+							addSegment(TYPE_STRING, str, 0, 1);
 					}
 				} else {
-					addSegment(TYPE_STRING, str);
+					addSegment(TYPE_STRING, str, 0, len);
 				}
 			} else {
-				fileWriter.write(str);
+				fileWriter.write(str, 0, len);
 			}
 			length = newLength;
 		}
@@ -307,19 +322,19 @@ public class SegmentedWriter extends BufferWriter {
 					// Prefer character shortcuts
 					switch(str.charAt(off)) {
 						case '\n' :
-							addSegment(TYPE_CHAR_NEWLINE, null);
+							addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
 							break;
 						case '\'' :
-							addSegment(TYPE_CHAR_APOS, null);
+							addSegment(TYPE_CHAR_APOS, null, 0, 1);
 							break;
 						case '"' :
-							addSegment(TYPE_CHAR_QUOTE, null);
+							addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
 							break;
 						default :
-							addSegment(TYPE_STRING, str);
+							addSegment(TYPE_STRING, str, off, 1);
 					}
 				} else {
-					addSegment(TYPE_STRING, str.substring(off, off+len));
+					addSegment(TYPE_STRING, str, off, len);
 				}
 			} else {
 				fileWriter.write(str, off, len);
@@ -343,19 +358,19 @@ public class SegmentedWriter extends BufferWriter {
 						// Prefer character shortcuts
 						switch(csq.charAt(0)) {
 							case '\n' :
-								addSegment(TYPE_CHAR_NEWLINE, null);
+								addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
 								break;
 							case '\'' :
-								addSegment(TYPE_CHAR_APOS, null);
+								addSegment(TYPE_CHAR_APOS, null, 0, 1);
 								break;
 							case '"' :
-								addSegment(TYPE_CHAR_QUOTE, null);
+								addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
 								break;
 							default :
-								addSegment(TYPE_STRING, csq.toString());
+								addSegment(TYPE_STRING, csq.toString(), 0, 1);
 						}
 					} else {
-						addSegment(TYPE_STRING, csq.toString());
+						addSegment(TYPE_STRING, csq.toString(), 0, len);
 					}
 				} else {
 					fileWriter.append(csq);
@@ -379,21 +394,56 @@ public class SegmentedWriter extends BufferWriter {
 				if(segmentValues!=null) {
 					if(len==1) {
 						// Prefer character shortcuts
-						switch(csq.charAt(start)) {
+						char ch = csq.charAt(start);
+						switch(ch) {
 							case '\n' :
-								addSegment(TYPE_CHAR_NEWLINE, null);
+								addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
 								break;
 							case '\'' :
-								addSegment(TYPE_CHAR_APOS, null);
+								addSegment(TYPE_CHAR_APOS, null, 0, 1);
 								break;
 							case '"' :
-								addSegment(TYPE_CHAR_QUOTE, null);
+								addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
 								break;
 							default :
-								addSegment(TYPE_STRING, csq.subSequence(start, end).toString());
+								if(
+									ch <= 127 // Always cached
+									|| !(csq instanceof String) // Use Character for all non-Strings
+								) {
+									addSegment(
+										TYPE_CHAR_OTHER,
+										Character.valueOf(ch),
+										0,
+										1
+									);
+								} else {
+									// Use offset for String
+									addSegment(
+										TYPE_STRING,
+										(String)csq,
+										start,
+										1
+									);
+								}
 						}
 					} else {
-						addSegment(TYPE_STRING, csq.subSequence(start, end).toString());
+						if(csq instanceof String) {
+							// Use offset for String
+							addSegment(
+								TYPE_STRING,
+								(String)csq,
+								start,
+								len
+							);
+						} else {
+							// Use subSequence().toString() for all non-Strings
+							addSegment(
+								TYPE_STRING,
+								csq.subSequence(start, end).toString(),
+								0,
+								len
+							);
+						}
 					}
 				} else {
 					fileWriter.append(csq, start, end);
@@ -412,16 +462,16 @@ public class SegmentedWriter extends BufferWriter {
         if(segmentValues!=null) {
 			switch(c) {
 				case '\n' :
-					addSegment(TYPE_CHAR_NEWLINE, null);
+					addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
 					break;
 				case '\'' :
-					addSegment(TYPE_CHAR_APOS, null);
+					addSegment(TYPE_CHAR_APOS, null, 0, 1);
 					break;
 				case '"' :
-					addSegment(TYPE_CHAR_QUOTE, null);
+					addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
 					break;
 				default :
-					addSegment(TYPE_CHAR_OTHER, Character.valueOf(c));
+					addSegment(TYPE_CHAR_OTHER, Character.valueOf(c), 0, 1);
 			}
 		} else {
 			fileWriter.append(c);
@@ -464,26 +514,23 @@ public class SegmentedWriter extends BufferWriter {
 			if(length==0) {
 				result = EmptyResult.getInstance();
 			} else if(segmentValues!=null) {
+				assert segmentCount>0 : "When not empty and using segments, must have at least one segment";
 				int endSegmentIndex = segmentCount - 1;
-				int endSegmentEnd =
-					endSegmentIndex==-1
-					? 0
-					: getLength(
-						segmentTypes[endSegmentIndex],
-						segmentValues[endSegmentIndex]
-					)
-				;
 				result = new SegmentedResult(
 					length,
 					segmentTypes,
 					segmentValues,
+					segmentOffsets,
+					segmentLengths,
 					segmentCount,
-					0,
-					0,
-					0,
-					length,
+					0, // start
+					0, // startSegmentIndex
+					segmentOffsets[0],
+					segmentLengths[0],
+					length, // end
 					endSegmentIndex,
-					endSegmentEnd
+					segmentOffsets[endSegmentIndex],
+					segmentLengths[endSegmentIndex]
 				);
 			} else if(tempFile!=null) {
 				result = new TempFileResult(tempFile, 0, length);
