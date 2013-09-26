@@ -52,23 +52,35 @@ public class ServletUtil {
         if(relativeUrlPath.length()>0 && relativeUrlPath.charAt(0)!='/') {
             int slashPos = servletPath.lastIndexOf('/');
             if(slashPos==-1) throw new MalformedURLException("No slash found in servlet path: "+servletPath);
-            String newPath = relativeUrlPath;
+            final String newPath = relativeUrlPath;
+			final int newPathLen = newPath.length();
+			int newPathStart = 0;
             boolean modified;
             do {
                 modified = false;
-                if(newPath.startsWith("./")) {
-                    newPath = newPath.substring(2);
+                if(
+					newPathLen >= (newPathStart+2)
+					&& newPath.regionMatches(newPathStart, "./", 0, 2)
+				) {
+					newPathStart += 2;
                     modified = true;
                 }
-                if(newPath.startsWith("../")) {
+                if(
+					newPathLen >= (newPathStart+3)
+					&& newPath.regionMatches(newPathStart, "../", 0, 3)
+				) {
                     slashPos = servletPath.lastIndexOf('/', slashPos-1);
                     if(slashPos==-1) throw new MalformedURLException("Too many ../ in relativeUrlPath: "+relativeUrlPath);
 
-                    newPath = newPath.substring(3);
+					newPathStart += 3;
                     modified = true;
                 }
             } while(modified);
-            relativeUrlPath = servletPath.substring(0, slashPos+1) + newPath;
+			relativeUrlPath =
+				new StringBuilder((slashPos+1) + (newPathLen-newPathStart))
+				.append(servletPath, 0, slashPos+1)
+				.append(newPath, newPathStart, newPathLen)
+				.toString();
         }
         return relativeUrlPath;
     }
