@@ -61,22 +61,33 @@ public class TrimFilterWriter extends PrintWriter {
         this.response = response;
     }
 
-    /**
+	private String isTrimEnabledCacheContentType;
+	private boolean isTrimEnabledCacheResult;
+
+	/**
      * Determines if trimming is enabled based on the output content type.
+	 * 
+	 * @see  TrimFilterOutputStream#isTrimEnabled()  for same method implemented
      */
     private boolean isTrimEnabled() {
         String contentType = response.getContentType();
-        return
-            contentType==null
-            || contentType.equals("application/xhtml+xml")
-            || contentType.startsWith("application/xhtml+xml;")
-            || contentType.equals("text/html")
-            || contentType.startsWith("text/html;")
-            || contentType.equals("application/xml")
-            || contentType.startsWith("application/xml;")
-            || contentType.equals("text/xml")
-            || contentType.startsWith("text/xml;")
-        ;
+		// If the contentType is the same string (by identity), return the previously determined value.
+		// This assumes the same string instance is returned by the response when content type not changed between calls.
+		if(contentType!=isTrimEnabledCacheContentType) {
+			isTrimEnabledCacheResult =
+				contentType==null
+				|| contentType.equals("application/xhtml+xml")
+				|| contentType.startsWith("application/xhtml+xml;")
+				|| contentType.equals("text/html")
+				|| contentType.startsWith("text/html;")
+				|| contentType.equals("application/xml")
+				|| contentType.startsWith("application/xml;")
+				|| contentType.equals("text/xml")
+				|| contentType.startsWith("text/xml;")
+			;
+			isTrimEnabledCacheContentType = contentType;
+		}
+		return isTrimEnabledCacheResult;
     }
 
     @Override
@@ -201,7 +212,10 @@ public class TrimFilterWriter extends PrintWriter {
 
     @Override
     public void write(int c) {
-        if(!isTrimEnabled() || processChar((char)c)) wrapped.write(c);
+        if(
+			!isTrimEnabled()
+			|| processChar((char)c)
+		) wrapped.write(c);
     }
 
     @Override
@@ -284,7 +298,10 @@ public class TrimFilterWriter extends PrintWriter {
 
     @Override
     public void print(char c) {
-        if(!isTrimEnabled() || processChar(c)) wrapped.print(c);
+        if(
+			!isTrimEnabled()
+			|| processChar(c)
+		) wrapped.print(c);
     }
 
     @Override

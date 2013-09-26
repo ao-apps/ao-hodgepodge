@@ -61,22 +61,33 @@ public class TrimFilterOutputStream extends ServletOutputStream {
         this.response = response;
     }
 
-    /**
+	private String isTrimEnabledCacheContentType;
+	private boolean isTrimEnabledCacheResult;
+
+	/**
      * Determines if trimming is enabled based on the output content type.
+	 * 
+	 * @see  TrimFilterWriter#isTrimEnabled()  for same method implemented
      */
     private boolean isTrimEnabled() {
         String contentType = response.getContentType();
-        return
-            contentType==null
-            || contentType.equals("application/xhtml+xml")
-            || contentType.startsWith("application/xhtml+xml;")
-            || contentType.equals("text/html")
-            || contentType.startsWith("text/html;")
-            || contentType.equals("application/xml")
-            || contentType.startsWith("application/xml;")
-            || contentType.equals("text/xml")
-            || contentType.startsWith("text/xml;")
-        ;
+		// If the contentType is the same string (by identity), return the previously determined value.
+		// This assumes the same string instance is returned by the response when content type not changed between calls.
+		if(contentType!=isTrimEnabledCacheContentType) {
+			isTrimEnabledCacheResult =
+				contentType==null
+				|| contentType.equals("application/xhtml+xml")
+				|| contentType.startsWith("application/xhtml+xml;")
+				|| contentType.equals("text/html")
+				|| contentType.startsWith("text/html;")
+				|| contentType.equals("application/xml")
+				|| contentType.startsWith("application/xml;")
+				|| contentType.equals("text/xml")
+				|| contentType.startsWith("text/xml;")
+			;
+			isTrimEnabledCacheContentType = contentType;
+		}
+		return isTrimEnabledCacheResult;
     }
 
     @Override
@@ -184,13 +195,16 @@ public class TrimFilterOutputStream extends ServletOutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        if(!isTrimEnabled() || processChar((char)b)) wrapped.write(b);
+        if(
+			!isTrimEnabled()
+			|| processChar((char)b)
+		) wrapped.write(b);
     }
 
     @Override
     public void write(byte[] buf, int off, int len) throws IOException {
         if(isTrimEnabled()) {
-            byte[] buff = outputBuffer;
+            final byte[] buff = outputBuffer;
             // If len > OUPUT_BUFFER_SIZE, process in blocks
             int buffUsed = 0;
             while(len>0) {
@@ -235,7 +249,10 @@ public class TrimFilterOutputStream extends ServletOutputStream {
 
     @Override
     public void print(char c) throws IOException {
-        if(!isTrimEnabled() || processChar(c)) wrapped.print(c);
+        if(
+			!isTrimEnabled()
+			|| processChar(c)
+		) wrapped.print(c);
     }
 
     @Override
