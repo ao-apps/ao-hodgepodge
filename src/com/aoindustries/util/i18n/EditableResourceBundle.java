@@ -24,7 +24,7 @@ package com.aoindustries.util.i18n;
 
 import com.aoindustries.encoding.MediaType;
 import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
-import com.aoindustries.util.EncodingUtils;
+import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import com.aoindustries.util.Sequence;
 import com.aoindustries.util.UnsynchronizedSequence;
 import java.io.File;
@@ -584,7 +584,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                             + ">\n"
                             + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\" style=\"text-align:right\">").append(Long.toString(lookupValue.id)).append("</td>\n"
                             + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\">");
-                    EncodingUtils.encodeHtml(lookupKey.key, out);
+                    encodeTextInXhtml(lookupKey.key, out);
                     out.append("</td>\n");
                     int localeIndex = 0;
                     for(Locale locale : allLocales) {
@@ -636,15 +636,15 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                                 }
                             }
 
-                            out.append("        <td id=\"EditableResourceBundleEditorRow").append(Integer.toString(i)).append("Locale").append(Integer.toString(localeIndex)).append("\" style=\"white-space:nowrap; ");
+                            out.append("        <td id=\"EditableResourceBundleEditorRow").append(Integer.toString(i)).append("Locale").append(Integer.toString(localeIndex)).append("\" style=\"white-space:pre; ");
                             if(borderColor!=null) out.append("border:2px solid ").append(borderColor).append("; ");
                             out.append("background-color:").append(backgroundColor).append("\" onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("'); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').select(); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').focus();\">");
                             if(currentValue!=null) {
                                 if(currentValue.length()>30) {
-                                    EncodingUtils.encodeHtml(currentValue.substring(0, 30), out);
-                                    out.append("\u2026");
+                                    encodeTextInXhtml(currentValue, 0, 30, out);
+                                    out.append("\u2026"); // Ellipsis
                                 } else {
-                                    EncodingUtils.encodeHtml(currentValue, out);
+                                    encodeTextInXhtml(currentValue, out);
                                 }
                             }
                             out.append("</td>\n");
@@ -668,18 +668,18 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                                 out.append("            <option");
                                 if(mediaType==mt && lookupKey.isBlockElement) out.append(" selected=\"selected\"");
                                 out.append('>');
-                                EncodingUtils.encodeHtml(mt.getMediaType(), out);
+                                encodeTextInXhtml(mt.getMediaType(), out);
                                 out.append(" (block)</option>\n"
                                         + "            <option");
                                 if(mediaType==mt && !lookupKey.isBlockElement) out.append(" selected=\"selected\"");
                                 out.append('>');
-                                EncodingUtils.encodeHtml(mt.getMediaType(), out);
+                                encodeTextInXhtml(mt.getMediaType(), out);
                                 out.append(" (inline)</option>\n");
                             } else {
                                 out.append("            <option");
                                 if(mediaType==mt) out.append(" selected=\"selected\"");
                                 out.append('>');
-                                EncodingUtils.encodeHtml(mt.getMediaType(), out);
+                                encodeTextInXhtml(mt.getMediaType(), out);
                                 out.append("</option>\n");
                             }
                         }
@@ -688,7 +688,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
                             + "        </td>\n"
                     // Base Name
                             + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(id).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\">");
-                    EncodingUtils.encodeHtml(bundleSet.getBaseName(), out);
+                    encodeTextInXhtml(bundleSet.getBaseName(), out);
                     out.append("</td>\n"
                             + "      </tr>\n");
                 }

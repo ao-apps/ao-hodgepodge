@@ -107,7 +107,7 @@ public class SQLUtility {
             if(ch<' ' || ch>'~' || ch=='\\') {
                 if(SB==null) {
                     SB=new StringBuilder();
-                    if(c>0) SB.append(S.substring(0, c));
+                    if(c>0) SB.append(S, 0, c);
                 }
                 if(ch=='\\') SB.append("\\\\");
                 else if(ch=='\b') SB.append("\\b");
@@ -142,7 +142,7 @@ public class SQLUtility {
             if(ch=='\\') {
                 if(SB==null) {
                     SB=new StringBuilder();
-                    if(c>0) SB.append(S.substring(0, c));
+                    if(c>0) SB.append(S, 0, c);
                 }
                 if(++c<len) {
                     ch=S.charAt(c);

@@ -104,20 +104,26 @@ final public class RGBColor {
 		Integer I = colors.get(name);
 		if (I != null) return I.intValue();
 
-		if (name.length() >= 1 && name.charAt(0) == '#') name = name.substring(1);
-		else if (name.length() >= 2 && name.charAt(0) == '0' && name.charAt(1) == 'x') name = name.substring(2);
+		int start = 0;
+		if (name.length() >= 1 && name.charAt(0) == '#') start = 1;
+		else if (name.length() >= 2 && name.charAt(0) == '0' && name.charAt(1) == 'x') start = 2;
 
-		if (name.length() != 6) throw new IllegalArgumentException("name should be 6 digits, name is " + name.length() + " digits");
+		int nameLen = name.length() - start;
+		if (nameLen != 6) throw new IllegalArgumentException("name should be 6 digits, name is " + nameLen + " digits");
 
 		// Get the number
 		int color = 0;
-		for (int c = 0; c < 6; c++) {
-			char ch = name.charAt(c);
+		for(
+			int i = start, end=start+6;
+			i < end;
+			i++
+		) {
+			char ch = name.charAt(i);
 			int value;
 			if (ch >= '0' && ch < '9') value = ch - '0';
 			else if (ch >= 'a' && ch <= 'f') value = ch - 'a' + 10;
 			else throw new IllegalArgumentException("Invalid character in name: " + ch);
-			color |= (value << ((5 - c) << 2));
+			color |= (value << ((5 - i) << 2));
 		}
 
 		return color;

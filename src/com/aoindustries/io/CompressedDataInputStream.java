@@ -144,13 +144,22 @@ public class CompressedDataInputStream extends DataInputStream {
             else {
                 String last = lastStrings[slot];
                 if(last==null) last="";
-                return lastStrings[slot]=last.substring(0, common)+suffix;
+				String combined =
+					new StringBuilder(common + suffix.length())
+					.append(last, 0, common)
+					.append(suffix)
+					.toString();
+				lastStrings[slot] = combined;
+                return combined;
             }
         } else {
             String last=lastStrings[slot];
             if(last==null) last="";
-            if(common==last.length()) return last;
-            else return lastStrings[slot]=last.substring(0, common);
+            if(common==last.length()) {
+				return last;
+			} else {
+				return lastStrings[slot]=last.substring(0, common);
+			}
         }
     }
 

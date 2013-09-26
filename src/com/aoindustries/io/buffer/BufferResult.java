@@ -45,6 +45,8 @@ public interface BufferResult {
      * Gets the captured data as a string.  For larger amounts of data, it is
 	 * much more efficient to call the <code>writeTo</code> method.
      *
+	 * TODO: Add contentEquals(String) method to avoid some uses of toString
+	 *
      * @see  #writeTo(java.io.Writer)
 	 * @see  #trim()
      */

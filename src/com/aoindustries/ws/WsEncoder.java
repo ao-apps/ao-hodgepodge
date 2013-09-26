@@ -107,7 +107,7 @@ public class WsEncoder {
             if(ch=='\\') {
                 if(value==null) {
                     value=new StringBuilder();
-                    if(c>0) value.append(encoded.substring(0, c));
+                    if(c>0) value.append(encoded, 0, c);
                 }
                 if(++c<len) {
                     ch=encoded.charAt(c);

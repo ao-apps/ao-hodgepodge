@@ -148,7 +148,18 @@ abstract public class Matcher {
 
         // Handle step
         int pos = str.indexOf('/');
-        if(pos!=-1) return new Step(parseMatcher(str.substring(0, pos), minimum, maximum, modulus, nameMap), Integer.parseInt(str.substring(pos+1)));
+        if(pos!=-1) {
+			return new Step(
+				parseMatcher(
+					str.substring(0, pos),
+					minimum,
+					maximum,
+					modulus,
+					nameMap
+				),
+				Integer.parseInt(str.substring(pos+1))
+			);
+		}
 
         // Handle wildcard
         if("*".equals(str)) return new Asterisk(minimum);
