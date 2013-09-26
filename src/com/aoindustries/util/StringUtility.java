@@ -26,6 +26,7 @@ import com.aoindustries.sql.SQLUtility;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -867,21 +868,58 @@ public final class StringUtility {
         return wordCount;
     }
 
-    public static String[] splitString(String line, char delim) {
-        List<String> words = new ArrayList<String>();
-        int len = line.length();
-        int pos = 0;
-        while (pos < len) {
+	/**
+	 * Splits a string on the given delimiter.
+	 * Does include all empty elements on the split.
+	 *
+	 * @return  the modifiable list from the split
+	 */
+	public static List<String> splitString(String line, char delim) {
+		return splitString(line, 0, line.length(), delim, new ArrayList<String>());
+	}
+
+	/**
+	 * Splits a string on the given delimiter.
+	 * Does include all empty elements on the split.
+	 *
+	 * @param  words  the words will be added to this collection.
+	 *
+	 * @return  the collection provided in words parameter
+	 */
+	public static <C extends Collection<String>> C splitString(String line, char delim, C words) {
+		return splitString(line, 0, line.length(), delim, words);
+	}
+
+	/**
+	 * Splits a string on the given delimiter over the given range.
+	 * Does include all empty elements on the split.
+	 *
+	 * @return  the modifiable list from the split
+	 */
+    public static List<String> splitString(String line, int begin, int end, char delim) {
+        return splitString(line, begin, end, delim, new ArrayList<String>());
+	}
+
+	/**
+	 * Splits a string on the given delimiter over the given range.
+	 * Does include all empty elements on the split.
+	 *
+	 * @param  words  the words will be added to this collection.
+	 *
+	 * @return  the collection provided in words parameter
+	 */
+	public static <C extends Collection<String>> C splitString(String line, int begin, int end, char delim, C words) {
+        int pos = begin;
+        while (pos < end) {
             int start = pos;
             pos = line.indexOf(delim, pos);
-            if (pos == -1) pos = len;
+            if(pos == -1 || pos > end) pos = end;
             words.add(line.substring(start, pos));
             pos++;
         }
         // If ending in a delimeter, add the empty string
-        if(len>0 && line.charAt(len-1)==delim) words.add("");
-
-        return words.toArray(new String[words.size()]);
+        if(end>begin && line.charAt(end-1)==delim) words.add("");
+        return words;
     }
 
     public static List<String> splitString(String line, String delim) {
