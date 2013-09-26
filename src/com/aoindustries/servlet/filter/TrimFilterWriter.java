@@ -24,6 +24,7 @@ package com.aoindustries.servlet.filter;
 
 import com.aoindustries.util.BufferManager;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Locale;
 import javax.servlet.ServletResponse;
 
