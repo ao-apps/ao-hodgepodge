@@ -52,7 +52,7 @@ public class TrimFilterWriter extends PrintWriter {
      */
     private char[] outputBuffer = BufferManager.getChars();
 
-    public TrimFilterWriter(PrintWriter out, ServletResponse response) {
+    public TrimFilterWriter(Writer out, ServletResponse response) {
         super(out);
         this.response = response;
     }
