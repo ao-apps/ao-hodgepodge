@@ -46,6 +46,13 @@ final public class MediaWriter extends FilterWriter implements ValidMediaFilter 
 		return encoder;
 	}
 
+	/**
+	 * Gets the wrapped writer.
+	 */
+	public Writer getOut() {
+		return out;
+	}
+
 	@Override
     public boolean isValidatingMediaInputType(MediaType inputType) {
 		return encoder.isValidatingMediaInputType(inputType);

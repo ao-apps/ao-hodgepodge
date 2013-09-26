@@ -41,12 +41,10 @@ public class SegmentedResult implements BufferResult {
 	/**
 	 * @see  SegmentedWriter#segmentTypes
 	 */
-	private final long length; // TODO: Should no longer be required once everything uses start and end
 	private final byte[] segmentTypes;
 	private final Object[] segmentValues;
 	private final int[] segmentOffsets;
 	private final int[] segmentLengths;
-	private final int segmentCount; // TODO: Should no longer be required once everything uses startSegmentIndex and endSegmentIndex
 
 	/**
 	 * When segments are trimmed (or other types of substring operations), they
@@ -63,12 +61,10 @@ public class SegmentedResult implements BufferResult {
 	private final int endSegmentLength;
 
 	protected SegmentedResult(
-		long length,
 		byte[] segmentTypes,
 		Object[] segmentValues,
 		int[] segmentOffsets,
 		int[] segmentLengths,
-		int segmentCount,
 		long start,
 		int startSegmentIndex,
 		int startSegmentOffset, // Start offset and length may have been affected by trimming
@@ -78,13 +74,10 @@ public class SegmentedResult implements BufferResult {
 		int endSegmentOffset,
 		int endSegmentLength // End offset and length may have been affected by trimming
 	) {
-		this.length = length;
 		this.segmentTypes = segmentTypes;
 		this.segmentValues = segmentValues;
 		this.segmentOffsets = segmentOffsets;
 		this.segmentLengths = segmentLengths;
-		assert segmentCount>0 : "All empty results should have been converted to EmptyResult";
-		this.segmentCount = segmentCount;
 		this.start = start;
 		this.startSegmentIndex = startSegmentIndex;
 		this.startSegmentOffset = startSegmentOffset;
@@ -150,6 +143,43 @@ public class SegmentedResult implements BufferResult {
 	}
 
 	/**
+	 * Appends the given range of a segment. to the buffer.
+	 */
+	private void append(int segmentIndex, int off, int len, StringBuilder buffer) {
+		switch(segmentTypes[segmentIndex]) {
+			case SegmentedWriter.TYPE_STRING :
+				buffer.append(
+					(String)segmentValues[segmentIndex],
+					off,
+					off + len
+				);
+				break;
+			case SegmentedWriter.TYPE_CHAR_NEWLINE :
+				assert off==0;
+				assert len==1;
+				buffer.append('\n');
+				break;
+			case SegmentedWriter.TYPE_CHAR_QUOTE :
+				assert off==0;
+				assert len==1;
+				buffer.append('"');
+				break;
+			case SegmentedWriter.TYPE_CHAR_APOS :
+				assert off==0;
+				assert len==1;
+				buffer.append('\'');
+				break;
+			case SegmentedWriter.TYPE_CHAR_OTHER :
+				assert off==0;
+				assert len==1;
+				buffer.append(((Character)segmentValues[segmentIndex]).charValue());
+				break;
+			default :
+				throw new AssertionError();
+		}
+	}
+
+	/**
 	 * Writes the full segment (with original offset and length) to the given writer using the given encoder.
 	 */
 	private void writeSegment(int segmentIndex, MediaEncoder encoder, Writer out) throws IOException {
@@ -188,6 +218,118 @@ public class SegmentedResult implements BufferResult {
 	}
 
 	/**
+	 * Writes the given range of a segment to the given writer using the given encoder.
+	 */
+	private void writeSegment(int segmentIndex, int off, int len, MediaEncoder encoder, Writer out) throws IOException {
+		switch(segmentTypes[segmentIndex]) {
+			case SegmentedWriter.TYPE_STRING :
+				encoder.write(
+					(String)segmentValues[segmentIndex],
+					off,
+					len,
+					out
+				);
+				break;
+			case SegmentedWriter.TYPE_CHAR_NEWLINE :
+				assert off==0;
+				assert len==1;
+				encoder.write('\n', out);
+				break;
+			case SegmentedWriter.TYPE_CHAR_QUOTE :
+				assert off==0;
+				assert len==1;
+				encoder.write('"', out);
+				break;
+			case SegmentedWriter.TYPE_CHAR_APOS :
+				assert off==0;
+				assert len==1;
+				encoder.write('\'', out);
+				break;
+			case SegmentedWriter.TYPE_CHAR_OTHER :
+				assert off==0;
+				assert len==1;
+				encoder.write(((Character)segmentValues[segmentIndex]).charValue(), out);
+				break;
+			default :
+				throw new AssertionError();
+		}
+	}
+
+	/**
+	 * Writes the full segment (with original offset and length) to the given writer.
+	 */
+	private void writeSegment(int segmentIndex, Writer out) throws IOException {
+		switch(segmentTypes[segmentIndex]) {
+			case SegmentedWriter.TYPE_STRING :
+				out.write(
+					(String)segmentValues[segmentIndex],
+					segmentOffsets[segmentIndex],
+					segmentLengths[segmentIndex]
+				);
+				break;
+			case SegmentedWriter.TYPE_CHAR_NEWLINE :
+				assert segmentOffsets[segmentIndex]==0;
+				assert segmentLengths[segmentIndex]==1;
+				out.write('\n');
+				break;
+			case SegmentedWriter.TYPE_CHAR_QUOTE :
+				assert segmentOffsets[segmentIndex]==0;
+				assert segmentLengths[segmentIndex]==1;
+				out.write('"');
+				break;
+			case SegmentedWriter.TYPE_CHAR_APOS :
+				assert segmentOffsets[segmentIndex]==0;
+				assert segmentLengths[segmentIndex]==1;
+				out.write('\'');
+				break;
+			case SegmentedWriter.TYPE_CHAR_OTHER :
+				assert segmentOffsets[segmentIndex]==0;
+				assert segmentLengths[segmentIndex]==1;
+				out.write(((Character)segmentValues[segmentIndex]).charValue());
+				break;
+			default :
+				throw new AssertionError();
+		}
+	}
+
+	/**
+	 * Writes the given range of a segment to the given writer.
+	 */
+	private void writeSegment(int segmentIndex, int off, int len, Writer out) throws IOException {
+		switch(segmentTypes[segmentIndex]) {
+			case SegmentedWriter.TYPE_STRING :
+				out.write(
+					(String)segmentValues[segmentIndex],
+					off,
+					len
+				);
+				break;
+			case SegmentedWriter.TYPE_CHAR_NEWLINE :
+				assert off==0;
+				assert len==1;
+				out.write('\n');
+				break;
+			case SegmentedWriter.TYPE_CHAR_QUOTE :
+				assert off==0;
+				assert len==1;
+				out.write('"');
+				break;
+			case SegmentedWriter.TYPE_CHAR_APOS :
+				assert off==0;
+				assert len==1;
+				out.write('\'');
+				break;
+			case SegmentedWriter.TYPE_CHAR_OTHER :
+				assert off==0;
+				assert len==1;
+				out.write(((Character)segmentValues[segmentIndex]).charValue());
+				break;
+			default :
+				throw new AssertionError();
+		}
+	}
+
+	/**
 	 * Gets the character at the given index in a segment.
 	 * This is the absolute index, the offset is not added-in.
 	 */
@@ -217,45 +359,48 @@ public class SegmentedResult implements BufferResult {
     @Override
     public String toString() {
 		if(toStringCache==null) {
-			// TODO: if(start!=0) throw new NotImplementedException("TODO: Handle start offset");
-			// TODO: if(end!=length) throw new NotImplementedException("TODO: Handle end offset");
-			if(segmentCount==1) {
+			if(startSegmentIndex==endSegmentIndex) {
 				// Shortcut for one segment
-				switch(segmentTypes[0]) {
+				switch(segmentTypes[startSegmentIndex]) {
 					case SegmentedWriter.TYPE_STRING :
-						int off = segmentOffsets[0];
-						int len = segmentLengths[0];
-						toStringCache = ((String)segmentValues[0]).substring(off, off+len);
+						toStringCache = ((String)segmentValues[startSegmentIndex]).substring(startSegmentOffset, startSegmentOffset + startSegmentLength);
 						break;
 					case SegmentedWriter.TYPE_CHAR_NEWLINE :
-						assert segmentOffsets[0]==0;
-						assert segmentLengths[0]==1;
+						assert startSegmentOffset==0;
+						assert startSegmentLength==1;
 						toStringCache = "\n";
 						break;
 					case SegmentedWriter.TYPE_CHAR_QUOTE :
-						assert segmentOffsets[0]==0;
-						assert segmentLengths[0]==1;
+						assert startSegmentOffset==0;
+						assert startSegmentLength==1;
 						toStringCache = "\"";
 						break;
 					case SegmentedWriter.TYPE_CHAR_APOS :
-						assert segmentOffsets[0]==0;
-						assert segmentLengths[0]==1;
+						assert startSegmentOffset==0;
+						assert startSegmentLength==1;
 						toStringCache = "'";
 						break;
 					case SegmentedWriter.TYPE_CHAR_OTHER :
-						assert segmentOffsets[0]==0;
-						assert segmentLengths[0]==1;
-						toStringCache = String.valueOf(((Character)segmentValues[0]).charValue());
+						assert startSegmentOffset==0;
+						assert startSegmentLength==1;
+						toStringCache = String.valueOf(((Character)segmentValues[startSegmentIndex]).charValue());
 						break;
 					default :
 						throw new AssertionError();
 				}
 			} else {
 				logger.fine("Creating String from segments - benefits of SegmentedWriter negated.");
+				final long length = end - start;
+				if(length>Integer.MAX_VALUE) throw new RuntimeException("Buffer too large to convert to String: length="+length);
 				StringBuilder buffer = new StringBuilder((int)length);
-				for(int i=0; i<segmentCount; i++) {
+				// First segment
+				append(startSegmentIndex, startSegmentOffset, startSegmentLength, buffer);
+				// Middle segments
+				for(int i=startSegmentIndex+1; i<endSegmentIndex; i++) {
 					append(i, buffer);
 				}
+				// End segment
+				append(endSegmentIndex, endSegmentOffset, endSegmentLength, buffer);
 				assert buffer.length()==length : "buffer.length()!=length: "+buffer.length()+"!="+length;
 				toStringCache = buffer.toString();
 			}
@@ -268,26 +413,55 @@ public class SegmentedResult implements BufferResult {
 		if(encoder==null) {
 			writeTo(out);
 		} else {
-			// TODO: if(start!=0) throw new NotImplementedException("TODO: Handle start offset");
-			// TODO: if(end!=length) throw new NotImplementedException("TODO: Handle end offset");
 			// TODO: If copying to another SegmentedWriter, we have a chance here to share segment list (current the StringBuilder)
-			for(int i=0; i<segmentCount; i++) {
-				writeSegment(i, encoder, out);
+			// First segment
+			writeSegment(
+				startSegmentIndex,
+				startSegmentOffset,
+				startSegmentLength,
+				encoder,
+				out
+			);
+			if(endSegmentIndex!=startSegmentIndex) {
+				// Middle segments
+				for(int i=startSegmentIndex+1; i<endSegmentIndex; i++) {
+					writeSegment(i, encoder, out);
+				}
+				// End segment
+				writeSegment(
+					endSegmentIndex,
+					endSegmentOffset,
+					endSegmentLength,
+					encoder,
+					out
+				);
 			}
 		}
 	}
 
 	@Override
     public void writeTo(Writer out) throws IOException {
-		// TODO: If copying to another SegmentedWriter, we have a chance here to share segment list (current the StringBuilder)
-		// TODO: if(start!=0) throw new NotImplementedException("TODO: Handle start offset");
-		// TODO: if(end!=length) throw new NotImplementedException("TODO: Handle end offset");
-		for(int i=0; i<segmentCount; i++) {
-			SegmentedWriter.writeSegment(
-				segmentTypes[i],
-				segmentValues[i],
-				segmentOffsets[i],
-				segmentLengths[i],
+		// First segment
+		writeSegment(
+			startSegmentIndex,
+			startSegmentOffset,
+			startSegmentLength,
+			out
+		);
+		if(endSegmentIndex!=startSegmentIndex) {
+			// Middle segments
+			int i = startSegmentIndex+1;
+			if(i<endSegmentIndex) {
+				// if(out instanceof SegmentedWriter) System.err.println("TODO: Perform array copy of middle segments");
+				do {
+					writeSegment(i++, out);
+				} while(i<endSegmentIndex);
+			}
+			// End segment
+			writeSegment(
+				endSegmentIndex,
+				endSegmentOffset,
+				endSegmentLength,
 				out
 			);
 		}
@@ -307,7 +481,6 @@ public class SegmentedResult implements BufferResult {
 		// Skip past the beginning whitespace characters
 		TRIM_LEFT :
 		while(newStart<newEnd) {
-			assert newStartSegmentIndex < segmentCount;
 			// Work on one segment
 			final byte type = segmentTypes[newStartSegmentIndex];
 			final Object value = segmentValues[newStartSegmentIndex];
@@ -386,12 +559,10 @@ public class SegmentedResult implements BufferResult {
 			} else {
 				// Otherwise, return new substring
 				return new SegmentedResult(
-					length,
 					segmentTypes,
 					segmentValues,
 					segmentOffsets,
 					segmentLengths,
-					segmentCount,
 					newStart,
 					newStartSegmentIndex,
 					newStartSegmentOffset,

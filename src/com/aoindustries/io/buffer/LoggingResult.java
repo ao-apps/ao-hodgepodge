@@ -24,6 +24,7 @@ package com.aoindustries.io.buffer;
 
 import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.javaScriptInXhtmlAttributeEncoder;
 import com.aoindustries.encoding.MediaEncoder;
+import com.aoindustries.encoding.MediaWriter;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.Sequence;
@@ -41,7 +42,7 @@ import java.io.Writer;
  */
 public class LoggingResult implements BufferResult {
 
-	private static final Sequence idSeq = new AtomicSequence();
+	private static final Sequence idSeq = new AtomicSequence(0);
 
 	final long id = idSeq.getNextSequenceValue();
 	private final BufferResult wrapped;
@@ -51,11 +52,52 @@ public class LoggingResult implements BufferResult {
 		this.wrapped = wrapped;
 		this.log = log;
     }
+
+	public long getId() {
+		return id;
+	}
+
+	/**
+	 * Provides detailed logging for a media encoder.
+	 */
+	private void log(MediaEncoder encoder) throws IOException {
+		if(encoder==null) log.write("null");
+		else if(encoder==javaScriptInXhtmlAttributeEncoder) log.write("javaScriptInXhtmlAttributeEncoder");
+		else if(encoder==textInXhtmlAttributeEncoder) log.write("textInXhtmlAttributeEncoder");
+		else log.write(encoder.getClass().getName());
+	}
+
+	/**
+	 * Provides detailed logging for a writer.
+	 */
+	private void log(Writer writer) throws IOException {
+		if(writer==null) {
+			log.write("null");
+		} else if(writer instanceof LoggingWriter) {
+			LoggingWriter loggingWriter = (LoggingWriter)writer;
+			log.write("writer[");
+			log.write(Long.toString(loggingWriter.getId()));
+			log.write(']');
+		} else if(writer instanceof MediaWriter) {
+			MediaWriter mediaWriter = (MediaWriter)writer;
+			log.write("new MediaWriter(");
+			log(mediaWriter.getEncoder());
+			log.write(", ");
+			log(mediaWriter.getOut());
+			log.write(')');
+		} else {
+			String classname = writer.getClass().getName();
+			if(classname.equals("org.apache.jasper.runtime.BodyContentImpl")) log.write("bodyContent");
+			else if(classname.equals("org.apache.jasper.runtime.JspWriterImpl")) log.write("jspWriter");
+			else log.write(classname);
+		}
+	}
+
 	@Override
     public long getLength() throws IOException {
-		log.write("result");
+		log.write("result[");
 		log.write(Long.toString(id));
-		log.write(".getLength();\n");
+		log.write("].getLength();\n");
 		log.flush();
 		return wrapped.getLength();
     }
@@ -63,9 +105,9 @@ public class LoggingResult implements BufferResult {
     @Override
     public String toString() {
 		try {
-			log.write("result");
+			log.write("result[");
 			log.write(Long.toString(id));
-			log.write(".toString();\n");
+			log.write("].toString();\n");
 			log.flush();
 		} catch(IOException e) {
 			throw new WrappedException(e);
@@ -75,16 +117,12 @@ public class LoggingResult implements BufferResult {
 
 	@Override
     public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
-		log.write("result");
+		log.write("result[");
 		log.write(Long.toString(id));
-		log.write(".writeTo(");
-		if(encoder==null) log.write("null");
-		else if(encoder==javaScriptInXhtmlAttributeEncoder) log.write("javaScriptInXhtmlAttributeEncoder");
-		else if(encoder==textInXhtmlAttributeEncoder) log.write("textInXhtmlAttributeEncoder");
-		else log.write(encoder.getClass().getName());
+		log.write("].writeTo(");
+		log(encoder);
 		log.write(", ");
-		//log.write(out.getClass().getName());
-		log.write("nullOut");
+		log(out);
 		log.write(");\n");
 		log.flush();
 		wrapped.writeTo(encoder, out);
@@ -92,11 +130,10 @@ public class LoggingResult implements BufferResult {
 
 	@Override
     public void writeTo(Writer out) throws IOException {
-		log.write("result");
+		log.write("result[");
 		log.write(Long.toString(id));
-		log.write(".writeTo(");
-		//log.write(out.getClass().getName());
-		log.write("nullOut");
+		log.write("].writeTo(");
+		log(out);
 		log.write(");\n");
 		log.flush();
 		wrapped.writeTo(out);
@@ -105,11 +142,11 @@ public class LoggingResult implements BufferResult {
 	@Override
 	public LoggingResult trim() throws IOException {
 		LoggingResult result = new LoggingResult(wrapped.trim(), log);
-		log.write("BufferResult result");
+		log.write("result[");
 		log.write(Long.toString(result.id));
-		log.write(" = result");
+		log.write("] = result[");
 		log.write(Long.toString(id));
-		log.write(".trim();\n");
+		log.write("].trim();\n");
 		log.flush();
 		return result;
 	}

@@ -73,30 +73,30 @@ public class SegmentedWriter extends BufferWriter {
 	/**
 	 * Appends the segment with the given offset and length to the given writer.
 	 */
-	static void writeSegment(byte type, Object value, int off, int len, Writer out) throws IOException {
-		switch(type) {
+	private void writeSegment(int segmentIndex, Writer out) throws IOException {
+		switch(segmentTypes[segmentIndex]) {
 			case TYPE_STRING :
-				out.write((String)value, off, len);
+				out.write((String)segmentValues[segmentIndex], segmentOffsets[segmentIndex], segmentLengths[segmentIndex]);
 				break;
 			case TYPE_CHAR_NEWLINE :
-				assert off==0;
-				assert len==1;
+				assert segmentOffsets[segmentIndex]==0;
+				assert segmentLengths[segmentIndex]==1;
 				out.write('\n');
 				break;
 			case TYPE_CHAR_QUOTE :
-				assert off==0;
-				assert len==1;
+				assert segmentOffsets[segmentIndex]==0;
+				assert segmentLengths[segmentIndex]==1;
 				out.write('"');
 				break;
 			case TYPE_CHAR_APOS :
-				assert off==0;
-				assert len==1;
+				assert segmentOffsets[segmentIndex]==0;
+				assert segmentLengths[segmentIndex]==1;
 				out.write('\'');
 				break;
 			case TYPE_CHAR_OTHER :
-				assert off==0;
-				assert len==1;
-				out.write(((Character)value).charValue());
+				assert segmentOffsets[segmentIndex]==0;
+				assert segmentLengths[segmentIndex]==1;
+				out.write(((Character)segmentValues[segmentIndex]).charValue());
 				break;
 			default :
 				throw new AssertionError();
@@ -145,18 +145,14 @@ public class SegmentedWriter extends BufferWriter {
     }
 
 	private void switchIfNeeded(long newLength) throws IOException {
-		final Object[] sValues = this.segmentValues;
-        if(sValues!=null && newLength>=tempFileThreshold) {
+        if(this.segmentValues!=null && newLength>=tempFileThreshold) {
             tempFile = new TempFile("SegmentedWriter"/*, null, new File("/dev/shm")*/);
             if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
             fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile.getFile()), Charsets.UTF_16BE));
 			// Write all segments to file
-			final byte[] sTypes = this.segmentTypes;
-			final int[] sOffsets = this.segmentOffsets;
-			final int[] sLengths = this.segmentLengths;
 			Writer out = fileWriter;
 			for(int i=0, count=segmentCount; i<count; i++) {
-				writeSegment(sTypes[i], sValues[i], sOffsets[i], sLengths[i], out);
+				writeSegment(i, out);
 			}
 			this.segmentTypes = null;
             this.segmentValues = null;
@@ -517,12 +513,10 @@ public class SegmentedWriter extends BufferWriter {
 				assert segmentCount>0 : "When not empty and using segments, must have at least one segment";
 				int endSegmentIndex = segmentCount - 1;
 				result = new SegmentedResult(
-					length,
 					segmentTypes,
 					segmentValues,
 					segmentOffsets,
 					segmentLengths,
-					segmentCount,
 					0, // start
 					0, // startSegmentIndex
 					segmentOffsets[0],

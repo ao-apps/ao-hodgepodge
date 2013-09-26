@@ -45,13 +45,17 @@ public class LoggingWriter extends BufferWriter {
 	private final Writer log;
 
 	public LoggingWriter(BufferWriter wrapped, Writer log) throws IOException {
-		log.write("BufferWriter writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(" = factory.newBufferWriter();\n");
+		log.write("] = factory.newBufferWriter();\n");
 		log.flush();
 		this.wrapped = wrapped;
 		this.log = log;
     }
+
+	public long getId() {
+		return id;
+	}
 
 	/**
 	 * Writes a character, unicode escaping as needed.
@@ -110,9 +114,9 @@ public class LoggingWriter extends BufferWriter {
 
 	@Override
     public void write(int c) throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".write(");
+		log.write("].write(");
 		log.write(Integer.toString(c));
 		log.write(");\n");
 		log.flush();
@@ -121,9 +125,9 @@ public class LoggingWriter extends BufferWriter {
 
     @Override
     public void write(char cbuf[]) throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".write(new char[] {");
+		log.write("].write(new char[] {");
 		for(int i=0, end=cbuf.length; i<end; i++) {
 			if((i%50)==0) log.write("\n    ");
 			if(i>0) log.write(',');
@@ -136,9 +140,9 @@ public class LoggingWriter extends BufferWriter {
 
     @Override
     public void write(char cbuf[], int off, int len) throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".write(new char[] {");
+		log.write("].write(new char[] {");
 		for(int i=0, end=off+len; i<end; i++) {
 			if((i%50)==0) log.write("\n    ");
 			if(i>0) log.write(',');
@@ -155,9 +159,9 @@ public class LoggingWriter extends BufferWriter {
 
     @Override
     public void write(String str) throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".write(");
+		log.write("].write(");
 		log(str);
 		log.write(");\n");
 		log.flush();
@@ -166,9 +170,9 @@ public class LoggingWriter extends BufferWriter {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".write(");
+		log.write("].write(");
 		log(str);
 		log.write(", ");
 		log.write(Integer.toString(off));
@@ -181,9 +185,9 @@ public class LoggingWriter extends BufferWriter {
 
     @Override
     public LoggingWriter append(CharSequence csq) throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".append(");
+		log.write("].append(");
 		log(csq==null ? null : csq.toString());
 		log.write(");\n");
 		log.flush();
@@ -193,9 +197,9 @@ public class LoggingWriter extends BufferWriter {
 
     @Override
     public LoggingWriter append(CharSequence csq, int start, int end) throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".append(");
+		log.write("].append(");
 		log(csq==null ? null : csq.toString());
 		log.write(", ");
 		log.write(Integer.toString(start));
@@ -209,9 +213,9 @@ public class LoggingWriter extends BufferWriter {
 
     @Override
     public LoggingWriter append(char c) throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".append(");
+		log.write("].append(");
 		log(c);
 		log.write(");\n");
 		log.flush();
@@ -221,27 +225,27 @@ public class LoggingWriter extends BufferWriter {
 
     @Override
     public void flush() throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".flush();\n");
+		log.write("].flush();\n");
 		log.flush();
 		wrapped.flush();
     }
 
     @Override
     public void close() throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".close();\n");
+		log.write("].close();\n");
 		log.flush();
 		wrapped.close();
     }
 
 	@Override
     public long getLength() throws IOException {
-		log.write("writer");
+		log.write("writer[");
 		log.write(Long.toString(id));
-		log.write(".getLength();\n");
+		log.write("].getLength();\n");
 		log.flush();
 		return wrapped.getLength();
     }
@@ -249,9 +253,9 @@ public class LoggingWriter extends BufferWriter {
     @Override
     public String toString() {
 		try {
-			log.write("writer");
+			log.write("writer[");
 			log.write(Long.toString(id));
-			log.write(".toString();\n");
+			log.write("].toString();\n");
 			log.flush();
 		} catch(IOException e) {
 			throw new WrappedException(e);
@@ -266,11 +270,11 @@ public class LoggingWriter extends BufferWriter {
 	public LoggingResult getResult() throws IllegalStateException, IOException {
 		if(result==null) {
 			result = new LoggingResult(wrapped.getResult(), log);
-			log.write("BufferResult result");
+			log.write("result[");
 			log.write(Long.toString(result.id));
-			log.write(" = writer");
+			log.write("] = writer[");
 			log.write(Long.toString(id));
-			log.write(".getResult();\n");
+			log.write("].getResult();\n");
 			log.flush();
 		}
 		return result;

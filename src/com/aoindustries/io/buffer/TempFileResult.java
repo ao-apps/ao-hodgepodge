@@ -71,8 +71,8 @@ public class TempFileResult implements BufferResult {
 		if(toStringCache==null) {
 			try {
 				logger.info("Creating String from temp file - benefits of buffering negated.");
-				long length = end - start;
-				if(length>Integer.MAX_VALUE) throw new RuntimeException("Buffer too large to convert to String: strLen="+length);
+				final long length = end - start;
+				if(length>Integer.MAX_VALUE) throw new RuntimeException("Buffer too large to convert to String: length="+length);
 				StringBuilder sb = new StringBuilder((int)length);
 				RandomAccessFile raf = new RandomAccessFile(tempFile.getFile(), "r");
 				try {
