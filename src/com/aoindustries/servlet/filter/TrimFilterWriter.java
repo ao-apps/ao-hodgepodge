@@ -31,9 +31,7 @@ import javax.servlet.ServletResponse;
  * Filters the output and removes extra white space at the beginning of lines and completely removes blank lines.
  * TEXTAREAs are automatically detected as long as they start with exact "&lt;textarea" and end with exactly "&lt;/textarea" (case insensitive).
  * The reason for the specific tag format is to simplify the implementation
- * for maximum performance.  Careful attention has been paid to minimize the internal buffering in this class.  As many write/print operations as possible
- * are passed directly to the wrapped <code>PrintWriter</code>.  Please note that these methods are not synchronized, as servlet output is normally written
- * by the thread allocated for the request.  If synchronization is required it should be provided externally.
+ * for maximum performance.  Careful attention has been paid to minimize the internal buffering in this class.
  * 
  * @author  AO Industries, Inc.
  */
@@ -41,7 +39,6 @@ public class TrimFilterWriter extends PrintWriter {
 
     private static String lineSeparator = System.getProperty("line.separator");
 
-    private final PrintWriter wrapped;
     private final ServletResponse response;
     boolean inTextArea = false;
     boolean inPre = false;
@@ -55,9 +52,8 @@ public class TrimFilterWriter extends PrintWriter {
      */
     private char[] outputBuffer = BufferManager.getChars();
 
-    public TrimFilterWriter(PrintWriter wrapped, ServletResponse response) {
-        super(wrapped);
-        this.wrapped = wrapped;
+    public TrimFilterWriter(PrintWriter out, ServletResponse response) {
+        super(out);
         this.response = response;
     }
 
@@ -90,10 +86,11 @@ public class TrimFilterWriter extends PrintWriter {
 		return isTrimEnabledCacheResult;
     }
 
+	/*
     @Override
     public void flush() {
-        wrapped.flush();
-    }
+        out.flush();
+    }*/
     
     @Override
     public void close() {
@@ -101,17 +98,12 @@ public class TrimFilterWriter extends PrintWriter {
             BufferManager.release(outputBuffer, false);
             outputBuffer = null;
         }
-        wrapped.close();
+        super.close();
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
         inTextArea = false;
         inPre = false;
         atLineStart = true;
-    }
-
-    @Override
-    public boolean checkError() {
-        return wrapped.checkError();
     }
 
     static final char[] textarea = {'<', 't', 'e', 'x', 't', 'a', 'r', 'e', 'a'};
@@ -215,7 +207,7 @@ public class TrimFilterWriter extends PrintWriter {
         if(
 			!isTrimEnabled()
 			|| processChar((char)c)
-		) wrapped.write(c);
+		) super.write(c);
     }
 
     @Override
@@ -236,7 +228,7 @@ public class TrimFilterWriter extends PrintWriter {
                         buff[buffUsed++] = c;
                         if(buffUsed>=BufferManager.BUFFER_SIZE) {
                             assert buffUsed==BufferManager.BUFFER_SIZE;
-                            wrapped.write(buff, 0, buffUsed);
+                            super.write(buff, 0, buffUsed);
                             buffUsed = 0;
                         }
                     }
@@ -244,16 +236,16 @@ public class TrimFilterWriter extends PrintWriter {
                 off+=blockLen;
                 len-=blockLen;
             }
-            if(buffUsed>0) wrapped.write(buff, 0, buffUsed);
+            if(buffUsed>0) super.write(buff, 0, buffUsed);
         } else {
-            wrapped.write(buf, off, len);
+            super.write(buf, off, len);
         }
     }
 
     @Override
     public void write(char buf[]) {
         if(isTrimEnabled()) write(buf, 0, buf.length);
-        else wrapped.write(buf);
+        else super.write(buf);
     }
 
     @Override
@@ -274,7 +266,7 @@ public class TrimFilterWriter extends PrintWriter {
                         buff[buffUsed++] = c;
                         if(buffUsed>=BufferManager.BUFFER_SIZE) {
                             assert buffUsed==BufferManager.BUFFER_SIZE;
-                            wrapped.write(buff, 0, buffUsed);
+                            super.write(buff, 0, buffUsed);
                             buffUsed = 0;
                         }
                     }
@@ -282,9 +274,9 @@ public class TrimFilterWriter extends PrintWriter {
                 off+=blockLen;
                 len-=blockLen;
             }
-            if(buffUsed>0) wrapped.write(buff, 0, buffUsed);
+            if(buffUsed>0) super.write(buff, 0, buffUsed);
         } else {
-            wrapped.write(s, off, len);
+            super.write(s, off, len);
         }
     }
 
@@ -293,7 +285,7 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = false;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.print(b);
+        super.print(b);
     }
 
     @Override
@@ -301,7 +293,7 @@ public class TrimFilterWriter extends PrintWriter {
         if(
 			!isTrimEnabled()
 			|| processChar(c)
-		) wrapped.print(c);
+		) super.print(c);
     }
 
     @Override
@@ -309,7 +301,7 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = false;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.print(i);
+        super.print(i);
     }
 
     @Override
@@ -317,7 +309,7 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = false;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.print(l);
+        super.print(l);
     }
 
     @Override
@@ -325,7 +317,7 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = false;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.print(f);
+        super.print(f);
     }
 
     @Override
@@ -333,13 +325,13 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = false;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.print(d);
+        super.print(d);
     }
 
     @Override
     public void println() {
         if(isTrimEnabled()) write(lineSeparator);
-        else wrapped.println();
+        else super.println();
     }
 
     @Override
@@ -347,15 +339,15 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = true;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.println(b);
+        super.println(b);
     }
 
     @Override
     public void println(char x) {
         if(isTrimEnabled()) {
-            if(processChar(x)) wrapped.print(x);
+            if(processChar(x)) super.print(x);
             write(lineSeparator);
-        } else wrapped.println(x);
+        } else super.println(x);
     }
 
     @Override
@@ -363,7 +355,7 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = true;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.println(i);
+        super.println(i);
     }
 
     @Override
@@ -371,7 +363,7 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = true;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.println(l);
+        super.println(l);
     }
 
     @Override
@@ -379,7 +371,7 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = true;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.println(f);
+        super.println(f);
     }
 
     @Override
@@ -387,23 +379,23 @@ public class TrimFilterWriter extends PrintWriter {
         atLineStart = true;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.println(d);
+        super.println(d);
     }
     
     @Override
     public void println(char x[]) {
         if(isTrimEnabled()) {
-            write(x);
+            print(x);
             write(lineSeparator);
-        } else wrapped.println(x);
+        } else super.println(x);
     }
 
     @Override
     public void println(String x) {
         if(isTrimEnabled()) {
-            write(x);
+            print(x);
             write(lineSeparator);
-        } else wrapped.println(x);
+        } else super.println(x);
     }
     
     @Override
@@ -411,24 +403,24 @@ public class TrimFilterWriter extends PrintWriter {
         if(isTrimEnabled()) {
             print(x);
             write(lineSeparator);
-        } else wrapped.println(x);
+        } else super.println(x);
     }
 
     @Override
-    public PrintWriter format(String format, Object ... args) {
+    public TrimFilterWriter format(String format, Object ... args) {
         atLineStart = false;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.format(format, args);
+        super.format(format, args);
         return this;
     }
 
     @Override
-    public PrintWriter format(Locale l, String format, Object ... args) {
+    public TrimFilterWriter format(Locale l, String format, Object ... args) {
         atLineStart = false;
         readCharMatchCount = 0;
         preReadCharMatchCount = 0;
-        wrapped.format(l, format, args);
+        super.format(l, format, args);
         return this;
     }
 }
