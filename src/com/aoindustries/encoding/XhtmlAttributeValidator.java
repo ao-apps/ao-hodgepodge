@@ -82,7 +82,12 @@ public class XhtmlAttributeValidator extends MediaValidator {
         ;
     }
 
-    @Override
+	@Override
+	public boolean canSkipValidation(MediaType inputType) {
+		return inputType == MediaType.XHTML_ATTRIBUTE;
+	}
+
+	@Override
     public MediaType getValidMediaOutputType() {
         return MediaType.XHTML_ATTRIBUTE;
     }

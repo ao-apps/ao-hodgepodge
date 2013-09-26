@@ -23,9 +23,15 @@
 package com.aoindustries.io;
 
 import com.aoindustries.encoding.MediaEncoder;
+import com.aoindustries.encoding.MediaType;
+import com.aoindustries.encoding.MediaValidator;
 import com.aoindustries.io.buffer.BufferResult;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Field;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.jsp.tagext.BodyContent;
 
 /**
  * Coerces objects to String compatible with JSTL (JSP EL).
@@ -33,6 +39,8 @@ import java.io.Writer;
  * @author  AO Industries, Inc.
  */
 public final class Coercion  {
+
+	private static final Logger logger = Logger.getLogger(Coercion.class.getName());
 
 	public static String toString(Object value) {
 		// If A is a string, then the result is A.
@@ -43,6 +51,69 @@ public final class Coercion  {
 		String str = value.toString();
 		// Otherwise, the result is A.toString();
 		return str;
+	}
+
+	private static final String BODY_CONTENT_IMPL_CLASS = "org.apache.jasper.runtime.BodyContentImpl";
+	private static final String WRITER_FIELD = "writer";
+
+	private static final Class<? extends BodyContent> bodyContentImplClass;
+	private static final Field writerField;
+	static {
+		Class<? extends BodyContent> clazz;
+		Field field;
+		try {
+			clazz = Class.forName(BODY_CONTENT_IMPL_CLASS).asSubclass(BodyContent.class);
+			field = clazz.getDeclaredField(WRITER_FIELD);
+			field.setAccessible(true);
+		} catch(Exception e) {
+			logger.log(
+				Level.WARNING,
+				"Cannot get direct access to the "+BODY_CONTENT_IMPL_CLASS+"."+WRITER_FIELD+" field.  "
+				+ "Unwrapping of BodyContent disabled.  "
+				+ "The system will behave correctly, but some optimizations are disabled.",
+				e
+			);
+			clazz = null;
+			field = null;
+		}
+		bodyContentImplClass = clazz;
+		writerField = field;
+		System.err.println("DEBUG: bodyContentImplClass="+bodyContentImplClass);
+		System.err.println("DEBUG: writerField="+writerField);
+	}
+
+	/**
+	 * Unwraps a writer to expose any wrapped writer.  The wrapped writer is
+	 * only returned when it is write-through, meaning the wrapper doesn't modify
+	 * the data written, and writes to the wrapped writer immediately (no buffering).
+	 *
+	 * This is used to access the wrapped write for Catalina's implementation of
+	 * the servlet BodyContent.  This allows implementations of BufferResult to
+	 * more efficiently write their contents to recognized writer implementations.
+	 */
+	private static Writer unwrap(Writer out) throws IOException {
+		while(true) {
+			Class<? extends Writer> outClass = out.getClass();
+			// Note: bodyContentImplClass will be null when direct access disabled
+			if(outClass==bodyContentImplClass) {
+				try {
+					Writer writer = (Writer)writerField.get(out);
+					// When the writer field is non-null, BodyContent is pass-through and we may safely directly access the wrapped writer.
+					if(writer!=null) {
+						// Will keep looping to unwrap the wrapped out
+						out = writer;
+					} else {
+						// BodyContent is buffering, must use directly
+						return out;
+					}
+				} catch(IllegalAccessException e) {
+					throw new IOException(e);
+				}
+			} else {
+				// No unwrapping
+				return out;
+			}
+		}
 	}
 
 	/**
@@ -57,7 +128,7 @@ public final class Coercion  {
 			// Write nothing
 		} else if(value instanceof BufferResult) {
 			// Avoid intermediate String from BufferResult
-			((BufferResult)value).writeTo(out);
+			((BufferResult)value).writeTo(unwrap(out));
 		} else {
 			// Otherwise, if A.toString() throws an exception, then raise an error
 			String str = value.toString();
@@ -75,6 +146,22 @@ public final class Coercion  {
 		if(encoder==null) {
 			write(value, out);
 		} else {
+			// Unwrap out to avoid unnecessary validation of known valid output
+			while(true) {
+				out = unwrap(out);
+				if(out instanceof MediaValidator) {
+					MediaValidator validator = (MediaValidator)out;
+					if(validator.canSkipValidation(encoder.getValidMediaOutputType())) {
+						// Can skip validation, write directly to the wrapped output through the encoder
+						out = validator.getOut();
+					} else {
+						break;
+					}
+				} else {
+					break;
+				}
+			}
+			// Write through the given encoder
 			if(value instanceof String) {
 				// If A is a string, then the result is A.
 				encoder.write((String)value, out);
