@@ -481,6 +481,7 @@ public class SegmentedWriter extends BufferWriter {
         if(fileWriter!=null) fileWriter.flush();
     }
 
+	private static long biggest = 0;
     @Override
     public void close() throws IOException {
         if(fileWriter!=null) {
@@ -488,6 +489,16 @@ public class SegmentedWriter extends BufferWriter {
             fileWriter = null;
 		}
 		isClosed = true;
+		long heap =
+			segmentTypes.length * Byte.SIZE
+			+ segmentValues.length * 8 // assume 64-bit data for worst-case numbers
+			+ segmentOffsets.length * Integer.SIZE
+			+ segmentLengths.length * Integer.SIZE
+		;
+		if(heap>biggest) {
+			biggest = heap;
+			System.err.println("SegmentedWriter: Biggest heap: " + biggest);
+		}
     }
 
 	@Override

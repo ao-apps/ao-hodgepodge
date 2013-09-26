@@ -169,6 +169,7 @@ public class CharArrayBufferWriter extends BufferWriter {
         if(fileWriter!=null) fileWriter.flush();
     }
 
+	private static long biggest = 0;
     @Override
     public void close() throws IOException {
         if(fileWriter!=null) {
@@ -176,6 +177,11 @@ public class CharArrayBufferWriter extends BufferWriter {
             fileWriter = null;
 		}
 		isClosed = true;
+		long heap = buffer.getInternalCharArray().length * Character.SIZE;
+		if(heap>biggest) {
+			biggest = heap;
+			System.err.println("CharArrayBufferWriter: Biggest heap: " + biggest);
+		}
     }
 
 	@Override

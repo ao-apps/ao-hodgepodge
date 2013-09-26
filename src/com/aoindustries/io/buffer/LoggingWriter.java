@@ -127,6 +127,12 @@ public class LoggingWriter extends BufferWriter {
     public void write(char cbuf[]) throws IOException {
 		log.write("writer[");
 		log.write(Long.toString(id));
+		log.write("].write(");
+		log(new String(cbuf));
+		log.write(".toCharArray());\n");
+		/*
+		log.write("writer[");
+		log.write(Long.toString(id));
 		log.write("].write(new char[] {");
 		for(int i=0, end=cbuf.length; i<end; i++) {
 			if((i%50)==0) log.write("\n    ");
@@ -134,12 +140,23 @@ public class LoggingWriter extends BufferWriter {
 			log(cbuf[i]);
 		}
 		log.write("\n});\n");
+		*/
 		log.flush();
 		wrapped.write(cbuf);
     }
 
     @Override
     public void write(char cbuf[], int off, int len) throws IOException {
+		log.write("writer[");
+		log.write(Long.toString(id));
+		log.write("].write(");
+		log(new String(cbuf, 0, off+len));
+		log.write(".toCharArray(), ");
+		log.write(Integer.toString(off));
+		log.write(", ");
+		log.write(Integer.toString(len));
+		log.write(");\n");
+		/*
 		log.write("writer[");
 		log.write(Long.toString(id));
 		log.write("].write(new char[] {");
@@ -153,6 +170,7 @@ public class LoggingWriter extends BufferWriter {
 		log.write(", ");
 		log.write(Integer.toString(len));
 		log.write(");\n");
+		*/
 		log.flush();
 		wrapped.write(cbuf, off, len);
     }

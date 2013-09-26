@@ -23,6 +23,7 @@
 package com.aoindustries.io.buffer;
 
 import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.javaScriptInXhtmlAttributeEncoder;
+import static com.aoindustries.encoding.JavaScriptInXhtmlEncoder.javaScriptInXhtmlEncoder;
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.MediaWriter;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
@@ -63,6 +64,7 @@ public class LoggingResult implements BufferResult {
 	private void log(MediaEncoder encoder) throws IOException {
 		if(encoder==null) log.write("null");
 		else if(encoder==javaScriptInXhtmlAttributeEncoder) log.write("javaScriptInXhtmlAttributeEncoder");
+		else if(encoder==javaScriptInXhtmlEncoder) log.write("javaScriptInXhtmlEncoder");
 		else if(encoder==textInXhtmlAttributeEncoder) log.write("textInXhtmlAttributeEncoder");
 		else log.write(encoder.getClass().getName());
 	}
