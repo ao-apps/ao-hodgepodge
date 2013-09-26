@@ -56,6 +56,8 @@ public class SegmentedWriterTest extends BufferWriterTest {
 
 				@Override
 				public BufferWriter newBufferWriter() {
+					// To test call overhead:
+					// return NullBufferWriter.getInstance();
 					return new SegmentedWriter(4 * 1024 * 1024);
 				}
 			}
