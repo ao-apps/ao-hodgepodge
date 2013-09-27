@@ -32,7 +32,7 @@ import java.util.Map;
 import javax.servlet.ServletRequest;
 
 /**
- * Gets parameters from the provided request.
+ * Gets unmodifiable parameters from the provided request.
  *
  * @author  AO Industries, Inc.
  */
@@ -66,7 +66,12 @@ public class ServletRequestParameters implements HttpParameters {
         @SuppressWarnings("unchecked") Map<String,String[]> requestMap = request.getParameterMap();
         Map<String,List<String>> map = new LinkedHashMap<String,List<String>>(requestMap.size()*4/3+1);
         for(Map.Entry<String,String[]> entry : requestMap.entrySet()) {
-            map.put(entry.getKey(), Collections.unmodifiableList(Arrays.asList(entry.getValue())));
+            map.put(
+				entry.getKey(),
+				Collections.unmodifiableList(
+					Arrays.asList(entry.getValue())
+				)
+			);
         }
         return Collections.unmodifiableMap(map);
     }
