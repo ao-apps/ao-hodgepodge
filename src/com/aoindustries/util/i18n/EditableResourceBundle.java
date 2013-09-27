@@ -131,7 +131,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
         final boolean missing;
         final boolean invalidated;
         LookupLocaleValue(boolean missing, boolean invalidated) {
-            assert !(missing && invalidated) : "May not be invalidated when missing";
+            //assert !(missing && invalidated) : "May not be invalidated when missing";
             this.missing = missing;
             this.invalidated = invalidated;
         }
