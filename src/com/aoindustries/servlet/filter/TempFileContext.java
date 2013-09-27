@@ -33,6 +33,24 @@ import javax.servlet.ServletResponse;
 
 /**
  * Automatically deletes temp files used during processing the request.
+ * This should be used fairly early in the filter chain.  Since it has no other
+ * affects on the request, it could be first.
+ * <p>
+ * Example web.xml contents:
+ * <pre>
+ * &lt;!-- Cleans-up temp files created during request processing. --&gt;
+ * &lt;filter&gt;
+ *     &lt;filter-name&gt;TempFileContext&lt;/filter-name&gt;
+ *     &lt;filter-class&gt;com.aoindustries.servlet.filter.TempFileContext&lt;/filter-class&gt;
+ * &lt;/filter&gt;
+ * ...
+ * &lt;filter-mapping&gt;
+ *     &lt;filter-name&gt;TempFileContext&lt;/filter-name&gt;
+ *     &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+ *     &lt;dispatcher&gt;REQUEST&lt;/dispatcher&gt;
+ * &lt;/filter-mapping&gt;
+ * </pre>
+ * </p>
  */
 public class TempFileContext implements Filter {
 

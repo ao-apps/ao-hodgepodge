@@ -78,8 +78,8 @@ public final class Coercion  {
 		}
 		bodyContentImplClass = clazz;
 		writerField = field;
-		System.err.println("DEBUG: bodyContentImplClass="+bodyContentImplClass);
-		System.err.println("DEBUG: writerField="+writerField);
+		//System.err.println("DEBUG: bodyContentImplClass="+bodyContentImplClass);
+		//System.err.println("DEBUG: writerField="+writerField);
 	}
 
 	/**
