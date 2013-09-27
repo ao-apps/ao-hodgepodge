@@ -29,8 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages a set of temporary files.  When the context is completed, all
- * temporary files created within that context are deleted.
+ * Manages a set of temporary files.  When a context is completed, all
+ * temporary files created within that context may be deleted by calling delete
+ * on its list.
  * <p>
  * For example, a context might be the lifecycle of serving one HTTP request.
  * Once the request has been completed, any temporary files created should be
@@ -42,7 +43,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class TempFileContext {
+public class TempFileList {
 
 	private final List<WeakReference<TempFile>> tempFiles = new ArrayList<WeakReference<TempFile>>();
 
@@ -50,15 +51,15 @@ public class TempFileContext {
 	private final String suffix;
 	private final File directory;
 
-	public TempFileContext(String prefix) throws IOException {
+	public TempFileList(String prefix) throws IOException {
 		this(prefix, null, null);
 	}
 
-	public TempFileContext(String prefix, String suffix) throws IOException {
+	public TempFileList(String prefix, String suffix) throws IOException {
 		this(prefix, suffix, null);
 	}
 
-	public TempFileContext(String prefix, String suffix, File directory) throws IOException {
+	public TempFileList(String prefix, String suffix, File directory) throws IOException {
 		this.prefix = prefix;
 		this.suffix = suffix;
 		this.directory = directory;
@@ -81,7 +82,7 @@ public class TempFileContext {
 
 	/**
 	 * Creates a new temp file while adding it to the list of files that will
-	 * be explicitely deleted when this context is deleted.
+	 * be explicitely deleted when this list is deleted.
 	 */
 	public TempFile createTempFile() throws IOException {
 		TempFile tempFile = new TempFile(prefix, suffix, directory);
@@ -92,7 +93,7 @@ public class TempFileContext {
 	/**
      * Deletes all of the underlying temp files immediately.
 	 *
-	 * This context may still be used for additional temp files.
+	 * This list may still be used for additional temp files.
 	 *
 	 * @see  TempFile#delete()
      */

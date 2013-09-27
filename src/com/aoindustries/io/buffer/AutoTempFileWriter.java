@@ -23,7 +23,7 @@
 package com.aoindustries.io.buffer;
 
 import com.aoindustries.io.TempFile;
-import com.aoindustries.io.TempFileContext;
+import com.aoindustries.io.TempFileList;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +40,7 @@ public class AutoTempFileWriter extends BufferWriter {
     private static final Logger logger = Logger.getLogger(AutoTempFileWriter.class.getName());
 
 	private final long tempFileThreshold;
-	private final TempFileContext tempFileContext;
+	private final TempFileList tempFileContext;
 
 	private BufferWriter buffer;
 
@@ -52,7 +52,7 @@ public class AutoTempFileWriter extends BufferWriter {
 	public AutoTempFileWriter(
 		BufferWriter initialBuffer,
 		long tempFileThreshold,
-		TempFileContext tempFileContext
+		TempFileList tempFileContext
 	) {
         this.tempFileThreshold = tempFileThreshold;
 		this.tempFileContext = tempFileContext;
