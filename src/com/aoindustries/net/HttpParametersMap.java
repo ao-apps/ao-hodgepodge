@@ -39,7 +39,9 @@ import java.util.TreeMap;
  */
 public class HttpParametersMap implements MutableHttpParameters {
 
-    private final Map<String,List<String>> map = new TreeMap<String,List<String>>();
+	private static final String DEFAULT_ENCODING = "UTF-8";
+
+	private final Map<String,List<String>> map = new TreeMap<String,List<String>>();
     private final Map<String,List<String>> unmodifiableMap = Collections.unmodifiableMap(map);
 
     /**
@@ -51,8 +53,12 @@ public class HttpParametersMap implements MutableHttpParameters {
     /**
      * Parses the provided URL-Encoded parameter string in the UTF-8 encoding.
      */
-    public HttpParametersMap(String parameters) throws UnsupportedEncodingException {
-        this(parameters, "UTF-8");
+    public HttpParametersMap(String parameters) {
+		try {
+			init(parameters, DEFAULT_ENCODING);
+		} catch(UnsupportedEncodingException e) {
+			throw new RuntimeException(DEFAULT_ENCODING + " should be supported on all platforms", e);
+		}
     }
 
     /**
@@ -60,6 +66,10 @@ public class HttpParametersMap implements MutableHttpParameters {
      * It is strongly recommended to use UTF-8 encoding.
      */
     public HttpParametersMap(String parameters, String encoding) throws UnsupportedEncodingException {
+		init(parameters, encoding);
+    }
+
+	private void init(String parameters, String encoding) throws UnsupportedEncodingException {
         for(String nameValue : StringUtility.splitString(parameters, '&')) {
             int pos = nameValue.indexOf('=');
             String name;
@@ -73,9 +83,9 @@ public class HttpParametersMap implements MutableHttpParameters {
             }
             addParameter(name, value);
         }
-    }
+	}
 
-    @Override
+	@Override
     public String getParameter(String name) {
         List<String> values = map.get(name);
         if(values==null) return null;
