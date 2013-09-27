@@ -30,7 +30,7 @@ import java.io.IOException;
  * a finalizer, on JVM shutdown, or when <code>delete()</code> is explicitely
  * called.
  *
- * @see  TempFileContext  for a way to confine instance lifetime to a narrower scope than automatic garbage collection
+ * @see  TempFileList  for a way to confine instance lifetime to a narrower scope than automatic garbage collection
  *
  * @author  AO Industries, Inc.
  */

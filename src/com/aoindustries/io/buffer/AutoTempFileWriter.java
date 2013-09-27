@@ -40,7 +40,7 @@ public class AutoTempFileWriter extends BufferWriter {
     private static final Logger logger = Logger.getLogger(AutoTempFileWriter.class.getName());
 
 	private final long tempFileThreshold;
-	private final TempFileList tempFileContext;
+	private final TempFileList tempFileList;
 
 	private BufferWriter buffer;
 
@@ -52,17 +52,17 @@ public class AutoTempFileWriter extends BufferWriter {
 	public AutoTempFileWriter(
 		BufferWriter initialBuffer,
 		long tempFileThreshold,
-		TempFileList tempFileContext
+		TempFileList tempFileList
 	) {
         this.tempFileThreshold = tempFileThreshold;
-		this.tempFileContext = tempFileContext;
+		this.tempFileList = tempFileList;
 		this.buffer = initialBuffer;
 		this.isInitialBuffer = !(initialBuffer instanceof TempFileWriter); // If already a temp file, no need to ever switch
     }
 
     private void switchIfNeeded(long newLength) throws IOException {
         if(isInitialBuffer && newLength>=tempFileThreshold) {
-			TempFile tempFile = tempFileContext.createTempFile();
+			TempFile tempFile = tempFileList.createTempFile();
             if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
 			buffer.close();
 			TempFileWriter tempFileWriter = new TempFileWriter(tempFile);
