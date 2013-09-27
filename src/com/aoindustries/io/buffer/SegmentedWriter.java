@@ -22,27 +22,19 @@
  */
 package com.aoindustries.io.buffer;
 
-import com.aoindustries.io.TempFile;
-import com.aoindustries.nio.charset.Charsets;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.channels.ClosedChannelException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Buffers all writes while switching to a temp file when the
- * threshold is reached.
- *
- * TODO: If writing to another segmented buffer, the segments will be shared between
- * the two instances.
+ * Buffers all writes in segments.  This is to hold references to strings instead
+ * of copying all the characters.
  *
  * This class is not thread safe.
  * 
- * @see  AutoTempFileWriter  This draws heavily from experienced gained in <code>AutoTempFileWriter</code>, but with the addition of segments.
+ * Future: If writing to another segmented buffer, the segments could be shared between
+ * the two instances. (or arraycopy instead of writing each)
  *
  * @author  AO Industries, Inc.
  */
@@ -103,8 +95,6 @@ public class SegmentedWriter extends BufferWriter {
 		}
 	}
 
-	private final int tempFileThreshold;
-
 	/**
 	 * The length of the writer is the sum of the length of all its segments.
 	 * Once closed, this length will not be modified.
@@ -127,12 +117,7 @@ public class SegmentedWriter extends BufferWriter {
 	 */
 	private boolean isClosed;
 
-	// The temp file is in UTF16-BE encoding
-    private TempFile tempFile;
-    private Writer fileWriter;
-
-	public SegmentedWriter(int tempFileThreshold) {
-        this.tempFileThreshold = tempFileThreshold;
+	public SegmentedWriter() {
         this.length = 0;
 		this.segmentTypes = EMPTY_BYTES;
 		this.segmentValues = EMPTY_OBJECTS;
@@ -140,30 +125,10 @@ public class SegmentedWriter extends BufferWriter {
 		this.segmentLengths = EMPTY_INTS;
 		this.segmentCount = 0;
 		this.isClosed = false;
-		this.tempFile = null;
-		this.fileWriter = null;
-    }
-
-	private void switchIfNeeded(long newLength) throws IOException {
-        if(this.segmentValues!=null && newLength>=tempFileThreshold) {
-            tempFile = new TempFile("SegmentedWriter"/*, null, new File("/dev/shm")*/);
-            if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "Switching to temp file: {0}", tempFile);
-            fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile.getFile()), Charsets.UTF_16BE));
-			// Write all segments to file
-			Writer out = fileWriter;
-			for(int i=0, count=segmentCount; i<count; i++) {
-				writeSegment(i, out);
-			}
-			this.segmentTypes = null;
-            this.segmentValues = null;
-			this.segmentOffsets = null;
-			this.segmentLengths = null;
-			this.segmentCount = 0;
-        }
     }
 
 	/**
-	 * Makes sure the segments have room for one more element.
+	 * Adds a new segment.
 	 */
 	private void addSegment(byte type, Object value, int off, int len) {
 		assert !isClosed;
@@ -200,294 +165,242 @@ public class SegmentedWriter extends BufferWriter {
 	}
 
 	@Override
-    public void write(int c) throws IOException {
+    public void write(int c) throws ClosedChannelException {
 		if(isClosed) throw new ClosedChannelException();
-        long newLength = length + 1;
-        switchIfNeeded(newLength);
-        if(segmentValues!=null) {
-			char ch = (char)c;
-			switch(ch) {
-				case '\n' :
-					addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
-					break;
-				case '\'' :
-					addSegment(TYPE_CHAR_APOS, null, 0, 1);
-					break;
-				case '"' :
-					addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
-					break;
-				default :
-					addSegment(TYPE_CHAR_OTHER, Character.valueOf(ch), 0, 1);
-			}
-		} else {
-	        fileWriter.write(c);
+		char ch = (char)c;
+		switch(ch) {
+			case '\n' :
+				addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
+				break;
+			case '\'' :
+				addSegment(TYPE_CHAR_APOS, null, 0, 1);
+				break;
+			case '"' :
+				addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
+				break;
+			default :
+				addSegment(TYPE_CHAR_OTHER, Character.valueOf(ch), 0, 1);
 		}
-        length = newLength;
+        length++;
     }
 
     @Override
-    public void write(char cbuf[]) throws IOException {
+    public void write(char cbuf[]) throws ClosedChannelException {
+		if(isClosed) throw new ClosedChannelException();
 		final int len = cbuf.length;
 		if(len>0) {
 			if(len==1) {
 				write(cbuf[0]);
 			} else {
-				if(isClosed) throw new ClosedChannelException();
-				long newLength = length + len;
-				switchIfNeeded(newLength);
-				if(segmentValues!=null) {
-					addSegment(
-						TYPE_STRING,
-						new String(cbuf),
-						0,
-						len
-					);
-				} else {
-					fileWriter.write(cbuf, 0, len);
-				}
-				length = newLength;
+				addSegment(
+					TYPE_STRING,
+					new String(cbuf),
+					0,
+					len
+				);
+				length += len;
 			}
 		}
     }
 
     @Override
-    public void write(char cbuf[], int off, int len) throws IOException {
+    public void write(char cbuf[], int off, int len) throws ClosedChannelException {
+		if(isClosed) throw new ClosedChannelException();
 		if(len>0) {
 			if(len==1) {
 				write(cbuf[off]);
 			} else {
-				if(isClosed) throw new ClosedChannelException();
-				long newLength = length + len;
-				switchIfNeeded(newLength);
-				if(segmentValues!=null) {
-					addSegment(
-						TYPE_STRING,
-						new String(cbuf, off, len),
-						0,
-						len
-					);
-				} else {
-					fileWriter.write(cbuf, off, len);
-				}
-				length = newLength;
+				addSegment(
+					TYPE_STRING,
+					new String(cbuf, off, len),
+					0,
+					len
+				);
+				length += len;
 			}
 		}
     }
 
     @Override
-    public void write(String str) throws IOException {
+    public void write(String str) throws ClosedChannelException {
+		if(isClosed) throw new ClosedChannelException();
 		final int len = str.length();
 		if(len>0) {
-			if(isClosed) throw new ClosedChannelException();
-			long newLength = length + len;
-			switchIfNeeded(newLength);
-			if(segmentValues!=null) {
-				if(len==1) {
-					// Prefer character shortcuts
-					switch(str.charAt(0)) {
-						case '\n' :
-							addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
-							break;
-						case '\'' :
-							addSegment(TYPE_CHAR_APOS, null, 0, 1);
-							break;
-						case '"' :
-							addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
-							break;
-						default :
-							addSegment(TYPE_STRING, str, 0, 1);
-					}
-				} else {
-					addSegment(TYPE_STRING, str, 0, len);
+			if(len==1) {
+				// Prefer character shortcuts
+				switch(str.charAt(0)) {
+					case '\n' :
+						addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
+						break;
+					case '\'' :
+						addSegment(TYPE_CHAR_APOS, null, 0, 1);
+						break;
+					case '"' :
+						addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
+						break;
+					default :
+						addSegment(TYPE_STRING, str, 0, 1);
 				}
 			} else {
-				fileWriter.write(str, 0, len);
+				addSegment(TYPE_STRING, str, 0, len);
 			}
-			length = newLength;
+			length += len;
 		}
     }
 
     @Override
-    public void write(String str, int off, int len) throws IOException {
+    public void write(String str, int off, int len) throws ClosedChannelException {
+		if(isClosed) throw new ClosedChannelException();
 		if(len>0) {
-			if(isClosed) throw new ClosedChannelException();
-			long newLength = length + len;
-			switchIfNeeded(newLength);
-			if(segmentValues!=null) {
-				if(len==1) {
-					// Prefer character shortcuts
-					switch(str.charAt(off)) {
-						case '\n' :
-							addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
-							break;
-						case '\'' :
-							addSegment(TYPE_CHAR_APOS, null, 0, 1);
-							break;
-						case '"' :
-							addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
-							break;
-						default :
-							addSegment(TYPE_STRING, str, off, 1);
-					}
-				} else {
-					addSegment(TYPE_STRING, str, off, len);
+			if(len==1) {
+				// Prefer character shortcuts
+				switch(str.charAt(off)) {
+					case '\n' :
+						addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
+						break;
+					case '\'' :
+						addSegment(TYPE_CHAR_APOS, null, 0, 1);
+						break;
+					case '"' :
+						addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
+						break;
+					default :
+						addSegment(TYPE_STRING, str, off, 1);
 				}
 			} else {
-				fileWriter.write(str, off, len);
+				addSegment(TYPE_STRING, str, off, len);
 			}
-			length = newLength;
+			length += len;
 		}
     }
 
     @Override
-    public SegmentedWriter append(CharSequence csq) throws IOException {
+    public SegmentedWriter append(CharSequence csq) throws ClosedChannelException {
+		if(isClosed) throw new ClosedChannelException();
 		if(csq==null) {
 			write("null");
 		} else {
 			final int len = csq.length();
 			if(len>0) {
-				if(isClosed) throw new ClosedChannelException();
-				long newLength = length + len;
-				switchIfNeeded(newLength);
-				if(segmentValues!=null) {
-					if(len==1) {
-						// Prefer character shortcuts
-						switch(csq.charAt(0)) {
-							case '\n' :
-								addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
-								break;
-							case '\'' :
-								addSegment(TYPE_CHAR_APOS, null, 0, 1);
-								break;
-							case '"' :
-								addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
-								break;
-							default :
-								addSegment(TYPE_STRING, csq.toString(), 0, 1);
-						}
-					} else {
-						addSegment(TYPE_STRING, csq.toString(), 0, len);
+				if(len==1) {
+					// Prefer character shortcuts
+					switch(csq.charAt(0)) {
+						case '\n' :
+							addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
+							break;
+						case '\'' :
+							addSegment(TYPE_CHAR_APOS, null, 0, 1);
+							break;
+						case '"' :
+							addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
+							break;
+						default :
+							addSegment(TYPE_STRING, csq.toString(), 0, 1);
 					}
 				} else {
-					fileWriter.append(csq);
+					addSegment(TYPE_STRING, csq.toString(), 0, len);
 				}
-				length = newLength;
+				length += len;
 			}
 		}
 		return this;
     }
 
     @Override
-    public SegmentedWriter append(CharSequence csq, int start, int end) throws IOException {
+    public SegmentedWriter append(CharSequence csq, int start, int end) throws ClosedChannelException {
+		if(isClosed) throw new ClosedChannelException();
 		if(csq==null) {
 			write("null");
 		} else {
 			final int len = end-start;
 			if(len>0) {
-				if(isClosed) throw new ClosedChannelException();
-				long newLength = length + len;
-				switchIfNeeded(newLength);
-				if(segmentValues!=null) {
-					if(len==1) {
-						// Prefer character shortcuts
-						char ch = csq.charAt(start);
-						switch(ch) {
-							case '\n' :
-								addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
-								break;
-							case '\'' :
-								addSegment(TYPE_CHAR_APOS, null, 0, 1);
-								break;
-							case '"' :
-								addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
-								break;
-							default :
-								if(
-									ch <= 127 // Always cached
-									|| !(csq instanceof String) // Use Character for all non-Strings
-								) {
-									addSegment(
-										TYPE_CHAR_OTHER,
-										Character.valueOf(ch),
-										0,
-										1
-									);
-								} else {
-									// Use offset for String
-									addSegment(
-										TYPE_STRING,
-										(String)csq,
-										start,
-										1
-									);
-								}
-						}
-					} else {
-						if(csq instanceof String) {
-							// Use offset for String
-							addSegment(
-								TYPE_STRING,
-								(String)csq,
-								start,
-								len
-							);
-						} else {
-							// Use subSequence().toString() for all non-Strings
-							addSegment(
-								TYPE_STRING,
-								csq.subSequence(start, end).toString(),
-								0,
-								len
-							);
-						}
+				if(len==1) {
+					// Prefer character shortcuts
+					char ch = csq.charAt(start);
+					switch(ch) {
+						case '\n' :
+							addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
+							break;
+						case '\'' :
+							addSegment(TYPE_CHAR_APOS, null, 0, 1);
+							break;
+						case '"' :
+							addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
+							break;
+						default :
+							if(
+								ch <= 127 // Always cached
+								|| !(csq instanceof String) // Use Character for all non-Strings
+							) {
+								addSegment(
+									TYPE_CHAR_OTHER,
+									Character.valueOf(ch),
+									0,
+									1
+								);
+							} else {
+								// Use offset for String
+								addSegment(
+									TYPE_STRING,
+									(String)csq,
+									start,
+									1
+								);
+							}
 					}
 				} else {
-					fileWriter.append(csq, start, end);
+					if(csq instanceof String) {
+						// Use offset for String
+						addSegment(
+							TYPE_STRING,
+							(String)csq,
+							start,
+							len
+						);
+					} else {
+						// Use subSequence().toString() for all non-Strings
+						addSegment(
+							TYPE_STRING,
+							csq.subSequence(start, end).toString(),
+							0,
+							len
+						);
+					}
 				}
-				length = newLength;
+				length += len;
 			}
 		}
         return this;
     }
 
     @Override
-    public SegmentedWriter append(char c) throws IOException {
+    public SegmentedWriter append(char c) throws ClosedChannelException {
 		if(isClosed) throw new ClosedChannelException();
-        long newLength = length + 1;
-        switchIfNeeded(newLength);
-        if(segmentValues!=null) {
-			switch(c) {
-				case '\n' :
-					addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
-					break;
-				case '\'' :
-					addSegment(TYPE_CHAR_APOS, null, 0, 1);
-					break;
-				case '"' :
-					addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
-					break;
-				default :
-					addSegment(TYPE_CHAR_OTHER, Character.valueOf(c), 0, 1);
-			}
-		} else {
-			fileWriter.append(c);
+		switch(c) {
+			case '\n' :
+				addSegment(TYPE_CHAR_NEWLINE, null, 0, 1);
+				break;
+			case '\'' :
+				addSegment(TYPE_CHAR_APOS, null, 0, 1);
+				break;
+			case '"' :
+				addSegment(TYPE_CHAR_QUOTE, null, 0, 1);
+				break;
+			default :
+				addSegment(TYPE_CHAR_OTHER, Character.valueOf(c), 0, 1);
 		}
-        length = newLength;
+        length++;
         return this;
     }
 
     @Override
-    public void flush() throws IOException {
-        if(fileWriter!=null) fileWriter.flush();
+    public void flush() {
+		// Nothing to do
     }
 
 	//private static long biggest = 0;
     @Override
-    public void close() throws IOException {
-        if(fileWriter!=null) {
-            fileWriter.close();
-            fileWriter = null;
-		}
+    public void close() {
 		isClosed = true;
 		/*
 		long heap =
@@ -509,7 +422,7 @@ public class SegmentedWriter extends BufferWriter {
 
     @Override
     public String toString() {
-		return "SegmentedWriter(length=" + length + ")";
+		return "SegmentedWriter(length=" + length + ", count=" + segmentCount + ", capacity=" + segmentValues.length +")";
     }
 
 	// The result is cached after first created
@@ -521,7 +434,7 @@ public class SegmentedWriter extends BufferWriter {
 		if(result==null) {
 			if(length==0) {
 				result = EmptyResult.getInstance();
-			} else if(segmentValues!=null) {
+			} else {
 				assert segmentCount>0 : "When not empty and using segments, must have at least one segment";
 				int endSegmentIndex = segmentCount - 1;
 				result = new SegmentedResult(
@@ -538,10 +451,6 @@ public class SegmentedWriter extends BufferWriter {
 					segmentOffsets[endSegmentIndex],
 					segmentLengths[endSegmentIndex]
 				);
-			} else if(tempFile!=null) {
-				result = new TempFileResult(tempFile, 0, length);
-			} else {
-				throw new AssertionError();
 			}
 		}
 		return result;

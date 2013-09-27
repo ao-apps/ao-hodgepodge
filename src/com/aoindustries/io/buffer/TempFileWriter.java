@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,23 +22,23 @@
  */
 package com.aoindustries.io.buffer;
 
-import com.aoindustries.io.AoCharArrayWriter;
+import com.aoindustries.io.TempFile;
+import com.aoindustries.nio.charset.Charsets;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.channels.ClosedChannelException;
-import java.util.logging.Logger;
 
 /**
- * Writes to a CharArrayBuffer.
+ * Writes to a temp file buffer.
  *
  * This class is not thread safe.
  *
- * @see  SegmentedBufferedWriter  for a possibly more efficient implementation.
- *
  * @author  AO Industries, Inc.
  */
-public class CharArrayBufferWriter extends BufferWriter {
-
-    private static final Logger logger = Logger.getLogger(CharArrayBufferWriter.class.getName());
+public class TempFileWriter extends BufferWriter {
 
 	/**
 	 * The length of the writer is the sum of the data written to the buffer.
@@ -47,97 +47,92 @@ public class CharArrayBufferWriter extends BufferWriter {
     private long length;
 
 	/**
-	 * The buffer used to capture data before switching to file-backed storage.
-	 * Once closed, this buffer will not be modified.
-	 */
-    final private AoCharArrayWriter buffer;
-
-	/**
 	 * Once closed, no further information may be written.
 	 * Manipulations are only active once closed.
 	 */
 	private boolean isClosed = false;
 
-	public CharArrayBufferWriter(int initialSize) {
+	// The temp file is in UTF16-BE encoding
+    private final TempFile tempFile;
+    private Writer fileWriter;
+
+	public TempFileWriter(TempFile tempFile) throws IOException {
         this.length = 0;
-        this.buffer = new AoCharArrayWriter(initialSize);
+		this.tempFile = tempFile;
+		this.fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile.getFile()), Charsets.UTF_16BE));
     }
 
     @Override
     public void write(int c) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(c);
-        length += 1;
+        fileWriter.write(c);
+        length++;
     }
 
     @Override
     public void write(char cbuf[]) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(cbuf);
+        fileWriter.write(cbuf);
         length += cbuf.length;
     }
 
     @Override
     public void write(char cbuf[], int off, int len) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(cbuf, off, len);
+        fileWriter.write(cbuf, off, len);
         length += len;
     }
 
     @Override
     public void write(String str) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(str);
+        fileWriter.write(str);
         length += str.length();
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.write(str, off, len);
+        fileWriter.write(str, off, len);
         length += len;
     }
 
     @Override
-    public CharArrayBufferWriter append(CharSequence csq) throws IOException {
+    public TempFileWriter append(CharSequence csq) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.append(csq);
+        fileWriter.append(csq);
         length += csq.length();
         return this;
     }
 
     @Override
-    public CharArrayBufferWriter append(CharSequence csq, int start, int end) throws IOException {
+    public TempFileWriter append(CharSequence csq, int start, int end) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.append(csq, start, end);
+        fileWriter.append(csq, start, end);
         length += (end-start);
         return this;
     }
 
     @Override
-    public CharArrayBufferWriter append(char c) throws IOException {
+    public TempFileWriter append(char c) throws IOException {
 		if(isClosed) throw new ClosedChannelException();
-        buffer.append(c);
+        fileWriter.append(c);
         length++;
         return this;
     }
 
     @Override
-    public void flush() {
-		buffer.flush();
+    public void flush() throws IOException {
+        if(fileWriter!=null) fileWriter.flush();
     }
 
-	//private static long biggest = 0;
     @Override
     public void close() throws IOException {
-		buffer.close();
+        if(fileWriter!=null) {
+            fileWriter.close();
+            fileWriter = null;
+		}
 		isClosed = true;
-		/*
-		long heap = buffer.getInternalCharArray().length * Character.SIZE;
-		if(heap>biggest) {
-			biggest = heap;
-			System.err.println("CharArrayBufferWriter: Biggest heap: " + biggest);
-		}*/
     }
 
 	@Override
@@ -147,7 +142,7 @@ public class CharArrayBufferWriter extends BufferWriter {
 
     @Override
     public String toString() {
-		return "CharArrayBufferWriter(length=" + length + ")";
+		return "TempFileWriter(tempFile=\"" + tempFile.toString() + "\", length=" + length + ")";
     }
 
 	// The result is cached after first created
@@ -157,11 +152,10 @@ public class CharArrayBufferWriter extends BufferWriter {
 	public BufferResult getResult() throws IllegalStateException {
 		if(!isClosed) throw new IllegalStateException();
 		if(result==null) {
-			assert length == buffer.size();
 			if(length==0) {
 				result = EmptyResult.getInstance();
 			} else {
-				result = new CharArrayBufferResult(buffer, 0, buffer.size());
+				result = new TempFileResult(tempFile, 0, length);
 			}
 		}
 		return result;
