@@ -31,6 +31,7 @@ import com.aoindustries.util.persistent.PersistentCollections;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Writer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -70,7 +71,13 @@ public class TempFileResult implements BufferResult {
     public String toString() {
 		if(toStringCache==null) {
 			try {
-				logger.info("Creating String from temp file - benefits of buffering negated.");
+				if(logger.isLoggable(Level.INFO)) {
+					logger.log(
+						Level.INFO,
+						"Creating String from temp file - benefits of buffering negated.",
+						new Throwable("Stack Trace")
+					);
+				}
 				final long length = end - start;
 				if(length>Integer.MAX_VALUE) throw new RuntimeException("Buffer too large to convert to String: length="+length);
 				StringBuilder sb = new StringBuilder((int)length);
