@@ -40,16 +40,17 @@ public class Locales {
 		private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>(16, 0.75f, 1);
 
 		/**
-		 * Parses locales from their <code>toString</code> representation.  Caches
-		 * locales for faster lookups.
+		 * @see  Locales#parseLocale(java.lang.String)
 		 */
 		private static Locale parseLocale(String locale) {
 			Locale l = locales.get(locale);
 			if(l==null) {
 				int pos = locale.indexOf('_');
+				if(pos==-1) pos = locale.indexOf('-');
 				if(pos==-1) l = new Locale(locale);
 				else {
 					int pos2 = locale.indexOf('_', pos+1);
+					if(pos2==-1) pos2 = locale.indexOf('-', pos+1);
 					if(pos2==-1) {
 						l = new Locale(locale.substring(0, pos), locale.substring(pos+1));
 					} else {
@@ -66,6 +67,11 @@ public class Locales {
 		}
 	}
 
+	/**
+	 * Parses locales from their <code>toString</code> representation.
+	 * Language, country, and variant may be separated by underscore "_" or hyphen "-".
+	 * Caches locales for faster lookups.
+	 */
 	public static Locale parseLocale(String locale) {
 		return LocaleCache.parseLocale(locale);
 	}
