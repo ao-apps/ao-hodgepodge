@@ -38,10 +38,11 @@ public class UnmodifiableMessageFormat extends MessageFormat {
 
     private boolean initCompleted = false;
 
+	/* Unused 2013-09-27
     public UnmodifiableMessageFormat(String pattern) {
         super(pattern);
         initCompleted = true;
-    }
+    } */
 
     public UnmodifiableMessageFormat(String pattern, Locale locale) {
         super(pattern, locale);
