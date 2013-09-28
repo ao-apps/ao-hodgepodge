@@ -125,6 +125,6 @@ public class ApplicationResourcesAccessor implements Serializable {
         }
         if(string==null) return "???"+locale.toString()+"."+key+"???";
         if(args.length==0) return string;
-        return MessageFormatFactory.getMessageFormat(string, locale).format(args, new StringBuffer(), null).toString();
+        return MessageFormatFactory.getMessageFormat(string, locale).format(args, new StringBuffer(string.length()<<1), null).toString();
     }
 }
