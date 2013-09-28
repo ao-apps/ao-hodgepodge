@@ -79,8 +79,8 @@ public class ApplicationResourcesAccessor implements Serializable {
 
     /**
      * <p>
-     * Gets the message.  If missing, will generate a struts-like value including
-     * the locale and key.
+     * Gets the message.
+	 * If missing, will generate a struts-like value including the locale and key.
      * </p>
      * <p>
      * Gets the message in the current thread's locale.
@@ -101,8 +101,16 @@ public class ApplicationResourcesAccessor implements Serializable {
     }
 
     /**
+     * <p>
+     * Gets the message.
+	 * If missing, will generate a struts-like value including the locale and key.
+     * </p>
+     * <p>
      * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
+     * </p>
+     * <p>
      * Gets the message in the current thread's locale.
+     * </p>
      *
      * @see ThreadLocale
      * @see  #getMessage(String,Locale,String)
