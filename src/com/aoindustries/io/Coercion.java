@@ -23,8 +23,8 @@
 package com.aoindustries.io;
 
 import com.aoindustries.encoding.MediaEncoder;
-import com.aoindustries.encoding.MediaType;
 import com.aoindustries.encoding.MediaValidator;
+import com.aoindustries.encoding.MediaWriter;
 import com.aoindustries.io.buffer.BufferResult;
 import java.io.IOException;
 import java.io.Writer;
@@ -120,20 +120,30 @@ public final class Coercion  {
 	 * Coerces an object to a String representation, supporting streaming for specialized types.
 	 */
 	public static void write(Object value, Writer out) throws IOException {
-		if(value instanceof String) {
-			// If A is a string, then the result is A.
-			out.write((String)value);
-		} else if(value == null) {
-			// Otherwise, if A is null, then the result is "".
-			// Write nothing
-		} else if(value instanceof BufferResult) {
-			// Avoid intermediate String from BufferResult
-			((BufferResult)value).writeTo(unwrap(out));
+		if(out instanceof MediaWriter) {
+			// Unwrap media writer and use encoder directly
+			MediaWriter mediaWriter = (MediaWriter)out;
+			write(
+				value,
+				mediaWriter.getEncoder(),
+				mediaWriter.getOut()
+			);
 		} else {
-			// Otherwise, if A.toString() throws an exception, then raise an error
-			String str = value.toString();
-			// Otherwise, the result is A.toString();
-			out.write(str);
+			if(value instanceof String) {
+				// If A is a string, then the result is A.
+				out.write((String)value);
+			} else if(value == null) {
+				// Otherwise, if A is null, then the result is "".
+				// Write nothing
+			} else if(value instanceof BufferResult) {
+				// Avoid intermediate String from BufferResult
+				((BufferResult)value).writeTo(unwrap(out));
+			} else {
+				// Otherwise, if A.toString() throws an exception, then raise an error
+				String str = value.toString();
+				// Otherwise, the result is A.toString();
+				out.write(str);
+			}
 		}
 	}
 
