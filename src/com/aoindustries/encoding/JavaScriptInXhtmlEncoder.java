@@ -137,7 +137,7 @@ final public class JavaScriptInXhtmlEncoder extends MediaEncoder {
     }
 
     @Override
-    public void writePrefix(Appendable out) throws IOException {
+    public void writePrefixTo(Appendable out) throws IOException {
         out.append("<script type=\"");
 		encodeTextInXhtmlAttribute(MediaType.JAVASCRIPT.getMediaType(), out);
 		out.append("\">\n"
@@ -190,7 +190,7 @@ final public class JavaScriptInXhtmlEncoder extends MediaEncoder {
     }
 
 	@Override
-    public void writeSuffix(Appendable out) throws IOException {
+    public void writeSuffixTo(Appendable out) throws IOException {
         out.append("  // ]]>\n"
                 + "</script>");
     }

@@ -55,7 +55,7 @@ public class UrlInJavaScriptEncoder extends BufferedEncoder {
     }
 
     @Override
-    public void writePrefix(Appendable out) throws IOException {
+    public void writePrefixTo(Appendable out) throws IOException {
         out.append('"');
     }
 

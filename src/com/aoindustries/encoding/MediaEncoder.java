@@ -118,7 +118,7 @@ abstract public class MediaEncoder implements ValidMediaFilter {
      * This default implementation does nothing.
      * </p>
      */
-    public void writePrefix(Appendable out) throws IOException {
+    public void writePrefixTo(Appendable out) throws IOException {
     }
 
     abstract public void write(int c, Writer out) throws IOException;
@@ -148,6 +148,6 @@ abstract public class MediaEncoder implements ValidMediaFilter {
      * This default implementation does nothing.
      * </p>
      */
-    public void writeSuffix(Appendable out) throws IOException {
+    public void writeSuffixTo(Appendable out) throws IOException {
     }
 }

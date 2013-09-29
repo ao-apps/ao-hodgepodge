@@ -22,8 +22,6 @@
  */
 package com.aoindustries.util.i18n;
 
-import com.aoindustries.encoding.MediaException;
-import com.aoindustries.encoding.MediaType;
 import com.aoindustries.io.FileUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -80,8 +78,6 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
     private static final String VALIDATED_SUFFIX = ".ModifiableResourceBundle.validated";
     private static final String MODIFIED_SUFFIX = ".ModifiableResourceBundle.modified";
-    private static final String MEDIATYPE_SUFFIX = ".ModifiableResourceBundle.mediaType";
-    private static final String ISBLOCKELEMENT_SUFFIX = ".ModifiableResourceBundle.isBlockElement";
 
 	/**
 	 * Checks if a key is used for tracking status.
@@ -90,8 +86,6 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		return
 			key.endsWith(VALIDATED_SUFFIX)
 			|| key.endsWith(MODIFIED_SUFFIX)
-			|| key.endsWith(MEDIATYPE_SUFFIX)
-			|| key.endsWith(ISBLOCKELEMENT_SUFFIX)
 		;
 	}
 
@@ -132,16 +126,6 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
      * All modified queries are performed on this concurrent map.
      */
     private final Map<String,Long> modifiedMap = new ConcurrentHashMap<String,Long>();
-
-    /**
-     * All type queries are performed on this concurrent map.
-     */
-    private final Map<String,MediaType> mediaTypeMap = new ConcurrentHashMap<String,MediaType>();
-
-    /**
-     * All isBlockElement queries are performed on this concurrent map.
-     */
-    private final Map<String,Boolean> isBlockElementMap = new ConcurrentHashMap<String,Boolean>();
 
     /**
      * The properties file is only used for updates.
@@ -272,15 +256,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
         for(Map.Entry<Object,Object> entry : properties.entrySet()) {
             String key = (String)entry.getKey();
             String value = (String)entry.getValue();
-            if(key.endsWith(MEDIATYPE_SUFFIX)) {
-                try {
-                    mediaTypeMap.put(key.substring(0, key.length()-MEDIATYPE_SUFFIX.length()), MediaType.getMediaType(value));
-                } catch(MediaException err) {
-                    throw new RuntimeException(err);
-                }
-            } else if(key.endsWith(ISBLOCKELEMENT_SUFFIX)) {
-                isBlockElementMap.put(key.substring(0, key.length()-ISBLOCKELEMENT_SUFFIX.length()), Boolean.parseBoolean(value));
-            } else if(key.endsWith(VALIDATED_SUFFIX)) {
+            if(key.endsWith(VALIDATED_SUFFIX)) {
                 validatedMap.put(key.substring(0, key.length()-VALIDATED_SUFFIX.length()), Long.parseLong(value));
             } else if(key.endsWith(MODIFIED_SUFFIX)) {
                 modifiedMap.put(key.substring(0, key.length()-MODIFIED_SUFFIX.length()), Long.parseLong(value));
@@ -322,8 +298,6 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
     private static void checkKey(String key) throws IllegalArgumentException {
         if(key.endsWith(VALIDATED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+VALIDATED_SUFFIX+": "+key);
         if(key.endsWith(MODIFIED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
-        if(key.endsWith(MEDIATYPE_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MEDIATYPE_SUFFIX+": "+key);
-        if(key.endsWith(ISBLOCKELEMENT_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+ISBLOCKELEMENT_SUFFIX+": "+key);
     }
 
     /**
@@ -400,14 +374,10 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             properties.remove(key);
             properties.remove(key + VALIDATED_SUFFIX);
             properties.remove(key + MODIFIED_SUFFIX);
-			properties.remove(key + MEDIATYPE_SUFFIX);
-			properties.remove(key + ISBLOCKELEMENT_SUFFIX);
             saveProperties();
             valueMap.remove(key);
             validatedMap.remove(key);
             modifiedMap.remove(key);
-            mediaTypeMap.remove(key);
-            isBlockElementMap.remove(key);
         }
     }
 
@@ -426,18 +396,6 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             validatedMap.put(key, currentTimeLong);
             if(modified) modifiedMap.put(key, currentTimeLong);
         }
-    }
-
-    @Override
-    protected MediaType handleGetMediaType(String key) {
-        if(key==null) throw new NullPointerException();
-        return mediaTypeMap.get(key);
-    }
-
-    @Override
-    protected Boolean handleIsBlockElement(String key) {
-        if(key==null) throw new NullPointerException();
-        return isBlockElementMap.get(key);
     }
 
     /**
@@ -459,20 +417,5 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
      */
     public Long getModifiedTime(String key) {
         return modifiedMap.get(key);
-    }
-
-    @Override
-    protected void handleSetMediaType(String key, MediaType mediaType, Boolean isBlockDevice) {
-        checkKey(key);
-        // Updates are serialized
-        synchronized(properties) {
-            properties.setProperty(key+MEDIATYPE_SUFFIX, mediaType.getMediaType());
-            if(isBlockDevice==null) properties.remove(key+ISBLOCKELEMENT_SUFFIX);
-            else properties.setProperty(key+ISBLOCKELEMENT_SUFFIX, isBlockDevice.toString());
-            saveProperties();
-            mediaTypeMap.put(key, mediaType);
-            if(isBlockDevice==null) isBlockElementMap.remove(key);
-            else isBlockElementMap.put(key, isBlockDevice);
-        }
     }
 }

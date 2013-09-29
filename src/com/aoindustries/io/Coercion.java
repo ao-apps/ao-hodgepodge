@@ -26,6 +26,10 @@ import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.MediaValidator;
 import com.aoindustries.encoding.MediaWriter;
 import com.aoindustries.io.buffer.BufferResult;
+import com.aoindustries.util.i18n.BundleLookup;
+import com.aoindustries.util.i18n.BundleLookupResult;
+import com.aoindustries.util.i18n.EditableResourceBundle;
+import com.aoindustries.util.i18n.StringBundleLookupResult;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
@@ -34,7 +38,8 @@ import java.util.logging.Logger;
 import javax.servlet.jsp.tagext.BodyContent;
 
 /**
- * Coerces objects to String compatible with JSTL (JSP EL).
+ * Coerces objects to String compatible with JSP Expression Language (JSP EL)
+ * and the Java Standard Taglib (JSTL).
  *
  * @author  AO Industries, Inc.
  */
@@ -42,6 +47,9 @@ public final class Coercion  {
 
 	private static final Logger logger = Logger.getLogger(Coercion.class.getName());
 
+	/**
+	 * Converts an object to a string.
+	 */
 	public static String toString(Object value) {
 		// If A is a string, then the result is A.
 		if(value instanceof String) return (String)value;
@@ -51,6 +59,25 @@ public final class Coercion  {
 		String str = value.toString();
 		// Otherwise, the result is A.toString();
 		return str;
+	}
+
+	/**
+	 * Converts an object to a string
+	 * while allowing possible prefixes and suffixes for the given context type.
+	 * This is used as a hook for in-context translation editors.
+	 *
+	 * @param  markupType  the type of prefix and suffix markup allowed
+	 *
+	 * @see  EditableResourceBundle
+	 */
+	public static BundleLookupResult toString(Object value, BundleLookup.MarkupType markupType) {
+		if(value instanceof BundleLookup) {
+			// Pass-on the value type to the bundle lookup
+			return ((BundleLookup)value).toString(markupType);
+		} else {
+			// Otherwise, use the default toString
+			return new StringBundleLookupResult(toString(value));
+		}
 	}
 
 	private static final String BODY_CONTENT_IMPL_CLASS = "org.apache.jasper.runtime.BodyContentImpl";

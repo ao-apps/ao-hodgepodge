@@ -24,7 +24,9 @@ package com.aoindustries.util;
 
 import com.aoindustries.encoding.NewEncodingUtils;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
-import com.aoindustries.encoding.TextInXhtmlEncoder;
+import com.aoindustries.io.Coercion;
+import com.aoindustries.util.i18n.BundleLookup;
+import com.aoindustries.util.i18n.BundleLookupResult;
 import java.io.IOException;
 
 /**
@@ -52,8 +54,8 @@ public final class EncodingUtils {
 	 * @deprecated  Use TextInXhtmlAttributeEncoder instead.
      */
 	@Deprecated
-    public static void encodeXmlAttribute(CharSequence S, Appendable out) throws IOException {
-		encodeTextInXhtmlAttribute(S, out);
+    public static void encodeXmlAttribute(Object value, Appendable out) throws IOException {
+		encodeTextInXhtmlAttribute(Coercion.toString(value), out);
     }
 
     /**
@@ -62,10 +64,10 @@ public final class EncodingUtils {
 	 * @deprecated  Use TextInXhtmlAttributeEncoder instead.
      */
 	@Deprecated
-    public static String encodeXmlAttribute(CharSequence S) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length());
-		encodeTextInXhtmlAttribute(S, result);
+    public static String encodeXmlAttribute(Object value) throws IOException {
+        if(value==null) return null;
+        StringBuilder result = new StringBuilder();
+		encodeTextInXhtmlAttribute(Coercion.toString(value), result);
         return result.toString();
     }
     // </editor-fold>
@@ -75,14 +77,14 @@ public final class EncodingUtils {
      * Escapes for use in a (X)HTML document and writes to the provided <code>Appendable</code>.
      * In addition to the standard XML Body encoding, it turns newlines into &lt;br /&gt;, tabs to &amp;#x9;, and spaces to &amp;#160;
      *
-     * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
+     * @param  value  the object to be escaped.  If value is <code>null</code>, nothing is written.
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * @see  TextInXhtmlEncoder
      */
 	@Deprecated
-    public static void encodeHtml(CharSequence S, Appendable out) throws IOException {
-        encodeHtml(S, true, true, out);
+    public static void encodeHtml(Object value, Appendable out) throws IOException {
+        encodeHtml(value, true, true, out);
     }
 
     /**
@@ -104,10 +106,10 @@ public final class EncodingUtils {
 	 * @see  TextInXhtmlEncoder
      */
 	@Deprecated
-    public static String encodeHtml(CharSequence S) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length());
-        encodeHtml(S, result);
+    public static String encodeHtml(Object value) throws IOException {
+        if(value==null) return null;
+        StringBuilder result = new StringBuilder();
+        encodeHtml(value, result);
         return result.toString();
     }
 
@@ -125,8 +127,14 @@ public final class EncodingUtils {
 	 * @see  TextInXhtmlEncoder
      */
 	@Deprecated
-    public static void encodeHtml(CharSequence S, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
-        if(S!=null) encodeHtml(S, 0, S.length(), make_br, make_nbsp, out);
+    public static void encodeHtml(Object value, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
+        if(value!=null) {
+			BundleLookupResult result = Coercion.toString(value, BundleLookup.MarkupType.XHTML);
+			result.appendPrefixTo(out);
+			String S = result.getResult();
+			encodeHtml(S, 0, S.length(), make_br, make_nbsp, out);
+			result.appendSuffixTo(out);
+		}
     }
 
     /**
@@ -224,18 +232,18 @@ public final class EncodingUtils {
     }
 
     /**
-     * @param S the string to be escaped.
+     * @param  value  the string to be escaped.
      *
-     * @return if S is null then null otherwise value escaped
+     * @return if value is null then null otherwise value escaped
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * @see  TextInXhtmlEncoder
      */
 	@Deprecated
-    public static String encodeHtml(CharSequence S, boolean make_br, boolean make_nbsp) throws IOException {
-        if(S==null) return null;
-        StringBuilder result = new StringBuilder(S.length());
-        encodeHtml(S, make_br, make_nbsp, result);
+    public static String encodeHtml(Object value, boolean make_br, boolean make_nbsp) throws IOException {
+        if(value==null) return null;
+        StringBuilder result = new StringBuilder();
+        encodeHtml(value, make_br, make_nbsp, result);
         return result.toString();
     }
 

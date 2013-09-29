@@ -23,20 +23,23 @@
 package com.aoindustries.io;
 
 import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute;
+import static com.aoindustries.encoding.JavaScriptInXhtmlEncoder.encodeJavaScriptInXhtml;
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
 import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
+import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import com.aoindustries.encoding.TextInXhtmlEncoder;
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.Sequence;
+import com.aoindustries.util.i18n.BundleLookup;
+import com.aoindustries.util.i18n.BundleLookupResult;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Locale;
 
@@ -444,7 +447,14 @@ final public class ChainWriter implements Appendable, Closeable {
      * @param  value  the value to be encoded
      */
     public ChainWriter encodeXhtml(Object value) throws IOException {
-		Coercion.write(value, textInXhtmlEncoder, out);
+		if(value instanceof BundleLookup) {
+			BundleLookupResult result = ((BundleLookup)value).toString(BundleLookup.MarkupType.XHTML);
+			result.appendPrefixTo(out);
+			out.write(result.getResult());
+			result.appendSuffixTo(out);
+		} else {
+			Coercion.write(value, textInXhtmlEncoder, out);
+		}
         return this;
     }
 
@@ -459,7 +469,7 @@ final public class ChainWriter implements Appendable, Closeable {
      */
 	@Deprecated
     public ChainWriter encodeHtml(Object value) throws IOException {
-        EncodingUtils.encodeHtml(Coercion.toString(value), true, true, out);
+        EncodingUtils.encodeHtml(value, true, true, out);
         return this;
     }
 
@@ -474,7 +484,7 @@ final public class ChainWriter implements Appendable, Closeable {
      */
 	@Deprecated
     public ChainWriter encodeHtml(Object value, boolean make_br, boolean make_nbsp) throws IOException {
-        EncodingUtils.encodeHtml(Coercion.toString(value), make_br, make_nbsp, out);
+        EncodingUtils.encodeHtml(value, make_br, make_nbsp, out);
         return this;
     }
 
@@ -489,11 +499,24 @@ final public class ChainWriter implements Appendable, Closeable {
         return this;
     }
 
+	/**
+	 * Encodes a javascript string for use in an XML attribute context.  Quotes
+	 * are added around the string.  Also, if the string is translated, comments
+	 * will be added giving the translation lookup id to aid in translation of
+	 * server-translated values in JavaScript.
+	 * 
+	 * @see  Coercion#toString(java.lang.Object, com.aoindustries.util.i18n.BundleLookup.MarkupType)
+	 */
     public ChainWriter encodeJavaScriptStringInXml(Object value) throws IOException {
-        String text = Coercion.toString(value);
+        BundleLookupResult result = Coercion.toString(value, BundleLookup.MarkupType.JAVASCRIPT);
         // Escape for javascript
-        StringBuilder javascript = new StringBuilder(text.length());
+		String text = result.getResult();
+        StringBuilder javascript = new StringBuilder(text.length() + 2);
+		result.appendPrefixTo(javascript);
+		javascript.append('"');
         encodeTextInJavaScript(text, javascript);
+		javascript.append('"');
+		result.appendSuffixTo(javascript);
         // Encode for XML attribute
         encodeJavaScriptInXhtmlAttribute(javascript, out);
         return this;
@@ -613,7 +636,7 @@ final public class ChainWriter implements Appendable, Closeable {
             out.append("<span id=\"chainWriterDate");
             out.append(idString);
             out.append("\">");
-            EncodingUtils.encodeHtml(dateString, out);
+            encodeTextInXhtml(dateString, out);
             out.append("</span>");
             // Write the shared script only on first sequence
             if(id==1) {
@@ -636,7 +659,7 @@ final public class ChainWriter implements Appendable, Closeable {
             scriptOut.append(", ");
             scriptOut.append(Long.toString(date.getTime()));
             scriptOut.append(", \"");
-            EncodingUtils.encodeHtml(dateString, scriptOut);
+            encodeJavaScriptInXhtml(dateString, scriptOut);
             scriptOut.append("\");\n");
         }
     }
@@ -687,7 +710,7 @@ final public class ChainWriter implements Appendable, Closeable {
             out.append("<span id=\"chainWriterDateTime");
             out.append(idString);
             out.append("\">");
-            EncodingUtils.encodeHtml(dateTimeString, out);
+            encodeTextInXhtml(dateTimeString, out);
             out.append("</span>");
             // Write the shared script only on first sequence
             if(id==1) {
@@ -719,7 +742,7 @@ final public class ChainWriter implements Appendable, Closeable {
             scriptOut.append(", ");
             scriptOut.append(Long.toString(date.getTime()));
             scriptOut.append(", \"");
-            EncodingUtils.encodeHtml(dateTimeString, scriptOut);
+            encodeJavaScriptInXhtml(dateTimeString, scriptOut);
             scriptOut.append("\");\n");
         }
     }
@@ -769,7 +792,7 @@ final public class ChainWriter implements Appendable, Closeable {
             out.append("<span id=\"chainWriterTime");
             out.append(idString);
             out.append("\">");
-            EncodingUtils.encodeHtml(timeString, out);
+            encodeTextInXhtml(timeString, out);
             out.append("</span>");
             // Write the shared script only on first sequence
             if(id==1) {
@@ -794,7 +817,7 @@ final public class ChainWriter implements Appendable, Closeable {
             scriptOut.append(", ");
             scriptOut.append(Long.toString(date.getTime()));
             scriptOut.append(", \"");
-            EncodingUtils.encodeHtml(timeString, scriptOut);
+            encodeJavaScriptInXhtml(timeString, scriptOut);
             scriptOut.append("\");\n");
         }
     }

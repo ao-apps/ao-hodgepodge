@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,6 @@
  */
 package com.aoindustries.util.i18n;
 
-import com.aoindustries.encoding.MediaType;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -91,59 +89,4 @@ abstract public class ModifiableResourceBundle extends ResourceBundle {
      * @see #setObject(java.lang.String, java.lang.Object, boolean)
      */
     protected abstract void handleSetObject(String key, Object value, boolean modified);
-
-    /**
-     * Gets the type for the provided key.  If this type is not specified in this
-     * bundle, will search the parent bundle.  If the type is not found, will
-     * default to XHTML.
-     */
-    public final MediaType getMediaType(String key) {
-        MediaType type = handleGetMediaType(key);
-        if (type == null && parent != null && (parent instanceof ModifiableResourceBundle)) type=((ModifiableResourceBundle)parent).getMediaType(key);
-        return type!=null ? type : MediaType.XHTML;
-    }
-
-    /**
-     * Gets the type within this bundle only.
-     */
-    protected abstract MediaType handleGetMediaType(String key);
-
-    /**
-     * Checks if this is a block element.  This is only used for XHTML mediaType
-     * and will be ignored for other types.  Defaults to <code>false</code>.
-     */
-    public final boolean isBlockElement(String key) {
-        Boolean isBlockElement = handleIsBlockElement(key);
-        if (isBlockElement == null && parent != null && (parent instanceof ModifiableResourceBundle)) isBlockElement=((ModifiableResourceBundle)parent).isBlockElement(key);
-        return isBlockElement!=null ? isBlockElement.booleanValue() : false;
-    }
-
-    /**
-     * Gets the block element flag within this bundle only.
-     */
-    protected abstract Boolean handleIsBlockElement(String key);
-
-    /**
-     * Sets the media type.  This bundle must be the default locale.  The
-     * isBlockElement must be non-null when the mediaType is XHTML, and must
-     * by null otherwise.
-     */
-    public final void setMediaType(String key, MediaType mediaType, Boolean isBlockElement) {
-        if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
-        if(!getLocale().equals(Locale.ROOT)) throw new AssertionError("ResourceBundle is not for the base locale: "+this);
-        if(mediaType==MediaType.XHTML) {
-            if(isBlockElement==null) throw new IllegalArgumentException("isBlockElement is null when mediaType is "+mediaType);
-        } else {
-            if(isBlockElement!=null) throw new IllegalArgumentException("isBlockElement is not null when mediaType is not "+MediaType.XHTML);
-        }
-        handleSetMediaType(key, mediaType, isBlockElement);
-    }
-
-    /**
-     * This will only be called on modifiable bundles.
-     *
-     * @see #isModifiable
-     * @see #setMediaType
-     */
-    protected abstract void handleSetMediaType(String key, MediaType mediaType, Boolean isBlockElement);
 }

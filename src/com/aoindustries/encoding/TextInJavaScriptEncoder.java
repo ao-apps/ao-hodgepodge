@@ -137,7 +137,7 @@ final public class TextInJavaScriptEncoder extends MediaEncoder {
     }
 
     @Override
-    public void writePrefix(Appendable out) throws IOException {
+    public void writePrefixTo(Appendable out) throws IOException {
         out.append('"');
     }
 
@@ -187,7 +187,7 @@ final public class TextInJavaScriptEncoder extends MediaEncoder {
     }
 
     @Override
-    public void writeSuffix(Appendable out) throws IOException {
+    public void writeSuffixTo(Appendable out) throws IOException {
         out.append('"');
     }
 }

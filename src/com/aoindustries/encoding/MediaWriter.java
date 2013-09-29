@@ -67,7 +67,7 @@ final public class MediaWriter extends FilterWriter implements ValidMediaFilter 
      * @see  MediaEncoder#writePrefix(java.lang.Appendable)
      */
     public void writePrefix() throws IOException {
-		encoder.writePrefix(out);
+		encoder.writePrefixTo(out);
     }
 
 	@Override
@@ -117,6 +117,6 @@ final public class MediaWriter extends FilterWriter implements ValidMediaFilter 
 	 * @see  MediaEncoder#writeSuffix(java.lang.Appendable)
      */
     public void writeSuffix() throws IOException {
-		encoder.writeSuffix(out);
+		encoder.writeSuffixTo(out);
     }
 }

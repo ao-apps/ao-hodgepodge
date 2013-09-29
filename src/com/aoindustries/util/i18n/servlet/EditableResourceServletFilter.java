@@ -82,24 +82,19 @@ public class EditableResourceServletFilter implements Filter {
                         // Generate value URL
                         url.append("SetResourceBundleValue");
                         String setValueUrl = url.toString();
-                        // Generate media type URL
-                        url.setLength(baseUrlLen);
-                        url.append("SetResourceBundleMediaType");
-                        String setMediaTypeUrl = url.toString();
                         // Setup request for editing
                         EditableResourceBundle.resetRequest(
                             true,
                             setValueUrl,
-                            setMediaTypeUrl,
                             modifyAllText
                         );
                         chain.doFilter(request, response);
                     } finally {
-                        EditableResourceBundle.resetRequest(false, null, null, false);
+                        EditableResourceBundle.resetRequest(false, null, false);
                     }
                 } else {
                     // Not allowed to translate
-                    EditableResourceBundle.resetRequest(false, null, null, false);
+                    EditableResourceBundle.resetRequest(false, null, false);
                     chain.doFilter(request, response);
                 }
             } finally {

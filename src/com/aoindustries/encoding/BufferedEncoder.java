@@ -90,7 +90,7 @@ abstract public class BufferedEncoder extends MediaEncoder {
 	 * Writes the suffix and clears the buffer for reuse.
 	 */
 	@Override
-    final public void writeSuffix(Appendable out) throws IOException {
+    final public void writeSuffixTo(Appendable out) throws IOException {
 		writeSuffix(buffer, out);
 		buffer.setLength(0);
     }

@@ -22,6 +22,8 @@
  */
 package com.aoindustries.encoding;
 
+import com.aoindustries.util.i18n.BundleLookup;
+
 /**
  * Supported content types.
  *
@@ -49,6 +51,11 @@ public enum MediaType {
                 || "text/html".equalsIgnoreCase(contentType)
             ;
         }
+
+		@Override
+		public BundleLookup.MarkupType getMarkupType() {
+			return BundleLookup.MarkupType.XHTML;
+		}
     },
 
     /**
@@ -61,6 +68,11 @@ public enum MediaType {
         boolean isUsedFor(String contentType) {
             return "application/xhtml+xml+attribute".equalsIgnoreCase(contentType);
         }
+
+		@Override
+		public BundleLookup.MarkupType getMarkupType() {
+			return BundleLookup.MarkupType.NONE;
+		}
     },
 
     /**
@@ -76,6 +88,11 @@ public enum MediaType {
         boolean isUsedFor(String contentType) {
             return "text/javascript".equalsIgnoreCase(contentType);
         }
+
+		@Override
+		public BundleLookup.MarkupType getMarkupType() {
+			return BundleLookup.MarkupType.JAVASCRIPT;
+		}
     },
 
     /**
@@ -89,6 +106,11 @@ public enum MediaType {
         boolean isUsedFor(String contentType) {
             return "text/plain".equalsIgnoreCase(contentType);
         }
+
+		@Override
+		public BundleLookup.MarkupType getMarkupType() {
+			return BundleLookup.MarkupType.TEXT;
+		}
     },
 
     /**
@@ -99,6 +121,11 @@ public enum MediaType {
         boolean isUsedFor(String contentType) {
             return "text/url".equalsIgnoreCase(contentType);
         }
+
+		@Override
+		public BundleLookup.MarkupType getMarkupType() {
+			return BundleLookup.MarkupType.NONE;
+		}
     };
 
     private final String mediaType;
@@ -116,7 +143,12 @@ public enum MediaType {
         return mediaType;
     }
 
-    private static final MediaType[] values = values();
+	/**
+	 * Gets the markup type compatible with this media type.
+	 */
+	public abstract BundleLookup.MarkupType getMarkupType();
+
+	private static final MediaType[] values = values();
 
     /**
      * Gets the media type for the provided textual content type.
