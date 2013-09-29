@@ -42,46 +42,46 @@ abstract public class BufferedEncoder extends MediaEncoder {
     }
 
     @Override
-    final public void write(int c, Writer out) throws IOException {
+    final public void write(int c, Writer out) {
         buffer.append((char)c);
     }
 
 	@Override
-    final public void write(char cbuf[], Writer out) throws IOException {
+    final public void write(char cbuf[], Writer out) {
         buffer.append(cbuf);
 	}
 
 	@Override
-    final public void write(char[] cbuf, int off, int len, Writer out) throws IOException {
+    final public void write(char[] cbuf, int off, int len, Writer out) {
         buffer.append(cbuf, off, len);
     }
 
 	@Override
-    final public void write(String str, Writer out) throws IOException {
+    final public void write(String str, Writer out) {
         if(str==null) throw new IllegalArgumentException("str is null");
         buffer.append(str);
 	}
 
 	@Override
-    final public void write(String str, int off, int len, Writer out) throws IOException {
+    final public void write(String str, int off, int len, Writer out) {
         if(str==null) throw new IllegalArgumentException("str is null");
         buffer.append(str, off, off+len);
     }
 
     @Override
-    final public BufferedEncoder append(char c, Appendable out) throws IOException {
+    final public BufferedEncoder append(char c, Appendable out) {
         buffer.append(c);
         return this;
     }
 
 	@Override
-    final public BufferedEncoder append(CharSequence csq, Appendable out) throws IOException {
+    final public BufferedEncoder append(CharSequence csq, Appendable out) {
 		buffer.append(csq);
         return this;
     }
 
     @Override
-    final public BufferedEncoder append(CharSequence csq, int start, int end, Appendable out) throws IOException {
+    final public BufferedEncoder append(CharSequence csq, int start, int end, Appendable out) {
 		buffer.append(csq, start, end);
         return this;
     }
