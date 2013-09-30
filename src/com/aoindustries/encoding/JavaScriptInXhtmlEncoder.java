@@ -139,7 +139,7 @@ final public class JavaScriptInXhtmlEncoder extends MediaEncoder {
     @Override
     public void writePrefixTo(Appendable out) throws IOException {
         out.append("<script type=\"");
-		encodeTextInXhtmlAttribute(MediaType.JAVASCRIPT.getMediaType(), out);
+		encodeTextInXhtmlAttribute(MediaType.JAVASCRIPT.getContentType(), out);
 		out.append("\">\n"
                 + "  // <![CDATA[\n");
     }

@@ -128,10 +128,10 @@ public enum MediaType {
 		}
     };
 
-    private final String mediaType;
+    private final String contentType;
 
-    private MediaType(String mediaType) {
-        this.mediaType = mediaType;
+    private MediaType(String contentType) {
+        this.contentType = contentType;
     }
 
     abstract boolean isUsedFor(String contentType);
@@ -139,8 +139,8 @@ public enum MediaType {
     /**
      * Gets the actual media type, such as <code>text/html</code>.
      */
-    public String getMediaType() {
-        return mediaType;
+    public String getContentType() {
+        return contentType;
     }
 
 	/**
@@ -150,10 +150,22 @@ public enum MediaType {
 
 	private static final MediaType[] values = values();
 
-    /**
+	/**
+	 * Gets the media type for the given name using case-insensitive matching.
+	 * 
+	 * @return  the <code>MediaType</code> or <code>null</code> if not found.
+	 */
+	public static MediaType getMediaTypeByName(String name) {
+		for(MediaType value : values) {
+			if(value.name().equalsIgnoreCase(name)) return value;
+		}
+		return null;
+	}
+
+	/**
      * Gets the media type for the provided textual content type.
      */
-    public static MediaType getMediaType(final String fullContentType) throws MediaException {
+    public static MediaType getMediaTypeForContentType(final String fullContentType) throws MediaException {
         int semiPos = fullContentType.indexOf(';');
         String contentType = ((semiPos==-1) ? fullContentType : fullContentType.substring(0, semiPos)).trim();
         for(MediaType value : values) {

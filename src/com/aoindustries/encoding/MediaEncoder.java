@@ -62,7 +62,7 @@ abstract public class MediaEncoder implements ValidMediaFilter {
                     case TEXT :            return null;
                     case XHTML :           encoder = JavaScriptInXhtmlEncoder.javaScriptInXhtmlEncoder; break;
                     case XHTML_ATTRIBUTE : encoder = JavaScriptInXhtmlAttributeEncoder.javaScriptInXhtmlAttributeEncoder; break;
-					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getContentType(), containerType.getContentType()));
                 }
                 break;
             case TEXT:
@@ -71,7 +71,7 @@ abstract public class MediaEncoder implements ValidMediaFilter {
                     case TEXT :            return null;
                     case XHTML :           encoder = TextInXhtmlEncoder.textInXhtmlEncoder; break;
                     case XHTML_ATTRIBUTE : encoder = TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder; break;
-					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getContentType(), containerType.getContentType()));
                 }
                 break;
             case URL :
@@ -81,14 +81,14 @@ abstract public class MediaEncoder implements ValidMediaFilter {
                     case URL :             return null;
                     case XHTML :           encoder = new UrlInXhtmlEncoder(response); break;
                     case XHTML_ATTRIBUTE : encoder = new UrlInXhtmlAttributeEncoder(response); break;
-					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getContentType(), containerType.getContentType()));
                 }
                 break;
             case XHTML :
                 switch(containerType) {
                     case TEXT :            return null;
                     case XHTML :           return null;
-					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getContentType(), containerType.getContentType()));
                 }
                 //break;
             case XHTML_ATTRIBUTE :
@@ -96,10 +96,10 @@ abstract public class MediaEncoder implements ValidMediaFilter {
                     case TEXT :            return null;
                     case XHTML :           return null;
                     case XHTML_ATTRIBUTE : return null;
-					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+					default :              throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getContentType(), containerType.getContentType()));
                 }
                 //break;
-			default : throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getMediaType(), containerType.getMediaType()));
+			default : throw new MediaException(ApplicationResources.accessor.getMessage("MediaWriter.unableToFindEncoder", contentType.getContentType(), containerType.getContentType()));
         }
 		// Make sure types match - bug catching
 		assert encoder.getValidMediaOutputType()==containerType : "encoder.getValidMediaOutputType()!=containerType: "+encoder.getValidMediaOutputType()+"!="+containerType;

@@ -60,7 +60,7 @@ abstract public class MediaValidator extends FilterWriter implements ValidMediaF
             case XHTML_ATTRIBUTE:
                 return new XhtmlAttributeValidator(out);
             default:
-                throw new MediaException(ApplicationResources.accessor.getMessage("MediaValidator.unableToFindValidator", contentType.getMediaType()));
+                throw new MediaException(ApplicationResources.accessor.getMessage("MediaValidator.unableToFindValidator", contentType.getContentType()));
         }
     }
 
