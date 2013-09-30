@@ -26,6 +26,7 @@ import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.encode
 import static com.aoindustries.encoding.JavaScriptInXhtmlEncoder.encodeJavaScriptInXhtml;
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
 import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
+import com.aoindustries.encoding.TextInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
@@ -35,11 +36,13 @@ import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.Sequence;
 import com.aoindustries.util.i18n.BundleLookup;
 import com.aoindustries.util.i18n.BundleLookupResult;
+import com.aoindustries.util.i18n.MarkupType;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Locale;
 
@@ -448,7 +451,7 @@ final public class ChainWriter implements Appendable, Closeable {
      */
     public ChainWriter encodeXhtml(Object value) throws IOException {
 		if(value instanceof BundleLookup) {
-			BundleLookupResult result = ((BundleLookup)value).toString(BundleLookup.MarkupType.XHTML);
+			BundleLookupResult result = ((BundleLookup)value).toString(MarkupType.XHTML);
 			result.appendPrefixTo(out);
 			out.write(result.getResult());
 			result.appendSuffixTo(out);
@@ -508,7 +511,7 @@ final public class ChainWriter implements Appendable, Closeable {
 	 * @see  Coercion#toString(java.lang.Object, com.aoindustries.util.i18n.BundleLookup.MarkupType)
 	 */
     public ChainWriter encodeJavaScriptStringInXml(Object value) throws IOException {
-        BundleLookupResult result = Coercion.toString(value, BundleLookup.MarkupType.JAVASCRIPT);
+        BundleLookupResult result = Coercion.toString(value, MarkupType.JAVASCRIPT);
         // Escape for javascript
 		String text = result.getResult();
         StringBuilder javascript = new StringBuilder(text.length() + 2);

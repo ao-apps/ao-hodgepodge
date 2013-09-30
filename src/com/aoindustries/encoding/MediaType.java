@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.aoindustries.encoding;
 
-import com.aoindustries.util.i18n.BundleLookup;
+import com.aoindustries.util.i18n.MarkupType;
 
 /**
  * Supported content types.
@@ -53,8 +53,8 @@ public enum MediaType {
         }
 
 		@Override
-		public BundleLookup.MarkupType getMarkupType() {
-			return BundleLookup.MarkupType.XHTML;
+		public MarkupType getMarkupType() {
+			return MarkupType.XHTML;
 		}
     },
 
@@ -70,8 +70,8 @@ public enum MediaType {
         }
 
 		@Override
-		public BundleLookup.MarkupType getMarkupType() {
-			return BundleLookup.MarkupType.NONE;
+		public MarkupType getMarkupType() {
+			return MarkupType.NONE;
 		}
     },
 
@@ -90,8 +90,8 @@ public enum MediaType {
         }
 
 		@Override
-		public BundleLookup.MarkupType getMarkupType() {
-			return BundleLookup.MarkupType.JAVASCRIPT;
+		public MarkupType getMarkupType() {
+			return MarkupType.JAVASCRIPT;
 		}
     },
 
@@ -108,8 +108,8 @@ public enum MediaType {
         }
 
 		@Override
-		public BundleLookup.MarkupType getMarkupType() {
-			return BundleLookup.MarkupType.TEXT;
+		public MarkupType getMarkupType() {
+			return MarkupType.TEXT;
 		}
     },
 
@@ -123,8 +123,8 @@ public enum MediaType {
         }
 
 		@Override
-		public BundleLookup.MarkupType getMarkupType() {
-			return BundleLookup.MarkupType.NONE;
+		public MarkupType getMarkupType() {
+			return MarkupType.NONE;
 		}
     };
 
@@ -146,7 +146,7 @@ public enum MediaType {
 	/**
 	 * Gets the markup type compatible with this media type.
 	 */
-	public abstract BundleLookup.MarkupType getMarkupType();
+	public abstract MarkupType getMarkupType();
 
 	private static final MediaType[] values = values();
 
