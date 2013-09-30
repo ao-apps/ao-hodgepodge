@@ -25,8 +25,9 @@ package com.aoindustries.util;
 import com.aoindustries.encoding.NewEncodingUtils;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
 import com.aoindustries.io.Coercion;
-import com.aoindustries.util.i18n.BundleLookup;
 import com.aoindustries.util.i18n.BundleLookupResult;
+import com.aoindustries.util.i18n.BundleLookupThreadContext;
+import com.aoindustries.util.i18n.MarkupType;
 import java.io.IOException;
 
 /**
@@ -129,11 +130,17 @@ public final class EncodingUtils {
 	@Deprecated
     public static void encodeHtml(Object value, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
         if(value!=null) {
-			BundleLookupResult result = Coercion.toString(value, BundleLookup.MarkupType.XHTML);
-			result.appendPrefixTo(out);
-			String S = result.getResult();
-			encodeHtml(S, 0, S.length(), make_br, make_nbsp, out);
-			result.appendSuffixTo(out);
+			String str = Coercion.toString(value);
+			BundleLookupResult result;
+			BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
+			if(threadContext!=null) {
+				result = threadContext.getLookupResult(str);
+			} else {
+				result = null;
+			}
+			if(result!=null) result.appendPrefixTo(MarkupType.XHTML, out);
+			encodeHtml(str, 0, str.length(), make_br, make_nbsp, out);
+			if(result!=null) result.appendSuffixTo(MarkupType.XHTML, out);
 		}
     }
 

@@ -40,14 +40,14 @@ public interface BundleLookupResult {
 	String toString();
 
 	/**
-	 * Appends the prefix to the given out.
+	 * Appends the prefix to the given out using the given markup type.
 	 */
-	void appendPrefixTo(Appendable out) throws IOException;
+	void appendPrefixTo(MarkupType markupType, Appendable out) throws IOException;
 
 	/**
-	 * Appends the prefix to the given out using the given encoder.
+	 * Appends the prefix to the given out using the given encoder and markup type.
 	 */
-	void appendPrefixTo(MediaEncoder encoder, Appendable out) throws IOException;
+	void appendPrefixTo(MarkupType markupType, MediaEncoder encoder, Appendable out) throws IOException;
 
 	/**
 	 * Gets the resulting value from the lookup.
@@ -55,12 +55,12 @@ public interface BundleLookupResult {
 	String getResult();
 
 	/**
-	 * Appends the suffix to the given out.
+	 * Appends the suffix to the given out using the given markup type.
 	 */
-	void appendSuffixTo(Appendable out) throws IOException;
+	void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException;
 
 	/**
-	 * Appends the suffix to the given out using the given encoder.
+	 * Appends the suffix to the given out using the given encoder and markup type.
 	 */
-	void appendSuffixTo(MediaEncoder encoder, Appendable out) throws IOException;
+	void appendSuffixTo(MarkupType markupType, MediaEncoder encoder, Appendable out) throws IOException;
 }
