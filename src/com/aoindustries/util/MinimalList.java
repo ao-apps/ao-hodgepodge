@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * MinimalList provides a set of static methods to dynamically choose the most
  * efficient List implementation.  The implementation of List is changed as needed.
- * MinimalList is most suited for building map-based data structures that use less
+ * MinimalList is most suited for building list-based data structures that use less
  * heap space than a pure-ArrayList based solution.
  * <p>
  * size=0: null<br/>
