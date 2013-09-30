@@ -43,7 +43,7 @@ abstract public class MediaEncoder implements ValidMediaFilter {
      * Gets the media encoder for the requested types or <code>null</code> if
      * no encoding is necessary.  When an encoder is returned it is also a validator
      * for the contentType and produces valid output for the containerType.
-     * If no encoder is returned, it is necessary to use a separate validator
+     * When no encoder is returned, it is necessary to use a separate validator
      * if character validation is required.
      *
 	 * @param  response  Only required when contentType is MediaType.URL
