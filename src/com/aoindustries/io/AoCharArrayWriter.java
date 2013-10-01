@@ -22,6 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.encoding.MediaEncoder;
+import com.aoindustries.math.SafeMath;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -31,7 +33,10 @@ import java.io.Writer;
  *
  * @author  AO Industries, Inc.
  */
-public class AoCharArrayWriter extends CharArrayWriter {
+public class AoCharArrayWriter
+	extends CharArrayWriter
+	implements Writable
+{
 
     public AoCharArrayWriter() {
         super();
@@ -45,6 +50,11 @@ public class AoCharArrayWriter extends CharArrayWriter {
         return this.buf;
     }
 	
+	@Override
+	public boolean isFastToString() {
+		return false;
+	}
+
     /**
      * Converts a portion of the input data to a string.
 	 *
@@ -59,9 +69,35 @@ public class AoCharArrayWriter extends CharArrayWriter {
 	/**
      * Writes a portion of the contents of the buffer to another character stream.
      */
-    public void writeTo(Writer out, int off, int len) throws IOException {
+	@Override
+    public void writeTo(Writer out, long off, long len) throws IOException {
         synchronized(lock) {
-            out.write(buf, off, len);
+			if((off+len)>count) throw new IndexOutOfBoundsException();
+            out.write(
+				buf,
+				SafeMath.castInt(off),
+				SafeMath.castInt(len)
+			);
         }
     }
+
+	@Override
+	public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
+        synchronized(lock) {
+			encoder.write(buf, 0, count, out);
+        }
+	}
+
+	@Override
+	public void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException {
+        synchronized(lock) {
+			if((off+len)>count) throw new IndexOutOfBoundsException();
+            encoder.write(
+				buf,
+				SafeMath.castInt(off),
+				SafeMath.castInt(len),
+				out
+			);
+        }
+	}
 }

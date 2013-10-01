@@ -57,14 +57,14 @@ final public class BundleLookupThreadContext {
 		threadContext.set(null);
 	}
 
-	private IdentityHashMap<String,BundleLookupResult> lookupResults;
+	private IdentityHashMap<String,BundleLookupMarkup> lookupResults;
 
 	private BundleLookupThreadContext() {
 	}
 
-	void addLookupResult(BundleLookupResult lookupResult) {
-		if(lookupResults==null) lookupResults = new IdentityHashMap<String, BundleLookupResult>();
-		lookupResults.put(lookupResult.getResult(), lookupResult);
+	void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) {
+		if(lookupResults==null) lookupResults = new IdentityHashMap<String, BundleLookupMarkup>();
+		lookupResults.put(lookupResult, lookupMarkup);
 	}
 
 	/**
@@ -75,13 +75,13 @@ final public class BundleLookupThreadContext {
 	}
 
 	/**
-	 * Gets the lookup result for the given String or <code>null</code> if not found.
+	 * Gets the lookup markup for the given String or <code>null</code> if not found.
 	 * <p>
 	 * The string is looked-up by identity only: .equals() is not called.
 	 * This is to give a more precise match to lookups.
 	 * </p>
 	 */
-	public BundleLookupResult getLookupResult(String result) {
+	public BundleLookupMarkup getLookupMarkup(String result) {
 		return lookupResults.get(result);
 	}
 }

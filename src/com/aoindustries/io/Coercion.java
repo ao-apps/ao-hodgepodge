@@ -25,11 +25,6 @@ package com.aoindustries.io;
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.MediaValidator;
 import com.aoindustries.encoding.MediaWriter;
-import com.aoindustries.io.buffer.BufferResult;
-import com.aoindustries.util.i18n.BundleLookup;
-import com.aoindustries.util.i18n.BundleLookupResult;
-import com.aoindustries.util.i18n.EditableResourceBundle;
-import com.aoindustries.util.i18n.StringBundleLookupResult;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
@@ -59,25 +54,6 @@ public final class Coercion  {
 		String str = value.toString();
 		// Otherwise, the result is A.toString();
 		return str;
-	}
-
-	/**
-	 * Converts an object to a string
-	 * while allowing possible prefixes and suffixes for the given context type.
-	 * This is used as a hook for in-context translation editors.
-	 *
-	 * @param  markupType  the type of prefix and suffix markup allowed
-	 *
-	 * @see  EditableResourceBundle
-	 */
-	public static BundleLookupResult toString(Object value, BundleLookup.MarkupType markupType) {
-		if(value instanceof BundleLookup) {
-			// Pass-on the value type to the bundle lookup
-			return ((BundleLookup)value).toString(markupType);
-		} else {
-			// Otherwise, use the default toString
-			return new StringBundleLookupResult(toString(value));
-		}
 	}
 
 	private static final String BODY_CONTENT_IMPL_CLASS = "org.apache.jasper.runtime.BodyContentImpl";
@@ -162,14 +138,18 @@ public final class Coercion  {
 			} else if(value == null) {
 				// Otherwise, if A is null, then the result is "".
 				// Write nothing
-			} else if(value instanceof BufferResult) {
-				// Avoid intermediate String from BufferResult
-				((BufferResult)value).writeTo(unwrap(out));
+			} else if(value instanceof Writable) {
+				Writable writable = (Writable)value;
+				if(writable.isFastToString()) {
+					out.write(writable.toString());
+				} else {
+					// Avoid intermediate String from Writable
+					writable.writeTo(unwrap(out));
+				}
 			} else {
 				// Otherwise, if A.toString() throws an exception, then raise an error
-				String str = value.toString();
 				// Otherwise, the result is A.toString();
-				out.write(str);
+				out.write(value.toString());
 			}
 		}
 	}
@@ -205,14 +185,18 @@ public final class Coercion  {
 			} else if(value == null) {
 				// Otherwise, if A is null, then the result is "".
 				// Write nothing
-			} else if(value instanceof BufferResult) {
-				// Avoid intermediate String from BufferResult
-				((BufferResult)value).writeTo(encoder, out);
+			} else if(value instanceof Writable) {
+				Writable writable = (Writable)value;
+				if(writable.isFastToString()) {
+					encoder.write(writable.toString(), out);
+				} else {
+					// Avoid intermediate String from Writable
+					writable.writeTo(encoder, out);
+				}
 			} else {
 				// Otherwise, if A.toString() throws an exception, then raise an error
-				String str = value.toString();
 				// Otherwise, the result is A.toString();
-				encoder.write(str, out);
+				encoder.write(value.toString(), out);
 			}
 		}
 	}

@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -157,6 +156,10 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	 * Any page that allows the editing of resources must set this at the beginning of the request.
 	 * If not all users of the site are allowed to edit the content, must also clear this at the end of the request
 	 * by either calling this method with <code>false</code> or calling <code>printEditableResourceBundleLookups</code>.
+	 * <p>
+	 * Also resets the thread lookup context.
+	 * @see  BundleLookupThreadContext
+	 * </p>
 	 *
 	 * @param  setValueUrl Must be non-null when <code>canEditResources</code> is true.
 	 *
@@ -166,6 +169,11 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		//System.out.println("DEBUG: EditableResourceBundle: resetRequest: thread.id="+Thread.currentThread().getId()+", canEditResources="+canEditResources+", setValueUrl="+setValueUrl);
 		if(canEditResources) {
 			if(setValueUrl==null) throw new IllegalArgumentException("setValueUrl is null when canEditResources is true");
+			// Clear lookup thread context
+			BundleLookupThreadContext.getThreadContext(true).reset();
+		} else {
+			// Remove from thread context entirely
+			BundleLookupThreadContext.removeThreadContext();
 		}
 		EditableResourceBundle.canEditResources.set(canEditResources);
 		elementIdGenerator.get().setNextSequenceValue(1);
@@ -192,7 +200,10 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	/**
 	 * Prints the resource bundle lookup editor.  This should be called at the end of a request,
 	 * just before the body tag is closed.
-	 *
+	 * <p>
+	 * Also clears the thread lookup context.
+	 * @see  BundleLookupThreadContext
+	 * </p>
 	 * TODO: Add language resources to properties files (but do not make it an editable properties file to avoid possible infinite recursion?)
 	 */
 	public static void printEditableResourceBundleLookups(Appendable out, int editorRows, boolean verticalButtons) throws IOException {
@@ -771,6 +782,13 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		return getClass().getName().compareTo(o.getClass().getName());
 	}
 
+	/**
+	 * Gets an object.
+	 * If editing is enabled and the bundle is modifiable, adds to the thread
+	 * lookup context if present.
+	 * 
+	 * @see  BundleLookupThreadContext
+	 */
 	@Override
 	public Object handleGetObject(String key) {
 		Object object = super.handleGetObject(key);
@@ -782,7 +800,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		}
 
 		// Must be a string
-		String value = (String)object;
+		final String value = (String)object;
 
 		// Determine if the value is validated.  The value is validated
 		// when its validated time is greater than the modified time of
@@ -809,253 +827,234 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		LookupValue lookupValue = lookups.get(lookupKey);
 		if(lookupValue==null) lookups.put(lookupKey, lookupValue = new LookupValue());
 		// Add this locale if not already set
-		if(!lookupValue.locales.containsKey(locale)) lookupValue.locales.put(locale, new LookupLocaleValue(value==null, invalidated));
+		if(!lookupValue.locales.containsKey(locale)) {
+			lookupValue.locales.put(
+				locale,
+				new LookupLocaleValue(value==null, invalidated)
+			);
+		}
 
+		// Record the lookup in any thread context
+		BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
+		if(threadContext!=null) {
+			// Reserve an element ID, even though it may not be used depending on final context
+			final long elementId = elementIdGenerator.get().getNextSequenceValue();
+			lookupValue.elementIds.add(elementId);
+			// Find invalidated flag
+			threadContext.addLookupMarkup(
+				value,
+				new EditableResourceBundleLookupMarkup(
+					lookupValue.id,
+					invalidated,
+					elementId,
+					modifyAllText.get()
+				)
+			);
+		}
 		return value;
 	}
 
-	private static class XhtmlBundleLookupResult extends StringBundleLookupResult {
-
-		private final long lookupId;
-		//private final boolean invalidated;
-		private final long elementId;
-		
-		private XhtmlBundleLookupResult(String result, long lookupId, /*boolean invalidated,*/ long elementId) {
-			super(result);
-			this.lookupId = lookupId;
-			//this.invalidated = invalidated;
-			this.elementId = elementId;
-		}
-
-		@Override
-		public void appendPrefixTo(Appendable out) throws IOException {
-			//if(invalidated) SB.append(" style=\"color:red\"");
-			String elementIdString = Long.toString(elementId);
-			out
-				.append("<!--")
-				.append(Long.toString(lookupId))
-				.append("--><span id=\"EditableResourceBundleElement")
-				.append(elementIdString)
-				.append("\" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(")
-				.append(elementIdString)
-				.append(", true);\"")
-				.append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(")
-				.append(elementIdString)
-				.append(");\">")
-			;
-		}
-
-		@Override
-		public void appendPrefixTo(MediaEncoder encoder, Appendable out) throws IOException {
-			if(encoder==null) {
-				appendPrefixTo(out);
-			} else {
-				//if(invalidated) SB.append(" style=\"color:red\"");
-				String elementIdString = Long.toString(elementId);
-				encoder
-					.append("<!--", out)
-					.append(Long.toString(lookupId), out)
-					.append("--><span id=\"EditableResourceBundleElement", out)
-					.append(elementIdString, out)
-					.append("\" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(", out)
-					.append(elementIdString, out)
-					.append(", true);\"", out)
-					.append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(", out)
-					.append(elementIdString, out)
-					.append(");\">", out)
-				;
-			}
-		}
-
-		@Override
-		public void appendSuffixTo(Appendable out) throws IOException {
-			out.append("</span>");
-		}
-
-		@Override
-		public void appendSuffixTo(MediaEncoder encoder, Appendable out) throws IOException {
-			if(encoder==null) {
-				appendSuffixTo(out);
-			} else {
-				encoder.append("</span>", out);
-			}
-		}
-	}
-
 	/**
-	 * &lt;#&lt; and &gt;#&gt; used to cause XHTML parse errors if text value not properly encoded
+	 * <p>
+	 * XHTML: Text surrounded by &lt;span&gt;
+	 * </p>
+	 * <p>
+	 * TEXT: &lt;#&lt; and &gt;#&gt; used to cause XHTML parse errors if text value not properly encoded
+	 * </p>
+	 * <p>
+	 * JAVASCRIPT: Adds a comment before the string with the lookup id
+	 * </p>
 	 */
-	private static class TextBundleLookupResult extends StringBundleLookupResult {
+	final private static class EditableResourceBundleLookupMarkup implements BundleLookupMarkup {
 
 		private final long lookupId;
 		private final boolean invalidated;
+		private final long elementId;
 		private final boolean modifyAllText;
 
-		private TextBundleLookupResult(String result, long lookupId, boolean invalidated, boolean modifyAllText) {
-			super(result);
+		private EditableResourceBundleLookupMarkup(long lookupId, boolean invalidated, long elementId, boolean modifyAllText) {
 			this.lookupId = lookupId;
 			this.invalidated = invalidated;
+			this.elementId = elementId;
 			this.modifyAllText = modifyAllText;
 		}
 
 		@Override
-		public void appendPrefixTo(Appendable out) throws IOException {
-			if(invalidated) {
-				out
-					.append("<<<")
-					.append(Long.toString(lookupId))
-					.append('<')
-				;
-			} else if(modifyAllText) {
-				out
-					.append('<')
-					.append(Long.toString(lookupId))
-					.append('<')
-				;
-			} else {
-				// No prefix
+		public void appendPrefixTo(MarkupType markupType, Appendable out) throws IOException {
+			switch(markupType) {
+				case NONE :
+					// No markup
+					break;
+				case XHTML :
+					//if(invalidated) SB.append(" style=\"color:red\"");
+					String elementIdString = Long.toString(elementId);
+					out
+						.append("<!--")
+						.append(Long.toString(lookupId))
+						.append("--><span id=\"EditableResourceBundleElement")
+						.append(elementIdString)
+						.append("\" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(")
+						.append(elementIdString)
+						.append(", true);\"")
+						.append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(")
+						.append(elementIdString)
+						.append(");\">")
+					;
+					break;
+				case TEXT :
+					if(invalidated) {
+						out
+							.append("<<<")
+							.append(Long.toString(lookupId))
+							.append('<')
+						;
+					} else if(modifyAllText) {
+						out
+							.append('<')
+							.append(Long.toString(lookupId))
+							.append('<')
+						;
+					} else {
+						// No prefix
+					}
+					break;
+				case JAVASCRIPT :
+					out
+						.append("/*")
+						.append(Long.toString(lookupId))
+						.append("*/")
+					;
+					break;
+				default :
+					throw new AssertionError();
 			}
 		}
 
 		@Override
-		public void appendPrefixTo(MediaEncoder encoder, Appendable out) throws IOException {
+		public void appendPrefixTo(MarkupType markupType, MediaEncoder encoder, Appendable out) throws IOException {
 			if(encoder==null) {
-				appendPrefixTo(out);
+				appendPrefixTo(markupType, out);
 			} else {
-				if(invalidated) {
-					encoder
-						.append("<<<", out)
-						.append(Long.toString(lookupId), out)
-						.append('<', out)
-					;
-				} else if(modifyAllText) {
-					encoder
-						.append('<', out)
-						.append(Long.toString(lookupId), out)
-						.append('<', out)
-					;
-				} else {
-					// No prefix
+				switch(markupType) {
+					case NONE :
+						// No markup
+						break;
+					case XHTML :
+						//if(invalidated) SB.append(" style=\"color:red\"");
+						String elementIdString = Long.toString(elementId);
+						encoder
+							.append("<!--", out)
+							.append(Long.toString(lookupId), out)
+							.append("--><span id=\"EditableResourceBundleElement", out)
+							.append(elementIdString, out)
+							.append("\" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(", out)
+							.append(elementIdString, out)
+							.append(", true);\"", out)
+							.append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(", out)
+							.append(elementIdString, out)
+							.append(");\">", out)
+						;
+						break;
+					case TEXT :
+						if(invalidated) {
+							encoder
+								.append("<<<", out)
+								.append(Long.toString(lookupId), out)
+								.append('<', out)
+							;
+						} else if(modifyAllText) {
+							encoder
+								.append('<', out)
+								.append(Long.toString(lookupId), out)
+								.append('<', out)
+							;
+						} else {
+							// No prefix
+						}
+						break;
+					case JAVASCRIPT :
+						encoder
+							.append("/*", out)
+							.append(Long.toString(lookupId), out)
+							.append("*/", out)
+						;
+						break;
+					default :
+						throw new AssertionError();
 				}
 			}
 		}
 
 		@Override
-		public void appendSuffixTo(Appendable out) throws IOException {
-			if(invalidated) {
-				out
-					.append('>')
-					.append(Long.toString(lookupId))
-					.append(">>>")
-				;
-			} else if(modifyAllText) {
-				out
-					.append('>')
-					.append(Long.toString(lookupId))
-					.append('>')
-				;
-			} else {
-				// No suffix
-			}
-		}
-
-		@Override
-		public void appendSuffixTo(MediaEncoder encoder, Appendable out) throws IOException {
-			if(encoder==null) {
-				appendSuffixTo(out);
-			} else {
-				if(invalidated) {
-					encoder
-						.append('>', out)
-						.append(Long.toString(lookupId), out)
-						.append(">>>", out)
-					;
-				} else if(modifyAllText) {
-					encoder
-						.append('>', out)
-						.append(Long.toString(lookupId), out)
-						.append('>', out)
-					;
-				} else {
+		public void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException {
+			switch(markupType) {
+				case NONE :
+					// No markup
+					break;
+				case XHTML :
+					out.append("</span>");
+					break;
+				case TEXT :
+					if(invalidated) {
+						out
+							.append('>')
+							.append(Long.toString(lookupId))
+							.append(">>>")
+						;
+					} else if(modifyAllText) {
+						out
+							.append('>')
+							.append(Long.toString(lookupId))
+							.append('>')
+						;
+					} else {
+						// No suffix
+					}
+					break;
+				case JAVASCRIPT :
 					// No suffix
+					break;
+				default :
+					throw new AssertionError();
+			}
+		}
+
+		@Override
+		public void appendSuffixTo(MarkupType markupType, MediaEncoder encoder, Appendable out) throws IOException {
+			if(encoder==null) {
+				appendSuffixTo(markupType, out);
+			} else {
+				switch(markupType) {
+					case NONE :
+						// No markup
+						break;
+					case XHTML :
+						encoder.append("</span>", out);
+						break;
+					case TEXT :
+						if(invalidated) {
+							encoder
+								.append('>', out)
+								.append(Long.toString(lookupId), out)
+								.append(">>>", out)
+							;
+						} else if(modifyAllText) {
+							encoder
+								.append('>', out)
+								.append(Long.toString(lookupId), out)
+								.append('>', out)
+							;
+						} else {
+							// No suffix
+						}
+						break;
+					case JAVASCRIPT :
+						// No suffix
+						break;
+					default :
+						throw new AssertionError();
 				}
 			}
-		}
-	}
-
-	/**
-	 * Adds a comment before the string with the lookup id
-	 */
-	private static class JavascriptBundleLookupResult extends StringBundleLookupResult {
-
-		private final long lookupId;
-
-		private JavascriptBundleLookupResult(String result, long lookupId) {
-			super(result);
-			this.lookupId = lookupId;
-		}
-
-		@Override
-		public void appendPrefixTo(Appendable out) throws IOException {
-			out
-				.append("/*")
-				.append(Long.toString(lookupId))
-				.append("*/")
-			;
-		}
-
-		@Override
-		public void appendPrefixTo(MediaEncoder encoder, Appendable out) throws IOException {
-			if(encoder==null) {
-				appendPrefixTo(out);
-			} else {
-				encoder
-					.append("/*", out)
-					.append(Long.toString(lookupId), out)
-					.append("*/", out)
-				;
-			}
-		}
-	}
-
-	/**
-	 * Gets a string for the given key from this resource bundle or one of its parents
-	 * while allowing possible prefixes and suffixes for the given context type.
-	 * This is used as a hook for in-context translation editors.
-	 *
-	 * @param  markupType  the type of prefix and suffix markup allowed
-	 * 
-	 * @return  the lookup result or 
-	 */
-	public BundleLookupResult getString(String key, BundleLookup.MarkupType markupType) throws MissingResourceException {
-		String value = getString(key);
-		assert value != null;
-		if(
-			markupType== BundleLookup.MarkupType.NONE // shortcut for no markup
-			|| !isModifiable() // unmodifiable
-			|| !canEditResources.get() // editing disabled
-		) {
-			return new StringBundleLookupResult(value);
-		}
-
-		// Modify and return the value
-		Map<LookupKey,LookupValue> lookups = requestLookups.get();
-		LookupValue lookupValue = lookups.get(new LookupKey(bundleSet, key));
-		assert lookupValue != null;
-		// Perform optional type-specific modification
-		switch(markupType) {
-			case XHTML :
-				final long elementId = elementIdGenerator.get().getNextSequenceValue();
-				lookupValue.elementIds.add(elementId);
-				return new XhtmlBundleLookupResult(value, lookupValue.id, /*localeValue.invalidated,*/ elementId);
-			case TEXT :
-				LookupLocaleValue localeValue = lookupValue.locales.get(locale);
-				assert localeValue != null;
-				return new TextBundleLookupResult(value, lookupValue.id, localeValue.invalidated, modifyAllText.get());
-			case JAVASCRIPT :
-				return new JavascriptBundleLookupResult(value, lookupValue.id);
-			default :
-				throw new AssertionError("Unexpected markup type: "+markupType);
 		}
 	}
 }

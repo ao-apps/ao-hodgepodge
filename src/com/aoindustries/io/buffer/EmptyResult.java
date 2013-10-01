@@ -45,8 +45,23 @@ final public class EmptyResult implements BufferResult {
 	}
 
 	@Override
+	public boolean isFastToString() {
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		return "";
+	}
+
+	@Override
+	public void writeTo(Writer out) {
+		// Nothing to write
+	}
+
+	@Override
+	public void writeTo(Writer out, long off, long len) {
+		// Nothing to write
 	}
 
 	@Override
@@ -55,7 +70,7 @@ final public class EmptyResult implements BufferResult {
 	}
 
 	@Override
-	public void writeTo(Writer out) {
+	public void writeTo(MediaEncoder encoder, Writer out, long off, long len) {
 		// Nothing to write
 	}
 

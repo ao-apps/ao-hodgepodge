@@ -22,48 +22,26 @@
  */
 package com.aoindustries.io.buffer;
 
-import com.aoindustries.encoding.MediaEncoder;
+import com.aoindustries.io.Writable;
 import java.io.IOException;
-import java.io.Writer;
 
 /**
  * The result from completion of a buffered writer.  Only available after a
  * buffered writer has been closed.
- * 
+ * <p>
+ * Idea: Add contentEquals(String) method to avoid some uses of toString?
+ * </p>
+ *
  * @see  AoBufferedWriter
  *
  * @author  AO Industries, Inc.
  */
-public interface BufferResult {
+public interface BufferResult extends Writable {
 
     /**
      * Gets the number of characters in this view of the buffer.
      */
     long getLength() throws IOException;
-
-    /**
-     * Gets the captured data as a string.  For larger amounts of data, it is
-	 * much more efficient to call the <code>writeTo</code> method.
-     *
-	 * TODO: Add contentEquals(String) method to avoid some uses of toString
-	 *
-     * @see  #writeTo(java.io.Writer)
-	 * @see  #trim()
-     */
-    @Override
-    String toString();
-
-	/**
-	 * Writes the captured body to the provided writer with the given encoding.
-	 * 
-	 * @param  encoder  if null, no encoding is performed - write through
-	 */
-    void writeTo(MediaEncoder encoder, Writer out) throws IOException;
-
-	/**
-     * Writes the captured body to the provided writer.
-     */
-    void writeTo(Writer out) throws IOException;
 
 	/**
 	 * Trims the contents of this result, returning the instance that represents this result trimmed.

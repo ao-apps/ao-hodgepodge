@@ -67,7 +67,12 @@ public class TempFileResult implements BufferResult {
 
 	private String toStringCache;
 
-    @Override
+	@Override
+	public boolean isFastToString() {
+		return toStringCache!=null;
+	}
+
+	@Override
     public String toString() {
 		if(toStringCache==null) {
 			try {
@@ -116,6 +121,17 @@ public class TempFileResult implements BufferResult {
     }
 
 	@Override
+    public void writeTo(Writer out) throws IOException {
+		writeToImpl(out, start, end);
+	}
+
+	@Override
+    public void writeTo(Writer out, long off, long len) throws IOException {
+		if((start + off + len) > end) throw new IndexOutOfBoundsException();
+		writeToImpl(out, start + off, start + off + len);
+	}
+
+	@Override
     public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
 		writeTo(
 			encoder!=null
@@ -125,7 +141,25 @@ public class TempFileResult implements BufferResult {
 	}
 
 	@Override
-    public void writeTo(Writer out) throws IOException {
+    public void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException {
+		writeTo(
+			encoder!=null
+				? new MediaWriter(encoder, out)
+				: out,
+			off,
+			len
+		);
+	}
+
+	/**
+	 * Implementation of writeTo
+	 *
+	 * @param out
+	 * @param writeStart  The absolute index to write from
+	 * @param writeEnd    The absolute index one past last character to write
+	 * @throws IOException 
+	 */
+    private void writeToImpl(Writer out, long writeStart, long writeEnd) throws IOException {
 		// TODO: If copying to another SegmentedBufferedWriter or AutoTempFileWriter, we have a chance here for disk-to-disk block level copying instead of going through all the conversions.
 		RandomAccessFile raf = new RandomAccessFile(tempFile.getFile(), "r");
 		try {
@@ -133,11 +167,11 @@ public class TempFileResult implements BufferResult {
 			try {
 				char[] chars = BufferManager.getChars();
 				try {
-					long index = this.start;
+					long index = writeStart;
 					raf.seek(index<<1);
-					while(index<end) {
+					while(index<writeEnd) {
 						// Read a block
-						long blockSizeLong = (end - index)<<1;
+						long blockSizeLong = (writeEnd - index)<<1;
 						int blockSize = blockSizeLong > BufferManager.BUFFER_SIZE ? BufferManager.BUFFER_SIZE : (int)blockSizeLong;
 						assert (blockSize&1) == 0 : "Must be an even number for UTF-16 conversion";
 						raf.readFully(bytes, 0, blockSize);

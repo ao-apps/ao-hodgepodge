@@ -23,6 +23,7 @@
 package com.aoindustries.io.buffer;
 
 import com.aoindustries.encoding.MediaEncoder;
+import com.aoindustries.lang.NotImplementedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.logging.Logger;
@@ -356,6 +357,41 @@ public class SegmentedResult implements BufferResult {
 
 	private String toStringCache;
 
+	@Override
+	public boolean isFastToString() {
+		// Already converted, fast now
+		if(toStringCache!=null) return true;
+		// If more than one segment, can't be fast toString
+		if(startSegmentIndex!=endSegmentIndex) return false;
+		// Look for one segment shortcut by type
+		switch(segmentTypes[startSegmentIndex]) {
+			case SegmentedWriter.TYPE_STRING :
+				// If offset into string, is not fast (would incur substring)
+				if(startSegmentOffset!=0) return false;
+				String str = (String)segmentValues[startSegmentIndex];
+				// If fast when covers entire string in this segment
+				return startSegmentLength==str.length();
+			case SegmentedWriter.TYPE_CHAR_NEWLINE :
+				assert startSegmentOffset==0;
+				assert startSegmentLength==1;
+				return true;
+			case SegmentedWriter.TYPE_CHAR_QUOTE :
+				assert startSegmentOffset==0;
+				assert startSegmentLength==1;
+				return true;
+			case SegmentedWriter.TYPE_CHAR_APOS :
+				assert startSegmentOffset==0;
+				assert startSegmentLength==1;
+				return true;
+			case SegmentedWriter.TYPE_CHAR_OTHER :
+				assert startSegmentOffset==0;
+				assert startSegmentLength==1;
+				return true;
+			default :
+				throw new AssertionError();
+		}
+	}
+
     @Override
     public String toString() {
 		if(toStringCache==null) {
@@ -409,6 +445,40 @@ public class SegmentedResult implements BufferResult {
     }
 
 	@Override
+    public void writeTo(Writer out) throws IOException {
+		// First segment
+		writeSegment(
+			startSegmentIndex,
+			startSegmentOffset,
+			startSegmentLength,
+			out
+		);
+		if(endSegmentIndex!=startSegmentIndex) {
+			// Middle segments
+			int i = startSegmentIndex+1;
+			if(i<endSegmentIndex) {
+				// if(out instanceof SegmentedWriter) System.err.println("TODO: Perform array copy of middle segments");
+				do {
+					writeSegment(i++, out);
+				} while(i<endSegmentIndex);
+			}
+			// End segment
+			writeSegment(
+				endSegmentIndex,
+				endSegmentOffset,
+				endSegmentLength,
+				out
+			);
+		}
+    }
+
+	@Override
+    public void writeTo(Writer out, long off, long len) throws IOException {
+		// Implementation will need to start through beginning
+		throw new NotImplementedException("Implement when first needed.");
+	}
+
+	@Override
     public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
 		if(encoder==null) {
 			writeTo(out);
@@ -440,32 +510,10 @@ public class SegmentedResult implements BufferResult {
 	}
 
 	@Override
-    public void writeTo(Writer out) throws IOException {
-		// First segment
-		writeSegment(
-			startSegmentIndex,
-			startSegmentOffset,
-			startSegmentLength,
-			out
-		);
-		if(endSegmentIndex!=startSegmentIndex) {
-			// Middle segments
-			int i = startSegmentIndex+1;
-			if(i<endSegmentIndex) {
-				// if(out instanceof SegmentedWriter) System.err.println("TODO: Perform array copy of middle segments");
-				do {
-					writeSegment(i++, out);
-				} while(i<endSegmentIndex);
-			}
-			// End segment
-			writeSegment(
-				endSegmentIndex,
-				endSegmentOffset,
-				endSegmentLength,
-				out
-			);
-		}
-    }
+    public void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException {
+		// Implementation will need to start through beginning
+		throw new NotImplementedException("Implement when first needed.");
+	}
 
 	@Override
 	public BufferResult trim() throws IOException {

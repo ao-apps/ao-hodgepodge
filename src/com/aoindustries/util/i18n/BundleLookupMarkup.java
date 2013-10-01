@@ -26,45 +26,30 @@ import com.aoindustries.encoding.MediaEncoder;
 import java.io.IOException;
 
 /**
- * A result with a string and no special prefix or suffix.
+ * The result of a bundle lookup, with possible prefix and suffix values that
+ * represent markup to be added for any in-context translation editors.
  *
  * @author  AO Industries, Inc.
  */
-public class StringBundleLookupResult implements BundleLookupResult {
+public interface BundleLookupMarkup {
 
-	private final String result;
+	/**
+	 * Appends the prefix to the given out using the given markup type.
+	 */
+	void appendPrefixTo(MarkupType markupType, Appendable out) throws IOException;
 
-    public StringBundleLookupResult(String result) {
-		this.result = result;
-	}
+	/**
+	 * Appends the prefix to the given out using the given encoder and markup type.
+	 */
+	void appendPrefixTo(MarkupType markupType, MediaEncoder encoder, Appendable out) throws IOException;
 
-	@Override
-	public String toString() {
-		return result;
-	}
+	/**
+	 * Appends the suffix to the given out using the given markup type.
+	 */
+	void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException;
 
-	@Override
-	public void appendPrefixTo(Appendable out) throws IOException {
-		// No prefix
-	}
-
-	@Override
-	public void appendPrefixTo(MediaEncoder encoder, Appendable out) throws IOException {
-		// No prefix
-	}
-
-	@Override
-	public String getResult() {
-		return result;
-	}
-
-	@Override
-	public void appendSuffixTo(Appendable out) throws IOException {
-		// No suffix
-	}
-
-	@Override
-	public void appendSuffixTo(MediaEncoder encoder, Appendable out) throws IOException {
-		// No suffix
-	}
+	/**
+	 * Appends the suffix to the given out using the given encoder and markup type.
+	 */
+	void appendSuffixTo(MarkupType markupType, MediaEncoder encoder, Appendable out) throws IOException;
 }

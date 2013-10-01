@@ -89,7 +89,16 @@ public class ApplicationResourcesAccessor implements Serializable {
      * @see ThreadLocale
      */
     public String getMessage(String key) {
-        Locale locale = ThreadLocale.get();
+		return getMessage(ThreadLocale.get(), key);
+    }
+
+    /**
+     * <p>
+     * Gets the message.
+	 * If missing, will generate a struts-like value including the locale and key.
+     * </p>
+     */
+    public String getMessage(Locale locale, String key) {
         String string = null;
         try {
             string = getResourceBundle(locale).getString(key);
@@ -100,7 +109,7 @@ public class ApplicationResourcesAccessor implements Serializable {
         return string;
     }
 
-    /**
+	/**
      * <p>
      * Gets the message.
 	 * If missing, will generate a struts-like value including the locale and key.
@@ -116,7 +125,21 @@ public class ApplicationResourcesAccessor implements Serializable {
      * @see  #getMessage(String,Locale,String)
      */
     public String getMessage(String key, Object... args) {
-        Locale locale = ThreadLocale.get();
+		return getMessage(ThreadLocale.get(), key, args);
+    }
+
+	/**
+     * <p>
+     * Gets the message.
+	 * If missing, will generate a struts-like value including the locale and key.
+     * </p>
+     * <p>
+     * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
+     * </p>
+     *
+     * @see  #getMessage(String,Locale,String)
+     */
+    public String getMessage(Locale locale, String key, Object... args) {
         String string = null;
         try {
             string = getResourceBundle(locale).getString(key);
@@ -125,6 +148,13 @@ public class ApplicationResourcesAccessor implements Serializable {
         }
         if(string==null) return "???"+locale.toString()+"."+key+"???";
         if(args.length==0) return string;
-        return MessageFormatFactory.getMessageFormat(string, locale).format(args, new StringBuffer(string.length()<<1), null).toString();
+        String newString = MessageFormatFactory.getMessageFormat(string, locale).format(args, new StringBuffer(string.length()<<1), null).toString();
+		// Copy any lookup markup to the newly generated string
+		BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
+		if(threadContext!=null) {
+			BundleLookupMarkup lookupMarkup = threadContext.getLookupMarkup(string);
+			threadContext.addLookupMarkup(newString, lookupMarkup);
+		}
+		return newString;
     }
 }

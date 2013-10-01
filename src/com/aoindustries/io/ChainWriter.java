@@ -23,9 +23,12 @@
 package com.aoindustries.io;
 
 import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute;
+import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.javaScriptInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.JavaScriptInXhtmlEncoder.encodeJavaScriptInXhtml;
+import com.aoindustries.encoding.MediaWriter;
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
 import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
+import static com.aoindustries.encoding.TextInJavaScriptEncoder.textInJavaScriptEncoder;
 import com.aoindustries.encoding.TextInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
@@ -34,8 +37,8 @@ import com.aoindustries.encoding.TextInXhtmlEncoder;
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.Sequence;
-import com.aoindustries.util.i18n.BundleLookup;
-import com.aoindustries.util.i18n.BundleLookupResult;
+import com.aoindustries.util.i18n.BundleLookupMarkup;
+import com.aoindustries.util.i18n.BundleLookupThreadContext;
 import com.aoindustries.util.i18n.MarkupType;
 import java.io.Closeable;
 import java.io.IOException;
@@ -57,6 +60,7 @@ final public class ChainWriter implements Appendable, Closeable {
 
     // <editor-fold defaultstate="collapsed" desc="PrintWriter wrapping">
     private final PrintWriter out;
+	private final MediaWriter javaScriptInXhtmlAttributeWriter;
 
     /**
      * Create a new PrintWriter, without automatic line flushing, from an
@@ -68,7 +72,7 @@ final public class ChainWriter implements Appendable, Closeable {
      */
     public ChainWriter(OutputStream out) {
         this(new PrintWriter(out));
-    }
+	}
 
     /**
      * Create a new PrintWriter from an existing OutputStream.  This
@@ -86,6 +90,7 @@ final public class ChainWriter implements Appendable, Closeable {
 
     public ChainWriter(PrintWriter out) {
         this.out=out;
+		javaScriptInXhtmlAttributeWriter = new MediaWriter(javaScriptInXhtmlAttributeEncoder, out);
     }
 
     /**
@@ -450,15 +455,28 @@ final public class ChainWriter implements Appendable, Closeable {
      * @param  value  the value to be encoded
      */
     public ChainWriter encodeXhtml(Object value) throws IOException {
-		if(value instanceof BundleLookup) {
-			BundleLookupResult result = ((BundleLookup)value).toString(MarkupType.XHTML);
-			result.appendPrefixTo(out);
-			out.write(result.getResult());
-			result.appendSuffixTo(out);
-		} else {
-			Coercion.write(value, textInXhtmlEncoder, out);
+		if(value!=null) {
+			if(
+				value instanceof Writable
+				&& !((Writable)value).isFastToString()
+			) {
+				// Avoid unnecessary toString calls
+				Coercion.write(value, textInXhtmlEncoder, out);
+			} else {
+				String str = Coercion.toString(value);
+				BundleLookupMarkup lookupMarkup;
+				BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
+				if(threadContext!=null) {
+					lookupMarkup = threadContext.getLookupMarkup(str);
+				} else {
+					lookupMarkup = null;
+				}
+				if(lookupMarkup!=null) lookupMarkup.appendPrefixTo(MarkupType.XHTML, out);
+				textInXhtmlEncoder.write(str, out);
+				if(lookupMarkup!=null) lookupMarkup.appendSuffixTo(MarkupType.XHTML, out);
+			}
 		}
-        return this;
+		return this;
     }
 
     /**
@@ -511,17 +529,34 @@ final public class ChainWriter implements Appendable, Closeable {
 	 * @see  Coercion#toString(java.lang.Object, com.aoindustries.util.i18n.BundleLookup.MarkupType)
 	 */
     public ChainWriter encodeJavaScriptStringInXml(Object value) throws IOException {
-        BundleLookupResult result = Coercion.toString(value, MarkupType.JAVASCRIPT);
-        // Escape for javascript
-		String text = result.getResult();
-        StringBuilder javascript = new StringBuilder(text.length() + 2);
-		result.appendPrefixTo(javascript);
-		javascript.append('"');
-        encodeTextInJavaScript(text, javascript);
-		javascript.append('"');
-		result.appendSuffixTo(javascript);
-        // Encode for XML attribute
-        encodeJavaScriptInXhtmlAttribute(javascript, out);
+		if(value!=null) {
+			// Two stage encoding:
+			//   1) Text -> JavaScript (with quotes added)
+			//   2) JavaScript -> XML Attribute
+			if(
+				value instanceof Writable
+				&& !((Writable)value).isFastToString()
+			) {
+				// Avoid unnecessary toString calls
+				textInJavaScriptEncoder.writePrefixTo(javaScriptInXhtmlAttributeWriter);
+				Coercion.write(value, textInJavaScriptEncoder, javaScriptInXhtmlAttributeWriter);
+				textInJavaScriptEncoder.writeSuffixTo(javaScriptInXhtmlAttributeWriter);
+			} else {
+				String str = Coercion.toString(value);
+				BundleLookupMarkup lookupMarkup;
+				BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
+				if(threadContext!=null) {
+					lookupMarkup = threadContext.getLookupMarkup(str);
+				} else {
+					lookupMarkup = null;
+				}
+				if(lookupMarkup!=null) lookupMarkup.appendPrefixTo(MarkupType.JAVASCRIPT, javaScriptInXhtmlAttributeWriter);
+				textInJavaScriptEncoder.writePrefixTo(javaScriptInXhtmlAttributeWriter);
+				textInJavaScriptEncoder.write(str, javaScriptInXhtmlAttributeWriter);
+				textInJavaScriptEncoder.writeSuffixTo(javaScriptInXhtmlAttributeWriter);
+				if(lookupMarkup!=null) lookupMarkup.appendSuffixTo(MarkupType.JAVASCRIPT, javaScriptInXhtmlAttributeWriter);
+			}
+		}
         return this;
     }
 

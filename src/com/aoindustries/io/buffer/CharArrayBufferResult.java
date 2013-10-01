@@ -24,6 +24,7 @@ package com.aoindustries.io.buffer;
 
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.io.AoCharArrayWriter;
+import com.aoindustries.math.SafeMath;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -61,10 +62,30 @@ public class CharArrayBufferResult implements BufferResult {
 
 	private String toStringCache;
 
+	@Override
+	public boolean isFastToString() {
+		return toStringCache!=null;
+	}
+
     @Override
     public String toString() {
 		if(toStringCache==null) toStringCache = buffer.toString(start, end - start);
 		return toStringCache;
+    }
+
+	@Override
+    public void writeTo(Writer out) throws IOException {
+		buffer.writeTo(out, start, end - start);
+    }
+
+	@Override
+    public void writeTo(Writer out, long off, long len) throws IOException {
+		if((start + off + len) > end) throw new IndexOutOfBoundsException();
+		buffer.writeTo(
+			out,
+			SafeMath.castInt(start + off),
+			SafeMath.castInt(len)
+		);
     }
 
 	@Override
@@ -82,9 +103,19 @@ public class CharArrayBufferResult implements BufferResult {
 	}
 
 	@Override
-    public void writeTo(Writer out) throws IOException {
-		buffer.writeTo(out, start, end - start);
-    }
+    public void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException {
+		if(encoder==null) {
+			writeTo(out, off, len);
+		} else {
+			if((start + off + len) > end) throw new IndexOutOfBoundsException();
+			encoder.write(
+				buffer.getInternalCharArray(),
+				SafeMath.castInt(start + off),
+				SafeMath.castInt(len),
+				out
+			);
+		}
+	}
 
 	@Override
 	public BufferResult trim() throws IOException {

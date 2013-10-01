@@ -104,7 +104,12 @@ public class LoggingResult implements BufferResult {
 		return wrapped.getLength();
     }
 
-    @Override
+	@Override
+	public boolean isFastToString() {
+		return wrapped.isFastToString();
+	}
+
+	@Override
     public String toString() {
 		try {
 			log.write("result[");
@@ -115,6 +120,32 @@ public class LoggingResult implements BufferResult {
 			throw new WrappedException(e);
 		}
 		return wrapped.toString();
+    }
+
+	@Override
+    public void writeTo(Writer out) throws IOException {
+		log.write("result[");
+		log.write(Long.toString(id));
+		log.write("].writeTo(");
+		log(out);
+		log.write(");\n");
+		log.flush();
+		wrapped.writeTo(out);
+    }
+
+	@Override
+    public void writeTo(Writer out, long off, long len) throws IOException {
+		log.write("result[");
+		log.write(Long.toString(id));
+		log.write("].writeTo(");
+		log(out);
+		log.write(", ");
+		log.write(Long.toString(off));
+		log.write(", ");
+		log.write(Long.toString(len));
+		log.write(");\n");
+		log.flush();
+		wrapped.writeTo(out, off, len);
     }
 
 	@Override
@@ -131,15 +162,21 @@ public class LoggingResult implements BufferResult {
 	}
 
 	@Override
-    public void writeTo(Writer out) throws IOException {
+    public void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException {
 		log.write("result[");
 		log.write(Long.toString(id));
 		log.write("].writeTo(");
+		log(encoder);
+		log.write(", ");
 		log(out);
+		log.write(", ");
+		log.write(Long.toString(off));
+		log.write(", ");
+		log.write(Long.toString(len));
 		log.write(");\n");
 		log.flush();
-		wrapped.writeTo(out);
-    }
+		wrapped.writeTo(encoder, out, off, len);
+	}
 
 	@Override
 	public LoggingResult trim() throws IOException {

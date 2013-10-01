@@ -37,13 +37,24 @@ public class SafeMath {
      *
      * @exception  ArithmeticException  for underflow or overflow
      */
-    public static short castShort(int value1) throws ArithmeticException {
-        if(value1<Short.MIN_VALUE) throw new ArithmeticException("short underflow: " + value1);
-        if(value1>Short.MAX_VALUE) throw new ArithmeticException("short overflow: " + value1);
-        return (short)value1;
+    public static short castShort(int value) throws ArithmeticException {
+        if(value<Short.MIN_VALUE) throw new ArithmeticException("short underflow: " + value);
+        if(value>Short.MAX_VALUE) throw new ArithmeticException("short overflow: " + value);
+        return (short)value;
     }
 
     /**
+     * Casts long to int, looking for any underflow or overflow.
+     *
+     * @exception  ArithmeticException  for underflow or overflow
+     */
+    public static int castInt(long value) throws ArithmeticException {
+        if(value<Integer.MIN_VALUE) throw new ArithmeticException("int underflow: " + value);
+        if(value>Integer.MAX_VALUE) throw new ArithmeticException("int overflow: " + value);
+        return (int)value;
+    }
+
+	/**
      * Multiplies two longs, looking for any overflow.
      *
      * @exception  ArithmeticException  for overflow
