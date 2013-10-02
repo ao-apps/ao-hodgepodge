@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.i18n;
 
+import static com.aoindustries.util.i18n.ApplicationResources.accessor;
 import java.util.IdentityHashMap;
 
 /**
@@ -62,9 +63,16 @@ final public class BundleLookupThreadContext {
 	private BundleLookupThreadContext() {
 	}
 
-	void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) {
+	/**
+	 * @throws IllegalStateException   if the string has already been added to this context (as matched by identity)
+	 */
+	void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) throws IllegalStateException {
 		if(lookupResults==null) lookupResults = new IdentityHashMap<String, BundleLookupMarkup>();
-		lookupResults.put(lookupResult, lookupMarkup);
+		if(lookupResults.put(lookupResult, lookupMarkup)!=null) {
+			throw new IllegalStateException(
+				accessor.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")
+			);
+		}
 	}
 
 	/**

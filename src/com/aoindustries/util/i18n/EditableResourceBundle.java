@@ -800,7 +800,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		}
 
 		// Must be a string
-		final String value = (String)object;
+		String value = (String)object;
 
 		// Determine if the value is validated.  The value is validated
 		// when its validated time is greater than the modified time of
@@ -840,6 +840,10 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 			// Reserve an element ID, even though it may not be used depending on final context
 			final long elementId = elementIdGenerator.get().getNextSequenceValue();
 			lookupValue.elementIds.add(elementId);
+			// If this string is already in the thread context, make a new instance to be unique by identity
+			if(threadContext.getLookupMarkup(value)!=null) {
+				value = new String(value); // Need new string with different identity for unique threadContext lookups
+			}
 			// Find invalidated flag
 			threadContext.addLookupMarkup(
 				value,

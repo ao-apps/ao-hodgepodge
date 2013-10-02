@@ -153,7 +153,10 @@ public class ApplicationResourcesAccessor implements Serializable {
 		BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
 		if(threadContext!=null) {
 			BundleLookupMarkup lookupMarkup = threadContext.getLookupMarkup(string);
-			threadContext.addLookupMarkup(newString, lookupMarkup);
+			threadContext.addLookupMarkup(
+				newString, // This string is already a new instance and therefore is already unique by identity
+				lookupMarkup
+			);
 		}
 		return newString;
     }
