@@ -90,6 +90,6 @@ final public class BundleLookupThreadContext {
 	 * </p>
 	 */
 	public BundleLookupMarkup getLookupMarkup(String result) {
-		return lookupResults.get(result);
+		return lookupResults==null ? null : lookupResults.get(result);
 	}
 }
