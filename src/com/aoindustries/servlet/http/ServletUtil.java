@@ -22,6 +22,7 @@
  */
 package com.aoindustries.servlet.http;
 
+import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.NewEncodingUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -184,6 +185,23 @@ public class ServletUtil {
         if(port!=(request.isSecure() ? 443 : 80)) out.append(':').append(Integer.toString(port));
         out.append(request.getContextPath());
         out.append(relPath);
+    }
+
+    /**
+     * Gets an absolute URL for the given context-relative path.  This includes
+     * protocol, port, context path, and relative path.
+     */
+    public static void getAbsoluteURL(HttpServletRequest request, String relPath, MediaEncoder encoder, Appendable out) throws IOException {
+		if(encoder==null) {
+			getAbsoluteURL(request, relPath, out);
+		} else {
+			encoder.append(request.isSecure() ? "https://" : "http://", out);
+			encoder.append(request.getServerName(), out);
+			int port = request.getServerPort();
+			if(port!=(request.isSecure() ? 443 : 80)) encoder.append(':', out).append(Integer.toString(port), out);
+			encoder.append(request.getContextPath(), out);
+			encoder.append(relPath, out);
+		}
     }
 
 	/**
