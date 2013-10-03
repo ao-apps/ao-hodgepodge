@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -186,9 +186,9 @@ public class ServletUtil {
         out.append(relPath);
     }
 
-    /**
-     * Sends a redirect of the provided status.
-     *
+	/**
+	 * Gets the absolute URL that should be used for a redirect.
+	 * 
      * @param  href  The absolute, context-relative, or page-relative path to redirect to.
      *               The following actions are performed on the provided href:
      *               <ol>
@@ -197,14 +197,20 @@ public class ServletUtil {
      *                 <li>Perform URL rewriting (response.encodeRedirectURL)</li>
      *                 <li>Convert to absolute URL if needed.  This will also add the context path.</li>
      *               </ol>
-     * @param  status  The HTTP status.  Only 301, 302, or 303 make sense.
-     */
-    public static void sendRedirect(HttpServletRequest request, HttpServletResponse response, String href, int status) throws UnsupportedEncodingException, MalformedURLException, IOException {
-        // Convert page-relative paths to context-relative path, resolving ./ and ../
+	 *
+	 * @see  #sendRedirect(javax.servlet.http.HttpServletResponse, java.lang.String, int)
+	 */
+	public static String getRedirectLocation(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String servletPath,
+		String href
+	) throws MalformedURLException, UnsupportedEncodingException {
+		// Convert page-relative paths to context-relative path, resolving ./ and ../
         if(
             !href.startsWith("http://")
             && !href.startsWith("https://")
-        ) href = getAbsolutePath(request, href);
+        ) href = getAbsolutePath(servletPath, href);
 
         // Encode URL path elements (like Japanese filenames)
         href = NewEncodingUtils.encodeUrlPath(href);
@@ -213,9 +219,48 @@ public class ServletUtil {
         href = response.encodeRedirectURL(href);
 
         // Convert to absolute URL if needed.  This will also add the context path.
-        if(href.startsWith("/")) href = ServletUtil.getAbsoluteURL(request, href);
+        if(href.startsWith("/")) href = getAbsoluteURL(request, href);
+		
+		return href;
+	}
 
-        response.setHeader("Location", href);
+	/**
+	 * Sends a redirect to the provided absolute URL location.
+	 * 
+	 * @see  #getRedirectLocation(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, java.lang.String) 
+	 */
+    public static void sendRedirect(
+		HttpServletResponse response,
+		String location,
+		int status
+	) throws IllegalStateException, IOException {
+		// Response must not be committed
+		if(response.isCommitted()) throw new IllegalStateException("Unable to redirect: Response already committed");
+
+        response.setHeader("Location", location);
         response.sendError(status);
     }
+	
+	/**
+	 * Sends a redirect with relative paths determined from the request servlet path.
+	 * 
+	 * @see  #getRedirectLocation(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, java.lang.String)  for transformations applied to the href
+	 */
+	public static void sendRedirect(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String href,
+		int status
+	) throws IllegalStateException, IOException {
+		sendRedirect(
+			response,
+			getRedirectLocation(
+				request,
+				response,
+				request.getServletPath(),
+				href
+			),
+			status
+		);
+	}
 }
