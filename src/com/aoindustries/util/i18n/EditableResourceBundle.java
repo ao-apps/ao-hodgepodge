@@ -799,7 +799,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 			return object;
 		}
 
-		// Must be a string
+		// Must be a string (or null)
 		String value = (String)object;
 
 		// Determine if the value is validated.  The value is validated
@@ -834,26 +834,28 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 			);
 		}
 
-		// Record the lookup in any thread context
-		BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
-		if(threadContext!=null) {
-			// Reserve an element ID, even though it may not be used depending on final context
-			final long elementId = elementIdGenerator.get().getNextSequenceValue();
-			lookupValue.elementIds.add(elementId);
-			// If this string is already in the thread context, make a new instance to be unique by identity
-			if(threadContext.getLookupMarkup(value)!=null) {
-				value = new String(value); // Need new string with different identity for unique threadContext lookups
+		if(value!=null) {
+			// Record the lookup in any thread context
+			BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
+			if(threadContext!=null) {
+				// Reserve an element ID, even though it may not be used depending on final context
+				final long elementId = elementIdGenerator.get().getNextSequenceValue();
+				lookupValue.elementIds.add(elementId);
+				// If this string is already in the thread context, make a new instance to be unique by identity
+				if(threadContext.getLookupMarkup(value)!=null) {
+					value = new String(value); // Need new string with different identity for unique threadContext lookups
+				}
+				// Find invalidated flag
+				threadContext.addLookupMarkup(
+					value,
+					new EditableResourceBundleLookupMarkup(
+						lookupValue.id,
+						invalidated,
+						elementId,
+						modifyAllText.get()
+					)
+				);
 			}
-			// Find invalidated flag
-			threadContext.addLookupMarkup(
-				value,
-				new EditableResourceBundleLookupMarkup(
-					lookupValue.id,
-					invalidated,
-					elementId,
-					modifyAllText.get()
-				)
-			);
 		}
 		return value;
 	}
