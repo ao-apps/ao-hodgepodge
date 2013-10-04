@@ -22,6 +22,7 @@
  */
 package com.aoindustries.net;
 
+import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.util.StringUtility;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -76,7 +77,7 @@ public class HttpParametersMap implements MutableHttpParameters {
             String value;
             if(pos==-1) {
                 name = URLDecoder.decode(nameValue, encoding);
-                value = null;
+                value = ""; // Servlet environment treats no equal sign same as value equal empty string - matching here
             } else {
                 name = URLDecoder.decode(nameValue.substring(0, pos), encoding);
                 value = URLDecoder.decode(nameValue.substring(pos+1), encoding);
@@ -110,6 +111,8 @@ public class HttpParametersMap implements MutableHttpParameters {
 
     @Override
     public void addParameter(String name, String value) {
+		NullArgumentException.checkNotNull(name, "name");
+		NullArgumentException.checkNotNull(value, "value");
         List<String> values = map.get(name);
         if(values==null) map.put(name, values = new ArrayList<String>());
         values.add(value);
