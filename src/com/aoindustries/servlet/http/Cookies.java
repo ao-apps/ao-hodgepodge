@@ -56,8 +56,8 @@ public final class Cookies {
         newCookie.setSecure(secure && request.isSecure());
         String path;
         if(contextOnlyPath) {
-            path = request.getContextPath();
-            if(path.length()==0) path = "/";
+            path = request.getContextPath() + "/";
+            //if(path.length()==0) path = "/";
         } else {
             path = "/";
         }
