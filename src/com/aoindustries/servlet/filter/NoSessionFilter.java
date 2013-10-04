@@ -318,7 +318,9 @@ public class NoSessionFilter implements Filter {
                                         ) {
                                             String value = originalRequest.getParameter(paramName);
                                             assert value!=null;
-                                            allCookies.put(cookieName, new Cookie(cookieName, value));
+											Cookie newCookie = new Cookie(cookieName, value);
+											newCookie.setPath(originalRequest.getContextPath()+"/");
+                                            allCookies.put(cookieName, newCookie);
                                         }
                                     }
                                 }
