@@ -177,6 +177,7 @@ public class ServletUtil {
     /**
      * Gets an absolute URL for the given context-relative path.  This includes
      * protocol, port, context path, and relative path.
+	 * No URL rewriting is performed.
      */
     public static void getAbsoluteURL(HttpServletRequest request, String relPath, Appendable out) throws IOException {
         out.append(request.isSecure() ? "https://" : "http://");
@@ -190,6 +191,7 @@ public class ServletUtil {
     /**
      * Gets an absolute URL for the given context-relative path.  This includes
      * protocol, port, context path, and relative path.
+	 * No URL rewriting is performed.
      */
     public static void getAbsoluteURL(HttpServletRequest request, String relPath, MediaEncoder encoder, Appendable out) throws IOException {
 		if(encoder==null) {
