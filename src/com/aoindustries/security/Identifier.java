@@ -159,11 +159,18 @@ public class Identifier implements Serializable, Comparable<Identifier> {
     @Override
     public boolean equals(Object O) {
         if(!(O instanceof Identifier)) return false;
-        Identifier other = (Identifier)O;
-        return hi==other.hi && lo==other.lo;
+		return equals((Identifier)O);
     }
 
-    @Override
+    public boolean equals(Identifier other) {
+		return
+			other!=null
+			&& hi==other.hi
+			&& lo==other.lo
+		;
+    }
+
+	@Override
     public int hashCode() {
         // The values should be well distributed, any set of 32 bits should be equally good.
         return (int)lo;

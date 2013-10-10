@@ -63,7 +63,7 @@ final class PrivateMethodProfile {
     }
     
     boolean equals(PrivateMethodProfile mp) {
-        return this==mp || equals(mp.level, mp.clazz, mp.method, mp.param1);
+        return mp!=null && (this==mp || equals(mp.level, mp.clazz, mp.method, mp.param1));
     }
 
     boolean equals(int level, Class clazz, String method, Object param1) {

@@ -76,7 +76,7 @@ final public class MethodProfile implements Serializable {
     }
     
     public boolean equals(MethodProfile mp) {
-        return this==mp || equals(mp.level, mp.classname, mp.method, mp.param1);
+        return mp!=null && (this==mp || equals(mp.level, mp.classname, mp.method, mp.param1));
     }
 
     public boolean equals(int level, String classname, String method, String param1) {
