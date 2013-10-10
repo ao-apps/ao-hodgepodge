@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012  AO Industries, Inc.
+ * Copyright (C) 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -28,6 +28,7 @@ import com.aoindustries.math.LongLong;
 import com.aoindustries.util.persistent.PersistentCollections;
 import java.io.Serializable;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -46,22 +47,34 @@ public class Identifier implements Serializable, Comparable<Identifier> {
         return new Identifier(encoded);
     }
 
-    private static final char[] characters = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        '0', '1', '2', '3', '4', /*'5', '6', '7', '8', '9'*/
-    };
+	private static final long BASE = 57;
 
-    private static final long BASE = 57;
+	private static final char[] characters = {
+        'A', /*'B',*/ 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+        'N', /*'O',*/ 'P', /*'Q',*/ 'R', /*'S',*/ 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', /*'l',*/ 'm',
+        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+    };
+	static {
+		assert characters.length == BASE;
+	}
+
+	private static final char LOWEST_CHAR = '0';
+	private static final char HIGHEST_CHAR = 'z';
+
+	private static final int[] values = new int[HIGHEST_CHAR + 1 - LOWEST_CHAR];
+	static {
+		Arrays.fill(values, -1);
+		for(int i=0; i<BASE; i++) {
+			values[characters[i] - LOWEST_CHAR] = i;
+		}
+	}
+
     /**
      * Gets the character for the low-order modulus BASE a long value.
      */
     private static char getCharacter(long value) {
-        //long remainder = value % BASE;
-        //int index = (int)((remainder + BASE) % BASE); // Make sure is always positive
-        //int index = (int)Math.abs(remainder);
         int index = (int)remainder(value, BASE);
         return characters[index];
     }
@@ -70,9 +83,13 @@ public class Identifier implements Serializable, Comparable<Identifier> {
      * Gets the value for a character as a long.
      */
     private static long getValue(char ch) {
-        if(ch>='A' && ch<='Z') return (long)(ch - 'A');
-        if(ch>='a' && ch<='z') return (long)(ch - 'a' + 26);
-        if(ch>='0' && ch<='4') return (long)(ch - '0' + 52);
+		if(ch >= LOWEST_CHAR && ch<=HIGHEST_CHAR) {
+			int value = values[ch - LOWEST_CHAR];
+			if(value!=-1) return value;
+		}
+		//if(ch>='A' && ch<='Z') return (long)(ch - 'A');
+        //if(ch>='a' && ch<='z') return (long)(ch - 'a' + 26);
+        //if(ch>='0' && ch<='4') return (long)(ch - '0' + 52);
         throw new IllegalArgumentException(Character.toString(ch));
     }
 
