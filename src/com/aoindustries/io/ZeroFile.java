@@ -53,17 +53,25 @@ public class ZeroFile {
 
     public static void main(String[] args) {
         if(args.length!=2) {
-            System.err.println("usage: "+ZeroFile.class.getName()+" <mb_per_sec> <path>");
+            System.err.println("usage: "+ZeroFile.class.getName()+" <mb_per_sec>[/<mb_per_sec_write>] <path>");
             System.exit(1);
         } else {
             try {
-                int bps = Integer.parseInt(args[0]);
+				int bpsIn, bpsOut;
+				String bpsArg = args[0];
+				int slashPos = bpsArg.indexOf('/');
+				if(slashPos == -1) {
+					bpsIn = bpsOut = Integer.parseInt(bpsArg);
+				} else {
+					bpsIn = Integer.parseInt(bpsArg.substring(0, slashPos));
+					bpsOut = Integer.parseInt(bpsArg.substring(slashPos+1));
+				}
                 long bytesWritten;
                 File file = new File(args[1]);
                 if(DEBUG) System.err.println("Opening " + file);
                 RandomAccessFile raf = new RandomAccessFile(file, DRY_RUN ? "r" : "rw");
                 try {
-                    bytesWritten = zeroFile(bps, raf);
+                    bytesWritten = zeroFile(bpsIn, bpsOut, raf);
                 } finally {
                     if(DEBUG) System.err.println("Closing " + file);
                     raf.close();
@@ -101,11 +109,12 @@ public class ZeroFile {
     }
 
     /**
-     * Zeroes the provided random access file, only writing blocks that contain
-     * non-zero.  Writes at the maximum provided bps blocks per second.
+     * Zeroes the provided random access file, only writing blocks that contain non-zero.
+	 * Reads at the maximum provided bpsIn blocks per second.
+	 * Writes at the maximum provided bpsOut blocks per second.
      * Returns the number of bytes written.
      */
-    public static long zeroFile(int bps, RandomAccessFile raf) throws IOException {
+    public static long zeroFile(int bpsIn, int bpsOut, RandomAccessFile raf) throws IOException {
         // Initialize bitset
         final long len = raf.length();
         final int blocks;
@@ -128,7 +137,7 @@ public class ZeroFile {
             }
             raf.seek(pos);
             raf.readFully(buff, 0, blockSize);
-            lastTime = sleep(bps, lastTime);
+            lastTime = sleep(bpsIn, lastTime);
             boolean allZero = true;
             for(int i=0; i<blockSize; i++) {
                 if(buff[i]!=0) {
@@ -154,7 +163,7 @@ public class ZeroFile {
                 if(!DRY_RUN) {
                     raf.seek(pos);
                     raf.write(buff, 0, blockSize);
-                    lastTime = sleep(bps, lastTime);
+                    lastTime = sleep(bpsOut, lastTime);
                     bytesWritten += blockSize;
                 }
             }
