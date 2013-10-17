@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 /**
  * Limits the concurrency to a resource identified by any arbitrary key object.
  * When a second thread tries to access the same resource as a previous thread,
- * it will shared the results that are obtained by the previous thread.
+ * it will share the results that are obtained by the previous thread.
  */
 final public class ConcurrencyLimiter<K,R> {
 
