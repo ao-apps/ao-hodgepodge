@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
 
 /**
  * Limits the concurrency to a resource identified by any arbitrary key object.
@@ -35,7 +34,7 @@ import java.util.logging.Logger;
  */
 final public class ConcurrencyLimiter<K,R> {
 
-    private static final Logger logger = Logger.getLogger(ConcurrencyLimiter.class.getName());
+    //private static final Logger logger = Logger.getLogger(ConcurrencyLimiter.class.getName());
 
 	private static class ResultsCache<R> {
 		private int threadCount;
