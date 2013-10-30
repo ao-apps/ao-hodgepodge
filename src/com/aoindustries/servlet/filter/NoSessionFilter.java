@@ -192,7 +192,8 @@ public class NoSessionFilter implements Filter {
     @Override
     public void init(FilterConfig config) {
         cookieNames.clear();
-        cookieNames.addAll(StringUtility.splitStringCommaSpace(config.getInitParameter("cookieNames")));
+		String cookieNamesInitParam = config.getInitParameter("cookieNames");
+        if(cookieNamesInitParam != null) cookieNames.addAll(StringUtility.splitStringCommaSpace(cookieNamesInitParam));
         if(cookieNames.size()>MAXIMUM_COOKIES) throw new IllegalArgumentException("cookieNames.size()>"+MAXIMUM_COOKIES);
     }
 
