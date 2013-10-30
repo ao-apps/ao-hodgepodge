@@ -216,6 +216,20 @@ final public class FileUtils {
     }
 
     /**
+     * Copies a file to an output stream.
+     *
+     * @return  the number of bytes copied
+     */
+    public static long copy(File from, OutputStream out) throws IOException {
+        InputStream in = new FileInputStream(from);
+        try {
+			return IoUtils.copy(in, out);
+        } finally {
+            in.close();
+        }
+    }
+
+	/**
      * Recursively copies source to destination.  Destination must not exist.
      */
     public static void copyRecursive(File from, File to) throws IOException {
