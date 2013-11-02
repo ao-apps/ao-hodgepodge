@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.util.CalendarUtils;
 import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.StringUtility;
 import java.io.IOException;
@@ -234,27 +235,13 @@ public class SQLUtility {
     }
 
     /**
-     * Gets the date from the YYYY-MM-DD format.
+	 * @see  CalendarUtils#parseDate(java.lang.String)
      */
-    public static java.sql.Date getDate(String s) throws IllegalArgumentException {
-        if (s.length()!=10) throw new IllegalArgumentException("Invalid date: "+s);
-        int year = Integer.parseInt(s.substring(0,4));
-        int month = Integer.parseInt(s.substring(5,7));
-        if (month>12) throw new IllegalArgumentException("Invalid date: "+s);
-        int day = Integer.parseInt(s.substring(8,10));
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, year);
-        cal.set(Calendar.MONTH, month-1);
-        if (day>cal.getMaximum(Calendar.DATE)) throw new IllegalArgumentException("Invalid date: "+s);
-        cal.set(Calendar.DATE, day);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return new java.sql.Date(cal.getTimeInMillis());
+    public static java.sql.Date getDate(String yyyy_mm_dd) throws IllegalArgumentException {
+        return new java.sql.Date(CalendarUtils.parseDate(yyyy_mm_dd).getTimeInMillis());
     }
 
-    /**
+	/**
      * Gets the date and time from the YYYY-MM-DD HH:MM:SS format.
      */
     public static java.sql.Date getDateTime(String s) throws IllegalArgumentException {
