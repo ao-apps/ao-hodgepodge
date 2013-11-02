@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util;
 
+import java.io.IOException;
 import java.util.Calendar;
 
 /**
@@ -59,4 +60,37 @@ public class CalendarUtils {
         cal.set(Calendar.MILLISECOND, 0);
         return cal;
     }
+
+	/**
+	 * Formats a date in YYYY-MM-DD format.
+	 */
+	public static String formatDate(Calendar cal) {
+		try {
+			StringBuilder result=new StringBuilder(10); // 10: Number of characters in "YYYY-MM-DD"
+			formatDate(cal, result);
+			return result.toString();
+		} catch(IOException e) {
+			AssertionError assertFailed = new AssertionError("IOException should never occur on StringBuilder");
+			assertFailed.initCause(e);
+			throw assertFailed;
+		}
+	}
+
+	/**
+	 * Formats a date in YYYY-MM-DD format.
+	 */
+	public static void formatDate(Calendar cal, Appendable out) throws IOException {
+        // year
+        out.append(Integer.toString(cal.get(Calendar.YEAR)));
+        out.append('-');
+        // Month
+        int month=cal.get(Calendar.MONTH)+1;
+        if(month<10) out.append('0');
+        out.append(Integer.toString(month));
+        out.append('-');
+        // Day
+        int day=cal.get(Calendar.DAY_OF_MONTH);
+        if(day<10) out.append('0');
+        out.append(Integer.toString(day));
+	}
 }

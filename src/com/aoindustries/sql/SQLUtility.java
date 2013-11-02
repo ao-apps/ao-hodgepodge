@@ -207,31 +207,12 @@ public class SQLUtility {
     }
 
     /**
-     * Gets the date in the YYYY-MM-DD format.
+	 * @see  CalendarUtils#formatDate(java.util.Calendar)
      */
     public static String getDate(long time) {
         Calendar cal=Calendar.getInstance();
-        cal.setTime(new java.util.Date(time));
-        StringBuilder SB=new StringBuilder();
-
-        // year
-        SB.append(cal.get(Calendar.YEAR));
-
-        SB.append('-');
-
-        // Month
-        int month=cal.get(Calendar.MONTH)+1;
-        if(month<10) SB.append('0');
-        SB.append(month);
-
-        SB.append('-');
-
-        // Day
-        int day=cal.get(Calendar.DAY_OF_MONTH);
-        if(day<10) SB.append('0');
-        SB.append(day);
-
-        return SB.toString();
+        cal.setTimeInMillis(time);
+		return CalendarUtils.formatDate(cal);
     }
 
     /**
