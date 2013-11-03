@@ -231,10 +231,10 @@ public class SQLUtility {
         int year=Integer.parseInt(s.substring(0,4));
         cal.set(Calendar.YEAR, year);
         int month = Integer.parseInt(s.substring(5,7));
-        if (month>12) throw new IllegalArgumentException("Invalid date: "+s);
+        if (month<1 || month>12) throw new IllegalArgumentException("Invalid date: "+s);
         cal.set(Calendar.MONTH, month-1);
         int day = Integer.parseInt(s.substring(8,10));
-        if (day>cal.getMaximum(Calendar.DATE)) throw new IllegalArgumentException("Invalid date: "+s);
+        if (day<1 || day>cal.getActualMaximum(Calendar.DATE)) throw new IllegalArgumentException("Invalid date: "+s);
         cal.set(Calendar.DATE, day);
         int hour=Integer.parseInt(s.substring(11, 13));
         if(hour<0 || hour>23) throw new IllegalArgumentException("Invalid hour: "+hour);
