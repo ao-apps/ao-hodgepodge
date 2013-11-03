@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,9 +36,20 @@ final public class UnmodifiableCalendar extends Calendar {
 
     private static final long serialVersionUID = -8096789285108910128L;
 
-    private final Calendar wrapped;
+	/**
+	 * Wraps the calendar if needed.
+	 * If null, null is returned.
+	 * If already unmodifiable, parameter is returned without additional wrapping.
+	 */
+	public static UnmodifiableCalendar wrap(Calendar cal) {
+		if(cal == null) return null;
+		if(cal instanceof UnmodifiableCalendar) return (UnmodifiableCalendar)cal;
+		return new UnmodifiableCalendar(cal);
+	}
 
-    public UnmodifiableCalendar(Calendar wrapped) {
+	private final Calendar wrapped;
+
+    private UnmodifiableCalendar(Calendar wrapped) {
         this.wrapped = wrapped;
     }
 
