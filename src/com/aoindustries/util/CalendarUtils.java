@@ -36,11 +36,12 @@ public class CalendarUtils {
     }
 
     /**
-     * Gets the date from the YYYY-MM-DD format.
+     * Gets the date from the YYYY-MM-DD format or <code>null</code> if the parameter is <code>null</code>.
 	 * Allows negative years like "-344-01-23".
 	 * Allows shorter months and days like "1976-1-9".
      */
     public static Calendar parseDate(String yyyy_mm_dd) throws IllegalArgumentException {
+		if(yyyy_mm_dd == null) return null;
 		int pos1 = yyyy_mm_dd.indexOf('-', 1); // Start search at second character to allow negative years: -1000-01-23
 		if(pos1==-1) throw new IllegalArgumentException("Invalid date: "+yyyy_mm_dd);
 		int pos2 = yyyy_mm_dd.indexOf('-', pos1 + 1);
@@ -52,7 +53,7 @@ public class CalendarUtils {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.MONTH, month-1);
-        if (day<1 || day>cal.getMaximum(Calendar.DATE)) throw new IllegalArgumentException("Invalid day of month: "+yyyy_mm_dd);
+        if (day<1 || day>cal.getActualMaximum(Calendar.DATE)) throw new IllegalArgumentException("Invalid day of month: "+yyyy_mm_dd);
         cal.set(Calendar.DATE, day);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
@@ -63,8 +64,11 @@ public class CalendarUtils {
 
 	/**
 	 * Formats a date in YYYY-MM-DD format.
+	 *
+	 * @return  the formatted date or <code>null</code> if the parameter is <code>null</code>
 	 */
 	public static String formatDate(Calendar cal) {
+		if(cal == null) return null;
 		try {
 			StringBuilder result=new StringBuilder(10); // 10: Number of characters in "YYYY-MM-DD"
 			formatDate(cal, result);
@@ -93,4 +97,16 @@ public class CalendarUtils {
         if(day<10) out.append('0');
         out.append(Integer.toString(day));
 	}
+
+    /**
+     * Gets today's date.  Hour, minute, second, and millisecond are all set to zero.
+     */
+    public static Calendar getToday() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal;
+    }
 }
