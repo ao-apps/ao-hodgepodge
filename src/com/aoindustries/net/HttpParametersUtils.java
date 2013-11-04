@@ -39,8 +39,19 @@ final public class HttpParametersUtils {
      */
     public static String addParams(String href, HttpParameters params) throws UnsupportedEncodingException {
         if(params!=null) {
-            boolean hasQuestion = href.indexOf('?')!=-1;
             StringBuilder sb = new StringBuilder(href);
+			// First find any anchor and if has parameters
+			int anchorStart = href.lastIndexOf('#');
+			String anchor;
+			boolean hasQuestion;
+			if(anchorStart == -1) {
+				anchor = null;
+				hasQuestion = href.lastIndexOf('?') != -1;
+			} else {
+				anchor = href.substring(anchorStart);
+				sb.setLength(anchorStart);
+				hasQuestion = href.lastIndexOf('?', anchorStart-1) != -1;
+			}
             for(Map.Entry<String,List<String>> entry : params.getParameterMap().entrySet()) {
                 String encodedName = URLEncoder.encode(entry.getKey(), "UTF-8");
                 for(String value : entry.getValue()) {
@@ -54,6 +65,7 @@ final public class HttpParametersUtils {
                     sb.append('=').append(URLEncoder.encode(value, "UTF-8"));
                 }
             }
+			if(anchor!=null) sb.append(anchor);
             href = sb.toString();
         }
         return href;
