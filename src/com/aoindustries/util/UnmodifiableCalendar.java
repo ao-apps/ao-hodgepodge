@@ -47,25 +47,40 @@ final public class UnmodifiableCalendar extends Calendar {
 		return new UnmodifiableCalendar(cal);
 	}
 
+	private static Calendar unwrap(Calendar cal) {
+		if(cal instanceof UnmodifiableCalendar) {
+			return ((UnmodifiableCalendar)cal).wrapped;
+		}
+		return cal;
+	}
+
+	private static Object unwrap(Object when) {
+		if(when instanceof UnmodifiableCalendar) {
+			return ((UnmodifiableCalendar)when).wrapped;
+		}
+		return when;
+	}
+
 	private final Calendar wrapped;
 
     private UnmodifiableCalendar(Calendar wrapped) {
+		assert !(wrapped instanceof UnmodifiableCalendar);
         this.wrapped = wrapped;
     }
 
-    @Override
+	@Override
     public void add(int field, int amount) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean after(Object when) {
-        return wrapped.after(when);
+        return wrapped.after(unwrap(when));
     }
 
     @Override
     public boolean before(Object when) {
-        return wrapped.before(when);
+        return wrapped.before(unwrap(when));
     }
 
     @Override
@@ -73,9 +88,9 @@ final public class UnmodifiableCalendar extends Calendar {
         return new UnmodifiableCalendar((Calendar)wrapped.clone());
     }
 
-    @Override
+	@Override
     public int compareTo(Calendar anotherCalendar) {
-        return wrapped.compareTo(anotherCalendar);
+		return wrapped.compareTo(unwrap(anotherCalendar));
     }
 
     @Override
@@ -95,7 +110,7 @@ final public class UnmodifiableCalendar extends Calendar {
 
     @Override
     public boolean equals(Object obj) {
-        return wrapped.equals(obj);
+        return wrapped.equals(unwrap(obj));
     }
 
     @Override
