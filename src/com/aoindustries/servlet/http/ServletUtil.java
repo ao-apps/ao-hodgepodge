@@ -24,11 +24,13 @@ package com.aoindustries.servlet.http;
 
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.NewEncodingUtils;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import javax.servlet.ServletContext;
@@ -282,5 +284,72 @@ public class ServletUtil {
 			),
 			status
 		);
+	}
+
+	/**
+	 * The name of the last modified parameter that is optionally added.
+	 */
+	public static final String LAST_MODIFIED_PARAMETER_NAME = "lastModified";
+
+	/**
+	 * <p>
+	 * Adds a last modified time (to the nearest second) to a URL if the resource is directly available
+	 * as a local resource.  Only applies to URLs that being with a slash (/).
+	 * </p>
+	 * <p>
+	 * This implementation assume anchors (#) are always after the last question mark (?).
+	 * </p>
+	 */
+	public static String addLastModified(ServletContext servletContext, String url) {
+		if(url.startsWith("/")) {
+			long lastModified = 0;
+			int questionPos = url.lastIndexOf('?');
+			String path = questionPos==-1 ? url : url.substring(0, questionPos);
+			String realPath = servletContext.getRealPath(path);
+			if(realPath != null) {
+				// Use File first
+				lastModified = new File(realPath).lastModified();
+			}
+			if(lastModified == 0) {
+				// Try URL
+				try {
+					URL resourceUrl = servletContext.getResource(path);
+					if(resourceUrl != null) {
+						URLConnection conn = resourceUrl.openConnection();
+						conn.setAllowUserInteraction(false);
+						conn.setConnectTimeout(10);
+						conn.setDoInput(false);
+						conn.setDoOutput(false);
+						conn.setReadTimeout(10);
+						conn.setUseCaches(false);
+						lastModified = conn.getLastModified();
+					}
+				} catch(IOException e) {
+					// lastModified stays unmodified
+				}
+			}
+			if(lastModified != 0) {
+				int anchorStart = url.lastIndexOf('#');
+				if(anchorStart == -1) {
+					// No anchor
+					url =
+						url
+						+ (questionPos==-1 ? '?' : '&')
+						+ LAST_MODIFIED_PARAMETER_NAME + "="
+						+ Long.toString(lastModified / 1000, Character.MIN_RADIX)
+					;
+				} else {
+					// With anchor
+					url =
+						url.substring(0, anchorStart)
+						+ (questionPos==-1 ? '?' : '&')
+						+ LAST_MODIFIED_PARAMETER_NAME + "="
+						+ Long.toString(lastModified / 1000, Character.MIN_RADIX)
+						+ url.substring(anchorStart)
+					;
+				}
+			}
+		}
+		return url;
 	}
 }
