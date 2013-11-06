@@ -749,7 +749,8 @@ public class UnixFile {
 	}
 
 	/**
-	 * Gets the extension from the path.
+	 * Gets the extension from the path, not including any period.
+	 * If no extension, returns an empty string.
 	 */
 	public static String getExtension(String path) {
 		int pos=path.lastIndexOf('.');

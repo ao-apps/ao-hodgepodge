@@ -24,6 +24,7 @@ package com.aoindustries.servlet.http;
 
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.NewEncodingUtils;
+import com.aoindustries.io.unix.UnixFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -32,7 +33,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -297,65 +302,165 @@ public class ServletUtil {
 	 * The value is URL-safe and does not need to be passed through URLEncoder.
 	 */
 	public static String encodeLastModified(long lastModified) {
-		return Long.toString(lastModified / 1000, Character.MIN_RADIX);
+		return Long.toString(lastModified / 1000, 32);
+	}
+
+	public enum AddLastModifiedWhen {
+		/**
+		 * Always tries to add last modified time.
+		 */
+		TRUE("true"),
+		/**
+		 * Never tries to add last modified time.
+		 */
+		FALSE("false"),
+		/**
+		 * Only tries to add last modified time to URLs that match expected
+		 * static resource files, by extension.  This list is for the
+		 * paths generally used for distributing web content and may not
+		 * include every possible static file type.
+		 */
+		AUTO("auto");
+
+		public static AddLastModifiedWhen valueOfLowerName(String lowerName) {
+			// Quick identify checks first
+			if("true"==lowerName) return TRUE;
+			if("false"==lowerName) return FALSE;
+			if("auto"==lowerName) return AUTO;
+			// .equals checks
+			if("true".equals(lowerName)) return TRUE;
+			if("false".equals(lowerName)) return FALSE;
+			if("auto".equals(lowerName)) return AUTO;
+			// No match
+			throw new IllegalArgumentException(lowerName);
+		}
+
+		private final String lowerName;
+
+		private AddLastModifiedWhen(String lowerName) {
+			this.lowerName = lowerName;
+		}
+		
+		public String getLowerName() {
+			return lowerName;
+		}
 	}
 
 	/**
+	 * Fetched some {@link from http://en.wikipedia.org/wiki/List_of_file_formats}
+	 */
+	private static final Set<String> staticExtensions = new HashSet<String>(
+		Arrays.asList(
+			// CSS
+			"css",
+			// Diagrams
+			"dia",
+			// Java
+			"jar",
+			"class",
+			// JavaScript
+			"js",
+			"spt",
+			"jsfl",
+			// Image types
+			"bmp",
+			"exif",
+			"gif",
+			"ico",
+			"jfif",
+			"jpg",
+			"jpeg",
+			"jpe",
+			"mng",
+			"nitf",
+			"png",
+			"svg",
+			"tif",
+			"tiff",
+			// HTML document
+			"htm",
+			"html",
+			"xhtml",
+			"mhtml",
+			// PDF document
+			"pdf",
+			// XML document
+			"xml",
+			"rss"
+		)
+	);
+	
+	/**
 	 * <p>
 	 * Adds a last modified time (to the nearest second) to a URL if the resource is directly available
-	 * as a local resource.  Only applies to URLs that being with a slash (/).
+	 * as a local resource.  Only applies to URLs that begin with a slash (/).
 	 * </p>
 	 * <p>
 	 * This implementation assume anchors (#) are always after the last question mark (?).
 	 * </p>
 	 */
-	public static String addLastModified(ServletContext servletContext, String url) {
-		if(url.startsWith("/")) {
-			long lastModified = 0;
+	public static String addLastModified(ServletContext servletContext, String url, AddLastModifiedWhen when) {
+		if(
+			when != AddLastModifiedWhen.FALSE // Never try to add
+			&& url.startsWith("/")
+		) {
 			int questionPos = url.lastIndexOf('?');
 			String path = questionPos==-1 ? url : url.substring(0, questionPos);
-			String realPath = servletContext.getRealPath(path);
-			if(realPath != null) {
-				// Use File first
-				lastModified = new File(realPath).lastModified();
+			boolean doAdd;
+			if(when == AddLastModifiedWhen.TRUE) {
+				// Always try to add
+				doAdd = true;
+			} else {
+				// Conditionally try to add based on file extension
+				doAdd = staticExtensions.contains(
+					UnixFile.getExtension(path).toLowerCase(Locale.ENGLISH)
+				);
 			}
-			if(lastModified == 0) {
-				// Try URL
-				try {
-					URL resourceUrl = servletContext.getResource(path);
-					if(resourceUrl != null) {
-						URLConnection conn = resourceUrl.openConnection();
-						conn.setAllowUserInteraction(false);
-						conn.setConnectTimeout(10);
-						conn.setDoInput(false);
-						conn.setDoOutput(false);
-						conn.setReadTimeout(10);
-						conn.setUseCaches(false);
-						lastModified = conn.getLastModified();
-					}
-				} catch(IOException e) {
-					// lastModified stays unmodified
+			if(doAdd) {
+				long lastModified = 0;
+				String realPath = servletContext.getRealPath(path);
+				if(realPath != null) {
+					// Use File first
+					lastModified = new File(realPath).lastModified();
 				}
-			}
-			if(lastModified != 0) {
-				int anchorStart = url.lastIndexOf('#');
-				if(anchorStart == -1) {
-					// No anchor
-					url =
-						url
-						+ (questionPos==-1 ? '?' : '&')
-						+ LAST_MODIFIED_PARAMETER_NAME + "="
-						+ encodeLastModified(lastModified)
-					;
-				} else {
-					// With anchor
-					url =
-						url.substring(0, anchorStart)
-						+ (questionPos==-1 ? '?' : '&')
-						+ LAST_MODIFIED_PARAMETER_NAME + "="
-						+ encodeLastModified(lastModified)
-						+ url.substring(anchorStart)
-					;
+				if(lastModified == 0) {
+					// Try URL
+					try {
+						URL resourceUrl = servletContext.getResource(path);
+						if(resourceUrl != null) {
+							URLConnection conn = resourceUrl.openConnection();
+							conn.setAllowUserInteraction(false);
+							conn.setConnectTimeout(10);
+							conn.setDoInput(false);
+							conn.setDoOutput(false);
+							conn.setReadTimeout(10);
+							conn.setUseCaches(false);
+							lastModified = conn.getLastModified();
+						}
+					} catch(IOException e) {
+						// lastModified stays unmodified
+					}
+				}
+				if(lastModified != 0) {
+					int anchorStart = url.lastIndexOf('#');
+					if(anchorStart == -1) {
+						// No anchor
+						url =
+							url
+							+ (questionPos==-1 ? '?' : '&')
+							+ LAST_MODIFIED_PARAMETER_NAME + "="
+							+ encodeLastModified(lastModified)
+						;
+					} else {
+						// With anchor
+						url =
+							url.substring(0, anchorStart)
+							+ (questionPos==-1 ? '?' : '&')
+							+ LAST_MODIFIED_PARAMETER_NAME + "="
+							+ encodeLastModified(lastModified)
+							+ url.substring(anchorStart)
+						;
+					}
 				}
 			}
 		}
