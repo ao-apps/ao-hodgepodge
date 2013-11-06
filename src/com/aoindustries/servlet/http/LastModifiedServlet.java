@@ -73,7 +73,7 @@ public class LastModifiedServlet extends HttpServlet {
 	/**
 	 * The number of milliseconds to keep cache entries.
 	 */
-	private static final long CACHE_MAX_AGE = 1L;
+	private static final long CACHE_MAX_AGE = 1000L;
 
 	/**
 	 * Encoding used on reading files and writing output.
