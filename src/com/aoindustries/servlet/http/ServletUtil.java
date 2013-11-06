@@ -24,20 +24,13 @@ package com.aoindustries.servlet.http;
 
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.NewEncodingUtils;
-import com.aoindustries.io.unix.UnixFile;
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,9 +48,16 @@ public class ServletUtil {
     /**
      * Converts a possibly-relative path to a context-relative absolute path.
      * Resolves ./ and ../ at the beginning of the URL but not in the middle of the URL.
+	 * If the URL begins with http:/, https:/, or file:/, it is not altered.
      */
     public static String getAbsolutePath(String servletPath, String relativeUrlPath) throws MalformedURLException {
-        if(relativeUrlPath.length()>0 && relativeUrlPath.charAt(0)!='/') {
+        if(
+			relativeUrlPath.length()>0
+			&& relativeUrlPath.charAt(0)!='/'
+			&& !relativeUrlPath.startsWith("http:/")
+			&& !relativeUrlPath.startsWith("https:/")
+			&& !relativeUrlPath.startsWith("file:/")
+		) {
             int slashPos = servletPath.lastIndexOf('/');
             if(slashPos==-1) throw new MalformedURLException("No slash found in servlet path: "+servletPath);
             final String newPath = relativeUrlPath;
@@ -94,7 +94,7 @@ public class ServletUtil {
     }
 
     /**
-     * Converts a possibly-relative path to a context-relative absolute path.
+	 * @see  #getAbsolutePath(java.lang.String, java.lang.String)
      */
     public static String getAbsolutePath(HttpServletRequest request, String path) throws MalformedURLException {
         return getAbsolutePath(request.getServletPath(), path);
@@ -234,10 +234,7 @@ public class ServletUtil {
 		String href
 	) throws MalformedURLException, UnsupportedEncodingException {
 		// Convert page-relative paths to context-relative path, resolving ./ and ../
-        if(
-            !href.startsWith("http://")
-            && !href.startsWith("https://")
-        ) href = getAbsolutePath(servletPath, href);
+        href = getAbsolutePath(servletPath, href);
 
         // Encode URL path elements (like Japanese filenames)
         href = NewEncodingUtils.encodeUrlPath(href);
@@ -289,202 +286,5 @@ public class ServletUtil {
 			),
 			status
 		);
-	}
-
-	/**
-	 * The name of the last modified parameter that is optionally added.
-	 * The value is URL-safe and does not need to be passed through URLEncoder.
-	 */
-	public static final String LAST_MODIFIED_PARAMETER_NAME = "lastModified";
-
-	/**
-	 * Encodes a last modified value.
-	 * The value is URL-safe and does not need to be passed through URLEncoder.
-	 */
-	public static String encodeLastModified(long lastModified) {
-		return Long.toString(lastModified / 1000, 32);
-	}
-
-	/**
-	 * <p>
-	 * Gets a last modified time given a context-relative path starting with a
-	 * slash (/).
-	 * </p>
-	 * <p>
-	 * TODO: Cache values and perform lookups less frequently when needed for performance.
-	 * </p>
-	 * <p>
-	 * TODO: To handle the URLs instead of CSS files, create a servlet that is mapped into
-	 * *.css that has a modified time equal to the greatest of itself or any referenced URL.
-	 * Use that modified time here when determining lastModified time of a .css file.
-	 * </p>
-	 *
-	 * @return  the modified time or <code>0</code> when unknown.
-	 */
-	public static long getLastModified(ServletContext servletContext, String path) {
-		long lastModified = 0;
-		String realPath = servletContext.getRealPath(path);
-		if(realPath != null) {
-			// Use File first
-			lastModified = new File(realPath).lastModified();
-		}
-		if(lastModified == 0) {
-			// Try URL
-			try {
-				URL resourceUrl = servletContext.getResource(path);
-				if(resourceUrl != null) {
-					URLConnection conn = resourceUrl.openConnection();
-					conn.setAllowUserInteraction(false);
-					conn.setConnectTimeout(10);
-					conn.setDoInput(false);
-					conn.setDoOutput(false);
-					conn.setReadTimeout(10);
-					conn.setUseCaches(false);
-					lastModified = conn.getLastModified();
-				}
-			} catch(IOException e) {
-				// lastModified stays unmodified
-			}
-		}
-		return lastModified;
-	}
-
-	public enum AddLastModifiedWhen {
-		/**
-		 * Always tries to add last modified time.
-		 */
-		TRUE("true"),
-		/**
-		 * Never tries to add last modified time.
-		 */
-		FALSE("false"),
-		/**
-		 * Only tries to add last modified time to URLs that match expected
-		 * static resource files, by extension.  This list is for the
-		 * paths generally used for distributing web content and may not
-		 * include every possible static file type.
-		 */
-		AUTO("auto");
-
-		public static AddLastModifiedWhen valueOfLowerName(String lowerName) {
-			// Quick identify checks first
-			if("true"==lowerName) return TRUE;
-			if("false"==lowerName) return FALSE;
-			if("auto"==lowerName) return AUTO;
-			// .equals checks
-			if("true".equals(lowerName)) return TRUE;
-			if("false".equals(lowerName)) return FALSE;
-			if("auto".equals(lowerName)) return AUTO;
-			// No match
-			throw new IllegalArgumentException(lowerName);
-		}
-
-		private final String lowerName;
-
-		private AddLastModifiedWhen(String lowerName) {
-			this.lowerName = lowerName;
-		}
-		
-		public String getLowerName() {
-			return lowerName;
-		}
-	}
-
-	/**
-	 * Fetched some {@link from http://en.wikipedia.org/wiki/List_of_file_formats}
-	 */
-	private static final Set<String> staticExtensions = new HashSet<String>(
-		Arrays.asList(
-			// CSS
-			"css",
-			// Diagrams
-			"dia",
-			// Java
-			"jar",
-			"class",
-			// JavaScript
-			"js",
-			"spt",
-			"jsfl",
-			// Image types
-			"bmp",
-			"exif",
-			"gif",
-			"ico",
-			"jfif",
-			"jpg",
-			"jpeg",
-			"jpe",
-			"mng",
-			"nitf",
-			"png",
-			"svg",
-			"tif",
-			"tiff",
-			// HTML document
-			"htm",
-			"html",
-			"xhtml",
-			"mhtml",
-			// PDF document
-			"pdf",
-			// XML document
-			"xml",
-			"rss"
-		)
-	);
-	
-	/**
-	 * <p>
-	 * Adds a last modified time (to the nearest second) to a URL if the resource is directly available
-	 * as a local resource.  Only applies to URLs that begin with a slash (/).
-	 * </p>
-	 * <p>
-	 * This implementation assume anchors (#) are always after the last question mark (?).
-	 * </p>
-	 */
-	public static String addLastModified(ServletContext servletContext, String url, AddLastModifiedWhen when) {
-		if(
-			when != AddLastModifiedWhen.FALSE // Never try to add
-			&& url.startsWith("/")
-		) {
-			int questionPos = url.lastIndexOf('?');
-			String path = questionPos==-1 ? url : url.substring(0, questionPos);
-			boolean doAdd;
-			if(when == AddLastModifiedWhen.TRUE) {
-				// Always try to add
-				doAdd = true;
-			} else {
-				// Conditionally try to add based on file extension
-				doAdd = staticExtensions.contains(
-					UnixFile.getExtension(path).toLowerCase(Locale.ENGLISH)
-				);
-			}
-			if(doAdd) {
-				long lastModified = getLastModified(servletContext, path);
-				if(lastModified != 0) {
-					int anchorStart = url.lastIndexOf('#');
-					if(anchorStart == -1) {
-						// No anchor
-						url =
-							url
-							+ (questionPos==-1 ? '?' : '&')
-							+ LAST_MODIFIED_PARAMETER_NAME + "="
-							+ encodeLastModified(lastModified)
-						;
-					} else {
-						// With anchor
-						url =
-							url.substring(0, anchorStart)
-							+ (questionPos==-1 ? '?' : '&')
-							+ LAST_MODIFIED_PARAMETER_NAME + "="
-							+ encodeLastModified(lastModified)
-							+ url.substring(anchorStart)
-						;
-					}
-				}
-			}
-		}
-		return url;
 	}
 }
