@@ -122,7 +122,7 @@ public class LastModifiedServlet extends HttpServlet {
 			}
 			synchronized(cache) {
 				// Check the cache
-				final long lastModified = getLastModifiedNoCache(servletContext, path);
+				final long lastModified = getLastModifiedNoCache(servletContext, path); // Before synchronized to avoid deadlock
 				ParsedCssFile parsedCssFile = cache.get(path);
 				if(
 					parsedCssFile != null
@@ -157,7 +157,7 @@ public class LastModifiedServlet extends HttpServlet {
 						// Get the resource path relative to the CSS file
 						String resourcePath = ServletUtil.getAbsolutePath(path, url);
 						if(resourcePath.startsWith("/")) {
-							long resourceModified = getLastModified(servletContext, resourcePath);
+							long resourceModified = getLastModifiedNoCache(servletContext, resourcePath);
 							if(resourceModified != 0) {
 								referencedPaths.put(resourcePath, resourceModified);
 								int questionPos = url.lastIndexOf('?');
@@ -215,7 +215,7 @@ public class LastModifiedServlet extends HttpServlet {
 			this.rewrittenCssFile = rewrittenCssFile;
 			long newest = lastModified;
 			for(Map.Entry<String,Long> entry : referencedPaths.entrySet()) {
-				long modified = getLastModified(servletContext, entry.getKey());
+				long modified = getLastModifiedNoCache(servletContext, entry.getKey());
 				if(modified > newest) newest = modified;
 			}
 			this.newestLastModified = newest;
@@ -226,7 +226,7 @@ public class LastModifiedServlet extends HttpServlet {
 		 */
 		private boolean hasModifiedUrl(ServletContext servletContext) {
 			for(Map.Entry<String,Long> entry : referencedPaths.entrySet()) {
-				if(getLastModified(servletContext, entry.getKey()) != entry.getValue().longValue()) {
+				if(getLastModifiedNoCache(servletContext, entry.getKey()) != entry.getValue().longValue()) {
 					return true;
 				}
 			}
