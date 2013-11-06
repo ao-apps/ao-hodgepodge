@@ -288,8 +288,17 @@ public class ServletUtil {
 
 	/**
 	 * The name of the last modified parameter that is optionally added.
+	 * The value is URL-safe and does not need to be passed through URLEncoder.
 	 */
 	public static final String LAST_MODIFIED_PARAMETER_NAME = "lastModified";
+
+	/**
+	 * Encodes a last modified value.
+	 * The value is URL-safe and does not need to be passed through URLEncoder.
+	 */
+	public static String encodeLastModified(long lastModified) {
+		return Long.toString(lastModified / 1000, Character.MIN_RADIX);
+	}
 
 	/**
 	 * <p>
@@ -336,7 +345,7 @@ public class ServletUtil {
 						url
 						+ (questionPos==-1 ? '?' : '&')
 						+ LAST_MODIFIED_PARAMETER_NAME + "="
-						+ Long.toString(lastModified / 1000, Character.MIN_RADIX)
+						+ encodeLastModified(lastModified)
 					;
 				} else {
 					// With anchor
@@ -344,7 +353,7 @@ public class ServletUtil {
 						url.substring(0, anchorStart)
 						+ (questionPos==-1 ? '?' : '&')
 						+ LAST_MODIFIED_PARAMETER_NAME + "="
-						+ Long.toString(lastModified / 1000, Character.MIN_RADIX)
+						+ encodeLastModified(lastModified)
 						+ url.substring(anchorStart)
 					;
 				}
