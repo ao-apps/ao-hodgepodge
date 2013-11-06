@@ -122,7 +122,7 @@ public class LastModifiedServlet extends HttpServlet {
 			}
 			synchronized(cache) {
 				// Check the cache
-				final long lastModified = getLastModifiedNoCache(servletContext, path); // Before synchronized to avoid deadlock
+				final long lastModified = getCachedLastModified(servletContext, path);
 				ParsedCssFile parsedCssFile = cache.get(path);
 				if(
 					parsedCssFile != null
@@ -157,7 +157,7 @@ public class LastModifiedServlet extends HttpServlet {
 						// Get the resource path relative to the CSS file
 						String resourcePath = ServletUtil.getAbsolutePath(path, url);
 						if(resourcePath.startsWith("/")) {
-							long resourceModified = getLastModifiedNoCache(servletContext, resourcePath);
+							long resourceModified = getCachedLastModified(servletContext, resourcePath);
 							if(resourceModified != 0) {
 								referencedPaths.put(resourcePath, resourceModified);
 								int questionPos = url.lastIndexOf('?');
@@ -215,7 +215,7 @@ public class LastModifiedServlet extends HttpServlet {
 			this.rewrittenCssFile = rewrittenCssFile;
 			long newest = lastModified;
 			for(Map.Entry<String,Long> entry : referencedPaths.entrySet()) {
-				long modified = getLastModifiedNoCache(servletContext, entry.getKey());
+				long modified = getCachedLastModified(servletContext, entry.getKey());
 				if(modified > newest) newest = modified;
 			}
 			this.newestLastModified = newest;
@@ -226,7 +226,7 @@ public class LastModifiedServlet extends HttpServlet {
 		 */
 		private boolean hasModifiedUrl(ServletContext servletContext) {
 			for(Map.Entry<String,Long> entry : referencedPaths.entrySet()) {
-				if(getLastModifiedNoCache(servletContext, entry.getKey()) != entry.getValue().longValue()) {
+				if(getCachedLastModified(servletContext, entry.getKey()) != entry.getValue().longValue()) {
 					return true;
 				}
 			}
@@ -256,55 +256,15 @@ public class LastModifiedServlet extends HttpServlet {
 	}
 
 	/**
-	 * Gets a modified time from either a file or URL.
-	 */
-	private static long getLastModifiedNoCache(ServletContext servletContext, String path) {
-		long lastModified = 0;
-		String realPath = servletContext.getRealPath(path);
-		if(realPath != null) {
-			// Use File first
-			lastModified = new File(realPath).lastModified();
-		}
-		if(lastModified == 0) {
-			// Try URL
-			try {
-				URL resourceUrl = servletContext.getResource(path);
-				if(resourceUrl != null) {
-					URLConnection conn = resourceUrl.openConnection();
-					conn.setAllowUserInteraction(false);
-					conn.setConnectTimeout(10);
-					conn.setDoInput(false);
-					conn.setDoOutput(false);
-					conn.setReadTimeout(10);
-					conn.setUseCaches(false);
-					lastModified = conn.getLastModified();
-				}
-			} catch(IOException e) {
-				// lastModified stays unmodified
-			}
-		}
-		return lastModified;
-	}
-
-	/**
 	 * The attribute name used to store the cache.
 	 */
 	private static final String GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME = LastModifiedServlet.class.getName()+".getLastModified.cache";
 
 	/**
-	 * <p>
-	 * Gets a last modified time given a context-relative path starting with a
-	 * slash (/).
-	 * </p>
-	 * <p>
-	 * Any file ending in ".css" (case-insensitive) will be parsed and will have
-	 * a modified time that is equal to the greatest of itself or any referenced
-	 * URL.
-	 * </p>
-	 *
-	 * @return  the modified time or <code>0</code> when unknown.
+	 * Gets a modified time from either a file or URL.
+	 * Caches results for up to a second.
 	 */
-	public static long getLastModified(ServletContext servletContext, String path, String extension) {
+	private static long getCachedLastModified(ServletContext servletContext, String path) {
 		// Get the cache
 		@SuppressWarnings("unchecked")
 		Map<String,GetLastModifiedCacheValue> cache = (Map<String,GetLastModifiedCacheValue>)servletContext.getAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME);
@@ -320,23 +280,62 @@ public class LastModifiedServlet extends HttpServlet {
 			if(cacheValue != null && cacheValue.isValid(currentTime)) {
 				return cacheValue.lastModified;
 			} else {
-				long lastModified;
-				if(CSS_EXTENSION.equals(extension)) {
+				long lastModified = 0;
+				String realPath = servletContext.getRealPath(path);
+				if(realPath != null) {
+					// Use File first
+					lastModified = new File(realPath).lastModified();
+				}
+				if(lastModified == 0) {
+					// Try URL
 					try {
-						// Parse CSS file, finding all dependencies.
-						// Don't re-parse when CSS file not changed, but still check
-						// dependencies.
-						lastModified = ParsedCssFile.parseCssFile(servletContext, path).newestLastModified;
+						URL resourceUrl = servletContext.getResource(path);
+						if(resourceUrl != null) {
+							URLConnection conn = resourceUrl.openConnection();
+							conn.setAllowUserInteraction(false);
+							conn.setConnectTimeout(10);
+							conn.setDoInput(false);
+							conn.setDoOutput(false);
+							conn.setReadTimeout(10);
+							conn.setUseCaches(false);
+							lastModified = conn.getLastModified();
+						}
 					} catch(IOException e) {
-						lastModified = 0;
+						// lastModified stays unmodified
 					}
-				} else {
-					lastModified = getLastModifiedNoCache(servletContext, path);
 				}
 				// Store in cache
 				cache.put(path, new GetLastModifiedCacheValue(currentTime, lastModified));
 				return lastModified;
 			}
+		}
+	}
+
+	/**
+	 * <p>
+	 * Gets a last modified time given a context-relative path starting with a
+	 * slash (/).
+	 * </p>
+	 * <p>
+	 * Any file ending in ".css" (case-insensitive) will be parsed and will have
+	 * a modified time that is equal to the greatest of itself or any referenced
+	 * URL.
+	 * </p>
+	 *
+	 * @return  the modified time or <code>0</code> when unknown.
+	 */
+	public static long getLastModified(ServletContext servletContext, String path, String extension) {
+		if(CSS_EXTENSION.equals(extension)) {
+			try {
+				// Parse CSS file, finding all dependencies.
+				// Don't re-parse when CSS file not changed, but still check
+				// dependencies.
+				return ParsedCssFile.parseCssFile(servletContext, path).newestLastModified;
+			} catch(IOException e) {
+				return 0;
+			}
+		} else {
+			return getCachedLastModified(servletContext, path);
 		}
 	}
 
