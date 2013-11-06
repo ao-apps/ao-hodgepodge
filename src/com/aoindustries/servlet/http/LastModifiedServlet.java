@@ -235,12 +235,10 @@ public class LastModifiedServlet extends HttpServlet {
 	}
 
 	private static class GetLastModifiedCacheValue {
-		private final long cacheTime;
-		private final long lastModified;
+		private long cacheTime = Long.MIN_VALUE;
+		private long lastModified = Long.MIN_VALUE;
 
-		private GetLastModifiedCacheValue(long cacheTime, long lastModified) {
-			this.cacheTime = cacheTime;
-			this.lastModified = lastModified;
+		private GetLastModifiedCacheValue() {
 		}
 
 		/**
@@ -273,11 +271,18 @@ public class LastModifiedServlet extends HttpServlet {
 			cache = new HashMap<String,GetLastModifiedCacheValue>();
 			servletContext.setAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME, cache);
 		}
+		GetLastModifiedCacheValue cacheValue;
 		synchronized(cache) {
+			// Get the cache entry
+			cacheValue = cache.get(path);
+			if(cacheValue==null) {
+				cacheValue = new GetLastModifiedCacheValue();
+				cache.put(path, cacheValue);
+			}
+		}
+		synchronized(cacheValue) {
 			final long currentTime = System.currentTimeMillis();
-			// Check the cache
-			GetLastModifiedCacheValue cacheValue = cache.get(path);
-			if(cacheValue != null && cacheValue.isValid(currentTime)) {
+			if(cacheValue.isValid(currentTime)) {
 				return cacheValue.lastModified;
 			} else {
 				long lastModified = 0;
@@ -305,7 +310,8 @@ public class LastModifiedServlet extends HttpServlet {
 					}
 				}
 				// Store in cache
-				cache.put(path, new GetLastModifiedCacheValue(currentTime, lastModified));
+				cacheValue.cacheTime = currentTime;
+				cacheValue.lastModified = lastModified;
 				return lastModified;
 			}
 		}
