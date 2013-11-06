@@ -305,6 +305,50 @@ public class ServletUtil {
 		return Long.toString(lastModified / 1000, 32);
 	}
 
+	/**
+	 * <p>
+	 * Gets a last modified time given a context-relative path starting with a
+	 * slash (/).
+	 * </p>
+	 * <p>
+	 * TODO: Cache values and perform lookups less frequently when needed for performance.
+	 * </p>
+	 * <p>
+	 * TODO: To handle the URLs instead of CSS files, create a servlet that is mapped into
+	 * *.css that has a modified time equal to the greatest of itself or any referenced URL.
+	 * Use that modified time here when determining lastModified time of a .css file.
+	 * </p>
+	 *
+	 * @return  the modified time or <code>0</code> when unknown.
+	 */
+	public static long getLastModified(ServletContext servletContext, String path) {
+		long lastModified = 0;
+		String realPath = servletContext.getRealPath(path);
+		if(realPath != null) {
+			// Use File first
+			lastModified = new File(realPath).lastModified();
+		}
+		if(lastModified == 0) {
+			// Try URL
+			try {
+				URL resourceUrl = servletContext.getResource(path);
+				if(resourceUrl != null) {
+					URLConnection conn = resourceUrl.openConnection();
+					conn.setAllowUserInteraction(false);
+					conn.setConnectTimeout(10);
+					conn.setDoInput(false);
+					conn.setDoOutput(false);
+					conn.setReadTimeout(10);
+					conn.setUseCaches(false);
+					lastModified = conn.getLastModified();
+				}
+			} catch(IOException e) {
+				// lastModified stays unmodified
+			}
+		}
+		return lastModified;
+	}
+
 	public enum AddLastModifiedWhen {
 		/**
 		 * Always tries to add last modified time.
@@ -417,30 +461,7 @@ public class ServletUtil {
 				);
 			}
 			if(doAdd) {
-				long lastModified = 0;
-				String realPath = servletContext.getRealPath(path);
-				if(realPath != null) {
-					// Use File first
-					lastModified = new File(realPath).lastModified();
-				}
-				if(lastModified == 0) {
-					// Try URL
-					try {
-						URL resourceUrl = servletContext.getResource(path);
-						if(resourceUrl != null) {
-							URLConnection conn = resourceUrl.openConnection();
-							conn.setAllowUserInteraction(false);
-							conn.setConnectTimeout(10);
-							conn.setDoInput(false);
-							conn.setDoOutput(false);
-							conn.setReadTimeout(10);
-							conn.setUseCaches(false);
-							lastModified = conn.getLastModified();
-						}
-					} catch(IOException e) {
-						// lastModified stays unmodified
-					}
-				}
+				long lastModified = getLastModified(servletContext, path);
 				if(lastModified != 0) {
 					int anchorStart = url.lastIndexOf('#');
 					if(anchorStart == -1) {
