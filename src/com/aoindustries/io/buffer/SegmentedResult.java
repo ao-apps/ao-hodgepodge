@@ -61,6 +61,24 @@ public class SegmentedResult implements BufferResult {
 	private final int endSegmentOffset;
 	private final int endSegmentLength;
 
+	private static void assertThingsMakeSense(
+		long start,
+		int startSegmentIndex,
+		int startSegmentOffset,
+		int startSegmentLength,
+		long end,
+		int endSegmentIndex,
+		int endSegmentOffset,
+		int endSegmentLength
+	) {
+		assert start <= end;
+		assert startSegmentIndex <= endSegmentIndex;
+		if(startSegmentIndex == endSegmentIndex) {
+			assert startSegmentOffset == endSegmentOffset;
+			assert startSegmentLength == endSegmentLength;
+		}
+	}
+
 	protected SegmentedResult(
 		byte[] segmentTypes,
 		Object[] segmentValues,
@@ -75,6 +93,7 @@ public class SegmentedResult implements BufferResult {
 		int endSegmentOffset,
 		int endSegmentLength // End offset and length may have been affected by trimming
 	) {
+		assertThingsMakeSense(start, startSegmentIndex, startSegmentOffset, startSegmentLength, end, endSegmentIndex, endSegmentOffset, endSegmentLength);
 		this.segmentTypes = segmentTypes;
 		this.segmentValues = segmentValues;
 		this.segmentOffsets = segmentOffsets;
@@ -526,6 +545,7 @@ public class SegmentedResult implements BufferResult {
 		int newEndSegmentIndex = endSegmentIndex;
 		int newEndSegmentOffset = endSegmentOffset;
 		int newEndSegmentLength = endSegmentLength;
+		assertThingsMakeSense(newStart, newStartSegmentIndex, newStartSegmentOffset, newStartSegmentLength, newEnd, newEndSegmentIndex, newEndSegmentOffset, newEndSegmentLength);
 		// Skip past the beginning whitespace characters
 		TRIM_LEFT :
 		while(newStart<newEnd) {
@@ -544,7 +564,9 @@ public class SegmentedResult implements BufferResult {
 					newEndSegmentOffset++;
 					newEndSegmentLength--;
 				}
-			} while(/*newStart<newEnd &&*/ newStartSegmentLength>0);
+				assertThingsMakeSense(newStart, newStartSegmentIndex, newStartSegmentOffset, newStartSegmentLength, newEnd, newEndSegmentIndex, newEndSegmentOffset, newEndSegmentLength);
+				if(newEnd==newStart) break TRIM_LEFT;
+			} while(newStartSegmentLength>0);
 			// Move to next segment
 			newStartSegmentIndex++;
 			if(newStartSegmentIndex==newEndSegmentIndex) {
@@ -556,6 +578,7 @@ public class SegmentedResult implements BufferResult {
 				newStartSegmentOffset = segmentOffsets[newStartSegmentIndex];
 				newStartSegmentLength = segmentLengths[newStartSegmentIndex];
 			}
+			assertThingsMakeSense(newStart, newStartSegmentIndex, newStartSegmentOffset, newStartSegmentLength, newEnd, newEndSegmentIndex, newEndSegmentOffset, newEndSegmentLength);
 		}
 		// Trim from the right
 		if(newEnd>newStart) {
@@ -575,6 +598,7 @@ public class SegmentedResult implements BufferResult {
 					if(newStartSegmentIndex==newEndSegmentIndex)  {
 						newStartSegmentLength--;
 					}
+					assertThingsMakeSense(newStart, newStartSegmentIndex, newStartSegmentOffset, newStartSegmentLength, newEnd, newEndSegmentIndex, newEndSegmentOffset, newEndSegmentLength);
 					if(newEnd==newStart) break TRIM_RIGHT;
 				} while(newEndSegmentLength > 0);
 				// Move to previous segment
@@ -591,6 +615,7 @@ public class SegmentedResult implements BufferResult {
 					newEndSegmentOffset = segmentOffsets[newEndSegmentIndex];
 					newEndSegmentLength = segmentLengths[newEndSegmentIndex];
 				}
+				assertThingsMakeSense(newStart, newStartSegmentIndex, newStartSegmentOffset, newStartSegmentLength, newEnd, newEndSegmentIndex, newEndSegmentOffset, newEndSegmentLength);
 			} while(true);
 		}
 
