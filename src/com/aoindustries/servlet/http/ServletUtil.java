@@ -51,9 +51,11 @@ public class ServletUtil {
 	 * If the URL begins with http:/, https:/, or file:/, it is not altered.
      */
     public static String getAbsolutePath(String servletPath, String relativeUrlPath) throws MalformedURLException {
+		char firstChar;
         if(
-			relativeUrlPath.length()>0
-			&& relativeUrlPath.charAt(0)!='/'
+			relativeUrlPath.length() > 0
+			&& (firstChar=relativeUrlPath.charAt(0)) != '/'
+			&& firstChar != '#' // Skip anchor-only paths
 			&& !relativeUrlPath.startsWith("http:/")
 			&& !relativeUrlPath.startsWith("https:/")
 			&& !relativeUrlPath.startsWith("file:/")
