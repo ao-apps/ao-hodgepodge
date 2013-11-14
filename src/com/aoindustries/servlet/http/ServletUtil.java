@@ -48,7 +48,7 @@ public class ServletUtil {
     /**
      * Converts a possibly-relative path to a context-relative absolute path.
      * Resolves ./ and ../ at the beginning of the URL but not in the middle of the URL.
-	 * If the URL begins with http:/, https:/, or file:/, it is not altered.
+	 * If the URL begins with http:, https:, file:, mailto:, or cid:, it is not altered.
      */
     public static String getAbsolutePath(String servletPath, String relativeUrlPath) throws MalformedURLException {
 		char firstChar;
@@ -56,9 +56,11 @@ public class ServletUtil {
 			relativeUrlPath.length() > 0
 			&& (firstChar=relativeUrlPath.charAt(0)) != '/'
 			&& firstChar != '#' // Skip anchor-only paths
-			&& !relativeUrlPath.startsWith("http:/")
-			&& !relativeUrlPath.startsWith("https:/")
-			&& !relativeUrlPath.startsWith("file:/")
+			&& !relativeUrlPath.startsWith("http:")
+			&& !relativeUrlPath.startsWith("https:")
+			&& !relativeUrlPath.startsWith("file:")
+			&& !relativeUrlPath.startsWith("mailto:")
+			&& !relativeUrlPath.startsWith("cid:")
 		) {
             int slashPos = servletPath.lastIndexOf('/');
             if(slashPos==-1) throw new MalformedURLException("No slash found in servlet path: "+servletPath);
