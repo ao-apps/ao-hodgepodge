@@ -22,6 +22,7 @@
  */
 package com.aoindustries.servlet.filter;
 
+import com.aoindustries.util.WildcardPatternMatcher;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -29,15 +30,29 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * Returns not found for any filter-mapping that is sent to this filter.
- */
+ *
+ * Due to the limitations of filter mapping URLs, patterns may be provided and
+ * handled by this filter itself.
+ * 
+ * Init Parameters:
+ *    patterns  Commas-separated list of patterns (default to *)
+ * 
+ * @see  WildcardPatternMatcher  for supported patterns
+*/
 public class NotFoundFilter implements Filter {
 
-    @Override
+	private WildcardPatternMatcher patterns;
+
+	@Override
     public void init(FilterConfig config) {
+		String param = config.getInitParameter("patterns");
+		if(param==null) patterns = WildcardPatternMatcher.getMatchAll();
+		else patterns = WildcardPatternMatcher.getInstance(param);
     }
 
     @Override
@@ -47,9 +62,17 @@ public class NotFoundFilter implements Filter {
         FilterChain chain
     ) throws IOException, ServletException {
 		final String message = "404 Not Found";
-		if(response instanceof HttpServletResponse) {
-			HttpServletResponse httpResponse = (HttpServletResponse)response;
-			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, message);
+		if(
+			(request instanceof HttpServletRequest)
+			&& (response instanceof HttpServletResponse)
+		) {
+			HttpServletRequest httpRequest = (HttpServletRequest)request;
+			if(patterns.isMatch(httpRequest.getServletPath())) {
+				HttpServletResponse httpResponse = (HttpServletResponse)response;
+				httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, message);
+			} else {
+				chain.doFilter(request, response);
+			}
 		} else {
 			throw new ServletException(message);
 		}
