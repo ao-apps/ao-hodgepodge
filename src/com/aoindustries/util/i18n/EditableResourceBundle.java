@@ -547,7 +547,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 						+ ">Resource Editor</div>\n"
 						+ "  </div>\n"
 						+ "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:").append(Integer.toString(allLocales.size()*editorRows)).append("em; overflow:auto\">\n"
-						+ "    <table border=\"1\" cellspacing=\"0\" cellpadding=\"2\" style=\"width:100%\">\n"
+						+ "    <table border=\"1\" style=\"width:100%\">\n" // Not HTML 5 compatible: cellspacing=\"0\" cellpadding=\"2\"
 						+ "      <tr style=\"background-color:#e0e0e0\">\n"
 						+ "        <th></th>\n"
 						+ "        <th>Key</th>\n");
