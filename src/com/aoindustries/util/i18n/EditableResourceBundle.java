@@ -547,15 +547,15 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 						+ ">Resource Editor</div>\n"
 						+ "  </div>\n"
 						+ "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:").append(Integer.toString(allLocales.size()*editorRows)).append("em; overflow:auto\">\n"
-						+ "    <table border=\"1\" style=\"width:100%\">\n" // Not HTML 5 compatible: cellspacing=\"0\" cellpadding=\"2\"
+						+ "    <table style=\"width:100%; border-collapse: collapse; border:1px solid black\">\n" // Not HTML 5 compatible: cellspacing=\"0\" cellpadding=\"2\"
 						+ "      <tr style=\"background-color:#e0e0e0\">\n"
-						+ "        <th></th>\n"
-						+ "        <th>Key</th>\n");
+						+ "        <th style=\"border:1px solid black\"></th>\n"
+						+ "        <th style=\"border:1px solid black\">Key</th>\n");
 				for(Locale locale : allLocales) {
 					String toString = locale.toString();
-					out.append("        <th>").append(toString.length()==0 ? "Default" : toString).append("</th>\n");
+					out.append("        <th style=\"border:1px solid black\">").append(toString.length()==0 ? "Default" : toString).append("</th>\n");
 				}
-				out.append("        <th>Bundle Set</th>\n"
+				out.append("        <th style=\"border:1px solid black\">Bundle Set</th>\n"
 						+ "      </tr>\n");
 				i = 0;
 				for(LookupKey lookupKey : lookupKeys) {
@@ -573,8 +573,8 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 								+ " onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(").append(elementIds.get(0).toString()).append(");\"");
 					}
 					out.append(">\n"
-							+ "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\" style=\"text-align:right\">").append(Long.toString(lookupValue.id)).append("</td>\n"
-							+ "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\">");
+							+ "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\" style=\"text-align:right; border:1px solid black\">").append(Long.toString(lookupValue.id)).append("</td>\n"
+							+ "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\" style=\"border:1px solid black\">");
 					encodeTextInXhtml(lookupKey.key, out);
 					out.append("</td>\n");
 					int localeIndex = 0;
@@ -629,6 +629,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
 							out.append("        <td id=\"EditableResourceBundleEditorRow").append(Integer.toString(i)).append("Locale").append(Integer.toString(localeIndex)).append("\" style=\"white-space:pre; ");
 							if(borderColor!=null) out.append("border:2px solid ").append(borderColor).append("; ");
+							else out.append("border:1px solid black; ");
 							out.append("background-color:").append(backgroundColor).append("\" onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("'); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').select(); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').focus();\">");
 							if(currentValue!=null) {
 								if(currentValue.length()>30) {
@@ -641,7 +642,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 							out.append("</td>\n");
 						} else {
 							// Not supported by this bundleSet
-							out.append("        <td style=\"opacity:.5;background-color:#404040;\"></td>\n");
+							out.append("        <td style=\"opacity:.5; background-color:#404040; border:1px solid black\"></td>\n");
 						}
 					}
 					// Base Name
