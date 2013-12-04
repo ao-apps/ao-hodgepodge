@@ -118,12 +118,12 @@ public class NewEncodingUtils {
     }
 
     private static final char[] noEncodeCharacters = {
-        '?', ':', '/', ';', '#'
+        '?', ':', '/', ';', '#', '+'
     };
 
     /**
      * UTF-8 encodes the URL up to the first ?, if present.  Does not encode
-     * any characters in the set { '?', ':', '/', ';', '#' }.
+     * any characters in the set { '?', ':', '/', ';', '#', '+' }.
      */
     public static String encodeUrlPath(String href) throws UnsupportedEncodingException {
         int len = href.length();
