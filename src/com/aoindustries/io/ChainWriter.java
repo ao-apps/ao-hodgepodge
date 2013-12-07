@@ -25,6 +25,7 @@ package com.aoindustries.io;
 import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute;
 import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.javaScriptInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.JavaScriptInXhtmlEncoder.encodeJavaScriptInXhtml;
+import static com.aoindustries.encoding.JavaScriptInXhtmlEncoder.javaScriptInXhtmlEncoder;
 import com.aoindustries.encoding.MediaWriter;
 import com.aoindustries.encoding.TextInJavaScriptEncoder;
 import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
@@ -61,6 +62,7 @@ final public class ChainWriter implements Appendable, Closeable {
     // <editor-fold defaultstate="collapsed" desc="PrintWriter wrapping">
     private final PrintWriter out;
 	private final MediaWriter javaScriptInXhtmlAttributeWriter;
+	private final MediaWriter javaScriptInXhtmlWriter;
 
     /**
      * Create a new PrintWriter, without automatic line flushing, from an
@@ -91,6 +93,7 @@ final public class ChainWriter implements Appendable, Closeable {
     public ChainWriter(PrintWriter out) {
         this.out=out;
 		javaScriptInXhtmlAttributeWriter = new MediaWriter(javaScriptInXhtmlAttributeEncoder, out);
+		javaScriptInXhtmlWriter = new MediaWriter(javaScriptInXhtmlEncoder, out);
     }
 
     /**
@@ -528,7 +531,7 @@ final public class ChainWriter implements Appendable, Closeable {
 	 * 
 	 * @see  Coercion#toString(java.lang.Object, com.aoindustries.util.i18n.BundleLookup.MarkupType)
 	 */
-    public ChainWriter encodeJavaScriptStringInXml(Object value) throws IOException {
+    public ChainWriter encodeJavaScriptStringInXmlAttribute(Object value) throws IOException {
 		if(value!=null) {
 			// Two stage encoding:
 			//   1) Text -> JavaScript (with quotes added)
@@ -560,7 +563,47 @@ final public class ChainWriter implements Appendable, Closeable {
         return this;
     }
 
-    /**
+	/**
+	 * Encodes a javascript string for use in an XML body CDATA context.  Quotes
+	 * are added around the string.  Also, if the string is translated, comments
+	 * will be added giving the translation lookup id to aid in translation of
+	 * server-translated values in JavaScript.
+	 * 
+	 * @see  Coercion#toString(java.lang.Object, com.aoindustries.util.i18n.BundleLookup.MarkupType)
+	 */
+    public ChainWriter encodeJavaScriptStringInXhtml(Object value) throws IOException {
+		if(value!=null) {
+			// Two stage encoding:
+			//   1) Text -> JavaScript (with quotes added)
+			//   2) JavaScript -> XHTML
+			if(
+				value instanceof Writable
+				&& !((Writable)value).isFastToString()
+			) {
+				// Avoid unnecessary toString calls
+				textInJavaScriptEncoder.writePrefixTo(javaScriptInXhtmlWriter);
+				Coercion.write(value, textInJavaScriptEncoder, javaScriptInXhtmlWriter);
+				textInJavaScriptEncoder.writeSuffixTo(javaScriptInXhtmlWriter);
+			} else {
+				String str = Coercion.toString(value);
+				BundleLookupMarkup lookupMarkup;
+				BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
+				if(threadContext!=null) {
+					lookupMarkup = threadContext.getLookupMarkup(str);
+				} else {
+					lookupMarkup = null;
+				}
+				if(lookupMarkup!=null) lookupMarkup.appendPrefixTo(MarkupType.JAVASCRIPT, javaScriptInXhtmlWriter);
+				textInJavaScriptEncoder.writePrefixTo(javaScriptInXhtmlWriter);
+				textInJavaScriptEncoder.write(str, javaScriptInXhtmlWriter);
+				textInJavaScriptEncoder.writeSuffixTo(javaScriptInXhtmlWriter);
+				if(lookupMarkup!=null) lookupMarkup.appendSuffixTo(MarkupType.JAVASCRIPT, javaScriptInXhtmlWriter);
+			}
+		}
+        return this;
+    }
+
+	/**
      * Prints a value that may be placed in a URL.
      *
      * @deprecated  Use URLEncoder instead.
