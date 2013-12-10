@@ -47,6 +47,7 @@ final public class JavaScriptInXhtmlEncoder extends MediaEncoder {
         switch(ch) {
 			// TODO: Should ']' be encoded to avoid potential ]]> encoding CDATA early?
 			// TODO: Test and implement as-needed.
+			// TODO: Imagine script with: if(array[array2[index]]>value) { ... }
 
             // Commented-out because now using CDATA
             // case '<': return "&lt;";
