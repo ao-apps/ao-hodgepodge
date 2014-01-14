@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
@@ -153,6 +154,16 @@ public class LastModifiedServlet extends HttpServlet {
 						int end = matcher.end(1);
 						if(start!=lastEnd) newContent.append(cssContent, lastEnd, start);
 						String url = matcher.group(1);
+						// The regular expression leaves ' or " at end of URL, strip here
+						String addAfterUrl = null;
+						if(url.endsWith("'")) {
+							url = url.substring(0, url.length()-1);
+							addAfterUrl = "'";
+						} else if(url.endsWith("\"")) {
+							url = url.substring(0, url.length()-1);
+							addAfterUrl = "\"";
+						}
+						//System.err.println("url=" + url);
 						newContent.append(url);
 						// Get the resource path relative to the CSS file
 						String resourcePath = ServletUtil.getAbsolutePath(path, url);
@@ -169,6 +180,7 @@ public class LastModifiedServlet extends HttpServlet {
 								;
 							}
 						}
+						if(addAfterUrl!=null) newContent.append(addAfterUrl);
 						lastEnd = end;
 					}
 					if(lastEnd < cssContent.length()) newContent.append(cssContent, lastEnd, cssContent.length());
@@ -446,51 +458,60 @@ public class LastModifiedServlet extends HttpServlet {
 	/**
 	 * <p>
 	 * Adds a last modified time (to the nearest second) to a URL if the resource is directly available
-	 * as a local resource.  Only applies to URLs that begin with a slash (/).
+	 * as a local resource.  Only applies to relative URLs (./, ../) or URLs that begin with a slash (/).
 	 * </p>
 	 * <p>
 	 * This implementation assume anchors (#) are always after the last question mark (?).
 	 * </p>
 	 */
-	public static String addLastModified(ServletContext servletContext, String url, AddLastModifiedWhen when) {
-		if(
-			when != AddLastModifiedWhen.FALSE // Never try to add
-			&& url.startsWith("/")
-		) {
-			int questionPos = url.lastIndexOf('?');
-			String path = questionPos==-1 ? url : url.substring(0, questionPos);
-			String extension = UnixFile.getExtension(path).toLowerCase(Locale.ENGLISH);
-			boolean doAdd;
-			if(when == AddLastModifiedWhen.TRUE) {
-				// Always try to add
-				doAdd = true;
-			} else {
-				// Conditionally try to add based on file extension
-				doAdd = staticExtensions.contains(
-					extension
-				);
-			}
-			if(doAdd) {
-				long lastModified = getLastModified(servletContext, path, extension);
-				if(lastModified != 0) {
-					int anchorStart = url.lastIndexOf('#');
-					if(anchorStart == -1) {
-						// No anchor
-						url =
-							url
-							+ (questionPos==-1 ? '?' : '&')
-							+ LAST_MODIFIED_PARAMETER_NAME + "="
-							+ encodeLastModified(lastModified)
-						;
-					} else {
-						// With anchor
-						url =
-							url.substring(0, anchorStart)
-							+ (questionPos==-1 ? '?' : '&')
-							+ LAST_MODIFIED_PARAMETER_NAME + "="
-							+ encodeLastModified(lastModified)
-							+ url.substring(anchorStart)
-						;
+	public static String addLastModified(ServletContext servletContext, String servletPath, String url, AddLastModifiedWhen when) throws MalformedURLException {
+		// Never try to add if when==falsee
+		if(when != AddLastModifiedWhen.FALSE) {
+			// Get the context-relative path (resolves relative paths)
+			String resourcePath = ServletUtil.getAbsolutePath(
+				servletPath,
+				url
+			);
+			if(resourcePath.startsWith("/")) {
+				// Strip parameters from resourcePath
+				{
+					int questionPos = resourcePath.lastIndexOf('?');
+					resourcePath = questionPos==-1 ? resourcePath : resourcePath.substring(0, questionPos);
+				}
+				String extension = UnixFile.getExtension(resourcePath).toLowerCase(Locale.ENGLISH);
+				boolean doAdd;
+				if(when == AddLastModifiedWhen.TRUE) {
+					// Always try to add
+					doAdd = true;
+				} else {
+					// Conditionally try to add based on file extension
+					doAdd = staticExtensions.contains(
+						extension
+					);
+				}
+				if(doAdd) {
+					long lastModified = getLastModified(servletContext, resourcePath, extension);
+					if(lastModified != 0) {
+						int questionPos = url.lastIndexOf('?');
+						int anchorStart = url.lastIndexOf('#');
+						if(anchorStart == -1) {
+							// No anchor
+							url =
+								url
+								+ (questionPos==-1 ? '?' : '&')
+								+ LAST_MODIFIED_PARAMETER_NAME + "="
+								+ encodeLastModified(lastModified)
+							;
+						} else {
+							// With anchor
+							url =
+								url.substring(0, anchorStart)
+								+ (questionPos==-1 ? '?' : '&')
+								+ LAST_MODIFIED_PARAMETER_NAME + "="
+								+ encodeLastModified(lastModified)
+								+ url.substring(anchorStart)
+							;
+						}
 					}
 				}
 			}
