@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -46,7 +46,13 @@ public class AoArrays {
     private AoArrays() {
     }
 
+    public static final byte[] EMPTY_BYTE_ARRAY = {};
+    public static final int[] EMPTY_INT_ARRAY = {};
+    public static final long[] EMPTY_LONG_ARRAY = {};
+    public static final Class<?>[] EMPTY_CLASS_ARRAY = {};
+    public static final Object[] EMPTY_OBJECT_ARRAY = {};
     public static final Serializable[] EMPTY_SERIALIZABLE_ARRAY = {};
+    public static final String[] EMPTY_STRING_ARRAY = {};
 
     /**
      * Checks if the subrange of two byte arrays is equal.

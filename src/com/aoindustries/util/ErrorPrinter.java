@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -274,8 +274,8 @@ public class ErrorPrinter {
         try {
             Class<?> clazz=thrown.getClass();
             if(isSubclass(clazz, "javax.servlet.jsp.JspException")) {
-                Method method=clazz.getMethod("getRootCause", new Class[0]);
-                Throwable rootCause=(Throwable)method.invoke(thrown, new Object[0]);
+                Method method=clazz.getMethod("getRootCause");
+                Throwable rootCause=(Throwable)method.invoke(thrown);
                 if(rootCause!=null) {
                     if(!isClosed(rootCause, closed)) {
                         closed.add(rootCause);
@@ -297,8 +297,8 @@ public class ErrorPrinter {
         try {
             Class<?> clazz=thrown.getClass();
             if(isSubclass(clazz, "javax.servlet.ServletException")) {
-                Method method=clazz.getMethod("getRootCause", new Class[0]);
-                Throwable rootCause=(Throwable)method.invoke(thrown, new Object[0]);
+                Method method=clazz.getMethod("getRootCause");
+                Throwable rootCause=(Throwable)method.invoke(thrown);
                 if(rootCause!=null) {
                     if(!isClosed(rootCause, closed)) {
                         closed.add(rootCause);

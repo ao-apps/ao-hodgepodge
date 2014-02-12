@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -48,8 +48,6 @@ import java.util.Set;
  * @author  AO Industries, Inc.
  */
 public class UnionMethodSet<E> extends AbstractSet<E> {
-
-	static final Object[] NO_PARAMS = new Object[0];
 
 	public static interface Method<E> {
 
@@ -110,7 +108,7 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
 		@SuppressWarnings("unchecked")
 		public E getSingleton(Object target) {
 			try {
-				return (E)method.invoke(target, NO_PARAMS);
+				return (E)method.invoke(target);
 			} catch(IllegalAccessException exc) {
 				throw new RuntimeException(target+"."+method+"()", exc);
 			} catch(InvocationTargetException exc) {
@@ -152,7 +150,7 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
 		@SuppressWarnings("unchecked")
 		public Set<? extends E> getSet(Object target) {
 			try {
-				return (Set<E>)method.invoke(target, NO_PARAMS);
+				return (Set<E>)method.invoke(target);
 			} catch(IllegalAccessException exc) {
 				throw new RuntimeException(target+"."+method+"()", exc);
 			} catch(InvocationTargetException exc) {

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.util.AoArrays;
 import com.aoindustries.util.Stack;
 import com.aoindustries.util.WrappedException;
 import java.io.File;
@@ -56,8 +57,6 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
      */
     private static final int LIST_RETRY_DELAY = 10;
     
-    private static final String[] emptyStringArray = new String[0];
-
     private final Map<String,FilesystemIteratorRule> rules;
     private final Map<String,FilesystemIteratorRule> prefixRules;
     private final String startPath;
@@ -231,7 +230,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
                             ATTEMPT:    for(int attempt=1; attempt<=MAX_LIST_RETRIES; attempt++) {
                                             list = file.list();
                                             if(list==null) {
-                                                list = emptyStringArray;
+                                                list = AoArrays.EMPTY_STRING_ARRAY;
                                             } else if(isSorted && list.length>0) {
                                                 Arrays.sort(list);
                                                 // TODO: Remove this once ParallelDelete is debugged
@@ -262,10 +261,10 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
                                         }
                                     } else {
                                         //System.err.println("Skipping non-canonical directory listing: "+filename);
-                                        list = emptyStringArray;
+                                        list = AoArrays.EMPTY_STRING_ARRAY;
                                     }
                                 } else {
-                                    list = emptyStringArray;
+                                    list = AoArrays.EMPTY_STRING_ARRAY;
                                 }
                                 // No need to push onto the stack if the children are empty?
                                 if(list.length>0) {

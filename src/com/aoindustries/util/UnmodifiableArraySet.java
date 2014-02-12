@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -125,8 +125,6 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
         }
         return true;
     }
-
-    private static final Object[] emptyArray = new Object[0];
 
     /**
      * Uses the provided elements, which must already be sorted in hashCode order and unique.
@@ -312,7 +310,7 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
         FastObjectInput fastIn = FastObjectInput.wrap(in);
         try {
             final int len = fastIn.readInt();
-            if(len==0) elements = (E[])emptyArray;
+            if(len==0) elements = (E[])AoArrays.EMPTY_OBJECT_ARRAY;
             else {
                 E[] newElements = (E[])new Object[len];
                 for(int i=0; i<len; i++) newElements[i] = (E)fastIn.readObject();

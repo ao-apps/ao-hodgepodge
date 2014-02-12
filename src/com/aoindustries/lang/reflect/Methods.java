@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.lang.reflect;
 
+import com.aoindustries.util.AoArrays;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -31,9 +32,6 @@ import java.lang.reflect.Method;
  * @author  AO Industries, Inc.
  */
 public final class Methods {
-
-	private static final Class<?>[] emptyClassArray = new Class<?>[0];
-	private static final Object[] emptyObjectArray = new Object[0];
 
     /**
      * Make no instances.
@@ -47,7 +45,7 @@ public final class Methods {
 	 * us the full reflection API.
 	 */
 	public static <T> T invoke(Class<T> returnType, Object target, String methodName) throws ReflectionException {
-		return invoke(returnType, target, methodName, emptyClassArray, emptyObjectArray);
+		return invoke(returnType, target, methodName, AoArrays.EMPTY_CLASS_ARRAY, AoArrays.EMPTY_OBJECT_ARRAY);
 	}
 
 	/**

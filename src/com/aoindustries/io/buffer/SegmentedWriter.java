@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io.buffer;
 
+import com.aoindustries.util.AoArrays;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.channels.ClosedChannelException;
@@ -46,10 +47,6 @@ public class SegmentedWriter extends BufferWriter {
 	 * The number of starting elements in segment arrays.
 	 */
 	private static final int START_LEN = 16;
-
-	private static final byte[] EMPTY_BYTES = new byte[0];
-	private static final int[] EMPTY_INTS = new int[0];
-	private static final Object[] EMPTY_OBJECTS = new Object[0];
 
 	/**
 	 * The set of internal types supported.
@@ -119,10 +116,10 @@ public class SegmentedWriter extends BufferWriter {
 
 	public SegmentedWriter() {
         this.length = 0;
-		this.segmentTypes = EMPTY_BYTES;
-		this.segmentValues = EMPTY_OBJECTS;
-		this.segmentOffsets = EMPTY_INTS;
-		this.segmentLengths = EMPTY_INTS;
+		this.segmentTypes = AoArrays.EMPTY_BYTE_ARRAY;
+		this.segmentValues = AoArrays.EMPTY_OBJECT_ARRAY;
+		this.segmentOffsets = AoArrays.EMPTY_INT_ARRAY;
+		this.segmentLengths = AoArrays.EMPTY_INT_ARRAY;
 		this.segmentCount = 0;
 		this.isClosed = false;
     }
