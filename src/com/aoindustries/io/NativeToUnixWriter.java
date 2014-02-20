@@ -40,7 +40,7 @@ final public class NativeToUnixWriter {
 	/**
 	 * The end of line character for Unix.
 	 */
-	private static final String UNIX_EOL = "\n";
+	static final String UNIX_EOL = "\n";
 
 	/**
 	 * The end of line character for the current Java virtual machine.
