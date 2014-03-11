@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -47,7 +47,7 @@ public class Identifier implements Serializable, Comparable<Identifier> {
         return new Identifier(encoded);
     }
 
-	private static final long BASE = 57;
+	static final long BASE = 57;
 
 	private static final char[] characters = {
         'A', /*'B',*/ 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -74,7 +74,7 @@ public class Identifier implements Serializable, Comparable<Identifier> {
     /**
      * Gets the character for the low-order modulus BASE a long value.
      */
-    private static char getCharacter(long value) {
+    static char getCharacter(long value) {
         int index = (int)remainder(value, BASE);
         return characters[index];
     }
@@ -96,7 +96,7 @@ public class Identifier implements Serializable, Comparable<Identifier> {
     /**
      * Decodes one set of 11 characters to a long.
      */
-    private static long decode(String encoded) {
+    static long decode(String encoded) {
         assert encoded.length()==11;
         return
               getValue(encoded.charAt(0)) * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE
@@ -112,7 +112,7 @@ public class Identifier implements Serializable, Comparable<Identifier> {
             + getValue(encoded.charAt(10))
         ;
     }
-    private static final Random random = new SecureRandom();
+    static final Random random = new SecureRandom();
 
     private final long hi;
     private final long lo;
