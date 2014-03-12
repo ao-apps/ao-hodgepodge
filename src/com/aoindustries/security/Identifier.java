@@ -177,7 +177,7 @@ public class Identifier implements Serializable, Comparable<Identifier> {
     }
 
     /**
-     * The external representation is a string of characters encoded in base 62, with
+     * The external representation is a string of characters encoded in base 57, with
      * the first 11 characters for "hi" and the last 11 characters for "lo".
      */
     @Override

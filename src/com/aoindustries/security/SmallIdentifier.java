@@ -30,7 +30,7 @@ import java.io.Serializable;
 import java.util.Random;
 
 /**
- * A 64-bit random identifier internally stored as two long values.
+ * A 64-bit random identifier internally stored as a long value.
  *
  * @author  AO Industries, Inc.
  */
@@ -95,7 +95,7 @@ public class SmallIdentifier implements Serializable, Comparable<SmallIdentifier
     }
 
     /**
-     * The external representation is a string of characters encoded in base 62, with
+     * The external representation is a string of characters encoded in base 57, with
      * 11 characters for "value".
      */
     @Override
