@@ -67,15 +67,24 @@ final public class Images {
 	 *          <code>null</code> if not found within tolerance.
 	 */
 	public static Point findImage(BufferedImage image, BufferedImage findme, double tolerance) {
-		return findImage(
-			getRGB(image),
-			image.getWidth(),
-			image.getHeight(),
-			getRGB(findme),
-			findme.getWidth(),
-			findme.getHeight(),
-			tolerance
-		);
+		final int imageWidth = image.getWidth();
+		final int findmeWidth = findme.getWidth();
+		if(imageWidth >= findmeWidth) {
+			final int imageHeight = image.getHeight();
+			final int findmeHeight = findme.getHeight();
+			if(imageHeight >= findmeHeight) {
+				return findImage(
+					getRGB(image),
+					imageWidth,
+					imageHeight,
+					getRGB(findme),
+					findmeWidth,
+					findmeHeight,
+					tolerance
+				);
+			}
+		}
+		return null;
 	}
 
 	/**
