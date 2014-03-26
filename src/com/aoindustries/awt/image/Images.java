@@ -59,14 +59,14 @@ final public class Images {
 	/**
 	 * Finds one image within another.
 	 *
-	 * @param  tolerance  The total values of red, green, and blue differences
+	 * @param  tolerance  The portion of red, green, and blue differences
 	 *                    allowed before ignoring a certain location.  Zero implies
 	 *                    an exact match.
 	 * 
 	 * @return  The top-left point where the top left of the image is found or
 	 *          <code>null</code> if not found within tolerance.
 	 */
-	public static Point findImage(BufferedImage image, BufferedImage findme, long tolerance) {
+	public static Point findImage(BufferedImage image, BufferedImage findme, double tolerance) {
 		return findImage(
 			getRGB(image),
 			image.getWidth(),
@@ -81,18 +81,21 @@ final public class Images {
 	/**
 	 * Finds one image within another.
 	 *
-	 * @param  tolerance  The total values of red, green, and blue differences
+	 * @param  tolerance  The portion of red, green, and blue differences
 	 *                    allowed before ignoring a certain location.  Zero implies
 	 *                    an exact match.
 	 *
 	 * @return  The top-left point where the top left of the image is found or
 	 *          <code>null</code> if not found within tolerance.
 	 */
-	public static Point findImage(int[] imagePixels, int imageWidth, int imageHeight, int[] findmePixels, int findmeWidth, int findmeHeight, long tolerance) {
+	public static Point findImage(int[] imagePixels, int imageWidth, int imageHeight, int[] findmePixels, int findmeWidth, int findmeHeight, double tolerance) {
 		final int searchWidth = imageWidth - findmeWidth;
 		if(searchWidth>0) {
 			final int searchHeight = imageHeight - findmeHeight;
 			if(searchHeight>0) {
+				// Each pixel can deviate by up to 255 for each primary color
+				final double maxDeviation = (double)3 * (double)255 * (double)findmeWidth * (double)findmeHeight;
+				final long maxMismatch = (long)(tolerance * maxDeviation);
 				// Get pixels all at once
 				for(int imageY=0; imageY<searchHeight; imageY++) {
 NextLocation :
@@ -118,7 +121,7 @@ NextLocation :
 										// Blue difference
 										+ Math.abs((imagePixel & 255) - (findmePixel & 255))
 									;
-									if(totalMismatch > tolerance) continue NextLocation;
+									if(totalMismatch > maxMismatch) continue NextLocation;
 								}
 							}
 						}
