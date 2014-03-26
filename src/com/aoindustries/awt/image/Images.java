@@ -22,6 +22,7 @@
  */
 package com.aoindustries.awt.image;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
@@ -31,11 +32,27 @@ import java.awt.image.BufferedImage;
 final public class Images {
 
 	/**
+	 * Gets an array big enough to hold the pixels for an image of the given size.
+	 * The array is not populated.
+	 */
+	public static int[] getRGBArray(int width, int height) {
+		return new int[width * height];
+	}
+
+	/**
+	 * Gets an array big enough to hold the pixels for an image of the given size.
+	 * The array is not populated.
+	 */
+	public static int[] getRGBArray(Dimension size) {
+		return getRGBArray(size.width, size.height);
+	}
+
+	/**
 	 * Gets an array big enough to hold the provided image pixels.
 	 * The array is not populated.
 	 */
 	public static int[] getRGBArray(BufferedImage image) {
-		return new int[image.getHeight() * image.getWidth()];
+		return getRGBArray(image.getWidth(), image.getHeight());
 	}
 
 	/**
