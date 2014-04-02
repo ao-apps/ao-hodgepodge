@@ -111,36 +111,6 @@ public class ZeroFile {
         }
     }
 
-	private static String overwriteVerboseOutput(String lastVerboseString, String newVerboseString) {
-		final int lastLen = lastVerboseString.length();
-		final int newLen = newVerboseString.length();
-		StringBuilder verboseOut = new StringBuilder();
-
-		// Find the number of characters that match from before and now
-		int sameCount = 0;
-		for(int i=0; i<newLen && i<lastLen; i++) {
-			if(lastVerboseString.charAt(i)!=newVerboseString.charAt(i)) break;
-			sameCount++;
-		}
-
-		// backspace and overwrite with spaces when new is shorter than last
-		for(int i=newLen; i<lastLen; i++) {
-			verboseOut.append('\b');
-		}
-		for(int i=newLen; i<lastLen; i++) {
-			verboseOut.append(' ');
-		}
-
-		// Backspace to the first character that is different
-		for(int i=0; i<(lastLen - sameCount); i++) verboseOut.append('\b');
-		
-		// Append part of new output that is different
-		verboseOut.append(newVerboseString, sameCount, newLen);
-		System.err.print(verboseOut.toString());
-		System.err.flush();
-		return newVerboseString;
-	}
-
 	/**
      * Zeroes the provided random access file, only writing blocks that contain non-zero.
 	 * Reads at the maximum provided bpsIn blocks per second.
@@ -187,14 +157,15 @@ public class ZeroFile {
 				numDirtyBlocks++;
 			}
             if(PROGRESS) {
-				lastVerboseString = overwriteVerboseOutput(
+				lastVerboseString = TerminalWriter.progressOutput(
 					lastVerboseString,
 					StringUtility.getApproximateSize(pos+blockSize)
 					+ ": "
 					+ SQLUtility.getDecimal((long)block * 10000L / (long)blocks)
 					+ "% read, "
 					+ SQLUtility.getDecimal((long)numDirtyBlocks * 10000L / (long)block)
-					+ "% dirty"
+					+ "% dirty",
+					System.err
 				);
 				//System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": "+(allZero ? "Already zero" : "Dirty"));
 			}
@@ -223,12 +194,13 @@ public class ZeroFile {
                 }
 				written++;
                 if(PROGRESS) {
-					lastVerboseString = overwriteVerboseOutput(
+					lastVerboseString = TerminalWriter.progressOutput(
 						lastVerboseString,
 						StringUtility.getApproximateSize(bytesWritten)
 						+ ": "
 						+ SQLUtility.getDecimal((long)written * 10000L / (long)numDirtyBlocks)
-						+ "% written"
+						+ "% written",
+						System.err
 					);
 					// System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": Cleared");
 				}

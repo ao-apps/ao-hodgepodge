@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,6 +23,7 @@
 package com.aoindustries.io;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Locale;
@@ -53,7 +54,66 @@ public class TerminalWriter extends PrintWriter {
         return supported;
     }
 
-    private boolean enabled=true;
+	private static String getVerboseOut(String lastVerboseString, String newVerboseString) {
+		final int lastLen = lastVerboseString.length();
+		final int newLen = newVerboseString.length();
+		StringBuilder verboseOut = new StringBuilder();
+
+		// Find the number of characters that match from before and now
+		int sameCount = 0;
+		for(int i=0; i<newLen && i<lastLen; i++) {
+			if(lastVerboseString.charAt(i)!=newVerboseString.charAt(i)) break;
+			sameCount++;
+		}
+
+		// backspace and overwrite with spaces when new is shorter than last
+		for(int i=newLen; i<lastLen; i++) {
+			verboseOut.append('\b');
+		}
+		for(int i=newLen; i<lastLen; i++) {
+			verboseOut.append(' ');
+		}
+
+		// Backspace to the first character that is different
+		for(int i=0; i<(lastLen - sameCount); i++) verboseOut.append('\b');
+		
+		// Append part of new output that is different
+		verboseOut.append(newVerboseString, sameCount, newLen);
+		
+		return verboseOut.toString();
+	}
+
+	/**
+	 * (Over)writes a progress line to the given PrintStream.
+	 * Any extra characters from previous output are covered with spaces.
+	 * Any common prefix is not overwritten.
+	 * 
+	 * @param  lastVerboseString  The last line output
+	 * @param  newVerboseString   The new line to display
+	 * @return  The new line (newVerboseString)
+	 */
+	public static String progressOutput(String lastVerboseString, String newVerboseString, PrintStream out) {
+		out.print(getVerboseOut(lastVerboseString, newVerboseString));
+		out.flush();
+		return newVerboseString;
+	}
+
+	/**
+	 * (Over)writes a progress line to the given PrintStream.
+	 * Any extra characters from previous output are covered with spaces.
+	 * Any common prefix is not overwritten.
+	 * 
+	 * @param  lastVerboseString  The last line output
+	 * @param  newVerboseString   The new line to display
+	 * @return  The new line (newVerboseString)
+	 */
+	public static String progressOutput(String lastVerboseString, String newVerboseString, Writer out) throws IOException {
+		out.write(getVerboseOut(lastVerboseString, newVerboseString));
+		out.flush();
+		return newVerboseString;
+	}
+
+	private boolean enabled=true;
 
     public TerminalWriter(Writer out) {
     	super(out);
@@ -114,4 +174,11 @@ public class TerminalWriter extends PrintWriter {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+	/**
+	 * @see  #progressOutput(java.lang.String, java.lang.String, java.io.Writer) 
+	 */
+	public String progressOutput(String lastVerboseString, String newVerboseString) throws IOException {
+		return progressOutput(lastVerboseString, newVerboseString, out);
+	}
 }
