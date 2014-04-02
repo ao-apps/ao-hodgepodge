@@ -193,7 +193,7 @@ public class ZeroFile {
 					+ ": "
 					+ SQLUtility.getDecimal((long)block * 10000L / (long)blocks)
 					+ "% read, "
-					+ SQLUtility.getDecimal((long)numDirtyBlocks * 10000L / (long)blocks)
+					+ SQLUtility.getDecimal((long)numDirtyBlocks * 10000L / (long)block)
 					+ "% dirty"
 				);
 				//System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": "+(allZero ? "Already zero" : "Dirty"));
