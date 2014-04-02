@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.sql.SQLUtility;
+import com.aoindustries.util.StringUtility;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -38,9 +40,10 @@ import java.util.BitSet;
 public class ZeroFile {
 
     /**
-     * Debug flags.
+     * Flags - these should become commandline switches.
      */
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
+    private static final boolean PROGRESS = true;
     private static final boolean DRY_RUN = false;
 
     /**
@@ -125,10 +128,13 @@ public class ZeroFile {
             blocks = (int)blocksLong;
         }
         BitSet dirtyBlocks = new BitSet(blocks);
+		int numDirtyBlocks = 0;
         // Pass one: read for non zeros
         long lastTime = System.currentTimeMillis();
         byte[] buff = new byte[BLOCK_SIZE];
         int blockIndex = 0;
+		String lastVerboseString = "";
+		int block = 0;
         for(long pos=0; pos<len; pos+=BLOCK_SIZE, blockIndex++) {
             int blockSize;
             {
@@ -137,6 +143,7 @@ public class ZeroFile {
             }
             raf.seek(pos);
             raf.readFully(buff, 0, blockSize);
+			block++;
             lastTime = sleep(bpsIn, lastTime);
             boolean allZero = true;
             for(int i=0; i<blockSize; i++) {
@@ -145,13 +152,45 @@ public class ZeroFile {
                     break;
                 }
             }
-            if(!allZero) dirtyBlocks.set(blockIndex);
-            if(DEBUG) System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": "+(allZero ? "Already zero" : "Dirty"));
+            if(!allZero) {
+				dirtyBlocks.set(blockIndex);
+				numDirtyBlocks++;
+			}
+            if(PROGRESS) {
+				String newVerboseString =
+					StringUtility.getApproximateSize(pos+blockSize)
+					+ ": "
+					+ SQLUtility.getDecimal((long)block * 10000L / (long)blocks)
+					+ "% read, "
+					+ SQLUtility.getDecimal((long)numDirtyBlocks * 10000L / (long)blocks)
+					+ "% dirty"
+				;
+				StringBuilder verboseOut = new StringBuilder();
+				// backspace and overwrite with spaces when new 
+				for(int i=newVerboseString.length(); i<lastVerboseString.length(); i++) {
+					verboseOut.append('\b');
+				}
+				for(int i=newVerboseString.length(); i<lastVerboseString.length(); i++) {
+					verboseOut.append(' ');
+				}
+				// Backspace to beginning of line
+				for(int i=0; i<lastVerboseString.length(); i++) verboseOut.append('\b');
+				verboseOut.append(newVerboseString);
+				System.err.print(verboseOut);
+				System.err.flush();
+				lastVerboseString = newVerboseString;
+				//System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": "+(allZero ? "Already zero" : "Dirty"));
+			}
         }
+		if(PROGRESS) {
+			System.err.println();
+			lastVerboseString = "";
+		}
         // Pass two: write dirty blocks
         long bytesWritten = 0;
         blockIndex = 0;
         Arrays.fill(buff, (byte)0);
+		int written = 0;
         for(long pos=0; pos<len; pos+=BLOCK_SIZE, blockIndex++) {
             if(dirtyBlocks.get(blockIndex)) {
                 int blockSize;
@@ -159,15 +198,42 @@ public class ZeroFile {
                     long blockSizeLong = len-pos;
                     blockSize = blockSizeLong>BLOCK_SIZE ? BLOCK_SIZE : (int)blockSizeLong;
                 }
-                if(DEBUG) System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": Clearing");
                 if(!DRY_RUN) {
                     raf.seek(pos);
                     raf.write(buff, 0, blockSize);
                     lastTime = sleep(bpsOut, lastTime);
                     bytesWritten += blockSize;
                 }
+				written++;
+                if(PROGRESS) {
+					String newVerboseString =
+						StringUtility.getApproximateSize(bytesWritten)
+						+ ": "
+						+ SQLUtility.getDecimal((long)written * 10000L / (long)numDirtyBlocks)
+						+ "% written"
+					;
+					StringBuilder verboseOut = new StringBuilder();
+					// backspace and overwrite with spaces when new 
+					for(int i=newVerboseString.length(); i<lastVerboseString.length(); i++) {
+						verboseOut.append('\b');
+					}
+					for(int i=newVerboseString.length(); i<lastVerboseString.length(); i++) {
+						verboseOut.append(' ');
+					}
+					// Backspace to beginning of line
+					for(int i=0; i<lastVerboseString.length(); i++) verboseOut.append('\b');
+					verboseOut.append(newVerboseString);
+					System.err.print(verboseOut);
+					System.err.flush();
+					lastVerboseString = newVerboseString;
+					// System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": Cleared");
+				}
             }
         }
+		if(PROGRESS) {
+			System.err.println();
+			lastVerboseString = "";
+		}
         return bytesWritten;
     }
 }
