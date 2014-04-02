@@ -82,6 +82,7 @@ public class ZeroFile {
                 if(DEBUG) System.err.println("Wrote " + bytesWritten + " bytes");
             } catch(IOException e) {
                 e.printStackTrace(System.err);
+				System.exit(2);
             }
         }
     }
