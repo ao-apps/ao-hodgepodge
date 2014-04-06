@@ -136,8 +136,8 @@ NextLocation :
 									// Check for exact match
 									imagePixel != findmePixel
 									// If either is full alpha, consider a match
-									|| (imagePixel & 0xff000000)==0
-									|| (findmePixel & 0xff000000)==0
+									&& (imagePixel & 0xff000000)!=0
+									&& (findmePixel & 0xff000000)!=0
 								) {
 									totalMismatch +=
 										// Red difference
