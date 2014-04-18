@@ -27,6 +27,7 @@ import static com.aoindustries.util.ApplicationResources.accessor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import javax.servlet.ServletContext;
 
 /**
  * Property utilities.
@@ -39,11 +40,26 @@ final public class PropertiesUtils {
     private PropertiesUtils() {}
 
 	/**
-	 * Loads properties from a resource.
+	 * Loads properties from a classpath resource.
 	 */
 	public static Properties loadFromResource(Class<?> clazz, String resource) throws IOException {
 		Properties props = new Properties();
 		InputStream in = clazz.getResourceAsStream(resource);
+        if(in==null) throw new LocalizedIOException(accessor, "PropertiesUtils.readProperties.resourceNotFound", resource);
+		try {
+			props.load(in);
+		} finally {
+			in.close();
+		}
+		return props;
+	}
+
+	/**
+	 * Loads properties from a web resource.
+	 */
+	public static Properties loadFromResource(ServletContext servletContext, String resource) throws IOException {
+		Properties props = new Properties();
+		InputStream in = servletContext.getResourceAsStream(resource);
         if(in==null) throw new LocalizedIOException(accessor, "PropertiesUtils.readProperties.resourceNotFound", resource);
 		try {
 			props.load(in);
