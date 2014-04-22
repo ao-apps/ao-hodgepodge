@@ -24,6 +24,7 @@ package com.aoindustries.servlet.http;
 
 import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.encoding.NewEncodingUtils;
+import com.aoindustries.lang.NullArgumentException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -49,6 +50,8 @@ public class ServletUtil {
      * Converts a possibly-relative path to a context-relative absolute path.
      * Resolves ./ and ../ at the beginning of the URL but not in the middle of the URL.
 	 * If the URL begins with http:, https:, file:, mailto:, or cid:, it is not altered.
+	 * 
+	 * @param  servletPath  Required when path might be altered.
      */
     public static String getAbsolutePath(String servletPath, String relativeUrlPath) throws MalformedURLException {
 		char firstChar;
@@ -62,6 +65,7 @@ public class ServletUtil {
 			&& !relativeUrlPath.startsWith("mailto:")
 			&& !relativeUrlPath.startsWith("cid:")
 		) {
+			NullArgumentException.checkNotNull(servletPath, "servletPath");
             int slashPos = servletPath.lastIndexOf('/');
             if(slashPos==-1) throw new MalformedURLException("No slash found in servlet path: "+servletPath);
             final String newPath = relativeUrlPath;
