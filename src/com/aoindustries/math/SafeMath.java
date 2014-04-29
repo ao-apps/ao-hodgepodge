@@ -82,7 +82,20 @@ public class SafeMath {
         }
         return value1*value2;
     }
-    /*
+
+	/**
+	 * Computes the average of two values without overflow or underflow.
+	 */
+	public static int avg(int value1, int value2) {
+		return (int)(
+			(
+				(long)value1
+				+ (long)value2
+			) / 2
+		);
+	}
+
+	/*
      * The following is an attempt to accomplish overflow checks using bit trickery only (no division)
     public static void main(String[] args) {
         for(int value1=1; value1<=16; value1++) {
