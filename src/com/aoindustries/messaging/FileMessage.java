@@ -22,6 +22,7 @@
  */
 package com.aoindustries.messaging;
 
+import com.aoindustries.io.AoByteArrayOutputStream;
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
 import com.aoindustries.util.Base64Coder;
@@ -32,9 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 
 /**
  * A message that is a file.
@@ -44,7 +42,6 @@ public class FileMessage implements Message {
 	private final boolean isTemp;
 	private final Object lock = new Object();
 	private File file;
-	private RandomAccessFile raf;
 
 	/**
 	 * base-64 decodes the message into a temp file.
@@ -87,37 +84,40 @@ public class FileMessage implements Message {
 	 * base-64 encodes the message.
 	 */
 	@Override
-	public String getMessageAsString() throws IOException {
-		byte[] bytes;
-		InputStream in = new FileInputStream(file);
-		try {
-			bytes = IoUtils.readFully(in);
-		} finally {
-			in.close();
-		}
-		return new String(Base64Coder.encode(bytes));
+	public String encodeAsString() throws IOException {
+		ByteArray byteArray = encodeAsByteArray();
+		return new String(Base64Coder.encode(byteArray.array, byteArray.length));
 	}
 
 	@Override
-	public MappedByteBuffer getMessageAsByteBuffer() throws IOException {
-		synchronized(lock) {
-			if(raf == null) raf = new RandomAccessFile(file, "r");
-			return raf.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, raf.length());
+	public ByteArray encodeAsByteArray() throws IOException {
+		long len = file.length();
+		InputStream in = new FileInputStream(file);
+		try {
+			AoByteArrayOutputStream bout = new AoByteArrayOutputStream(len > 0 && len <= Integer.MAX_VALUE ? (int)len : 32);
+			try {
+				IoUtils.copy(in, bout);
+			} finally {
+				bout.close();
+			}
+			return new ByteArray(bout.getInternalByteArray(), bout.size());
+		} finally {
+			in.close();
 		}
 	}
 
 	@Override
 	public void close() throws IOException {
 		synchronized(lock) {
-			if(raf != null) {
-				raf.close();
-				raf = null;
-			}
 			if(isTemp && file != null) {
 				FileUtils.delete(file);
 				file = null;
 			}
 		}
+	}
+
+	public boolean isTemp() {
+		return isTemp;
 	}
 
 	public File getMessage() {

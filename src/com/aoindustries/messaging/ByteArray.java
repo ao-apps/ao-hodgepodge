@@ -31,6 +31,11 @@ public class ByteArray {
 	public final byte[] array;
 	public final int length;
 
+	public ByteArray(byte[] array) {
+		this.array = array;
+		this.length = array.length;
+	}
+
 	public ByteArray(byte[] array, int length) {
 		this.array = array;
 		this.length = length;
