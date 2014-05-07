@@ -57,8 +57,8 @@ public class ByteArrayMessage implements Message {
 	}
 
 	@Override
-	public SerializationType getPreferredSerializationType() {
-		return SerializationType.BINARY;
+	public MessageType getPreferredSerializationType() {
+		return MessageType.BINARY;
 	}
 
 	/**
