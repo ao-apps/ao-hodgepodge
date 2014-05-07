@@ -32,9 +32,10 @@ import java.nio.ByteBuffer;
 public interface Message extends Closeable {
 
 	/**
-	 * Gets the message type.
+	 * Gets the preferred serialization type.
+	 * This should be the format that is most efficient for this type of message.
 	 */
-	MessageType getMessageType();
+	MessageType getPreferredSerializationType();
 
 	/**
 	 * Gets a String representation of this message.
