@@ -388,7 +388,7 @@ public class LastModifiedServlet extends HttpServlet {
 		AUTO("auto");
 
 		public static AddLastModifiedWhen valueOfLowerName(String lowerName) {
-			// Quick identify checks first
+			// Quick identity checks first
 			if("true"==lowerName) return TRUE;
 			if("false"==lowerName) return FALSE;
 			if("auto"==lowerName) return AUTO;

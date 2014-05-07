@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,6 +26,7 @@ import com.aoindustries.util.BufferManager;
 import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
+import javax.servlet.WriteListener;
 
 /**
  * Filters the output and removes extra white space at the beginning of lines and completely removes blank lines.
@@ -386,4 +387,14 @@ public class TrimFilterOutputStream extends ServletOutputStream {
             wrapped.println(s);
         }
     }
+
+	@Override
+	public boolean isReady() {
+		return wrapped.isReady();
+	}
+
+	@Override
+	public void setWriteListener(WriteListener wl) {
+		wrapped.setWriteListener(wl);
+	}
 }

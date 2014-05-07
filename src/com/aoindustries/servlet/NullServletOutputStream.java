@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,6 +23,7 @@
 package com.aoindustries.servlet;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 /**
  * Discards all data.
@@ -116,5 +117,21 @@ public final class NullServletOutputStream extends ServletOutputStream {
 
 	@Override
 	public void println(double d) {
+	}
+
+	@Override
+	public boolean isReady() {
+		return true;
+	}
+
+	@Override
+	public void setWriteListener(WriteListener wl) {
+		throw new IllegalStateException("Implement when first required");
+		/*
+		try {
+			wl.onWritePossible();
+		} catch(IOException e) {
+			wl.onError(e);
+		}*/
 	}
 }
