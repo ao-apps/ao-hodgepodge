@@ -22,10 +22,129 @@
  */
 package com.aoindustries.messaging;
 
+import java.io.IOException;
+
 /**
  * The types of serializations.
  */
 public enum MessageType {
-	BINARY,
-	TEXT
+
+	BYTE_ARRAY {
+		@Override
+		byte getTypeByte() {
+			return 0;
+		}
+
+		@Override
+		char getTypeChar() {
+			return 'b';
+		}
+
+		@Override
+		ByteArrayMessage decode(String encodedMessage) {
+			return new ByteArrayMessage(encodedMessage);
+		}
+
+		@Override
+		ByteArrayMessage decode(byte[] encodedMessage) {
+			return new ByteArrayMessage(encodedMessage);
+		}
+	},
+	FILE {
+		@Override
+		byte getTypeByte() {
+			return 1;
+		}
+
+		@Override
+		char getTypeChar() {
+			return 'f';
+		}
+
+		@Override
+		FileMessage decode(String encodedMessage) throws IOException {
+			return new FileMessage(encodedMessage);
+		}
+
+		@Override
+		FileMessage decode(byte[] encodedMessage) throws IOException {
+			return new FileMessage(encodedMessage);
+		}
+	},
+	STRING {
+		@Override
+		byte getTypeByte() {
+			return 2;
+		}
+
+		@Override
+		char getTypeChar() {
+			return 's';
+		}
+
+		@Override
+		StringMessage decode(String encodedMessage) {
+			return new StringMessage(encodedMessage);
+		}
+
+		@Override
+		StringMessage decode(byte[] encodedMessage) {
+			return new StringMessage(encodedMessage);
+		}
+	},
+	MULTI {
+		@Override
+		byte getTypeByte() {
+			return 3;
+		}
+
+		@Override
+		char getTypeChar() {
+			return 'm';
+		}
+
+		@Override
+		MultiMessage decode(String encodedMessage) {
+			return new MultiMessage(encodedMessage);
+		}
+
+		@Override
+		MultiMessage decode(byte[] encodedMessage) throws IOException {
+			return new MultiMessage(encodedMessage);
+		}
+	};
+
+	public static MessageType getFromTypeByte(byte typeByte) {
+		switch(typeByte) {
+			case 0 : return BYTE_ARRAY;
+			case 1 : return FILE;
+			case 2 : return STRING;
+			case 3 : return MULTI;
+			default : throw new IllegalArgumentException("Invalid type byte: " + typeByte);
+		}
+	}
+
+	public static MessageType getFromTypeChar(char typeChar) {
+		switch(typeChar) {
+			case 'b' : return BYTE_ARRAY;
+			case 'f' : return FILE;
+			case 's' : return STRING;
+			case 'm' : return MULTI;
+			default : throw new IllegalArgumentException("Invalid type char: " + typeChar);
+		}
+	}
+
+	abstract byte getTypeByte();
+
+	abstract char getTypeChar();
+
+	/**
+	 * Constructs a message of this type from its string encoding.
+	 */
+	abstract Message decode(String encodedMessage) throws IOException;
+
+	/**
+	 * Constructs a message of this type from its byte[] encoding.
+	 */
+	abstract Message decode(byte[] encodedMessage) throws IOException;
 }

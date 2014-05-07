@@ -45,18 +45,24 @@ public class FileMessage implements Message {
 	private final Object lock = new Object();
 	private File file;
 	private RandomAccessFile raf;
-	private MappedByteBuffer buffer;
 
 	/**
 	 * base-64 decodes the message into a temp file.
 	 */
-	public FileMessage(String encodedMessage) throws IOException {
+	FileMessage(String encodedMessage) throws IOException {
+		this(Base64Coder.decode(encodedMessage));
+	}
+
+	/**
+	 * Restores this message into a temp file.
+	 */
+	FileMessage(byte[] encodedMessage) throws IOException {
 		this.isTemp = true;
 		this.file = File.createTempFile("FileMessage.", null);
 		this.file.deleteOnExit();
 		OutputStream out = new FileOutputStream(file);
 		try {
-			out.write(Base64Coder.decode(encodedMessage));
+			out.write(encodedMessage);
 		} finally {
 			out.close();
 		}
@@ -73,8 +79,8 @@ public class FileMessage implements Message {
 	}
 
 	@Override
-	public MessageType getPreferredSerializationType() {
-		return MessageType.BINARY;
+	public MessageType getMessageType() {
+		return MessageType.FILE;
 	}
 
 	/**
@@ -96,8 +102,7 @@ public class FileMessage implements Message {
 	public MappedByteBuffer getMessageAsByteBuffer() throws IOException {
 		synchronized(lock) {
 			if(raf == null) raf = new RandomAccessFile(file, "r");
-			if(buffer == null) buffer = raf.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, raf.length());
-			return buffer;
+			return raf.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, raf.length());
 		}
 	}
 
@@ -113,5 +118,9 @@ public class FileMessage implements Message {
 				file = null;
 			}
 		}
+	}
+
+	public File getMessage() {
+		return file;
 	}
 }

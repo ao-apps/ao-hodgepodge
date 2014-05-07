@@ -36,7 +36,7 @@ public class ByteArrayMessage implements Message {
 	/**
 	 * base-64 decodes the message.
 	 */
-	public ByteArrayMessage(String encodedMessage) {
+	ByteArrayMessage(String encodedMessage) {
 		byte[] decoded = Base64Coder.decode(encodedMessage);
 		this.message = decoded;
 		this.length = decoded.length;
@@ -77,5 +77,13 @@ public class ByteArrayMessage implements Message {
 	@Override
 	public void close() {
 		// Nothing to do
+	}
+
+	public byte[] getMessage() {
+		return message;
+	}
+
+	public int getMessageLength() {
+		return length;
 	}
 }

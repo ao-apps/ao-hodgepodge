@@ -42,7 +42,7 @@ public class StringMessage implements Message {
 	/**
 	 * UTF-8 decodes the message.
 	 */
-	public StringMessage(byte[] encodedMessage) {
+	StringMessage(byte[] encodedMessage) {
 		this.message = new String(encodedMessage, CHARSET);
 	}
 
@@ -56,8 +56,8 @@ public class StringMessage implements Message {
 	}
 
 	@Override
-	public MessageType getPreferredSerializationType() {
-		return MessageType.TEXT;
+	public MessageType getMessageType() {
+		return MessageType.STRING;
 	}
 
 	@Override
@@ -78,5 +78,9 @@ public class StringMessage implements Message {
 	@Override
 	public void close() {
 		// Nothing to do
+	}
+
+	public String getMessage() {
+		return message;
 	}
 }
