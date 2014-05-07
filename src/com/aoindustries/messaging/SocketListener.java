@@ -20,16 +20,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.net.httpsocket;
+package com.aoindustries.messaging;
 
+import com.aoindustries.messaging.http.HttpSocket;
 import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
  * Receives messages as they come in from the sockets.
  * Also notified on other important socket events.
+ * <p>
+ * None of the messages will be triggered concurrently on this listener;
+ * however, different listeners may be notified in parallel.
+ * This means, for example, that onClose will not happen while onMessages is being invoked.
+ * </p>
+ * <p>
+ * The given socket will always represent the current state, while the events are
+ * delivered in-order.  Thus, newLocalSocketAddress may not necessarily be the
+ * same as the HttpSocket.getMostRecentLocalSocketAddress.
+ * </p>
  */
-public interface HttpSocketListener<HS extends HttpSocket<HS>> {
+public interface SocketListener {
 
 	/**
 	 * Called when one or more new messages arrive.
@@ -39,13 +50,13 @@ public interface HttpSocketListener<HS extends HttpSocket<HS>> {
 	 * 
 	 * @param  messages  The unmodifiable list of messages in the order received
 	 */
-	void onMessages(HttpSocket<? extends HS> socket, List<String> messages);
+	void onMessages(HttpSocket socket, List<String> messages);
 
 	/**
 	 * Called when a new local address is seen.
 	 */
 	void onLocalSocketAddressChange(
-		HttpSocket<? extends HS> socket,
+		HttpSocket socket,
 		InetSocketAddress oldLocalSocketAddress,
 		InetSocketAddress newLocalSocketAddress
 	);
@@ -54,7 +65,7 @@ public interface HttpSocketListener<HS extends HttpSocket<HS>> {
 	 * Called when a new remote address is seen.
 	 */
 	void onRemoteSocketAddressChange(
-		HttpSocket<? extends HS> socket,
+		HttpSocket socket,
 		InetSocketAddress oldRemoteSocketAddress,
 		InetSocketAddress newRemoteSocketAddress
 	);
@@ -63,5 +74,5 @@ public interface HttpSocketListener<HS extends HttpSocket<HS>> {
 	 * Called when a socket is closed.
 	 * This will only be called once.
 	 */
-	void onClose(HttpSocket<? extends HS> socket);
+	void onClose(HttpSocket socket);
 }

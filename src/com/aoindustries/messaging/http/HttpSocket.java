@@ -20,11 +20,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.net.httpsocket;
+package com.aoindustries.messaging.http;
 
 import com.aoindustries.lang.NotImplementedException;
+import com.aoindustries.messaging.Message;
+import com.aoindustries.messaging.Socket;
+import com.aoindustries.messaging.SocketListener;
 import com.aoindustries.security.Identifier;
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
@@ -33,26 +35,26 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * One established connection.
+ * One established connection over HTTP(S).
  */
-public class HttpSocket<HS extends HttpSocket<HS>> implements Closeable {
+public class HttpSocket implements Socket {
 
-	private final HttpSocketContext<HS> socketContext;
+	private final HttpSocketContext socketContext;
 
 	private final Identifier id;
 
 	private final long connectTime;
 
-	private final    InetSocketAddress localSocketAddress;
-	private volatile InetSocketAddress mostRecentLocalSocketAddress;
+	private final    InetSocketAddress connectLocalSocketAddress;
+	private volatile InetSocketAddress localSocketAddress;
 
-	private final    InetSocketAddress remoteSocketAddress;
-	private volatile InetSocketAddress mostRecentRemoteSocketAddress;
+	private final    InetSocketAddress connectRemoteSocketAddress;
+	private volatile InetSocketAddress remoteSocketAddress;
 
-	private final List<HttpSocketListener<? super HS>> listeners = new ArrayList<HttpSocketListener<? super HS>>();
+	private final List<SocketListener> listeners = new ArrayList<SocketListener>();
 
 	protected HttpSocket(
-		HttpSocketContext<HS> socketContext,
+		HttpSocketContext socketContext,
 		Identifier id,
 		long connectTime,
 		InetSocketAddress localSocketAddress,
@@ -61,65 +63,53 @@ public class HttpSocket<HS extends HttpSocket<HS>> implements Closeable {
 		this.socketContext = socketContext;
 		this.id = id;
 		this.connectTime = connectTime;
+		this.connectLocalSocketAddress = localSocketAddress;
 		this.localSocketAddress = localSocketAddress;
-		this.mostRecentLocalSocketAddress = localSocketAddress;
+		this.connectRemoteSocketAddress = remoteSocketAddress;
 		this.remoteSocketAddress = remoteSocketAddress;
-		this.mostRecentRemoteSocketAddress = remoteSocketAddress;
 	}
 
 	@Override
 	public String toString() {
-		return mostRecentRemoteSocketAddress.toString();
+		return remoteSocketAddress.toString();
 	}
 
 	/**
 	 * Gets this socket's unique identifier.  This identifier should remain secret
 	 * as compromising an identifier may allow hijacking a connection.
 	 */
-	public Identifier getId() {
+	Identifier getId() {
 		return id;
 	}
 
-	/**
-	 * Gets the time this connection was established.
-	 */
+	@Override
 	public long getConnectTime() {
 		return connectTime;
 	}
 
-	/**
-	 * Gets the time this connection closed or null if still connected.
-	 */
+	@Override
 	public Long getCloseTime() {
 		throw new NotImplementedException("TODO");
 	}
 
-	/**
-	 * Gets the local address at connection time.  This value will not change.
-	 */
+	@Override
+	public InetSocketAddress getConnectSocketAddress() {
+		return connectLocalSocketAddress;
+	}
+
+	@Override
 	public InetSocketAddress getLocalSocketAddress() {
 		return localSocketAddress;
 	}
 
-	/**
-	 * Gets the most recently seen local address.  This value may change.
-	 */
-	public InetSocketAddress getMostRecentLocalSocketAddress() {
-		return mostRecentLocalSocketAddress;
+	@Override
+	public InetSocketAddress getConnectRemoteSocketAddress() {
+		return connectRemoteSocketAddress;
 	}
 
-	/**
-	 * Gets the remote address at connection time.  This value will not change.
-	 */
+	@Override
 	public InetSocketAddress getRemoteSocketAddress() {
 		return remoteSocketAddress;
-	}
-
-	/**
-	 * Gets the most recently seen remote address.  This value may change.
-	 */
-	public InetSocketAddress getMostRecentRemoteSocketAddress() {
-		return mostRecentRemoteSocketAddress;
 	}
 
 	@Override
@@ -127,33 +117,26 @@ public class HttpSocket<HS extends HttpSocket<HS>> implements Closeable {
 		throw new NotImplementedException("TODO");
 	}
 
+	@Override
 	public boolean isClosed() {
 		throw new NotImplementedException("TODO");
 	}
 
-	/**
-	 * Adds a listener.
-	 *
-	 * @throws IllegalStateException  If the listener has already been added
-	 */
-	public void addSocketListener(HttpSocketListener<? super HS> listener) throws IllegalStateException {
+	@Override
+	public void addSocketListener(SocketListener listener) throws IllegalStateException {
 		synchronized(listener) {
-			for(HttpSocketListener<? super HS> existing : listeners) {
+			for(SocketListener existing : listeners) {
 				if(existing == listener) throw new IllegalStateException("listener already added");
 			}
 			listeners.add(listener);
 		}
 	}
 
-	/**
-	 * Removes a listener.
-	 *
-	 * @return true if the listener was found
-	 */
-	public boolean removeSocketListener(HttpSocketListener<? super HS> listener) {
+	@Override
+	public boolean removeSocketListener(SocketListener listener) {
 		synchronized(listener) {
 			for(int i=0, size=listeners.size(); i<size; i++) {
-				HttpSocketListener<? super HS> existing = listeners.get(i);
+				SocketListener existing = listeners.get(i);
 				if(existing == listener) {
 					listeners.remove(i);
 					return true;
@@ -163,18 +146,13 @@ public class HttpSocket<HS extends HttpSocket<HS>> implements Closeable {
 		}
 	}
 
-	/**
-	 * Sends a single message.  This will never block.
-	 */
-	public void sendMessage(String message) throws ClosedChannelException {
+	@Override
+	public void sendMessage(Message message) throws ClosedChannelException {
 		Collections.singletonList(message);
 	}
 
-	/**
-	 * Sends a set of messages.  This will never block.
-	 * If the messages are empty, the request is ignored.
-	 */
-	public void sendMessages(Iterable<String> messages) throws ClosedChannelException {
+	@Override
+	public void sendMessages(Iterable<? extends Message> messages) throws ClosedChannelException {
 		throw new NotImplementedException("TODO");
 	}
 }

@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.net.httpsocket;
+package com.aoindustries.messaging.http;
 
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.security.Identifier;
@@ -38,18 +38,23 @@ import javax.servlet.http.HttpServletResponse;
  * Requires Servlet 3.0 or newer.
  * Must use with asyncSupported=true.
  */
-abstract public class HttpSocketServlet<HS extends HttpSocket<HS>>
-	extends HttpServlet
-	implements HttpSocketContext<HS> {
+abstract public class HttpSocketServlet extends HttpServlet {
 
 	//private static final Logger logger = Logger.getLogger(HttpSocketServlet.class.getName());
 
 	private static final long serialVersionUID = 1L;
 
+	private final HttpSocketContext socketContext = new HttpSocketContext() {
+		@Override
+		public void onClose(HttpSocket socket) {
+			throw new NotImplementedException("TODO");
+		}
+	};
+
 	/**
 	 * Each socket is kept here, keyed on id.
 	 */
-	private final Map<Identifier,HS> sockets = new LinkedHashMap<Identifier,HS>();
+	private final Map<Identifier,HttpSocket> sockets = new LinkedHashMap<Identifier,HttpSocket>();
 
 	/**
 	 * Last modified times must never be used.
@@ -71,21 +76,24 @@ abstract public class HttpSocketServlet<HS extends HttpSocket<HS>>
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = request.getParameter("action");
 		if("connect".equals(action)) {
-			doConnect(request, response);
+			throw new NotImplementedException("TODO");
 		} else {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unexpected action: " + action);
 		}
 	}
 
+	/**
+	 * When the servlet is destroyed, all active connections are
+	 * also closed.
+	 */
 	@Override
-	public void onClose(HttpSocket<HS> socket) {
+	public void destroy() {
 		throw new NotImplementedException("TODO");
 	}
 
 	/**
-	 * Handles establishing a new connection.
+	 * Handles a new connection.
+	 * This can register any necessary listeners on the socket itself.
 	 */
-	protected void doConnect(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		throw new NotImplementedException("TODO");
-	}
+	abstract void onConnect(HttpSocket socket);
 }

@@ -20,17 +20,46 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.net.httpsocket;
+package com.aoindustries.messaging;
+
+import com.aoindustries.util.Base64Coder;
+import java.nio.ByteBuffer;
 
 /**
- * The same HttpSocket implementation is used for both client-side and
- * server-side.  This interface bridges the gap between context and implementation.
+ * A message that is a byte[].
  */
-public interface HttpSocketContext<HS extends HttpSocket<HS>> {
+public class ByteArrayMessage implements Message {
+
+	private final byte[] message;
+	
+	public ByteArrayMessage(byte[] message) {
+		this.message = message;
+	}
+
+	public ByteArrayMessage(String encodedMessage) {
+		this.message = Base64Coder.decode(encodedMessage);
+	}
+
+	@Override
+	public String toString() {
+		return "ByteArrayMessage(byte[" + message.length + "])";
+	}
+
+	@Override
+	public SerializationType getPreferredSerializationType() {
+		return SerializationType.BINARY;
+	}
 
 	/**
-	 * Called when a socket is closed.
-	 * This will only be called once.
+	 * base-64 encodes the message.
 	 */
-	void onClose(HttpSocket<HS> socket);
+	@Override
+	public String getMessageAsString() {
+		return new String(Base64Coder.encode(message));
+	}
+
+	@Override
+	public ByteBuffer getMessageAsByteBuffer() {
+		return ByteBuffer.wrap(message);
+	}
 }

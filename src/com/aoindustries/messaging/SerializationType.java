@@ -20,26 +20,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.net.httpsocket;
-
-import com.aoindustries.lang.NotImplementedException;
-import com.aoindustries.util.concurrent.Callback;
+package com.aoindustries.messaging;
 
 /**
- * Client component for bi-directional messaging over HTTP.
+ * The types of serializations.
  */
-abstract public class HttpSocketClient<HS extends HttpSocket<HS>> {
-
-	/**
-	 * Asynchronously connects.
-	 */
-	public void connect(
-		String url,
-		Callback<HS> onConnect,
-		Callback<Throwable> onError
-	) {
-		throw new NotImplementedException("TODO");
-	}
-
-	abstract protected HS createSocket();
+public enum SerializationType {
+	BINARY,
+	TEXT
 }
