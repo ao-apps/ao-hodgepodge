@@ -31,18 +31,29 @@ import java.nio.ByteBuffer;
 public class ByteArrayMessage implements Message {
 
 	private final byte[] message;
+	private final int length;
 	
-	public ByteArrayMessage(byte[] message) {
-		this.message = message;
+	/**
+	 * base-64 decodes the message.
+	 */
+	public ByteArrayMessage(String encodedMessage) {
+		byte[] decoded = Base64Coder.decode(encodedMessage);
+		this.message = decoded;
+		this.length = decoded.length;
 	}
 
-	public ByteArrayMessage(String encodedMessage) {
-		this.message = Base64Coder.decode(encodedMessage);
+	public ByteArrayMessage(byte[] message) {
+		this(message, message.length);
+	}
+
+	public ByteArrayMessage(byte[] message, int length) {
+		this.message = message;
+		this.length = length;
 	}
 
 	@Override
 	public String toString() {
-		return "ByteArrayMessage(byte[" + message.length + "])";
+		return "ByteArrayMessage(byte[" + length + "])";
 	}
 
 	@Override
@@ -55,11 +66,16 @@ public class ByteArrayMessage implements Message {
 	 */
 	@Override
 	public String getMessageAsString() {
-		return new String(Base64Coder.encode(message));
+		return new String(Base64Coder.encode(message, length));
 	}
 
 	@Override
 	public ByteBuffer getMessageAsByteBuffer() {
-		return ByteBuffer.wrap(message);
+		return ByteBuffer.wrap(message, 0, length);
+	}
+
+	@Override
+	public void close() {
+		// Nothing to do
 	}
 }

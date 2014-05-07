@@ -25,7 +25,8 @@ package com.aoindustries.messaging;
 /**
  * The types of serializations.
  */
-public enum SerializationType {
-	BINARY,
-	TEXT
+public enum MessageType {
+	BYTE_ARRAY,
+	FILE,
+	STRING
 }

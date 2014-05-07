@@ -73,8 +73,8 @@ public class FileMessage implements Message {
 	}
 
 	@Override
-	public SerializationType getPreferredSerializationType() {
-		return SerializationType.BINARY;
+	public MessageType getMessageType() {
+		return MessageType.FILE;
 	}
 
 	/**

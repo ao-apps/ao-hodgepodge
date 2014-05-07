@@ -88,7 +88,7 @@ public interface Socket extends Closeable {
 
 	/**
 	 * Sends a set of messages.  This will never block.
-	 * If the messages are empty, the request is ignored.
+	 * If messages is empty, the request is ignored.
 	 */
 	void sendMessages(Iterable<? extends Message> messages) throws ClosedChannelException;
 }

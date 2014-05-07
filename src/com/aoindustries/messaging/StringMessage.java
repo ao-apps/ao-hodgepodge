@@ -56,8 +56,8 @@ public class StringMessage implements Message {
 	}
 
 	@Override
-	public SerializationType getPreferredSerializationType() {
-		return SerializationType.TEXT;
+	public MessageType getMessageType() {
+		return MessageType.STRING;
 	}
 
 	@Override
