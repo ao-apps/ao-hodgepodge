@@ -39,13 +39,20 @@ public class StringMessage implements Message {
 		this.message = message;
 	}
 
+	/**
+	 * UTF-8 decodes the message.
+	 */
 	public StringMessage(byte[] encodedMessage) {
 		this.message = new String(encodedMessage, CHARSET);
 	}
 
 	@Override
 	public String toString() {
-		return "StringMessage(\"" + message + "\")";
+		if(message.length() > 21) {
+			return "StringMessage(\"" + message.substring(0, 20) + "…\")";
+		} else {
+			return "StringMessage(\"" + message + "\")";
+		}
 	}
 
 	@Override
@@ -66,5 +73,10 @@ public class StringMessage implements Message {
 		return ByteBuffer.wrap(
 			message.getBytes(CHARSET)
 		);
+	}
+
+	@Override
+	public void close() {
+		// Nothing to do
 	}
 }

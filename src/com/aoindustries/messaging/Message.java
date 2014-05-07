@@ -22,12 +22,14 @@
  */
 package com.aoindustries.messaging;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
  * Any type of encapsulated message.
  */
-public interface Message {
+public interface Message extends Closeable {
 
 	/**
 	 * Gets the preferred serialization type.
@@ -38,10 +40,16 @@ public interface Message {
 	/**
 	 * Gets a String representation of this message.
 	 */
-	String getMessageAsString();
+	String getMessageAsString() throws IOException;
 
 	/**
 	 * Gets a binary representation of this message.
 	 */
-	ByteBuffer getMessageAsByteBuffer();
+	ByteBuffer getMessageAsByteBuffer() throws IOException;
+
+	/**
+	 * The message should be closed when it is no longer needed.
+	 */
+	@Override
+	void close() throws IOException;
 }
