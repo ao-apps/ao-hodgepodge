@@ -23,7 +23,6 @@
 package com.aoindustries.messaging;
 
 import com.aoindustries.nio.charset.Charsets;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 /**
@@ -61,7 +60,7 @@ public class StringMessage implements Message {
 	}
 
 	@Override
-	public String getMessageAsString() {
+	public String encodeAsString() {
 		return message;
 	}
 
@@ -69,10 +68,8 @@ public class StringMessage implements Message {
 	 * UTF-8 encodes the message.
 	 */
 	@Override
-	public ByteBuffer getMessageAsByteBuffer() {
-		return ByteBuffer.wrap(
-			message.getBytes(CHARSET)
-		);
+	public ByteArray encodeAsByteArray() {
+		return new ByteArray(message.getBytes(CHARSET));
 	}
 
 	@Override

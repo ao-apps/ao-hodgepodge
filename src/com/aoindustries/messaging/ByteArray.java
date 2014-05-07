@@ -22,32 +22,18 @@
  */
 package com.aoindustries.messaging;
 
-import java.io.Closeable;
-import java.io.IOException;
-
 /**
- * Any type of encapsulated message.
+ * A byte[] and associated length.  This is used to avoid copying arrays
+ * for return values.
  */
-public interface Message extends Closeable {
+public class ByteArray {
 
-	/**
-	 * Gets the message type.
-	 */
-	MessageType getMessageType();
+	public final byte[] array;
+	public final int length;
 
-	/**
-	 * Gets a String representation of this message.
-	 */
-	String encodeAsString() throws IOException;
-
-	/**
-	 * Gets a binary representation of this message.
-	 */
-	ByteArray encodeAsByteArray() throws IOException;
-
-	/**
-	 * The message should be closed when it is no longer needed.
-	 */
-	@Override
-	void close() throws IOException;
+	public ByteArray(byte[] array, int length) {
+		this.array = array;
+		this.length = length;
+		assert(length <= array.length);
+	}
 }

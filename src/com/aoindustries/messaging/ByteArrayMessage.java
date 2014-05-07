@@ -23,7 +23,6 @@
 package com.aoindustries.messaging;
 
 import com.aoindustries.util.Base64Coder;
-import java.nio.ByteBuffer;
 
 /**
  * A message that is a byte[].
@@ -65,13 +64,13 @@ public class ByteArrayMessage implements Message {
 	 * base-64 encodes the message.
 	 */
 	@Override
-	public String getMessageAsString() {
+	public String encodeAsString() {
 		return new String(Base64Coder.encode(message, length));
 	}
 
 	@Override
-	public ByteBuffer getMessageAsByteBuffer() {
-		return ByteBuffer.wrap(message, 0, length);
+	public ByteArray encodeAsByteArray() {
+		return new ByteArray(message, length);
 	}
 
 	@Override
