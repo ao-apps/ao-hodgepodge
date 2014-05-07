@@ -22,8 +22,11 @@
  */
 package com.aoindustries.net.httpsocket;
 
+import com.aoindustries.lang.NotImplementedException;
+import com.aoindustries.security.Identifier;
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,20 +34,58 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Server component for bi-directional messaging over HTTP.
+ *
+ * Requires Servlet 3.0 or newer.
+ * Must use with asyncSupported=true.
  */
-abstract public class HttpSocketServlet extends HttpServlet {
+abstract public class HttpSocketServlet<HS extends HttpSocket<HS>>
+	extends HttpServlet
+	implements HttpSocketContext<HS> {
 
-	private static final Logger logger = Logger.getLogger(HttpSocketServlet.class.getName());
+	//private static final Logger logger = Logger.getLogger(HttpSocketServlet.class.getName());
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Each socket is kept here, keyed on id.
+	 */
+	private final Map<Identifier,HS> sockets = new LinkedHashMap<Identifier,HS>();
+
+	/**
+	 * Last modified times must never be used.
+	 */
 	@Override
 	final protected long getLastModified(HttpServletRequest request) {
 		return -1;
 	}
 
+	/**
+	 * Get requests must never be used.
+	 */
 	@Override
 	final protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String action = request.getParameter("action");
+		if("connect".equals(action)) {
+			doConnect(request, response);
+		} else {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unexpected action: " + action);
+		}
+	}
+
+	@Override
+	public void onClose(HttpSocket<HS> socket) {
+		throw new NotImplementedException("TODO");
+	}
+
+	/**
+	 * Handles establishing a new connection.
+	 */
+	protected void doConnect(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		throw new NotImplementedException("TODO");
 	}
 }
