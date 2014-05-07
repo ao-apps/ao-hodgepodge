@@ -41,8 +41,8 @@ public class StringMessage implements Message {
 	/**
 	 * UTF-8 decodes the message.
 	 */
-	StringMessage(byte[] encodedMessage) {
-		this.message = new String(encodedMessage, CHARSET);
+	StringMessage(byte[] encodedMessage, int encodedMessageLength) {
+		this.message = new String(encodedMessage, 0, encodedMessageLength, CHARSET);
 	}
 
 	@Override

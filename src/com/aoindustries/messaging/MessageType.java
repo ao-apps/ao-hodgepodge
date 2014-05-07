@@ -46,8 +46,8 @@ public enum MessageType {
 		}
 
 		@Override
-		ByteArrayMessage decode(byte[] encodedMessage) {
-			return new ByteArrayMessage(encodedMessage);
+		ByteArrayMessage decode(byte[] encodedMessage, int encodedMessageLength) {
+			return new ByteArrayMessage(encodedMessage, encodedMessageLength);
 		}
 	},
 	FILE {
@@ -67,8 +67,8 @@ public enum MessageType {
 		}
 
 		@Override
-		FileMessage decode(byte[] encodedMessage) throws IOException {
-			return new FileMessage(encodedMessage);
+		FileMessage decode(byte[] encodedMessage, int encodedMessageLength) throws IOException {
+			return new FileMessage(encodedMessage, encodedMessageLength);
 		}
 	},
 	STRING {
@@ -88,8 +88,8 @@ public enum MessageType {
 		}
 
 		@Override
-		StringMessage decode(byte[] encodedMessage) {
-			return new StringMessage(encodedMessage);
+		StringMessage decode(byte[] encodedMessage, int encodedMessageLength) {
+			return new StringMessage(encodedMessage, encodedMessageLength);
 		}
 	},
 	MULTI {
@@ -104,13 +104,13 @@ public enum MessageType {
 		}
 
 		@Override
-		MultiMessage decode(String encodedMessage) {
+		MultiMessage decode(String encodedMessage) throws IOException {
 			return new MultiMessage(encodedMessage);
 		}
 
 		@Override
-		MultiMessage decode(byte[] encodedMessage) throws IOException {
-			return new MultiMessage(encodedMessage);
+		MultiMessage decode(byte[] encodedMessage, int encodedMessageLength) throws IOException {
+			return new MultiMessage(encodedMessage, encodedMessageLength);
 		}
 	};
 
@@ -146,5 +146,5 @@ public enum MessageType {
 	/**
 	 * Constructs a message of this type from its byte[] encoding.
 	 */
-	abstract Message decode(byte[] encodedMessage) throws IOException;
+	abstract Message decode(byte[] encodedMessage, int encodedMessageLength) throws IOException;
 }

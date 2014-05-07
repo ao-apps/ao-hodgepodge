@@ -24,13 +24,9 @@ package com.aoindustries.messaging;
 
 import com.aoindustries.io.AoByteArrayInputStream;
 import com.aoindustries.io.AoByteArrayOutputStream;
-import com.aoindustries.util.AoArrays;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -77,21 +73,27 @@ public class MultiMessage implements Message {
 	/**
 	 * Decodes the messages.
 	 */
-	MultiMessage(byte[] encodedMessages) throws IOException {
+	MultiMessage(byte[] encodedMessages, int encodedMessageLength) throws IOException {
 		if(encodedMessages.length==0) {
 			messages = Collections.emptyList();
 		} else {
 			DataInputStream in = new DataInputStream(new AoByteArrayInputStream(encodedMessages));
 			try {
+				int totalRead = 0;
 				final int size = in.readInt();
+				totalRead += 4;
 				List<Message> decodedMessages = new ArrayList<Message>(size);
 				for(int i=0; i<size; i++) {
 					MessageType type = MessageType.getFromTypeByte(in.readByte());
+					totalRead++;
 					final int capacity = in.readInt();
+					totalRead += 4;
 					byte[] encodedMessage = new byte[capacity];
 					in.readFully(encodedMessage, 0, capacity);
-					decodedMessages.add(type.decode(encodedMessage));
+					totalRead += capacity;
+					decodedMessages.add(type.decode(encodedMessage, capacity));
 				}
+				if(totalRead != encodedMessageLength) throw new IllegalArgumentException("totalRead != encodedMessageLength");
 				this.messages = Collections.unmodifiableList(decodedMessages);
 			} finally {
 				in.close();
@@ -113,7 +115,7 @@ public class MultiMessage implements Message {
 	 * Encodes the messages into a single string.
 	 */
 	@Override
-	public String getMessageAsString() throws IOException {
+	public String encodeAsString() throws IOException {
 		final int size = messages.size();
 		if(size == 0) return "";
 		StringBuilder sb = new StringBuilder();
@@ -121,7 +123,7 @@ public class MultiMessage implements Message {
 		int count = 0;
 		for(Message message : messages) {
 			count++;
-			String str = message.getMessageAsString();
+			String str = message.encodeAsString();
 			sb
 				.append(message.getMessageType().getTypeChar())
 				.append(str.length())
@@ -139,41 +141,31 @@ public class MultiMessage implements Message {
 	 * is a simple implementation.
 	 */
 	@Override
-	public ByteBuffer getMessageAsByteBuffer() throws IOException {
+	public ByteArray encodeAsByteArray() throws IOException {
 		final int size = messages.size();
-		if(size == 0) return ByteBuffer.wrap(AoArrays.EMPTY_BYTE_ARRAY);
+		if(size == 0) return ByteArray.EMPTY_BYTE_ARRAY;
 		AoByteArrayOutputStream bout = new AoByteArrayOutputStream();
 		try {
 			DataOutputStream out = new DataOutputStream(bout);
 			try {
-				WritableByteChannel channel = Channels.newChannel(out);
-				try {
-					out.writeInt(size);
-					int count = 0;
-					for(Message message : messages) {
-						count++;
-						ByteBuffer bytes = message.getMessageAsByteBuffer();
-						out.writeByte(message.getMessageType().getTypeByte());
-						final int capacity = bytes.capacity();
-						out.writeInt(capacity);
-						int totalWritten = 0;
-						while(totalWritten < capacity) {
-							int written = channel.write(bytes);
-							totalWritten += written;
-						}
-						if(totalWritten != capacity) throw new ConcurrentModificationException();
-					}
-					if(count != size) throw new ConcurrentModificationException();
-				} finally {
-					channel.close();
+				out.writeInt(size);
+				int count = 0;
+				for(Message message : messages) {
+					count++;
+					ByteArray byteArray = message.encodeAsByteArray();
+					final int capacity = byteArray.length;
+					out.writeByte(message.getMessageType().getTypeByte());
+					out.writeInt(capacity);
+					out.write(byteArray.array, 0, capacity);
 				}
+				if(count != size) throw new ConcurrentModificationException();
 			} finally {
 				out.close();
 			}
 		} finally {
 			bout.close();
 		}
-		return ByteBuffer.wrap(bout.getInternalByteArray(), 0, bout.size());
+		return new ByteArray(bout.getInternalByteArray(), bout.size());
 	}
 
 	/**

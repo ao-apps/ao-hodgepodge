@@ -50,16 +50,20 @@ public class FileMessage implements Message {
 		this(Base64Coder.decode(encodedMessage));
 	}
 
+	private FileMessage(byte[] encodedMessage) throws IOException {
+		this(encodedMessage, encodedMessage.length);
+	}
+
 	/**
 	 * Restores this message into a temp file.
 	 */
-	FileMessage(byte[] encodedMessage) throws IOException {
+	FileMessage(byte[] encodedMessage, int encodedMessageLength) throws IOException {
 		this.isTemp = true;
 		this.file = File.createTempFile("FileMessage.", null);
 		this.file.deleteOnExit();
 		OutputStream out = new FileOutputStream(file);
 		try {
-			out.write(encodedMessage);
+			out.write(encodedMessage, 0, encodedMessageLength);
 		} finally {
 			out.close();
 		}

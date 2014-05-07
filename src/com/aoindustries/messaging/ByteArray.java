@@ -22,11 +22,15 @@
  */
 package com.aoindustries.messaging;
 
+import com.aoindustries.util.AoArrays;
+
 /**
  * A byte[] and associated length.  This is used to avoid copying arrays
  * for return values.
  */
 public class ByteArray {
+
+	public static final ByteArray EMPTY_BYTE_ARRAY = new ByteArray(AoArrays.EMPTY_BYTE_ARRAY);
 
 	public final byte[] array;
 	public final int length;
