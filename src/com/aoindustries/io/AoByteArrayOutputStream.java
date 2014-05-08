@@ -39,6 +39,10 @@ public class AoByteArrayOutputStream extends ByteArrayOutputStream {
         super(size);
     }
 
+	/**
+	 * Provides direct access to the internal byte[] to avoid unnecessary
+	 * copying of the array.
+	 */
     public byte[] getInternalByteArray() {
         return this.buf;
     }

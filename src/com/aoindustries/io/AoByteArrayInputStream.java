@@ -38,11 +38,15 @@ public class AoByteArrayInputStream extends ByteArrayInputStream {
         super(buf);
     }
 
+	/**
+	 * Provides direct access to the internal byte[] to avoid unnecessary
+	 * copying of the array.
+	 */
     public byte[] getInternalByteArray() {
         return this.buf;
     }
 
-    public void readFrom(DataInput in) throws IOException {
+    public void fillFrom(DataInput in) throws IOException {
         synchronized(this) {
             in.readFully(buf);
             mark=0;
@@ -51,7 +55,7 @@ public class AoByteArrayInputStream extends ByteArrayInputStream {
         }
     }
 
-    public void readFrom(DataInput in, int len) throws IOException {
+    public void fillFrom(DataInput in, int len) throws IOException {
         synchronized(this) {
             in.readFully(buf, 0, len);
             mark=0;
@@ -60,7 +64,7 @@ public class AoByteArrayInputStream extends ByteArrayInputStream {
         }
     }
 
-    public void readFrom(PersistentBuffer pbuffer, long position, int len) throws IOException {
+    public void fillFrom(PersistentBuffer pbuffer, long position, int len) throws IOException {
         synchronized(this) {
             pbuffer.get(position, buf, 0, len);
             mark=0;

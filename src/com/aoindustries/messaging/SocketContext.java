@@ -20,40 +20,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.messaging.http;
+package com.aoindustries.messaging;
 
-import com.aoindustries.lang.NotImplementedException;
-import com.aoindustries.messaging.AbstractSocket;
-import com.aoindustries.messaging.Message;
-import com.aoindustries.security.Identifier;
+import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
 
 /**
- * One established connection over HTTP(S).
+ * Each socket, regardless or protocol and whether client or server, has a
+ * context.
  */
-public class HttpSocket extends AbstractSocket {
+public interface SocketContext extends Closeable {
 
-	protected HttpSocket(
-		HttpSocketContext socketContext,
-		Identifier id,
-		long connectTime,
-		InetSocketAddress localSocketAddress,
-		InetSocketAddress remoteSocketAddress,
-	) {
-		super(socketContext, id, connectTime, localSocketAddress, remoteSocketAddress);
-	}
+	/**
+	 * Gets a snapshot list of all active sockets.
+	 * If context is closed will be an empty collection.
+	 */
+	Collection<? extends Socket> getSockets();
 
+	/**
+	 * Closes this context.  When the context is closed, all active sockets are
+	 * closed and all related persistent resources are freed.
+	 */
 	@Override
-	public void close() throws IOException {
-		super.close();
-		throw new NotImplementedException("TODO");
-	}
+	void close() throws IOException;
 
-	@Override
-	public void sendMessages(Collection<? extends Message> messages) throws ClosedChannelException {
-		throw new NotImplementedException("TODO");
-	}
+	/**
+	 * Called when a socket is closed.
+	 * This will only be called once.
+	 */
+	void onClose(Socket socket);
 }

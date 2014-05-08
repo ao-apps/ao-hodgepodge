@@ -20,19 +20,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.messaging.http;
+package com.aoindustries.messaging.tcp;
 
 import com.aoindustries.lang.NotImplementedException;
-import com.aoindustries.security.Identifier;
 import com.aoindustries.util.concurrent.Callback;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
 /**
- * Client component for bi-directional messaging over HTTP.
+ * Client component for bi-directional messaging over TCP.
  */
-public class HttpSocketClient implements Closeable {
+public class TcpSocketClient implements Closeable {
 
 	private final HttpSocketContext socketContext = new HttpSocketContext() {
 		@Override
@@ -59,16 +58,17 @@ public class HttpSocketClient implements Closeable {
 		InetSocketAddress remoteSocketAddress
 	) {
 		return new HttpSocket(
+			socketContext,
+			id,
 			connectTime,
 			localSocketAddress,
-			remoteSocketAddress,
-			socketContext,
-			id
+			remoteSocketAddress
 		);
 	}
 
 	/**
-	 * Closes this client.  When the client is closed, all active connections are also closed.
+	 * Closes this client.  When the client is closed, all active sockets are
+	 * also closed.
 	 */
 	@Override
 	public void close() throws IOException {

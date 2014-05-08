@@ -22,7 +22,6 @@
  */
 package com.aoindustries.messaging;
 
-import com.aoindustries.messaging.http.HttpSocket;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -50,13 +49,13 @@ public interface SocketListener {
 	 * 
 	 * @param  messages  The unmodifiable list of messages in the order received
 	 */
-	void onMessages(HttpSocket socket, List<String> messages);
+	void onMessages(Socket socket, List<String> messages);
 
 	/**
 	 * Called when a new local address is seen.
 	 */
 	void onLocalSocketAddressChange(
-		HttpSocket socket,
+		Socket socket,
 		InetSocketAddress oldLocalSocketAddress,
 		InetSocketAddress newLocalSocketAddress
 	);
@@ -65,7 +64,7 @@ public interface SocketListener {
 	 * Called when a new remote address is seen.
 	 */
 	void onRemoteSocketAddressChange(
-		HttpSocket socket,
+		Socket socket,
 		InetSocketAddress oldRemoteSocketAddress,
 		InetSocketAddress newRemoteSocketAddress
 	);
@@ -74,5 +73,5 @@ public interface SocketListener {
 	 * Called when a socket is closed.
 	 * This will only be called once.
 	 */
-	void onClose(HttpSocket socket);
+	void onClose(Socket socket);
 }

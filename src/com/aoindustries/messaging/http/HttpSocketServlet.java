@@ -83,8 +83,7 @@ abstract public class HttpSocketServlet extends HttpServlet {
 	}
 
 	/**
-	 * When the servlet is destroyed, all active connections are
-	 * also closed.
+	 * When the servlet is destroyed, all active sockets are also closed.
 	 */
 	@Override
 	public void destroy() {

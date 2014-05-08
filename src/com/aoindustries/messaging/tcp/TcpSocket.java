@@ -20,40 +20,52 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.messaging.http;
+package com.aoindustries.messaging.tcp;
 
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.messaging.AbstractSocket;
 import com.aoindustries.messaging.Message;
-import com.aoindustries.security.Identifier;
+import com.aoindustries.util.concurrent.ExecutorService;
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
- * One established connection over HTTP(S).
+ * One established connection over a socket.
  */
-public class HttpSocket extends AbstractSocket {
+public class TcpSocket extends AbstractSocket {
 
-	protected HttpSocket(
-		HttpSocketContext socketContext,
-		Identifier id,
-		long connectTime,
-		InetSocketAddress localSocketAddress,
-		InetSocketAddress remoteSocketAddress,
-	) {
-		super(socketContext, id, connectTime, localSocketAddress, remoteSocketAddress);
+	private final Queue<Message> sendQueue = new LinkedList<Message>();
+
+	public TcpSocket(InetAddress address, int port) throws IOException {
+		this(new Socket(address, port));
+	}
+
+	public TcpSocket(String host, int port) throws IOException {
+		this(new Socket(host, port));
+	}
+
+	public TcpSocket(Socket socket) {
+		super(System.currentTimeMillis(), socket.getLocalSocketAddress(), socket.getRemoteSocketAddress());
 	}
 
 	@Override
 	public void close() throws IOException {
-		super.close();
-		throw new NotImplementedException("TODO");
+		try {
+			super.close();
+		} finally {
+			executorService.dispose();
+		}
 	}
 
 	@Override
 	public void sendMessages(Collection<? extends Message> messages) throws ClosedChannelException {
-		throw new NotImplementedException("TODO");
+		synchronized(sendQueue) {
+			sendQueue.addAll(messages);
+		}
 	}
 }

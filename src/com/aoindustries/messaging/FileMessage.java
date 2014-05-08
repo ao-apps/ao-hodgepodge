@@ -90,7 +90,7 @@ public class FileMessage implements Message {
 	@Override
 	public String encodeAsString() throws IOException {
 		ByteArray byteArray = encodeAsByteArray();
-		return new String(Base64Coder.encode(byteArray.array, byteArray.length));
+		return new String(Base64Coder.encode(byteArray.array, byteArray.size));
 	}
 
 	@Override

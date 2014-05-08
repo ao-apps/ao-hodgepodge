@@ -153,7 +153,7 @@ public class MultiMessage implements Message {
 				for(Message message : messages) {
 					count++;
 					ByteArray byteArray = message.encodeAsByteArray();
-					final int capacity = byteArray.length;
+					final int capacity = byteArray.ByteArray.this.size;
 					out.writeByte(message.getMessageType().getTypeByte());
 					out.writeInt(capacity);
 					out.write(byteArray.array, 0, capacity);

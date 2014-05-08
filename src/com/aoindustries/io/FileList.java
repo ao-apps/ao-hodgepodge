@@ -84,7 +84,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
     public T get(int index) {
         try {
             frf.seekToExistingRecord(index);
-            inBuffer.readFrom(frf);
+            inBuffer.fillFrom(frf);
             if(dataInBuffer.readBoolean()) {
                 T obj=objectFactory.createInstance();
                 obj.readRecord(dataInBuffer);
@@ -117,7 +117,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
         try {
             // Read old object
             frf.seekToExistingRecord(index);
-            inBuffer.readFrom(frf);
+            inBuffer.fillFrom(frf);
             T old;
             if(dataInBuffer.readBoolean()) {
                 old=objectFactory.createInstance();
@@ -234,7 +234,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
         try {
             // Read the old object
             frf.seekToExistingRecord(index);
-            inBuffer.readFrom(frf);
+            inBuffer.fillFrom(frf);
             T old;
             if(dataInBuffer.readBoolean()) {
                 old=objectFactory.createInstance();

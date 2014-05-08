@@ -22,15 +22,29 @@
  */
 package com.aoindustries.messaging;
 
+import com.aoindustries.security.Identifier;
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
+import java.util.Collection;
 
 /**
  * One established connection.
  */
 public interface Socket extends Closeable {
+
+	/**
+	 * Gets the context this socket is running within.
+	 */
+	SocketContext getSocketContext();
+
+	/**
+	 * Gets this socket's unique identifier.  This identifier should remain secret
+	 * as compromising an identifier may allow hijacking a connection.
+	 * No two sockets will have the same identifier for a given context at the same time.
+	 */
+	Identifier getId();
 
 	/**
 	 * Gets the time this connection was established.
@@ -45,22 +59,22 @@ public interface Socket extends Closeable {
 	/**
 	 * Gets the local address at connection time.  This value will not change.
 	 */
-	InetSocketAddress getConnectSocketAddress();
+	SocketAddress getConnectSocketAddress();
 
 	/**
 	 * Gets the most recently seen local address.  This value may change.
 	 */
-	InetSocketAddress getLocalSocketAddress();
+	SocketAddress getLocalSocketAddress();
 
 	/**
 	 * Gets the remote address at connection time.  This value will not change.
 	 */
-	InetSocketAddress getConnectRemoteSocketAddress();
+	SocketAddress getConnectRemoteSocketAddress();
 
 	/**
 	 * Gets the most recently seen remote address.  This value may change.
 	 */
-	InetSocketAddress getRemoteSocketAddress();
+	SocketAddress getRemoteSocketAddress();
 
 	@Override
 	void close() throws IOException;
@@ -90,5 +104,5 @@ public interface Socket extends Closeable {
 	 * Sends a set of messages.  This will never block.
 	 * If messages is empty, the request is ignored.
 	 */
-	void sendMessages(Iterable<? extends Message> messages) throws ClosedChannelException;
+	void sendMessages(Collection<? extends Message> messages) throws ClosedChannelException;
 }
