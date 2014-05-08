@@ -22,6 +22,7 @@
  */
 package com.aoindustries.messaging;
 
+import com.aoindustries.util.concurrent.ConcurrentListenerManager;
 import com.aoindustries.security.Identifier;
 import com.aoindustries.util.AoCollections;
 import java.util.ArrayList;
