@@ -29,17 +29,16 @@ import com.aoindustries.util.Base64Coder;
  */
 public class ByteArrayMessage implements Message {
 
-	private final byte[] message;
-	private final int length;
-	
 	/**
 	 * base-64 decodes the message.
 	 */
-	ByteArrayMessage(String encodedMessage) {
+	public static ByteArrayMessage decode(String encodedMessage) {
 		byte[] decoded = Base64Coder.decode(encodedMessage);
-		this.message = decoded;
-		this.length = decoded.length;
+		return new ByteArrayMessage(decoded, decoded.length);
 	}
+
+	private final byte[] message;
+	private final int length;
 
 	public ByteArrayMessage(byte[] message) {
 		this(message, message.length);

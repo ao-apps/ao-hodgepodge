@@ -40,16 +40,11 @@ public class MultiMessage implements Message {
 
 	private static final char DELIMITER = ',';
 
-	private final Collection<? extends Message> messages;
-	
-	public MultiMessage(Collection<? extends Message> messages) {
-		this.messages = messages;
-	}
-
 	/**
 	 * Decodes the messages.
 	 */
-	MultiMessage(String encodedMessages) throws IOException {
+	public static MultiMessage decode(String encodedMessages) throws IOException {
+		Collection<? extends Message> messages;
 		if(encodedMessages.isEmpty()) {
 			messages = Collections.emptyList();
 		} else {
@@ -66,14 +61,16 @@ public class MultiMessage implements Message {
 				decodedMessages.add(type.decode(encodedMessages.substring(nextPos, pos)));
 			}
 			if(pos != encodedMessages.length()) throw new IllegalArgumentException("pos != encodedMessages.length()");
-			this.messages = Collections.unmodifiableList(decodedMessages);
+			messages = Collections.unmodifiableList(decodedMessages);
 		}
+		return new MultiMessage(messages);
 	}
 
 	/**
 	 * Decodes the messages.
 	 */
-	MultiMessage(byte[] encodedMessages, int encodedMessageLength) throws IOException {
+	public static MultiMessage decode(byte[] encodedMessages, int encodedMessageLength) throws IOException {
+		Collection<? extends Message> messages;
 		if(encodedMessages.length==0) {
 			messages = Collections.emptyList();
 		} else {
@@ -94,11 +91,18 @@ public class MultiMessage implements Message {
 					decodedMessages.add(type.decode(encodedMessage, capacity));
 				}
 				if(totalRead != encodedMessageLength) throw new IllegalArgumentException("totalRead != encodedMessageLength");
-				this.messages = Collections.unmodifiableList(decodedMessages);
+				messages = Collections.unmodifiableList(decodedMessages);
 			} finally {
 				in.close();
 			}
 		}
+		return new MultiMessage(messages);
+	}
+
+	private final Collection<? extends Message> messages;
+	
+	public MultiMessage(Collection<? extends Message> messages) {
+		this.messages = messages;
 	}
 
 	@Override
@@ -153,7 +157,7 @@ public class MultiMessage implements Message {
 				for(Message message : messages) {
 					count++;
 					ByteArray byteArray = message.encodeAsByteArray();
-					final int capacity = byteArray.ByteArray.this.size;
+					final int capacity = byteArray.size;
 					out.writeByte(message.getMessageType().getTypeByte());
 					out.writeInt(capacity);
 					out.write(byteArray.array, 0, capacity);

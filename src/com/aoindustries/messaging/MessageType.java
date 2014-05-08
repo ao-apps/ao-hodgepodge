@@ -42,7 +42,7 @@ public enum MessageType {
 
 		@Override
 		ByteArrayMessage decode(String encodedMessage) {
-			return new ByteArrayMessage(encodedMessage);
+			return ByteArrayMessage.decode(encodedMessage);
 		}
 
 		@Override
@@ -63,12 +63,12 @@ public enum MessageType {
 
 		@Override
 		FileMessage decode(String encodedMessage) throws IOException {
-			return new FileMessage(encodedMessage);
+			return FileMessage.decode(encodedMessage);
 		}
 
 		@Override
 		FileMessage decode(byte[] encodedMessage, int encodedMessageLength) throws IOException {
-			return new FileMessage(encodedMessage, encodedMessageLength);
+			return FileMessage.decode(encodedMessage, encodedMessageLength);
 		}
 	},
 	STRING {
@@ -89,7 +89,7 @@ public enum MessageType {
 
 		@Override
 		StringMessage decode(byte[] encodedMessage, int encodedMessageLength) {
-			return new StringMessage(encodedMessage, encodedMessageLength);
+			return StringMessage.decode(encodedMessage, encodedMessageLength);
 		}
 	},
 	MULTI {
@@ -105,12 +105,12 @@ public enum MessageType {
 
 		@Override
 		MultiMessage decode(String encodedMessage) throws IOException {
-			return new MultiMessage(encodedMessage);
+			return MultiMessage.decode(encodedMessage);
 		}
 
 		@Override
 		MultiMessage decode(byte[] encodedMessage, int encodedMessageLength) throws IOException {
-			return new MultiMessage(encodedMessage, encodedMessageLength);
+			return MultiMessage.decode(encodedMessage, encodedMessageLength);
 		}
 	};
 

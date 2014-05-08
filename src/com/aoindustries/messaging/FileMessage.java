@@ -28,7 +28,6 @@ import com.aoindustries.io.IoUtils;
 import com.aoindustries.util.Base64Coder;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,38 +38,39 @@ import java.io.OutputStream;
  */
 public class FileMessage implements Message {
 
-	private final boolean isTemp;
-	private final Object lock = new Object();
-	private File file;
-
 	/**
 	 * base-64 decodes the message into a temp file.
 	 */
-	FileMessage(String encodedMessage) throws IOException {
-		this(Base64Coder.decode(encodedMessage));
-	}
-
-	private FileMessage(byte[] encodedMessage) throws IOException {
-		this(encodedMessage, encodedMessage.length);
+	public static FileMessage decode(String encodedMessage) throws IOException {
+		byte[] decoded = Base64Coder.decode(encodedMessage);
+		return decode(decoded, decoded.length);
 	}
 
 	/**
 	 * Restores this message into a temp file.
 	 */
-	FileMessage(byte[] encodedMessage, int encodedMessageLength) throws IOException {
-		this.isTemp = true;
-		this.file = File.createTempFile("FileMessage.", null);
-		this.file.deleteOnExit();
+	public static FileMessage decode(byte[] encodedMessage, int encodedMessageLength) throws IOException {
+		File file = File.createTempFile("FileMessage.", null);
+		file.deleteOnExit();
 		OutputStream out = new FileOutputStream(file);
 		try {
 			out.write(encodedMessage, 0, encodedMessageLength);
 		} finally {
 			out.close();
 		}
+		return new FileMessage(true, file);
 	}
 
-	public FileMessage(File file) throws FileNotFoundException {
-		this.isTemp = false;
+	private final boolean isTemp;
+	private final Object lock = new Object();
+	private File file;
+
+	public FileMessage(File file) {
+		this(false, file);
+	}
+
+	private FileMessage(boolean isTemp, File file) {
+		this.isTemp = isTemp;
 		this.file = file;
 	}
 

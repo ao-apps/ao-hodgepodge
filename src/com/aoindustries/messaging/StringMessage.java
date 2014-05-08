@@ -32,17 +32,17 @@ public class StringMessage implements Message {
 
 	private static final Charset CHARSET = Charsets.UTF_8;
 
+	/**
+	 * UTF-8 decodes the message.
+	 */
+	public static StringMessage decode(byte[] encodedMessage, int encodedMessageLength) {
+		return new StringMessage(new String(encodedMessage, 0, encodedMessageLength, CHARSET));
+	}
+
 	private final String message;
 	
 	public StringMessage(String message) {
 		this.message = message;
-	}
-
-	/**
-	 * UTF-8 decodes the message.
-	 */
-	StringMessage(byte[] encodedMessage, int encodedMessageLength) {
-		this.message = new String(encodedMessage, 0, encodedMessageLength, CHARSET);
 	}
 
 	@Override
