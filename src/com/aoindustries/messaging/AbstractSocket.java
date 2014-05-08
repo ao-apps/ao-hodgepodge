@@ -26,7 +26,6 @@ import com.aoindustries.security.Identifier;
 import com.aoindustries.util.concurrent.ConcurrentListenerManager;
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -172,10 +171,16 @@ abstract public class AbstractSocket implements Socket {
 	}
 
 	@Override
-	public void sendMessage(Message message) throws ClosedChannelException {
+	public void sendMessage(Message message) throws IllegalStateException {
+		if(isClosed()) throw new IllegalStateException("Socket is closed");
 		Collections.singletonList(message);
 	}
 
 	@Override
-	abstract public void sendMessages(Collection<? extends Message> messages) throws ClosedChannelException;
+	public void sendMessages(Collection<? extends Message> messages) throws IllegalStateException {
+		if(isClosed()) throw new IllegalStateException("Socket is closed");
+		if(!messages.isEmpty()) sendMessagesImpl(messages);
+	}
+
+	abstract protected void sendMessagesImpl(Collection<? extends Message> messages) throws IllegalStateException;
 }
