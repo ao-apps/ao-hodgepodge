@@ -24,6 +24,8 @@ package com.aoindustries.messaging;
 
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.util.concurrent.ExecutorService;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -38,7 +40,7 @@ import java.util.logging.Logger;
  * Provides per-listener event queues, and fires off events concurrently across
  * listeners, but in-order per listener.
  */
-public class ConcurrentListenerManager<L> {
+public class ConcurrentListenerManager<L> implements Closeable {
 
 	private static final Logger logger = Logger.getLogger(ConcurrentListenerManager.class.getName());
 
@@ -64,20 +66,37 @@ public class ConcurrentListenerManager<L> {
 	 */
 	private final Map<L,Queue<EventCall<L>>> listeners = new IdentityHashMap<L,Queue<EventCall<L>>>();
 
-	private final ExecutorService executor;
+	private final ExecutorService executor = ExecutorService.newInstance();
 
-	ConcurrentListenerManager(ExecutorService executor) {
-		this.executor = executor;
+	public ConcurrentListenerManager() {
 	}
 
-	void addListener(L listener) throws IllegalStateException {
+	/**
+	 * When no longer needed, close should be called to free resources.
+	 */
+	@Override
+	public void close() {
+		executor.dispose();
+	}
+
+	/**
+	 * Adds a listener.
+	 *
+	 * @throws IllegalStateException  If the listener has already been added
+	 */
+	public void addListener(L listener) throws IllegalStateException {
 		synchronized(listeners) {
 			if(listeners.containsKey(listener)) throw new IllegalStateException("listener already added");
 			listeners.put(listener, null);
 		}
 	}
 
-	boolean removeListener(L listener) {
+	/**
+	 * Removes a listener.
+	 *
+	 * @return true if the listener was found
+	 */
+	public boolean removeListener(L listener) {
 		synchronized(listeners) {
 			if(!listeners.containsKey(listener)) {
 				return false;
@@ -89,11 +108,11 @@ public class ConcurrentListenerManager<L> {
 	}
 
 	/**
-	 * Enqueues a new event to on all listeners event queues.
+	 * Enqueues a new event to all listeners' event queues.
 	 * If the caller needs to wait until the event has been handled by each
-	 * of the listeners, can call .get() on the returned Future.
+	 * of the listeners, then call .get() on the returned Future.
 	 */
-	Future<?> enqueueEvent(Event<? super L> event) {
+	public Future<?> enqueueEvent(Event<? super L> event) {
 		synchronized(listeners) {
 			// The future is not finished until all individual calls have removed themselves from this map
 			// and this map is empty.
