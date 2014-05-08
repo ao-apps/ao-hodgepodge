@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,11 +24,13 @@ package com.aoindustries.util;
 
 import com.aoindustries.lang.ObjectUtils;
 import java.io.Serializable;
+import java.util.AbstractList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -644,6 +646,64 @@ public class AoCollections {
     public static <E> PeekIterator<E> peekIterator(Iterator<? extends E> iter) {
         return new PeekIterator<E>(iter);
     }
-	
-	
+
+	/**
+	 * Two collections are considered equal when they are the same size and have the same
+	 * elements in the same iteration order.
+	 * 
+	 * If both collections are null they are also considered equal.
+	 */
+	public static boolean equals(Collection<?> collection1, Collection<?> collection2) {
+		if(collection1 == null) {
+			if(collection2 == null) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			if(collection2 == null) {
+				return false;
+			} else {
+				int size = collection1.size();
+				if(size != collection2.size()) {
+					return false;
+				} else {
+					Iterator<?> iter1 = collection1.iterator();
+					Iterator<?> iter2 = collection2.iterator();
+					int count = 0;
+					while(iter1.hasNext() && iter2.hasNext()) {
+						if(
+							!ObjectUtils.equals(
+								iter1.next(),
+								iter2.next()
+							)
+						) return false;
+						count++;
+					}
+					if(
+						size != count
+						|| iter1.hasNext()
+						|| iter2.hasNext()
+					) throw new ConcurrentModificationException();
+					return true;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Computes the hashCode of a collection in a manner consistent with
+	 * AbstractList.
+	 * 
+	 * @see  AbstractList#hashCode() 
+	 */
+	public static int hashCode(Iterable<?> iterable) {
+        int hashCode = 1;
+		Iterator<?> iter = iterable.iterator();
+		while(iter.hasNext()) {
+			Object e = iter.next();
+            hashCode = 31*hashCode + (e==null ? 0 : e.hashCode());
+		}
+        return hashCode;
+	}
 }

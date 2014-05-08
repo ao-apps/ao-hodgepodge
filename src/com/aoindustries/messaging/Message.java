@@ -31,6 +31,18 @@ import java.io.IOException;
 public interface Message extends Closeable {
 
 	/**
+	 * Two messages of the same type with the same body must be considered equal.
+	 */
+	@Override
+	boolean equals(Object o);
+
+	/**
+	 * The hash code must be consistent with equals.
+	 */
+	@Override
+	int hashCode();
+
+	/**
 	 * Gets the message type.
 	 */
 	MessageType getMessageType();

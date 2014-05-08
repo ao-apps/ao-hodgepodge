@@ -59,6 +59,19 @@ public class StringMessage implements Message {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if(this == o) return true;
+		if(!(o instanceof StringMessage)) return false;
+		StringMessage other = (StringMessage)o;
+		return message.equals(other.message);
+	}
+
+	@Override
+	public int hashCode() {
+		return message.hashCode();
+	}
+
+	@Override
 	public MessageType getMessageType() {
 		return MessageType.STRING;
 	}

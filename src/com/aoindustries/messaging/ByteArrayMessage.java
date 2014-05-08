@@ -56,6 +56,19 @@ public class ByteArrayMessage implements Message {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if(this == o) return true;
+		if(!(o instanceof ByteArrayMessage)) return false;
+		ByteArrayMessage other = (ByteArrayMessage)o;
+		return message.equals(other.message);
+	}
+
+	@Override
+	public int hashCode() {
+		return message.hashCode();
+	}
+
+	@Override
 	public MessageType getMessageType() {
 		return MessageType.BYTE_ARRAY;
 	}

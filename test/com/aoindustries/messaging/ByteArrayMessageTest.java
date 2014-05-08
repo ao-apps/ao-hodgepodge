@@ -24,7 +24,6 @@ package com.aoindustries.messaging;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -37,20 +36,27 @@ public class ByteArrayMessageTest {
 	private static final Random random = new SecureRandom();
 
 	@Test
-	public void testStringEncodeAndDecode() throws IOException {
-		int len = random.nextInt(10000);
-		byte[] bytes = new byte[len + random.nextInt(10)];
-		random.nextBytes(bytes);
-		byte[] expected = Arrays.copyOf(bytes, len);
+	public void testEncodeAndDecode() throws IOException {
+		for(int i=0; i<100; i++) {
+			int len = random.nextInt(10000);
+			byte[] bytes = new byte[len + random.nextInt(10)];
+			random.nextBytes(bytes);
 
-		ByteArrayMessage message = new ByteArrayMessage(bytes);
-		
-		// Encode to String
-		String encodedString = message.encodeAsString();
-		
-		// Decode back to message
-		ByteArrayMessage decoded = (ByteArrayMessage)MessageType.BYTE_ARRAY.decode(encodedString);
+			ByteArrayMessage original = new ByteArrayMessage(bytes);
+			try {
+				// Encode to String
+				String encodedString = original.encodeAsString();
 
-		assertArrayEquals(expected, decoded.getMessage());
+				// Decode back to message
+				ByteArrayMessage decoded = (ByteArrayMessage)MessageType.BYTE_ARRAY.decode(encodedString);
+				try {
+					assertEquals(original, decoded);
+				} finally {
+					decoded.close();
+				}
+			} finally {
+				original.close();
+			}
+		}
 	}
 }

@@ -24,6 +24,7 @@ package com.aoindustries.messaging;
 
 import com.aoindustries.io.AoByteArrayInputStream;
 import com.aoindustries.io.AoByteArrayOutputStream;
+import com.aoindustries.util.AoCollections;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -106,6 +107,19 @@ public class MultiMessage implements Message {
 	@Override
 	public String toString() {
 		return "MultiMessage(" + messages.size() + ")";
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if(this == o) return true;
+		if(!(o instanceof MultiMessage)) return false;
+		MultiMessage other = (MultiMessage)o;
+		return AoCollections.equals(messages, other.messages);
+	}
+
+	@Override
+	public int hashCode() {
+		return AoCollections.hashCode(messages);
 	}
 
 	@Override

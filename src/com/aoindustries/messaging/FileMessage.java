@@ -26,6 +26,7 @@ import com.aoindustries.io.AoByteArrayOutputStream;
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
 import com.aoindustries.util.Base64Coder;
+import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -84,6 +85,27 @@ public class FileMessage implements Message {
 	@Override
 	public String toString() {
 		return "FileMessage(\"" + file.getPath() + "\")";
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if(this == o) return true;
+		if(!(o instanceof FileMessage)) return false;
+		FileMessage other = (FileMessage)o;
+		try {
+			return FileUtils.contentEquals(file, other.file);
+		} catch(IOException e) {
+			throw new WrappedException(e);
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		try {
+			return FileUtils.contentHashCode(file);
+		} catch(IOException e) {
+			throw new WrappedException(e);
+		}
 	}
 
 	@Override

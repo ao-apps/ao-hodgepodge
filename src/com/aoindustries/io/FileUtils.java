@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Arrays;
 
 /**
  * File utilities.
@@ -110,7 +111,26 @@ final public class FileUtils {
         }
     }
 
-    /**
+	/**
+	 * Computes a hash code of the file contents, consistent with Arrays.hashCode(byte[]).
+	 * 
+	 * @see  Arrays#hashCode(byte[])
+	 */
+	public static int contentHashCode(File file) throws IOException {
+        final InputStream in = new BufferedInputStream(new FileInputStream(file));
+        try {
+			int result = 1;
+			int readVal;
+			while((readVal = in.read()) != -1) {
+				result = 31 * result + (byte)readVal;
+			}
+			return result;
+        } finally {
+            in.close();
+        }
+	}
+
+	/**
      * Creates a temporary directory.
      */
     public static File createTempDirectory(String prefix, String suffix) throws IOException {

@@ -50,6 +50,7 @@ public class ByteArray {
 	 */
 	@Override
 	public boolean equals(Object o) {
+		if(this == o) return true;
 		if(!(o instanceof ByteArray)) return false;
 		ByteArray other = (ByteArray)o;
 		if(size != other.size) return false;
