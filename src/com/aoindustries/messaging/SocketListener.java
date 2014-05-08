@@ -22,7 +22,7 @@
  */
 package com.aoindustries.messaging;
 
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.List;
 
 /**
@@ -56,8 +56,8 @@ public interface SocketListener {
 	 */
 	void onLocalSocketAddressChange(
 		Socket socket,
-		InetSocketAddress oldLocalSocketAddress,
-		InetSocketAddress newLocalSocketAddress
+		SocketAddress oldLocalSocketAddress,
+		SocketAddress newLocalSocketAddress
 	);
 
 	/**
@@ -65,8 +65,8 @@ public interface SocketListener {
 	 */
 	void onRemoteSocketAddressChange(
 		Socket socket,
-		InetSocketAddress oldRemoteSocketAddress,
-		InetSocketAddress newRemoteSocketAddress
+		SocketAddress oldRemoteSocketAddress,
+		SocketAddress newRemoteSocketAddress
 	);
 
 	/**

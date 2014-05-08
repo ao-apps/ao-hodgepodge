@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -47,10 +48,12 @@ abstract public class AbstractSocket implements Socket {
 	private final long connectTime;
 
 	private final    SocketAddress connectLocalSocketAddress;
-	private volatile SocketAddress localSocketAddress;
+	private final    Object        localSocketAddressLock = new Object();
+	private          SocketAddress localSocketAddress;
 
 	private final    SocketAddress connectRemoteSocketAddress;
-	private volatile SocketAddress remoteSocketAddress;
+	private final    Object        remoteSocketAddressLock = new Object();
+	private          SocketAddress remoteSocketAddress;
 
 	private final Object closeLock = new Object();
 	private Long closeTime;
@@ -75,7 +78,7 @@ abstract public class AbstractSocket implements Socket {
 
 	@Override
 	public String toString() {
-		return remoteSocketAddress.toString();
+		return getRemoteSocketAddress().toString();
 	}
 
 	@Override
@@ -102,7 +105,39 @@ abstract public class AbstractSocket implements Socket {
 
 	@Override
 	public SocketAddress getLocalSocketAddress() {
-		return localSocketAddress;
+		synchronized(localSocketAddressLock) {
+			return localSocketAddress;
+		}
+	}
+
+	/**
+	 * Sets the most recently seen local address.
+	 * If the provided value is different than the previous, will notify all listeners.
+	 */
+	protected void setLocalSocketAddress(final SocketAddress newLocalSocketAddress) {
+		synchronized(localSocketAddressLock) {
+			final SocketAddress oldLocalSocketAddress = this.localSocketAddress;
+			if(!newLocalSocketAddress.equals(oldLocalSocketAddress)) {
+				this.localSocketAddress = newLocalSocketAddress;
+				listenerManager.enqueueEvent(
+					new ConcurrentListenerManager.Event<SocketListener>() {
+						@Override
+						public Runnable createCall(final SocketListener listener) {
+							return new Runnable() {
+								@Override
+								public void run() {
+									listener.onLocalSocketAddressChange(
+										AbstractSocket.this,
+										oldLocalSocketAddress,
+										newLocalSocketAddress
+									);
+								}
+							};
+						}
+					}
+				);
+			}
+		}
 	}
 
 	@Override
@@ -112,7 +147,39 @@ abstract public class AbstractSocket implements Socket {
 
 	@Override
 	public SocketAddress getRemoteSocketAddress() {
-		return remoteSocketAddress;
+		synchronized(remoteSocketAddressLock) {
+			return remoteSocketAddress;
+		}
+	}
+
+	/**
+	 * Sets the most recently seen remote address.
+	 * If the provided value is different than the previous, will notify all listeners.
+	 */
+	protected void setRemoteSocketAddress(final SocketAddress newRemoteSocketAddress) {
+		synchronized(remoteSocketAddressLock) {
+			final SocketAddress oldRemoteSocketAddress = this.remoteSocketAddress;
+			if(!newRemoteSocketAddress.equals(oldRemoteSocketAddress)) {
+				this.remoteSocketAddress = newRemoteSocketAddress;
+				listenerManager.enqueueEvent(
+					new ConcurrentListenerManager.Event<SocketListener>() {
+						@Override
+						public Runnable createCall(final SocketListener listener) {
+							return new Runnable() {
+								@Override
+								public void run() {
+									listener.onRemoteSocketAddressChange(
+										AbstractSocket.this,
+										oldRemoteSocketAddress,
+										newRemoteSocketAddress
+									);
+								}
+							};
+						}
+					}
+				);
+			}
+		}
 	}
 
 	/**
@@ -170,6 +237,34 @@ abstract public class AbstractSocket implements Socket {
 		return listenerManager.removeListener(listener);
 	}
 
+	/**
+	 * When one or more new messages have arrived, call this to distribute to all of the listeners.
+	 * If need to wait until all of the listeners have handled the messages, can call Future.get()
+	 * or Future.isDone().
+	 *
+	 * @throws  IllegalStateException  if this socket is closed
+	 */
+	protected Future<?> callOnMessages(final List<String> messages) throws IllegalStateException {
+		if(isClosed()) throw new IllegalStateException("Socket is closed");
+		if(messages.isEmpty()) throw new IllegalArgumentException("messages may not be empty");
+		return listenerManager.enqueueEvent(
+			new ConcurrentListenerManager.Event<SocketListener>() {
+				@Override
+				public Runnable createCall(final SocketListener listener) {
+					return new Runnable() {
+						@Override
+						public void run() {
+							listener.onMessages(
+								AbstractSocket.this,
+								messages
+							);
+						}
+					};
+				}
+			}
+		);
+	}
+
 	@Override
 	public void sendMessage(Message message) throws IllegalStateException {
 		if(isClosed()) throw new IllegalStateException("Socket is closed");
@@ -182,5 +277,9 @@ abstract public class AbstractSocket implements Socket {
 		if(!messages.isEmpty()) sendMessagesImpl(messages);
 	}
 
+	/**
+	 * Implementation to actually enqueue and send messages.
+	 * This must never block.
+	 */
 	abstract protected void sendMessagesImpl(Collection<? extends Message> messages) throws IllegalStateException;
 }
