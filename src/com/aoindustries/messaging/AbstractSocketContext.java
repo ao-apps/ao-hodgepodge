@@ -25,14 +25,11 @@ package com.aoindustries.messaging;
 import com.aoindustries.security.Identifier;
 import com.aoindustries.util.AoCollections;
 import java.io.IOException;
-import java.net.SocketAddress;
-import java.nio.channels.ClosedChannelException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Base implementation of socket context.
@@ -41,7 +38,7 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 
 	private final Map<Identifier,S> sockets = new LinkedHashMap<Identifier,S>();
 
-	private final List<SocketContextListener> listeners = new ArrayList<SocketContextListener>();
+	private final Map<SocketContextListener,Queue<Runnable>> listeners = new IdentityHashMap<SocketContextListener,Queue<Runnable>>();
 
 	private volatile boolean closed;
 
@@ -74,25 +71,16 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 
 	@Override
 	public void addSocketContextListener(SocketContextListener listener) throws IllegalStateException {
-		synchronized(listener) {
-			for(SocketContextListener existing : listeners) {
-				if(existing == listener) throw new IllegalStateException("listener already added");
-			}
-			listeners.add(listener);
+		synchronized(listeners) {
+			if(listeners.containsKey(listener)) throw new IllegalStateException("listener already added");
+			listeners.put(listener, new LinkedList<Runnable>());
 		}
 	}
 
 	@Override
 	public boolean removeSocketContextListener(SocketContextListener listener) {
-		synchronized(listener) {
-			for(int i=0, size=listeners.size(); i<size; i++) {
-				SocketContextListener existing = listeners.get(i);
-				if(existing == listener) {
-					listeners.remove(i);
-					return true;
-				}
-			}
-			return false;
+		synchronized(listeners) {
+			return listeners.remove(listener) != null;
 		}
 	}
 }

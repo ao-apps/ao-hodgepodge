@@ -26,10 +26,12 @@ import com.aoindustries.security.Identifier;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Base implementation of socket.
@@ -48,7 +50,7 @@ abstract public class AbstractSocket implements Socket {
 	private final    SocketAddress connectRemoteSocketAddress;
 	private volatile SocketAddress remoteSocketAddress;
 
-	private final List<SocketListener> listeners = new ArrayList<SocketListener>();
+	private final Map<SocketListener,Queue<Runnable>> listeners = new IdentityHashMap<SocketListener,Queue<Runnable>>();
 
 	private final Object closeLock = new Object();
 	private Long closeTime;
@@ -131,25 +133,16 @@ abstract public class AbstractSocket implements Socket {
 
 	@Override
 	public void addSocketListener(SocketListener listener) throws IllegalStateException {
-		synchronized(listener) {
-			for(SocketListener existing : listeners) {
-				if(existing == listener) throw new IllegalStateException("listener already added");
-			}
-			listeners.add(listener);
+		synchronized(listeners) {
+			if(listeners.containsKey(listener)) throw new IllegalStateException("listener already added");
+			listeners.put(listener, new LinkedList<Runnable>());
 		}
 	}
 
 	@Override
 	public boolean removeSocketListener(SocketListener listener) {
-		synchronized(listener) {
-			for(int i=0, size=listeners.size(); i<size; i++) {
-				SocketListener existing = listeners.get(i);
-				if(existing == listener) {
-					listeners.remove(i);
-					return true;
-				}
-			}
-			return false;
+		synchronized(listeners) {
+			return listeners.remove(listener) != null;
 		}
 	}
 
