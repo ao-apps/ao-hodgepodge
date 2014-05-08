@@ -36,7 +36,7 @@ public interface SocketContextListener {
 	 * This may be used to register a listener on the socket without
 	 * missing any messages.
 	 */
-	void onNewSocket(SocketContext socketContext, Socket socket);
+	void onNewSocket(SocketContext socketContext, Socket newSocket);
 
 	/**
 	 * Called when a socket context is closed.

@@ -110,10 +110,13 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 			for(Map.Entry<SocketContextListener,Queue<Runnable>> entry : listeners.entrySet()) {
 				final SocketContextListener listener = entry.getKey();
 				Queue<Runnable> queue = entry.getValue();
-				boolean isFirst = queue == null;
-				if(isFirst) {
+				boolean isFirst;
+				if(queue == null) {
 					queue = new LinkedList<Runnable>();
 					entry.setValue(queue);
+					isFirst = true;
+				} else {
+					isFirst = false;
 				}
 				queue.add(
 					new Runnable() {
