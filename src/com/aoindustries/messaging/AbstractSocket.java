@@ -23,20 +23,23 @@
 package com.aoindustries.messaging;
 
 import com.aoindustries.security.Identifier;
+import com.aoindustries.util.concurrent.ConcurrentListenerManager;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base implementation of socket.
  */
 abstract public class AbstractSocket implements Socket {
+
+	private static final Logger logger = Logger.getLogger(AbstractSocket.class.getName());
 
 	private final SocketContext socketContext;
 
@@ -50,10 +53,10 @@ abstract public class AbstractSocket implements Socket {
 	private final    SocketAddress connectRemoteSocketAddress;
 	private volatile SocketAddress remoteSocketAddress;
 
-	private final Map<SocketListener,Queue<Runnable>> listeners = new IdentityHashMap<SocketListener,Queue<Runnable>>();
-
 	private final Object closeLock = new Object();
 	private Long closeTime;
+
+	private final ConcurrentListenerManager<SocketListener> listenerManager = new ConcurrentListenerManager<SocketListener>();
 
 	protected AbstractSocket(
 		SocketContext socketContext,
@@ -118,12 +121,39 @@ abstract public class AbstractSocket implements Socket {
 	 */
 	@Override
 	public void close() throws IOException {
+		boolean enqueueOnSocketClose;
 		synchronized(closeLock) {
 			if(closeTime == null) {
 				closeTime = System.currentTimeMillis();
-				// TODO: One per type: socketContext.onClose(this);
+				enqueueOnSocketClose = true;
+			} else {
+				enqueueOnSocketClose = false;
 			}
 		}
+		if(enqueueOnSocketClose) {
+			// TODO: One per type: socketContext.onClose(this);
+			Future<?> future = listenerManager.enqueueEvent(
+				new ConcurrentListenerManager.Event<SocketListener>() {
+					@Override
+					public Runnable createCall(final SocketListener listener) {
+						return new Runnable() {
+							@Override
+							public void run() {
+								listener.onSocketClose(AbstractSocket.this);
+							}
+						};
+					}
+				}
+			);
+			try {
+				future.get();
+			} catch(ExecutionException e) {
+				logger.log(Level.SEVERE, null, e);
+			} catch(InterruptedException e) {
+				logger.log(Level.SEVERE, null, e);
+			}
+		}
+		listenerManager.close();
 	}
 
 	@Override
@@ -133,17 +163,12 @@ abstract public class AbstractSocket implements Socket {
 
 	@Override
 	public void addSocketListener(SocketListener listener) throws IllegalStateException {
-		synchronized(listeners) {
-			if(listeners.containsKey(listener)) throw new IllegalStateException("listener already added");
-			listeners.put(listener, new LinkedList<Runnable>());
-		}
+		listenerManager.addListener(listener);
 	}
 
 	@Override
 	public boolean removeSocketListener(SocketListener listener) {
-		synchronized(listeners) {
-			return listeners.remove(listener) != null;
-		}
+		return listenerManager.removeListener(listener);
 	}
 
 	@Override

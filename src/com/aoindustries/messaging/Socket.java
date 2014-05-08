@@ -26,7 +26,6 @@ import com.aoindustries.security.Identifier;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
 
 /**
@@ -97,12 +96,16 @@ public interface Socket extends Closeable {
 
 	/**
 	 * Sends a single message.  This will never block.
+	 *
+	 * @throws  IllegalStateException  if this socket is closed
 	 */
-	void sendMessage(Message message) throws ClosedChannelException;
+	void sendMessage(Message message) throws IllegalStateException;
 
 	/**
 	 * Sends a set of messages.  This will never block.
 	 * If messages is empty, the request is ignored.
+	 *
+	 * @throws  IllegalStateException  if this socket is closed
 	 */
-	void sendMessages(Collection<? extends Message> messages) throws ClosedChannelException;
+	void sendMessages(Collection<? extends Message> messages) throws IllegalStateException;
 }
