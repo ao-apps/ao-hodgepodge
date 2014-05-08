@@ -22,9 +22,10 @@
  */
 package com.aoindustries.messaging;
 
+import com.aoindustries.security.Identifier;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * Each socket, regardless or protocol and whether client or server, has a
@@ -33,10 +34,10 @@ import java.util.Collection;
 public interface SocketContext extends Closeable {
 
 	/**
-	 * Gets a snapshot list of all active sockets.
-	 * If context is closed will be an empty collection.
+	 * Gets a snapshot of all active sockets.
+	 * If context is closed will be an empty map.
 	 */
-	Collection<? extends Socket> getSockets();
+	Map<Identifier,? extends Socket> getSockets();
 
 	/**
 	 * Closes this context.  When the context is closed, all active sockets are
@@ -45,9 +46,27 @@ public interface SocketContext extends Closeable {
 	@Override
 	void close() throws IOException;
 
+	boolean isClosed();
+
 	/**
-	 * Called when a socket is closed.
+	 * Called by a socket when it is closed.
 	 * This will only be called once.
+	 * 
+	 * This is part of the implementation and should not be called directly.
 	 */
-	void onClose(Socket socket);
+	// TODO: Put in another way: void onClose(Socket socket);
+
+	/**
+	 * Adds a listener.
+	 *
+	 * @throws IllegalStateException  If the listener has already been added
+	 */
+	void addSocketContextListener(SocketContextListener listener);
+
+	/**
+	 * Removes a listener.
+	 *
+	 * @return true if the listener was found
+	 */
+	boolean removeSocketContextListener(SocketContextListener listener);
 }

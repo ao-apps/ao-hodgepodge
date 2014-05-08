@@ -73,5 +73,5 @@ public interface SocketListener {
 	 * Called when a socket is closed.
 	 * This will only be called once.
 	 */
-	void onClose(Socket socket);
+	void onSocketClose(Socket socket);
 }

@@ -60,13 +60,13 @@ abstract public class AbstractSocket implements Socket {
 		SocketAddress localSocketAddress,
 		SocketAddress remoteSocketAddress
 	) {
-		this.socketContext = socketContext;
-		this.id = id;
-		this.connectTime = connectTime;
-		this.connectLocalSocketAddress = localSocketAddress;
-		this.localSocketAddress = localSocketAddress;
+		this.socketContext              = socketContext;
+		this.id                         = id;
+		this.connectTime                = connectTime;
+		this.connectLocalSocketAddress  = localSocketAddress;
+		this.localSocketAddress         = localSocketAddress;
 		this.connectRemoteSocketAddress = remoteSocketAddress;
-		this.remoteSocketAddress = remoteSocketAddress;
+		this.remoteSocketAddress        = remoteSocketAddress;
 	}
 
 	@Override
@@ -119,7 +119,7 @@ abstract public class AbstractSocket implements Socket {
 		synchronized(closeLock) {
 			if(closeTime == null) {
 				closeTime = System.currentTimeMillis();
-				socketContext.onClose(this);
+				// TODO: One per type: socketContext.onClose(this);
 			}
 		}
 	}
