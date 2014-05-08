@@ -24,7 +24,6 @@ package com.aoindustries.messaging;
 
 import com.aoindustries.security.Identifier;
 import com.aoindustries.util.AoCollections;
-import com.aoindustries.util.concurrent.ExecutorService;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,9 +45,7 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 	private final Object closeLock = new Object();
 	private boolean closed;
 
-	private final ExecutorService executor = ExecutorService.newInstance();
-
-	private final ConcurrentListenerManager<SocketContextListener> listenerManager = new ConcurrentListenerManager<SocketContextListener>(executor);
+	private final ConcurrentListenerManager<SocketContextListener> listenerManager = new ConcurrentListenerManager<SocketContextListener>();
 
 	protected AbstractSocketContext() {
 	}
@@ -78,6 +75,7 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 		synchronized(sockets) {
 			// Gets a copy of the sockets to avoid concurrent modification exception and avoid holding lock
 			socketsToClose = new ArrayList<S>(sockets.values());
+			// Each will be removed from socket.close() below: sockets.clear();
 		}
 		for(S socket : socketsToClose) {
 			try {
@@ -89,7 +87,7 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 			}
 		}
 		if(enqueueOnSocketContextClose) {
-			listenerManager.enqueueEvent(
+			Future<?> future = listenerManager.enqueueEvent(
 				new ConcurrentListenerManager.Event<SocketContextListener>() {
 					@Override
 					public Runnable createCall(final SocketContextListener listener) {
@@ -102,8 +100,18 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 					}
 				}
 			);
+			try {
+				future.get();
+			} catch(ExecutionException e) {
+				logger.log(Level.SEVERE, null, e);
+			} catch(InterruptedException e) {
+				logger.log(Level.SEVERE, null, e);
+			}
 		}
-		executor.dispose();
+		listenerManager.close();
+		synchronized(sockets) {
+			if(!sockets.isEmpty()) throw new AssertionError("Not all sockets closed");
+		}
 	}
 
 	@Override
@@ -133,6 +141,7 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 	 * Third, waits for all listeners to handle the event before returning.
 	 */
 	protected void addSocket(final S newSocket) {
+		if(isClosed()) throw new IllegalStateException("SocketContext is closed");
 		Future<?> future;
 		synchronized(sockets) {
 			Identifier id = newSocket.getId();

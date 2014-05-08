@@ -20,12 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.messaging;
+package com.aoindustries.util.concurrent;
 
 import com.aoindustries.lang.NotImplementedException;
-import com.aoindustries.util.concurrent.ExecutorService;
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.Map;
