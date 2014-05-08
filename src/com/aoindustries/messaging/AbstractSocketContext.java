@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 /**
  * Base implementation of socket context.
  */
-abstract public class AbstractSocketContext<S extends Socket> implements SocketContext {
+abstract public class AbstractSocketContext<S extends AbstractSocket> implements SocketContext {
 
 	private static final Logger logger = Logger.getLogger(AbstractSocketContext.class.getName());
 
@@ -55,6 +55,16 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 	public Map<Identifier,S> getSockets() {
 		synchronized(sockets) {
 			return AoCollections.unmodifiableCopyMap(sockets);
+		}
+	}
+
+	/**
+	 * Called by a socket when it is closed.
+	 * This will only be called once.
+	 */
+	void onClose(AbstractSocket socket) {
+		synchronized(sockets) {
+			if(sockets.remove(socket.getId()) == null) throw new AssertionError("Socket not part of this context.  onClose called twice?");
 		}
 	}
 

@@ -49,14 +49,6 @@ public interface SocketContext extends Closeable {
 	boolean isClosed();
 
 	/**
-	 * Called by a socket when it is closed.
-	 * This will only be called once.
-	 * 
-	 * This is part of the implementation and should not be called directly.
-	 */
-	// TODO: Put in another way: void onClose(Socket socket);
-
-	/**
 	 * Adds a listener.
 	 *
 	 * @throws IllegalStateException  If the listener has already been added

@@ -75,6 +75,9 @@ public interface Socket extends Closeable {
 	 */
 	SocketAddress getRemoteSocketAddress();
 
+	/**
+	 * Closing a socket also removes it from its context.
+	 */
 	@Override
 	void close() throws IOException;
 

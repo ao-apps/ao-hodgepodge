@@ -41,7 +41,7 @@ abstract public class AbstractSocket implements Socket {
 
 	private static final Logger logger = Logger.getLogger(AbstractSocket.class.getName());
 
-	private final SocketContext socketContext;
+	private final AbstractSocketContext<? extends AbstractSocket> socketContext;
 
 	private final Identifier id;
 
@@ -61,7 +61,7 @@ abstract public class AbstractSocket implements Socket {
 	private final ConcurrentListenerManager<SocketListener> listenerManager = new ConcurrentListenerManager<SocketListener>();
 
 	protected AbstractSocket(
-		SocketContext socketContext,
+		AbstractSocketContext<? extends AbstractSocket> socketContext,
 		Identifier id,
 		long connectTime,
 		SocketAddress localSocketAddress,
@@ -79,6 +79,11 @@ abstract public class AbstractSocket implements Socket {
 	@Override
 	public String toString() {
 		return getRemoteSocketAddress().toString();
+	}
+
+	@Override
+	public AbstractSocketContext<? extends AbstractSocket> getSocketContext() {
+		return socketContext;
 	}
 
 	@Override
@@ -190,6 +195,8 @@ abstract public class AbstractSocket implements Socket {
 		boolean enqueueOnSocketClose;
 		synchronized(closeLock) {
 			if(closeTime == null) {
+				// Remove this from the context
+				socketContext.onClose(this);
 				closeTime = System.currentTimeMillis();
 				enqueueOnSocketClose = true;
 			} else {
@@ -197,7 +204,6 @@ abstract public class AbstractSocket implements Socket {
 			}
 		}
 		if(enqueueOnSocketClose) {
-			// TODO: One per type: socketContext.onClose(this);
 			Future<?> future = listenerManager.enqueueEvent(
 				new ConcurrentListenerManager.Event<SocketListener>() {
 					@Override
