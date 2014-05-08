@@ -40,63 +40,61 @@ public class MultiMessage implements Message {
 
 	private static final char DELIMITER = ',';
 
-	/**
-	 * Decodes the messages.
-	 */
-	public static MultiMessage decode(String encodedMessages) throws IOException {
-		Collection<? extends Message> messages;
-		if(encodedMessages.isEmpty()) {
-			messages = Collections.emptyList();
-		} else {
-			int pos = encodedMessages.indexOf(DELIMITER);
-			if(pos == -1) throw new IllegalArgumentException("Delimiter not found");
-			final int size = Integer.parseInt(encodedMessages.substring(0, pos++));
-			List<Message> decodedMessages = new ArrayList<Message>(size);
-			for(int i=0; i<size; i++) {
-				MessageType type = MessageType.getFromTypeChar(encodedMessages.charAt(pos++));
-				int nextPos = encodedMessages.indexOf(DELIMITER, pos);
-				if(nextPos == -1) throw new IllegalArgumentException("Delimiter not found");
-				final int capacity = Integer.parseInt(encodedMessages.substring(pos, nextPos++));
-				pos = nextPos + capacity;
-				decodedMessages.add(type.decode(encodedMessages.substring(nextPos, pos)));
-			}
-			if(pos != encodedMessages.length()) throw new IllegalArgumentException("pos != encodedMessages.length()");
-			messages = Collections.unmodifiableList(decodedMessages);
-		}
-		return new MultiMessage(messages);
+	public static final MultiMessage EMPTY_MULTI_MESSAGE;
+	static {
+		Collection<? extends Message> empty = Collections.emptyList();
+		EMPTY_MULTI_MESSAGE = new MultiMessage(empty);
 	}
 
 	/**
 	 * Decodes the messages.
 	 */
-	public static MultiMessage decode(byte[] encodedMessages, int encodedMessageLength) throws IOException {
-		Collection<? extends Message> messages;
-		if(encodedMessages.length==0) {
-			messages = Collections.emptyList();
-		} else {
-			DataInputStream in = new DataInputStream(new AoByteArrayInputStream(encodedMessages));
-			try {
-				int totalRead = 0;
-				final int size = in.readInt();
-				totalRead += 4;
-				List<Message> decodedMessages = new ArrayList<Message>(size);
-				for(int i=0; i<size; i++) {
-					MessageType type = MessageType.getFromTypeByte(in.readByte());
-					totalRead++;
-					final int capacity = in.readInt();
-					totalRead += 4;
-					byte[] encodedMessage = new byte[capacity];
-					in.readFully(encodedMessage, 0, capacity);
-					totalRead += capacity;
-					decodedMessages.add(type.decode(encodedMessage, capacity));
-				}
-				if(totalRead != encodedMessageLength) throw new IllegalArgumentException("totalRead != encodedMessageLength");
-				messages = Collections.unmodifiableList(decodedMessages);
-			} finally {
-				in.close();
-			}
+	public static MultiMessage decode(String encodedMessages) throws IOException {
+		if(encodedMessages.isEmpty()) return EMPTY_MULTI_MESSAGE;
+
+		int pos = encodedMessages.indexOf(DELIMITER);
+		if(pos == -1) throw new IllegalArgumentException("Delimiter not found");
+		final int size = Integer.parseInt(encodedMessages.substring(0, pos++));
+		List<Message> decodedMessages = new ArrayList<Message>(size);
+		for(int i=0; i<size; i++) {
+			MessageType type = MessageType.getFromTypeChar(encodedMessages.charAt(pos++));
+			int nextPos = encodedMessages.indexOf(DELIMITER, pos);
+			if(nextPos == -1) throw new IllegalArgumentException("Delimiter not found");
+			final int capacity = Integer.parseInt(encodedMessages.substring(pos, nextPos++));
+			pos = nextPos + capacity;
+			decodedMessages.add(type.decode(encodedMessages.substring(nextPos, pos)));
 		}
-		return new MultiMessage(messages);
+		if(pos != encodedMessages.length()) throw new IllegalArgumentException("pos != encodedMessages.length()");
+		return new MultiMessage(Collections.unmodifiableList(decodedMessages));
+	}
+
+	/**
+	 * Decodes the messages.
+	 */
+	public static MultiMessage decode(ByteArray encodedMessages) throws IOException {
+		if(encodedMessages.size == 0) return EMPTY_MULTI_MESSAGE;
+
+		DataInputStream in = new DataInputStream(new AoByteArrayInputStream(encodedMessages.array));
+		try {
+			int totalRead = 0;
+			final int size = in.readInt();
+			totalRead += 4;
+			List<Message> decodedMessages = new ArrayList<Message>(size);
+			for(int i=0; i<size; i++) {
+				MessageType type = MessageType.getFromTypeByte(in.readByte());
+				totalRead++;
+				final int capacity = in.readInt();
+				totalRead += 4;
+				byte[] encodedMessage = new byte[capacity];
+				in.readFully(encodedMessage, 0, capacity);
+				totalRead += capacity;
+				decodedMessages.add(type.decode(new ByteArray(encodedMessage, capacity)));
+			}
+			if(totalRead != encodedMessages.size) throw new IllegalArgumentException("totalRead != encodedMessages.size");
+			return new MultiMessage(Collections.unmodifiableList(decodedMessages));
+		} finally {
+			in.close();
+		}
 	}
 
 	private final Collection<? extends Message> messages;
@@ -122,6 +120,7 @@ public class MultiMessage implements Message {
 	public String encodeAsString() throws IOException {
 		final int size = messages.size();
 		if(size == 0) return "";
+
 		StringBuilder sb = new StringBuilder();
 		sb.append(size).append(DELIMITER);
 		int count = 0;
@@ -148,6 +147,7 @@ public class MultiMessage implements Message {
 	public ByteArray encodeAsByteArray() throws IOException {
 		final int size = messages.size();
 		if(size == 0) return ByteArray.EMPTY_BYTE_ARRAY;
+
 		AoByteArrayOutputStream bout = new AoByteArrayOutputStream();
 		try {
 			DataOutputStream out = new DataOutputStream(bout);

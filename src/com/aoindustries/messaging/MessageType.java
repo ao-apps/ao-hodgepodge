@@ -46,8 +46,8 @@ public enum MessageType {
 		}
 
 		@Override
-		ByteArrayMessage decode(byte[] encodedMessage, int encodedMessageLength) {
-			return new ByteArrayMessage(encodedMessage, encodedMessageLength);
+		ByteArrayMessage decode(ByteArray encodedMessage) {
+			return new ByteArrayMessage(encodedMessage);
 		}
 	},
 	FILE {
@@ -67,8 +67,8 @@ public enum MessageType {
 		}
 
 		@Override
-		FileMessage decode(byte[] encodedMessage, int encodedMessageLength) throws IOException {
-			return FileMessage.decode(encodedMessage, encodedMessageLength);
+		FileMessage decode(ByteArray encodedMessage) throws IOException {
+			return FileMessage.decode(encodedMessage);
 		}
 	},
 	STRING {
@@ -88,8 +88,8 @@ public enum MessageType {
 		}
 
 		@Override
-		StringMessage decode(byte[] encodedMessage, int encodedMessageLength) {
-			return StringMessage.decode(encodedMessage, encodedMessageLength);
+		StringMessage decode(ByteArray encodedMessage) {
+			return StringMessage.decode(encodedMessage);
 		}
 	},
 	MULTI {
@@ -109,8 +109,8 @@ public enum MessageType {
 		}
 
 		@Override
-		MultiMessage decode(byte[] encodedMessage, int encodedMessageLength) throws IOException {
-			return MultiMessage.decode(encodedMessage, encodedMessageLength);
+		MultiMessage decode(ByteArray encodedMessage) throws IOException {
+			return MultiMessage.decode(encodedMessage);
 		}
 	};
 
@@ -144,7 +144,7 @@ public enum MessageType {
 	abstract Message decode(String encodedMessage) throws IOException;
 
 	/**
-	 * Constructs a message of this type from its byte[] encoding.
+	 * Constructs a message of this type from its byte array encoding.
 	 */
-	abstract Message decode(byte[] encodedMessage, int encodedMessageLength) throws IOException;
+	abstract Message decode(ByteArray encodedMessage) throws IOException;
 }

@@ -26,6 +26,7 @@ import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.util.AoCollections.PeekIterator;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -683,4 +684,22 @@ public class AoArrays {
 		return -1;
 	}
 	// </editor-fold>
+
+	/**
+	 * Computes hashCode compatible with Arrays.hashCode, but only across the
+	 * given subset of the array.
+	 *
+	 * @see  Arrays#hashCode(byte[]) 
+	 */
+	public static int hashCode(byte a[], int off, int len) {
+        if(a == null) return 0;
+
+        int result = 1;
+		// while(len-- > 0) result = 31 * result + a[off++];
+        for(int end=off+len; off<end; off++) {
+			result = 31 * result + a[off];
+        }
+
+		return result;
+    }
 }

@@ -29,29 +29,30 @@ import com.aoindustries.util.Base64Coder;
  */
 public class ByteArrayMessage implements Message {
 
+	public static final ByteArrayMessage EMPTY_BYTE_ARRAY_MESSAGE = new ByteArrayMessage(ByteArray.EMPTY_BYTE_ARRAY);
+
 	/**
 	 * base-64 decodes the message.
 	 */
 	public static ByteArrayMessage decode(String encodedMessage) {
-		byte[] decoded = Base64Coder.decode(encodedMessage);
-		return new ByteArrayMessage(decoded, decoded.length);
+		if(encodedMessage.isEmpty()) return EMPTY_BYTE_ARRAY_MESSAGE;
+
+		return new ByteArrayMessage(Base64Coder.decode(encodedMessage));
 	}
 
-	private final byte[] message;
-	private final int length;
+	private final ByteArray message;
 
 	public ByteArrayMessage(byte[] message) {
-		this(message, message.length);
+		this(new ByteArray(message));
 	}
 
-	public ByteArrayMessage(byte[] message, int length) {
+	public ByteArrayMessage(ByteArray message) {
 		this.message = message;
-		this.length = length;
 	}
 
 	@Override
 	public String toString() {
-		return "ByteArrayMessage(byte[" + length + "])";
+		return "ByteArrayMessage(" + message.size + ")";
 	}
 
 	@Override
@@ -64,12 +65,14 @@ public class ByteArrayMessage implements Message {
 	 */
 	@Override
 	public String encodeAsString() {
-		return new String(Base64Coder.encode(message, length));
+		if(message.size == 0) return "";
+
+		return new String(Base64Coder.encode(message.array, message.size));
 	}
 
 	@Override
 	public ByteArray encodeAsByteArray() {
-		return new ByteArray(message, length);
+		return message;
 	}
 
 	@Override
@@ -77,11 +80,7 @@ public class ByteArrayMessage implements Message {
 		// Nothing to do
 	}
 
-	public byte[] getMessage() {
+	public ByteArray getMessage() {
 		return message;
-	}
-
-	public int getMessageLength() {
-		return length;
 	}
 }

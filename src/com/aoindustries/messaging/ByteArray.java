@@ -43,4 +43,24 @@ public class ByteArray {
 		this.size = size;
 		assert(size <= array.length);
 	}
+
+	/**
+	 * Two ByteArray are equal when they have the same size and each byte
+	 * within the first <code>size</code> bytes are equal.
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof ByteArray)) return false;
+		ByteArray other = (ByteArray)o;
+		if(size != other.size) return false;
+		return AoArrays.equals(array, other.array, 0, size);
+	}
+
+	/**
+	 * The hashCode is created from the first <code>size</code> bytes.
+	 */
+	@Override
+	public int hashCode() {
+		return AoArrays.hashCode(array, 0, size);
+	}
 }

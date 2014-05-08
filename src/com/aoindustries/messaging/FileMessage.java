@@ -42,19 +42,26 @@ public class FileMessage implements Message {
 	 * base-64 decodes the message into a temp file.
 	 */
 	public static FileMessage decode(String encodedMessage) throws IOException {
-		byte[] decoded = Base64Coder.decode(encodedMessage);
-		return decode(decoded, decoded.length);
+		return decode(
+			encodedMessage.isEmpty()
+			? ByteArray.EMPTY_BYTE_ARRAY
+			: new ByteArray(
+				Base64Coder.decode(
+					encodedMessage
+				)
+			)
+		);
 	}
 
 	/**
 	 * Restores this message into a temp file.
 	 */
-	public static FileMessage decode(byte[] encodedMessage, int encodedMessageLength) throws IOException {
+	public static FileMessage decode(ByteArray encodedMessage) throws IOException {
 		File file = File.createTempFile("FileMessage.", null);
 		file.deleteOnExit();
 		OutputStream out = new FileOutputStream(file);
 		try {
-			out.write(encodedMessage, 0, encodedMessageLength);
+			out.write(encodedMessage.array, 0, encodedMessage.size);
 		} finally {
 			out.close();
 		}
@@ -90,6 +97,7 @@ public class FileMessage implements Message {
 	@Override
 	public String encodeAsString() throws IOException {
 		ByteArray byteArray = encodeAsByteArray();
+		if(byteArray.size == 0) return "";
 		return new String(Base64Coder.encode(byteArray.array, byteArray.size));
 	}
 

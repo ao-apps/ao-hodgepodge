@@ -22,14 +22,10 @@
  */
 package com.aoindustries.messaging;
 
-import com.aoindustries.awt.image.*;
-import java.awt.Point;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.logging.Level;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -55,5 +51,6 @@ public class ByteArrayMessageTest {
 		// Decode back to message
 		ByteArrayMessage decoded = (ByteArrayMessage)MessageType.BYTE_ARRAY.decode(encodedString);
 
+		assertArrayEquals(expected, decoded.getMessage());
 	}
 }

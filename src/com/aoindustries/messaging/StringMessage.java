@@ -30,13 +30,17 @@ import java.nio.charset.Charset;
  */
 public class StringMessage implements Message {
 
+	public static final StringMessage EMPTY_STRING_MESSAGE = new StringMessage("");
+
 	private static final Charset CHARSET = Charsets.UTF_8;
 
 	/**
 	 * UTF-8 decodes the message.
 	 */
-	public static StringMessage decode(byte[] encodedMessage, int encodedMessageLength) {
-		return new StringMessage(new String(encodedMessage, 0, encodedMessageLength, CHARSET));
+	public static StringMessage decode(ByteArray encodedMessage) {
+		if(encodedMessage.size == 0) return EMPTY_STRING_MESSAGE;
+
+		return new StringMessage(new String(encodedMessage.array, 0, encodedMessage.size, CHARSET));
 	}
 
 	private final String message;
@@ -69,6 +73,8 @@ public class StringMessage implements Message {
 	 */
 	@Override
 	public ByteArray encodeAsByteArray() {
+		if(message.isEmpty()) return ByteArray.EMPTY_BYTE_ARRAY;
+
 		return new ByteArray(message.getBytes(CHARSET));
 	}
 
