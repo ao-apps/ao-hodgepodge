@@ -67,7 +67,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
     public static final long UNLIMITED_MAX_CONNECTION_AGE = -1;
     public static final long DEFAULT_MAX_CONNECTION_AGE = 30L * 60 * 1000;
 
-    public static final int DEFAULT_CONNECT_TIMEOUT = 5 * 1000;
+    public static final int DEFAULT_CONNECT_TIMEOUT = 15 * 1000; // Was 5 seconds for a very long time, but too sensitive to transient network problems
     public static final int DEFAULT_SOCKET_SO_LINGER = 15;
 
     /**

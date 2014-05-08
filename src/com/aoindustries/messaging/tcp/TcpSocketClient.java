@@ -22,56 +22,67 @@
  */
 package com.aoindustries.messaging.tcp;
 
-import com.aoindustries.lang.NotImplementedException;
+import com.aoindustries.messaging.AbstractSocketContext;
+import com.aoindustries.messaging.http.HttpSocket;
 import com.aoindustries.util.concurrent.Callback;
-import java.io.Closeable;
-import java.io.IOException;
-import java.net.InetSocketAddress;
+import com.aoindustries.util.concurrent.ExecutorService;
+import java.net.Socket;
+import java.net.SocketAddress;
 
 /**
  * Client component for bi-directional messaging over TCP.
  */
-public class TcpSocketClient implements Closeable {
+public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 
-	private final HttpSocketContext socketContext = new HttpSocketContext() {
-		@Override
-		public void onClose(HttpSocket socket) {
-			throw new NotImplementedException("TODO");
+	private static boolean KEEPALIVE = true;
+
+	private static boolean SOCKET_SO_LINGER_ENABLED = true;
+	private static int SOCKET_SO_LINGER_SECONDS = 15;
+
+	private static int CONNECT_TIMEOUT = 15;
+
+	private final ExecutorService executor = ExecutorService.newInstance();
+
+	public TcpSocketClient() {
+	}
+
+	@Override
+	public void close() {
+		try {
+			super.close();
+		} finally {
+			executor.dispose();
 		}
-	};
+	}
 
 	/**
 	 * Asynchronously connects.
 	 */
 	public void connect(
-		String url,
-		Callback<HttpSocket> onConnect,
-		Callback<Throwable> onError
+		final SocketAddress endpoint,
+		final Callback<TcpSocket> onConnect,
+		final Callback<Throwable> onError
 	) {
-		throw new NotImplementedException("TODO");
-	}
-
-	protected HttpSocket newSocket(
-		Identifier id,
-		long connectTime,
-		InetSocketAddress localSocketAddress,
-		InetSocketAddress remoteSocketAddress
-	) {
-		return new HttpSocket(
-			socketContext,
-			id,
-			connectTime,
-			localSocketAddress,
-			remoteSocketAddress
+		executor.submitUnbounded(
+			new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Socket socket = new Socket();
+						socket.setKeepAlive(KEEPALIVE);
+						socket.setSoLinger(SOCKET_SO_LINGER_ENABLED, SOCKET_SO_LINGER_SECONDS);
+						//socket.setTcpNoDelay(true);
+						socket.connect(endpoint, CONNECT_TIMEOUT);
+						TcpSocket tcpSocket = new TcpSocket(socket);
+						addSocket(tcpSocket);
+						onConnect.call(tcpSocket);
+					} catch(ThreadDeath td) {
+						throw td;
+					} catch(Throwable t) {
+						onError.call(t);
+					}
+				}
+			}
 		);
-	}
-
-	/**
-	 * Closes this client.  When the client is closed, all active sockets are
-	 * also closed.
-	 */
-	@Override
-	public void close() throws IOException {
-		throw new NotImplementedException("TODO");
 	}
 }
