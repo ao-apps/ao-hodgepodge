@@ -38,18 +38,18 @@ import java.util.logging.Logger;
  * Provides per-listener event queues, and fires off events concurrently across
  * listeners, but in-order per listener.
  */
-class ConcurrentListenerManager<L> {
+public class ConcurrentListenerManager<L> {
 
 	private static final Logger logger = Logger.getLogger(ConcurrentListenerManager.class.getName());
 
-	static interface Event<L> {
+	public static interface Event<L> {
 		/**
-		 * Creates the Runnable that will call the event callback on the listener.
+		 * Creates the Runnable that will call the event callback on the given listener.
 		 */
 		Runnable createCall(L listener);
 	}
 
-	static class EventCall<L> {
+	private static class EventCall<L> {
 		final Map<L,Boolean> unfinishedCalls;
 		final Runnable call;
 		EventCall(Map<L,Boolean> unfinishedCalls, Runnable call) {
@@ -59,8 +59,8 @@ class ConcurrentListenerManager<L> {
 	}
 
 	/**
-	 * A queue of events per listener.  When the queue is null, no executors are running.
-	 * When the queue is non-null, even when empty, an executor is running.
+	 * A queue of events per listener.  When the queue is null, no executor is running for the listener.
+	 * When the queue is non-null, even when empty, an executor is running for the listener.
 	 */
 	private final Map<L,Queue<EventCall<L>>> listeners = new IdentityHashMap<L,Queue<EventCall<L>>>();
 
