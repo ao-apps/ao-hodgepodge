@@ -25,12 +25,12 @@ package com.aoindustries.messaging;
 import com.aoindustries.security.Identifier;
 import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.concurrent.ExecutorService;
-import java.io.IOException;
-import java.util.IdentityHashMap;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,18 +43,14 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 
 	private final Map<Identifier,S> sockets = new LinkedHashMap<Identifier,S>();
 
-	/**
-	 * A queue of events per listener.  When the queue is null, no executors are running.
-	 * When the queue is non-null, even when empty, an executor is running.
-	 */
-	private final Map<SocketContextListener,Queue<Runnable>> listeners = new IdentityHashMap<SocketContextListener,Queue<Runnable>>();
-
-	private volatile boolean closed;
+	private final Object closeLock = new Object();
+	private boolean closed;
 
 	private final ExecutorService executor = ExecutorService.newInstance();
 
+	private final ConcurrentListenerManager<SocketContextListener> listenerManager = new ConcurrentListenerManager<SocketContextListener>(executor);
+
 	protected AbstractSocketContext() {
-		// On startup get the executor
 	}
 
 	@Override
@@ -68,96 +64,100 @@ abstract public class AbstractSocketContext<S extends Socket> implements SocketC
 	 * Any overriding implementation must call super.close() first.
 	 */
 	@Override
-	public void close() throws IOException {
-		closed = true;
+	public void close() {
+		boolean enqueueOnSocketContextClose;
+		synchronized(closeLock) {
+			if(!closed) {
+				closed = true;
+				enqueueOnSocketContextClose = true;
+			} else {
+				enqueueOnSocketContextClose = false;
+			}
+		}
+		List<S> socketsToClose;
 		synchronized(sockets) {
-			for(S socket : sockets.values()) socket.close();
-			sockets.clear();
+			// Gets a copy of the sockets to avoid concurrent modification exception and avoid holding lock
+			socketsToClose = new ArrayList<S>(sockets.values());
+		}
+		for(S socket : socketsToClose) {
+			try {
+				socket.close();
+			} catch(ThreadDeath td) {
+				throw td;
+			} catch(Throwable t) {
+				logger.log(Level.SEVERE, null, t);
+			}
+		}
+		if(enqueueOnSocketContextClose) {
+			listenerManager.enqueueEvent(
+				new ConcurrentListenerManager.Event<SocketContextListener>() {
+					@Override
+					public Runnable createCall(final SocketContextListener listener) {
+						return new Runnable() {
+							@Override
+							public void run() {
+								listener.onSocketContextClose(AbstractSocketContext.this);
+							}
+						};
+					}
+				}
+			);
 		}
 		executor.dispose();
 	}
 
 	@Override
 	public boolean isClosed() {
-		return closed;
+		synchronized(closeLock) {
+			return closed;
+		}
 	}
 
 	@Override
 	public void addSocketContextListener(SocketContextListener listener) throws IllegalStateException {
-		synchronized(listeners) {
-			if(listeners.containsKey(listener)) throw new IllegalStateException("listener already added");
-			listeners.put(listener, null);
-		}
+		listenerManager.addListener(listener);
 	}
 
 	@Override
 	public boolean removeSocketContextListener(SocketContextListener listener) {
-		synchronized(listeners) {
-			if(!listeners.containsKey(listener)) {
-				return false;
-			} else {
-				listeners.remove(listener);
-				return true;
-			}
-		}
+		return listenerManager.removeListener(listener);
 	}
 
 	/**
-	 * Enqueues calls to onNewSocket on all listeners.
+	 * Adds a new socket to this context, sockets must be added to the context
+	 * before they create any of their own events.  This gives context listeners
+	 * a chance to register per-socket listeners in "onNewSocket".
+	 *
+	 * First, adds to the list of sockets.
+	 * Second, calls all listeners notifying them of new socket.
+	 * Third, waits for all listeners to handle the event before returning.
 	 */
-	protected void enqueueOnNewSocket(final S newSocket) {
-		synchronized(listeners) {
-			for(Map.Entry<SocketContextListener,Queue<Runnable>> entry : listeners.entrySet()) {
-				final SocketContextListener listener = entry.getKey();
-				Queue<Runnable> queue = entry.getValue();
-				boolean isFirst;
-				if(queue == null) {
-					queue = new LinkedList<Runnable>();
-					entry.setValue(queue);
-					isFirst = true;
-				} else {
-					isFirst = false;
-				}
-				queue.add(
-					new Runnable() {
-						@Override
-						public void run() {
-							listener.onNewSocket(AbstractSocketContext.this, newSocket);
-						}
-					}
-				);
-				if(isFirst) {
-					executor.submitUnbounded(
-						new Runnable() {
+	protected void addSocket(final S newSocket) {
+		Future<?> future;
+		synchronized(sockets) {
+			Identifier id = newSocket.getId();
+			if(sockets.containsKey(id)) throw new IllegalStateException("Socket with the same ID has already been added");
+			sockets.put(id, newSocket);
+			future = listenerManager.enqueueEvent(
+				new ConcurrentListenerManager.Event<SocketContextListener>() {
+					@Override
+					public Runnable createCall(final SocketContextListener listener) {
+						return new Runnable() {
 							@Override
 							public void run() {
-								while(true) {
-									// Invoke each of the events until the queue is empty
-									Runnable event;
-									synchronized(listeners) {
-										Queue<Runnable> queue = listeners.get(listener);
-										if(queue.isEmpty()) {
-											// Remove the empty queue so a new executor will be submitted on next event
-											listeners.remove(listener);
-											return;
-										} else {
-											event = queue.remove();
-										}
-									}
-									// Run the event without holding the listeners lock
-									try {
-										event.run();
-									} catch(ThreadDeath TD) {
-										throw TD;
-									} catch(Throwable t) {
-										logger.log(Level.SEVERE, null, t);
-									}
-								}
+								listener.onNewSocket(AbstractSocketContext.this, newSocket);
 							}
-						}
-					);
+						};
+					}
 				}
-			}
+			);
+		}
+		try {
+			future.get();
+		} catch(ExecutionException e) {
+			logger.log(Level.SEVERE, null, e);
+		} catch(InterruptedException e) {
+			logger.log(Level.SEVERE, null, e);
 		}
 	}
 }

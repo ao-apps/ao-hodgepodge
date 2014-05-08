@@ -96,10 +96,8 @@ class ConcurrentListenerManager<L> {
 	Future<?> enqueueEvent(Event<? super L> event) {
 		synchronized(listeners) {
 			// The future is not finished until all individual calls have removed themselves from this map
+			// and this map is empty.
 			final Map<L,Boolean> unfinishedCalls = new IdentityHashMap<L,Boolean>();
-			for(L listener : listeners.keySet()) {
-				unfinishedCalls.put(listener, Boolean.TRUE);
-			}
 			for(Map.Entry<L,Queue<EventCall<L>>> entry : listeners.entrySet()) {
 				final L listener = entry.getKey();
 				Queue<EventCall<L>> queue = entry.getValue();
@@ -111,8 +109,11 @@ class ConcurrentListenerManager<L> {
 				} else {
 					isFirst = false;
 				}
+				unfinishedCalls.put(listener, Boolean.TRUE);
 				queue.add(new EventCall<L>(unfinishedCalls, event.createCall(listener)));
 				if(isFirst) {
+					// When the queue is first created, we submit the queue runner to the executor for queue processing
+					// There is only on executor per queue, and on queue per listener
 					executor.submitUnbounded(
 						new Runnable() {
 							@Override
