@@ -60,10 +60,10 @@ public class AoArrays {
      */
     // @ThreadSafe
     public static boolean equals(byte[] b1, byte[] b2, int off, int len) {
-        for(int end=off+len; off<end; off++) {
-            if(b1[off]!=b2[off]) return false;
-        }
-        return true;
+		for(int end=off+len; off<end; off++) {
+			if(b1[off]!=b2[off]) return false;
+		}
+		return true;
     }
 
     /**
