@@ -62,13 +62,12 @@ abstract public class AbstractSocket implements Socket {
 
 	protected AbstractSocket(
 		AbstractSocketContext<? extends AbstractSocket> socketContext,
-		Identifier id,
 		long connectTime,
 		SocketAddress localSocketAddress,
 		SocketAddress remoteSocketAddress
 	) {
 		this.socketContext              = socketContext;
-		this.id                         = id;
+		this.id                         = socketContext.newIdentifer();
 		this.connectTime                = connectTime;
 		this.connectLocalSocketAddress  = localSocketAddress;
 		this.localSocketAddress         = localSocketAddress;
@@ -234,8 +233,8 @@ abstract public class AbstractSocket implements Socket {
 	}
 
 	@Override
-	public void addSocketListener(SocketListener listener) throws IllegalStateException {
-		listenerManager.addListener(listener);
+	public void addSocketListener(SocketListener listener, boolean synchronous) throws IllegalStateException {
+		listenerManager.addListener(listener, synchronous);
 	}
 
 	@Override

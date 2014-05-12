@@ -49,16 +49,12 @@ public interface SocketContext extends Closeable {
 	boolean isClosed();
 
 	/**
-	 * Adds a listener.
-	 *
-	 * @throws IllegalStateException  If the listener has already been added
+	 * @see  ConcurrentListenerManager#addListener(java.lang.Object, boolean)
 	 */
-	void addSocketContextListener(SocketContextListener listener);
+	void addSocketContextListener(SocketContextListener listener, boolean synchronous);
 
 	/**
-	 * Removes a listener.
-	 *
-	 * @return true if the listener was found
+	 * @see  ConcurrentListenerManager#removeListener(java.lang.Object)
 	 */
 	boolean removeSocketContextListener(SocketContextListener listener);
 }

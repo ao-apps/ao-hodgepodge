@@ -59,6 +59,18 @@ abstract public class AbstractSocketContext<S extends AbstractSocket> implements
 	}
 
 	/**
+	 * Creates a random identifier that is not in the current set of sockets.
+	 */
+	protected Identifier newIdentifer() {
+		synchronized(sockets) {
+			while(true) {
+				Identifier id = new Identifier();
+				if(!sockets.containsKey(id)) return id;
+			}
+		}
+	}
+
+	/**
 	 * Called by a socket when it is closed.
 	 * This will only be called once.
 	 */
@@ -133,8 +145,8 @@ abstract public class AbstractSocketContext<S extends AbstractSocket> implements
 	}
 
 	@Override
-	public void addSocketContextListener(SocketContextListener listener) throws IllegalStateException {
-		listenerManager.addListener(listener);
+	public void addSocketContextListener(SocketContextListener listener, boolean synchronous) throws IllegalStateException {
+		listenerManager.addListener(listener, synchronous);
 	}
 
 	@Override

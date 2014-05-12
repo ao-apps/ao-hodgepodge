@@ -23,6 +23,7 @@
 package com.aoindustries.messaging;
 
 import com.aoindustries.security.Identifier;
+import com.aoindustries.util.concurrent.ConcurrentListenerManager;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -84,16 +85,12 @@ public interface Socket extends Closeable {
 	boolean isClosed();
 
 	/**
-	 * Adds a listener.
-	 *
-	 * @throws IllegalStateException  If the listener has already been added
+	 * @see  ConcurrentListenerManager#addListener(java.lang.Object, boolean)
 	 */
-	void addSocketListener(SocketListener listener) throws IllegalStateException;
+	void addSocketListener(SocketListener listener, boolean synchronous) throws IllegalStateException;
 
 	/**
-	 * Removes a listener.
-	 *
-	 * @return true if the listener was found
+	 * @see  ConcurrentListenerManager#removeListener(java.lang.Object)
 	 */
 	boolean removeSocketListener(SocketListener listener);
 

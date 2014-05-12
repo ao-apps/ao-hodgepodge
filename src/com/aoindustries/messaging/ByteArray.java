@@ -41,7 +41,7 @@ public class ByteArray {
 	public ByteArray(byte[] array, int size) {
 		this.array = array;
 		this.size = size;
-		assert(size <= array.length);
+		assert size <= array.length;
 	}
 
 	/**
