@@ -24,7 +24,9 @@ package com.aoindustries.util.concurrent;
 
 import com.aoindustries.lang.NotImplementedException;
 import java.io.Closeable;
+import java.util.Collection;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -59,6 +61,104 @@ public class ConcurrentListenerManager<L> implements Closeable {
 	}
 
 	/**
+	 * The object instance used to indicate that a listener is called synchronously.
+	 */
+	private final Queue<EventCall<L>> SYNC_DO_NOT_QUEUE = new Queue<EventCall<L>>() {
+
+		private static final String MESSAGE = "This queue is a synchronous marker and none of its method should be called.";
+
+		@Override
+		public boolean add(EventCall<L> e) {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public boolean offer(EventCall<L> e) {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public EventCall<L> remove() {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public EventCall<L> poll() {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public EventCall<L> element() {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public EventCall<L> peek() {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public int size() {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public boolean isEmpty() {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public boolean contains(Object o) {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public Iterator<EventCall<L>> iterator() {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public Object[] toArray() {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public <T> T[] toArray(T[] a) {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public boolean remove(Object o) {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public boolean containsAll(Collection<?> c) {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public boolean addAll(Collection<? extends EventCall<L>> c) {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public boolean removeAll(Collection<?> c) {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public boolean retainAll(Collection<?> c) {
+			throw new AssertionError(MESSAGE);
+		}
+
+		@Override
+		public void clear() {
+			throw new AssertionError(MESSAGE);
+		}
+	};
+
+	/**
 	 * A queue of events per listener.  When the queue is null, no executor is running for the listener.
 	 * When the queue is non-null, even when empty, an executor is running for the listener.
 	 */
@@ -80,12 +180,15 @@ public class ConcurrentListenerManager<L> implements Closeable {
 	/**
 	 * Adds a listener.
 	 *
+	 * @param  synchronous  When true, listener will be called synchronously by the I/O thread;
+	 *                      when false, listener will be called asynchronously by a separate thread.
+	 *
 	 * @throws IllegalStateException  If the listener has already been added
 	 */
-	public void addListener(L listener) throws IllegalStateException {
+	public void addListener(L listener, boolean synchronous) throws IllegalStateException {
 		synchronized(listeners) {
 			if(listeners.containsKey(listener)) throw new IllegalStateException("listener already added");
-			listeners.put(listener, null);
+			listeners.put(listener, synchronous ? SYNC_DO_NOT_QUEUE : null);
 		}
 	}
 
@@ -106,7 +209,7 @@ public class ConcurrentListenerManager<L> implements Closeable {
 	}
 
 	/**
-	 * Enqueues a new event to all listeners' event queues.
+	 * Enqueues a new event to all listener event queues.
 	 * If the caller needs to wait until the event has been handled by each
 	 * of the listeners, then call .get() on the returned Future.
 	 */
@@ -114,61 +217,74 @@ public class ConcurrentListenerManager<L> implements Closeable {
 		synchronized(listeners) {
 			// The future is not finished until all individual calls have removed themselves from this map
 			// and this map is empty.
-			final Map<L,Boolean> unfinishedCalls = new IdentityHashMap<L,Boolean>();
+			final Map<L,Boolean> unfinishedCalls = new IdentityHashMap<L,Boolean>(listeners.size()*4/3 + 1);
 			for(Map.Entry<L,Queue<EventCall<L>>> entry : listeners.entrySet()) {
 				final L listener = entry.getKey();
+				final Runnable call = event.createCall(listener);
 				Queue<EventCall<L>> queue = entry.getValue();
-				boolean isFirst;
-				if(queue == null) {
-					queue = new LinkedList<EventCall<L>>();
-					entry.setValue(queue);
-					isFirst = true;
+				if(queue == SYNC_DO_NOT_QUEUE) {
+					// Call synchronous listeners immediately
+					try {
+						call.run();
+					} catch(ThreadDeath TD) {
+						throw TD;
+					} catch(Throwable t) {
+						logger.log(Level.SEVERE, null, t);
+					}
 				} else {
-					isFirst = false;
-				}
-				unfinishedCalls.put(listener, Boolean.TRUE);
-				queue.add(new EventCall<L>(unfinishedCalls, event.createCall(listener)));
-				if(isFirst) {
-					// When the queue is first created, we submit the queue runner to the executor for queue processing
-					// There is only on executor per queue, and on queue per listener
-					executor.submitUnbounded(
-						new Runnable() {
-							@Override
-							public void run() {
-								while(true) {
-									// Invoke each of the events until the queue is empty
-									EventCall<L> eventCall;
-									synchronized(listeners) {
-										Queue<EventCall<L>> queue = listeners.get(listener);
-										if(queue.isEmpty()) {
-											// Remove the empty queue so a new executor will be submitted on next event
-											listeners.remove(listener);
-											return;
-										} else {
-											eventCall = queue.remove();
+					// Enqueue asynchronous calls
+					boolean isFirst;
+					if(queue == null) {
+						queue = new LinkedList<EventCall<L>>();
+						entry.setValue(queue);
+						isFirst = true;
+					} else {
+						isFirst = false;
+					}
+					unfinishedCalls.put(listener, Boolean.TRUE);
+					queue.add(new EventCall<L>(unfinishedCalls, call));
+					if(isFirst) {
+						// When the queue is first created, we submit the queue runner to the executor for queue processing
+						// There is only on executor per queue, and on queue per listener
+						executor.submitUnbounded(
+							new Runnable() {
+								@Override
+								public void run() {
+									while(true) {
+										// Invoke each of the events until the queue is empty
+										EventCall<L> eventCall;
+										synchronized(listeners) {
+											Queue<EventCall<L>> queue = listeners.get(listener);
+											if(queue.isEmpty()) {
+												// Remove the empty queue so a new executor will be submitted on next event
+												listeners.remove(listener);
+												return;
+											} else {
+												eventCall = queue.remove();
+											}
 										}
-									}
-									// Run the event without holding the listeners lock
-									try {
-										eventCall.call.run();
-									} catch(ThreadDeath TD) {
-										throw TD;
-									} catch(Throwable t) {
-										logger.log(Level.SEVERE, null, t);
-									}
-									// Remove this listener from unfinished calls
-									synchronized(eventCall.unfinishedCalls) {
-										Boolean removedValue = eventCall.unfinishedCalls.remove(listener);
-										// Notify when the last call completes
-										if(eventCall.unfinishedCalls.isEmpty()) {
-											eventCall.unfinishedCalls.notify();
+										// Run the event without holding the listeners lock
+										try {
+											eventCall.call.run();
+										} catch(ThreadDeath TD) {
+											throw TD;
+										} catch(Throwable t) {
+											logger.log(Level.SEVERE, null, t);
 										}
-										if(removedValue == null) throw new AssertionError();
+										// Remove this listener from unfinished calls
+										synchronized(eventCall.unfinishedCalls) {
+											Boolean removedValue = eventCall.unfinishedCalls.remove(listener);
+											// Notify when the last call completes
+											if(eventCall.unfinishedCalls.isEmpty()) {
+												eventCall.unfinishedCalls.notify();
+											}
+											if(removedValue == null) throw new AssertionError();
+										}
 									}
 								}
 							}
-						}
-					);
+						);
+					}
 				}
 			}
 			// This future will wait until unfinishedCalls is empty
