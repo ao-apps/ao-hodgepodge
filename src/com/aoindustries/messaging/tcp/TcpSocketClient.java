@@ -22,7 +22,10 @@
  */
 package com.aoindustries.messaging.tcp;
 
+import com.aoindustries.io.CompressedDataInputStream;
+import com.aoindustries.io.CompressedDataOutputStream;
 import com.aoindustries.messaging.AbstractSocketContext;
+import com.aoindustries.security.Identifier;
 import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ExecutorService;
 import java.net.Socket;
@@ -73,9 +76,27 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 						//socket.setTcpNoDelay(true);
 						long connectTime = System.currentTimeMillis();
 						socket.connect(endpoint, CONNECT_TIMEOUT);
-						TcpSocket tcpSocket = new TcpSocket(TcpSocketClient.this, connectTime, socket);
-						addSocket(tcpSocket);
-						onConnect.call(tcpSocket);
+						boolean successful = false;
+						try {
+							CompressedDataInputStream in = new CompressedDataInputStream(socket.getInputStream());
+							CompressedDataOutputStream out = new CompressedDataOutputStream(socket.getOutputStream());
+							Identifier id = new Identifier(in.readLong(), in.readLong());
+							TcpSocket tcpSocket = new TcpSocket(
+								TcpSocketClient.this,
+								id,
+								connectTime,
+								socket,
+								in,
+								out
+							);
+							addSocket(tcpSocket);
+							onConnect.call(tcpSocket);
+							successful = true;
+						} finally {
+							if(!successful) {
+								socket.close();
+							}
+						}
 					} catch(ThreadDeath td) {
 						throw td;
 					} catch(Throwable t) {

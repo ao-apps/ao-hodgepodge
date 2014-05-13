@@ -49,7 +49,7 @@ public interface SocketListener {
 	 * 
 	 * @param  messages  The unmodifiable list of messages in the order received
 	 */
-	void onMessages(Socket socket, List<String> messages);
+	void onMessages(Socket socket, List<? extends Message> messages);
 
 	/**
 	 * Called when an error occurs.  The socket is closed

@@ -24,20 +24,20 @@ package com.aoindustries.messaging.tcp;
 
 import com.aoindustries.io.CompressedDataInputStream;
 import com.aoindustries.io.CompressedDataOutputStream;
+import com.aoindustries.io.IoUtils;
 import com.aoindustries.messaging.AbstractSocket;
 import com.aoindustries.messaging.ByteArray;
 import com.aoindustries.messaging.Message;
+import com.aoindustries.messaging.MessageType;
 import com.aoindustries.messaging.Socket;
+import com.aoindustries.security.Identifier;
 import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ExecutorService;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -63,16 +63,22 @@ public class TcpSocket extends AbstractSocket {
 
 	TcpSocket(
 		TcpSocketClient socketContext,
+		Identifier id,
 		long connectTime,
-		java.net.Socket socket
+		java.net.Socket socket,
+		CompressedDataInputStream in,
+		CompressedDataOutputStream out
 	) {
 		super(
 			socketContext,
+			id,
 			connectTime,
 			socket.getLocalSocketAddress(),
 			socket.getRemoteSocketAddress()
 		);
 		this.socket = socket;
+		this.in = in;
+		this.out = out;
 	}
 
 	@Override
@@ -110,10 +116,6 @@ public class TcpSocket extends AbstractSocket {
 							java.net.Socket socket;
 							synchronized(lock) {
 								socket = TcpSocket.this.socket;
-								if(socket!=null) {
-									in = new CompressedDataInputStream(socket.getInputStream());
-									out = new CompressedDataOutputStream(socket.getOutputStream());
-								}
 							}
 							if(socket==null) {
 								onError.call(new SocketException("Socket closed"));
@@ -125,24 +127,39 @@ public class TcpSocket extends AbstractSocket {
 										public void run() {
 											try {
 												while(true) {
-													InputStream in;
+													CompressedDataInputStream in;
 													synchronized(lock) {
 														// Check if closed
 														in = TcpSocket.this.in;
 														if(in==null) break;
 													}
-													// TODO
+													final int size = in.readCompressedInt();
+													List<Message> messages = new ArrayList<Message>(size);
+													for(int i=0; i<size; i++) {
+														MessageType type = MessageType.getFromTypeByte(in.readByte());
+														int arraySize = in.readCompressedInt();
+														byte[] array = new byte[arraySize];
+														IoUtils.readFully(in, array, 0, arraySize);
+														messages.add(
+															type.decode(
+																new ByteArray(
+																	array,
+																	arraySize
+																)
+															)
+														);
+													}
+													callOnMessages(Collections.unmodifiableList(messages));
 												}
 											} catch(ThreadDeath td) {
 												throw td;
 											} catch(Throwable t) {
-												if(!isClosed()) {
-													callOnError(t);
-													try {
-														close();
-													} catch(IOException e) {
-														logger.log(Level.SEVERE, null, e);
-													}
+												if(!isClosed()) callOnError(t);
+											} finally {
+												try {
+													close();
+												} catch(IOException e) {
+													logger.log(Level.SEVERE, null, e);
 												}
 											}
 										}
@@ -203,12 +220,12 @@ public class TcpSocket extends AbstractSocket {
 									}
 									// Write the messages without holding the queue lock
 									final int size = messages.size();
-									out.writeInt(size);
+									out.writeCompressedInt(size);
 									for(int i=0; i<size; i++) {
 										Message message = messages.get(i);
 										out.writeByte(message.getMessageType().getTypeByte());
 										ByteArray data = message.encodeAsByteArray();
-										out.writeInt(data.size);
+										out.writeCompressedInt(data.size);
 										out.write(data.array, 0, data.size);
 									}
 									messages.clear();

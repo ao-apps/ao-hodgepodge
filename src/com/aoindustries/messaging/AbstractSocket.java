@@ -63,12 +63,13 @@ abstract public class AbstractSocket implements Socket {
 
 	protected AbstractSocket(
 		AbstractSocketContext<? extends AbstractSocket> socketContext,
+		Identifier id,
 		long connectTime,
 		SocketAddress localSocketAddress,
 		SocketAddress remoteSocketAddress
 	) {
 		this.socketContext              = socketContext;
-		this.id                         = socketContext.newIdentifer();
+		this.id                         = id;
 		this.connectTime                = connectTime;
 		this.connectLocalSocketAddress  = localSocketAddress;
 		this.localSocketAddress         = localSocketAddress;
@@ -264,7 +265,7 @@ abstract public class AbstractSocket implements Socket {
 	 *
 	 * @throws  IllegalStateException  if this socket is closed
 	 */
-	protected Future<?> callOnMessages(final List<String> messages) throws IllegalStateException {
+	protected Future<?> callOnMessages(final List<? extends Message> messages) throws IllegalStateException {
 		if(isClosed()) throw new IllegalStateException("Socket is closed");
 		if(messages.isEmpty()) throw new IllegalArgumentException("messages may not be empty");
 		return listenerManager.enqueueEvent(
