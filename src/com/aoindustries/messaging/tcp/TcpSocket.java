@@ -22,35 +22,57 @@
  */
 package com.aoindustries.messaging.tcp;
 
-import com.aoindustries.lang.NotImplementedException;
+import com.aoindustries.io.CompressedDataInputStream;
+import com.aoindustries.io.CompressedDataOutputStream;
 import com.aoindustries.messaging.AbstractSocket;
+import com.aoindustries.messaging.ByteArray;
 import com.aoindustries.messaging.Message;
+import com.aoindustries.messaging.Socket;
+import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ExecutorService;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.nio.channels.ClosedChannelException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * One established connection over a socket.
  */
 public class TcpSocket extends AbstractSocket {
 
-	private final Queue<Message> sendQueue = new LinkedList<Message>();
+	private static final Logger logger = Logger.getLogger(TcpSocket.class.getName());
 
-	public TcpSocket(InetAddress address, int port) throws IOException {
-		this(new Socket(address, port));
-	}
+	private final Object sendQueueLock = new Object();
+	private Queue<Message> sendQueue;
 
-	public TcpSocket(String host, int port) throws IOException {
-		this(new Socket(host, port));
-	}
+	private final ExecutorService executor = ExecutorService.newInstance();
 
-	public TcpSocket(Socket socket) {
-		super(System.currentTimeMillis(), socket.getLocalSocketAddress(), socket.getRemoteSocketAddress());
+	private final Object lock = new Object();
+	private java.net.Socket socket;
+	private CompressedDataInputStream in;
+	private CompressedDataOutputStream out;
+
+	TcpSocket(
+		TcpSocketClient socketContext,
+		long connectTime,
+		java.net.Socket socket
+	) {
+		super(
+			socketContext,
+			connectTime,
+			socket.getLocalSocketAddress(),
+			socket.getRemoteSocketAddress()
+		);
+		this.socket = socket;
 	}
 
 	@Override
@@ -58,14 +80,155 @@ public class TcpSocket extends AbstractSocket {
 		try {
 			super.close();
 		} finally {
-			executorService.dispose();
+			try {
+				synchronized(lock) {
+					if(socket!=null) {
+						socket = null;
+						in = null;
+						out = null;
+						socket.close();
+					}
+				}
+			} finally {
+				executor.dispose();
+			}
 		}
 	}
 
 	@Override
-	public void sendMessages(Collection<? extends Message> messages) throws ClosedChannelException {
-		synchronized(sendQueue) {
+	protected void startImpl(
+		final Callback<? super Socket> onStart,
+		final Callback<? super Throwable> onError
+	) throws IllegalStateException {
+		synchronized(lock) {
+			if(socket==null || in!=null || out!=null) throw new IllegalStateException();
+			executor.submitUnbounded(
+				new Runnable() {
+					@Override
+					public void run() {
+						try {
+							java.net.Socket socket;
+							synchronized(lock) {
+								socket = TcpSocket.this.socket;
+								if(socket!=null) {
+									in = new CompressedDataInputStream(socket.getInputStream());
+									out = new CompressedDataOutputStream(socket.getOutputStream());
+								}
+							}
+							if(socket==null) {
+								onError.call(new SocketException("Socket closed"));
+							} else {
+								// Handle incoming messages in a Thread, can try nio later
+								executor.submitUnbounded(
+									new Runnable() {
+										@Override
+										public void run() {
+											try {
+												while(true) {
+													InputStream in;
+													synchronized(lock) {
+														// Check if closed
+														in = TcpSocket.this.in;
+														if(in==null) break;
+													}
+													// TODO
+												}
+											} catch(ThreadDeath td) {
+												throw td;
+											} catch(Throwable t) {
+												if(!isClosed()) {
+													callOnError(t);
+													try {
+														close();
+													} catch(IOException e) {
+														logger.log(Level.SEVERE, null, e);
+													}
+												}
+											}
+										}
+									}
+								);
+							}
+							onStart.call(TcpSocket.this);
+						} catch(ThreadDeath td) {
+							throw td;
+						} catch(Throwable t) {
+							onError.call(t);
+						}
+					}
+				}
+			);
+		}
+	}
+
+	@Override
+	protected void sendMessagesImpl(Collection<? extends Message> messages) {
+		synchronized(sendQueueLock) {
+			// Enqueue asynchronous write
+			boolean isFirst;
+			if(sendQueue == null) {
+				sendQueue = new LinkedList<Message>();
+				isFirst = true;
+			} else {
+				isFirst = false;
+			}
 			sendQueue.addAll(messages);
+			if(isFirst) {
+				// When the queue is first created, we submit the queue runner to the executor for queue processing
+				// There is only one executor per queue, and on queue per socket
+				executor.submitUnbounded(
+					new Runnable() {
+						@Override
+						public void run() {
+							try {
+								final List<Message> messages = new ArrayList<Message>();
+								while(true) {
+									CompressedDataOutputStream out;
+									synchronized(lock) {
+										// Check if closed
+										out = TcpSocket.this.out;
+										if(out==null) break;
+									}
+									// Get all of the messages until the queue is empty
+									synchronized(sendQueueLock) {
+										if(sendQueue.isEmpty()) {
+											out.flush();
+											// Remove the empty queue so a new executor will be submitted on next event
+											sendQueue = null;
+											break;
+										} else {
+											messages.addAll(sendQueue);
+											sendQueue.clear();
+										}
+									}
+									// Write the messages without holding the queue lock
+									final int size = messages.size();
+									out.writeInt(size);
+									for(int i=0; i<size; i++) {
+										Message message = messages.get(i);
+										out.writeByte(message.getMessageType().getTypeByte());
+										ByteArray data = message.encodeAsByteArray();
+										out.writeInt(data.size);
+										out.write(data.array, 0, data.size);
+									}
+									messages.clear();
+								}
+							} catch(ThreadDeath TD) {
+								throw TD;
+							} catch(Throwable t) {
+								if(!isClosed()) {
+									callOnError(t);
+									try {
+										close();
+									} catch(IOException e) {
+										logger.log(Level.SEVERE, null, e);
+									}
+								}
+							}
+						}
+					}
+				);
+			}
 		}
 	}
 }

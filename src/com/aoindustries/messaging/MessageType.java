@@ -31,7 +31,7 @@ public enum MessageType {
 
 	BYTE_ARRAY {
 		@Override
-		byte getTypeByte() {
+		public byte getTypeByte() {
 			return 0;
 		}
 
@@ -52,7 +52,7 @@ public enum MessageType {
 	},
 	FILE {
 		@Override
-		byte getTypeByte() {
+		public byte getTypeByte() {
 			return 1;
 		}
 
@@ -73,7 +73,7 @@ public enum MessageType {
 	},
 	STRING {
 		@Override
-		byte getTypeByte() {
+		public byte getTypeByte() {
 			return 2;
 		}
 
@@ -94,7 +94,7 @@ public enum MessageType {
 	},
 	MULTI {
 		@Override
-		byte getTypeByte() {
+		public byte getTypeByte() {
 			return 3;
 		}
 
@@ -134,7 +134,7 @@ public enum MessageType {
 		}
 	}
 
-	abstract byte getTypeByte();
+	abstract public byte getTypeByte();
 
 	abstract char getTypeChar();
 

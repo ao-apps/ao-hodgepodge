@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.text.Collator;
@@ -356,11 +357,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
             } finally {
                 out.close();
             }
-            if(!tmpFile.renameTo(sourceFile)) {
-                // Try deleteRecursive then rename for Windows
-                FileUtils.delete(sourceFile);
-				FileUtils.rename(tmpFile, sourceFile);
-            }
+			FileUtils.renameAllowNonAtomic(tmpFile, sourceFile);
         } catch(IOException err) {
             throw new RuntimeException(err);
         }

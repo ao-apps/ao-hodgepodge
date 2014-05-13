@@ -23,7 +23,6 @@
 package com.aoindustries.messaging.tcp;
 
 import com.aoindustries.messaging.AbstractSocketContext;
-import com.aoindustries.messaging.http.HttpSocket;
 import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ExecutorService;
 import java.net.Socket;
@@ -34,12 +33,12 @@ import java.net.SocketAddress;
  */
 public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 
-	private static boolean KEEPALIVE = true;
+	private static final boolean KEEPALIVE = true;
 
-	private static boolean SOCKET_SO_LINGER_ENABLED = true;
-	private static int SOCKET_SO_LINGER_SECONDS = 15;
+	private static final boolean SOCKET_SO_LINGER_ENABLED = true;
+	private static final int SOCKET_SO_LINGER_SECONDS = 15;
 
-	private static int CONNECT_TIMEOUT = 15;
+	private static final int CONNECT_TIMEOUT = 15;
 
 	private final ExecutorService executor = ExecutorService.newInstance();
 
@@ -60,8 +59,8 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 	 */
 	public void connect(
 		final SocketAddress endpoint,
-		final Callback<TcpSocket> onConnect,
-		final Callback<Throwable> onError
+		final Callback<? super TcpSocket> onConnect,
+		final Callback<? super Throwable> onError
 	) {
 		executor.submitUnbounded(
 			new Runnable() {
@@ -72,8 +71,9 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 						socket.setKeepAlive(KEEPALIVE);
 						socket.setSoLinger(SOCKET_SO_LINGER_ENABLED, SOCKET_SO_LINGER_SECONDS);
 						//socket.setTcpNoDelay(true);
+						long connectTime = System.currentTimeMillis();
 						socket.connect(endpoint, CONNECT_TIMEOUT);
-						TcpSocket tcpSocket = new TcpSocket(socket);
+						TcpSocket tcpSocket = new TcpSocket(TcpSocketClient.this, connectTime, socket);
 						addSocket(tcpSocket);
 						onConnect.call(tcpSocket);
 					} catch(ThreadDeath td) {

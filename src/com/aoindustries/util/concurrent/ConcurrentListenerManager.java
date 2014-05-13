@@ -245,7 +245,7 @@ public class ConcurrentListenerManager<L> implements Closeable {
 					queue.add(new EventCall<L>(unfinishedCalls, call));
 					if(isFirst) {
 						// When the queue is first created, we submit the queue runner to the executor for queue processing
-						// There is only on executor per queue, and on queue per listener
+						// There is only one executor per queue, and on queue per listener
 						executor.submitUnbounded(
 							new Runnable() {
 								@Override
@@ -258,7 +258,7 @@ public class ConcurrentListenerManager<L> implements Closeable {
 											if(queue.isEmpty()) {
 												// Remove the empty queue so a new executor will be submitted on next event
 												listeners.remove(listener);
-												return;
+												break;
 											} else {
 												eventCall = queue.remove();
 											}

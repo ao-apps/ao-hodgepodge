@@ -23,6 +23,7 @@
 package com.aoindustries.messaging;
 
 import com.aoindustries.security.Identifier;
+import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ConcurrentListenerManager;
 import java.io.Closeable;
 import java.io.IOException;
@@ -75,6 +76,18 @@ public interface Socket extends Closeable {
 	 * Gets the most recently seen remote address.  This value may change.
 	 */
 	SocketAddress getRemoteSocketAddress();
+
+	/**
+	 * Starts the I/O of a socket.  After connection, a socket does not send
+	 * I/O events until started.  This allows listeners to be registered between
+	 * connect and start calls.
+	 * 
+	 * @throws IllegalStateException  if closed or already started
+	 */
+	void start(
+		Callback<? super Socket> onStart,
+		Callback<? super Throwable> onError
+	) throws IllegalStateException;
 
 	/**
 	 * Closing a socket also removes it from its context.

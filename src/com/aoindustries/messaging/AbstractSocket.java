@@ -23,6 +23,7 @@
 package com.aoindustries.messaging;
 
 import com.aoindustries.security.Identifier;
+import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ConcurrentListenerManager;
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -187,6 +188,20 @@ abstract public class AbstractSocket implements Socket {
 	}
 
 	/**
+	 * Makes sure the socket is not already closed then calls startImpl.
+	 * 
+	 * @see  #startImpl()
+	 */
+	@Override
+	public void start(
+		Callback<? super Socket> onStart,
+		Callback<? super Throwable> onError
+	) throws IllegalStateException {
+		if(isClosed()) throw new IllegalStateException("Socket is closed");
+		startImpl(onStart, onError);
+	}
+
+	/**
 	 * Any overriding implementation must call super.close() first.
 	 */
 	@Override
@@ -270,6 +285,33 @@ abstract public class AbstractSocket implements Socket {
 		);
 	}
 
+	/**
+	 * When an error as occurred, call this to distribute to all of the listeners.
+	 * If need to wait until all of the listeners have handled the error, can call Future.get()
+	 * or Future.isDone().
+	 *
+	 * @throws  IllegalStateException  if this socket is closed
+	 */
+	protected Future<?> callOnError(final Throwable t) throws IllegalStateException {
+		if(isClosed()) throw new IllegalStateException("Socket is closed");
+		return listenerManager.enqueueEvent(
+			new ConcurrentListenerManager.Event<SocketListener>() {
+				@Override
+				public Runnable createCall(final SocketListener listener) {
+					return new Runnable() {
+						@Override
+						public void run() {
+							listener.onError(
+								AbstractSocket.this,
+								t
+							);
+						}
+					};
+				}
+			}
+		);
+	}
+
 	@Override
 	public void sendMessage(Message message) throws IllegalStateException {
 		if(isClosed()) throw new IllegalStateException("Socket is closed");
@@ -283,8 +325,20 @@ abstract public class AbstractSocket implements Socket {
 	}
 
 	/**
+	 * Called once the socket is confirm to not be closed.
+	 * 
+	 * @see  #start()
+	 *
+	 * @throws IllegalStateException  if already started
+	 */
+	abstract protected void startImpl(
+		Callback<? super Socket> onStart,
+		Callback<? super Throwable> onError
+	) throws IllegalStateException;
+
+	/**
 	 * Implementation to actually enqueue and send messages.
 	 * This must never block.
 	 */
-	abstract protected void sendMessagesImpl(Collection<? extends Message> messages) throws IllegalStateException;
+	abstract protected void sendMessagesImpl(Collection<? extends Message> messages);
 }

@@ -499,9 +499,27 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
             //raf.close(); // Now closed by flushWriteCache
             if(deleteOnClose) {
                 IOException ioErr = null;
-                if(newFile.exists() && !newFile.delete()) ioErr = new IOException("Unable to delete temp file: "+newFile);
-                if(oldFile.exists() && !oldFile.delete()) ioErr = new IOException("Unable to delete temp file: "+oldFile);
-                if(file.exists() && !file.delete()) ioErr = new IOException("Unable to delete temp file: "+file);
+                if(newFile.exists()) {
+					try {
+						FileUtils.delete(newFile);
+					} catch(IOException e) {
+						ioErr = e;
+					}
+				}
+                if(oldFile.exists()) {
+					try {
+						FileUtils.delete(oldFile);
+					} catch(IOException e) {
+						ioErr = e;
+					}
+				}
+                if(file.exists()) {
+					try {
+						FileUtils.delete(file);
+					} catch(IOException e) {
+						ioErr = e;
+					}
+				}
                 if(ioErr!=null) throw ioErr;
             }
         }

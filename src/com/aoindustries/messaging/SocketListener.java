@@ -52,6 +52,12 @@ public interface SocketListener {
 	void onMessages(Socket socket, List<String> messages);
 
 	/**
+	 * Called when an error occurs.  The socket is closed
+	 * after the first error.
+	 */
+	void onError(Socket socket, Throwable t);
+
+	/**
 	 * Called when a new local address is seen.
 	 */
 	void onLocalSocketAddressChange(

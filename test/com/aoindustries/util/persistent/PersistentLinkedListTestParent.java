@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.FileUtils;
 import com.aoindustries.util.Sequence;
 import com.aoindustries.util.UnsynchronizedSequence;
 import com.aoindustries.util.WrappedException;
@@ -142,9 +143,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		} finally {
 			linkedFileList.close();
 			linkedFileList = null;
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 			linkedList = null;
 		}
 	}
@@ -236,9 +239,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		} finally {
 			linkedFileList.close();
 			linkedFileList = null;
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 			linkedList = null;
 		}
 	}
@@ -273,9 +278,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		} finally {
 			linkedFileList.close();
 			linkedFileList = null;
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 		}
 	}
 
@@ -300,9 +307,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		} finally {
 			linkedFileList.close();
 			linkedFileList = null;
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 		}
 	}
 
@@ -325,9 +334,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		} finally {
 			linkedFileList.close();
 			linkedFileList = null;
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 		}
 	}
 
@@ -351,9 +362,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		} finally {
 			linkedFileList.close();
 			linkedFileList = null;
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 		}
 	}
 
@@ -377,9 +390,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		} finally {
 			linkedFileList.close();
 			linkedFileList = null;
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 		}
 	}
 
@@ -400,9 +415,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		} finally {
 			linkedFileList.close();
 			linkedFileList = null;
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 		}
 	}
 
@@ -423,9 +440,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		} finally {
 			linkedFileList.close();
 			linkedFileList = null;
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 		}
 	}
 
@@ -652,9 +671,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 				if((c%10)==9) System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": Tested block buffer failure recovery in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
 			}
 		} finally {
-			tempFile.delete();
-			new File(tempFile.getPath()+".new").delete();
-			new File(tempFile.getPath()+".old").delete();
+            FileUtils.delete(tempFile);
+            File newFile = new File(tempFile.getPath()+".new");
+			if(newFile.exists()) FileUtils.delete(newFile);
+            File oldFile = new File(tempFile.getPath()+".old");
+			if(oldFile.exists()) FileUtils.delete(oldFile);
 		}
 	}
 

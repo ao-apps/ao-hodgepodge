@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -322,9 +323,42 @@ final public class FileUtils {
     }
 
 	/**
-	 * Renames one file to another, throwing IOException when unsuccessful.
+	 * Atomically renames one file to another, throwing IOException when unsuccessful.
 	 */
 	public static void rename(File from, File to) throws IOException {
-		if(!from.renameTo(to)) throw new IOException("Unable to rename \""+from+"\" to \""+to+'"');
+		if(!from.renameTo(to)) throw new IOException("Unable to atomically rename \""+from+"\" to \""+to+'"');
+	}
+
+	/**
+	 * Renames one file to another, throwing IOException when unsuccessful.
+	 * Allow a non-atomic delete/rename pair when the underlying system is unable
+	 * to rename one file over another, such as in Microsoft Windows.
+	 * <p>
+	 * When the delete or rename fails, will retry up to ten times with increasing
+	 * delay between each attempt.
+	 * </p>
+	 */
+	public static void renameAllowNonAtomic(File from, File to) throws IOException {
+		// Try atomic rename first
+		if(!from.renameTo(to)) {
+			final int NUM_TRIES = 10;
+			for(int attempt=1; attempt<=NUM_TRIES; attempt++) {
+				// Try delete then rename for Windows
+				if(
+					(!to.exists() || to.delete())
+					&& from.renameTo(to)
+				) {
+					break;
+				}
+				if(attempt == NUM_TRIES) throw new IOException("Unable to non-atomically rename \""+from+"\" to \""+to+'"');
+				try {
+					Thread.sleep(4 << NUM_TRIES);
+				} catch(InterruptedException e2) {
+					IOException ioErr = new InterruptedIOException();
+					ioErr.initCause(e2);
+					throw ioErr;
+				}
+			}
+		}
 	}
 }
