@@ -41,6 +41,8 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 	private static final boolean SOCKET_SO_LINGER_ENABLED = true;
 	private static final int SOCKET_SO_LINGER_SECONDS = 15;
 
+	private static final boolean TCP_NO_DELAY = true;
+
 	private static final int CONNECT_TIMEOUT = 15;
 
 	private final ExecutorService executor = ExecutorService.newInstance();
@@ -73,7 +75,7 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 						Socket socket = new Socket();
 						socket.setKeepAlive(KEEPALIVE);
 						socket.setSoLinger(SOCKET_SO_LINGER_ENABLED, SOCKET_SO_LINGER_SECONDS);
-						//socket.setTcpNoDelay(true);
+						socket.setTcpNoDelay(TCP_NO_DELAY);
 						long connectTime = System.currentTimeMillis();
 						socket.connect(endpoint, CONNECT_TIMEOUT);
 						boolean successful = false;
