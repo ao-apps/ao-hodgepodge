@@ -192,4 +192,31 @@ abstract public class AbstractSocketContext<S extends AbstractSocket> implements
 			logger.log(Level.SEVERE, null, e);
 		}
 	}
+
+	/**
+	 * When an error as occurred, call this to distribute to all of the listeners.
+	 * If need to wait until all of the listeners have handled the error, can call Future.get()
+	 * or Future.isDone().
+	 *
+	 * @throws  IllegalStateException  if this socket is closed
+	 */
+	protected Future<?> callOnError(final Throwable t) throws IllegalStateException {
+		if(isClosed()) throw new IllegalStateException("Socket is closed");
+		return listenerManager.enqueueEvent(
+			new ConcurrentListenerManager.Event<SocketContextListener>() {
+				@Override
+				public Runnable createCall(final SocketContextListener listener) {
+					return new Runnable() {
+						@Override
+						public void run() {
+							listener.onError(
+								AbstractSocketContext.this,
+								t
+							);
+						}
+					};
+				}
+			}
+		);
+	}
 }

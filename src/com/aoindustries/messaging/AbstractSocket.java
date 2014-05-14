@@ -326,7 +326,7 @@ abstract public class AbstractSocket implements Socket {
 	}
 
 	/**
-	 * Called once the socket is confirm to not be closed.
+	 * Called once the socket is confirmed to not be closed.
 	 * 
 	 * @see  #start()
 	 *

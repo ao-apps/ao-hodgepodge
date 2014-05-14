@@ -39,6 +39,12 @@ public interface SocketContextListener {
 	void onNewSocket(SocketContext socketContext, Socket newSocket);
 
 	/**
+	 * Called when an error occurs.  The socket is closed
+	 * after the first error.
+	 */
+	void onError(SocketContext socketContext, Throwable t);
+
+	/**
 	 * Called when a socket context is closed.
 	 * This will only be called once.
 	 */

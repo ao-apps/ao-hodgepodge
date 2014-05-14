@@ -26,6 +26,7 @@ import com.aoindustries.io.CompressedDataInputStream;
 import com.aoindustries.io.CompressedDataOutputStream;
 import com.aoindustries.io.IoUtils;
 import com.aoindustries.messaging.AbstractSocket;
+import com.aoindustries.messaging.AbstractSocketContext;
 import com.aoindustries.messaging.ByteArray;
 import com.aoindustries.messaging.Message;
 import com.aoindustries.messaging.MessageType;
@@ -62,7 +63,7 @@ public class TcpSocket extends AbstractSocket {
 	private CompressedDataOutputStream out;
 
 	TcpSocket(
-		TcpSocketClient socketContext,
+		AbstractSocketContext<? extends AbstractSocket> socketContext,
 		Identifier id,
 		long connectTime,
 		java.net.Socket socket,
@@ -118,7 +119,7 @@ public class TcpSocket extends AbstractSocket {
 								socket = TcpSocket.this.socket;
 							}
 							if(socket==null) {
-								onError.call(new SocketException("Socket closed"));
+								onError.call(new SocketException("Socket is closed"));
 							} else {
 								// Handle incoming messages in a Thread, can try nio later
 								executor.submitUnbounded(
