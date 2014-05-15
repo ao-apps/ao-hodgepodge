@@ -36,6 +36,8 @@ import java.net.SocketAddress;
  */
 public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 
+	private static final boolean DEBUG = false;
+
 	private static final boolean KEEPALIVE = true;
 
 	private static final boolean SOCKET_SO_LINGER_ENABLED = true;
@@ -43,7 +45,7 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 
 	private static final boolean TCP_NO_DELAY = true;
 
-	private static final int CONNECT_TIMEOUT = 15;
+	private static final int CONNECT_TIMEOUT = 15 * 1000;
 
 	private final ExecutorService executor = ExecutorService.newInstance();
 
@@ -78,11 +80,15 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 						socket.setTcpNoDelay(TCP_NO_DELAY);
 						long connectTime = System.currentTimeMillis();
 						socket.connect(endpoint, CONNECT_TIMEOUT);
+						if(DEBUG) System.out.println("DEBUG: TcpSocketClient: connect: got connection");
 						boolean successful = false;
 						try {
 							CompressedDataInputStream in = new CompressedDataInputStream(socket.getInputStream());
+							if(DEBUG) System.out.println("DEBUG: TcpSocketClient: connect: got in");
 							CompressedDataOutputStream out = new CompressedDataOutputStream(socket.getOutputStream());
+							if(DEBUG) System.out.println("DEBUG: TcpSocketClient: connect: got out");
 							Identifier id = new Identifier(in.readLong(), in.readLong());
+							if(DEBUG) System.out.println("DEBUG: TcpSocketClient: connect: got id=" + id);
 							TcpSocket tcpSocket = new TcpSocket(
 								TcpSocketClient.this,
 								id,
@@ -91,8 +97,12 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 								in,
 								out
 							);
+							if(DEBUG) System.out.println("DEBUG: TcpSocketClient: connect: adding socket");
 							addSocket(tcpSocket);
-							if(onConnect!=null) onConnect.call(tcpSocket);
+							if(onConnect!=null) {
+								if(DEBUG) System.out.println("DEBUG: TcpSocketClient: connect: calling onConnect");
+								onConnect.call(tcpSocket);
+							}
 							successful = true;
 						} finally {
 							if(!successful) {
@@ -100,7 +110,10 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 							}
 						}
 					} catch(Exception exc) {
-						if(onError!=null) onError.call(exc);
+						if(onError!=null) {
+							if(DEBUG) System.out.println("DEBUG: TcpSocketClient: connect: calling onError");
+							onError.call(exc);
+						}
 					}
 				}
 			}

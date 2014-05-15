@@ -42,6 +42,8 @@ abstract public class AbstractSocket implements Socket {
 
 	private static final Logger logger = Logger.getLogger(AbstractSocket.class.getName());
 
+	private static final boolean DEBUG = false;
+
 	private final AbstractSocketContext<? extends AbstractSocket> socketContext;
 
 	private final Identifier id;
@@ -315,12 +317,14 @@ abstract public class AbstractSocket implements Socket {
 
 	@Override
 	public void sendMessage(Message message) throws IllegalStateException {
+		if(DEBUG) System.err.println("AbstractSocket: sendMessage: message=" + message);
 		if(isClosed()) throw new IllegalStateException("Socket is closed");
-		Collections.singletonList(message);
+		sendMessages(Collections.singletonList(message));
 	}
 
 	@Override
 	public void sendMessages(Collection<? extends Message> messages) throws IllegalStateException {
+		if(DEBUG) System.err.println("AbstractSocket: sendMessages: messages=" + messages);
 		if(isClosed()) throw new IllegalStateException("Socket is closed");
 		if(!messages.isEmpty()) sendMessagesImpl(messages);
 	}

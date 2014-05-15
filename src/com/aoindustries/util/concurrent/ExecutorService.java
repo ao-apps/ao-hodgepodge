@@ -73,7 +73,7 @@ final public class ExecutorService implements Disposable {
 
     /**
      * Keeps track of which threads are running from the per-processor executor.
-     * TRUE if from per-processor, FALSE if from unbounded, or null if from neither.
+     * TRUE if from per-processor, FALSE if from unbounded, or null a thread is not from this ExecutorService.
      */
     private static final ThreadLocal<Boolean> isPerProcessor = new ThreadLocal<Boolean>();
 
@@ -85,7 +85,7 @@ final public class ExecutorService implements Disposable {
         PER_PROCESSOR_PREFIX = ExecutorService.class.getName()+".perProcessorExecutorService-thread-"
     ;
 
-    /*
+	/*
      * The thread factories are created once so each thread gets a unique
      * identifier independent of creation and destruction of executors.
      */
@@ -114,20 +114,32 @@ final public class ExecutorService implements Disposable {
 
     private static final ThreadFactory unboundedThreadFactory = new PrefixThreadFactory(UNBOUNDED_PREFIX, Thread.NORM_PRIORITY) {
         @Override
-        public Thread newThread(Runnable target) {
-            Thread t = super.newThread(target);
-            isPerProcessor.set(Boolean.FALSE);
-            return t;
+        public Thread newThread(final Runnable target) {
+            return super.newThread(
+				new Runnable() {
+					@Override
+					public void run() {
+			            isPerProcessor.set(Boolean.FALSE);
+						target.run();
+					}
+				}
+			);
         }
     };
 
     private static final ThreadFactory perProcessorThreadFactory = new PrefixThreadFactory(PER_PROCESSOR_PREFIX, Thread.NORM_PRIORITY) {
         @Override
-        public Thread newThread(Runnable target) {
-            Thread t = super.newThread(target);
+        public Thread newThread(final Runnable target) {
             if(isPerProcessor.get()!=null) throw new AssertionError(); // If from either executor, request should be redirected to unbounded executor.
-            isPerProcessor.set(Boolean.TRUE);
-            return t;
+            return super.newThread(
+				new Runnable() {
+					@Override
+					public void run() {
+			            isPerProcessor.set(Boolean.TRUE);
+						target.run();
+					}
+				}
+			);
         }
     };
 
@@ -187,7 +199,11 @@ final public class ExecutorService implements Disposable {
                 UNBOUNDED_PREFIX+"shutdownHook"
             );
             // Only keep instances once shutdown hook properly registered
-            Runtime.getRuntime().addShutdownHook(newShutdownHook);
+			try {
+	            Runtime.getRuntime().addShutdownHook(newShutdownHook);
+			} catch(SecurityException e) {
+				logger.log(Level.WARNING, null, e);
+			}
             unboundedExecutorService = newExecutorService;
             unboundedShutdownHook = newShutdownHook;
         }
@@ -219,7 +235,11 @@ final public class ExecutorService implements Disposable {
                     PER_PROCESSOR_PREFIX+"shutdownHook"
                 );
                 // Only keep instances once shutdown hook properly registered
-                Runtime.getRuntime().addShutdownHook(newShutdownHook);
+				try {
+	                Runtime.getRuntime().addShutdownHook(newShutdownHook);
+				} catch(SecurityException e) {
+					logger.log(Level.WARNING, null, e);
+				}
                 perProcessorExecutorService = newExecutorService;
                 perProcessorShutdownHook = newShutdownHook;
             }
@@ -719,15 +739,28 @@ final public class ExecutorService implements Disposable {
                         }
                         unboundedShutdownHook = null;
                     }
-                    if(unboundedExecutorService!=null) {
-                        unboundedExecutorService.shutdown();
-                        try {
-                            unboundedExecutorService.awaitTermination(60, TimeUnit.SECONDS);
-                        } catch(InterruptedException e) {
-                            logger.log(Level.WARNING, null, e);
-                            unboundedExecutorService.shutdownNow();
-                        }
-                        unboundedExecutorService = null;
+					final java.util.concurrent.ExecutorService ues = unboundedExecutorService;
+                    if(ues!=null) {
+						Runnable uesShutdown = new Runnable() {
+							@Override
+							public void run() {
+								ues.shutdown();
+								try {
+									ues.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS);
+								} catch(InterruptedException e) {
+									logger.log(Level.WARNING, null, e);
+									ues.shutdownNow();
+								}
+							}
+						};
+						unboundedExecutorService = null;
+						// Never wait for own thread (causes stall every time)
+						if(isPerProcessor.get()!=null) {
+							new Thread(uesShutdown).start();
+						} else {
+							// OK to use current thread directly
+							uesShutdown.run();
+						}
                     }
                     if(perProcessorShutdownHook!=null) {
                         try {
@@ -737,15 +770,28 @@ final public class ExecutorService implements Disposable {
                         }
                         perProcessorShutdownHook = null;
                     }
-                    if(perProcessorExecutorService!=null) {
-                        perProcessorExecutorService.shutdown();
-                        try {
-                            perProcessorExecutorService.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS);
-                        } catch(InterruptedException e) {
-                            logger.log(Level.WARNING, null, e);
-                            perProcessorExecutorService.shutdownNow();
-                        }
-                        perProcessorExecutorService = null;
+					final java.util.concurrent.ExecutorService ppes = perProcessorExecutorService;
+                    if(ppes!=null) {
+						Runnable ppesShutdown = new Runnable() {
+							@Override
+							public void run() {
+								ppes.shutdown();
+								try {
+									ppes.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS);
+								} catch(InterruptedException e) {
+									logger.log(Level.WARNING, null, e);
+									ppes.shutdownNow();
+								}
+							}
+						};
+						perProcessorExecutorService = null;
+						// Never wait for own thread (causes stall every time)
+						if(isPerProcessor.get()!=null) {
+							new Thread(ppesShutdown).start();
+						} else {
+							// OK to use current thread directly
+							ppesShutdown.run();
+						}
                     }
                     if(timer!=null) {
                         timer.cancel();
@@ -765,7 +811,11 @@ final public class ExecutorService implements Disposable {
                 incompleteFutures.clear();
             }
         }
-        if(waitFutures!=null) {
+        if(
+			waitFutures!=null
+			// Never wait for own thread (causes stall every time)
+			&& isPerProcessor.get()==null
+		) {
             final long waitUntil = System.nanoTime() + DISPOSE_WAIT_NANOS;
             // Wait for our incomplete tasks to complete.
             // This is done while not holding privateLock to avoid deadlock.

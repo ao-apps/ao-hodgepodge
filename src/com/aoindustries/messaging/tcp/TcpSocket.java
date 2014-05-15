@@ -52,6 +52,8 @@ public class TcpSocket extends AbstractSocket {
 
 	private static final Logger logger = Logger.getLogger(TcpSocket.class.getName());
 
+	private static final boolean DEBUG = false;
+
 	private final Object sendQueueLock = new Object();
 	private Queue<Message> sendQueue;
 
@@ -90,10 +92,10 @@ public class TcpSocket extends AbstractSocket {
 			try {
 				synchronized(lock) {
 					if(socket!=null) {
+						socket.close();
 						socket = null;
 						in = null;
 						out = null;
-						socket.close();
 					}
 				}
 			} finally {
@@ -108,7 +110,7 @@ public class TcpSocket extends AbstractSocket {
 		final Callback<? super Exception> onError
 	) throws IllegalStateException {
 		synchronized(lock) {
-			if(socket==null || in!=null || out!=null) throw new IllegalStateException();
+			if(socket==null || in==null || out==null) throw new IllegalStateException();
 			executor.submitUnbounded(
 				new Runnable() {
 					@Override
@@ -177,6 +179,7 @@ public class TcpSocket extends AbstractSocket {
 
 	@Override
 	protected void sendMessagesImpl(Collection<? extends Message> messages) {
+		if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: enqueuing " + messages.size() + " messages");
 		synchronized(sendQueueLock) {
 			// Enqueue asynchronous write
 			boolean isFirst;
@@ -188,6 +191,7 @@ public class TcpSocket extends AbstractSocket {
 			}
 			sendQueue.addAll(messages);
 			if(isFirst) {
+				if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: submitting runnable");
 				// When the queue is first created, we submit the queue runner to the executor for queue processing
 				// There is only one executor per queue, and on queue per socket
 				executor.submitUnbounded(
@@ -206,6 +210,7 @@ public class TcpSocket extends AbstractSocket {
 									// Get all of the messages until the queue is empty
 									synchronized(sendQueueLock) {
 										if(sendQueue.isEmpty()) {
+											if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: run: queue empty, flushing and returning");
 											out.flush();
 											// Remove the empty queue so a new executor will be submitted on next event
 											sendQueue = null;
@@ -217,6 +222,7 @@ public class TcpSocket extends AbstractSocket {
 									}
 									// Write the messages without holding the queue lock
 									final int size = messages.size();
+									if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: run: writing " + size + " messages");
 									out.writeCompressedInt(size);
 									for(int i=0; i<size; i++) {
 										Message message = messages.get(i);
@@ -229,6 +235,7 @@ public class TcpSocket extends AbstractSocket {
 								}
 							} catch(Exception exc) {
 								if(!isClosed()) {
+									if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: run: calling onError");
 									callOnError(exc);
 									try {
 										close();
