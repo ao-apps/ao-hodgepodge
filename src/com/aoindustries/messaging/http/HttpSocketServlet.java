@@ -22,25 +22,31 @@
  */
 package com.aoindustries.messaging.http;
 
+import com.aoindustries.encoding.TextInXhtmlEncoder;
 import com.aoindustries.io.AoByteArrayOutputStream;
 import com.aoindustries.messaging.AbstractSocket;
 import com.aoindustries.messaging.AbstractSocketContext;
 import com.aoindustries.messaging.Message;
 import com.aoindustries.messaging.MessageType;
 import com.aoindustries.messaging.Socket;
-import com.aoindustries.messaging.tcp.TcpSocket;
+import com.aoindustries.nio.charset.Charsets;
 import com.aoindustries.security.Identifier;
 import com.aoindustries.util.concurrent.Callback;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -52,15 +58,20 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HttpSocketServlet extends HttpServlet {
 
-	//private static final Logger logger = Logger.getLogger(HttpSocketServlet.class.getName());
+	private static final Logger logger = Logger.getLogger(HttpSocketServlet.class.getName());
 
 	private static final long serialVersionUID = 1L;
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
+
+	/** Server should normally respond within 60 seconds even if no data coming back. */
+	private static final int LONG_POLL_TIMEOUT = HttpSocket.READ_TIMEOUT / 2;
 
 	public static class ServletSocket extends AbstractSocket {
 		
 		private final String serverName;
+
+		private final Queue<Message> outQueue = new LinkedList<Message>();
 
 		ServletSocket(
 			ServletSocketContext socketContext,
@@ -83,6 +94,17 @@ public class HttpSocketServlet extends HttpServlet {
 		 */
 		public String getServerName() {
 			return serverName;
+		}
+
+		@Override
+		public void close() throws IOException {
+			try {
+				super.close();
+			} finally {
+				synchronized(outQueue) {
+					outQueue.notifyAll();
+				}
+			}
 		}
 
 		@Override
@@ -110,7 +132,36 @@ public class HttpSocketServlet extends HttpServlet {
 
 		@Override
 		protected void sendMessagesImpl(Collection<? extends Message> messages) {
-			// TODO
+			synchronized(outQueue) {
+				outQueue.addAll(messages);
+				outQueue.notify();
+			}
+		}
+
+		/**
+		 * Gets the messages to be sent back, blocks for a maximum of
+		 * LONG_POLL_TIMEOUT milliseconds.
+		 */
+		List<? extends Message> getOutMessages() {
+			long endMillis = (System.nanoTime() / 1000000) + LONG_POLL_TIMEOUT;
+			synchronized(outQueue) {
+				while(true) {
+					if(!outQueue.isEmpty()) {
+						List<Message> messages = new ArrayList<Message>(outQueue);
+						outQueue.clear();
+						outQueue.notify();
+						return Collections.unmodifiableList(messages);
+					}
+					if(isClosed()) return Collections.emptyList();
+					long timeRemaining = endMillis - (System.nanoTime() / 1000000);
+					if(timeRemaining <= 0) return Collections.emptyList();
+					try {
+						outQueue.wait(timeRemaining);
+					} catch(InterruptedException e) {
+						logger.log(Level.WARNING, null, e);
+					}
+				}
+			}
 		}
 	}
 
@@ -158,12 +209,12 @@ public class HttpSocketServlet extends HttpServlet {
 			// Build the response
 			AoByteArrayOutputStream bout = new AoByteArrayOutputStream();
 			try {
-				DataOutputStream out = new DataOutputStream(bout);
+				Writer out = new OutputStreamWriter(bout, Charsets.UTF_8);
 				try {
-					out.writeBytes("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
+					out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
 						+ "<connection id=\"");
-					out.writeBytes(id.toString());
-					out.writeBytes("\"/>");
+					out.write(id.toString());
+					out.write("\"/>");
 				} finally {
 					out.close();
 				}
@@ -203,19 +254,55 @@ public class HttpSocketServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Socket id not found");
 			} else {
 				try {
-					int size = Integer.parseInt(request.getParameter("l"));
-					if(DEBUG) System.err.println("DEBUG: HttpSocketServlet: doPost: size="+size);
-					List<Message> messages = new ArrayList<Message>(size);
-					for(int i=0; i<size; i++) {
-						// Get the type
-						MessageType type = MessageType.getFromTypeChar(request.getParameter("t"+i).charAt(0));
-						// Get the message string
-						String encodedMessage = request.getParameter("m"+i);
-						// Decode and add
-						messages.add(type.decode(encodedMessage));
+					// Handle incoming messages
+					{
+						int size = Integer.parseInt(request.getParameter("l"));
+						if(DEBUG) System.err.println("DEBUG: HttpSocketServlet: doPost: size="+size);
+						List<Message> messages = new ArrayList<Message>(size);
+						for(int i=0; i<size; i++) {
+							// Get the type
+							MessageType type = MessageType.getFromTypeChar(request.getParameter("t"+i).charAt(0));
+							// Get the message string
+							String encodedMessage = request.getParameter("m"+i);
+							// Decode and add
+							messages.add(type.decode(encodedMessage));
+						}
+						if(!messages.isEmpty()) socket.callOnMessages(Collections.unmodifiableList(messages));
 					}
-					if(!messages.isEmpty()) socket.callOnMessages(Collections.unmodifiableList(messages));
-					// TODO: Wait for any return messages
+					// Handle outgoing messages
+					{
+						List<? extends Message> outMessages = socket.getOutMessages();
+						// Build the response
+						AoByteArrayOutputStream bout = new AoByteArrayOutputStream();
+						try {
+							Writer out = new OutputStreamWriter(bout, Charsets.UTF_8);
+							try {
+								out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
+									+ "<messages>\n");
+								for(Message message : outMessages) {
+									out.write("  <message type=\"");
+									out.write(message.getMessageType().getTypeChar());
+									out.write("\">");
+									TextInXhtmlEncoder.encodeTextInXhtml(message.encodeAsString(), out);
+									out.write("</message>\n");
+								}
+								out.write("</messages>");
+							} finally {
+								out.close();
+							}
+						} finally {
+							bout.close();
+						}
+						response.setContentType("application/xml");
+						response.setCharacterEncoding("UTF-8");
+						response.setContentLength(bout.size());
+						OutputStream out = response.getOutputStream();
+						try {
+							out.write(bout.getInternalByteArray(), 0, bout.size());
+						} finally {
+							out.close();
+						}
+					}
 				} catch(Exception e) {
 					socket.callOnError(e);
 					if(e instanceof ServletException) throw (ServletException)e;

@@ -58,7 +58,7 @@ public class HttpSocket extends AbstractSocket {
 
 	private static final Logger logger = Logger.getLogger(HttpSocket.class.getName());
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	public static final String PROTOCOL = "http";
 
@@ -67,7 +67,7 @@ public class HttpSocket extends AbstractSocket {
 	private static final int CONNECT_TIMEOUT = 15 * 1000;
 
 	/** Server should normally respond within 60 seconds even if no data coming back. */
-	private static final int READ_TIMEOUT = 2 * 60 * 1000;
+	static final int READ_TIMEOUT = 2 * 60 * 1000;
 
 	private final Object lock = new Object();
 	private Queue<Message> sendQueue;
@@ -99,6 +99,9 @@ public class HttpSocket extends AbstractSocket {
 		try {
 			super.close();
 		} finally {
+			synchronized(lock) {
+				lock.notifyAll();
+			}
 			executor.dispose();
 		}
 	}
@@ -165,7 +168,7 @@ public class HttpSocket extends AbstractSocket {
 														// Decode and add
 														messages.add(type.decode(encodedMessage));
 													}
-													callOnMessages(Collections.unmodifiableList(messages));
+													if(!messages.isEmpty()) callOnMessages(Collections.unmodifiableList(messages));
 												} finally {
 													synchronized(lock) {
 														if(receiveConn != HttpSocket.this.receiveConn) throw new AssertionError();

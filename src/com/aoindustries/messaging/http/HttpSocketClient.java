@@ -40,7 +40,7 @@ import org.w3c.dom.Element;
  */
 public class HttpSocketClient extends AbstractSocketContext<HttpSocket> {
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private static final int CONNECT_TIMEOUT = 15 * 1000;
 
