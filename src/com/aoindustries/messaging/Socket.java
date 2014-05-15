@@ -58,6 +58,11 @@ public interface Socket extends Closeable {
 	Long getCloseTime();
 
 	/**
+	 * Gets the protocol, such as "http" or "tcp".
+	 */
+	String getProtocol();
+
+	/**
 	 * Gets the remote address at connection time.  This value will not change.
 	 */
 	SocketAddress getConnectRemoteSocketAddress();

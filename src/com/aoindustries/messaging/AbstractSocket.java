@@ -280,6 +280,9 @@ abstract public class AbstractSocket implements Socket {
 		if(!messages.isEmpty()) sendMessagesImpl(messages);
 	}
 
+	@Override
+	abstract public String getProtocol();
+
 	/**
 	 * Called once the socket is confirmed to not be closed.
 	 * 

@@ -61,7 +61,7 @@ abstract public class AbstractSocketContext<S extends AbstractSocket> implements
 	/**
 	 * Creates a random identifier that is not in the current set of sockets.
 	 */
-	protected Identifier newIdentifer() {
+	protected Identifier newIdentifier() {
 		synchronized(sockets) {
 			while(true) {
 				Identifier id = new Identifier();

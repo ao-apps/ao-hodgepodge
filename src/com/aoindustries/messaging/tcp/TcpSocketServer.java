@@ -119,7 +119,7 @@ public class TcpSocketServer extends AbstractSocketContext<TcpSocket> {
 												socket.setTcpNoDelay(TCP_NO_DELAY);
 												CompressedDataInputStream in = new CompressedDataInputStream(socket.getInputStream());
 												CompressedDataOutputStream out = new CompressedDataOutputStream(socket.getOutputStream());
-												Identifier id = newIdentifer();
+												Identifier id = newIdentifier();
 												out.writeLong(id.getHi());
 												out.writeLong(id.getLo());
 												out.flush();

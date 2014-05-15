@@ -62,7 +62,7 @@ public class HttpSocketClient extends AbstractSocketContext<HttpSocket> {
 	 * Asynchronously connects.
 	 */
 	public void connect(
-		final URL endpoint,
+		final String endpoint,
 		final Callback<? super HttpSocket> onConnect,
 		final Callback<? super Exception> onError
 	) {
@@ -84,7 +84,8 @@ public class HttpSocketClient extends AbstractSocketContext<HttpSocket> {
 							bout.close();
 						}
 						long connectTime = System.currentTimeMillis();
-						HttpURLConnection conn = (HttpURLConnection)endpoint.openConnection();
+						URL endpointURL = new URL(endpoint);
+						HttpURLConnection conn = (HttpURLConnection)endpointURL.openConnection();
 						conn.setAllowUserInteraction(false);
 						conn.setConnectTimeout(CONNECT_TIMEOUT);
 						conn.setDoOutput(true);
@@ -113,7 +114,7 @@ public class HttpSocketClient extends AbstractSocketContext<HttpSocket> {
 							HttpSocketClient.this,
 							id,
 							connectTime,
-							endpoint
+							endpointURL
 						);
 						if(DEBUG) System.out.println("DEBUG: HttpSocketClient: connect: adding socket");
 						addSocket(httpSocket);

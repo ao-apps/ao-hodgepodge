@@ -54,6 +54,8 @@ public class TcpSocket extends AbstractSocket {
 
 	private static final boolean DEBUG = false;
 
+	public static final String PROTOCOL = "tcp";
+
 	private final Object sendQueueLock = new Object();
 	private Queue<Message> sendQueue;
 
@@ -101,6 +103,11 @@ public class TcpSocket extends AbstractSocket {
 				executor.dispose();
 			}
 		}
+	}
+
+	@Override
+	public String getProtocol() {
+		return PROTOCOL;
 	}
 
 	@Override

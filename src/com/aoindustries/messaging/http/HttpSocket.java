@@ -45,6 +45,8 @@ public class HttpSocket extends AbstractSocket {
 
 	private static final boolean DEBUG = true;
 
+	public static final String PROTOCOL = "http";
+
 	private final Object sendQueueLock = new Object();
 	private Queue<Message> sendQueue;
 
@@ -74,6 +76,11 @@ public class HttpSocket extends AbstractSocket {
 		} finally {
 			executor.dispose();
 		}
+	}
+
+	@Override
+	public String getProtocol() {
+		return PROTOCOL;
 	}
 
 	@Override
