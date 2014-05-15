@@ -36,12 +36,12 @@ public enum MessageType {
 		}
 
 		@Override
-		char getTypeChar() {
+		public char getTypeChar() {
 			return 'b';
 		}
 
 		@Override
-		ByteArrayMessage decode(String encodedMessage) {
+		public ByteArrayMessage decode(String encodedMessage) {
 			return ByteArrayMessage.decode(encodedMessage);
 		}
 
@@ -57,12 +57,12 @@ public enum MessageType {
 		}
 
 		@Override
-		char getTypeChar() {
+		public char getTypeChar() {
 			return 'f';
 		}
 
 		@Override
-		FileMessage decode(String encodedMessage) throws IOException {
+		public FileMessage decode(String encodedMessage) throws IOException {
 			return FileMessage.decode(encodedMessage);
 		}
 
@@ -78,12 +78,12 @@ public enum MessageType {
 		}
 
 		@Override
-		char getTypeChar() {
+		public char getTypeChar() {
 			return 's';
 		}
 
 		@Override
-		StringMessage decode(String encodedMessage) {
+		public StringMessage decode(String encodedMessage) {
 			return new StringMessage(encodedMessage);
 		}
 
@@ -99,12 +99,12 @@ public enum MessageType {
 		}
 
 		@Override
-		char getTypeChar() {
+		public char getTypeChar() {
 			return 'm';
 		}
 
 		@Override
-		MultiMessage decode(String encodedMessage) throws IOException {
+		public MultiMessage decode(String encodedMessage) throws IOException {
 			return MultiMessage.decode(encodedMessage);
 		}
 
@@ -136,12 +136,12 @@ public enum MessageType {
 
 	abstract public byte getTypeByte();
 
-	abstract char getTypeChar();
+	abstract public char getTypeChar();
 
 	/**
 	 * Constructs a message of this type from its string encoding.
 	 */
-	abstract Message decode(String encodedMessage) throws IOException;
+	abstract public Message decode(String encodedMessage) throws IOException;
 
 	/**
 	 * Constructs a message of this type from its byte array encoding.

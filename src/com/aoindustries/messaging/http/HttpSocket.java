@@ -22,19 +22,34 @@
  */
 package com.aoindustries.messaging.http;
 
+import com.aoindustries.io.AoByteArrayOutputStream;
 import com.aoindustries.messaging.AbstractSocket;
 import com.aoindustries.messaging.AbstractSocketContext;
 import com.aoindustries.messaging.Message;
+import com.aoindustries.messaging.MessageType;
 import com.aoindustries.messaging.Socket;
 import com.aoindustries.security.Identifier;
 import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ExecutorService;
+import com.aoindustries.xml.XmlUtils;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.SocketException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 /**
  * One established connection over HTTP.
@@ -47,12 +62,22 @@ public class HttpSocket extends AbstractSocket {
 
 	public static final String PROTOCOL = "http";
 
-	private final Object sendQueueLock = new Object();
+	private static final String ENCODING = "UTF-8";
+
+	private static final int CONNECT_TIMEOUT = 15 * 1000;
+
+	/** Server should normally respond within 60 seconds even if no data coming back. */
+	private static final int READ_TIMEOUT = 2 * 60 * 1000;
+
+	private final Object lock = new Object();
 	private Queue<Message> sendQueue;
 
 	private final ExecutorService executor = ExecutorService.newInstance();
 
 	private final URL endpoint;
+
+	/** The HttpURLConnection that is currently waiting for return traffic */
+	private HttpURLConnection receiveConn;
 
 	HttpSocket(
 		AbstractSocketContext<? extends AbstractSocket> socketContext,
@@ -88,80 +113,93 @@ public class HttpSocket extends AbstractSocket {
 		final Callback<? super Socket> onStart,
 		final Callback<? super Exception> onError
 	) throws IllegalStateException {
-		/* TODO
-		synchronized(lock) {
-			if(socket==null || in==null || out==null) throw new IllegalStateException();
-			executor.submitUnbounded(
-				new Runnable() {
-					@Override
-					public void run() {
-						try {
-							java.net.Socket socket;
-							synchronized(lock) {
-								socket = HttpSocket.this.socket;
-							}
-							if(socket==null) {
-								if(onError!=null) onError.call(new SocketException("Socket is closed"));
-							} else {
-								// Handle incoming messages in a Thread, can try nio later
-								executor.submitUnbounded(
-									new Runnable() {
-										@Override
-										public void run() {
-											try {
-												while(true) {
-													CompressedDataInputStream in;
-													synchronized(lock) {
-														// Check if closed
-														in = HttpSocket.this.in;
-														if(in==null) break;
+		executor.submitUnbounded(
+			new Runnable() {
+				@Override
+				public void run() {
+					try {
+						if(isClosed()) {
+							if(onError!=null) onError.call(new SocketException("Socket is closed"));
+						} else {
+							// Handle incoming messages in a Thread, can try nio later
+							executor.submitUnbounded(
+								new Runnable() {
+									@Override
+									public void run() {
+										try {
+											while(!isClosed()) {
+												HttpURLConnection receiveConn = null;
+												synchronized(lock) {
+													// Wait until a connection is ready
+													while(receiveConn==null) {
+														if(isClosed()) return;
+														receiveConn = HttpSocket.this.receiveConn;
+														if(receiveConn==null) {
+															// No receive connection - kick-out an empty set of messages
+															Collection<? extends Message> kicker = Collections.emptyList();
+															sendMessagesImpl(kicker);
+															lock.wait();
+														}
 													}
-													final int size = in.readCompressedInt();
-													List<Message> messages = new ArrayList<Message>(size);
-													for(int i=0; i<size; i++) {
-														MessageType type = MessageType.getFromTypeByte(in.readByte());
-														int arraySize = in.readCompressedInt();
-														byte[] array = new byte[arraySize];
-														IoUtils.readFully(in, array, 0, arraySize);
-														messages.add(
-															type.decode(
-																new ByteArray(
-																	array,
-																	arraySize
-																)
-															)
-														);
+												}
+												try {
+													// Get response
+													int responseCode = receiveConn.getResponseCode();
+													if(responseCode != 200) throw new IOException("Unexpect response code: " + responseCode);
+													if(DEBUG) System.out.println("DEBUG: HttpSocket: receive: got response");
+													Element document = XmlUtils.parseXml(receiveConn.getInputStream()).getDocumentElement();
+													if(!"messages".equals(document.getNodeName())) throw new IOException("Unexpected root node name: " + document.getNodeName());
+													List<Message> messages = new ArrayList<Message>();
+													for(Element messageElem : XmlUtils.iterableChildElementsByTagName(document, "message")) {
+														// Get the type
+														MessageType type = MessageType.getFromTypeChar(messageElem.getAttribute("type").charAt(0));
+														// Get the message string
+														Node firstChild = messageElem.getFirstChild();
+														String encodedMessage;
+														if(firstChild == null) {
+															encodedMessage = "";
+														} else {
+															if(!(firstChild instanceof Text)) throw new IllegalArgumentException("Child of message is not a Text node");
+															encodedMessage = ((Text)firstChild).getTextContent();
+														}
+														// Decode and add
+														messages.add(type.decode(encodedMessage));
 													}
 													callOnMessages(Collections.unmodifiableList(messages));
+												} finally {
+													synchronized(lock) {
+														assert receiveConn == HttpSocket.this.receiveConn;
+														HttpSocket.this.receiveConn = null;
+														lock.notify();
+													}
 												}
-											} catch(Exception exc) {
-												if(!isClosed()) callOnError(exc);
-											} finally {
-												try {
-													close();
-												} catch(IOException e) {
-													logger.log(Level.SEVERE, null, e);
-												}
+											}
+										} catch(Exception exc) {
+											if(!isClosed()) callOnError(exc);
+										} finally {
+											try {
+												close();
+											} catch(IOException e) {
+												logger.log(Level.SEVERE, null, e);
 											}
 										}
 									}
-								);
-							}
-							if(onStart!=null) onStart.call(HttpSocket.this);
-						} catch(Exception exc) {
-							if(onError!=null) onError.call(exc);
+								}
+							);
 						}
+						if(onStart!=null) onStart.call(HttpSocket.this);
+					} catch(Exception exc) {
+						if(onError!=null) onError.call(exc);
 					}
 				}
-			);
-		}
-		 */
+			}
+		);
 	}
 
 	@Override
 	protected void sendMessagesImpl(Collection<? extends Message> messages) {
 		if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: enqueuing " + messages.size() + " messages");
-		synchronized(sendQueueLock) {
+		synchronized(lock) {
 			// Enqueue asynchronous write
 			boolean isFirst;
 			if(sendQueue == null) {
@@ -172,7 +210,6 @@ public class HttpSocket extends AbstractSocket {
 			}
 			sendQueue.addAll(messages);
 			if(isFirst) {
-				/* TODO
 				if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: submitting runnable");
 				// When the queue is first created, we submit the queue runner to the executor for queue processing
 				// There is only one executor per queue, and on queue per socket
@@ -182,18 +219,11 @@ public class HttpSocket extends AbstractSocket {
 						public void run() {
 							try {
 								final List<Message> messages = new ArrayList<Message>();
-								while(true) {
-									CompressedDataOutputStream out;
-									synchronized(lock) {
-										// Check if closed
-										out = HttpSocket.this.out;
-										if(out==null) break;
-									}
+								while(!isClosed()) {
 									// Get all of the messages until the queue is empty
-									synchronized(sendQueueLock) {
-										if(sendQueue.isEmpty()) {
-											if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: run: queue empty, flushing and returning");
-											out.flush();
+									synchronized(lock) {
+										if(sendQueue.isEmpty() && receiveConn!=null) {
+											if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: run: queue empty and receiveConn present, returning");
 											// Remove the empty queue so a new executor will be submitted on next event
 											sendQueue = null;
 											break;
@@ -205,13 +235,56 @@ public class HttpSocket extends AbstractSocket {
 									// Write the messages without holding the queue lock
 									final int size = messages.size();
 									if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: run: writing " + size + " messages");
-									out.writeCompressedInt(size);
-									for(int i=0; i<size; i++) {
-										Message message = messages.get(i);
-										out.writeByte(message.getMessageType().getTypeByte());
-										ByteArray data = message.encodeAsByteArray();
-										out.writeCompressedInt(data.size);
-										out.write(data.array, 0, data.size);
+									// Build request bytes
+									AoByteArrayOutputStream bout = new AoByteArrayOutputStream();
+									try {
+										DataOutputStream out = new DataOutputStream(bout);
+										try {
+											out.writeBytes("action=messages&l=");
+											out.writeBytes(Integer.toString(size));
+											for(int i=0; i<size; i++) {
+												Message message = messages.get(i);
+												out.writeBytes("&t");
+												String iString = Integer.toString(i);
+												out.writeBytes(iString);
+												out.write('=');
+												out.write(message.getMessageType().getTypeChar());
+												out.writeBytes("&m");
+												out.writeBytes(iString);
+												out.write('=');
+												out.writeBytes(URLEncoder.encode(message.encodeAsString(), ENCODING));
+											}
+										} finally {
+											out.close();
+										}
+									} finally {
+										bout.close();
+									}
+									HttpURLConnection conn = (HttpURLConnection)endpoint.openConnection();
+									conn.setAllowUserInteraction(false);
+									conn.setConnectTimeout(CONNECT_TIMEOUT);
+									conn.setDoOutput(true);
+									conn.setFixedLengthStreamingMode(bout.size());
+									conn.setInstanceFollowRedirects(false);
+									conn.setReadTimeout(READ_TIMEOUT);
+									conn.setRequestMethod("POST");
+									conn.setUseCaches(false);
+									// Write request
+									OutputStream out = conn.getOutputStream();
+									try {
+										out.write(bout.getInternalByteArray(), 0, bout.size());
+										out.flush();
+									} finally {
+										out.close();
+									}
+									// Use this connection as the new receive connection
+									synchronized(lock) {
+										// Wait until receive connection available
+										while(!isClosed() && receiveConn!=null) {
+											lock.wait();
+										}
+										receiveConn = conn;
+										lock.notify();
 									}
 									messages.clear();
 								}
@@ -229,7 +302,6 @@ public class HttpSocket extends AbstractSocket {
 						}
 					}
 				);
-				 */
 			}
 		}
 	}
