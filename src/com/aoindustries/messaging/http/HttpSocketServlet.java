@@ -26,6 +26,7 @@ import com.aoindustries.io.AoByteArrayOutputStream;
 import com.aoindustries.messaging.AbstractSocket;
 import com.aoindustries.messaging.AbstractSocketContext;
 import com.aoindustries.messaging.Message;
+import com.aoindustries.messaging.MessageType;
 import com.aoindustries.messaging.Socket;
 import com.aoindustries.messaging.tcp.TcpSocket;
 import com.aoindustries.security.Identifier;
@@ -35,7 +36,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Future;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -50,6 +55,8 @@ public class HttpSocketServlet extends HttpServlet {
 	//private static final Logger logger = Logger.getLogger(HttpSocketServlet.class.getName());
 
 	private static final long serialVersionUID = 1L;
+
+	private static final boolean DEBUG = true;
 
 	public static class ServletSocket extends AbstractSocket {
 		
@@ -80,12 +87,25 @@ public class HttpSocketServlet extends HttpServlet {
 
 		@Override
 		public String getProtocol() {
-			return TcpSocket.PROTOCOL;
+			return HttpSocket.PROTOCOL;
+		}
+
+		// Expose to this package
+		@Override
+		protected Future<?> callOnMessages(List<? extends Message> messages) throws IllegalStateException {
+			return super.callOnMessages(messages);
+		}
+
+		// Expose to this package
+		@Override
+		protected Future<?> callOnError(Exception exc) throws IllegalStateException {
+			return super.callOnError(exc);
 		}
 
 		@Override
-		protected void startImpl(Callback<? super Socket> onStart, Callback<? super Exception> onError) throws IllegalStateException {
-			// TODO
+		protected void startImpl(Callback<? super Socket> onStart, Callback<? super Exception> onError) {
+			// Nothing to do
+			if(onStart!=null) onStart.call(this);
 		}
 
 		@Override
@@ -159,17 +179,51 @@ public class HttpSocketServlet extends HttpServlet {
 			} finally {
 				out.close();
 			}
+			// Determine the port
+			int remotePort = request.getRemotePort();
+			if(remotePort < 0) remotePort = 0; // < 0 when unknown such as old AJP13 protocol
+			if(DEBUG) System.err.println("DEBUG: HttpSocketServlet: doPost: remotePort="+remotePort);
 			ServletSocket servletSocket = new ServletSocket(
 				socketContext,
 				id,
 				connectTime,
 				new InetSocketAddress(
 					request.getRemoteAddr(),
-					request.getRemotePort()
+					remotePort
 				),
 				request.getServerName()
 			);
 			socketContext.addSocket(servletSocket);
+		} else if("messages".equals(action)) {
+			Identifier id = Identifier.valueOf(request.getParameter("id"));
+			if(DEBUG) System.err.println("DEBUG: HttpSocketServlet: doPost: id="+id);
+			ServletSocket socket = socketContext.getSocket(id);
+			if(socket==null) {
+				if(DEBUG) System.err.println("DEBUG: HttpSocketServlet: doPost: socket not found");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Socket id not found");
+			} else {
+				try {
+					int size = Integer.parseInt(request.getParameter("l"));
+					if(DEBUG) System.err.println("DEBUG: HttpSocketServlet: doPost: size="+size);
+					List<Message> messages = new ArrayList<Message>(size);
+					for(int i=0; i<size; i++) {
+						// Get the type
+						MessageType type = MessageType.getFromTypeChar(request.getParameter("t"+i).charAt(0));
+						// Get the message string
+						String encodedMessage = request.getParameter("m"+i);
+						// Decode and add
+						messages.add(type.decode(encodedMessage));
+					}
+					if(!messages.isEmpty()) socket.callOnMessages(Collections.unmodifiableList(messages));
+					// TODO: Wait for any return messages
+				} catch(Exception e) {
+					socket.callOnError(e);
+					if(e instanceof ServletException) throw (ServletException)e;
+					if(e instanceof IOException) throw (IOException)e;
+					if(e instanceof RuntimeException) throw (RuntimeException)e;
+					throw new ServletException(e);
+				}
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unexpected action: " + action);
 		}

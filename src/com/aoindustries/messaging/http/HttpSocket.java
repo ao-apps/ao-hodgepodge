@@ -168,7 +168,7 @@ public class HttpSocket extends AbstractSocket {
 													callOnMessages(Collections.unmodifiableList(messages));
 												} finally {
 													synchronized(lock) {
-														assert receiveConn == HttpSocket.this.receiveConn;
+														if(receiveConn != HttpSocket.this.receiveConn) throw new AssertionError();
 														HttpSocket.this.receiveConn = null;
 														lock.notify();
 													}
@@ -240,7 +240,10 @@ public class HttpSocket extends AbstractSocket {
 									try {
 										DataOutputStream out = new DataOutputStream(bout);
 										try {
-											out.writeBytes("action=messages&l=");
+											out.writeBytes("action=messages&id=");
+											out.writeBytes(getId().toString());
+											if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: run: id=" + getId().toString());
+											out.writeBytes("&l=");
 											out.writeBytes(Integer.toString(size));
 											for(int i=0; i<size; i++) {
 												Message message = messages.get(i);
@@ -280,7 +283,8 @@ public class HttpSocket extends AbstractSocket {
 									// Use this connection as the new receive connection
 									synchronized(lock) {
 										// Wait until receive connection available
-										while(!isClosed() && receiveConn!=null) {
+										while(receiveConn!=null) {
+											if(isClosed()) return;
 											lock.wait();
 										}
 										receiveConn = conn;

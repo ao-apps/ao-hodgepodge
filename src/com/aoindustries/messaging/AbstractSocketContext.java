@@ -58,6 +58,13 @@ abstract public class AbstractSocketContext<S extends AbstractSocket> implements
 		}
 	}
 
+	@Override
+	public S getSocket(Identifier id) {
+		synchronized(sockets) {
+			return sockets.get(id);
+		}
+	}
+
 	/**
 	 * Creates a random identifier that is not in the current set of sockets.
 	 */

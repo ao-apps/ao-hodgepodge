@@ -40,6 +40,11 @@ public interface SocketContext extends Closeable {
 	Map<Identifier,? extends Socket> getSockets();
 
 	/**
+	 * Gets the socket of the given ID or <code>null</code> if not found.
+	 */
+	Socket getSocket(Identifier id);
+
+	/**
 	 * Closes this context.  When the context is closed, all active sockets are
 	 * closed and all related persistent resources are freed.
 	 */
