@@ -35,8 +35,8 @@ import java.util.List;
  * </p>
  * <p>
  * The given socket will always represent the current state, while the events are
- * delivered in-order.  Thus, newLocalSocketAddress may not necessarily be the
- * same as the HttpSocket.getMostRecentLocalSocketAddress.
+ * delivered in-order.  Thus, newRemoteSocketAddress may not necessarily be the
+ * same as the HttpSocket.getMostRecentRemoteSocketAddress.
  * </p>
  */
 public interface SocketListener {
@@ -56,15 +56,6 @@ public interface SocketListener {
 	 * after the first error.
 	 */
 	void onError(Socket socket, Exception exc);
-
-	/**
-	 * Called when a new local address is seen.
-	 */
-	void onLocalSocketAddressChange(
-		Socket socket,
-		SocketAddress oldLocalSocketAddress,
-		SocketAddress newLocalSocketAddress
-	);
 
 	/**
 	 * Called when a new remote address is seen.

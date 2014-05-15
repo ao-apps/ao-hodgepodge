@@ -20,67 +20,51 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.messaging.tcp;
+package com.aoindustries.messaging.http;
 
-import com.aoindustries.io.CompressedDataInputStream;
-import com.aoindustries.io.CompressedDataOutputStream;
-import com.aoindustries.io.IoUtils;
 import com.aoindustries.messaging.AbstractSocket;
 import com.aoindustries.messaging.AbstractSocketContext;
-import com.aoindustries.messaging.ByteArray;
 import com.aoindustries.messaging.Message;
-import com.aoindustries.messaging.MessageType;
 import com.aoindustries.messaging.Socket;
 import com.aoindustries.security.Identifier;
 import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ExecutorService;
 import java.io.IOException;
-import java.net.SocketException;
-import java.util.ArrayList;
+import java.net.URL;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * One established connection over a socket.
+ * One established connection over HTTP.
  */
-public class TcpSocket extends AbstractSocket {
+public class HttpSocket extends AbstractSocket {
 
-	private static final Logger logger = Logger.getLogger(TcpSocket.class.getName());
+	private static final Logger logger = Logger.getLogger(HttpSocket.class.getName());
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 
 	private final Object sendQueueLock = new Object();
 	private Queue<Message> sendQueue;
 
 	private final ExecutorService executor = ExecutorService.newInstance();
 
-	private final Object lock = new Object();
-	private java.net.Socket socket;
-	private CompressedDataInputStream in;
-	private CompressedDataOutputStream out;
+	private final URL endpoint;
 
-	TcpSocket(
+	HttpSocket(
 		AbstractSocketContext<? extends AbstractSocket> socketContext,
 		Identifier id,
 		long connectTime,
-		java.net.Socket socket,
-		CompressedDataInputStream in,
-		CompressedDataOutputStream out
+		URL endpoint
 	) {
 		super(
 			socketContext,
 			id,
 			connectTime,
-			socket.getRemoteSocketAddress()
+			new UrlSocketAddress(endpoint)
 		);
-		this.socket = socket;
-		this.in = in;
-		this.out = out;
+		this.endpoint = endpoint;
 	}
 
 	@Override
@@ -88,18 +72,7 @@ public class TcpSocket extends AbstractSocket {
 		try {
 			super.close();
 		} finally {
-			try {
-				synchronized(lock) {
-					if(socket!=null) {
-						socket.close();
-						socket = null;
-						in = null;
-						out = null;
-					}
-				}
-			} finally {
-				executor.dispose();
-			}
+			executor.dispose();
 		}
 	}
 
@@ -108,6 +81,7 @@ public class TcpSocket extends AbstractSocket {
 		final Callback<? super Socket> onStart,
 		final Callback<? super Exception> onError
 	) throws IllegalStateException {
+		/* TODO
 		synchronized(lock) {
 			if(socket==null || in==null || out==null) throw new IllegalStateException();
 			executor.submitUnbounded(
@@ -117,7 +91,7 @@ public class TcpSocket extends AbstractSocket {
 						try {
 							java.net.Socket socket;
 							synchronized(lock) {
-								socket = TcpSocket.this.socket;
+								socket = HttpSocket.this.socket;
 							}
 							if(socket==null) {
 								if(onError!=null) onError.call(new SocketException("Socket is closed"));
@@ -132,7 +106,7 @@ public class TcpSocket extends AbstractSocket {
 													CompressedDataInputStream in;
 													synchronized(lock) {
 														// Check if closed
-														in = TcpSocket.this.in;
+														in = HttpSocket.this.in;
 														if(in==null) break;
 													}
 													final int size = in.readCompressedInt();
@@ -166,7 +140,7 @@ public class TcpSocket extends AbstractSocket {
 									}
 								);
 							}
-							if(onStart!=null) onStart.call(TcpSocket.this);
+							if(onStart!=null) onStart.call(HttpSocket.this);
 						} catch(Exception exc) {
 							if(onError!=null) onError.call(exc);
 						}
@@ -174,11 +148,12 @@ public class TcpSocket extends AbstractSocket {
 				}
 			);
 		}
+		 */
 	}
 
 	@Override
 	protected void sendMessagesImpl(Collection<? extends Message> messages) {
-		if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: enqueuing " + messages.size() + " messages");
+		if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: enqueuing " + messages.size() + " messages");
 		synchronized(sendQueueLock) {
 			// Enqueue asynchronous write
 			boolean isFirst;
@@ -190,7 +165,8 @@ public class TcpSocket extends AbstractSocket {
 			}
 			sendQueue.addAll(messages);
 			if(isFirst) {
-				if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: submitting runnable");
+				/* TODO
+				if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: submitting runnable");
 				// When the queue is first created, we submit the queue runner to the executor for queue processing
 				// There is only one executor per queue, and on queue per socket
 				executor.submitUnbounded(
@@ -203,13 +179,13 @@ public class TcpSocket extends AbstractSocket {
 									CompressedDataOutputStream out;
 									synchronized(lock) {
 										// Check if closed
-										out = TcpSocket.this.out;
+										out = HttpSocket.this.out;
 										if(out==null) break;
 									}
 									// Get all of the messages until the queue is empty
 									synchronized(sendQueueLock) {
 										if(sendQueue.isEmpty()) {
-											if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: run: queue empty, flushing and returning");
+											if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: run: queue empty, flushing and returning");
 											out.flush();
 											// Remove the empty queue so a new executor will be submitted on next event
 											sendQueue = null;
@@ -221,7 +197,7 @@ public class TcpSocket extends AbstractSocket {
 									}
 									// Write the messages without holding the queue lock
 									final int size = messages.size();
-									if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: run: writing " + size + " messages");
+									if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: run: writing " + size + " messages");
 									out.writeCompressedInt(size);
 									for(int i=0; i<size; i++) {
 										Message message = messages.get(i);
@@ -234,7 +210,7 @@ public class TcpSocket extends AbstractSocket {
 								}
 							} catch(Exception exc) {
 								if(!isClosed()) {
-									if(DEBUG) System.err.println("DEBUG: TcpSocket: sendMessagesImpl: run: calling onError");
+									if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: run: calling onError");
 									callOnError(exc);
 									try {
 										close();
@@ -246,6 +222,7 @@ public class TcpSocket extends AbstractSocket {
 						}
 					}
 				);
+				 */
 			}
 		}
 	}

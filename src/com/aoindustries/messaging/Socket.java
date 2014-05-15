@@ -58,16 +58,6 @@ public interface Socket extends Closeable {
 	Long getCloseTime();
 
 	/**
-	 * Gets the local address at connection time.  This value will not change.
-	 */
-	SocketAddress getConnectSocketAddress();
-
-	/**
-	 * Gets the most recently seen local address.  This value may change.
-	 */
-	SocketAddress getLocalSocketAddress();
-
-	/**
 	 * Gets the remote address at connection time.  This value will not change.
 	 */
 	SocketAddress getConnectRemoteSocketAddress();

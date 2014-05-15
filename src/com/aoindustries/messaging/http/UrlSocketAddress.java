@@ -22,38 +22,40 @@
  */
 package com.aoindustries.messaging.http;
 
-import com.aoindustries.lang.NotImplementedException;
-import com.aoindustries.messaging.AbstractSocket;
-import com.aoindustries.messaging.Message;
-import com.aoindustries.security.Identifier;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.ClosedChannelException;
-import java.util.Collection;
+import java.net.SocketAddress;
+import java.net.URL;
 
 /**
- * One established connection over HTTP(S).
+ * A URL as a socket address.
  */
-public class HttpSocket extends AbstractSocket {
+public class UrlSocketAddress extends SocketAddress {
 
-	protected HttpSocket(
-		HttpSocketContext socketContext,
-		Identifier id,
-		long connectTime,
-		InetSocketAddress localSocketAddress,
-		InetSocketAddress remoteSocketAddress,
-	) {
-		super(socketContext, id, connectTime, localSocketAddress, remoteSocketAddress);
+	private static final long serialVersionUID = 1L;
+
+	private final URL url;
+	
+	public UrlSocketAddress(URL url) {
+		this.url = url;
 	}
 
 	@Override
-	public void close() throws IOException {
-		super.close();
-		throw new NotImplementedException("TODO");
+	public boolean equals(Object obj) {
+		if(!(obj instanceof UrlSocketAddress)) return false;
+		UrlSocketAddress other = (UrlSocketAddress)obj;
+		return url.toExternalForm().equals(other.url.toExternalForm());
 	}
 
 	@Override
-	public void sendMessages(Collection<? extends Message> messages) throws ClosedChannelException {
-		throw new NotImplementedException("TODO");
+	public int hashCode() {
+		return url.toExternalForm().hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return url.toExternalForm();
+	}
+
+	public URL getUrl() {
+		return url;
 	}
 }

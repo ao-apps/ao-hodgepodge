@@ -50,10 +50,6 @@ abstract public class AbstractSocket implements Socket {
 
 	private final long connectTime;
 
-	private final    SocketAddress connectLocalSocketAddress;
-	private final    Object        localSocketAddressLock = new Object();
-	private          SocketAddress localSocketAddress;
-
 	private final    SocketAddress connectRemoteSocketAddress;
 	private final    Object        remoteSocketAddressLock = new Object();
 	private          SocketAddress remoteSocketAddress;
@@ -67,14 +63,11 @@ abstract public class AbstractSocket implements Socket {
 		AbstractSocketContext<? extends AbstractSocket> socketContext,
 		Identifier id,
 		long connectTime,
-		SocketAddress localSocketAddress,
 		SocketAddress remoteSocketAddress
 	) {
 		this.socketContext              = socketContext;
 		this.id                         = id;
 		this.connectTime                = connectTime;
-		this.connectLocalSocketAddress  = localSocketAddress;
-		this.localSocketAddress         = localSocketAddress;
 		this.connectRemoteSocketAddress = remoteSocketAddress;
 		this.remoteSocketAddress        = remoteSocketAddress;
 	}
@@ -103,48 +96,6 @@ abstract public class AbstractSocket implements Socket {
 	public Long getCloseTime() {
 		synchronized(closeLock) {
 			return closeTime;
-		}
-	}
-
-	@Override
-	public SocketAddress getConnectSocketAddress() {
-		return connectLocalSocketAddress;
-	}
-
-	@Override
-	public SocketAddress getLocalSocketAddress() {
-		synchronized(localSocketAddressLock) {
-			return localSocketAddress;
-		}
-	}
-
-	/**
-	 * Sets the most recently seen local address.
-	 * If the provided value is different than the previous, will notify all listeners.
-	 */
-	protected void setLocalSocketAddress(final SocketAddress newLocalSocketAddress) {
-		synchronized(localSocketAddressLock) {
-			final SocketAddress oldLocalSocketAddress = this.localSocketAddress;
-			if(!newLocalSocketAddress.equals(oldLocalSocketAddress)) {
-				this.localSocketAddress = newLocalSocketAddress;
-				listenerManager.enqueueEvent(
-					new ConcurrentListenerManager.Event<SocketListener>() {
-						@Override
-						public Runnable createCall(final SocketListener listener) {
-							return new Runnable() {
-								@Override
-								public void run() {
-									listener.onLocalSocketAddressChange(
-										AbstractSocket.this,
-										oldLocalSocketAddress,
-										newLocalSocketAddress
-									);
-								}
-							};
-						}
-					}
-				);
-			}
 		}
 	}
 
