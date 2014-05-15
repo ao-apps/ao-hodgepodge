@@ -196,7 +196,7 @@ abstract public class AbstractSocket implements Socket {
 	@Override
 	public void start(
 		Callback<? super Socket> onStart,
-		Callback<? super Throwable> onError
+		Callback<? super Exception> onError
 	) throws IllegalStateException {
 		if(isClosed()) throw new IllegalStateException("Socket is closed");
 		startImpl(onStart, onError);
@@ -293,7 +293,7 @@ abstract public class AbstractSocket implements Socket {
 	 *
 	 * @throws  IllegalStateException  if this socket is closed
 	 */
-	protected Future<?> callOnError(final Throwable t) throws IllegalStateException {
+	protected Future<?> callOnError(final Exception exc) throws IllegalStateException {
 		if(isClosed()) throw new IllegalStateException("Socket is closed");
 		return listenerManager.enqueueEvent(
 			new ConcurrentListenerManager.Event<SocketListener>() {
@@ -304,7 +304,7 @@ abstract public class AbstractSocket implements Socket {
 						public void run() {
 							listener.onError(
 								AbstractSocket.this,
-								t
+								exc
 							);
 						}
 					};
@@ -334,7 +334,7 @@ abstract public class AbstractSocket implements Socket {
 	 */
 	abstract protected void startImpl(
 		Callback<? super Socket> onStart,
-		Callback<? super Throwable> onError
+		Callback<? super Exception> onError
 	) throws IllegalStateException;
 
 	/**

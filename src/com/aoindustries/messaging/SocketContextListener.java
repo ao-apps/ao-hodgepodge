@@ -42,7 +42,7 @@ public interface SocketContextListener {
 	 * Called when an error occurs.  The socket is closed
 	 * after the first error.
 	 */
-	void onError(SocketContext socketContext, Throwable t);
+	void onError(SocketContext socketContext, Exception exc);
 
 	/**
 	 * Called when a socket context is closed.

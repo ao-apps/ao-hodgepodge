@@ -47,7 +47,7 @@ public class HttpSocketClient implements Closeable {
 	public void connect(
 		String url,
 		Callback<HttpSocket> onConnect,
-		Callback<Throwable> onError
+		Callback<Exception> onError
 	) {
 		throw new NotImplementedException("TODO");
 	}

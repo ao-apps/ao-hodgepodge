@@ -86,7 +86,7 @@ public class TcpSocketServer extends AbstractSocketContext<TcpSocket> {
 	 */
 	public void start(
 		final Callback<? super TcpSocketServer> onStart,
-		final Callback<? super Throwable> onError
+		final Callback<? super Exception> onError
 	) throws IllegalStateException {
 		if(isClosed()) throw new IllegalStateException("TcpSocketServer is closed");
 		synchronized(lock) {
@@ -133,21 +133,17 @@ public class TcpSocketServer extends AbstractSocketContext<TcpSocket> {
 												);
 												addSocket(tcpSocket);
 											}
-										} catch(ThreadDeath td) {
-											throw td;
-										} catch(Throwable t) {
-											if(!isClosed()) callOnError(t);
+										} catch(Exception exc) {
+											if(!isClosed()) callOnError(exc);
 										} finally {
 											close();
 										}
 									}
 								}
 							);
-							onStart.call(TcpSocketServer.this);
-						} catch(ThreadDeath td) {
-							throw td;
-						} catch(Throwable t) {
-							onError.call(t);
+							if(onStart!=null) onStart.call(TcpSocketServer.this);
+						} catch(Exception exc) {
+							if(onError!=null) onError.call(exc);
 						}
 					}
 				}

@@ -103,10 +103,8 @@ abstract public class AbstractSocketContext<S extends AbstractSocket> implements
 		for(S socket : socketsToClose) {
 			try {
 				socket.close();
-			} catch(ThreadDeath td) {
-				throw td;
-			} catch(Throwable t) {
-				logger.log(Level.SEVERE, null, t);
+			} catch(Exception exc) {
+				logger.log(Level.SEVERE, null, exc);
 			}
 		}
 		if(enqueueOnSocketContextClose) {
@@ -200,7 +198,7 @@ abstract public class AbstractSocketContext<S extends AbstractSocket> implements
 	 *
 	 * @throws  IllegalStateException  if this socket is closed
 	 */
-	protected Future<?> callOnError(final Throwable t) throws IllegalStateException {
+	protected Future<?> callOnError(final Exception exc) throws IllegalStateException {
 		if(isClosed()) throw new IllegalStateException("Socket is closed");
 		return listenerManager.enqueueEvent(
 			new ConcurrentListenerManager.Event<SocketContextListener>() {
@@ -211,7 +209,7 @@ abstract public class AbstractSocketContext<S extends AbstractSocket> implements
 						public void run() {
 							listener.onError(
 								AbstractSocketContext.this,
-								t
+								exc
 							);
 						}
 					};

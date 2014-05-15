@@ -65,7 +65,7 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 	public void connect(
 		final SocketAddress endpoint,
 		final Callback<? super TcpSocket> onConnect,
-		final Callback<? super Throwable> onError
+		final Callback<? super Exception> onError
 	) {
 		executor.submitUnbounded(
 			new Runnable() {
@@ -92,17 +92,15 @@ public class TcpSocketClient extends AbstractSocketContext<TcpSocket> {
 								out
 							);
 							addSocket(tcpSocket);
-							onConnect.call(tcpSocket);
+							if(onConnect!=null) onConnect.call(tcpSocket);
 							successful = true;
 						} finally {
 							if(!successful) {
 								socket.close();
 							}
 						}
-					} catch(ThreadDeath td) {
-						throw td;
-					} catch(Throwable t) {
-						onError.call(t);
+					} catch(Exception exc) {
+						if(onError!=null) onError.call(exc);
 					}
 				}
 			}

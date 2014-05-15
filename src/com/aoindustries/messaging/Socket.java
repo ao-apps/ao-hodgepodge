@@ -86,7 +86,7 @@ public interface Socket extends Closeable {
 	 */
 	void start(
 		Callback<? super Socket> onStart,
-		Callback<? super Throwable> onError
+		Callback<? super Exception> onError
 	) throws IllegalStateException;
 
 	/**

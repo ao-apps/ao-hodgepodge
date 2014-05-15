@@ -55,7 +55,7 @@ public interface SocketListener {
 	 * Called when an error occurs.  The socket is closed
 	 * after the first error.
 	 */
-	void onError(Socket socket, Throwable t);
+	void onError(Socket socket, Exception exc);
 
 	/**
 	 * Called when a new local address is seen.

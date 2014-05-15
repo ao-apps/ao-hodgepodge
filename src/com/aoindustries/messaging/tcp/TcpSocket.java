@@ -105,7 +105,7 @@ public class TcpSocket extends AbstractSocket {
 	@Override
 	protected void startImpl(
 		final Callback<? super Socket> onStart,
-		final Callback<? super Throwable> onError
+		final Callback<? super Exception> onError
 	) throws IllegalStateException {
 		synchronized(lock) {
 			if(socket==null || in!=null || out!=null) throw new IllegalStateException();
@@ -119,7 +119,7 @@ public class TcpSocket extends AbstractSocket {
 								socket = TcpSocket.this.socket;
 							}
 							if(socket==null) {
-								onError.call(new SocketException("Socket is closed"));
+								if(onError!=null) onError.call(new SocketException("Socket is closed"));
 							} else {
 								// Handle incoming messages in a Thread, can try nio later
 								executor.submitUnbounded(
@@ -152,10 +152,8 @@ public class TcpSocket extends AbstractSocket {
 													}
 													callOnMessages(Collections.unmodifiableList(messages));
 												}
-											} catch(ThreadDeath td) {
-												throw td;
-											} catch(Throwable t) {
-												if(!isClosed()) callOnError(t);
+											} catch(Exception exc) {
+												if(!isClosed()) callOnError(exc);
 											} finally {
 												try {
 													close();
@@ -167,11 +165,9 @@ public class TcpSocket extends AbstractSocket {
 									}
 								);
 							}
-							onStart.call(TcpSocket.this);
-						} catch(ThreadDeath td) {
-							throw td;
-						} catch(Throwable t) {
-							onError.call(t);
+							if(onStart!=null) onStart.call(TcpSocket.this);
+						} catch(Exception exc) {
+							if(onError!=null) onError.call(exc);
 						}
 					}
 				}
@@ -231,11 +227,9 @@ public class TcpSocket extends AbstractSocket {
 									}
 									messages.clear();
 								}
-							} catch(ThreadDeath TD) {
-								throw TD;
-							} catch(Throwable t) {
+							} catch(Exception exc) {
 								if(!isClosed()) {
-									callOnError(t);
+									callOnError(exc);
 									try {
 										close();
 									} catch(IOException e) {
