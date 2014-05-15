@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
@@ -74,13 +75,14 @@ public class HttpSocket extends AbstractSocket {
 
 	private final ExecutorService executor = ExecutorService.newInstance();
 
+	private final HttpSocketClient socketContext;
 	private final URL endpoint;
 
 	/** The HttpURLConnection that is currently waiting for return traffic */
 	private HttpURLConnection receiveConn;
 
 	HttpSocket(
-		AbstractSocketContext<? extends AbstractSocket> socketContext,
+		HttpSocketClient socketContext,
 		Identifier id,
 		long connectTime,
 		URL endpoint
@@ -91,6 +93,7 @@ public class HttpSocket extends AbstractSocket {
 			connectTime,
 			new UrlSocketAddress(endpoint)
 		);
+		this.socketContext = socketContext;
 		this.endpoint = endpoint;
 	}
 
@@ -150,7 +153,8 @@ public class HttpSocket extends AbstractSocket {
 													int responseCode = receiveConn.getResponseCode();
 													if(responseCode != 200) throw new IOException("Unexpect response code: " + responseCode);
 													if(DEBUG) System.out.println("DEBUG: HttpSocket: receive: got response");
-													Element document = XmlUtils.parseXml(receiveConn.getInputStream()).getDocumentElement();
+													DocumentBuilder builder = socketContext.builderFactory.newDocumentBuilder();
+													Element document = builder.parse(receiveConn.getInputStream()).getDocumentElement();
 													if(!"messages".equals(document.getNodeName())) throw new IOException("Unexpected root node name: " + document.getNodeName());
 													List<Message> messages = new ArrayList<Message>();
 													for(Element messageElem : XmlUtils.iterableChildElementsByTagName(document, "message")) {

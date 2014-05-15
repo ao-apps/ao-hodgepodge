@@ -27,12 +27,13 @@ import com.aoindustries.messaging.AbstractSocketContext;
 import com.aoindustries.security.Identifier;
 import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ExecutorService;
-import com.aoindustries.xml.XmlUtils;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Element;
 
 /**
@@ -46,6 +47,8 @@ public class HttpSocketClient extends AbstractSocketContext<HttpSocket> {
 
 	private final ExecutorService executor = ExecutorService.newInstance();
 
+	final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+	
 	public HttpSocketClient() {
 	}
 
@@ -106,7 +109,8 @@ public class HttpSocketClient extends AbstractSocketContext<HttpSocket> {
 						int responseCode = conn.getResponseCode();
 						if(responseCode != 200) throw new IOException("Unexpect response code: " + responseCode);
 						if(DEBUG) System.out.println("DEBUG: HttpSocketClient: connect: got connection");
-						Element document = XmlUtils.parseXml(conn.getInputStream()).getDocumentElement();
+						DocumentBuilder builder = builderFactory.newDocumentBuilder();
+						Element document = builder.parse(conn.getInputStream()).getDocumentElement();
 						if(!"connection".equals(document.getNodeName())) throw new IOException("Unexpected root node name: " + document.getNodeName());
 						Identifier id = Identifier.valueOf(document.getAttribute("id"));
 						if(DEBUG) System.out.println("DEBUG: HttpSocketClient: connect: got id=" + id);
