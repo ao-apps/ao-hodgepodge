@@ -24,7 +24,6 @@ package com.aoindustries.messaging.http;
 
 import com.aoindustries.io.AoByteArrayOutputStream;
 import com.aoindustries.messaging.AbstractSocket;
-import com.aoindustries.messaging.AbstractSocketContext;
 import com.aoindustries.messaging.Message;
 import com.aoindustries.messaging.MessageType;
 import com.aoindustries.messaging.Socket;

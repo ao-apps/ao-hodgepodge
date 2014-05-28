@@ -306,7 +306,7 @@ public class HttpSocketServlet extends HttpServlet {
 				} catch(Exception e) {
 					socket.callOnError(e);
 					if(e instanceof ServletException) throw (ServletException)e;
-					if(e instanceof IOException) throw (IOException)e;
+					if(e instanceof IOException     ) throw (IOException)e;
 					if(e instanceof RuntimeException) throw (RuntimeException)e;
 					throw new ServletException(e);
 				}
