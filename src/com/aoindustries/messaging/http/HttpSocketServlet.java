@@ -72,6 +72,7 @@ public class HttpSocketServlet extends HttpServlet {
 		private final String serverName;
 
 		private final Queue<Message> outQueue = new LinkedList<Message>();
+		private Thread outQueueCurrentThread; // Synchronized on outQueue
 
 		ServletSocket(
 			ServletSocketContext socketContext,
@@ -134,32 +135,43 @@ public class HttpSocketServlet extends HttpServlet {
 		protected void sendMessagesImpl(Collection<? extends Message> messages) {
 			synchronized(outQueue) {
 				outQueue.addAll(messages);
-				outQueue.notify();
+				outQueue.notifyAll();
 			}
 		}
 
 		/**
 		 * Gets the messages to be sent back, blocks for a maximum of
 		 * LONG_POLL_TIMEOUT milliseconds.
+		 * If a new thread comes-in, the first thread will be notified to return immediately.
 		 */
 		List<? extends Message> getOutMessages() {
 			long endMillis = (System.nanoTime() / 1000000) + LONG_POLL_TIMEOUT;
+			final Thread currentThread = Thread.currentThread();
 			synchronized(outQueue) {
-				while(true) {
-					if(!outQueue.isEmpty()) {
-						List<Message> messages = new ArrayList<Message>(outQueue);
-						outQueue.clear();
-						outQueue.notify();
-						return Collections.unmodifiableList(messages);
+				// If more than one out thread, notify previous
+				if(outQueueCurrentThread != null) outQueue.notifyAll();
+				// Replace any previous with new current
+				outQueueCurrentThread = currentThread;
+				try {
+					while(true) {
+						if(!outQueue.isEmpty()) {
+							List<Message> messages = new ArrayList<Message>(outQueue);
+							outQueue.clear();
+							outQueue.notifyAll();
+							return Collections.unmodifiableList(messages);
+						}
+						if(isClosed()) return Collections.emptyList();
+						if(outQueueCurrentThread != currentThread) return Collections.emptyList();
+						long timeRemaining = endMillis - (System.nanoTime() / 1000000);
+						if(timeRemaining <= 0) return Collections.emptyList();
+						try {
+							outQueue.wait(timeRemaining);
+						} catch(InterruptedException e) {
+							logger.log(Level.WARNING, null, e);
+						}
 					}
-					if(isClosed()) return Collections.emptyList();
-					long timeRemaining = endMillis - (System.nanoTime() / 1000000);
-					if(timeRemaining <= 0) return Collections.emptyList();
-					try {
-						outQueue.wait(timeRemaining);
-					} catch(InterruptedException e) {
-						logger.log(Level.WARNING, null, e);
-					}
+				} finally {
+					if(outQueueCurrentThread == currentThread) outQueueCurrentThread = null;
 				}
 			}
 		}
