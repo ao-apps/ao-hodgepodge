@@ -37,7 +37,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Element;
 
 /**
- * Client component for bi-directional messaging over TCP.
+ * Client component for bi-directional messaging over HTTP.
  */
 public class HttpSocketClient extends AbstractSocketContext<HttpSocket> {
 
