@@ -41,8 +41,11 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -71,8 +74,12 @@ public class HttpSocketServlet extends HttpServlet {
 		
 		private final String serverName;
 
+		final Map<Long,Message> inQueue = new HashMap<Long,Message>();
+		long inSeq = 1; // Synchronized on inQueue
+
 		private final Queue<Message> outQueue = new LinkedList<Message>();
 		private Thread outQueueCurrentThread; // Synchronized on outQueue
+		private long outSeq = 1; // Synchronized on outQueue
 
 		ServletSocket(
 			ServletSocketContext socketContext,
@@ -144,7 +151,7 @@ public class HttpSocketServlet extends HttpServlet {
 		 * LONG_POLL_TIMEOUT milliseconds.
 		 * If a new thread comes-in, the first thread will be notified to return immediately.
 		 */
-		List<? extends Message> getOutMessages() {
+		Map<Long,? extends Message> getOutMessages() {
 			long endMillis = (System.nanoTime() / 1000000) + LONG_POLL_TIMEOUT;
 			final Thread currentThread = Thread.currentThread();
 			synchronized(outQueue) {
@@ -155,15 +162,20 @@ public class HttpSocketServlet extends HttpServlet {
 				try {
 					while(true) {
 						if(!outQueue.isEmpty()) {
-							List<Message> messages = new ArrayList<Message>(outQueue);
-							outQueue.clear();
+							Map<Long,Message> messages = new LinkedHashMap<Long,Message>(outQueue.size()*4/3+1);
+							while(!outQueue.isEmpty()) {
+								messages.put(outSeq++, outQueue.remove());
+							}
 							outQueue.notifyAll();
-							return Collections.unmodifiableList(messages);
+							return Collections.unmodifiableMap(messages);
 						}
-						if(isClosed()) return Collections.emptyList();
-						if(outQueueCurrentThread != currentThread) return Collections.emptyList();
+						// Check if closed
+						if(isClosed()) return Collections.emptyMap();
+						// Check if replaced by a newer thread
+						if(outQueueCurrentThread != currentThread) return Collections.emptyMap();
+						// Check if time expired
 						long timeRemaining = endMillis - (System.nanoTime() / 1000000);
-						if(timeRemaining <= 0) return Collections.emptyList();
+						if(timeRemaining <= 0) return Collections.emptyMap();
 						try {
 							outQueue.wait(timeRemaining);
 						} catch(InterruptedException e) {
@@ -270,20 +282,39 @@ public class HttpSocketServlet extends HttpServlet {
 					{
 						int size = Integer.parseInt(request.getParameter("l"));
 						if(DEBUG) System.err.println("DEBUG: HttpSocketServlet: doPost: size="+size);
-						List<Message> messages = new ArrayList<Message>(size);
-						for(int i=0; i<size; i++) {
-							// Get the type
-							MessageType type = MessageType.getFromTypeChar(request.getParameter("t"+i).charAt(0));
-							// Get the message string
-							String encodedMessage = request.getParameter("m"+i);
-							// Decode and add
-							messages.add(type.decode(encodedMessage));
+						// Add all messages to the inQueue by sequence to handle out-of-order messages
+						List<Message> messages;
+						synchronized(socket.inQueue) {
+							for(int i=0; i<size; i++) {
+								// Get the sequence
+								Long seq = Long.parseLong(request.getParameter("s"+i));
+								// Get the type
+								MessageType type = MessageType.getFromTypeChar(request.getParameter("t"+i).charAt(0));
+								// Get the message string
+								String encodedMessage = request.getParameter("m"+i);
+								// Decode and add
+								if(socket.inQueue.put(seq, type.decode(encodedMessage)) != null) {
+									throw new IOException("Duplicate incoming sequence: " + seq);
+								}
+							}
+							// Gather as many messages that have been delivered in-order
+							messages = new ArrayList<Message>(socket.inQueue.size());
+							while(true) {
+								Message message = socket.inQueue.remove(socket.inSeq);
+								if(message != null) {
+									messages.add(message);
+									socket.inSeq++;
+								} else {
+									// Break in the sequence
+									break;
+								}
+							}
 						}
 						if(!messages.isEmpty()) socket.callOnMessages(Collections.unmodifiableList(messages));
 					}
 					// Handle outgoing messages
 					{
-						List<? extends Message> outMessages = socket.getOutMessages();
+						Map<Long,? extends Message> outMessages = socket.getOutMessages();
 						// Build the response
 						AoByteArrayOutputStream bout = new AoByteArrayOutputStream();
 						try {
@@ -291,8 +322,12 @@ public class HttpSocketServlet extends HttpServlet {
 							try {
 								out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
 									+ "<messages>\n");
-								for(Message message : outMessages) {
-									out.write("  <message type=\"");
+								for(Map.Entry<Long,? extends Message> entry : outMessages.entrySet()) {
+									Long seq = entry.getKey();
+									Message message = entry.getValue();
+									out.write("  <message seq=\"");
+									out.write(seq.toString());
+									out.write("\" type=\"");
 									out.write(message.getMessageType().getTypeChar());
 									out.write("\">");
 									TextInXhtmlEncoder.encodeTextInXhtml(message.encodeAsString(), out);

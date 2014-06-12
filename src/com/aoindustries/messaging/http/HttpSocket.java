@@ -28,6 +28,8 @@ import com.aoindustries.messaging.Message;
 import com.aoindustries.messaging.MessageType;
 import com.aoindustries.messaging.Socket;
 import com.aoindustries.security.Identifier;
+import com.aoindustries.util.AtomicSequence;
+import com.aoindustries.util.Sequence;
 import com.aoindustries.util.concurrent.Callback;
 import com.aoindustries.util.concurrent.ExecutorService;
 import com.aoindustries.xml.XmlUtils;
@@ -41,8 +43,10 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,8 +73,13 @@ public class HttpSocket extends AbstractSocket {
 	/** Server should normally respond within 60 seconds even if no data coming back. */
 	static final int READ_TIMEOUT = 2 * 60 * 1000;
 
+	private final Map<Long,Message> inQueue = new HashMap<Long,Message>();
+	private long inSeq = 1; // Synchronized on inQueue
+
 	private final Object lock = new Object();
-	private Queue<Message> sendQueue;
+	private Queue<Message> outQueue;
+
+	private final Sequence outSeq = new AtomicSequence();
 
 	private final ExecutorService executor = ExecutorService.newInstance();
 
@@ -155,21 +164,40 @@ public class HttpSocket extends AbstractSocket {
 													DocumentBuilder builder = socketContext.builderFactory.newDocumentBuilder();
 													Element document = builder.parse(receiveConn.getInputStream()).getDocumentElement();
 													if(!"messages".equals(document.getNodeName())) throw new IOException("Unexpected root node name: " + document.getNodeName());
-													List<Message> messages = new ArrayList<Message>();
-													for(Element messageElem : XmlUtils.iterableChildElementsByTagName(document, "message")) {
-														// Get the type
-														MessageType type = MessageType.getFromTypeChar(messageElem.getAttribute("type").charAt(0));
-														// Get the message string
-														Node firstChild = messageElem.getFirstChild();
-														String encodedMessage;
-														if(firstChild == null) {
-															encodedMessage = "";
-														} else {
-															if(!(firstChild instanceof Text)) throw new IllegalArgumentException("Child of message is not a Text node");
-															encodedMessage = ((Text)firstChild).getTextContent();
+													// Add all messages to the inQueue by sequence to handle out-of-order messages
+													List<Message> messages;
+													synchronized(inQueue) {
+														for(Element messageElem : XmlUtils.iterableChildElementsByTagName(document, "message")) {
+															// Get the sequence
+															Long seq = Long.parseLong(messageElem.getAttribute("seq"));
+															// Get the type
+															MessageType type = MessageType.getFromTypeChar(messageElem.getAttribute("type").charAt(0));
+															// Get the message string
+															Node firstChild = messageElem.getFirstChild();
+															String encodedMessage;
+															if(firstChild == null) {
+																encodedMessage = "";
+															} else {
+																if(!(firstChild instanceof Text)) throw new IllegalArgumentException("Child of message is not a Text node");
+																encodedMessage = ((Text)firstChild).getTextContent();
+															}
+															// Decode and add
+															if(inQueue.put(seq, type.decode(encodedMessage)) != null) {
+																throw new IOException("Duplicate incoming sequence: " + seq);
+															}
 														}
-														// Decode and add
-														messages.add(type.decode(encodedMessage));
+														// Gather as many messages that have been delivered in-order
+														messages = new ArrayList<Message>(inQueue.size());
+														while(true) {
+															Message message = inQueue.remove(inSeq);
+															if(message != null) {
+																messages.add(message);
+																inSeq++;
+															} else {
+																// Break in the sequence
+																break;
+															}
+														}
 													}
 													if(!messages.isEmpty()) callOnMessages(Collections.unmodifiableList(messages));
 												} finally {
@@ -208,13 +236,13 @@ public class HttpSocket extends AbstractSocket {
 		synchronized(lock) {
 			// Enqueue asynchronous write
 			boolean isFirst;
-			if(sendQueue == null) {
-				sendQueue = new LinkedList<Message>();
+			if(outQueue == null) {
+				outQueue = new LinkedList<Message>();
 				isFirst = true;
 			} else {
 				isFirst = false;
 			}
-			sendQueue.addAll(messages);
+			outQueue.addAll(messages);
 			if(isFirst) {
 				if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: submitting runnable");
 				// When the queue is first created, we submit the queue runner to the executor for queue processing
@@ -228,14 +256,14 @@ public class HttpSocket extends AbstractSocket {
 								while(!isClosed()) {
 									// Get all of the messages until the queue is empty
 									synchronized(lock) {
-										if(sendQueue.isEmpty() && receiveConn!=null) {
+										if(outQueue.isEmpty() && receiveConn!=null) {
 											if(DEBUG) System.err.println("DEBUG: HttpSocket: sendMessagesImpl: run: queue empty and receiveConn present, returning");
 											// Remove the empty queue so a new executor will be submitted on next event
-											sendQueue = null;
+											outQueue = null;
 											break;
 										} else {
-											messages.addAll(sendQueue);
-											sendQueue.clear();
+											messages.addAll(outQueue);
+											outQueue.clear();
 										}
 									}
 									// Write the messages without holding the queue lock
@@ -252,12 +280,19 @@ public class HttpSocket extends AbstractSocket {
 											out.writeBytes("&l=");
 											out.writeBytes(Integer.toString(size));
 											for(int i=0; i<size; i++) {
-												Message message = messages.get(i);
-												out.writeBytes("&t");
 												String iString = Integer.toString(i);
+												Message message = messages.get(i);
+												// Sequence
+												out.writeBytes("&s");
+												out.writeBytes(iString);
+												out.write('=');
+												out.writeBytes(Long.toString(outSeq.getNextSequenceValue()));
+												// Type
+												out.writeBytes("&t");
 												out.writeBytes(iString);
 												out.write('=');
 												out.write(message.getMessageType().getTypeChar());
+												// Message
 												out.writeBytes("&m");
 												out.writeBytes(iString);
 												out.write('=');

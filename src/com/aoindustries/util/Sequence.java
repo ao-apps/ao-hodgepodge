@@ -28,6 +28,10 @@ package com.aoindustries.util;
  * @author  AO Industries, Inc.
  */
 public interface Sequence {
+	
+	/**
+	 * Gets the next value from the sequence.
+	 */
     long getNextSequenceValue();
 
     void setNextSequenceValue(long nextValue);
