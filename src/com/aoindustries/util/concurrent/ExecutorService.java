@@ -67,9 +67,9 @@ final public class ExecutorService implements Disposable {
     private static final boolean DAEMON_THREADS = true;
 
     /**
-     * The maximum number of nanoseconds that will be waited for during dispose (60 seconds).
+     * The maximum number of nanoseconds that will be waited for during dispose (0.1 seconds).
      */
-    private static final long DISPOSE_WAIT_NANOS = 60L * 1000L * 1000L * 1000L;
+    private static final long DISPOSE_WAIT_NANOS = 100L * 1000L * 1000L; // 60L * 1000L * 1000L * 1000L;
 
     /**
      * Keeps track of which threads are running from the per-processor executor.
@@ -716,6 +716,7 @@ final public class ExecutorService implements Disposable {
      * tasks may be submitted.
      *
      * If this is the last active executor, the underlying threads will also be shutdown.
+	 * This shutdown may wait up to 200 milliseconds for clean termination of all threads.
      *
      * If already disposed, no action will be taken and no exception thrown.
      */
@@ -746,7 +747,9 @@ final public class ExecutorService implements Disposable {
 							public void run() {
 								ues.shutdown();
 								try {
-									ues.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS);
+									if(!ues.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS)) {
+										ues.shutdownNow();
+									}
 								} catch(InterruptedException e) {
 									logger.log(Level.WARNING, null, e);
 									ues.shutdownNow();
@@ -777,7 +780,9 @@ final public class ExecutorService implements Disposable {
 							public void run() {
 								ppes.shutdown();
 								try {
-									ppes.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS);
+									if(!ppes.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS)) {
+										ppes.shutdownNow();
+									}
 								} catch(InterruptedException e) {
 									logger.log(Level.WARNING, null, e);
 									ppes.shutdownNow();

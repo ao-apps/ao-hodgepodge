@@ -110,10 +110,14 @@ public class HttpSocket extends AbstractSocket {
 		try {
 			super.close();
 		} finally {
+			logger.log(Level.FINE, "Notifying all on lock");
 			synchronized(lock) {
 				lock.notifyAll();
 			}
+			logger.log(Level.FINE, "Notifying all on lock completed");
+			logger.log(Level.FINE, "Calling executor.dispose()");
 			executor.dispose();
+			logger.log(Level.FINE, "executor.dispose() finished");
 		}
 	}
 

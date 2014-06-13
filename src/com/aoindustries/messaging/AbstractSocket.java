@@ -186,7 +186,9 @@ abstract public class AbstractSocket implements Socket {
 				}
 			);
 			try {
+				logger.log(Level.FINE, "Waiting for calls to onSocketClose to complete");
 				future.get();
+				logger.log(Level.FINE, "All calls to onSocketClose finished");
 			} catch(ExecutionException e) {
 				logger.log(Level.SEVERE, null, e);
 			} catch(InterruptedException e) {

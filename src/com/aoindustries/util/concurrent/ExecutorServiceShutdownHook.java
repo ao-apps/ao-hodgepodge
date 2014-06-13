@@ -49,7 +49,7 @@ public class ExecutorServiceShutdownHook extends Thread {
     /**
      * The default amount of time to wait before issuing a forceful shutdown.
      */
-    private static final long DEFAULT_SHUTDOWN_TIMEOUT = 60;
+    private static final long DEFAULT_SHUTDOWN_TIMEOUT = 5; // Was 60;
     private static final TimeUnit DEFAULT_SHUTDOWN_TIMEUNIT = TimeUnit.SECONDS;
 
     private final java.util.concurrent.ExecutorService executorService;

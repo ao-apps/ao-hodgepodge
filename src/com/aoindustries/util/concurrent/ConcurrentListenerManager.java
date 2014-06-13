@@ -174,7 +174,9 @@ public class ConcurrentListenerManager<L> implements Closeable {
 	 */
 	@Override
 	public void close() {
+		logger.log(Level.FINE, "Calling executor.dispose()");
 		executor.dispose();
+		logger.log(Level.FINE, "executor.dispose() finished");
 	}
 
 	/**
