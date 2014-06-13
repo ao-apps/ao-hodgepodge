@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -91,21 +91,22 @@ final public class ExecutorService implements Disposable {
      */
     static class PrefixThreadFactory implements ThreadFactory {
 
-        final ThreadGroup group;
+		// The thread group management was not compatible with an Applet environment
+        // final ThreadGroup group;
         final Sequence threadNumber = new AtomicSequence();
         final String namePrefix;
         final int priority;
 
         PrefixThreadFactory(String namePrefix, int priority) {
             SecurityManager s = System.getSecurityManager();
-            this.group = (s != null)? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            //this.group = (s != null)? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
             this.namePrefix = namePrefix;
             this.priority = priority;
         }
 
         @Override
         public Thread newThread(Runnable target) {
-            Thread t = new Thread(group, target, namePrefix + threadNumber.getNextSequenceValue());
+            Thread t = new Thread(/*group, */target, namePrefix + threadNumber.getNextSequenceValue());
             t.setPriority(priority);
             t.setDaemon(DAEMON_THREADS);
             return t;
@@ -203,6 +204,7 @@ final public class ExecutorService implements Disposable {
 	            Runtime.getRuntime().addShutdownHook(newShutdownHook);
 			} catch(SecurityException e) {
 				logger.log(Level.WARNING, null, e);
+				newShutdownHook = null;
 			}
             unboundedExecutorService = newExecutorService;
             unboundedShutdownHook = newShutdownHook;
@@ -239,6 +241,7 @@ final public class ExecutorService implements Disposable {
 	                Runtime.getRuntime().addShutdownHook(newShutdownHook);
 				} catch(SecurityException e) {
 					logger.log(Level.WARNING, null, e);
+					newShutdownHook = null;
 				}
                 perProcessorExecutorService = newExecutorService;
                 perProcessorShutdownHook = newShutdownHook;
@@ -731,32 +734,36 @@ final public class ExecutorService implements Disposable {
                 if(logger.isLoggable(Level.FINE)) logger.log(Level.FINE, "activeCount={0}", activeCount);
 
                 if(activeCount==0) {
-                    Runtime runtime = Runtime.getRuntime();
-                    if(unboundedShutdownHook!=null) {
-                        try {
-                            runtime.removeShutdownHook(unboundedShutdownHook);
-                        } catch(IllegalStateException e) {
-                            // System shutting down, can't remove hook
-                        }
-                        unboundedShutdownHook = null;
-                    }
 					final java.util.concurrent.ExecutorService ues = unboundedExecutorService;
                     if(ues!=null) {
+						final Thread ush = unboundedShutdownHook;
 						Runnable uesShutdown = new Runnable() {
 							@Override
 							public void run() {
-								ues.shutdown();
 								try {
-									if(!ues.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS)) {
-										ues.shutdownNow();
+									ues.shutdown();
+								} catch(SecurityException e) {
+									logger.log(Level.WARNING, null, e);
+								}
+								try {
+									if(ues.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS)) {
+										if(ush!=null) {
+											try {
+												Runtime.getRuntime().removeShutdownHook(ush);
+											} catch(IllegalStateException e) {
+												// System shutting down, can't remove hook
+											} catch(SecurityException e) {
+												logger.log(Level.WARNING, null, e);
+											}
+										}
 									}
 								} catch(InterruptedException e) {
 									logger.log(Level.WARNING, null, e);
-									ues.shutdownNow();
 								}
 							}
 						};
 						unboundedExecutorService = null;
+						unboundedShutdownHook = null;
 						// Never wait for own thread (causes stall every time)
 						if(isPerProcessor.get()!=null) {
 							new Thread(uesShutdown).start();
@@ -765,31 +772,36 @@ final public class ExecutorService implements Disposable {
 							uesShutdown.run();
 						}
                     }
-                    if(perProcessorShutdownHook!=null) {
-                        try {
-                            runtime.removeShutdownHook(perProcessorShutdownHook);
-                        } catch(IllegalStateException e) {
-                            // System shutting down, can't remove hook
-                        }
-                        perProcessorShutdownHook = null;
-                    }
 					final java.util.concurrent.ExecutorService ppes = perProcessorExecutorService;
                     if(ppes!=null) {
+						final Thread ppsh = perProcessorShutdownHook;
 						Runnable ppesShutdown = new Runnable() {
 							@Override
 							public void run() {
-								ppes.shutdown();
 								try {
-									if(!ppes.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS)) {
-										ppes.shutdownNow();
+									ppes.shutdown();
+								} catch(SecurityException e) {
+									logger.log(Level.WARNING, null, e);
+								}
+								try {
+									if(ppes.awaitTermination(DISPOSE_WAIT_NANOS, TimeUnit.NANOSECONDS)) {
+										if(ppsh!=null) {
+											try {
+												Runtime.getRuntime().removeShutdownHook(ppsh);
+											} catch(IllegalStateException e) {
+												// System shutting down, can't remove hook
+											} catch(SecurityException e) {
+												logger.log(Level.WARNING, null, e);
+											}
+										}
 									}
 								} catch(InterruptedException e) {
 									logger.log(Level.WARNING, null, e);
-									ppes.shutdownNow();
 								}
 							}
 						};
 						perProcessorExecutorService = null;
+						perProcessorShutdownHook = null;
 						// Never wait for own thread (causes stall every time)
 						if(isPerProcessor.get()!=null) {
 							new Thread(ppesShutdown).start();

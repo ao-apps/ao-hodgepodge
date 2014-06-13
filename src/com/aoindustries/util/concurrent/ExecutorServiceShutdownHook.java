@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -77,13 +77,26 @@ public class ExecutorServiceShutdownHook extends Thread {
 
     @Override
     public void run() {
-        executorService.shutdown();
+		try {
+	        executorService.shutdown();
+		} catch(SecurityException e) {
+            logger.log(Level.WARNING, null, e);
+		}
         try {
-            executorService.awaitTermination(shutdownTimeout, shutdownTimeoutUnit);
+            if(!executorService.awaitTermination(shutdownTimeout, shutdownTimeoutUnit)) {
+				try {
+					executorService.shutdownNow();
+				} catch(SecurityException e) {
+					logger.log(Level.WARNING, null, e);
+				}
+			}
         } catch(InterruptedException e) {
             logger.log(Level.SEVERE, null, e);
-            System.err.println();
-            executorService.shutdownNow();
+			try {
+	            executorService.shutdownNow();
+			} catch(SecurityException e2) {
+				logger.log(Level.WARNING, null, e2);
+			}
         }
     }
 }
