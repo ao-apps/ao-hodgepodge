@@ -98,6 +98,7 @@ public class FindReplaceProxy {
                                     Socket socketIn = ss.accept();
                                     new FindReplaceProxyThread(
                                         socketIn,
+										listenAddress,
                                         connectAddress,
                                         connectPort,
                                         Collections.unmodifiableList(inFindReplaces),
@@ -130,6 +131,7 @@ public class FindReplaceProxy {
 
     static class FindReplaceProxyThread extends Thread {
         private final Socket socketIn;
+		private final InetAddress sourceAddress;
         private final InetAddress connectAddress;
         private final int connectPort;
         private final List<FindReplace> inFindReplaces;
@@ -137,12 +139,14 @@ public class FindReplaceProxy {
 
         FindReplaceProxyThread(
             Socket socketIn,
+			InetAddress sourceAddress,
             InetAddress connectAddress,
             int connectPort,
             List<FindReplace> inFindReplaces,
             List<FindReplace> outFindReplaces
         ) {
             this.socketIn = socketIn;
+			this.sourceAddress = sourceAddress;
             this.connectAddress = connectAddress;
             this.connectPort = connectPort;
             this.inFindReplaces = inFindReplaces;
@@ -153,7 +157,7 @@ public class FindReplaceProxy {
         public void run() {
             try {
                 try {
-                    Socket socketOut = new Socket(connectAddress, connectPort);
+                    Socket socketOut = new Socket(connectAddress, connectPort, sourceAddress, 0);
                     try {
                         FindReplaceReadThread inThread = new FindReplaceReadThread(socketIn.getInputStream(), socketOut.getOutputStream(), inFindReplaces);
                         try {
