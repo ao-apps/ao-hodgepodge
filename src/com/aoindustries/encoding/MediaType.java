@@ -49,6 +49,9 @@ public enum MediaType {
             return
                 "application/xhtml+xml".equalsIgnoreCase(contentType)
                 || "text/html".equalsIgnoreCase(contentType)
+				// Also use this type for general purpose XML documents
+                || "application/xml".equalsIgnoreCase(contentType)
+                || "text/xml".equalsIgnoreCase(contentType)
             ;
         }
 
