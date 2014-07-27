@@ -23,6 +23,7 @@
 package com.aoindustries.util;
 
 import com.aoindustries.lang.ObjectUtils;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +85,17 @@ public class MinimalMap {
 	 */
 	public static <K,V> boolean containsKey(Map<K,V> map, K key) {
 		return map!=null && map.containsKey(key);
+	}
+
+	/**
+	 * Gets the value set.
+	 */
+	public static <K,V> Collection<V> values(Map<K,V> map) {
+		if(map==null) {
+			return Collections.emptyList();
+		} else {
+			return map.values();
+		}
 	}
 
 	/**
