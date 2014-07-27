@@ -23,6 +23,7 @@
 package com.aoindustries.util;
 
 import com.aoindustries.lang.ObjectUtils;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -119,13 +120,28 @@ public class MinimalMap {
 	}
 
 	/**
-	 * Gets the value set.
+	 * Gets the value collection.
 	 */
 	public static <K,V> Collection<V> values(Map<K,V> map) {
 		if(map==null) {
 			return Collections.emptyList();
 		} else {
 			return map.values();
+		}
+	}
+
+	/**
+	 * Performs a shallow copy of the value collection.
+	 */
+	public static <K,V> Collection<V> valuesCopy(Map<K,V> map) {
+		if(map==null) {
+			return Collections.emptyList();
+		} if(map.size() == 1) {
+			// singletonMap is unmodifiable: no wrapping required
+			return map.values();
+		} else {
+			// Wrap in an ArrayList
+			return new ArrayList<V>(map.values());
 		}
 	}
 
