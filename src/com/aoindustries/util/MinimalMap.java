@@ -74,6 +74,37 @@ public class MinimalMap {
 	}
 
 	/**
+	 * Removes an element from a map, returning the (possibly new) map.
+	 */
+	public static <K,V> Map<K,V> remove(final Map<K,V> map, final K key) {
+        if(map == null) {
+			// Empty map, nothing to remove
+			return null;
+		} else if(map.size()==1) {
+			// Is a singleton map
+			if(map.containsKey(key)) {
+				// Map is now empty
+				return null;
+			} else {
+				// Map unchanged
+				return map;
+			}
+		} else {
+			// Is a HashMap
+			map.remove(key);
+			if(map.size() == 1) {
+				// Convert to singletonMap
+				Map.Entry<K,V> entry = map.entrySet().iterator().next();
+				return Collections.singletonMap(entry.getKey(), entry.getValue());
+			} else {
+				// Still more than one item, use same HashMap instance
+				assert map.size() > 1;
+				return map;
+			}
+		}
+	}
+
+	/**
 	 * Gets an element from a map.
 	 */
 	public static <K,V> V get(Map<K,V> map, K key) {
