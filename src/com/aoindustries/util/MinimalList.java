@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -30,7 +30,7 @@ import java.util.List;
  * MinimalList provides a set of static methods to dynamically choose the most
  * efficient List implementation.  The implementation of List is changed as needed.
  * MinimalList is most suited for building list-based data structures that use less
- * heap space than a pure-ArrayList based solution.
+ * heap space than a pure ArrayList-based solution.
  * <p>
  * size=0: null<br/>
  * size=1: Collections.singletonList<br/>

@@ -32,7 +32,7 @@ import java.util.Map;
  * MinimalMap provides a set of static methods to dynamically choose the most
  * efficient Map implementation.  The implementation of Map is changed as needed.
  * MinimalMap is most suited for building map-based data structures that use less
- * heap space than a pure-HashMap based solution.
+ * heap space than a pure HashMap-based solution.
  * <p>
  * size=0: null<br/>
  * size=1: Collections.singletonMap<br/>
