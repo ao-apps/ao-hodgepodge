@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -77,6 +77,13 @@ public class MinimalMap {
 	 */
 	public static <K,V> V get(Map<K,V> map, K key) {
 		return map==null ? null : map.get(key);
+	}
+
+	/**
+	 * Checks if a key is contained in the map.
+	 */
+	public static <K,V> boolean containsKey(Map<K,V> map, K key) {
+		return map!=null && map.containsKey(key);
 	}
 
 	/**
