@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -94,7 +94,15 @@ public class Database extends AbstractDatabaseAccess {
     public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
         if(pool!=null) {
             // From pool
-            return pool.getConnection(isolationLevel, readOnly, maxConnections);
+            Connection conn = pool.getConnection(isolationLevel, readOnly, maxConnections);
+			boolean successful = false;
+			try {
+				initConnection(conn);
+				successful = true;
+				return conn;
+			} finally {
+				if(!successful) pool.releaseConnection(conn);
+			}
         } else {
             // From dataSource
             Connection conn = dataSource.getConnection();
@@ -102,8 +110,9 @@ public class Database extends AbstractDatabaseAccess {
             try {
                 if(isolationLevel!=conn.getTransactionIsolation()) conn.setTransactionIsolation(isolationLevel);
                 if(readOnly!=conn.isReadOnly()) conn.setReadOnly(readOnly);
+				initConnection(conn);
                 successful = true;
-                return conn;
+				return conn;
             } finally {
                 if(!successful) conn.close();
             }
@@ -977,4 +986,13 @@ public class Database extends AbstractDatabaseAccess {
     public String toString() {
         return "Database("+(pool!=null ? pool.toString() : dataSource.toString())+")";
     }
+
+	/**
+	 * Whenever a new connection is obtained from the pool or the dataSource,
+	 * it is passed here for any intialization routine.
+	 * This default implementation does nothing.
+	 */
+	protected void initConnection(Connection conn) throws SQLException {
+		// Do nothing
+	}
 }
