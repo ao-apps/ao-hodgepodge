@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,15 +22,12 @@
  */
 package com.aoindustries.sql;
 
-import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.IntArrayList;
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.LongArrayList;
 import com.aoindustries.util.LongList;
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
@@ -52,9 +49,7 @@ import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -207,33 +202,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     @Override
-    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-		Connection conn = getConnection(isolationLevel, readOnly);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            setParams(conn, pstmt, params);
-            ResultSet results=pstmt.executeQuery();
-            try {
-                if(results.next()) {
-                    BigDecimal b=results.getBigDecimal(1);
-                    if(results.next()) throw new ExtraRowException();
-                    return b;
-                }
-                if(rowRequired) throw new NoRowException();
-                return null;
-            } finally {
-                results.close();
-            }
-        } catch(NoRowException err) {
-            throw err;
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
     public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
 		Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -248,60 +216,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                 }
                 if(rowRequired) throw new NoRowException();
                 return false;
-            } finally {
-                results.close();
-            }
-        } catch(NoRowException err) {
-            throw err;
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-		Connection conn = getConnection(isolationLevel, readOnly);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            setParams(conn, pstmt, params);
-            ResultSet results=pstmt.executeQuery();
-            try {
-                if(results.next()) {
-                    byte[] b=results.getBytes(1);
-                    if(results.next()) throw new ExtraRowException();
-                    return b;
-                }
-                if(rowRequired) throw new NoRowException();
-                return null;
-            } finally {
-                results.close();
-            }
-        } catch(NoRowException err) {
-            throw err;
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-		Connection conn = getConnection(isolationLevel, readOnly);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            setParams(conn, pstmt, params);
-            ResultSet results=pstmt.executeQuery();
-            try {
-                if(results.next()) {
-                    java.sql.Date D=results.getDate(1);
-                    if(results.next()) throw new ExtraRowException();
-                    return D;
-                }
-                if(rowRequired) throw new NoRowException();
-                return null;
             } finally {
                 results.close();
             }
@@ -415,53 +329,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException {
-        Connection conn = getConnection(isolationLevel, readOnly);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            try {
-                setParams(conn, pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    if(results.next()) {
-                        Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
-                        T object = constructor.newInstance(results);
-                        if(results.next()) throw new ExtraRowException();
-                        return object;
-                    }
-                    if(rowRequired) throw new NoRowException();
-                    return null;
-                } finally {
-                    results.close();
-                }
-            } catch(NoSuchMethodException err) {
-                SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(InstantiationException err) {
-                SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(IllegalAccessException err) {
-                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(InvocationTargetException err) {
-                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            }
-        } catch(NoRowException err) {
-            throw err;
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException {
+    public <T,E extends Exception> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws NoRowException, SQLException, E {
         Connection conn = getConnection(isolationLevel, readOnly);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
@@ -488,116 +356,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
-        Connection conn = getConnection(isolationLevel, readOnly);
-        conn.setAutoCommit(false);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            pstmt.setFetchSize(FETCH_SIZE);
-            try {
-                setParams(conn, pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
-                    List<T> list=new ArrayList<T>();
-                    while(results.next()) list.add(constructor.newInstance(results));
-                    return AoCollections.optimalUnmodifiableList(list);
-                } finally {
-                    results.close();
-                }
-            } catch(NoSuchMethodException err) {
-                SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(InstantiationException err) {
-                SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(IllegalAccessException err) {
-                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(InvocationTargetException err) {
-                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            }
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
-        Connection conn = getConnection(isolationLevel, readOnly);
-        conn.setAutoCommit(false);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            pstmt.setFetchSize(FETCH_SIZE);
-            setParams(conn, pstmt, params);
-            ResultSet results=pstmt.executeQuery();
-            try {
-                List<T> list=new ArrayList<T>();
-                while(results.next()) list.add(objectFactory.createObject(results));
-                return AoCollections.optimalUnmodifiableList(list);
-            } finally {
-                results.close();
-            }
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, Class<T> clazz, String sql, Object ... params) throws SQLException {
-        Connection conn = getConnection(isolationLevel, readOnly);
-        conn.setAutoCommit(false);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            pstmt.setFetchSize(FETCH_SIZE);
-            try {
-                setParams(conn, pstmt, params);
-                ResultSet results=pstmt.executeQuery();
-                try {
-                    Constructor<T> constructor = clazz.getConstructor(ResultSet.class);
-                    while(results.next()) {
-                        T newObj = constructor.newInstance(results);
-                        if(!collection.add(newObj)) throw new SQLException("Duplicate row in results: "+getRow(results));
-                    }
-                    return collection;
-                } finally {
-                    results.close();
-                }
-            } catch(NoSuchMethodException err) {
-                SQLException sqlErr = new SQLException("Unable to find constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(InstantiationException err) {
-                SQLException sqlErr = new SQLException("Unable to instantiate object: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(IllegalAccessException err) {
-                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            } catch(InvocationTargetException err) {
-                SQLException sqlErr = new SQLException("Illegal access on constructor: "+clazz.getName()+"(java.sql.ResultSet)");
-                sqlErr.initCause(err);
-                throw sqlErr;
-            }
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+    public <T,C extends Collection<? super T>,E extends Exception> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws SQLException, E {
         Connection conn = getConnection(isolationLevel, readOnly);
         conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -631,30 +390,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
-                while(results.next()) resultSetHandler.handleResultSet(results);
-            } finally {
-                results.close();
-            }
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        Connection conn = getConnection(isolationLevel, readOnly);
-        conn.setAutoCommit(false);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            pstmt.setFetchSize(FETCH_SIZE);
-            setParams(conn, pstmt, params);
-            ResultSet results=pstmt.executeQuery();
-            try {
-                List<Short> list = new ArrayList<Short>();
-                while(results.next()) list.add(results.getShort(1));
-                return AoCollections.optimalUnmodifiableList(list);
+                resultSetHandler.handleResultSet(results);
             } finally {
                 results.close();
             }
@@ -680,83 +416,6 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                 }
                 if(rowRequired) throw new NoRowException();
                 return 0;
-            } finally {
-                results.close();
-            }
-        } catch(NoRowException err) {
-            throw err;
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-		Connection conn = getConnection(isolationLevel, readOnly);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            setParams(conn, pstmt, params);
-            ResultSet results=pstmt.executeQuery();
-            try {
-                if(results.next()) {
-                    String S=results.getString(1);
-                    if(results.next()) throw new ExtraRowException();
-                    return S;
-                }
-                if(rowRequired) throw new NoRowException();
-                return null;
-            } finally {
-                results.close();
-            }
-        } catch(NoRowException err) {
-            throw err;
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        Connection conn = getConnection(isolationLevel, readOnly);
-        conn.setAutoCommit(false);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            pstmt.setFetchSize(FETCH_SIZE);
-            setParams(conn, pstmt, params);
-            ResultSet results=pstmt.executeQuery();
-            try {
-                List<String> list = new ArrayList<String>();
-                while(results.next()) list.add(results.getString(1));
-                return AoCollections.optimalUnmodifiableList(list);
-            } finally {
-                results.close();
-            }
-        } catch(SQLException err) {
-            throw new WrappedSQLException(err, pstmt);
-        } finally {
-            pstmt.close();
-        }
-    }
-
-    @Override
-    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-		Connection conn = getConnection(isolationLevel, readOnly);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            setParams(conn, pstmt, params);
-            ResultSet results=pstmt.executeQuery();
-            try {
-                if(results.next()) {
-                    Timestamp T=results.getTimestamp(1);
-                    if(results.next()) throw new ExtraRowException();
-                    return T;
-                }
-                if(rowRequired) throw new NoRowException();
-                return null;
             } finally {
                 results.close();
             }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2014  AO Industries, Inc.
+ * Copyright (C) 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,14 +25,14 @@ package com.aoindustries.sql;
 import java.sql.SQLException;
 
 /**
- * Target that may be used by <code>Database.executeTransaction</code>.
+ * Target that may be used by <code>Database.executeTransaction</code>
+ * and allows any arbitrary exception type in addition to the usual SQLException.
  *
- * @see  Database#executeTransaction(com.aoindustries.sql.DatabaseCallable)
+ * @see  Database#executeTransaction(com.aoindustries.sql.DatabaseRunnableE)
  *
  * @author  AO Industries, Inc.
  */
-public interface DatabaseCallable<V> extends DatabaseCallableE<V,RuntimeException> {
+public interface DatabaseRunnableE<E extends Exception> {
 
-	@Override
-    V call(DatabaseConnection db) throws SQLException;
+    void run(DatabaseConnection db) throws SQLException, E;
 }

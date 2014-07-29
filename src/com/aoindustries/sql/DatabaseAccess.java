@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -248,6 +248,21 @@ public interface DatabaseAccess {
     <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException;
 
     /**
+     * Read-only query the database with a <code>&lt;T&gt;</code> return type, objects are created with the provided factory.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     *   <li>rowRequired = <code>true</code></li>
+     * </ul>
+     */
+    <T,E extends Exception> T executeObjectQuery(Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws NoRowException, SQLException, E;
+
+    /**
+     * Query the database with a <code>&lt;T&gt;</code> return type, objects are created with the provided factory.
+     */
+    <T,E extends Exception> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws NoRowException, SQLException, E;
+
+	/**
      * Read-only query the database with a <code>List&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
@@ -276,6 +291,20 @@ public interface DatabaseAccess {
     <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
 
     /**
+     * Read-only query the database with a <code>List&lt;T&gt;</code> return type, objects are created with the provided factory.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     * </ul>
+     */
+    <T,E extends Exception> List<T> executeObjectListQuery(Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws SQLException, E;
+
+    /**
+     * Query the database with a <code>List&lt;T&gt;</code> return type, objects are created with the provided factory.
+     */
+    <T,E extends Exception> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws SQLException, E;
+
+	/**
      * Read-only query the database with a <code>Collection&lt;T&gt;</code> return type.  Class &lt;T&gt; must have a contructor that takes a single argument of <code>ResultSet</code>.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
@@ -304,7 +333,21 @@ public interface DatabaseAccess {
     <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException;
 
     /**
-     * Read-only query the database, calling the <code>ResultSetHandler</code> for each row retrieved.
+     * Read-only query the database with a <code>Collection&lt;T&gt;</code> return type, objects are created with the provided factory.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     * </ul>
+     */
+    <T,C extends Collection<? super T>,E extends Exception> C executeObjectCollectionQuery(C collection, Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws SQLException, E;
+
+    /**
+     * Query the database with a <code>Collection&lt;T&gt;</code> return type, objects are created with the provided factory.
+     */
+    <T,C extends Collection<? super T>,E extends Exception> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws SQLException, E;
+
+	/**
+     * Read-only query the database, calling the <code>ResultSetHandler</code> once.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
      *   <li>readOnly = <code>true</code></li>
@@ -313,7 +356,7 @@ public interface DatabaseAccess {
     void executeQuery(ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException;
 
     /**
-     * Query the database, calling the <code>ResultSetHandler</code> for each row retrieved.
+     * Query the database, calling the <code>ResultSetHandler</code> once.
      */
     void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException;
 

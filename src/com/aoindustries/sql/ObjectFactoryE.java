@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2014  AO Industries, Inc.
+ * Copyright (C) 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,17 +22,18 @@
  */
 package com.aoindustries.sql;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Target that may be used by <code>Database.executeTransaction</code>.
- *
- * @see  Database#executeTransaction(com.aoindustries.sql.DatabaseCallable)
+ * Creates instances of objects of the generics type from a result set.
  *
  * @author  AO Industries, Inc.
  */
-public interface DatabaseCallable<V> extends DatabaseCallableE<V,RuntimeException> {
+public interface ObjectFactoryE<T,E extends Exception> {
 
-	@Override
-    V call(DatabaseConnection db) throws SQLException;
+    /**
+     * Creates one object from the current values in the ResultSet.
+     */
+    T createObject(ResultSet result) throws SQLException, E;
 }

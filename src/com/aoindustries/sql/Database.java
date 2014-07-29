@@ -24,13 +24,9 @@ package com.aoindustries.sql;
 
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.LongList;
-import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 
@@ -140,43 +136,6 @@ public class Database extends AbstractDatabaseAccess {
     }
 
     @Override
-    public BigDecimal executeBigDecimalQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeBigDecimalQuery(isolationLevel, readOnly, rowRequired, sql, params);
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                BigDecimal value=conn.executeBigDecimalQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
     public boolean executeBooleanQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
         DatabaseConnection conn = transactionConnection.get();
         if(conn!=null) {
@@ -203,80 +162,7 @@ public class Database extends AbstractDatabaseAccess {
                 conn.rollback();
                 throw err;
             } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public byte[] executeByteArrayQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeByteArrayQuery(isolationLevel, readOnly, rowRequired, sql, params);
-            } catch(RuntimeException err) {
                 conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                byte[] value=conn.executeByteArrayQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public Date executeDateQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeDateQuery(isolationLevel, readOnly, rowRequired, sql, params);
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                Date value=conn.executeDateQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
                 throw err;
             } catch(SQLException err) {
                 conn.rollbackAndClose();
@@ -311,6 +197,9 @@ public class Database extends AbstractDatabaseAccess {
                 if(!readOnly) conn.commit();
                 return value;
             } catch(RuntimeException err) {
+                conn.rollback();
+                throw err;
+            } catch(NoRowException err) {
                 conn.rollback();
                 throw err;
             } catch(SQLException err) {
@@ -349,6 +238,7 @@ public class Database extends AbstractDatabaseAccess {
                 conn.rollback();
                 throw err;
             } catch(NoRowException err) {
+                conn.rollback();
                 throw err;
             } catch(SQLException err) {
                 conn.rollbackAndClose();
@@ -383,6 +273,9 @@ public class Database extends AbstractDatabaseAccess {
                 if(!readOnly) conn.commit();
                 return value;
             } catch(RuntimeException err) {
+                conn.rollback();
+                throw err;
+            } catch(NoRowException err) {
                 conn.rollback();
                 throw err;
             } catch(SQLException err) {
@@ -421,114 +314,6 @@ public class Database extends AbstractDatabaseAccess {
                 conn.rollback();
                 throw err;
             } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<T> clazz, String sql, Object ... params) throws NoRowException, SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, clazz, sql, params);
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, clazz, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public <T> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, ObjectFactory<T> objectFactory, String sql, Object ... params) throws NoRowException, SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, objectFactory, sql, params);
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, objectFactory, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, Class<T> clazz, String sql, Object ... params) throws SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeObjectListQuery(isolationLevel, readOnly, clazz, sql, params);
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, clazz, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
             } catch(SQLException err) {
@@ -541,12 +326,12 @@ public class Database extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T> List<T> executeObjectListQuery(int isolationLevel, boolean readOnly, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
+    public <T,E extends Exception> T executeObjectQuery(int isolationLevel, boolean readOnly, boolean rowRequired, Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws NoRowException, SQLException, E {
         DatabaseConnection conn = transactionConnection.get();
         if(conn!=null) {
             // Reuse existing connection
             try {
-                return conn.executeObjectListQuery(isolationLevel, readOnly, objectFactory, sql, params);
+                return conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, eClass, objectFactory, sql, params);
             } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
@@ -555,20 +340,31 @@ public class Database extends AbstractDatabaseAccess {
             } catch(SQLException err) {
                 conn.rollbackAndClose();
                 throw err;
+            } catch(Exception e) {
+                conn.rollback();
+				if(eClass.isInstance(e)) throw eClass.cast(e);
+				throw new SQLException(e);
             }
         } else {
             // Create new connection
             conn=createDatabaseConnection();
             try {
-                List<T> value=conn.executeObjectListQuery(isolationLevel, readOnly, objectFactory, sql, params);
+                T value=conn.executeObjectQuery(isolationLevel, readOnly, rowRequired, eClass, objectFactory, sql, params);
                 if(!readOnly) conn.commit();
                 return value;
             } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
+            } catch(NoRowException err) {
+                conn.rollback();
+                throw err;
             } catch(SQLException err) {
                 conn.rollbackAndClose();
                 throw err;
+            } catch(Exception e) {
+                conn.rollback();
+				if(eClass.isInstance(e)) throw eClass.cast(e);
+				throw new SQLException(e);
             } finally {
                 conn.releaseConnection();
             }
@@ -576,12 +372,12 @@ public class Database extends AbstractDatabaseAccess {
     }
 
     @Override
-    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, Class<T> clazz, String sql, Object ... params) throws SQLException {
+    public <T,C extends Collection<? super T>,E extends Exception> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws SQLException, E {
         DatabaseConnection conn = transactionConnection.get();
         if(conn!=null) {
             // Reuse existing connection
             try {
-                return conn.executeObjectCollectionQuery(isolationLevel, readOnly, collection, clazz, sql, params);
+                return conn.executeObjectCollectionQuery(isolationLevel, readOnly, collection, eClass, objectFactory, sql, params);
             } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
@@ -590,55 +386,31 @@ public class Database extends AbstractDatabaseAccess {
             } catch(SQLException err) {
                 conn.rollbackAndClose();
                 throw err;
+            } catch(Exception e) {
+                conn.rollback();
+				if(eClass.isInstance(e)) throw eClass.cast(e);
+				throw new SQLException(e);
             }
         } else {
             // Create new connection
             conn=createDatabaseConnection();
             try {
-                C value=conn.executeObjectCollectionQuery(isolationLevel, readOnly, collection, clazz, sql, params);
+                C value=conn.executeObjectCollectionQuery(isolationLevel, readOnly, collection, eClass, objectFactory, sql, params);
                 if(!readOnly) conn.commit();
                 return value;
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public <T,C extends Collection<? super T>> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, ObjectFactory<T> objectFactory, String sql, Object ... params) throws SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeObjectCollectionQuery(isolationLevel, readOnly, collection, objectFactory, sql, params);
             } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
             } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                C value=conn.executeObjectCollectionQuery(isolationLevel, readOnly, collection, objectFactory, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
             } catch(SQLException err) {
                 conn.rollbackAndClose();
                 throw err;
+            } catch(Exception e) {
+                conn.rollback();
+				if(eClass.isInstance(e)) throw eClass.cast(e);
+				throw new SQLException(e);
             } finally {
                 conn.releaseConnection();
             }
@@ -670,39 +442,7 @@ public class Database extends AbstractDatabaseAccess {
             } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public List<Short> executeShortListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeShortListQuery(isolationLevel, readOnly, sql, params);
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
             } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                List<Short> value=conn.executeShortListQuery(isolationLevel, readOnly, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
             } catch(SQLException err) {
@@ -741,115 +481,7 @@ public class Database extends AbstractDatabaseAccess {
                 conn.rollback();
                 throw err;
             } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public String executeStringQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeStringQuery(isolationLevel, readOnly, rowRequired, sql, params);
-            } catch(RuntimeException err) {
                 conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                String value=conn.executeStringQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public List<String> executeStringListQuery(int isolationLevel, boolean readOnly, String sql, Object ... params) throws SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeStringListQuery(isolationLevel, readOnly, sql, params);
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                List<String> value=conn.executeStringListQuery(isolationLevel, readOnly, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            } finally {
-                conn.releaseConnection();
-            }
-        }
-    }
-
-    @Override
-    public Timestamp executeTimestampQuery(int isolationLevel, boolean readOnly, boolean rowRequired, String sql, Object ... params) throws NoRowException, SQLException {
-        DatabaseConnection conn = transactionConnection.get();
-        if(conn!=null) {
-            // Reuse existing connection
-            try {
-                return conn.executeTimestampQuery(isolationLevel, readOnly, rowRequired, sql, params);
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
-                throw err;
-            } catch(SQLException err) {
-                conn.rollbackAndClose();
-                throw err;
-            }
-        } else {
-            // Create new connection
-            conn=createDatabaseConnection();
-            try {
-                Timestamp value=conn.executeTimestampQuery(isolationLevel, readOnly, rowRequired, sql, params);
-                if(!readOnly) conn.commit();
-                return value;
-            } catch(RuntimeException err) {
-                conn.rollback();
-                throw err;
-            } catch(NoRowException err) {
                 throw err;
             } catch(SQLException err) {
                 conn.rollbackAndClose();
@@ -886,6 +518,9 @@ public class Database extends AbstractDatabaseAccess {
             } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
+            } catch(NoRowException err) {
+                conn.rollback();
+                throw err;
             } catch(SQLException err) {
                 conn.rollbackAndClose();
                 throw err;
@@ -901,20 +536,23 @@ public class Database extends AbstractDatabaseAccess {
      * Checks if currently in a transaction.
      *
      * @see #executeTransaction(com.aoindustries.sql.DatabaseCallable)
+     * @see #executeTransaction(com.aoindustries.sql.DatabaseCallableE)
      * @see #executeTransaction(com.aoindustries.sql.DatabaseRunnable)
+     * @see #executeTransaction(com.aoindustries.sql.DatabaseRunnableE)
      */
     public boolean isInTransaction() {
         return transactionConnection.get()!=null;
     }
 
     /**
-     * @see  #executeTransaction(com.aoindustries.sql.DatabaseCallable)
+     * @see  #executeTransaction(com.aoindustries.sql.DatabaseCallableE)
      *
      * @see #isInTransaction()
      */
     public void executeTransaction(final DatabaseRunnable runnable) throws SQLException {
         executeTransaction(
-            new DatabaseCallable<Void>() {
+			RuntimeException.class,
+            new DatabaseCallableE<Void,RuntimeException>() {
                 @Override
                 public Void call(DatabaseConnection db) throws SQLException {
                     runnable.run(db);
@@ -924,12 +562,51 @@ public class Database extends AbstractDatabaseAccess {
         );
     }
 
-    /**
+	/**
+     * @see  #executeTransaction(com.aoindustries.sql.DatabaseCallableE)
+     *
+     * @see #isInTransaction()
+     */
+    public <E extends Exception> void executeTransaction(
+		Class<E> eClass,
+		final DatabaseRunnableE<E> runnable
+	) throws SQLException, E {
+        executeTransaction(
+			eClass,
+            new DatabaseCallableE<Void,E>() {
+                @Override
+                public Void call(DatabaseConnection db) throws SQLException, E {
+                    runnable.run(db);
+                    return null;
+                }
+            }
+        );
+    }
+
+   /**
+     * @see  #executeTransaction(com.aoindustries.sql.DatabaseCallableE)
+     *
+     * @see #isInTransaction()
+     */
+    public <V> V executeTransaction(final DatabaseCallable<V> callable) throws SQLException {
+        return executeTransaction(
+			RuntimeException.class,
+            new DatabaseCallableE<V,RuntimeException>() {
+                @Override
+                public V call(DatabaseConnection db) throws SQLException {
+                    return callable.call(db);
+                }
+            }
+        );
+    }
+
+	/**
      * <p>
      * Executes an arbitrary transaction, providing automatic commit, rollback, and connection management.
      * Rolls-back the transaction on RuntimeException.
      * Rolls-back the transaction on NoRowException on the outer-most transaction only.
      * Rolls-back and closes the connection on all SQLException except NoRowException.
+     * Rolls-back the transaction on E.
      * </p>
      * <p>
      * The connection allocated is stored as a ThreadLocal and will be automatically reused if
@@ -940,7 +617,10 @@ public class Database extends AbstractDatabaseAccess {
      *
      * @see #isInTransaction()
      */
-    public <V> V executeTransaction(DatabaseCallable<V> callable) throws SQLException {
+    public <V,E extends Exception> V executeTransaction(
+		Class<E> eClass,
+		DatabaseCallableE<V,E> callable
+	) throws SQLException, E {
         DatabaseConnection conn = transactionConnection.get();
         if(conn!=null) {
             // Reuse existing connection
@@ -954,7 +634,11 @@ public class Database extends AbstractDatabaseAccess {
             } catch(SQLException err) {
                 conn.rollbackAndClose();
                 throw err;
-            }
+            } catch(Exception e) {
+                conn.rollback();
+				if(eClass.isInstance(e)) throw eClass.cast(e);
+				throw new SQLException(e);
+			}
         } else {
             // Create new connection
             conn=createDatabaseConnection();
@@ -976,6 +660,10 @@ public class Database extends AbstractDatabaseAccess {
             } catch(SQLException err) {
                 conn.rollbackAndClose();
                 throw err;
+            } catch(Exception e) {
+                conn.rollback();
+				if(eClass.isInstance(e)) throw eClass.cast(e);
+				throw new SQLException(e);
             } finally {
                 conn.releaseConnection();
             }

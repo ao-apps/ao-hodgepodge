@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,14 +26,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Processes result sets from a query one-at-a-time.
+ * Processes the resultSet from a query.  This is called only once, it is no longer
+ * row-by-row.  Iteration over the results is up to the implementor.
  *
  * @author  AO Industries, Inc.
  */
 public interface ResultSetHandler {
 
     /**
-     * Process one result set.
+     * Process one set of results.
      */
-    void handleResultSet(ResultSet result) throws SQLException;
+    void handleResultSet(ResultSet results) throws SQLException;
 }
