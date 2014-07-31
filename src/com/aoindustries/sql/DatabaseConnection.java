@@ -381,7 +381,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
     }
 
     @Override
-    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException {
+    public <T,E extends Exception> T executeQuery(int isolationLevel, boolean readOnly, Class<E> eClass, ResultSetHandlerE<T,E> resultSetHandler, String sql, Object ... params) throws SQLException, E {
         Connection conn = getConnection(isolationLevel, readOnly);
         conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -390,7 +390,7 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
             setParams(conn, pstmt, params);
             ResultSet results=pstmt.executeQuery();
             try {
-                resultSetHandler.handleResultSet(results);
+                return resultSetHandler.handleResultSet(results);
             } finally {
                 results.close();
             }

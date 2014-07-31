@@ -353,14 +353,28 @@ public interface DatabaseAccess {
      *   <li>readOnly = <code>true</code></li>
      * </ul>
      */
-    void executeQuery(ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException;
+    <T> T executeQuery(ResultSetHandler<T> resultSetHandler, String sql, Object ... params) throws SQLException;
 
     /**
      * Query the database, calling the <code>ResultSetHandler</code> once.
      */
-    void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException;
+    <T> T executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler<T> resultSetHandler, String sql, Object ... params) throws SQLException;
+
+	/**
+     * Read-only query the database, calling the <code>ResultSetHandlerE</code> once.
+     * <ul>
+     *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>
+     *   <li>readOnly = <code>true</code></li>
+     * </ul>
+     */
+    <T,E extends Exception> T executeQuery(Class<E> eClass, ResultSetHandlerE<T,E> resultSetHandler, String sql, Object ... params) throws SQLException, E;
 
     /**
+     * Query the database, calling the <code>ResultSetHandlerE</code> once.
+     */
+    <T,E extends Exception> T executeQuery(int isolationLevel, boolean readOnly, Class<E> eClass, ResultSetHandlerE<T,E> resultSetHandler, String sql, Object ... params) throws SQLException, E;
+
+	/**
      * Read-only query the database with a <code>List<Short></code> return type.
      * <ul>
      *   <li>isolationLevel = <code>Connection.TRANSACTION_READ_COMMITTED</code></li>

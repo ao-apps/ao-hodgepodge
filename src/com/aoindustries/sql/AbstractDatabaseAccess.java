@@ -262,12 +262,22 @@ abstract public class AbstractDatabaseAccess implements DatabaseAccess {
     abstract public <T,C extends Collection<? super T>,E extends Exception> C executeObjectCollectionQuery(int isolationLevel, boolean readOnly, C collection, Class<E> eClass, ObjectFactoryE<T,E> objectFactory, String sql, Object ... params) throws SQLException, E;
 
 	@Override
-    final public void executeQuery(ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException {
-        executeQuery(Connection.TRANSACTION_READ_COMMITTED, true, resultSetHandler, sql, params);
+    final public <T> T executeQuery(ResultSetHandler<T> resultSetHandler, String sql, Object ... params) throws SQLException {
+        return executeQuery(Connection.TRANSACTION_READ_COMMITTED, true, RuntimeException.class, resultSetHandler, sql, params);
     }
 
 	@Override
-    abstract public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException;
+    final public <T> T executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler<T> resultSetHandler, String sql, Object ... params) throws SQLException {
+        return executeQuery(isolationLevel, readOnly, RuntimeException.class, resultSetHandler, sql, params);
+	}
+
+	@Override
+    final public <T,E extends Exception> T executeQuery(Class<E> eClass, ResultSetHandlerE<T,E> resultSetHandler, String sql, Object ... params) throws SQLException, E {
+        return executeQuery(Connection.TRANSACTION_READ_COMMITTED, true, eClass, resultSetHandler, sql, params);
+	}
+
+	@Override
+    abstract public <T,E extends Exception> T executeQuery(int isolationLevel, boolean readOnly, Class<E> eClass, ResultSetHandlerE<T,E> resultSetHandler, String sql, Object ... params) throws SQLException, E;
 
 	private static final ObjectFactory<Short> shortObjectFactory = new ObjectFactory<Short>() {
 		@Override

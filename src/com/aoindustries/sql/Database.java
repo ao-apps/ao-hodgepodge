@@ -418,12 +418,12 @@ public class Database extends AbstractDatabaseAccess {
     }
 
     @Override
-    public void executeQuery(int isolationLevel, boolean readOnly, ResultSetHandler resultSetHandler, String sql, Object ... params) throws SQLException {
+    public <T,E extends Exception> T executeQuery(int isolationLevel, boolean readOnly, Class<E> eClass, ResultSetHandlerE<T,E> resultSetHandler, String sql, Object ... params) throws SQLException, E {
         DatabaseConnection conn = transactionConnection.get();
         if(conn!=null) {
             // Reuse existing connection
             try {
-                conn.executeQuery(isolationLevel, readOnly, resultSetHandler, sql, params);
+                return conn.executeQuery(isolationLevel, readOnly, eClass, resultSetHandler, sql, params);
             } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
@@ -432,13 +432,18 @@ public class Database extends AbstractDatabaseAccess {
             } catch(SQLException err) {
                 conn.rollbackAndClose();
                 throw err;
+            } catch(Exception e) {
+                conn.rollback();
+				if(eClass.isInstance(e)) throw eClass.cast(e);
+				throw new SQLException(e);
             }
         } else {
             // Create new connection
             conn=createDatabaseConnection();
             try {
-                conn.executeQuery(isolationLevel, readOnly, resultSetHandler, sql, params);
+                T value = conn.executeQuery(isolationLevel, readOnly, eClass, resultSetHandler, sql, params);
                 if(!readOnly) conn.commit();
+				return value;
             } catch(RuntimeException err) {
                 conn.rollback();
                 throw err;
@@ -448,6 +453,10 @@ public class Database extends AbstractDatabaseAccess {
             } catch(SQLException err) {
                 conn.rollbackAndClose();
                 throw err;
+            } catch(Exception e) {
+                conn.rollback();
+				if(eClass.isInstance(e)) throw eClass.cast(e);
+				throw new SQLException(e);
             } finally {
                 conn.releaseConnection();
             }
