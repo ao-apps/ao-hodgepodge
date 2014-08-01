@@ -50,7 +50,7 @@
 // backup is in sync.
 //
 // Because the counters must be read before they can be updated, this implies
-// that writes must be preceeded by reads.  The reads, however, are physcally
+// that writes must be preceeded by reads.  The reads, however, are physically
 // close to the writes to minimize the seek times.
 //
 // Due to using 32-bit counters, it is possible - although very unlikely - that

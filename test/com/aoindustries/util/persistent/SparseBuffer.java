@@ -43,10 +43,14 @@ import java.util.Map;
 public class SparseBuffer extends AbstractPersistentBuffer {
 
     private static final int BIT_SHIFT = 12;
+	
+	private static final int BLOCK_SIZE = 1 << BIT_SHIFT;
+	
+	private static final int BLOCK_MASK = BLOCK_SIZE - 1;
 
     private boolean isClosed = false;
     private long capacity = 0L;
-    private Map<Long,byte[]> buffers = new HashMap<Long,byte[]>();
+    private final Map<Long,byte[]> buffers = new HashMap<Long,byte[]>();
 
     /**
      * Creates a read-write test buffer with protection level <code>NONE</code>.
@@ -113,7 +117,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
         while(len>0) {
             long blockNum = position >>> BIT_SHIFT;
             if(blockNum!=lastBufferNum) lastBuffer = buffers.get(lastBufferNum = blockNum);
-            buff[off] = lastBuffer==null ? 0 : lastBuffer[(int)(position & 0xfffL)];
+            buff[off] = lastBuffer==null ? 0 : lastBuffer[(int)(position & BLOCK_MASK)];
             position++;
             off++;
             len--;
@@ -140,7 +144,7 @@ public class SparseBuffer extends AbstractPersistentBuffer {
             byte value = buff[off];
             // Only create the buffer when a non-zero value is being added
             if(lastBuffer==null && value!=0) buffers.put(lastBufferNum, lastBuffer = new byte[4096]);
-            if(lastBuffer!=null) lastBuffer[(int)(position & 0xfffL)] = value;
+            if(lastBuffer!=null) lastBuffer[(int)(position & BLOCK_MASK)] = value;
             position++;
             off++;
             len--;
