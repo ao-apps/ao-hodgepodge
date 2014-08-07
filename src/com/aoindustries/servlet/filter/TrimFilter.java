@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,11 +32,16 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * <p>
  * Filters the output and removes extra white space at the beginning of lines and completely removes blank lines.
  * TEXTAREAs are automatically detected as long as they start with exact "&lt;textarea" and end with exactly "&lt;/textarea" (case insensitive).
  * PREs are automatically detected as long as they start with exact "&lt;pre" and end with exactly "&lt;/pre" (case insensitive).
  * The reason for the specific tag format is to simplify the implementation
  * for maximum performance.
+ * </p>
+ * <p>
+ * This should be used for the REQUEST, FORWARD, and optionally ERROR dispatchers.
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
@@ -55,7 +60,7 @@ public class TrimFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        // Makes sure only one trim filter is applied per request
+        // Makes sure only one filter is applied per request
         if(
             enabled
             && request.getAttribute(REQUEST_ATTRIBUTE_KEY)==null
