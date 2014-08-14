@@ -22,9 +22,14 @@
  */
 package com.aoindustries.awt.image;
 
+import com.aoindustries.io.IoUtils;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author  AO Industries, Inc.
@@ -158,6 +163,28 @@ NextLocation :
 		}
 		return null;
 	};
+
+	/**
+	 * Loads an image from a resource using the default toolkit.
+	 */
+    public static Image getImageFromResources(Class<?> clazz, String name) throws IOException {
+		return getImageFromResources(clazz, name, Toolkit.getDefaultToolkit());
+    }
+
+	/**
+	 * Loads an image from a resource using the provided toolkit.
+	 */
+    public static Image getImageFromResources(Class<?> clazz, String name, Toolkit toolkit) throws IOException {
+		byte[] imageData;
+		InputStream in = clazz.getResourceAsStream(name);
+		if(in==null) throw new IOException("Unable to find resource: "+name);
+		try {
+			imageData = IoUtils.readFully(in);
+		} finally {
+			in.close();
+		}
+		return toolkit.createImage(imageData);
+    }
 
 	private Images() {
 	}

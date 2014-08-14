@@ -26,7 +26,7 @@ import com.aoindustries.lang.ObjectUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -35,9 +35,12 @@ import java.util.Map;
  * MinimalMap is most suited for building map-based data structures that use less
  * heap space than a pure HashMap-based solution.
  * <p>
+ * Insertion order is maintained.
+ * </p>
+ * <p>
  * size=0: null<br/>
  * size=1: Collections.singletonMap<br/>
- * size=2: HashMap
+ * size=2: LinkedHashMap
  * </p>
  *
  * @author  AO Industries, Inc.
@@ -63,12 +66,12 @@ public class MinimalMap {
 				map = Collections.singletonMap(entryKey, value);
 			} else {
 				// Is a second property
-				map = new HashMap<K,V>(8);
+				map = new LinkedHashMap<K,V>(8);
 				map.put(entryKey, entry.getValue());
 				map.put(key, value);
 			}
 		} else {
-			// Is a HashMap
+			// Is a LinkedHashMap
 			map.put(key, value);
 		}
 		return map;
@@ -91,14 +94,14 @@ public class MinimalMap {
 				return map;
 			}
 		} else {
-			// Is a HashMap
+			// Is a LinkedHashMap
 			map.remove(key);
 			if(map.size() == 1) {
 				// Convert to singletonMap
 				Map.Entry<K,V> entry = map.entrySet().iterator().next();
 				return Collections.singletonMap(entry.getKey(), entry.getValue());
 			} else {
-				// Still more than one item, use same HashMap instance
+				// Still more than one item, use same LinkedHashMap instance
 				assert map.size() > 1;
 				return map;
 			}
@@ -159,6 +162,6 @@ public class MinimalMap {
 			return map;
 		}
 		// Create copy of map
-		return new HashMap<K,V>(map);
+		return new LinkedHashMap<K,V>(map);
 	}
 }
