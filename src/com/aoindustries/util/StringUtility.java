@@ -552,6 +552,10 @@ public final class StringUtility {
     }
 
     public static String getDecimalTimeLengthString(long time) {
+		return getDecimalTimeLengthString(time, true);
+    }
+
+    public static String getDecimalTimeLengthString(long time, boolean alwaysShowMillis) {
         StringBuilder SB=new StringBuilder();
         if(time<0) {
             SB.append('-');
@@ -572,14 +576,17 @@ public final class StringUtility {
         if(minutes<10) SB.append('0');
         SB.append(minutes).append(':');
         if(seconds<10) SB.append('0');
-        SB.append(seconds).append('.');
-        if(time<10) SB.append("00");
-        else if(time<100) SB.append('0');
-        SB.append(time);
+        SB.append(seconds);
+		if(alwaysShowMillis || time != 0) {
+			SB.append('.');
+			if(time<10) SB.append("00");
+			else if(time<100) SB.append('0');
+			SB.append(time);
+		}
         return SB.toString();
     }
 
-    /**
+	/**
      * Finds the first occurrence of any of the supplied characters
      *
      * @param  S  the <code>String</code> to search
