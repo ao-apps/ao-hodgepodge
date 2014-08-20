@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -47,14 +47,24 @@ public class Locales {
 			if(l==null) {
 				int pos = locale.indexOf('_');
 				if(pos==-1) pos = locale.indexOf('-');
-				if(pos==-1) l = new Locale(locale);
-				else {
+				if(pos==-1) {
+					l = new Locale(
+						locale.toLowerCase(Locale.ENGLISH)
+					);
+				} else {
 					int pos2 = locale.indexOf('_', pos+1);
 					if(pos2==-1) pos2 = locale.indexOf('-', pos+1);
 					if(pos2==-1) {
-						l = new Locale(locale.substring(0, pos), locale.substring(pos+1));
+						l = new Locale(
+							locale.substring(0, pos).toLowerCase(Locale.ENGLISH),
+							locale.substring(pos + 1).toUpperCase(Locale.ENGLISH)
+						);
 					} else {
-						l = new Locale(locale.substring(0, pos), locale.substring(pos+1, pos2), locale.substring(pos2+1));
+						l = new Locale(
+							locale.substring(0, pos).toLowerCase(Locale.ENGLISH),
+							locale.substring(pos + 1, pos2).toUpperCase(Locale.ENGLISH),
+							locale.substring(pos2 + 1)
+						);
 					}
 				}
 				Locale existing = locales.putIfAbsent(locale, l);
