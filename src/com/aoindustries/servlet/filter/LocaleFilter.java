@@ -37,6 +37,7 @@ import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -77,6 +78,8 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * </p>
  */
 abstract public class LocaleFilter implements Filter {
+
+	private static final boolean DEBUG = true;
 
 	/**
 	 * UTF-8 encoding is assumed for all URL encoding.
@@ -136,9 +139,11 @@ abstract public class LocaleFilter implements Filter {
 		}
     }
 
+	private ServletContext servletContext;
+
     @Override
     public void init(FilterConfig config) throws ServletException {
-		// Do nothing
+		this.servletContext = config.getServletContext();
     }
 
     /**
@@ -186,12 +191,13 @@ abstract public class LocaleFilter implements Filter {
 					paramValue != null
 					&& httpRequest.getMethod().equals("GET")
 					&& (
-						// Never allow paramName when no choice in locale
-						supportedLocales.size() < 2
 						// Never allow paramName on non-localized paths
-						|| !isLocalized
+						!isLocalized
+						// Never allow paramName when no choice in locale
+						|| supportedLocales.size() < 2
 					)
 				) {
+					if(DEBUG) servletContext.log("DEBUG: Redirecting to remove \"" + paramName + "\" parameter.");
 					StringBuilder url = new StringBuilder();
 					url.append(requestUri);
 					boolean didOne = false;
@@ -210,16 +216,43 @@ abstract public class LocaleFilter implements Filter {
 						}
 					}
 					ServletUtil.sendRedirect(httpRequest, httpResponse, url.toString(), HttpServletResponse.SC_MOVED_PERMANENTLY);
-				} else if(
+					return;
+				}
+				if(
+					// Set no response locale and perform no URL rewriting when no locales supported
+					!isLocalized
+				) {
+					if(DEBUG) servletContext.log("DEBUG: Resource not localized, using container's default locale and performing no URL rewriting.");
+		            chain.doFilter(request, response);
+					return;
+				}
+				if(
 					// Set no response locale and perform no URL rewriting when no locales supported
 					supportedLocales.isEmpty()
 				) {
+					if(DEBUG) servletContext.log("DEBUG: No supported locales, using container's default locale and performing no URL rewriting.");
 		            chain.doFilter(request, response);
+					return;
+				}
+				Locale locale;
+				boolean rewriteUrls;
+				if(
+					// Only one choice of locale, use it in the response - no language negotiation
+					supportedLocales.size() < 2
+				) {
+					assert supportedLocales.size() == 1;
+					if(DEBUG) servletContext.log("DEBUG: Only one supported locale, using the locale and performing no URL rewriting.");
+					locale = supportedLocales.values().iterator().next();
+					rewriteUrls = false;
 				} else {
-					Locale locale = null;
+					assert supportedLocales.size() >= 2;
+					rewriteUrls = true;
+					locale = null;
 					if(paramValue != null) {
 						locale = supportedLocales.get(paramValue);
-						if(locale == null) {
+						if(locale != null) {
+							if(DEBUG) servletContext.log("DEBUG: Exact match on locale parameter: " + toLocaleString(locale));
+						} else {
 							// Use best match here to have parameter like "en-GB" redirect to just "en".
 							// In this regard, a parameter behaves similarly to, and takes precedence over, the Accept-Language header.
 							// Note: this assumes that parameter values are compatible with header values, which is
@@ -227,6 +260,9 @@ abstract public class LocaleFilter implements Filter {
 							MatchedLocale matched = getBestMatch(supportedLocales, paramValue);
 							if(matched != null) {
 								locale = matched.locale;
+								if(DEBUG) servletContext.log("DEBUG: Found best match on locale parameter: " + toLocaleString(locale));
+							} else {
+								if(DEBUG) servletContext.log("DEBUG: Found no match on locale parameter.");
 							}
 						}
 					}
@@ -234,18 +270,16 @@ abstract public class LocaleFilter implements Filter {
 						// Determine language from Accept-Language header, if present
 						locale = getBestLocale(supportedLocales, httpRequest);
 						assert locale != null;
+						if(DEBUG) servletContext.log("DEBUG: Found best locale from headers: " + toLocaleString(locale));
 					}
 					final String localeString = toLocaleString(locale);
 					if(
 						// 301 redirect if paramName not on GET request
 						// or if the parameter value doesn't match the resolved locale
 						httpRequest.getMethod().equals("GET")
-						&& (
-							paramValue == null
-							? isLocalized
-							: !localeString.equals(paramValue)
-						)
+						&& !localeString.equals(paramValue)
 					) {
+						if(DEBUG) servletContext.log("DEBUG: Redirecting for missing or mismatched locale parameter: " + localeString);
 						StringBuilder url = new StringBuilder();
 						url.append(requestUri);
 						boolean didOne = false;
@@ -270,120 +304,125 @@ abstract public class LocaleFilter implements Filter {
 						}
 						url.append(encodedParamName).append('=').append(URLEncoder.encode(localeString, ENCODING));
 						ServletUtil.sendRedirect(httpRequest, httpResponse, url.toString(), HttpServletResponse.SC_MOVED_PERMANENTLY);
-					} else {
-						// Set the response locale.
-						httpResponse.setLocale(locale);
-
-						// Set the locale for JSTL fmt tags
-						httpRequest.setAttribute("javax.servlet.jsp.jstl.fmt.locale.request", locale);
-
-						// Set and restore ThreadLocale
-						Locale oldThreadLocale = ThreadLocale.get();
-						try {
-							ThreadLocale.set(locale);
-							// Perform URL rewriting to maintain locale
-							chain.doFilter(
-								httpRequest,
-								supportedLocales.size() < 2
-								// No URL rewriting when no choice in language
-								? httpResponse
-								// Perform URL rewriting
-								: new HttpServletResponseWrapper(httpResponse) {
-									@Override
-									@Deprecated
-									public String encodeRedirectUrl(String url) {
-										return encodeRedirectURL(url);
-									}
-
-									@Override
-									public String encodeRedirectURL(String url) {
-										// Don't rewrite anchor-only URLs
-										if(url.length()>0 && url.charAt(0)=='#') return url;
-										// If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
-										String protocol;
-										String remaining;
-										if(url.length()>7 && (protocol=url.substring(0, 7)).equalsIgnoreCase("http://")) {
-											remaining = url.substring(7);
-										} else if(url.length()>8 && (protocol=url.substring(0, 8)).equalsIgnoreCase("https://")) {
-											remaining = url.substring(8);
-										} else if(url.startsWith("javascript:")) {
-											return httpResponse.encodeRedirectURL(url);
-										} else if(url.startsWith("mailto:")) {
-											return httpResponse.encodeRedirectURL(url);
-										} else if(url.startsWith("cid:")) {
-											return httpResponse.encodeRedirectURL(url);
-										} else {
-											String newUrl = addLocale(httpResponse.getLocale(), url, encodedParamName);
-											return httpResponse.encodeRedirectURL(newUrl);
-										}
-										int slashPos = remaining.indexOf('/');
-										if(slashPos==-1) {
-											String newUrl = addLocale(httpResponse.getLocale(), url, encodedParamName);
-											return httpResponse.encodeRedirectURL(newUrl);
-										}
-										String hostPort = remaining.substring(0, slashPos);
-										int colonPos = hostPort.indexOf(':');
-										String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
-										String encoded;
-										if(host.equalsIgnoreCase(httpRequest.getServerName())) {
-											encoded = protocol + hostPort + addLocale(httpResponse.getLocale(), remaining.substring(slashPos), encodedParamName);
-										} else {
-											// Going to an different hostname, do not add request parameters
-											encoded = url;
-										}
-										return httpResponse.encodeRedirectURL(encoded);
-									}
-
-									@Override
-									@Deprecated
-									public String encodeUrl(String url) {
-										return encodeURL(url);
-									}
-
-									@Override
-									public String encodeURL(String url) {
-										// Don't rewrite anchor-only URLs
-										if(url.length()>0 && url.charAt(0)=='#') return url;
-										// If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
-										String protocol;
-										String remaining;
-										if(url.length()>7 && (protocol=url.substring(0, 7)).equalsIgnoreCase("http://")) {
-											remaining = url.substring(7);
-										} else if(url.length()>8 && (protocol=url.substring(0, 8)).equalsIgnoreCase("https://")) {
-											remaining = url.substring(8);
-										} else if(url.startsWith("javascript:")) {
-											return httpResponse.encodeURL(url);
-										} else if(url.startsWith("mailto:")) {
-											return httpResponse.encodeURL(url);
-										} else if(url.startsWith("cid:")) {
-											return httpResponse.encodeURL(url);
-										} else {
-											String newUrl = addLocale(httpResponse.getLocale(), url, encodedParamName);
-											return httpResponse.encodeURL(newUrl);
-										}
-										int slashPos = remaining.indexOf('/');
-										if(slashPos==-1) {
-											String newUrl = addLocale(httpResponse.getLocale(), url, encodedParamName);
-											return httpResponse.encodeURL(newUrl);
-										}
-										String hostPort = remaining.substring(0, slashPos);
-										int colonPos = hostPort.indexOf(':');
-										String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
-										String encoded;
-										if(host.equalsIgnoreCase(httpRequest.getServerName())) {
-											encoded = protocol + hostPort + addLocale(httpResponse.getLocale(), remaining.substring(slashPos), encodedParamName);
-										} else {
-											// Going to an different hostname, do not add request parameters
-											encoded = url;
-										}
-										return httpResponse.encodeURL(encoded);
-									}
-								}
-							);
-						} finally {
-							ThreadLocale.set(oldThreadLocale);
-						}
+						return;
 					}
+				}
+				if(DEBUG) servletContext.log("DEBUG: Setting response locale: " + toLocaleString(locale));
+
+				// Set the response locale.
+				httpResponse.setLocale(locale);
+
+				// Set the locale for JSTL fmt tags
+				httpRequest.setAttribute("javax.servlet.jsp.jstl.fmt.locale.request", locale);
+
+				// Set and restore ThreadLocale
+				Locale oldThreadLocale = ThreadLocale.get();
+				try {
+					ThreadLocale.set(locale);
+					if(rewriteUrls) {
+						// Perform URL rewriting to maintain locale
+						if(DEBUG) servletContext.log("DEBUG: Performing URL rewriting.");
+						chain.doFilter(
+							httpRequest,
+							new HttpServletResponseWrapper(httpResponse) {
+								@Override
+								@Deprecated
+								public String encodeRedirectUrl(String url) {
+									return encodeRedirectURL(url);
+								}
+
+								@Override
+								public String encodeRedirectURL(String url) {
+									// Don't rewrite anchor-only URLs
+									if(url.length()>0 && url.charAt(0)=='#') return url;
+									// If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
+									String protocol;
+									String remaining;
+									if(url.length()>7 && (protocol=url.substring(0, 7)).equalsIgnoreCase("http://")) {
+										remaining = url.substring(7);
+									} else if(url.length()>8 && (protocol=url.substring(0, 8)).equalsIgnoreCase("https://")) {
+										remaining = url.substring(8);
+									} else if(url.startsWith("javascript:")) {
+										return httpResponse.encodeRedirectURL(url);
+									} else if(url.startsWith("mailto:")) {
+										return httpResponse.encodeRedirectURL(url);
+									} else if(url.startsWith("cid:")) {
+										return httpResponse.encodeRedirectURL(url);
+									} else {
+										String newUrl = addLocale(httpResponse.getLocale(), url, encodedParamName);
+										return httpResponse.encodeRedirectURL(newUrl);
+									}
+									int slashPos = remaining.indexOf('/');
+									if(slashPos==-1) {
+										String newUrl = addLocale(httpResponse.getLocale(), url, encodedParamName);
+										return httpResponse.encodeRedirectURL(newUrl);
+									}
+									String hostPort = remaining.substring(0, slashPos);
+									int colonPos = hostPort.indexOf(':');
+									String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
+									String encoded;
+									if(host.equalsIgnoreCase(httpRequest.getServerName())) {
+										encoded = protocol + hostPort + addLocale(httpResponse.getLocale(), remaining.substring(slashPos), encodedParamName);
+									} else {
+										// Going to an different hostname, do not add request parameters
+										encoded = url;
+									}
+									return httpResponse.encodeRedirectURL(encoded);
+								}
+
+								@Override
+								@Deprecated
+								public String encodeUrl(String url) {
+									return encodeURL(url);
+								}
+
+								@Override
+								public String encodeURL(String url) {
+									// Don't rewrite anchor-only URLs
+									if(url.length()>0 && url.charAt(0)=='#') return url;
+									// If starts with http:// or https:// parse out the first part of the URL, encode the path, and reassemble.
+									String protocol;
+									String remaining;
+									if(url.length()>7 && (protocol=url.substring(0, 7)).equalsIgnoreCase("http://")) {
+										remaining = url.substring(7);
+									} else if(url.length()>8 && (protocol=url.substring(0, 8)).equalsIgnoreCase("https://")) {
+										remaining = url.substring(8);
+									} else if(url.startsWith("javascript:")) {
+										return httpResponse.encodeURL(url);
+									} else if(url.startsWith("mailto:")) {
+										return httpResponse.encodeURL(url);
+									} else if(url.startsWith("cid:")) {
+										return httpResponse.encodeURL(url);
+									} else {
+										String newUrl = addLocale(httpResponse.getLocale(), url, encodedParamName);
+										return httpResponse.encodeURL(newUrl);
+									}
+									int slashPos = remaining.indexOf('/');
+									if(slashPos==-1) {
+										String newUrl = addLocale(httpResponse.getLocale(), url, encodedParamName);
+										return httpResponse.encodeURL(newUrl);
+									}
+									String hostPort = remaining.substring(0, slashPos);
+									int colonPos = hostPort.indexOf(':');
+									String host = colonPos==-1 ? hostPort : hostPort.substring(0, colonPos);
+									String encoded;
+									if(host.equalsIgnoreCase(httpRequest.getServerName())) {
+										encoded = protocol + hostPort + addLocale(httpResponse.getLocale(), remaining.substring(slashPos), encodedParamName);
+									} else {
+										// Going to an different hostname, do not add request parameters
+										encoded = url;
+									}
+									return httpResponse.encodeURL(encoded);
+								}
+							}
+						);
+					} else {
+						// No URL rewriting when no choice in language
+						if(DEBUG) servletContext.log("DEBUG: Performing no URL rewriting.");
+						chain.doFilter(request, response);
+					}
+				} finally {
+					ThreadLocale.set(oldThreadLocale);
 				}
             } finally {
                 request.removeAttribute(ENABLED_LOCALES_REQUEST_ATTRIBUTE_KEY);
