@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -295,4 +295,19 @@ public class ServletUtil {
 			status
 		);
 	}
+
+	/**
+     * Gets the current request URI in context-relative form.  The contextPath stripped.
+     */
+    public static String getContextRequestUri(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        String contextPath = request.getContextPath();
+		int cpLen = contextPath.length();
+        if(cpLen > 0) {
+            assert requestUri.startsWith(contextPath);
+            return requestUri.substring(cpLen);
+        } else {
+	        return requestUri;
+		}
+    }
 }

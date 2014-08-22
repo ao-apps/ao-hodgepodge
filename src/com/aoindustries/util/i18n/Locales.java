@@ -37,53 +37,133 @@ public class Locales {
 	// It might have been due to memory exhausted in Tomcat, but this won't hurt.
 	private static class LocaleCache {
 
-		private static final ConcurrentMap<String,Locale> locales = new ConcurrentHashMap<String,Locale>(16, 0.75f, 1);
+		private static class CacheKey {
+			private final String language;
+			private final String country;
+			private final String variant;
 
-		/**
-		 * @see  Locales#parseLocale(java.lang.String)
-		 */
-		private static Locale parseLocale(String locale) {
-			Locale l = locales.get(locale);
-			if(l==null) {
-				int pos = locale.indexOf('_');
-				if(pos==-1) pos = locale.indexOf('-');
-				if(pos==-1) {
-					l = new Locale(
-						locale.toLowerCase(Locale.ENGLISH)
-					);
-				} else {
-					int pos2 = locale.indexOf('_', pos+1);
-					if(pos2==-1) pos2 = locale.indexOf('-', pos+1);
-					if(pos2==-1) {
-						l = new Locale(
-							locale.substring(0, pos).toLowerCase(Locale.ENGLISH),
-							locale.substring(pos + 1).toUpperCase(Locale.ENGLISH)
-						);
-					} else {
-						l = new Locale(
-							locale.substring(0, pos).toLowerCase(Locale.ENGLISH),
-							locale.substring(pos + 1, pos2).toUpperCase(Locale.ENGLISH),
-							locale.substring(pos2 + 1)
-						);
-					}
-				}
-				Locale existing = locales.putIfAbsent(locale, l);
-				if(existing!=null) l = existing;
+			private CacheKey(String language, String country, String variant) {
+				this.language = language;
+				this.country = country;
+				this.variant = variant;
 			}
-			return l;
+
+			@Override
+			public boolean equals(Object o) {
+				if(!(o instanceof CacheKey)) return false;
+				CacheKey other = (CacheKey)o;
+				return
+					language.equals(other.language)
+					&& country.equals(other.country)
+					&& variant.equals(other.variant)
+				;
+			}
+
+			@Override
+			public int hashCode() {
+				int hash = language.hashCode();
+				hash = hash * 31 + country.hashCode();
+				hash = hash * 31 + variant.hashCode();
+				return hash;
+			}
 		}
 
+		private static final ConcurrentMap<CacheKey,Locale> locales = new ConcurrentHashMap<CacheKey,Locale>(16, 0.75f, 1);
+
+		/**
+		 * @see  Locales#getCachedLocale(java.lang.String, java.lang.String, java.lang.String)
+		 */
+		private static Locale getCachedLocale(String language, String country, String variant) {
+			language = language.toLowerCase(Locale.ENGLISH);
+			country = country.toUpperCase(Locale.ENGLISH);
+			CacheKey key = new CacheKey(language, country, variant);
+			Locale locale = locales.get(key);
+			if(locale == null) {
+				locale = new Locale(
+					language,
+					country,
+					variant
+				);
+				Locale existing = locales.putIfAbsent(key, locale);
+				if(existing != null) locale = existing;
+			}
+			return locale;
+		}
+
+		// Preload all standard Java locales
+		static {
+			for(Locale locale : Locale.getAvailableLocales()) {
+				locales.put(
+					new CacheKey(
+						locale.getLanguage(),
+						locale.getCountry(),
+						locale.getVariant()
+					),
+					locale
+				);
+			}
+		}
 		private LocaleCache() {
+		}
+	}
+
+	/**
+	 * Gets a cached locale instance.
+	 */
+	public static Locale getCachedLocale(String language, String country, String variant) {
+		return LocaleCache.getCachedLocale(language, country, variant);
+	}
+
+	/**
+	 * Finds the first underscore (_) or dash(-).
+	 *
+	 * @return the position in the string or -1 if not found
+	 */
+	private static int indexOfSeparator(String locale, int fromIndex) {
+		int pos1 = locale.indexOf('_', fromIndex);
+		int pos2 = locale.indexOf('-', fromIndex);
+		if(pos1 == -1) {
+			return pos2;
+		} else {
+			if(pos2 == -1) {
+				return pos1;
+			} else {
+				return Math.min(pos1, pos2);
+			}
 		}
 	}
 
 	/**
 	 * Parses locales from their <code>toString</code> representation.
 	 * Language, country, and variant may be separated by underscore "_" or hyphen "-".
-	 * Caches locales for faster lookups.
+	 * Language is converted to lowercase.
+	 * Country is converted to uppercase.
+	 * Caches locales so the same instance will be returned for each combination of language, country, and variant.
+	 * <p>
+	 *   Locales are currently cached forever.
+	 *   Malicious external sources of locales could fill the heap space, so protect against this if needed.
+	 * </p>
 	 */
 	public static Locale parseLocale(String locale) {
-		return LocaleCache.parseLocale(locale);
+		int pos = indexOfSeparator(locale, 0);
+		if(pos == -1) {
+			return getCachedLocale(locale, "", "");
+		} else {
+			int pos2 = indexOfSeparator(locale, pos+1);
+			if(pos2 == -1) {
+				return getCachedLocale(
+					locale.substring(0, pos).toLowerCase(Locale.ENGLISH),
+					locale.substring(pos + 1).toUpperCase(Locale.ENGLISH),
+					""
+				);
+			} else {
+				return getCachedLocale(
+					locale.substring(0, pos).toLowerCase(Locale.ENGLISH),
+					locale.substring(pos + 1, pos2).toUpperCase(Locale.ENGLISH),
+					locale.substring(pos2 + 1)
+				);
+			}
+		}
 	}
 
 	/**
