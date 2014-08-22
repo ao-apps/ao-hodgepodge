@@ -79,7 +79,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
  */
 abstract public class LocaleFilter implements Filter {
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	/**
 	 * UTF-8 encoding is assumed for all URL encoding.
@@ -234,20 +234,19 @@ abstract public class LocaleFilter implements Filter {
 		            chain.doFilter(request, response);
 					return;
 				}
-				Locale locale;
-				boolean rewriteUrls;
+				final Locale responseLocale;
+				final boolean rewriteUrls;
 				if(
 					// Only one choice of locale, use it in the response - no language negotiation
 					supportedLocales.size() < 2
 				) {
 					assert supportedLocales.size() == 1;
 					if(DEBUG) servletContext.log("DEBUG: Only one supported locale, using the locale and performing no URL rewriting.");
-					locale = supportedLocales.values().iterator().next();
+					responseLocale = supportedLocales.values().iterator().next();
 					rewriteUrls = false;
 				} else {
 					assert supportedLocales.size() >= 2;
-					rewriteUrls = true;
-					locale = null;
+					Locale locale = null;
 					if(paramValue != null) {
 						locale = supportedLocales.get(paramValue);
 						if(locale != null) {
@@ -306,19 +305,21 @@ abstract public class LocaleFilter implements Filter {
 						ServletUtil.sendRedirect(httpRequest, httpResponse, url.toString(), HttpServletResponse.SC_MOVED_PERMANENTLY);
 						return;
 					}
+					responseLocale = locale;
+					rewriteUrls = true;
 				}
-				if(DEBUG) servletContext.log("DEBUG: Setting response locale: " + toLocaleString(locale));
+				if(DEBUG) servletContext.log("DEBUG: Setting response locale: " + toLocaleString(responseLocale));
 
 				// Set the response locale.
-				httpResponse.setLocale(locale);
+				httpResponse.setLocale(responseLocale);
 
 				// Set the locale for JSTL fmt tags
-				httpRequest.setAttribute("javax.servlet.jsp.jstl.fmt.locale.request", locale);
+				httpRequest.setAttribute("javax.servlet.jsp.jstl.fmt.locale.request", responseLocale);
 
 				// Set and restore ThreadLocale
 				Locale oldThreadLocale = ThreadLocale.get();
 				try {
-					ThreadLocale.set(locale);
+					ThreadLocale.set(responseLocale);
 					if(rewriteUrls) {
 						// Perform URL rewriting to maintain locale
 						if(DEBUG) servletContext.log("DEBUG: Performing URL rewriting.");
