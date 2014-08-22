@@ -22,6 +22,7 @@
  */
 package com.aoindustries.servlet.filter;
 
+import com.aoindustries.encoding.NewEncodingUtils;
 import com.aoindustries.net.ServletRequestParameters;
 import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.util.StringUtility;
@@ -199,7 +200,7 @@ abstract public class LocaleFilter implements Filter {
 				) {
 					if(DEBUG) servletContext.log("DEBUG: Redirecting to remove \"" + paramName + "\" parameter.");
 					StringBuilder url = new StringBuilder();
-					url.append(requestUri);
+					url.append(NewEncodingUtils.decodeUrlPath(requestUri));
 					boolean didOne = false;
 					for(Map.Entry<String,List<String>> entry : new ServletRequestParameters(request).getParameterMap().entrySet()) {
 						String name = entry.getKey();
@@ -280,7 +281,7 @@ abstract public class LocaleFilter implements Filter {
 					) {
 						if(DEBUG) servletContext.log("DEBUG: Redirecting for missing or mismatched locale parameter: " + localeString);
 						StringBuilder url = new StringBuilder();
-						url.append(requestUri);
+						url.append(NewEncodingUtils.decodeUrlPath(requestUri));
 						boolean didOne = false;
 						for(Map.Entry<String,List<String>> entry : new ServletRequestParameters(request).getParameterMap().entrySet()) {
 							String name = entry.getKey();

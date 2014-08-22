@@ -28,6 +28,7 @@ import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJava
 import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 /**
@@ -124,6 +125,8 @@ public class NewEncodingUtils {
     /**
      * UTF-8 encodes the URL up to the first ?, if present.  Does not encode
      * any characters in the set { '?', ':', '/', ';', '#', '+' }.
+	 * 
+	 * @see  #decodeUrlPath(java.lang.String) 
      */
     public static String encodeUrlPath(String href) throws UnsupportedEncodingException {
         int len = href.length();
@@ -139,6 +142,37 @@ public class NewEncodingUtils {
                 char nextChar = href.charAt(nextPos);
                 if(nextChar=='?') {
                     // End encoding
+                    SB.append(href, nextPos, len);
+                    pos = len;
+                } else {
+                    SB.append(nextChar);
+                    pos = nextPos+1;
+                }
+            }
+        }
+        return SB.toString();
+    }
+
+	/**
+     * UTF-8 decodes the URL up to the first ?, if present.  Does not decode
+     * any characters in the set { '?', ':', '/', ';', '#', '+' }.
+	 * 
+	 * @see  #encodeUrlPath(java.lang.String) 
+     */
+    public static String decodeUrlPath(String href) throws UnsupportedEncodingException {
+        int len = href.length();
+        int pos = 0;
+        StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
+        while(pos<len) {
+            int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
+            if(nextPos==-1) {
+                SB.append(URLDecoder.decode(href.substring(pos, len), "UTF-8"));
+                pos = len;
+            } else {
+                SB.append(URLDecoder.decode(href.substring(pos, nextPos), "UTF-8"));
+                char nextChar = href.charAt(nextPos);
+                if(nextChar=='?') {
+                    // End decoding
                     SB.append(href, nextPos, len);
                     pos = len;
                 } else {
