@@ -148,7 +148,8 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 
 	/**
 	 * Gets this duration as a number of nanoseconds only.
-	 * 
+	 * This covers a range around -292 years to +292 years.
+	 *
 	 * @throws ArithmeticException if duration is outside the range representable in nanoseconds
 	 */
 	public long getNanoDuration() throws ArithmeticException {

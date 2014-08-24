@@ -38,6 +38,8 @@ import java.io.Serializable;
  */
 public class Instant implements Comparable<Instant>, Serializable, ObjectInputValidation {
 
+	private static final int NANOS_PER_SECOND = 1000000000;
+
 	public static final Instant EPOCH = new Instant(0, 0);
 
 	private static final long serialVersionUID = 1L;
@@ -52,7 +54,7 @@ public class Instant implements Comparable<Instant>, Serializable, ObjectInputVa
 	}
 
     private void validate() throws IllegalArgumentException {
-		if(nanos < 0 || nanos > 999999999) throw new IllegalArgumentException("nanoseconds out of range 0-999999999");
+		if(nanos < 0 || nanos >= NANOS_PER_SECOND) throw new IllegalArgumentException("nanoseconds out of range 0-" + (NANOS_PER_SECOND - 1));
     }
 
     @Override
