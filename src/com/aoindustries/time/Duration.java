@@ -38,6 +38,8 @@ import java.io.Serializable;
  */
 public class Duration implements Comparable<Duration>, Serializable, ObjectInputValidation {
 
+	private static final int NANOS_PER_SECOND = 1000000000;
+
 	public static final Duration ZERO = new Duration(0, 0);
 
 	public static Duration between(Instant startInclusive, Instant endExclusive) {
@@ -45,7 +47,7 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 		int diffNanos = endExclusive.nanos - startInclusive.nanos;
 		if(diffNanos < 0) {
 			diffSeconds--;
-			diffNanos += 1000000000;
+			diffNanos += NANOS_PER_SECOND;
 		}
 		return new Duration(diffSeconds, diffNanos);
 	}
@@ -62,7 +64,7 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 	}
 
     private void validate() throws IllegalArgumentException {
-		if(nanos < 0 || nanos > 999999999) throw new IllegalArgumentException("nanoseconds out of range 0-999999999");
+		if(nanos < 0 || nanos >= NANOS_PER_SECOND) throw new IllegalArgumentException("nanoseconds out of range 0-" + (NANOS_PER_SECOND - 1));
     }
 
     @Override
@@ -139,5 +141,23 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 	 */
 	public int getNanos() {
 		return nanos;
+	}
+
+	private static final long MINIMUM_NANO_DURATION_SECONDS = Long.MIN_VALUE / NANOS_PER_SECOND;
+	private static final long MAXIMUM_NANO_DURATION_SECONDS = (Long.MAX_VALUE - NANOS_PER_SECOND) / NANOS_PER_SECOND;
+
+	/**
+	 * Gets this duration as a number of nanoseconds only.
+	 * 
+	 * @throws ArithmeticException if duration is outside the range representable in nanoseconds
+	 */
+	public long getNanoDuration() throws ArithmeticException {
+		if(
+			seconds < MINIMUM_NANO_DURATION_SECONDS
+			|| seconds > MAXIMUM_NANO_DURATION_SECONDS
+		) {
+			throw new IllegalArgumentException("seconds out of range " + MINIMUM_NANO_DURATION_SECONDS + "-" + MAXIMUM_NANO_DURATION_SECONDS);
+		}
+		return seconds * NANOS_PER_SECOND + nanos;
 	}
 }
