@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,13 +33,35 @@ public class SafeMath {
     }
 
     /**
+     * Casts int to byte, looking for any underflow or overflow.
+     *
+     * @exception  ArithmeticException  for underflow or overflow
+     */
+    public static byte castByte(int value) throws ArithmeticException {
+        if(value < Byte.MIN_VALUE) throw new ArithmeticException("byte underflow: " + value);
+        if(value > Byte.MAX_VALUE) throw new ArithmeticException("byte overflow: " + value);
+        return (byte)value;
+    }
+
+    /**
+     * Casts long to byte, looking for any underflow or overflow.
+     *
+     * @exception  ArithmeticException  for underflow or overflow
+     */
+    public static byte castByte(long value) throws ArithmeticException {
+        if(value < Byte.MIN_VALUE) throw new ArithmeticException("byte underflow: " + value);
+        if(value > Byte.MAX_VALUE) throw new ArithmeticException("byte overflow: " + value);
+        return (byte)value;
+    }
+
+	/**
      * Casts int to short, looking for any underflow or overflow.
      *
      * @exception  ArithmeticException  for underflow or overflow
      */
     public static short castShort(int value) throws ArithmeticException {
-        if(value<Short.MIN_VALUE) throw new ArithmeticException("short underflow: " + value);
-        if(value>Short.MAX_VALUE) throw new ArithmeticException("short overflow: " + value);
+        if(value < Short.MIN_VALUE) throw new ArithmeticException("short underflow: " + value);
+        if(value > Short.MAX_VALUE) throw new ArithmeticException("short overflow: " + value);
         return (short)value;
     }
 
@@ -49,8 +71,8 @@ public class SafeMath {
      * @exception  ArithmeticException  for underflow or overflow
      */
     public static int castInt(long value) throws ArithmeticException {
-        if(value<Integer.MIN_VALUE) throw new ArithmeticException("int underflow: " + value);
-        if(value>Integer.MAX_VALUE) throw new ArithmeticException("int overflow: " + value);
+        if(value < Integer.MIN_VALUE) throw new ArithmeticException("int underflow: " + value);
+        if(value > Integer.MAX_VALUE) throw new ArithmeticException("int overflow: " + value);
         return (int)value;
     }
 
@@ -60,27 +82,27 @@ public class SafeMath {
      * @exception  ArithmeticException  for overflow
      */
     public static long multiply(long value1, long value2) {
-        if(value1>value2) {
+        if(value1 > value2) {
             long t = value1;
             value1 = value2;
             value2 = t;
         }
-        if(value1<0) {
-            if(value2<0) {
-                if(value1>(Long.MAX_VALUE/value2)) throw new ArithmeticException("long*long overflow");
-            } else if(value2>0) {
-                if(value1<(Long.MIN_VALUE/value2)) throw new ArithmeticException("long*long overflow");
+        if(value1 < 0) {
+            if(value2 < 0) {
+                if(value1 > (Long.MAX_VALUE/value2)) throw new ArithmeticException("long*long overflow");
+            } else if(value2 > 0) {
+                if(value1 < (Long.MIN_VALUE/value2)) throw new ArithmeticException("long*long overflow");
             } else {
                 // value2==0
                 return 0;
             }
-        } else if(value1>0) {
-            if(value1>(Long.MAX_VALUE/value2)) throw new ArithmeticException("long*long overflow");
+        } else if(value1 > 0) {
+            if(value1 > (Long.MAX_VALUE/value2)) throw new ArithmeticException("long*long overflow");
         } else {
             // value1==0
             return 0;
         }
-        return value1*value2;
+        return value1 * value2;
     }
 
 	/**
