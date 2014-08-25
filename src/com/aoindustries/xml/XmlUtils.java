@@ -24,6 +24,7 @@ package com.aoindustries.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
@@ -31,6 +32,13 @@ import java.util.NoSuchElementException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -189,5 +197,29 @@ public final class XmlUtils {
 				};
 			}
 		};
+	}
+
+	public static String toString(Document document) throws TransformerConfigurationException, TransformerException {
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		transformerFactory.setAttribute("indent-number", 4);
+		Transformer transformer = transformerFactory.newTransformer();
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		StringWriter writer = new StringWriter();
+		try {
+			transformer.transform(
+				new DOMSource(document),
+				new StreamResult(writer)
+			);
+		} finally {
+			try {
+				writer.close();
+			} catch(IOException e) {
+				AssertionError error = new AssertionError("IOException should never be thrown from StringWriter");
+				error.initCause(e);
+				throw error;
+			}
+		}
+		return writer.toString();
 	}
 }
