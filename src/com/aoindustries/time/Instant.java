@@ -44,6 +44,23 @@ public class Instant implements Comparable<Instant>, Serializable, ObjectInputVa
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Parses an Instant's string representation.
+	 *
+	 * @return Instant the instant or null when toString is null
+	 *
+	 * @throws IllegalArgumentException when unable to parse
+	 */
+	public static Instant valueOf(String toString) {
+		if(toString == null) return null;
+		int dotPos = toString.indexOf('.');
+		if(dotPos == -1) throw new IllegalArgumentException("Period (.) not found: " + toString);
+		return new Instant(
+			Long.parseLong(toString.substring(0, dotPos)),
+			Integer.parseInt(toString.substring(dotPos + 1))
+		);
+	}
+
 	final long seconds;
 	final int nanos;
 
