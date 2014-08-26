@@ -51,13 +51,13 @@ public class Instant implements Comparable<Instant>, Serializable, ObjectInputVa
 	 *
 	 * @throws IllegalArgumentException when unable to parse
 	 */
-	public static Instant valueOf(String toString) {
-		if(toString == null) return null;
-		int dotPos = toString.indexOf('.');
-		if(dotPos == -1) throw new IllegalArgumentException("Period (.) not found: " + toString);
+	public static Instant valueOf(String s) {
+		if(s == null) return null;
+		int dotPos = s.indexOf('.');
+		if(dotPos == -1) throw new IllegalArgumentException("Period (.) not found: " + s);
 		return new Instant(
-			Long.parseLong(toString.substring(0, dotPos)),
-			Integer.parseInt(toString.substring(dotPos + 1))
+			Long.parseLong(s.substring(0, dotPos)),
+			Integer.parseInt(s.substring(dotPos + 1))
 		);
 	}
 
