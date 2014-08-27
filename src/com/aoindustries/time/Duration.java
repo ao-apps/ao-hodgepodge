@@ -38,8 +38,6 @@ import java.io.Serializable;
  */
 public class Duration implements Comparable<Duration>, Serializable, ObjectInputValidation {
 
-	private static final int NANOS_PER_SECOND = 1000000000;
-
 	public static final Duration ZERO = new Duration(0, 0);
 
 	public static Duration between(Instant startInclusive, Instant endExclusive) {
@@ -47,24 +45,24 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 		int diffNanos = endExclusive.nano - startInclusive.nano;
 		if(diffNanos < 0) {
 			diffSeconds--;
-			diffNanos += NANOS_PER_SECOND;
+			diffNanos += Instant.NANOS_PER_SECOND;
 		}
 		return new Duration(diffSeconds, diffNanos);
 	}
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	private final long seconds;
-	private final int nanos;
+	private final int nano;
 
-	public Duration(long seconds, int nanos) {
+	public Duration(long seconds, int nano) {
 		this.seconds = seconds;
-		this.nanos = nanos;
+		this.nano = nano;
 		validate();
 	}
 
     private void validate() throws IllegalArgumentException {
-		if(nanos < 0 || nanos >= NANOS_PER_SECOND) throw new IllegalArgumentException("nanoseconds out of range 0-" + (NANOS_PER_SECOND - 1));
+		if(nano < 0 || nano >= Instant.NANOS_PER_SECOND) throw new IllegalArgumentException("nanoseconds out of range 0-" + (Instant.NANOS_PER_SECOND - 1));
     }
 
     @Override
@@ -79,13 +77,13 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
     }
 
 	private Object readResolve() {
-		if(seconds == 0 && nanos == 0) return ZERO;
+		if(seconds == 0 && nano == 0) return ZERO;
 		return this;
 	}
 
 	@Override
 	public String toString() {
-		return Instant.toString(seconds, nanos);
+		return Instant.toString(seconds, nano);
 	}
 
 	@Override
@@ -98,21 +96,21 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 		return
 			other != null
 			&& seconds == other.seconds
-			&& nanos == other.nanos
+			&& nano == other.nano
 		;
 	}
 
 	@Override
 	public int hashCode() {
-		return (int)(seconds ^ (seconds >>> 32)) ^ nanos;
+		return (int)(seconds ^ (seconds >>> 32)) ^ nano;
 	}
 
 	@Override
 	public int compareTo(Duration other) {
 		if(seconds < other.seconds) return -1;
 		if(seconds > other.seconds) return 1;
-		if(nanos < other.nanos) return -1;
-		if(nanos > other.nanos) return 1;
+		if(nano < other.nano) return -1;
+		if(nano > other.nano) return 1;
 		return 0;
 	}
 
@@ -139,12 +137,12 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 	 *   <li>0.000000002</li>
 	 * </ol>
 	 */
-	public int getNanos() {
-		return nanos;
+	public int getNano() {
+		return nano;
 	}
 
-	private static final long MINIMUM_NANO_DURATION_SECONDS = Long.MIN_VALUE / NANOS_PER_SECOND;
-	private static final long MAXIMUM_NANO_DURATION_SECONDS = (Long.MAX_VALUE - NANOS_PER_SECOND) / NANOS_PER_SECOND;
+	private static final long MINIMUM_NANO_DURATION_SECONDS = Long.MIN_VALUE / Instant.NANOS_PER_SECOND;
+	private static final long MAXIMUM_NANO_DURATION_SECONDS = (Long.MAX_VALUE - Instant.NANOS_PER_SECOND) / Instant.NANOS_PER_SECOND;
 
 	/**
 	 * Gets this duration as a number of nanoseconds only.
@@ -152,13 +150,13 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 	 *
 	 * @throws ArithmeticException if duration is outside the range representable in nanoseconds
 	 */
-	public long getNanoDuration() throws ArithmeticException {
+	public long toNanos() throws ArithmeticException {
 		if(
 			seconds < MINIMUM_NANO_DURATION_SECONDS
 			|| seconds > MAXIMUM_NANO_DURATION_SECONDS
 		) {
-			throw new IllegalArgumentException("seconds out of range " + MINIMUM_NANO_DURATION_SECONDS + "-" + MAXIMUM_NANO_DURATION_SECONDS);
+			throw new ArithmeticException("seconds out of range " + MINIMUM_NANO_DURATION_SECONDS + "-" + MAXIMUM_NANO_DURATION_SECONDS);
 		}
-		return seconds * NANOS_PER_SECOND + nanos;
+		return seconds * Instant.NANOS_PER_SECOND + nano;
 	}
 }

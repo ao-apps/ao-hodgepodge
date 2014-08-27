@@ -38,7 +38,7 @@ import java.io.Serializable;
  */
 public class Instant implements Comparable<Instant>, Serializable, ObjectInputValidation {
 
-	private static final int NANOS_PER_SECOND = 1000000000;
+	static final int NANOS_PER_SECOND = 1000000000;
 
 	public static final Instant EPOCH = new Instant(0, 0);
 
