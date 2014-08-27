@@ -43,8 +43,8 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 	public static final Duration ZERO = new Duration(0, 0);
 
 	public static Duration between(Instant startInclusive, Instant endExclusive) {
-		long diffSeconds = endExclusive.seconds - startInclusive.seconds;
-		int diffNanos = endExclusive.nanos - startInclusive.nanos;
+		long diffSeconds = endExclusive.epochSecond - startInclusive.epochSecond;
+		int diffNanos = endExclusive.nano - startInclusive.nano;
 		if(diffNanos < 0) {
 			diffSeconds--;
 			diffNanos += NANOS_PER_SECOND;

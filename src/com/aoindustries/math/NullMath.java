@@ -23,13 +23,13 @@
 package com.aoindustries.math;
 
 /**
- * Math routines that check for overflow conditions.
+ * Math routines that allow null.
  *
  * @author  AO Industries, Inc.
  */
-public class MathUtils {
+public class NullMath {
 
-    private MathUtils() {
+    private NullMath() {
     }
 
 	/**

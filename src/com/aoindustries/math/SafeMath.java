@@ -24,6 +24,7 @@ package com.aoindustries.math;
 
 /**
  * Math routines that check for overflow conditions.
+ * TODO: In Java 8, there are methods like addExact that should be used instead.
  *
  * @author  AO Industries, Inc.
  */

@@ -42,8 +42,6 @@ public class Instant implements Comparable<Instant>, Serializable, ObjectInputVa
 
 	public static final Instant EPOCH = new Instant(0, 0);
 
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * Parses an Instant's string representation.
 	 *
@@ -61,17 +59,19 @@ public class Instant implements Comparable<Instant>, Serializable, ObjectInputVa
 		);
 	}
 
-	final long seconds;
-	final int nanos;
+	private static final long serialVersionUID = 2L;
 
-	public Instant(long seconds, int nanos) {
-		this.seconds = seconds;
-		this.nanos = nanos;
+	final long epochSecond;
+	final int nano;
+
+	public Instant(long epochSecond, int nano) {
+		this.epochSecond = epochSecond;
+		this.nano = nano;
 		validate();
 	}
 
     private void validate() throws IllegalArgumentException {
-		if(nanos < 0 || nanos >= NANOS_PER_SECOND) throw new IllegalArgumentException("nanoseconds out of range 0-" + (NANOS_PER_SECOND - 1));
+		if(nano < 0 || nano >= NANOS_PER_SECOND) throw new IllegalArgumentException("nanoseconds out of range 0-" + (NANOS_PER_SECOND - 1));
     }
 
     @Override
@@ -86,32 +86,32 @@ public class Instant implements Comparable<Instant>, Serializable, ObjectInputVa
     }
 
 	private Object readResolve() {
-		if(seconds == 0 && nanos == 0) return EPOCH;
+		if(epochSecond == 0 && nano == 0) return EPOCH;
 		return this;
 	}
 
-	static String toString(long seconds, int nanos) {
+	static String toString(long epochSecond, int nano) {
 		StringBuilder sb = new StringBuilder(
 			20 // Length of "-9223372036854775808"
 			+ 1 // "."
 			+ 9 // Nanoseconds
 		);
-		sb.append(seconds).append('.');
-		if(nanos < 100000000) {
+		sb.append(epochSecond).append('.');
+		if(nano < 100000000) {
 			sb.append('0');
-			if(nanos < 10000000) {
+			if(nano < 10000000) {
 				sb.append('0');
-				if(nanos < 1000000) {
+				if(nano < 1000000) {
 					sb.append('0');
-					if(nanos < 100000) {
+					if(nano < 100000) {
 						sb.append('0');
-						if(nanos < 10000) {
+						if(nano < 10000) {
 							sb.append('0');
-							if(nanos < 1000) {
+							if(nano < 1000) {
 								sb.append('0');
-								if(nanos < 100) {
+								if(nano < 100) {
 									sb.append('0');
-									if(nanos < 10) {
+									if(nano < 10) {
 										sb.append('0');
 									}
 								}
@@ -121,13 +121,13 @@ public class Instant implements Comparable<Instant>, Serializable, ObjectInputVa
 				}
 			}
 		}
-		sb.append(nanos);
+		sb.append(nano);
 		return sb.toString();
 	}
 
 	@Override
 	public String toString() {
-		return toString(seconds, nanos);
+		return toString(epochSecond, nano);
 	}
 
 	@Override
@@ -139,27 +139,27 @@ public class Instant implements Comparable<Instant>, Serializable, ObjectInputVa
 	public boolean equals(Instant other) {
 		return
 			other != null
-			&& seconds == other.seconds
-			&& nanos == other.nanos
+			&& epochSecond == other.epochSecond
+			&& nano == other.nano
 		;
 	}
 
 	@Override
 	public int hashCode() {
-		return (int)(seconds ^ (seconds >>> 32)) ^ nanos;
+		return (int)(epochSecond ^ (epochSecond >>> 32)) ^ nano;
 	}
 
 	@Override
 	public int compareTo(Instant other) {
-		if(seconds < other.seconds) return -1;
-		if(seconds > other.seconds) return 1;
-		if(nanos < other.nanos) return -1;
-		if(nanos > other.nanos) return 1;
+		if(epochSecond < other.epochSecond) return -1;
+		if(epochSecond > other.epochSecond) return 1;
+		if(nano < other.nano) return -1;
+		if(nano > other.nano) return 1;
 		return 0;
 	}
 
-	public long getSeconds() {
-		return seconds;
+	public long getEpochSecond() {
+		return epochSecond;
 	}
 
 	/**
@@ -181,7 +181,21 @@ public class Instant implements Comparable<Instant>, Serializable, ObjectInputVa
 	 *   <li>0.000000002</li>
 	 * </ol>
 	 */
-	public int getNanos() {
-		return nanos;
+	public int getNano() {
+		return nano;
+	}
+
+	public Instant plusNanos(long nanosToAdd) {
+		if(nanosToAdd == 0) return this;
+		long newSeconds = this.epochSecond + nanosToAdd / NANOS_PER_SECOND;
+		int newNanos = this.nano + (int)(nanosToAdd % NANOS_PER_SECOND);
+		if(newNanos >= NANOS_PER_SECOND) {
+			newSeconds++;
+			newNanos -= NANOS_PER_SECOND;
+		} else if(newNanos < 0) {
+			newSeconds--;
+			newNanos += NANOS_PER_SECOND;
+		}
+		return new Instant(newSeconds, newNanos);
 	}
 }
