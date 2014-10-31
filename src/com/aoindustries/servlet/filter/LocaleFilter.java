@@ -268,7 +268,7 @@ abstract public class LocaleFilter implements Filter {
 					}
 					if(locale == null) {
 						// Determine language from Accept-Language header, if present
-						locale = getBestLocale(supportedLocales, httpRequest);
+						locale = getBestLocale(httpRequest, supportedLocales);
 						assert locale != null;
 						if(DEBUG) servletContext.log("DEBUG: Found best locale from headers: " + toLocaleString(locale));
 					}
@@ -498,12 +498,12 @@ abstract public class LocaleFilter implements Filter {
 	/**
 	 * Performs the language negotiation based on the Accept-Language header(s).
 	 */
-	protected Locale getBestLocale(Map<String,Locale> supportedLocales, HttpServletRequest request) throws ServletException {
+	protected Locale getBestLocale(HttpServletRequest request, Map<String,Locale> supportedLocales) throws ServletException {
 		@SuppressWarnings("unchecked")
 		Enumeration<String> acceptLanguages = request.getHeaders("accept-language");
 		if(acceptLanguages == null) {
 			// No header, use default
-			return getDefaultLocale(supportedLocales);
+			return getDefaultLocale(request, supportedLocales);
 		}
 		// Select the best locale from the Accept-Language header(s).
 		Locale bestExact = null;
@@ -556,7 +556,7 @@ abstract public class LocaleFilter implements Filter {
 		} else if(bestApprox != null) {
 			selected = bestApprox;
 		} else {
-			selected = getDefaultLocale(supportedLocales);
+			selected = getDefaultLocale(request, supportedLocales);
 		}
 		return selected;
 	}
@@ -685,5 +685,5 @@ abstract public class LocaleFilter implements Filter {
 	 * 
 	 * @see  #getSupportedLocales(javax.servlet.ServletRequest)
 	 */
-	abstract protected Locale getDefaultLocale(Map<String,Locale> supportedLocales) throws ServletException;
+	abstract protected Locale getDefaultLocale(ServletRequest request, Map<String,Locale> supportedLocales) throws ServletException;
 }
