@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -85,14 +85,24 @@ abstract public class AbstractTuple<
 
 			Comparable<?> column2 = columns2[i];
 			int diff;
-			if(column1.getClass()==String.class && column2.getClass()==String.class) {
+			if(
+				column1!=null
+				&& column2!=null
+				&& column1.getClass()==String.class
+				&& column2.getClass()==String.class
+			) {
 				String s1 = column1.toString();
 				String s2 = column2.toString();
 				// TODO: If both strings begin with a number, sort by that first
 				// TODO: This is for lot numbers, such as 1A, 1B, 2, 3, 10, 20, 100A
 				diff = s1.equals(s2) ? 0 : collator.compare(s1, s2);
 			} else {
-				diff = column1.compareTo(column2);
+				// Sort nulls as larger than any non-null
+				if(column1 == null) {
+					diff = column2 == null ? 0 : 1;
+				} else {
+					diff = column2 == null ? -1 : column1.compareTo(column2);
+				}
 			}
 			if(diff!=0) return diff;
 		}

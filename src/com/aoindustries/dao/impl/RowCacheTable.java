@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013, 2014  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,6 +24,7 @@ package com.aoindustries.dao.impl;
 
 import com.aoindustries.dao.DaoDatabase;
 import com.aoindustries.dao.Row;
+import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.sql.NoRowException;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -147,7 +148,7 @@ abstract public class RowCacheTable<
      * Adds a single object to the cache.
      */
     protected void addToCache(K canonicalKey, R row) {
-        assert canonicalize(row.getKey()).equals(canonicalKey);
+        assert ObjectUtils.equals(canonicalize(row.getKey()), canonicalKey);
         rowCache.get().put(canonicalKey, row);
     }
 
