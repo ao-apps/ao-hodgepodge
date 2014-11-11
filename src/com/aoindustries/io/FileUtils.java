@@ -23,10 +23,12 @@
 package com.aoindustries.io;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -361,4 +363,20 @@ final public class FileUtils {
 			}
 		}
 	}
+
+	/**
+     * Reads the contents of a File and returns as a String.
+     */
+    public static String readFileAsString(File file) throws IOException {
+		long len = file.length();
+        StringBuilder SB = len>0 && len<=Integer.MAX_VALUE ? new StringBuilder((int)len) : new StringBuilder();
+        BufferedReader in = new BufferedReader(new FileReader(file));
+        try {
+            int ch;
+            while((ch=in.read())!=-1) SB.append((char)ch);
+        } finally {
+            in.close();
+        }
+        return SB.toString();
+    }    
 }
