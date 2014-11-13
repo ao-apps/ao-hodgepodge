@@ -22,6 +22,7 @@
  */
 package com.aoindustries.text;
 
+import com.aoindustries.lang.ObjectUtils;
 import java.math.BigDecimal;
 import java.text.Collator;
 import java.util.Comparator;
@@ -177,8 +178,13 @@ public class SmartComparator implements Comparator<Object> {
 
 	@Override
 	public int compare(Object o1, Object o2) {
-		String s1 = o1.toString();
-		String s2 = o2.toString();
+		return compare(
+			ObjectUtils.toString(o1),
+			ObjectUtils.toString(o2)
+		);
+	}
+
+	public int compare(String s1, String s2) {
 		// Put all nulls after non-nulls
 		if(s1 == null) {
 			if(s2 == null) return 0;
