@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.i18n;
 
+import com.aoindustries.lang.NullArgumentException;
 import java.util.Locale;
 
 /**
@@ -36,8 +37,8 @@ public class LocaleString {
 	private final String value;
 
     public LocaleString(Locale locale, String value) {
-		this.locale = locale;
-		this.value = value;
+		this.locale = NullArgumentException.checkNotNull(locale, "locale");
+		this.value = NullArgumentException.checkNotNull(value, "value");
 	}
 
 	@Override
@@ -83,5 +84,9 @@ public class LocaleString {
 	public LocaleString trim() {
 		String newValue = value.trim();
 		return newValue == value ? this : new LocaleString(locale, newValue);
+	}
+
+	public boolean isEmpty() {
+		return value.isEmpty();
 	}
 }
