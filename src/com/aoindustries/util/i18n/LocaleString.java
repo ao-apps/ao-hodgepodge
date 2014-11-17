@@ -89,4 +89,16 @@ public class LocaleString {
 	public boolean isEmpty() {
 		return value.isEmpty();
 	}
+
+	public boolean startsWith(String prefix) {
+		return value.startsWith(prefix);
+	}
+
+	public boolean startsWith(String prefix, int offset) {
+		return value.startsWith(prefix, offset);
+	}
+
+	public boolean endsWith(String prefix) {
+		return value.endsWith(prefix);
+	}
 }
