@@ -24,6 +24,7 @@ package com.aoindustries.servlet.http;
 
 import com.aoindustries.io.IoUtils;
 import com.aoindustries.io.unix.UnixFile;
+import com.aoindustries.lang.ObjectUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -93,11 +94,57 @@ public class LastModifiedServlet extends HttpServlet {
 	public static final String LAST_MODIFIED_PARAMETER_NAME = "lastModified";
 
 	/**
+	 * The header that may be used to disable automatic lastModified parameters.
+	 */
+	public static final String LAST_MODIFIED_HEADER_NAME = "X-com-aoindustries-servlet-http-LastModifiedServlet-lastModified";
+
+	/**
 	 * Encodes a last modified value.
 	 * The value is URL-safe and does not need to be passed through URLEncoder.
 	 */
 	public static String encodeLastModified(long lastModified) {
 		return Long.toString(lastModified / 1000, 32);
+	}
+
+	private static class HeaderAndPath {
+
+		private final Boolean header;
+		private final String path;
+
+		private HeaderAndPath(Boolean header, String path) {
+			this.header = header;
+			this.path = path;
+		}
+
+		private HeaderAndPath(HttpServletRequest request, String path) {
+			String headerS = request.getHeader(LAST_MODIFIED_HEADER_NAME);
+			if("true".equalsIgnoreCase(headerS)) header = Boolean.TRUE;
+			else if("false".equalsIgnoreCase(headerS)) header = Boolean.FALSE;
+			else header = null;
+			this.path = path;
+		}
+
+		@Override
+		public String toString() {
+			return "(" + header + ", " + path + ")";
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(!(obj instanceof HeaderAndPath)) return false;
+			HeaderAndPath other = (HeaderAndPath)obj;
+			return
+				ObjectUtils.equals(header, other.header)
+				&& path.equals(other.path)
+			;
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = ObjectUtils.hashCode(header);
+			hash = hash * 31 + path.hashCode();
+			return hash;
+		}
 	}
 
 	private static class ParsedCssFile {
@@ -112,19 +159,19 @@ public class LastModifiedServlet extends HttpServlet {
 			Pattern.CASE_INSENSITIVE
 		);
 
-		private static ParsedCssFile parseCssFile(ServletContext servletContext, String path) throws FileNotFoundException, IOException {
+		private static ParsedCssFile parseCssFile(ServletContext servletContext, HeaderAndPath hap) throws FileNotFoundException, IOException {
 			// Get the cache
 			@SuppressWarnings("unchecked")
-			Map<String,ParsedCssFile> cache = (Map<String,ParsedCssFile>)servletContext.getAttribute(PARSE_CSS_FILE_CACHE_ATTRIBUTE_NAME);
+			Map<HeaderAndPath,ParsedCssFile> cache = (Map<HeaderAndPath,ParsedCssFile>)servletContext.getAttribute(PARSE_CSS_FILE_CACHE_ATTRIBUTE_NAME);
 			if(cache == null) {
 				// Create new cache
-				cache = new HashMap<String,ParsedCssFile>();
+				cache = new HashMap<HeaderAndPath,ParsedCssFile>();
 				servletContext.setAttribute(PARSE_CSS_FILE_CACHE_ATTRIBUTE_NAME, cache);
 			}
 			synchronized(cache) {
 				// Check the cache
-				final long lastModified = getCachedLastModified(servletContext, path);
-				ParsedCssFile parsedCssFile = cache.get(path);
+				final long lastModified = getCachedLastModified(servletContext, hap);
+				ParsedCssFile parsedCssFile = cache.get(hap);
 				if(
 					parsedCssFile != null
 					&& parsedCssFile.lastModified == lastModified
@@ -135,8 +182,8 @@ public class LastModifiedServlet extends HttpServlet {
 					// (Re)parse the file
 					String cssContent;
 					{
-						InputStream resourceIn = servletContext.getResourceAsStream(path);
-						if(resourceIn==null) throw new FileNotFoundException(path);
+						InputStream resourceIn = servletContext.getResourceAsStream(hap.path);
+						if(resourceIn==null) throw new FileNotFoundException(hap.path);
 						BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn, ENCODING));
 						try {
 							cssContent = IoUtils.readFully(in);
@@ -146,7 +193,7 @@ public class LastModifiedServlet extends HttpServlet {
 					}
 					// Replace values while capturing URLs
 					StringBuilder newContent = new StringBuilder(cssContent.length() << 1);
-					Map<String,Long> referencedPaths = new HashMap<String,Long>();
+					Map<HeaderAndPath,Long> referencedPaths = new HashMap<HeaderAndPath,Long>();
 					Matcher matcher = urlPattern.matcher(cssContent);
 					int lastEnd = 0;
 					while(matcher.find()) {
@@ -165,19 +212,23 @@ public class LastModifiedServlet extends HttpServlet {
 						}
 						//System.err.println("url=" + url);
 						newContent.append(url);
-						// Get the resource path relative to the CSS file
-						String resourcePath = ServletUtil.getAbsolutePath(path, url);
-						if(resourcePath.startsWith("/")) {
-							long resourceModified = getCachedLastModified(servletContext, resourcePath);
-							if(resourceModified != 0) {
-								referencedPaths.put(resourcePath, resourceModified);
-								int questionPos = url.lastIndexOf('?');
-								newContent
-									.append(questionPos==-1 ? '?' : '&')
-									.append(LAST_MODIFIED_PARAMETER_NAME)
-									.append('=')
-									.append(encodeLastModified(resourceModified))
-								;
+						// Check for header disabling auto last modified
+						if(hap.header==null || hap.header) {
+							// Get the resource path relative to the CSS file
+							String resourcePath = ServletUtil.getAbsolutePath(hap.path, url);
+							if(resourcePath.startsWith("/")) {
+								HeaderAndPath resourceHap = new HeaderAndPath(hap.header, resourcePath);
+								long resourceModified = getCachedLastModified(servletContext, resourceHap);
+								if(resourceModified != 0) {
+									referencedPaths.put(resourceHap, resourceModified);
+									int questionPos = url.lastIndexOf('?');
+									newContent
+										.append(questionPos==-1 ? '?' : '&')
+										.append(LAST_MODIFIED_PARAMETER_NAME)
+										.append('=')
+										.append(encodeLastModified(resourceModified))
+									;
+								}
 							}
 						}
 						if(addAfterUrl!=null) newContent.append(addAfterUrl);
@@ -190,7 +241,7 @@ public class LastModifiedServlet extends HttpServlet {
 						newContent.toString().getBytes(ENCODING),
 						referencedPaths
 					);
-					cache.put(path, parsedCssFile);
+					cache.put(hap, parsedCssFile);
 					return parsedCssFile;
 				}
 			}
@@ -209,7 +260,7 @@ public class LastModifiedServlet extends HttpServlet {
 		/**
 		 * The list of paths that need to be checked to get the new modified time.
 		 */
-		private final Map<String,Long> referencedPaths;
+		private final Map<HeaderAndPath,Long> referencedPaths;
 
 		/**
 		 * The most recent last modified of the CSS file itself and all dependencies.
@@ -220,13 +271,13 @@ public class LastModifiedServlet extends HttpServlet {
 			ServletContext servletContext,
 			long lastModified,
 			byte[] rewrittenCssFile,
-			Map<String,Long> referencedPaths
+			Map<HeaderAndPath,Long> referencedPaths
 		) {
 			this.lastModified = lastModified;
 			this.referencedPaths = referencedPaths;
 			this.rewrittenCssFile = rewrittenCssFile;
 			long newest = lastModified;
-			for(Map.Entry<String,Long> entry : referencedPaths.entrySet()) {
+			for(Map.Entry<HeaderAndPath,Long> entry : referencedPaths.entrySet()) {
 				long modified = getCachedLastModified(servletContext, entry.getKey());
 				if(modified > newest) newest = modified;
 			}
@@ -237,7 +288,7 @@ public class LastModifiedServlet extends HttpServlet {
 		 * Checks if any of the referencedPaths have been modified.
 		 */
 		private boolean hasModifiedUrl(ServletContext servletContext) {
-			for(Map.Entry<String,Long> entry : referencedPaths.entrySet()) {
+			for(Map.Entry<HeaderAndPath,Long> entry : referencedPaths.entrySet()) {
 				if(getCachedLastModified(servletContext, entry.getKey()) != entry.getValue().longValue()) {
 					return true;
 				}
@@ -274,22 +325,22 @@ public class LastModifiedServlet extends HttpServlet {
 	 * Gets a modified time from either a file or URL.
 	 * Caches results for up to a second.
 	 */
-	private static long getCachedLastModified(ServletContext servletContext, String path) {
+	private static long getCachedLastModified(ServletContext servletContext, HeaderAndPath hap) {
 		// Get the cache
 		@SuppressWarnings("unchecked")
-		Map<String,GetLastModifiedCacheValue> cache = (Map<String,GetLastModifiedCacheValue>)servletContext.getAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME);
+		Map<HeaderAndPath,GetLastModifiedCacheValue> cache = (Map<HeaderAndPath,GetLastModifiedCacheValue>)servletContext.getAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME);
 		if(cache == null) {
 			// Create new cache
-			cache = new HashMap<String,GetLastModifiedCacheValue>();
+			cache = new HashMap<HeaderAndPath,GetLastModifiedCacheValue>();
 			servletContext.setAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME, cache);
 		}
 		GetLastModifiedCacheValue cacheValue;
 		synchronized(cache) {
 			// Get the cache entry
-			cacheValue = cache.get(path);
+			cacheValue = cache.get(hap);
 			if(cacheValue==null) {
 				cacheValue = new GetLastModifiedCacheValue();
-				cache.put(path, cacheValue);
+				cache.put(hap, cacheValue);
 			}
 		}
 		synchronized(cacheValue) {
@@ -298,7 +349,7 @@ public class LastModifiedServlet extends HttpServlet {
 				return cacheValue.lastModified;
 			} else {
 				long lastModified = 0;
-				String realPath = servletContext.getRealPath(path);
+				String realPath = servletContext.getRealPath(hap.path);
 				if(realPath != null) {
 					// Use File first
 					lastModified = new File(realPath).lastModified();
@@ -306,7 +357,7 @@ public class LastModifiedServlet extends HttpServlet {
 				if(lastModified == 0) {
 					// Try URL
 					try {
-						URL resourceUrl = servletContext.getResource(path);
+						URL resourceUrl = servletContext.getResource(hap.path);
 						if(resourceUrl != null) {
 							URLConnection conn = resourceUrl.openConnection();
 							conn.setAllowUserInteraction(false);
@@ -342,18 +393,20 @@ public class LastModifiedServlet extends HttpServlet {
 	 *
 	 * @return  the modified time or <code>0</code> when unknown.
 	 */
-	public static long getLastModified(ServletContext servletContext, String path, String extension) {
+	public static long getLastModified(HttpServletRequest request, String path, String extension) {
+		ServletContext servletContext = request.getServletContext();
+		HeaderAndPath hap = new HeaderAndPath(request, path);
 		if(CSS_EXTENSION.equals(extension)) {
 			try {
 				// Parse CSS file, finding all dependencies.
 				// Don't re-parse when CSS file not changed, but still check
 				// dependencies.
-				return ParsedCssFile.parseCssFile(servletContext, path).newestLastModified;
+				return ParsedCssFile.parseCssFile(servletContext, hap).newestLastModified;
 			} catch(IOException e) {
 				return 0;
 			}
 		} else {
-			return getCachedLastModified(servletContext, path);
+			return getCachedLastModified(servletContext, hap);
 		}
 	}
 
@@ -362,9 +415,9 @@ public class LastModifiedServlet extends HttpServlet {
 	 * 
 	 * @see  #getLastModified(javax.servlet.ServletContext, java.lang.String, java.lang.String) 
 	 */
-	public static long getLastModified(ServletContext servletContext, String path) {
+	public static long getLastModified(HttpServletRequest request, String path) {
 		return getLastModified(
-			servletContext,
+			request,
 			path,
 			UnixFile.getExtension(path)
 		);
@@ -464,7 +517,7 @@ public class LastModifiedServlet extends HttpServlet {
 	 * This implementation assume anchors (#) are always after the last question mark (?).
 	 * </p>
 	 */
-	public static String addLastModified(ServletContext servletContext, String servletPath, String url, AddLastModifiedWhen when) throws MalformedURLException {
+	public static String addLastModified(HttpServletRequest request, String servletPath, String url, AddLastModifiedWhen when) throws MalformedURLException {
 		// Never try to add if when==falsee
 		if(when != AddLastModifiedWhen.FALSE) {
 			// Get the context-relative path (resolves relative paths)
@@ -479,18 +532,23 @@ public class LastModifiedServlet extends HttpServlet {
 					resourcePath = questionPos==-1 ? resourcePath : resourcePath.substring(0, questionPos);
 				}
 				String extension = UnixFile.getExtension(resourcePath).toLowerCase(Locale.ENGLISH);
-				boolean doAdd;
+				final boolean doAdd;
 				if(when == AddLastModifiedWhen.TRUE) {
 					// Always try to add
 					doAdd = true;
 				} else {
-					// Conditionally try to add based on file extension
-					doAdd = staticExtensions.contains(
-						extension
-					);
+					// Check for header disabling auto last modified
+					if("false".equalsIgnoreCase(request.getHeader(LAST_MODIFIED_HEADER_NAME))) {
+						doAdd = false;
+					} else {
+						// Conditionally try to add based on file extension
+						doAdd = staticExtensions.contains(
+							extension
+						);
+					}
 				}
 				if(doAdd) {
-					long lastModified = getLastModified(servletContext, resourcePath, extension);
+					long lastModified = getLastModified(request, resourcePath, extension);
 					if(lastModified != 0) {
 						int questionPos = url.lastIndexOf('?');
 						int anchorStart = url.lastIndexOf('#');
@@ -522,7 +580,7 @@ public class LastModifiedServlet extends HttpServlet {
 	@Override
 	protected long getLastModified(HttpServletRequest request) {
 		// Find the underlying file
-		long lastModified = getLastModified(getServletContext(), request.getServletPath());
+		long lastModified = getLastModified(request, request.getServletPath());
 		return lastModified==0 ? -1 : lastModified;
 	}
 
@@ -530,11 +588,11 @@ public class LastModifiedServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
 			// Find the underlying file
-			String path = request.getServletPath();
-			String extension = UnixFile.getExtension(path);
+			HeaderAndPath hap = new HeaderAndPath(request, request.getServletPath());
+			String extension = UnixFile.getExtension(hap.path);
 			if(CSS_EXTENSION.equalsIgnoreCase(extension)) {
 				// Special case for CSS files
-				byte[] rewrittenCss = ParsedCssFile.parseCssFile(getServletContext(), path).rewrittenCssFile;
+				byte[] rewrittenCss = ParsedCssFile.parseCssFile(request.getServletContext(), hap).rewrittenCssFile;
 				response.setContentType("text/css");
 				response.setCharacterEncoding(ENCODING);
 				response.setContentLength(rewrittenCss.length);
