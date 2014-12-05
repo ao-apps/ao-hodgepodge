@@ -393,8 +393,7 @@ public class LastModifiedServlet extends HttpServlet {
 	 *
 	 * @return  the modified time or <code>0</code> when unknown.
 	 */
-	public static long getLastModified(HttpServletRequest request, String path, String extension) {
-		ServletContext servletContext = request.getServletContext();
+	public static long getLastModified(ServletContext servletContext, HttpServletRequest request, String path, String extension) {
 		HeaderAndPath hap = new HeaderAndPath(request, path);
 		if(CSS_EXTENSION.equals(extension)) {
 			try {
@@ -415,8 +414,9 @@ public class LastModifiedServlet extends HttpServlet {
 	 * 
 	 * @see  #getLastModified(javax.servlet.ServletContext, java.lang.String, java.lang.String) 
 	 */
-	public static long getLastModified(HttpServletRequest request, String path) {
+	public static long getLastModified(ServletContext servletContext, HttpServletRequest request, String path) {
 		return getLastModified(
+			servletContext,
 			request,
 			path,
 			UnixFile.getExtension(path)
@@ -517,7 +517,7 @@ public class LastModifiedServlet extends HttpServlet {
 	 * This implementation assume anchors (#) are always after the last question mark (?).
 	 * </p>
 	 */
-	public static String addLastModified(HttpServletRequest request, String servletPath, String url, AddLastModifiedWhen when) throws MalformedURLException {
+	public static String addLastModified(ServletContext servletContext, HttpServletRequest request, String servletPath, String url, AddLastModifiedWhen when) throws MalformedURLException {
 		// Never try to add if when==falsee
 		if(when != AddLastModifiedWhen.FALSE) {
 			// Get the context-relative path (resolves relative paths)
@@ -548,7 +548,7 @@ public class LastModifiedServlet extends HttpServlet {
 					}
 				}
 				if(doAdd) {
-					long lastModified = getLastModified(request, resourcePath, extension);
+					long lastModified = getLastModified(servletContext, request, resourcePath, extension);
 					if(lastModified != 0) {
 						int questionPos = url.lastIndexOf('?');
 						int anchorStart = url.lastIndexOf('#');
@@ -580,7 +580,7 @@ public class LastModifiedServlet extends HttpServlet {
 	@Override
 	protected long getLastModified(HttpServletRequest request) {
 		// Find the underlying file
-		long lastModified = getLastModified(request, request.getServletPath());
+		long lastModified = getLastModified(getServletContext(), request, request.getServletPath());
 		return lastModified==0 ? -1 : lastModified;
 	}
 
@@ -592,7 +592,7 @@ public class LastModifiedServlet extends HttpServlet {
 			String extension = UnixFile.getExtension(hap.path);
 			if(CSS_EXTENSION.equalsIgnoreCase(extension)) {
 				// Special case for CSS files
-				byte[] rewrittenCss = ParsedCssFile.parseCssFile(request.getServletContext(), hap).rewrittenCssFile;
+				byte[] rewrittenCss = ParsedCssFile.parseCssFile(getServletContext(), hap).rewrittenCssFile;
 				response.setContentType("text/css");
 				response.setCharacterEncoding(ENCODING);
 				response.setContentLength(rewrittenCss.length);
