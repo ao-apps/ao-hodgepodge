@@ -100,12 +100,13 @@ public class DatabaseConnection extends AbstractDatabaseAccess {
                 case Types.TIME :
                 case Types.TIMESTAMP :
                 case Types.VARCHAR :
+				default :
                     sb.append('\'');
                     SQLUtility.escapeSQL(result.getString(c), sb);
                     sb.append('\'');
                     break;
-                default :
-                    throw new SQLException("Unexpected column type: "+colType);
+                //default :
+                //    throw new SQLException("Unexpected column type: "+colType);
             }
         }
         sb.append(')');
