@@ -63,7 +63,7 @@ public class ImagesTest {
 	}
 
 	@Test
-	public void hello() {
+	public void testFindImage() {
 		logger.log(
 			Level.INFO,
 			"Got image: {0} x {1}",
@@ -86,7 +86,7 @@ public class ImagesTest {
 			testRepeat();
 		}
 		long endNanos = System.nanoTime();
-		logger.log(Level.INFO, "Total time: {0} ms", BigDecimal.valueOf((endNanos - startNanos)/repeat, 6));
+		logger.log(Level.INFO, "Average time: {0} ms", BigDecimal.valueOf((endNanos - startNanos)/repeat, 6));
 	}
 
 	private void testRepeat() {
