@@ -34,6 +34,12 @@ import java.util.Iterator;
 public abstract class Recurring {
 
 	/**
+	 * Copy of values for internal use without temporary array copy.
+	 */
+	private static final DayOfWeek[] allDaysOfWeek = DayOfWeek.values();
+	private static final Month[] allMonths = Month.values();
+
+	/**
 	 * Parses a human-readable representation of a recurring schedule.
 	 * All parsing case-insensitive.
 	 * Supported values are:
@@ -74,7 +80,7 @@ public abstract class Recurring {
 			EnumSet<DayOfWeek> daysOfWeek = EnumSet.noneOf(DayOfWeek.class);
 			for(String dayStr : StringUtility.splitStringCommaSpace(recurring.substring(3))) {
 				boolean found = false;
-				for(DayOfWeek dow : daysOfWeek) {
+				for(DayOfWeek dow : allDaysOfWeek) {
 					if(
 						dow.getLongName().equalsIgnoreCase(dayStr)
 						|| dow.getShortName().equalsIgnoreCase(dayStr)
@@ -93,7 +99,7 @@ public abstract class Recurring {
 			EnumSet<Month> months = EnumSet.noneOf(Month.class);
 			for(String monthStr : StringUtility.splitStringCommaSpace(recurring.substring(3))) {
 				boolean found = false;
-				for(Month month : months) {
+				for(Month month : allMonths) {
 					if(
 						month.getLongName().equalsIgnoreCase(monthStr)
 						|| month.getShortName().equalsIgnoreCase(monthStr)
