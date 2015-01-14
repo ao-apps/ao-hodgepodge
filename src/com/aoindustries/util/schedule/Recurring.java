@@ -513,16 +513,16 @@ public abstract class Recurring {
 			sb.append(increment);
 			switch(field) {
 				case Calendar.DAY_OF_MONTH :
-					sb.append("days");
+					sb.append(" days");
 					break;
 				case Calendar.WEEK_OF_YEAR :
-					sb.append("weeks");
+					sb.append(" weeks");
 					break;
 				case Calendar.MONTH :
-					sb.append("months");
+					sb.append(" months");
 					break;
 				case Calendar.YEAR :
-					sb.append("years");
+					sb.append(" years");
 					break;
 				default :
 					throw new AssertionError("Unexpected value for field: " + field);
