@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.util.BufferManager;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -98,6 +99,36 @@ final public class IoUtils {
     }
 
     /**
+     * Copies all information from one stream to an appendable.
+     *
+     * @return  the number of bytes copied
+     *
+     * @see  BufferManager#getChars()
+     */
+    public static long copy(Reader in, Appendable out) throws IOException {
+		if(in == null) throw new NullArgumentException("in");
+		if(out == null) throw new NullArgumentException("out");
+		boolean isChainWriter = out instanceof ChainWriter;
+		ChainWriter chainOut = isChainWriter ? (ChainWriter)out : null;
+        char[] buff = BufferManager.getChars();
+        try {
+            long totalChars = 0;
+            int numChars;
+            while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+				if(chainOut != null) {
+	                chainOut.write(buff, 0, numChars);
+				} else {
+	                out.append(new String(buff, 0, numChars));
+				}
+                totalChars += numChars;
+            }
+            return totalChars;
+        } finally {
+            BufferManager.release(buff, false);
+        }
+    }
+
+	/**
      * Copies all information from one stream to another.  Internally reuses thread-local
      * buffers to avoid initial buffer zeroing cost and later garbage collection overhead.
      *
