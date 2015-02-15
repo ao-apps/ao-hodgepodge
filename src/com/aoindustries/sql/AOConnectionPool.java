@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,7 +23,7 @@
 package com.aoindustries.sql;
 
 import com.aoindustries.io.AOPool;
-import com.aoindustries.util.EncodingUtils;
+import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -41,10 +41,10 @@ import java.util.logging.Logger;
  */
 final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
 
-    private String driver;
-    private String url;
-    private String user;
-    private String password;
+    private final String driver;
+    private final String url;
+    private final String user;
+    private final String password;
 
     public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge, Logger logger) {
     	super(AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, logger);
@@ -183,13 +183,13 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
     protected void printConnectionStats(Appendable out) throws IOException {
         out.append("  <tr><th colspan='2'><span style='font-size:large;'>JDBC Driver</span></th></tr>\n"
                 + "  <tr><td>Driver:</td><td>");
-        EncodingUtils.encodeHtml(driver, out);
+        encodeTextInXhtml(driver, out);
         out.append("</td></tr>\n"
                 + "  <tr><td>URL:</td><td>");
-        EncodingUtils.encodeHtml(url, out);
+        encodeTextInXhtml(url, out);
         out.append("</td></tr>\n"
                 + "  <tr><td>User:</td><td>");
-        EncodingUtils.encodeHtml(user, out);
+        encodeTextInXhtml(user, out);
         out.append("</td></tr>\n"
                 + "  <tr><td>Password:</td><td>");
         int len=password.length();
