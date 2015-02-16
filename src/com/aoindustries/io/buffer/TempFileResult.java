@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,8 @@
  */
 package com.aoindustries.io.buffer;
 
-import com.aoindustries.encoding.MediaEncoder;
-import com.aoindustries.encoding.MediaWriter;
+import com.aoindustries.io.Encoder;
+import com.aoindustries.io.EncoderWriter;
 import com.aoindustries.io.TempFile;
 import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.WrappedException;
@@ -132,19 +132,19 @@ public class TempFileResult implements BufferResult {
 	}
 
 	@Override
-    public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
+    public void writeTo(Encoder encoder, Writer out) throws IOException {
 		writeTo(
 			encoder!=null
-				? new MediaWriter(encoder, out)
+				? new EncoderWriter(encoder, out)
 				: out
 		);
 	}
 
 	@Override
-    public void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException {
+    public void writeTo(Encoder encoder, Writer out, long off, long len) throws IOException {
 		writeTo(
 			encoder!=null
-				? new MediaWriter(encoder, out)
+				? new EncoderWriter(encoder, out)
 				: out,
 			off,
 			len

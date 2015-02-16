@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.encoding.MediaEncoder;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -73,7 +72,7 @@ public interface Writable  {
 	 * 
 	 * @param  encoder  if null, no encoding is performed and will be the same as a call to <code>writeTo(Writer)</code>
 	 */
-	void writeTo(MediaEncoder encoder, Writer out) throws IOException;
+	void writeTo(Encoder encoder, Writer out) throws IOException;
 
 	/**
 	 * Writes a streamed version of the object's String representation using the given encoder.
@@ -82,5 +81,5 @@ public interface Writable  {
 	 * 
 	 * @param  encoder  if null, no encoding is performed and will be the same as a call to <code>writeTo(Writer,off,len)</code>
 	 */
-	void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException;
+	void writeTo(Encoder encoder, Writer out, long off, long len) throws IOException;
 }

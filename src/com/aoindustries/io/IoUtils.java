@@ -108,18 +108,12 @@ final public class IoUtils {
     public static long copy(Reader in, Appendable out) throws IOException {
 		if(in == null) throw new NullArgumentException("in");
 		if(out == null) throw new NullArgumentException("out");
-		boolean isChainWriter = out instanceof ChainWriter;
-		ChainWriter chainOut = isChainWriter ? (ChainWriter)out : null;
         char[] buff = BufferManager.getChars();
         try {
             long totalChars = 0;
             int numChars;
             while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-				if(chainOut != null) {
-	                chainOut.write(buff, 0, numChars);
-				} else {
-	                out.append(new String(buff, 0, numChars));
-				}
+				out.append(new String(buff, 0, numChars));
                 totalChars += numChars;
             }
             return totalChars;
@@ -143,29 +137,6 @@ final public class IoUtils {
             int numChars;
             while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
                 out.append(buff, 0, numChars);
-                totalChars += numChars;
-            }
-            return totalChars;
-        } finally {
-            BufferManager.release(buff, false);
-        }
-    }
-
-    /**
-     * Copies all information from one stream to another.  Internally reuses thread-local
-     * buffers to avoid initial buffer zeroing cost and later garbage collection overhead.
-     *
-     * @return  the number of bytes copied
-     *
-     * @see  BufferManager#getChars()
-     */
-    public static long copy(Reader in, ChainWriter out) throws IOException {
-        char[] buff = BufferManager.getChars();
-        try {
-            long totalChars = 0;
-            int numChars;
-            while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-                out.write(buff, 0, numChars);
                 totalChars += numChars;
             }
             return totalChars;

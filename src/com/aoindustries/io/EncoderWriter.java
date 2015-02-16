@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,29 +20,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.encoding;
+package com.aoindustries.io;
 
 import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Streaming versions of media encoders.
+ * Writer that encodes during write.
  * 
  * @see  MediaEncoder
  *
  * @author  AO Industries, Inc.
  */
-final public class MediaWriter extends FilterWriter implements ValidMediaFilter {
+public class EncoderWriter extends FilterWriter {
 
-	private final MediaEncoder encoder;
+	private final Encoder encoder;
 
-	public MediaWriter(MediaEncoder encoder, Writer out) {
+	public EncoderWriter(Encoder encoder, Writer out) {
         super(out);
 		this.encoder = encoder;
     }
 
-	public MediaEncoder getEncoder() {
+	public Encoder getEncoder() {
 		return encoder;
 	}
 
@@ -52,16 +52,6 @@ final public class MediaWriter extends FilterWriter implements ValidMediaFilter 
 	public Writer getOut() {
 		return out;
 	}
-
-	@Override
-    public boolean isValidatingMediaInputType(MediaType inputType) {
-		return encoder.isValidatingMediaInputType(inputType);
-    }
-
-    @Override
-    public MediaType getValidMediaOutputType() {
-		return encoder.getValidMediaOutputType();
-    }
 
 	/**
      * @see  MediaEncoder#writePrefix(java.lang.Appendable)
@@ -96,19 +86,19 @@ final public class MediaWriter extends FilterWriter implements ValidMediaFilter 
 	}
 
 	@Override
-    public MediaWriter append(char c) throws IOException {
+    public EncoderWriter append(char c) throws IOException {
 		encoder.append(c, out);
 		return this;
 	}
 
 	@Override
-	public MediaWriter append(CharSequence csq) throws IOException {
+	public EncoderWriter append(CharSequence csq) throws IOException {
 		encoder.append(csq, out);
 		return this;
 	}
 
 	@Override
-    public MediaWriter append(CharSequence csq, int start, int end) throws IOException {
+    public EncoderWriter append(CharSequence csq, int start, int end) throws IOException {
 		encoder.append(csq, start, end, out);
 		return this;
 	}

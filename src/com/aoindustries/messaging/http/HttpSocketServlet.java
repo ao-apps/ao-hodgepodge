@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,8 @@
  */
 package com.aoindustries.messaging.http;
 
-import com.aoindustries.encoding.TextInXhtmlEncoder;
 import com.aoindustries.io.AoByteArrayOutputStream;
+import com.aoindustries.io.Encoder;
 import com.aoindustries.messaging.AbstractSocket;
 import com.aoindustries.messaging.AbstractSocketContext;
 import com.aoindustries.messaging.Message;
@@ -59,7 +59,7 @@ import javax.servlet.http.HttpServletResponse;
  * Server component for bi-directional messaging over HTTP.
  * This is a synchronous implementation compatible with older environments.
  */
-public class HttpSocketServlet extends HttpServlet {
+abstract public class HttpSocketServlet extends HttpServlet {
 
 	private static final Logger logger = Logger.getLogger(HttpSocketServlet.class.getName());
 
@@ -205,7 +205,10 @@ public class HttpSocketServlet extends HttpServlet {
 
 	protected final ServletSocketContext socketContext = new ServletSocketContext();
 
-	public HttpSocketServlet() {
+	private final Encoder textInXhtmlEncoder;
+
+	protected HttpSocketServlet(Encoder textInXhtmlEncoder) {
+		this.textInXhtmlEncoder = textInXhtmlEncoder;
 	}
 
 	/**
@@ -330,7 +333,7 @@ public class HttpSocketServlet extends HttpServlet {
 									out.write("\" type=\"");
 									out.write(message.getMessageType().getTypeChar());
 									out.write("\">");
-									TextInXhtmlEncoder.encodeTextInXhtml(message.encodeAsString(), out);
+									textInXhtmlEncoder.write(message.encodeAsString(), out);
 									out.write("</message>\n");
 								}
 								out.write("</messages>");

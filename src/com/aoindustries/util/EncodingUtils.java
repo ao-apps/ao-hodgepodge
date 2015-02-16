@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,9 +22,6 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.encoding.NewEncodingUtils;
-import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
-import com.aoindustries.io.Coercion;
 import com.aoindustries.util.i18n.BundleLookupMarkup;
 import com.aoindustries.util.i18n.BundleLookupThreadContext;
 import com.aoindustries.util.i18n.MarkupType;
@@ -36,8 +33,6 @@ import java.io.IOException;
  * @author  AO Industries, Inc.
  * 
  * @deprecated  Use new encoding package instead.
- *
- * @see  NewEncodingUtils
  */
 @Deprecated
 public final class EncodingUtils {
@@ -45,33 +40,25 @@ public final class EncodingUtils {
     private EncodingUtils() {
     }
 
-    private static final String EOL = System.getProperty("line.separator");
+	/**
+	 * Converts an object to a string.
+	 * 
+	 * @deprecated  Use Coercion.toString(Object) instead.
+	 */
+	@Deprecated
+	public static String toString(Object value) {
+		// If A is a string, then the result is A.
+		if(value instanceof String) return (String)value;
+		// Otherwise, if A is null, then the result is "".
+		if(value == null) return "";
+		// Otherwise, if A.toString() throws an exception, then raise an error
+		String str = value.toString();
+		// Otherwise, the result is A.toString();
+		return str;
+	}
+
+	private static final String EOL = System.getProperty("line.separator");
     private static final String BR_EOL = "<br />"+EOL;
-
-    // <editor-fold defaultstate="collapsed" desc="XML Attributes">
-    /**
-     * @see  TextInXhtmlAttributeEncoder
-	 *
-	 * @deprecated  Use TextInXhtmlAttributeEncoder instead.
-     */
-	@Deprecated
-    public static void encodeXmlAttribute(Object value, Appendable out) throws IOException {
-		encodeTextInXhtmlAttribute(Coercion.toString(value), out);
-    }
-
-    /**
-     * @see  TextInXhtmlAttributeEncoder
-	 *
-	 * @deprecated  Use TextInXhtmlAttributeEncoder instead.
-     */
-	@Deprecated
-    public static String encodeXmlAttribute(Object value) throws IOException {
-        if(value==null) return null;
-        StringBuilder result = new StringBuilder();
-		encodeTextInXhtmlAttribute(Coercion.toString(value), result);
-        return result.toString();
-    }
-    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="(X)HTML">
     /**
@@ -130,7 +117,7 @@ public final class EncodingUtils {
 	@Deprecated
     public static void encodeHtml(Object value, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
         if(value!=null) {
-			String str = Coercion.toString(value);
+			String str = toString(value);
 			BundleLookupMarkup lookupMarkup;
 			BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
 			if(threadContext!=null) {

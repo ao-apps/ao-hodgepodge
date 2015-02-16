@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.aoindustries.io.buffer;
 
-import com.aoindustries.encoding.MediaEncoder;
+import com.aoindustries.io.Encoder;
 import com.aoindustries.lang.NotImplementedException;
 import java.io.IOException;
 import java.io.Writer;
@@ -202,7 +202,7 @@ public class SegmentedResult implements BufferResult {
 	/**
 	 * Writes the full segment (with original offset and length) to the given writer using the given encoder.
 	 */
-	private void writeSegment(int segmentIndex, MediaEncoder encoder, Writer out) throws IOException {
+	private void writeSegment(int segmentIndex, Encoder encoder, Writer out) throws IOException {
 		switch(segmentTypes[segmentIndex]) {
 			case SegmentedWriter.TYPE_STRING :
 				encoder.write(
@@ -240,7 +240,7 @@ public class SegmentedResult implements BufferResult {
 	/**
 	 * Writes the given range of a segment to the given writer using the given encoder.
 	 */
-	private void writeSegment(int segmentIndex, int off, int len, MediaEncoder encoder, Writer out) throws IOException {
+	private void writeSegment(int segmentIndex, int off, int len, Encoder encoder, Writer out) throws IOException {
 		switch(segmentTypes[segmentIndex]) {
 			case SegmentedWriter.TYPE_STRING :
 				encoder.write(
@@ -498,7 +498,7 @@ public class SegmentedResult implements BufferResult {
 	}
 
 	@Override
-    public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
+    public void writeTo(Encoder encoder, Writer out) throws IOException {
 		if(encoder==null) {
 			writeTo(out);
 		} else {
@@ -529,7 +529,7 @@ public class SegmentedResult implements BufferResult {
 	}
 
 	@Override
-    public void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException {
+    public void writeTo(Encoder encoder, Writer out, long off, long len) throws IOException {
 		// Implementation will need to start through beginning
 		throw new NotImplementedException("Implement when first needed.");
 	}

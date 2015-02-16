@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,11 +22,8 @@
  */
 package com.aoindustries.io.buffer;
 
-import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.javaScriptInXhtmlAttributeEncoder;
-import static com.aoindustries.encoding.JavaScriptInXhtmlEncoder.javaScriptInXhtmlEncoder;
-import com.aoindustries.encoding.MediaEncoder;
-import com.aoindustries.encoding.MediaWriter;
-import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
+import com.aoindustries.io.Encoder;
+import com.aoindustries.io.EncoderWriter;
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.Sequence;
 import com.aoindustries.util.WrappedException;
@@ -61,12 +58,21 @@ public class LoggingResult implements BufferResult {
 	/**
 	 * Provides detailed logging for a media encoder.
 	 */
-	private void log(MediaEncoder encoder) throws IOException {
+	private void log(Encoder encoder) throws IOException {
 		if(encoder==null) log.write("null");
-		else if(encoder==javaScriptInXhtmlAttributeEncoder) log.write("javaScriptInXhtmlAttributeEncoder");
-		else if(encoder==javaScriptInXhtmlEncoder) log.write("javaScriptInXhtmlEncoder");
-		else if(encoder==textInXhtmlAttributeEncoder) log.write("textInXhtmlAttributeEncoder");
-		else log.write(encoder.getClass().getName());
+		else {
+			String className = encoder.getClass().getName();
+			// Some shortcuts from the ao-encoding project
+			if("com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder".equals(className)) {
+				log.write("javaScriptInXhtmlAttributeEncoder");
+			} else if("com.aoindustries.encoding.JavaScriptInXhtmlEncoder".equals(className)) {
+				log.write("javaScriptInXhtmlEncoder");
+			} else if("com.aoindustries.encoding.TextInXhtmlAttributeEncoder".equals(className)) {
+				log.write("textInXhtmlAttributeEncoder");
+			} else {
+				log.write(className);
+			}
+		}
 	}
 
 	/**
@@ -80,12 +86,12 @@ public class LoggingResult implements BufferResult {
 			log.write("writer[");
 			log.write(Long.toString(loggingWriter.getId()));
 			log.write(']');
-		} else if(writer instanceof MediaWriter) {
-			MediaWriter mediaWriter = (MediaWriter)writer;
-			log.write("new MediaWriter(");
-			log(mediaWriter.getEncoder());
+		} else if(writer instanceof EncoderWriter) {
+			EncoderWriter encoderWriter = (EncoderWriter)writer;
+			log.write("new EncoderWriter(");
+			log(encoderWriter.getEncoder());
 			log.write(", ");
-			log(mediaWriter.getOut());
+			log(encoderWriter.getOut());
 			log.write(')');
 		} else {
 			String classname = writer.getClass().getName();
@@ -149,7 +155,7 @@ public class LoggingResult implements BufferResult {
     }
 
 	@Override
-    public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
+    public void writeTo(Encoder encoder, Writer out) throws IOException {
 		log.write("result[");
 		log.write(Long.toString(id));
 		log.write("].writeTo(");
@@ -162,7 +168,7 @@ public class LoggingResult implements BufferResult {
 	}
 
 	@Override
-    public void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException {
+    public void writeTo(Encoder encoder, Writer out, long off, long len) throws IOException {
 		log.write("result[");
 		log.write(Long.toString(id));
 		log.write("].writeTo(");

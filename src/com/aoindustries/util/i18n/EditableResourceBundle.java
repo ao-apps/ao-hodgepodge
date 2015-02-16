@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,9 +22,7 @@
  */
 package com.aoindustries.util.i18n;
 
-import com.aoindustries.encoding.MediaEncoder;
-import static com.aoindustries.encoding.TextInJavaScriptEncoder.encodeTextInJavaScript;
-import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
+import com.aoindustries.io.Encoder;
 import com.aoindustries.util.Sequence;
 import com.aoindustries.util.UnsynchronizedSequence;
 import java.io.File;
@@ -190,12 +188,13 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	}
 
 	/**
-	 * @deprecated Please provide configuration values
+	 * @ deprecated Please provide configuration values
 	 */
-	@Deprecated
+	/*
+	@ Deprecated
 	public static void printEditableResourceBundleLookups(Appendable out) throws IOException {
 		printEditableResourceBundleLookups(out, 4, true);
-	}
+	}*/
 
 	/**
 	 * Prints the resource bundle lookup editor.  This should be called at the end of a request,
@@ -206,7 +205,13 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	 * </p>
 	 * TODO: Add language resources to properties files (but do not make it an editable properties file to avoid possible infinite recursion?)
 	 */
-	public static void printEditableResourceBundleLookups(Appendable out, int editorRows, boolean verticalButtons) throws IOException {
+	public static void printEditableResourceBundleLookups(
+		Encoder textInJavaScriptEncoder,
+		Encoder textInXhtmlEncoder,
+		Appendable out,
+		int editorRows,
+		boolean verticalButtons
+	) throws IOException {
 		final Map<LookupKey,LookupValue> lookups = requestLookups.get();
 		final String valueUrl = setValueUrl.get();
 		resetRequest(false, null, false);
@@ -330,7 +335,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 							// Value allowed
 							out.append('"');
 							String value = convertEmpty(bundleSet.getResourceBundle(locale).getValue(lookupKey.key));
-							encodeTextInJavaScript(value, out);
+							textInJavaScriptEncoder.append(value, out);
 							out.append('"');
 						} else {
 							// null means not allowed
@@ -347,7 +352,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					if(didOne1) out.append(',');
 					else didOne1 = true;
 					out.append("\n        \"");
-					encodeTextInJavaScript(lookupKey.bundleSet.getBaseName(), out);
+					textInJavaScriptEncoder.append(lookupKey.bundleSet.getBaseName(), out);
 					out.append('"');
 				}
 				out.append("\n  ];\n"
@@ -358,7 +363,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					if(didOne1) out.append(',');
 					else didOne1 = true;
 					out.append("\n        \"");
-					encodeTextInJavaScript(locale.toString(), out);
+					textInJavaScriptEncoder.append(locale.toString(), out);
 					out.append('"');
 				}
 				out.append("\n  ];\n"
@@ -369,7 +374,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					if(didOne1) out.append(',');
 					else didOne1 = true;
 					out.append("\n        \"");
-					encodeTextInJavaScript(lookupKey.key, out);
+					textInJavaScriptEncoder.append(lookupKey.key, out);
 					out.append('"');
 				}
 				out.append("\n  ];\n"
@@ -575,7 +580,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					out.append(">\n"
 							+ "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\" style=\"text-align:right; border:1px solid black\">").append(Long.toString(lookupValue.id)).append("</td>\n"
 							+ "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\" style=\"border:1px solid black\">");
-					encodeTextInXhtml(lookupKey.key, out);
+					textInXhtmlEncoder.append(lookupKey.key, out);
 					out.append("</td>\n");
 					int localeIndex = 0;
 					for(Locale locale : allLocales) {
@@ -633,10 +638,10 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 							out.append("background-color:").append(backgroundColor).append("\" onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("'); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').select(); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').focus();\">");
 							if(currentValue!=null) {
 								if(currentValue.length()>30) {
-									encodeTextInXhtml(currentValue, 0, 30, out);
+									textInXhtmlEncoder.append(currentValue, 0, 30, out);
 									out.append("\u2026"); // Ellipsis
 								} else {
-									encodeTextInXhtml(currentValue, out);
+									textInXhtmlEncoder.append(currentValue, out);
 								}
 							}
 							out.append("</td>\n");
@@ -647,7 +652,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					}
 					// Base Name
 					out.append("        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1)==1 ? "white" : "#e0e0e0").append("');\">");
-					encodeTextInXhtml(bundleSet.getBaseName(), out);
+					textInXhtmlEncoder.append(bundleSet.getBaseName(), out);
 					out.append("</td>\n"
 							+ "      </tr>\n");
 				}
@@ -938,7 +943,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		}
 
 		@Override
-		public void appendPrefixTo(MarkupType markupType, MediaEncoder encoder, Appendable out) throws IOException {
+		public void appendPrefixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException {
 			if(encoder==null) {
 				appendPrefixTo(markupType, out);
 			} else {
@@ -1027,7 +1032,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		}
 
 		@Override
-		public void appendSuffixTo(MarkupType markupType, MediaEncoder encoder, Appendable out) throws IOException {
+		public void appendSuffixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException {
 			if(encoder==null) {
 				appendSuffixTo(markupType, out);
 			} else {

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.encoding.MediaEncoder;
 import com.aoindustries.math.SafeMath;
 import java.io.CharArrayWriter;
 import java.io.IOException;
@@ -82,14 +81,14 @@ public class AoCharArrayWriter
     }
 
 	@Override
-	public void writeTo(MediaEncoder encoder, Writer out) throws IOException {
+	public void writeTo(Encoder encoder, Writer out) throws IOException {
         synchronized(lock) {
 			encoder.write(buf, 0, count, out);
         }
 	}
 
 	@Override
-	public void writeTo(MediaEncoder encoder, Writer out, long off, long len) throws IOException {
+	public void writeTo(Encoder encoder, Writer out, long off, long len) throws IOException {
         synchronized(lock) {
 			if((off+len)>count) throw new IndexOutOfBoundsException();
             encoder.write(

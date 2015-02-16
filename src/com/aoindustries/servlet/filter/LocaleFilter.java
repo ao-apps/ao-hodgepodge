@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,8 @@
  */
 package com.aoindustries.servlet.filter;
 
-import com.aoindustries.encoding.NewEncodingUtils;
 import com.aoindustries.net.ServletRequestParameters;
+import com.aoindustries.net.UrlUtils;
 import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.util.StringUtility;
 import com.aoindustries.util.WrappedException;
@@ -200,7 +200,7 @@ abstract public class LocaleFilter implements Filter {
 				) {
 					if(DEBUG) servletContext.log("DEBUG: Redirecting to remove \"" + paramName + "\" parameter.");
 					StringBuilder url = new StringBuilder();
-					url.append(NewEncodingUtils.decodeUrlPath(requestUri));
+					url.append(UrlUtils.decodeUrlPath(requestUri));
 					boolean didOne = false;
 					for(Map.Entry<String,List<String>> entry : new ServletRequestParameters(request).getParameterMap().entrySet()) {
 						String name = entry.getKey();
@@ -281,7 +281,7 @@ abstract public class LocaleFilter implements Filter {
 					) {
 						if(DEBUG) servletContext.log("DEBUG: Redirecting for missing or mismatched locale parameter: " + localeString);
 						StringBuilder url = new StringBuilder();
-						url.append(NewEncodingUtils.decodeUrlPath(requestUri));
+						url.append(UrlUtils.decodeUrlPath(requestUri));
 						boolean didOne = false;
 						for(Map.Entry<String,List<String>> entry : new ServletRequestParameters(request).getParameterMap().entrySet()) {
 							String name = entry.getKey();

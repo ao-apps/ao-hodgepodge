@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,9 +22,9 @@
  */
 package com.aoindustries.servlet.http;
 
-import com.aoindustries.encoding.MediaEncoder;
-import com.aoindustries.encoding.NewEncodingUtils;
+import com.aoindustries.io.Encoder;
 import com.aoindustries.lang.NullArgumentException;
+import com.aoindustries.net.UrlUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -208,7 +208,7 @@ public class ServletUtil {
      * protocol, port, context path, and relative path.
 	 * No URL rewriting is performed.
      */
-    public static void getAbsoluteURL(HttpServletRequest request, String relPath, MediaEncoder encoder, Appendable out) throws IOException {
+    public static void getAbsoluteURL(HttpServletRequest request, String relPath, Encoder encoder, Appendable out) throws IOException {
 		if(encoder==null) {
 			getAbsoluteURL(request, relPath, out);
 		} else {
@@ -245,7 +245,7 @@ public class ServletUtil {
         href = getAbsolutePath(servletPath, href);
 
         // Encode URL path elements (like Japanese filenames)
-        href = NewEncodingUtils.encodeUrlPath(href);
+        href = UrlUtils.encodeUrlPath(href);
 
         // Perform URL rewriting
         href = response.encodeRedirectURL(href);
