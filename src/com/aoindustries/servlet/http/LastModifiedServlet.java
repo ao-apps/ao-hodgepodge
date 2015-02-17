@@ -22,8 +22,8 @@
  */
 package com.aoindustries.servlet.http;
 
+import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
-import com.aoindustries.io.unix.UnixFile;
 import com.aoindustries.lang.ObjectUtils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -419,7 +419,7 @@ public class LastModifiedServlet extends HttpServlet {
 			servletContext,
 			request,
 			path,
-			UnixFile.getExtension(path)
+			FileUtils.getExtension(path)
 		);
 	}
 
@@ -531,7 +531,7 @@ public class LastModifiedServlet extends HttpServlet {
 					int questionPos = resourcePath.lastIndexOf('?');
 					resourcePath = questionPos==-1 ? resourcePath : resourcePath.substring(0, questionPos);
 				}
-				String extension = UnixFile.getExtension(resourcePath).toLowerCase(Locale.ENGLISH);
+				String extension = FileUtils.getExtension(resourcePath).toLowerCase(Locale.ENGLISH);
 				final boolean doAdd;
 				if(when == AddLastModifiedWhen.TRUE) {
 					// Always try to add
@@ -589,7 +589,7 @@ public class LastModifiedServlet extends HttpServlet {
 		try {
 			// Find the underlying file
 			HeaderAndPath hap = new HeaderAndPath(request, request.getServletPath());
-			String extension = UnixFile.getExtension(hap.path);
+			String extension = FileUtils.getExtension(hap.path);
 			if(CSS_EXTENSION.equalsIgnoreCase(extension)) {
 				// Special case for CSS files
 				byte[] rewrittenCss = ParsedCssFile.parseCssFile(getServletContext(), hap).rewrittenCssFile;

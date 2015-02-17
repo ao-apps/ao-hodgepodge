@@ -22,7 +22,6 @@
  */
 package com.aoindustries.md5;
 
-import com.aoindustries.io.unix.UnixFile;
 import com.aoindustries.util.BufferManager;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,13 +40,6 @@ public final class MD5Utils {
      */
     private MD5Utils() {
     }
-
-	/**
-	 * Gets the MD5 hashcode of a file.
-	 */
-    public static byte[] md5(UnixFile file) throws IOException {
-		return md5(file.getFile());
-	}
 
 	/**
 	 * Gets the MD5 hashcode of a file.

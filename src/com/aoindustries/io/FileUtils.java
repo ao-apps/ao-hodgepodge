@@ -319,6 +319,19 @@ final public class FileUtils {
 	}
 
 	/**
+	 * Gets the extension from the path, not including any period.
+	 * If no extension, returns an empty string.
+	 */
+	public static String getExtension(String path) {
+		int pos=path.lastIndexOf('.');
+		if(pos<1) return "";
+		// If a / follows the ., then no extension
+		int pos2=path.indexOf('/', pos+1);
+		if(pos2!=-1) return "";
+		return path.substring(pos+1);
+	}
+
+	/**
 	 * Gets a File for a URL, retrieving the contents into a temporary file if needed.
 	 * Assumes URL is UTF-8 encoded.
 	 *

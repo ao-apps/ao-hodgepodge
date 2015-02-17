@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.io.unix.UnixFile;
 import com.aoindustries.util.WrappedException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -280,6 +279,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 
     public static File getTempFile(String prefix, String extension) throws IOException {
         if(extension==null) extension="tmp";
+		/* Now just using standard Java temporary files to avoid dependency no new ao-io-unix project.
         try {
             // First try to use Unix file because it creates the files with 600 permissions.
             File f=UnixFile.mktemp(System.getProperty("java.io.tmpdir")+'/'+prefix+'_'+extension+'.', true).getFile();
@@ -289,7 +289,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
         } catch(UnsatisfiedLinkError err) {
             // This is OK if the library is not supported on this platform
         }
-
+		 */
         File f=File.createTempFile(prefix+'_', '.'+extension);
         f.deleteOnExit();
         return f;
