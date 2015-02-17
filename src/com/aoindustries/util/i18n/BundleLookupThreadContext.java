@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.i18n;
 
-import static com.aoindustries.util.i18n.ApplicationResources.accessor;
 import java.util.IdentityHashMap;
 
 /**
@@ -70,7 +69,7 @@ final public class BundleLookupThreadContext {
 		if(lookupResults==null) lookupResults = new IdentityHashMap<String, BundleLookupMarkup>();
 		if(lookupResults.put(lookupResult, lookupMarkup)!=null) {
 			throw new IllegalStateException(
-				accessor.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")
+				ApplicationResources.accessor.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")
 			);
 		}
 	}
