@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,7 +27,6 @@ import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.IntList;
 import com.aoindustries.util.Sequence;
 import com.aoindustries.util.WrappedException;
-import com.aoindustries.util.concurrent.ConcurrentUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -132,6 +131,17 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	 */
 	public static IntegerRadixSort getInstance(ExecutorService executor) {
 		return executor==null ? singleThreadedInstance : new IntegerRadixSort(executor);
+	}
+
+	/**
+	 * Waits for all futures to complete, discarding any results.
+	 * 
+	 * Note: This method is cloned from ConcurrentUtils.java to avoid package dependency.
+	 */
+	private static void waitForAll(Iterable<? extends Future<?>> futures) throws InterruptedException, ExecutionException {
+		for(Future<?> future : futures) {
+			future.get();
+		}
 	}
 
 	private final ExecutorService executor;
@@ -715,7 +725,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 							}
 						}
 						// Wait for each gather/scatter task to complete
-						ConcurrentUtils.waitForAll(runnableFutures);
+						waitForAll(runnableFutures);
 						runnableFutures.clear();
 					} else {
 						for(int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
@@ -780,7 +790,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					!= fromQueueStart
 				);
 				// Wait for each export task to complete
-				ConcurrentUtils.waitForAll(runnableFutures);
+				waitForAll(runnableFutures);
 				// This is the last stage, not needed: runnableFutures.clear()
 			} else {
 				// Use indexed strategy, single-threaded
