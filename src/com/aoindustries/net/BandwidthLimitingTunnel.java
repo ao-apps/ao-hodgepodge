@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,7 +29,7 @@ import java.net.Socket;
 
 /**
  * Provides a tunnel for TCP sockets that limits the bandwidth for both upstream and downstream bandwidth.
- * This was developed for the purpose of limiting the upload bandwidth consumed during CVS operating from
+ * This was developed for the purpose of limiting the upload bandwidth consumed during CVS operations from
  * our main office in order to keep the network responsive.  However, it is general purpose and might find additional
  * uses.
  *
@@ -37,14 +37,14 @@ import java.net.Socket;
  */
 public class BandwidthLimitingTunnel implements Runnable {
 
-    private boolean verbose;
-    private String listen_address;
-    private int listen_port;
-    private String connect_address;
-    private int connect_port;
-    private Long upstream_bandwidth;
-    private Long downstream_bandwidth;
-    private Thread thread;
+    private final boolean verbose;
+    private final String listen_address;
+    private final int listen_port;
+    private final String connect_address;
+    private final int connect_port;
+    private final Long upstream_bandwidth;
+    private final Long downstream_bandwidth;
+    private final Thread thread;
 
     public BandwidthLimitingTunnel(
         boolean verbose,
@@ -98,7 +98,6 @@ public class BandwidthLimitingTunnel implements Runnable {
         } else {
             printUsage();
             System.exit(1);
-            return;
         }
     }
 
