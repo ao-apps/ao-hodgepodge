@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2014  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2014, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 /**
  * <p>
  * The threads of executor services can cause a JVM to keep running if they are not
- * daemon threads.  Alternatively, daemon threads can be interrupted by an unclean
+ * daemon threads.  Additionally, daemon threads can be interrupted by an unclean
  * shutdown if no shutdown hook is provided.  By using this implementation of a
  * shutdown hook you get the best of both - threads stop at the correct time, not
  * too soon and not too late.
