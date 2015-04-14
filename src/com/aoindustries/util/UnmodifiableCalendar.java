@@ -61,6 +61,16 @@ final public class UnmodifiableCalendar extends Calendar {
 		return when;
 	}
 
+	/**
+	 * Unwraps and returns a modifiable clone of the given calendar.
+	 */
+	public static Calendar unwrapClone(Calendar cal) {
+		if(cal == null) return null;
+		if(cal instanceof UnmodifiableCalendar) {
+			cal = ((UnmodifiableCalendar)cal).wrapped;
+		}
+		return (Calendar)cal.clone();
+	}
 	private final Calendar wrapped;
 
     private UnmodifiableCalendar(Calendar wrapped) {

@@ -23,6 +23,7 @@
 package com.aoindustries.util.schedule;
 
 import com.aoindustries.util.StringUtility;
+import com.aoindustries.util.UnmodifiableCalendar;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -179,7 +180,7 @@ public abstract class Recurring {
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
 			return new Iterator<Calendar>() {
-				private final Calendar cal = (Calendar)from.clone();
+				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
 				@Override
 				public boolean hasNext() {
@@ -228,7 +229,7 @@ public abstract class Recurring {
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
 			return new Iterator<Calendar>() {
-				private final Calendar cal = (Calendar)from.clone();
+				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
 				@Override
 				public boolean hasNext() {
@@ -301,7 +302,7 @@ public abstract class Recurring {
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
 			return new Iterator<Calendar>() {
-				private final Calendar cal = (Calendar)from.clone();
+				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
 				@Override
 				public boolean hasNext() {
@@ -349,7 +350,7 @@ public abstract class Recurring {
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
 			return new Iterator<Calendar>() {
 				private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
-				private final Calendar cal = (Calendar)from.clone();
+				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
 				@Override
 				public boolean hasNext() {
@@ -406,7 +407,7 @@ public abstract class Recurring {
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
 			return new Iterator<Calendar>() {
-				private final Calendar cal = (Calendar)from.clone();
+				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
 				@Override
 				public boolean hasNext() {
@@ -454,7 +455,7 @@ public abstract class Recurring {
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
 			return new Iterator<Calendar>() {
 				private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
-				private final Calendar cal = (Calendar)from.clone();
+				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
 				@Override
 				public boolean hasNext() {
@@ -537,7 +538,7 @@ public abstract class Recurring {
 				case Calendar.WEEK_OF_YEAR :
 				case Calendar.YEAR :
 					return new Iterator<Calendar>() {
-						private final Calendar cal = (Calendar)from.clone();
+						private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
 						@Override
 						public boolean hasNext() {
@@ -560,7 +561,7 @@ public abstract class Recurring {
 				case Calendar.MONTH :
 					return new Iterator<Calendar>() {
 						private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
-						private final Calendar cal = (Calendar)from.clone();
+						private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
 						@Override
 						public boolean hasNext() {
