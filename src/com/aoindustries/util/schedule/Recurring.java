@@ -53,6 +53,7 @@ public abstract class Recurring {
 	 *     Example: "on Monday, Wednesday, Friday".
 	 *     Example: "On mon, tue, Sat".
 	 *   </li>
+	 *   <li>"weekly" - recurring on the same day every week.</li>
 	 *   <li>
 	 *     "monthly" - recurring on the same day every month.
 	 *     If the day is past the last day of the month, the last day of the month is used.
@@ -114,6 +115,9 @@ public abstract class Recurring {
 			}
 			if(months.isEmpty()) throw new IllegalArgumentException("Must specify at least one month for recurring in");
 			return new MonthList(months);
+		}
+		if("weekly".equalsIgnoreCase(recurring)) {
+			return WEEKLY;
 		}
 		if("monthly".equalsIgnoreCase(recurring)) {
 			return MONTHLY;
@@ -333,6 +337,44 @@ public abstract class Recurring {
 			};
 		}
 	}
+
+	public static final Recurring WEEKLY = new Recurring() {
+
+		@Override
+		public boolean equals(Object o) {
+			return o == WEEKLY;
+		}
+
+		@Override
+		public String getRecurringDisplay() {
+			return "Weekly";
+		}
+
+		@Override
+		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+			return new Iterator<Calendar>() {
+				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
+
+				@Override
+				public boolean hasNext() {
+					return true;
+				}
+
+				@Override
+				public Calendar next() {
+					Calendar date = (Calendar)cal.clone();
+					// Move the calendar to the next week
+					cal.add(Calendar.WEEK_OF_YEAR, 1);
+					return date;
+				}
+
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException();
+				}
+			};
+		}
+	};
 
 	public static final Recurring MONTHLY = new Recurring() {
 
