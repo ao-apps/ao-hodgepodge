@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014 ,2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -49,6 +49,27 @@ public class NullMath {
 				return i1;
 			} else {
 				return i1 + i2;
+			}
+		}
+	}
+
+	/**
+	 * Subtractions one integers from another while allowing null.
+	 * 
+	 * @return  the difference or null when both arguments are null
+	 */
+	public static Integer sub(Integer i1, Integer i2) {
+		if(i1 == null) {
+			if(i2 == null) {
+				return null;
+			} else {
+				return -i2;
+			}
+		} else {
+			if(i2 == null) {
+				return i1;
+			} else {
+				return i1 - i2;
 			}
 		}
 	}
