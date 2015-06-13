@@ -23,6 +23,7 @@
 package com.aoindustries.util;
 
 import com.aoindustries.sql.SQLUtility;
+import com.aoindustries.util.persistent.PersistentCollections;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -467,31 +468,6 @@ public final class StringUtility {
             +':'
             +time.substring(12,14)
         ;        
-    }
-
-    /**
-     * Converts one hex digit to an integer
-     */
-    public static int getHex(char ch) throws IllegalArgumentException {
-        switch(ch) {
-            case '0': return 0x00;
-            case '1': return 0x01;
-            case '2': return 0x02;
-            case '3': return 0x03;
-            case '4': return 0x04;
-            case '5': return 0x05;
-            case '6': return 0x06;
-            case '7': return 0x07;
-            case '8': return 0x08;
-            case '9': return 0x09;
-            case 'a': case 'A': return 0x0a;
-            case 'b': case 'B': return 0x0b;
-            case 'c': case 'C': return 0x0c;
-            case 'd': case 'D': return 0x0d;
-            case 'e': case 'E': return 0x0e;
-            case 'f': case 'F': return 0x0f;
-            default: throw new IllegalArgumentException("Invalid hex character: "+ch);
-        }
     }
 
     /**
@@ -1064,21 +1040,167 @@ public final class StringUtility {
         } while (string.length() > 0);
     }
 
-    public static String convertToHex(byte[] bytes) {
-        if(bytes==null) return null;
-        int len=bytes.length;
-        StringBuilder SB=new StringBuilder(len*2);
-        for(int c=0;c<len;c++) {
-            int b=bytes[c]&255;
-            int b1=b>>4;
-            SB.append((char)((b1<=9)?('0'+b1):('a'+b1-10)));
-            b&=0xf;
-            SB.append((char)((b<=9)?('0'+b):('a'+b-10)));
+	private static final char[] hexChars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+	/**
+	 * Gets the hexadecimal character for the low-order four bits of the provided int.
+	 */
+	public static char getHexChar(int v) {
+		return hexChars[v & 0xf];
+	}
+
+    /**
+     * Converts one hex digit to an integer
+     */
+    public static int getHex(char ch) throws IllegalArgumentException {
+        switch(ch) {
+            case '0': return 0x00;
+            case '1': return 0x01;
+            case '2': return 0x02;
+            case '3': return 0x03;
+            case '4': return 0x04;
+            case '5': return 0x05;
+            case '6': return 0x06;
+            case '7': return 0x07;
+            case '8': return 0x08;
+            case '9': return 0x09;
+            case 'a': case 'A': return 0x0a;
+            case 'b': case 'B': return 0x0b;
+            case 'c': case 'C': return 0x0c;
+            case 'd': case 'D': return 0x0d;
+            case 'e': case 'E': return 0x0e;
+            case 'f': case 'F': return 0x0f;
+            default: throw new IllegalArgumentException("Invalid hex character: "+ch);
         }
+    }
+
+	public static void convertToHex(byte[] bytes, Appendable out) throws IOException {
+        if(bytes != null) {
+			int len = bytes.length;
+			for(int c = 0; c < len; c++) {
+				int b = bytes[c];
+				out.append(getHexChar(b >> 4));
+				out.append(getHexChar(b));
+			}
+		}
+    }
+
+	public static String convertToHex(byte[] bytes) {
+        if(bytes == null) return null;
+        int len = bytes.length;
+        StringBuilder SB = new StringBuilder(len * 2);
+		try {
+			convertToHex(bytes, SB);
+		} catch(IOException e) {
+			throw new AssertionError(e);
+		}
         return SB.toString();
     }
 
-    /**
+	public static byte[] convertByteArrayFromHex(char[] hex) {
+		int hexLen = hex.length;
+		if((hexLen&1) != 0) throw new IllegalArgumentException("Uneven number of characters: " + hexLen);
+		byte[] result = new byte[hexLen / 2];
+		int resultPos = 0;
+		int hexPos = 0;
+		while(hexPos < hexLen) {
+			int h = getHex(hexChars[hexPos++]);
+			int l = getHex(hexChars[hexPos++]);
+			result[resultPos++] = (byte)(
+				(h<<4) | l
+			);
+		}
+		return result;
+	}
+
+	/**
+	 * Converts an int to a full 8-character hex code.
+	 */
+	public static void convertToHex(int value, Appendable out) throws IOException {
+		out.append(getHexChar(value >>> 28));
+		out.append(getHexChar(value >>> 24));
+		out.append(getHexChar(value >>> 20));
+		out.append(getHexChar(value >>> 16));
+		out.append(getHexChar(value >>> 12));
+		out.append(getHexChar(value >>> 8));
+		out.append(getHexChar(value >>> 4));
+		out.append(getHexChar(value));
+    }
+
+	/**
+	 * Converts an int to a full 8-character hex code.
+	 */
+	public static String convertToHex(int value) {
+        StringBuilder SB = new StringBuilder(8);
+		try {
+			convertToHex(value, SB);
+		} catch(IOException e) {
+			throw new AssertionError(e);
+		}
+        return SB.toString();
+    }
+
+	public static int convertIntArrayFromHex(char[] hex) {
+		int hexLen = hex.length;
+		if(hexLen < 8) throw new IllegalArgumentException("Too few characters: " + hexLen);
+		return
+			(getHex(hex[0]) << 28)
+			| (getHex(hex[1]) << 24)
+			| (getHex(hex[2]) << 20)
+			| (getHex(hex[3]) << 16)
+			| (getHex(hex[4]) << 12)
+			| (getHex(hex[5]) << 8)
+			| (getHex(hex[6]) << 4)
+			| (getHex(hex[7]))
+		;
+	}
+
+	/**
+	 * Converts a long integer to a full 16-character hex code.
+	 */
+	public static void convertToHex(long value, Appendable out) throws IOException {
+		convertToHex((int)(value >>> 32), out);
+		convertToHex((int)value, out);
+    }
+
+	/**
+	 * Converts a long integer to a full 16-character hex code.
+	 */
+	public static String convertToHex(long value) {
+        StringBuilder SB = new StringBuilder(16);
+		try {
+			convertToHex(value, SB);
+		} catch(IOException e) {
+			throw new AssertionError(e);
+		}
+        return SB.toString();
+    }
+
+	public static long convertLongArrayFromHex(char[] hex) {
+		int hexLen = hex.length;
+		if(hexLen < 16) throw new IllegalArgumentException("Too few characters: " + hexLen);
+		int h = (getHex(hex[0]) << 28)
+			| (getHex(hex[1]) << 24)
+			| (getHex(hex[2]) << 20)
+			| (getHex(hex[3]) << 16)
+			| (getHex(hex[4]) << 12)
+			| (getHex(hex[5]) << 8)
+			| (getHex(hex[6]) << 4)
+			| (getHex(hex[7]))
+		;
+		int l = (getHex(hex[8]) << 28)
+			| (getHex(hex[9]) << 24)
+			| (getHex(hex[10]) << 20)
+			| (getHex(hex[11]) << 16)
+			| (getHex(hex[12]) << 12)
+			| (getHex(hex[13]) << 8)
+			| (getHex(hex[14]) << 4)
+			| (getHex(hex[15]))
+		;
+		return (((long)h) << 32) | (l & 0xffffffffL);
+	}
+
+	/**
      * Gets the approximate size (where k=1024) of a file in this format:
      *
      * x byte(s)
