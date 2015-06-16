@@ -112,6 +112,11 @@ public class DayDuration {
 	}
 
 	/**
+	 * Some commonly used constant durations.
+	 */
+	public static final DayDuration ZERO_DAYS = new DayDuration(0, Unit.DAYS);
+
+	/**
 	 * Parses a duration compatible with results of toString.
 	 * Supports:
 	 * <ol>
@@ -130,16 +135,23 @@ public class DayDuration {
 	public static DayDuration valueOf(String duration) {
 		int spacePos = duration.indexOf(' ');
 		if(spacePos == -1) throw new IllegalArgumentException("Space not found in duration: " + duration);
-		return new DayDuration(
+		return getInstance(
 			Integer.parseInt(duration.substring(0, spacePos)),
 			Unit.valueOfUnit(duration.substring(spacePos + 1))
 		);
 	}
 
+	public static DayDuration getInstance(int count, Unit unit) {
+		// Shortcuts for constants
+		if(count == 0 && unit == Unit.DAYS) return ZERO_DAYS;
+		// Create new object
+		return new DayDuration(count, unit);
+	}
+
 	private final int count;
 	private final Unit unit;
 
-	public DayDuration(int count, Unit unit) {
+	protected DayDuration(int count, Unit unit) {
 		this.count = count;
 		this.unit = unit;
 	}
