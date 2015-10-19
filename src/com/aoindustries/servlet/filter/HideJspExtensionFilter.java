@@ -86,9 +86,17 @@ public class HideJspExtensionFilter implements Filter {
 		String param = config.getInitParameter("noRewritePatterns");
 		if(param==null) noRewritePatterns = WildcardPatternMatcher.getMatchNone();
 		else noRewritePatterns = WildcardPatternMatcher.getInstance(param);
-      }
+	}
 
-    @Override
+	/**
+	 * Checks if the path represents a folder.
+	 * A folder can be represented by empty string or ending slash.
+	 */
+	private static boolean isFolder(String path) {
+		return path.isEmpty() || path.endsWith("/");
+	}
+
+	@Override
     public void doFilter(
         ServletRequest request,
         ServletResponse response,
@@ -132,7 +140,7 @@ public class HideJspExtensionFilter implements Filter {
 						if(servletPath.endsWith(JSP_EXTENSION)) {
 							String queryString = httpRequest.getQueryString();
 							String path = servletPath.substring(0, servletPath.length() - JSP_EXTENSION.length());
-							if(!path.endsWith("/")) {
+							if(!isFolder(path)) {
 								// Encode URL path elements (like Japanese filenames)
 								path = UrlUtils.encodeUrlPath(path);
 								// Add any query string
@@ -180,7 +188,7 @@ public class HideJspExtensionFilter implements Filter {
 								// Rewrite any URLs ending in "/path/file.jsp" to "/path/file", maintaining any query string
 								if(path.endsWith(JSP_EXTENSION)) {
 									String shortenedPath = path.substring(0, path.length() - JSP_EXTENSION.length());
-									if(!shortenedPath.endsWith("/")) {
+									if(!isFolder(shortenedPath)) {
 										if(pathEnd == urlLen) {
 											return shortenedPath;
 										} else {
@@ -218,7 +226,7 @@ public class HideJspExtensionFilter implements Filter {
 					// This is done by container with a welcome file list of index.jsp in web.xml.
 
 					// Forward incoming request of "/path/file" to "/path/file.jsp", if the resource exists
-					if(!servletPath.endsWith("/")) {
+					if(!isFolder(servletPath)) {
 						String resourcePath = servletPath + JSP_EXTENSION;
 						if(!noRewritePatterns.isMatch(resourcePath)) {
 							URL resourceUrl;
