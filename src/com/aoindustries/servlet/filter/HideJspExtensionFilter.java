@@ -112,7 +112,8 @@ public class HideJspExtensionFilter implements Filter {
                     final HttpServletResponse httpResponse = (HttpServletResponse)response;
 
 					String servletPath = httpRequest.getServletPath();
-					if(!noRewritePatterns.isMatch(servletPath)) {
+					boolean requestRewrite = noRewritePatterns.isMatch(servletPath);
+					if(requestRewrite) {
 						// 301 redirect any incoming request ending in "/path/index.jsp" to "/path/" (to not lose traffic after enabling the filter)
 						if(servletPath.endsWith(SLASH_INDEX_JSP)) {
 							// "index.jsp" is added to the servlet path for requests ending in /, this
@@ -136,7 +137,11 @@ public class HideJspExtensionFilter implements Filter {
 						}
 
 						// 301 redirect any incoming request ending in "/path/file.jsp" to "/path/file" (to not lose traffic after enabling the filter)
-						if(servletPath.endsWith(JSP_EXTENSION)) {
+						if(
+							servletPath.endsWith(JSP_EXTENSION)
+							// Do not redirect the index.jsp
+							&& !servletPath.endsWith(SLASH_INDEX_JSP)
+						) {
 							String queryString = httpRequest.getQueryString();
 							String path = servletPath.substring(0, servletPath.length() - JSP_EXTENSION.length());
 							if(!isFolder(path)) {
@@ -220,30 +225,32 @@ public class HideJspExtensionFilter implements Filter {
 							return encode(url);
 						}
 					};
+					if(requestRewrite) {
+						// Forward incoming request of "/path/" to "/path/index.jsp", if the resource exists
+						// This is done by container with a welcome file list of index.jsp in web.xml.
 
-					// Forward incoming request of "/path/" to "/path/index.jsp", if the resource exists
-					// This is done by container with a welcome file list of index.jsp in web.xml.
-
-					// Forward incoming request of "/path/file" to "/path/file.jsp", if the resource exists
-					if(!isFolder(servletPath)) {
-						String resourcePath = servletPath + JSP_EXTENSION;
-						if(!noRewritePatterns.isMatch(resourcePath)) {
-							URL resourceUrl;
-							try {
-								resourceUrl = servletContext.getResource(resourcePath);
-							} catch(MalformedURLException e) {
-								// Assume does not exist
-								resourceUrl = null;
-							}
-							if(resourceUrl != null) {
-								// Forward to JSP file
-								Dispatcher.forward(
-									servletContext,
-									resourcePath,
-									httpRequest,
-									rewritingResponse
-								);
-								return;
+						// Forward incoming request of "/path/file" to "/path/file.jsp", if the resource exists
+						if(!isFolder(servletPath)) {
+							String resourcePath = servletPath + JSP_EXTENSION;
+							// Do not forward index to index.jsp
+							if(!resourcePath.endsWith(SLASH_INDEX_JSP)) {
+								URL resourceUrl;
+								try {
+									resourceUrl = servletContext.getResource(resourcePath);
+								} catch(MalformedURLException e) {
+									// Assume does not exist
+									resourceUrl = null;
+								}
+								if(resourceUrl != null) {
+									// Forward to JSP file
+									Dispatcher.forward(
+										servletContext,
+										resourcePath,
+										httpRequest,
+										rewritingResponse
+									);
+									return;
+								}
 							}
 						}
 					}
