@@ -49,6 +49,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * <li>Rewrite any URLs ending in "/path/index.jsp" to "/path/", maintaining any query string</li>
  * <li>Rewrite any URLs ending in "/path/file.jsp" to "/path/file", maintaining any query string</li>
  * <li>301 redirect any incoming request ending in "/path/index.jsp" to "/path/" (to not lose traffic after enabling the filter)</li>
+ * <li>301 redirect any incoming request ending in "/path/file.jsp" to "/path/file" (to not lose traffic after enabling the filter)</li>
  * <li>Forward incoming request of "/path/" to "/path/index.jsp", if the resource exists.
  *     This is done by container with a welcome file list of index.jsp in web.xml.</li>
  * <li>Forward incoming request of "/path/file" to "/path/file.jsp", if the resource exists</li>
@@ -65,6 +66,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * Note: When testing in Tomcat 7, /WEB-INF/ protection was not violated by the forwarding.
  * Requests to /WEB-INF/ never hit the filter.
  * </p>
+ * TODO: Is endsWith("/") sufficient?  What if it is a filename like just ".jsp"?
  */
 public class HideJspExtensionFilter implements Filter {
 
@@ -102,32 +104,50 @@ public class HideJspExtensionFilter implements Filter {
                     final HttpServletRequest httpRequest = (HttpServletRequest)request;
                     final HttpServletResponse httpResponse = (HttpServletResponse)response;
 
-					// 301 redirect any incoming request ending in "/path/index.jsp" to "/path/" (to not lose traffic after enabling the filter)
 					String servletPath = httpRequest.getServletPath();
-					if(
-						!noRewritePatterns.isMatch(servletPath)
-						&& servletPath.endsWith(SLASH_INDEX_JSP)
-					) {
-						// "index.jsp" is added to the servlet path for requests ending in /, this
-						// uses the un-decoded requestUri to distinguish between the two
-						if(httpRequest.getRequestURI().endsWith(SLASH_INDEX_JSP)) {
-							String queryString = httpRequest.getQueryString();
-							String path = servletPath.substring(0, servletPath.length() - INDEX_JSP.length());
-							// Encode URL path elements (like Japanese filenames)
-							path = UrlUtils.encodeUrlPath(path);
-							// Add any query string
-							if(queryString != null) {
-								path = path + '?' + queryString;
+					if(!noRewritePatterns.isMatch(servletPath)) {
+						// 301 redirect any incoming request ending in "/path/index.jsp" to "/path/" (to not lose traffic after enabling the filter)
+						if(servletPath.endsWith(SLASH_INDEX_JSP)) {
+							// "index.jsp" is added to the servlet path for requests ending in /, this
+							// uses the un-decoded requestUri to distinguish between the two
+							if(httpRequest.getRequestURI().endsWith(SLASH_INDEX_JSP)) {
+								String queryString = httpRequest.getQueryString();
+								String path = servletPath.substring(0, servletPath.length() - INDEX_JSP.length());
+								// Encode URL path elements (like Japanese filenames)
+								path = UrlUtils.encodeUrlPath(path);
+								// Add any query string
+								if(queryString != null) {
+									path = path + '?' + queryString;
+								}
+								// Perform URL rewriting
+								path = httpResponse.encodeRedirectURL(path);
+								// Convert to absolute URL
+								String location = ServletUtil.getAbsoluteURL(httpRequest, path);
+								ServletUtil.sendRedirect(httpResponse, location, HttpServletResponse.SC_MOVED_PERMANENTLY);
+								return;
 							}
-							// Perform URL rewriting
-							path = httpResponse.encodeRedirectURL(path);
-							// Convert to absolute URL
-							String location = ServletUtil.getAbsoluteURL(httpRequest, path);
-							ServletUtil.sendRedirect(httpResponse, location, HttpServletResponse.SC_MOVED_PERMANENTLY);
-							return;
+						}
+
+						// TODO: 301 redirect any incoming request ending in "/path/file.jsp" to "/path/file" (to not lose traffic after enabling the filter)
+						if(servletPath.endsWith(JSP_EXTENSION)) {
+							String queryString = httpRequest.getQueryString();
+							String path = servletPath.substring(0, servletPath.length() - JSP_EXTENSION.length());
+							if(!path.endsWith("/")) {
+								// Encode URL path elements (like Japanese filenames)
+								path = UrlUtils.encodeUrlPath(path);
+								// Add any query string
+								if(queryString != null) {
+									path = path + '?' + queryString;
+								}
+								// Perform URL rewriting
+								path = httpResponse.encodeRedirectURL(path);
+								// Convert to absolute URL
+								String location = ServletUtil.getAbsoluteURL(httpRequest, path);
+								ServletUtil.sendRedirect(httpResponse, location, HttpServletResponse.SC_MOVED_PERMANENTLY);
+								return;
+							}
 						}
 					}
-
 					HttpServletResponse rewritingResponse = new HttpServletResponseWrapper(httpResponse) {
 						private String encode(final String url) {
 							final int urlLen = url.length();
