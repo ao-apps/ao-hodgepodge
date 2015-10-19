@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * methods.
  * </p>
  * <p>
- * This should be used for the REQUEST and ERROR dispatchers.
+ * This should be used for both the REQUEST and ERROR dispatchers.
  * </p>
  */
 public class NoEncodeUrlFilter implements Filter {

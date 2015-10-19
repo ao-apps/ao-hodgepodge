@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -48,6 +48,7 @@ import javax.servlet.ServletResponse;
  *     &lt;filter-name&gt;TempFileContext&lt;/filter-name&gt;
  *     &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
  *     &lt;dispatcher&gt;REQUEST&lt;/dispatcher&gt;
+ *     &lt;dispatcher&gt;ERROR&lt;/dispatcher&gt;
  * &lt;/filter-mapping&gt;
  * </pre>
  * </p>

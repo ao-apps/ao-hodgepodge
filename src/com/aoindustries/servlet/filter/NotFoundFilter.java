@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,13 +34,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * <p>
  * Returns not found for any filter-mapping that is sent to this filter.
- *
+ * </p>
+ * <p>
  * Due to the limitations of filter mapping URLs, patterns may be provided and
  * handled by this filter itself.
- * 
+ * </p>
+ * <p>
+ * This should be used for the REQUEST dispatcher only.
+ * </p>
+ * <pre>
  * Init Parameters:
  *    patterns  Commas-separated list of patterns (default to *)
+ * </pre>
  * 
  * @see  WildcardPatternMatcher  for supported patterns
 */

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,6 +33,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * <p>
+ * Provides static access to the current request state via thread local variables.
+ * </p>
+ * <p>
+ * This should be used for the REQUEST, FORWARD, INCLUDE and ERROR dispatchers.
+ * </p>
+ */
 public class FunctionContext implements Filter {
 
     private static final String INIT_ERROR_MESSAGE = "Function context not initialized.  Please install FunctionContext filter to web.xml";

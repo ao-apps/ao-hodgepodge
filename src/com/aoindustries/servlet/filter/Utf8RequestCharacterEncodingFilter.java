@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2011 by AO Industries, Inc.,
+ * Copyright 2007-2011, 2015 by AO Industries, Inc.,
  * 7262 Bull Pen Cir, Mobile, Alabama, 36695, U.S.A.
  * All rights reserved.
  */
@@ -16,8 +16,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
+ * <p>
  * Sets the request encoding to "UTF-8".
  * Also restores the ThreadLocale to the system default upon request completion.
+ * </p>
+ * <p>
+ * This should be used for the REQUEST dispatcher only.
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
