@@ -25,6 +25,7 @@ package com.aoindustries.servlet.filter;
 import com.aoindustries.net.UrlUtils;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.ServletUtil;
+import com.aoindustries.util.WildcardPatternMatcher;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -74,12 +75,16 @@ public class HideJspExtensionFilter implements Filter {
 	private static final String SLASH_INDEX_JSP = "/" + INDEX_JSP;
 
 	private ServletContext servletContext;
+	private WildcardPatternMatcher noRewritePatterns;
 
 	@Override
     public void init(FilterConfig config) {
         ServletContext configContext = config.getServletContext();
 		this.servletContext = configContext;
-    }
+		String param = config.getInitParameter("noRewritePatterns");
+		if(param==null) noRewritePatterns = WildcardPatternMatcher.getMatchNone();
+		else noRewritePatterns = WildcardPatternMatcher.getInstance(param);
+      }
 
     @Override
     public void doFilter(
@@ -99,7 +104,10 @@ public class HideJspExtensionFilter implements Filter {
 
 					// 301 redirect any incoming request ending in "/path/index.jsp" to "/path/" (to not lose traffic after enabling the filter)
 					String servletPath = httpRequest.getServletPath();
-					if(servletPath.endsWith(SLASH_INDEX_JSP)) {
+					if(
+						!noRewritePatterns.isMatch(servletPath)
+						&& servletPath.endsWith(SLASH_INDEX_JSP)
+					) {
 						// "index.jsp" is added to the servlet path for requests ending in /, this
 						// uses the un-decoded requestUri to distinguish between the two
 						if(httpRequest.getRequestURI().endsWith(SLASH_INDEX_JSP)) {
@@ -121,49 +129,47 @@ public class HideJspExtensionFilter implements Filter {
 					}
 
 					HttpServletResponse rewritingResponse = new HttpServletResponseWrapper(httpResponse) {
-						private String encode(String url) {
-							int questionPos = url.indexOf('?');
-							// Strip the parameters
-							String noParamsUrl = questionPos==-1 ? url : url.substring(0, questionPos);
-							// Strip any remaining anchor (one still after parameters will remain with parameters)
-							int anchorPos = noParamsUrl.lastIndexOf('#');
-							String noAnchorUrl = anchorPos==-1 ? noParamsUrl : noParamsUrl.substring(0, anchorPos);
-							// Rewrite any URLs ending in "/path/index.jsp" to "/path/", maintaining any query string
-							if(noAnchorUrl.endsWith(SLASH_INDEX_JSP)) {
-								String shortenedUrl = noAnchorUrl.substring(0, noAnchorUrl.length() - INDEX_JSP.length());
-								if(questionPos == -1) {
-									if(anchorPos == -1) {
-										return shortenedUrl;
-									} else {
-										return shortenedUrl + noParamsUrl.substring(anchorPos);
-									}
+						private String encode(final String url) {
+							final int urlLen = url.length();
+							final int pathEnd;
+							{
+								int questionPos = url.indexOf('?');
+								if(questionPos != -1) {
+									pathEnd = questionPos;
 								} else {
-									if(anchorPos == -1) {
-										return shortenedUrl + url.substring(questionPos);
+									// Look for anchor
+									int anchorPos = url.lastIndexOf('#');
+									if(anchorPos != -1) {
+										pathEnd = anchorPos;
 									} else {
-										throw new AssertionError("Since anchors come after parameters, this should never happen because the anchor is left on the parameters");
+										pathEnd = urlLen;
 									}
 								}
 							}
-							// Rewrite any URLs ending in "/path/file.jsp" to "/path/file", maintaining any query string
-							if(noAnchorUrl.endsWith(JSP_EXTENSION)) {
-								String shortenedUrl = noAnchorUrl.substring(0, noAnchorUrl.length() - JSP_EXTENSION.length());
-								if(!shortenedUrl.endsWith("/")) {
-									if(questionPos == -1) {
-										if(anchorPos == -1) {
-											return shortenedUrl;
-										} else {
-											return shortenedUrl + noParamsUrl.substring(anchorPos);
-										}
+							String path = url.substring(0, pathEnd);
+							if(!noRewritePatterns.isMatch(path)) {
+								// Rewrite any URLs ending in "/path/index.jsp" to "/path/", maintaining any query string
+								if(path.endsWith(SLASH_INDEX_JSP)) {
+									String shortenedPath = path.substring(0, path.length() - INDEX_JSP.length());
+									if(pathEnd == urlLen) {
+										return shortenedPath;
 									} else {
-										if(anchorPos == -1) {
-											return shortenedUrl + url.substring(questionPos);
+										return shortenedPath + url.substring(pathEnd);
+									}
+								}
+								// Rewrite any URLs ending in "/path/file.jsp" to "/path/file", maintaining any query string
+								if(path.endsWith(JSP_EXTENSION)) {
+									String shortenedPath = path.substring(0, path.length() - JSP_EXTENSION.length());
+									if(!shortenedPath.endsWith("/")) {
+										if(pathEnd == urlLen) {
+											return shortenedPath;
 										} else {
-											throw new AssertionError("Since anchors come after parameters, this should never happen because the anchor is left on the parameters");
+											return shortenedPath + url.substring(pathEnd);
 										}
 									}
 								}
 							}
+							// No rewriting
 							return url;
 						}
 
@@ -194,22 +200,24 @@ public class HideJspExtensionFilter implements Filter {
 					// Forward incoming request of "/path/file" to "/path/file.jsp", if the resource exists
 					if(!servletPath.endsWith("/")) {
 						String resourcePath = servletPath + JSP_EXTENSION;
-						URL resourceUrl;
-						try {
-							resourceUrl = servletContext.getResource(resourcePath);
-						} catch(MalformedURLException e) {
-							// Assume does not exist
-							resourceUrl = null;
-						}
-						if(resourceUrl != null) {
-							// Forward to JSP file
-							Dispatcher.forward(
-								servletContext,
-								resourcePath,
-								httpRequest,
-								rewritingResponse
-							);
-							return;
+						if(!noRewritePatterns.isMatch(resourcePath)) {
+							URL resourceUrl;
+							try {
+								resourceUrl = servletContext.getResource(resourcePath);
+							} catch(MalformedURLException e) {
+								// Assume does not exist
+								resourceUrl = null;
+							}
+							if(resourceUrl != null) {
+								// Forward to JSP file
+								Dispatcher.forward(
+									servletContext,
+									resourcePath,
+									httpRequest,
+									rewritingResponse
+								);
+								return;
+							}
 						}
 					}
 					// Send any other request down the filter chain</li>
