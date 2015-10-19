@@ -66,7 +66,6 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * Note: When testing in Tomcat 7, /WEB-INF/ protection was not violated by the forwarding.
  * Requests to /WEB-INF/ never hit the filter.
  * </p>
- * TODO: Is endsWith("/") sufficient?  What if it is a filename like just ".jsp"?
  */
 public class HideJspExtensionFilter implements Filter {
 
@@ -136,7 +135,7 @@ public class HideJspExtensionFilter implements Filter {
 							}
 						}
 
-						// TODO: 301 redirect any incoming request ending in "/path/file.jsp" to "/path/file" (to not lose traffic after enabling the filter)
+						// 301 redirect any incoming request ending in "/path/file.jsp" to "/path/file" (to not lose traffic after enabling the filter)
 						if(servletPath.endsWith(JSP_EXTENSION)) {
 							String queryString = httpRequest.getQueryString();
 							String path = servletPath.substring(0, servletPath.length() - JSP_EXTENSION.length());
