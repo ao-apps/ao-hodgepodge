@@ -48,6 +48,20 @@ public class Dispatcher {
 	private static final ThreadLocal<String> originalPage = new ThreadLocal<String>();
 
 	/**
+	 * Gets the current-thread original page or null if not set.
+	 */
+	public static String getOriginalPage() {
+		return originalPage.get();
+	}
+
+	/**
+	 * Sets the current-thread original page.
+	 */
+	public static void setOriginalPage(String page) {
+		originalPage.set(page);
+	}
+
+	/**
 	 * Gets the original page path corresponding to the original request before any forward/include.
 	 * Assumes all forward/include done with ao taglib.
 	 */
@@ -62,6 +76,20 @@ public class Dispatcher {
 	private static final ThreadLocal<String> dispatchedPage = new ThreadLocal<String>();
 
 	/**
+	 * Gets the current-thread dispatched page or null if not set.
+	 */
+	public static String getDispatchedPage() {
+		return dispatchedPage.get();
+	}
+
+	/**
+	 * Sets the current-thread dispatched page.
+	 */
+	public static void setDispatchedPage(String page) {
+		dispatchedPage.set(page);
+	}
+
+	/**
 	 * Gets the current page path, including any effects from include/forward.
 	 * This will be the path of the current page on forward or include.
 	 * Assumes all forward/include done with ao taglib.
@@ -70,19 +98,6 @@ public class Dispatcher {
 	public static String getCurrentPagePath(HttpServletRequest request) {
 		String dispatched = dispatchedPage.get();
 		return dispatched!=null ? dispatched : request.getServletPath();
-	}
-
-	/**
-	 * Tracks if the request has been forwarded.
-	 */
-	protected static final ThreadLocal<Boolean> requestForwarded = new ThreadLocal<Boolean>();
-
-	/**
-	 * Checks if the request has been forwarded.
-	 */
-	public static boolean isForwarded() {
-		Boolean forwarded = requestForwarded.get();
-		return forwarded != null && forwarded;
 	}
 
 	/**
