@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,62 +32,66 @@ import java.util.EmptyStackException;
  * @see java.util.Stack
  *
  * @author  AO Industries, Inc.
+ * 
+ * @deprecated  With escape analysis in the JVM, there is really no point in this class,
+ *              just use the stock Stack implementation.
  */
+@Deprecated
 public class Stack<E> extends ArrayList<E> {
 
-    private static final long serialVersionUID = -3967561912087026100L;
+	private static final long serialVersionUID = -3967561912087026100L;
 
-    /**
-     * @see java.util.Stack#Stack
-     */
-    public Stack() {
-        super();
-    }
+	/**
+	 * @see java.util.Stack#Stack
+	 */
+	public Stack() {
+		super();
+	}
 
-    /**
-     * @see java.util.Stack#push
-     */
-    public E push(E item) {
-	add(item);
-	return item;
-    }
+	/**
+	 * @see java.util.Stack#push
+	 */
+	public E push(E item) {
+		add(item);
+		return item;
+	}
 
-    /**
-     * @see java.util.Stack#pop
-     */
-    public E pop() {
-	int len = size();
-	if (len == 0) throw new EmptyStackException();
-	return remove(len - 1);
-    }
+	/**
+	 * @see java.util.Stack#pop
+	 */
+	public E pop() {
+		int len = size();
+		if (len == 0) throw new EmptyStackException();
+		return remove(len - 1);
+	}
 
-    /**
-     * @see java.util.Stack#peek
-     */
-    public E peek() {
-	int len = size();
-	if (len == 0) throw new EmptyStackException();
-	return get(len - 1);
-    }
+	/**
+	 * @see java.util.Stack#peek
+	 */
+	public E peek() {
+		int len = size();
+		if (len == 0) throw new EmptyStackException();
+		return get(len - 1);
+	}
 
-    /**
-     * @see java.util.Stack#empty
-     *
-     * @deprecated  This exists only for source compatibility
-     *              with <code>java.util.Stack</code>, please use <code>isEmpty</code>
-     *              instead.
-     */
-    @Deprecated
-    public boolean empty() {
-	return isEmpty();
-    }
+	/**
+	 * @see java.util.Stack#empty
+	 *
+	 * @deprecated  This exists only for source compatibility
+	 *              with <code>java.util.Stack</code>, please use <code>isEmpty</code>
+	 *              instead.
+	 */
+	@Deprecated
+	public boolean empty() {
+		return isEmpty();
+	}
 
-    /**
-     * @see java.util.Stack#search
-     */
-    public int search(Object o) {
-	int i = lastIndexOf(o);
-	if (i >= 0) return size() - i;
-	return -1;
-    }
+	/**
+	 * @see java.util.Stack#search
+	 */
+	public int search(Object o) {
+		int i = lastIndexOf(o);
+		if (i >= 0) return size() - i;
+		return -1;
+	}
 }
