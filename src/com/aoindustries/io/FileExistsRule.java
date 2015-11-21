@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,28 +32,28 @@ import java.io.IOException;
  *
  * @author  AO Industries, Inc.
  */
-public class FileExistsRule extends FilesystemIteratorRule {
+public class FileExistsRule implements FilesystemIteratorRule {
 
-    private String[] fullPaths;
-    private FilesystemIteratorRule existsRule;
-    private FilesystemIteratorRule notExistsRule;
-    
-    public FileExistsRule(String[] fullPaths, FilesystemIteratorRule existsRule, FilesystemIteratorRule notExistsRule) {
-        this.fullPaths = fullPaths;
-        this.existsRule = existsRule;
-        this.notExistsRule = notExistsRule;
-    }
+	private final String[] fullPaths;
+	private final FilesystemIteratorRule existsRule;
+	private final FilesystemIteratorRule notExistsRule;
 
-    public FilesystemIteratorRule getEffectiveRule(String filename) throws IOException {
-        for(int c=0;c<fullPaths.length;c++) {
-            File file = new File(fullPaths[c]);
-            if(file.exists()) return existsRule;
-        }
-        return notExistsRule;
-    }
+	public FileExistsRule(String[] fullPaths, FilesystemIteratorRule existsRule, FilesystemIteratorRule notExistsRule) {
+		this.fullPaths = fullPaths;
+		this.existsRule = existsRule;
+		this.notExistsRule = notExistsRule;
+	}
+
+	public FilesystemIteratorRule getEffectiveRule(String filename) throws IOException {
+		for(int c=0;c<fullPaths.length;c++) {
+			File file = new File(fullPaths[c]);
+			if(file.exists()) return existsRule;
+		}
+		return notExistsRule;
+	}
 
 	@Override
-    public boolean isIncluded(String filename) throws IOException {
-        return getEffectiveRule(filename).isIncluded(filename);
-    }
+	public boolean isIncluded(String filename) throws IOException {
+		return getEffectiveRule(filename).isIncluded(filename);
+	}
 }

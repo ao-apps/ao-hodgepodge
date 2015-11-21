@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,17 +32,17 @@ import java.io.IOException;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class FilesystemIteratorRule {
+public interface FilesystemIteratorRule {
 
 	/**
 	 * Gets if this item should be included.
 	 */
-	abstract public boolean isIncluded(String filename) throws IOException;
+	boolean isIncluded(String filename) throws IOException;
 
 	/**
 	 * A rule that will always be backed-up.
 	 */
-	public static final FilesystemIteratorRule OK = new FilesystemIteratorRule() {
+	FilesystemIteratorRule OK = new FilesystemIteratorRule() {
 		@Override
 		public boolean isIncluded(String filename) {
 			return true;
@@ -52,7 +52,7 @@ abstract public class FilesystemIteratorRule {
 	/**
 	 * A rule that will not be backed-up.
 	 */
-	public static final FilesystemIteratorRule SKIP = new FilesystemIteratorRule() {
+	FilesystemIteratorRule SKIP = new FilesystemIteratorRule() {
 		@Override
 		public boolean isIncluded(String filename) {
 			return false;
