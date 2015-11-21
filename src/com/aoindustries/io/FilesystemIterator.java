@@ -45,18 +45,6 @@ import java.util.Stack;
  */
 public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
-	/**
-	 * The maximum number of times a list will be retried when it results
-	 * in duplicate filenames.  This is a workaround from some problems
-	 * with a specific server running JDK 1.5.0_12-i686 on reiserfs.
-	 */
-	private static final int MAX_LIST_RETRIES = 10;
-
-	/**
-	 * The number of millisecond to delay between list retries.
-	 */
-	private static final int LIST_RETRY_DELAY = 10;
-
 	private final Map<String,FilesystemIteratorRule> rules;
 	private final Map<String,FilesystemIteratorRule> prefixRules;
 	private final String startPath;
@@ -227,37 +215,11 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 								if(recurse) {
 									// Skip anything that is not canonical, this avoids symbolic link targets
 									if(file.getCanonicalPath().equals(filename)) {
-							ATTEMPT:    for(int attempt=1; attempt<=MAX_LIST_RETRIES; attempt++) {
-											list = file.list();
-											if(list==null) {
-												list = AoArrays.EMPTY_STRING_ARRAY;
-											} else if(isSorted && list.length>0) {
-												Arrays.sort(list);
-												// TODO: Remove this once ParallelDelete is debugged
-												// This happens on JDK1.5.0_12, reiserfs, xen2.mob.aoindustries.com (previously corrupted and repaired reiserfs)
-												int listlen = list.length;
-												String last = list[0];
-												for(int c=1; c<listlen; c++) {
-													String next = list[c];
-													if(last.equals(next)) {
-														if(attempt==MAX_LIST_RETRIES) {
-															throw new IOException("Entry returned twice from list, attempt #"+attempt+": "+new File(file, next).getPath());
-														} else {
-															System.err.println("[WARN] FilesystemIterator - getNextFile() - Entry returned twice from list, will retry list() in 100 milliseconds, attempt #"+attempt+": "+new File(file, next).getPath());
-														}
-														if(LIST_RETRY_DELAY>0) {
-															try {
-																Thread.sleep(LIST_RETRY_DELAY);
-															} catch(InterruptedException err) {
-																// OK
-															}
-														}
-														continue ATTEMPT;
-													}
-													last = next;
-												}
-											}
-											break;
+										list = file.list();
+										if(list==null) {
+											list = AoArrays.EMPTY_STRING_ARRAY;
+										} else if(isSorted && list.length>0) {
+											Arrays.sort(list);
 										}
 									} else {
 										//System.err.println("Skipping non-canonical directory listing: "+filename);
@@ -270,7 +232,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 								if(list.length>0) {
 									currentDirectories.push(filename);
 									currentLists.push(list);
-									currentIndexes.push(Integer.valueOf(0));
+									currentIndexes.push(0);
 									if(isPreorder) return file;
 								} else {
 									// If empty directory both preorder and postorder return directory immediately
@@ -315,8 +277,8 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 	protected String[] getFilesystemRoots() throws IOException {
 		File[] fileRoots=File.listRoots();
 		List<String> tempRoots=new ArrayList<String>(fileRoots.length);
-		for(int c=0;c<fileRoots.length;c++) {
-			String root=fileRoots[c].getPath();
+		for (File fileRoot : fileRoots) {
+			String root = fileRoot.getPath();
 			// Only add if this root is used for at least one backup setting
 			FilesystemIteratorRule defaultRule = rules.get("");
 			if(
@@ -393,6 +355,9 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 			}
 		}
 		if(prefixRules!=null) {
+			// TODO: If there are many more prefix rules than the length of this filename, it will at some threshold
+			//       be faster to do a map lookup for each possible length of the string.
+			//       Would also only need to look down to longestPrefix
 			for(Map.Entry<String,FilesystemIteratorRule> entry : prefixRules.entrySet()) {
 				String prefix = entry.getKey();
 				if(
