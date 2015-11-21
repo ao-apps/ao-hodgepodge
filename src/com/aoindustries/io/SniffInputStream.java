@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2015  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,8 +27,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * As add data is read from the input stream it is also written to the given
- * output stream.  When the input is closed, the output stream is flushed but not closed.
+ * As data is read from the input stream it is also written to the given output
+ * stream.  When the input is closed, the output stream is flushed but not
+ * closed.
  */
 public final class SniffInputStream extends InputStream {
 
@@ -49,27 +50,27 @@ public final class SniffInputStream extends InputStream {
 
 	@Override
 	public int read(byte b[]) throws IOException {
-        int numBytes = in.read(b);
+		int numBytes = in.read(b);
 		if(numBytes > 0) out.write(b, 0, numBytes);
 		return numBytes;
 	}
 
 	@Override
 	public int read(byte b[], int off, int len) throws IOException {
-        int numBytes = in.read(b, off, len);
+		int numBytes = in.read(b, off, len);
 		if(numBytes > 0) out.write(b, off, numBytes);
 		return numBytes;
 	}
 
 	// skip uses the default InputStream implementation to ensure skipped bytes are still sniffed.
-	
-	@Override
-	public int available() throws IOException {
-        return in.available();
-    }
 
 	@Override
-    public void close() throws IOException {
+	public int available() throws IOException {
+		return in.available();
+	}
+
+	@Override
+	public void close() throws IOException {
 		in.close();
 		out.flush();
 	}
