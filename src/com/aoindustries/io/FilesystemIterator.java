@@ -30,12 +30,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -137,7 +135,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 					}
 					(currentIndexes=new Stack<Integer>()).push(0);
 				}
-				String currentDirectory=null;
+				String currentDirectory;
 				String[] currentList=null;
 				int currentIndex=-1;
 				try {
@@ -211,7 +209,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 							}
 							// Push on stacks for next level
 							if(includeDirectory) {
-								String[] list = null;
+								String[] list;
 								if(recurse) {
 									// Skip anything that is not canonical, this avoids symbolic link targets
 									if(file.getCanonicalPath().equals(filename)) {
