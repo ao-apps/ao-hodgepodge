@@ -398,57 +398,6 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 		return false;
 	}
 
-	/**
-	 * Converts a list of filenames (usually representing an entire directory list) to filenames that do not include
-	 * any non-ASCII characters.  Each resulting filename will be unique in the list and be at an index corresponding
-	 * to the parameter array.  Any non-ASCII character is replaced with a <code>?</code> character.  If two or more
-	 * files result in the same filename, the second one processed will have a sequence appended, such as .2, .3, .4, ...
-	 * 
-	 * @deprecated
-	 */
-	public static String[] convertNonASCII(String[] list) {
-		String[] results = new String[list.length];
-
-		// First build a list of all filenames that already have ? in them
-		Set<String> questionFiles = new HashSet<String>();
-		for(String filename : list) {
-			if(filename.indexOf('?')!=-1) questionFiles.add(filename);
-		}
-
-		// Second, add each filename to the result array, replacing non-ASCII with ? and appending sequences as necessary
-		StringBuilder sb = new StringBuilder();
-		for(int c=0 ; c<list.length; c++) {
-			String filename = list[c];
-			sb.setLength(0);
-			boolean converted = false;
-			for(int d=0 ; d<filename.length(); d++) {
-				char ch = filename.charAt(d);
-				if(ch<' ' || ch>'~') {
-					sb.append('?');
-					converted = true;
-				} else sb.append(ch);
-			}
-			if(converted) {
-				String convertedFilename = sb.toString();
-				if(questionFiles.contains(convertedFilename)) {
-					for(int d=2; d<=Integer.MAX_VALUE; d++) {
-						String tempFilename = convertedFilename+"."+d;
-						if(!questionFiles.contains(tempFilename)) {
-							convertedFilename = tempFilename;
-							break;
-						}
-						if(d==Integer.MAX_VALUE) throw new RuntimeException("Unable to generate sequenced filename");
-					}
-				}
-				results[c] = convertedFilename;
-				questionFiles.add(convertedFilename);
-			} else {
-				results[c] = filename;
-			}
-		}
-		return results;
-	}
-
 	static class FilenameIterator implements Iterator<String> {
 
 		private final FilesystemIterator filesystemIterator;
