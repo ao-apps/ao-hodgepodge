@@ -71,7 +71,7 @@ public class HashedKey implements Comparable<HashedKey> {
 	}
 
 	/**
-	 * The hash code is just the first four bytes of the hash.
+	 * The hash code is just the first 32 bits of the hash.
 	 */
 	@Override
 	public int hashCode() {
@@ -80,6 +80,7 @@ public class HashedKey implements Comparable<HashedKey> {
 
 	@Override
 	public int compareTo(HashedKey other) {
+		// TODO: constant time compare here?
 		byte[] h1 = hash;
 		byte[] h2 = other.hash;
 		for(int i=0; i<HASH_BYTES; i++) {
