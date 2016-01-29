@@ -38,6 +38,7 @@ import javax.crypto.spec.PBEKeySpec;
  * PBKDF2 salted password hashing.
  * Author: havoc AT defuse.ca
  * www: http://crackstation.net/hashing-security.htm
+        http://crackstation.net/hashing-security.htm
  */
 class PasswordHash
 {

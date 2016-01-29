@@ -22,7 +22,13 @@
  */
 package com.aoindustries.security;
 
+import com.aoindustries.util.WrappedException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 /**
  * A salted, hashed and key stretched password.
@@ -32,6 +38,62 @@ import java.util.Arrays;
  */
 public class HashedPassword {
 	
+	/** From http://crackstation.net/hashing-security.htm */
+    private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
+
+	/** The number of bytes in the random salt. */
+	public static final int SALT_BYTES = 256 / 8;
+
+	/** The number of bytes in the hash. */
+	public static final int HASH_BYTES = 256 / 8;
+
+	/**
+	 * The recommended number of iterations for typical usage.
+	 * <p>
+	 * We may change this value between releases without notice.
+	 * Only use this value for new password hashes.
+	 * Always store the iterations with the salt and hash, and use the stored
+	 * iterations when checking password matches.
+	 * </p>
+	 *
+	 * @see  #hash(java.lang.String, byte[], int) 
+	 */
+	public static final int RECOMMENDED_ITERATIONS = 1000;
+
+	private static final SecureRandom secureRandom = new SecureRandom();
+
+	/**
+	 * Generates a random salt of <code>SALT_BYTES</code> bytes in length.
+	 * 
+	 * @see  #hash(java.lang.String, byte[], int) 
+	 */
+	public static byte[] generateSalt() {
+		byte[] salt = new byte[SALT_BYTES];
+		secureRandom.nextBytes(salt);
+		return salt;
+	}
+
+	/**
+	 * Hash the given password
+	 * 
+	 * @see  #generateSalt()
+	 * @see  #RECOMMENDED_ITERATIONS
+	 */
+	public static byte[] hash(String password, byte[] salt, int iterations) {
+		try {
+			// See http://crackstation.net/hashing-security.htm
+			PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, HASH_BYTES * 8);
+			SecretKeyFactory skf = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
+			byte[] hash = skf.generateSecret(spec).getEncoded();
+			assert hash.length == HASH_BYTES;
+			return hash;
+		} catch(InvalidKeySpecException e) {
+			throw new WrappedException(e);
+		} catch(NoSuchAlgorithmException e) {
+			throw new WrappedException(e);
+		}
+	}
+
 	private final byte[] passwordSalt;
 	private final int passwordIterations;
 	private final byte[] passwordHash;

@@ -38,7 +38,7 @@ public class HashedKey implements Comparable<HashedKey> {
 
 	public static final String ALGORITHM = "SHA-256";
 
-	/** The number of bytes in the 256-bit SHA-256 hash. */
+	/** The number of bytes in the SHA-256 hash. */
 	public static final int HASH_BYTES = 256 / 8;
 	static {
 		assert HASH_BYTES >= 4 : "Hash must be at least 32-bits for hashCode implementation";
