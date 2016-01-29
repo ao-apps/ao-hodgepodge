@@ -22,7 +22,10 @@
  */
 package com.aoindustries.security;
 
+import com.aoindustries.util.WrappedException;
 import com.aoindustries.util.persistent.PersistentCollections;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -32,6 +35,8 @@ import java.util.Arrays;
  * @author  AO Industries, Inc.
  */
 public class HashedKey implements Comparable<HashedKey> {
+
+	public static final String ALGORITHM = "SHA-256";
 
 	/** The number of bytes in the 256-bit SHA-256 hash. */
 	public static final int HASH_BYTES = 256 / 8;
@@ -43,11 +48,28 @@ public class HashedKey implements Comparable<HashedKey> {
 
 	/**
 	 * Generates a random plaintext key of <code>HASH_BYTES</code> bytes in length.
+	 *
+	 * @see  #hashKey(byte[])
 	 */
 	public static byte[] generateKey() {
 		byte[] key = new byte[HASH_BYTES];
 		secureRandom.nextBytes(key);
 		return key;
+	}
+
+	/**
+	 * SHA-256 hashes the given key.
+	 * 
+	 * @see  #generateKey()
+	 */
+	public static byte[] hash(byte[] key) {
+		try {
+			MessageDigest md = MessageDigest.getInstance(ALGORITHM);
+			md.update(key);
+			return md.digest();
+		} catch(NoSuchAlgorithmException e) {
+			throw new WrappedException(e);
+		}
 	}
 
 	private final byte[] hash;
