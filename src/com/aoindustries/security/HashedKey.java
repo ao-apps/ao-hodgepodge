@@ -23,6 +23,7 @@
 package com.aoindustries.security;
 
 import com.aoindustries.util.persistent.PersistentCollections;
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
@@ -34,8 +35,19 @@ public class HashedKey implements Comparable<HashedKey> {
 
 	/** The number of bytes in the 256-bit SHA-256 hash. */
 	public static final int HASH_BYTES = 256 / 8;
-	{
+	static {
 		assert HASH_BYTES >= 4 : "Hash must be at least 32-bits for hashCode implementation";
+	}
+
+	private static final SecureRandom secureRandom = new SecureRandom();
+
+	/**
+	 * Generates a random plaintext key of <code>HASH_BYTES</code> bytes in length.
+	 */
+	public static byte[] generateKey() {
+		byte[] key = new byte[HASH_BYTES];
+		secureRandom.nextBytes(key);
+		return key;
 	}
 
 	private final byte[] hash;
