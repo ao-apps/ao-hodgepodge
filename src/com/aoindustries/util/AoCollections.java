@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2012, 2013, 2014  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -56,6 +56,7 @@ public class AoCollections {
 
     public static final SortedSet EMPTY_SORTED_SET = new EmptySortedSet();
 
+	/** Java 1.8: use standard version */
     @SuppressWarnings("unchecked")
     public static final <T> SortedSet<T> emptySortedSet() {
         return (SortedSet<T>) EMPTY_SORTED_SET;
