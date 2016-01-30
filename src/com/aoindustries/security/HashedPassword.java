@@ -81,12 +81,17 @@ public class HashedPassword {
 	 */
 	public static byte[] hash(String password, byte[] salt, int iterations) {
 		try {
-			// See http://crackstation.net/hashing-security.htm
-			PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, HASH_BYTES * 8);
-			SecretKeyFactory skf = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
-			byte[] hash = skf.generateSecret(spec).getEncoded();
-			assert hash.length == HASH_BYTES;
-			return hash;
+			char[] chars = password.toCharArray();
+			try {
+				// See http://crackstation.net/hashing-security.htm
+				PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, HASH_BYTES * 8);
+				SecretKeyFactory skf = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
+				byte[] hash = skf.generateSecret(spec).getEncoded();
+				assert hash.length == HASH_BYTES;
+				return hash;
+			} finally {
+				Arrays.fill(chars, (char)0);
+			}
 		} catch(InvalidKeySpecException e) {
 			throw new WrappedException(e);
 		} catch(NoSuchAlgorithmException e) {
@@ -94,25 +99,25 @@ public class HashedPassword {
 		}
 	}
 
-	private final byte[] passwordSalt;
-	private final int passwordIterations;
-	private final byte[] passwordHash;
+	private final byte[] salt;
+	private final int iterations;
+	private final byte[] hash;
 
 	/**
-	 * @param passwordSalt  The provided parameter is zeroed
-	 * @param passwordIterations
-	 * @param passwordHash  The provided parameter is zeroed 
+	 * @param salt  The provided parameter is zeroed
+	 * @param iterations
+	 * @param hash  The provided parameter is zeroed 
 	 */
     public HashedPassword(
-		byte[] passwordSalt,
-		int passwordIterations,
-		byte[] passwordHash
+		byte[] salt,
+		int iterations,
+		byte[] hash
     ) {
-		this.passwordSalt = Arrays.copyOf(passwordSalt, passwordSalt.length);
-		Arrays.fill(passwordSalt, (byte)0);
-		this.passwordIterations = passwordIterations;
-		this.passwordHash = Arrays.copyOf(passwordHash, passwordHash.length);
-		Arrays.fill(passwordHash, (byte)0);
+		this.salt = Arrays.copyOf(salt, salt.length);
+		Arrays.fill(salt, (byte)0);
+		this.iterations = iterations;
+		this.hash = Arrays.copyOf(hash, hash.length);
+		Arrays.fill(hash, (byte)0);
 	}
 
 	@Override
@@ -130,4 +135,39 @@ public class HashedPassword {
 		;
 		 */
 	}
+
+	/**
+	 * Checks if this matches the provided password.
+	 * Performs comparisons in length-constant time.
+     * {@link https://crackstation.net/hashing-security.htm}
+	 */
+	public boolean matches(String password) {
+		// Hash again with the original salt and iterations
+		byte[] newHash = hash(password, salt, iterations);
+		try {
+			return slowEquals(
+				hash,
+				newHash
+			);
+		} finally {
+			Arrays.fill(newHash, (byte)0);
+		}
+	}
+
+	/**
+     * Compares two byte arrays in length-constant time. This comparison method
+     * is used so that password hashes cannot be extracted from an on-line 
+     * system using a timing attack and then attacked off-line.
+     * {@link https://crackstation.net/hashing-security.htm}
+	 *
+     * @param   a       the first byte array
+     * @param   b       the second byte array 
+     * @return          true if both byte arrays are the same, false if not
+     */
+    private static boolean slowEquals(byte[] a, byte[] b) {
+        int diff = a.length ^ b.length;
+        for(int i = 0; i < a.length && i < b.length; i++)
+            diff |= a[i] ^ b[i];
+        return diff == 0;
+    }
 }

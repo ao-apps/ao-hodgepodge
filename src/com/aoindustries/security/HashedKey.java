@@ -101,6 +101,7 @@ public class HashedKey implements Comparable<HashedKey> {
 		if(!(obj instanceof HashedKey)) return false;
 		HashedKey other = (HashedKey)obj;
 		// TODO: constant time equals here?
+		//return HashedPassword.slowEquals(hash, other.hash);
 		return Arrays.equals(hash, other.hash);
 	}
 
