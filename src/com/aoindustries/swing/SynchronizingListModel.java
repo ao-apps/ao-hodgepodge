@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,60 +38,60 @@ import javax.swing.SwingUtilities;
  *
  * @author  AO Industries, Inc.
  */
-public class SynchronizingListModel extends DefaultListModel {
+public class SynchronizingListModel<E> extends DefaultListModel<E> {
 
-    private static final long serialVersionUID = -4928047430792677729L;
+	private static final long serialVersionUID = -4928047430792677729L;
 
-    private final Object constantFirstRow;
+	private final E constantFirstRow;
 
-    public SynchronizingListModel() {
-        constantFirstRow = null;
-    }
+	public SynchronizingListModel() {
+		constantFirstRow = null;
+	}
 
-    public SynchronizingListModel(Object constantFirstRow) {
-        this.constantFirstRow = constantFirstRow;
-        addElement(constantFirstRow);
-    }
+	public SynchronizingListModel(E constantFirstRow) {
+		this.constantFirstRow = constantFirstRow;
+		addElement(constantFirstRow);
+	}
 
-    /**
-     * Synchronizes the list, adding and removing only a minimum number of elements.
-     * Comparisons are performed using .equals.  This must be called from the
-     * Swing event dispatch thread.
-     */
-    public void synchronize(List<?> list) {
-        assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage("assert.notRunningInSwingEventThread");
+	/**
+	 * Synchronizes the list, adding and removing only a minimum number of elements.
+	 * Comparisons are performed using .equals.  This must be called from the
+	 * Swing event dispatch thread.
+	 */
+	public void synchronize(List<? extends E> list) {
+		assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage("assert.notRunningInSwingEventThread");
 
-        // Make sure the first element exists and matches
-        int modelOffset;
-        if(constantFirstRow!=null) {
-            modelOffset = 1;
-            if(isEmpty()) addElement(constantFirstRow);
-            else if(!getElementAt(0).equals(constantFirstRow)) {
-                insertElementAt(constantFirstRow, 0);
-            }
-        } else modelOffset = 0;
+		// Make sure the first element exists and matches
+		int modelOffset;
+		if(constantFirstRow!=null) {
+			modelOffset = 1;
+			if(isEmpty()) addElement(constantFirstRow);
+			else if(!getElementAt(0).equals(constantFirstRow)) {
+				insertElementAt(constantFirstRow, 0);
+			}
+		} else modelOffset = 0;
 
-        // Synchronize the dynamic part of the list
-        int size = list.size();
-        for(int index=0; index<size; index++) {
-            Object obj = list.get(index);
-            if(index>=(size()-modelOffset)) addElement(obj);
-            else if(!obj.equals(getElementAt(index+modelOffset))) {
-                // Objects don't match
-                // If this object is found further down the list, then delete up to that object
-                int foundIndex = -1;
-                for(int searchIndex = index+1; searchIndex<(size()-modelOffset); searchIndex++) {
-                    if(obj.equals(getElementAt(searchIndex+modelOffset))) {
-                        foundIndex = searchIndex;
-                        break;
-                    }
-                }
-                if(foundIndex!=-1) removeRange(index+modelOffset, foundIndex-1+modelOffset);
-                // Otherwise, insert in the current index
-                else insertElementAt(obj, index+modelOffset);
-            }
-        }
-        // Remove any extra
-        if((size()-modelOffset) > size) removeRange(size+modelOffset, size()-1);
-    }
+		// Synchronize the dynamic part of the list
+		int size = list.size();
+		for(int index=0; index<size; index++) {
+			E obj = list.get(index);
+			if(index>=(size()-modelOffset)) addElement(obj);
+			else if(!obj.equals(getElementAt(index+modelOffset))) {
+				// Objects don't match
+				// If this object is found further down the list, then delete up to that object
+				int foundIndex = -1;
+				for(int searchIndex = index+1; searchIndex<(size()-modelOffset); searchIndex++) {
+					if(obj.equals(getElementAt(searchIndex+modelOffset))) {
+						foundIndex = searchIndex;
+						break;
+					}
+				}
+				if(foundIndex!=-1) removeRange(index+modelOffset, foundIndex-1+modelOffset);
+				// Otherwise, insert in the current index
+				else insertElementAt(obj, index+modelOffset);
+			}
+		}
+		// Remove any extra
+		if((size()-modelOffset) > size) removeRange(size+modelOffset, size()-1);
+	}
 }
