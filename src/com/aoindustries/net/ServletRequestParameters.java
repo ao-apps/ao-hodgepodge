@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,41 +38,41 @@ import javax.servlet.ServletRequest;
  */
 public class ServletRequestParameters implements HttpParameters {
 
-    private final ServletRequest request;
+	private final ServletRequest request;
 
-    public ServletRequestParameters(ServletRequest request) {
-        this.request = request;
-    }
+	public ServletRequestParameters(ServletRequest request) {
+		this.request = request;
+	}
 
-    @Override
-    public String getParameter(String name) {
-        return request.getParameter(name);
-    }
+	@Override
+	public String getParameter(String name) {
+		return request.getParameter(name);
+	}
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public Iterator<String> getParameterNames() {
-        return new EnumerationIterator<String>(request.getParameterNames());
-    }
+	@Override
+	@SuppressWarnings("unchecked")
+	public Iterator<String> getParameterNames() {
+		return new EnumerationIterator<>(request.getParameterNames());
+	}
 
-    @Override
-    public List<String> getParameterValues(String name) {
-        String[] values = request.getParameterValues(name);
-        return values==null ? null : Collections.unmodifiableList(Arrays.asList(values));
-    }
+	@Override
+	public List<String> getParameterValues(String name) {
+		String[] values = request.getParameterValues(name);
+		return values==null ? null : Collections.unmodifiableList(Arrays.asList(values));
+	}
 
-    @Override
-    public Map<String, List<String>> getParameterMap() {
-        @SuppressWarnings("unchecked") Map<String,String[]> requestMap = request.getParameterMap();
-        Map<String,List<String>> map = new LinkedHashMap<String,List<String>>(requestMap.size()*4/3+1);
-        for(Map.Entry<String,String[]> entry : requestMap.entrySet()) {
-            map.put(
+	@Override
+	public Map<String, List<String>> getParameterMap() {
+		@SuppressWarnings("unchecked") Map<String,String[]> requestMap = request.getParameterMap();
+		Map<String,List<String>> map = new LinkedHashMap<>(requestMap.size()*4/3+1);
+		for(Map.Entry<String,String[]> entry : requestMap.entrySet()) {
+			map.put(
 				entry.getKey(),
 				Collections.unmodifiableList(
 					Arrays.asList(entry.getValue())
 				)
 			);
-        }
-        return Collections.unmodifiableMap(map);
-    }
+		}
+		return Collections.unmodifiableMap(map);
+	}
 }

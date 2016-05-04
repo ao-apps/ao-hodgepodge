@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -70,7 +70,7 @@ public class SmartComparator implements Comparator<Object> {
 		final String value;
 		final int begin;
 		final int end;
-		
+
 		Token(TokenType tokenType, String value, int begin, int end) {
 			this.tokenType = tokenType;
 			this.value = value;
@@ -152,11 +152,11 @@ public class SmartComparator implements Comparator<Object> {
 					prefixLen = 0;
 				}
 			}
-			
+
 			if(isNumeric) {
 				if(i==pos) {
 					// Starts with numeric, find end of numeric range
-					for(i=i+prefixLen; i<len; i++) {
+					for(i += prefixLen; i<len; i++) {
 						char ch = value.charAt(i);
 						if(ch=='.') {
 							if(dotUsed) break;

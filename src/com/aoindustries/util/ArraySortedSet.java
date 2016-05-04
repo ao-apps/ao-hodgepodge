@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -56,206 +56,206 @@ import java.util.SortedSet;
  */
 public class ArraySortedSet<E> extends AbstractSet<E> implements SortedSet<E>, Serializable {
 
-    private static final long serialVersionUID = -8200779660844889853L;
+	private static final long serialVersionUID = -8200779660844889853L;
 
-    private final Comparator<? super E> comparator;
-    private final ArrayList<E> elements;
+	private final Comparator<? super E> comparator;
+	private final ArrayList<E> elements;
 
-    public ArraySortedSet() {
-        this.comparator = null;
-        this.elements = new ArrayList<E>();
-    }
+	public ArraySortedSet() {
+		this.comparator = null;
+		this.elements = new ArrayList<>();
+	}
 
-    public ArraySortedSet(int initialCapacity) {
-        this.comparator = null;
-        this.elements = new ArrayList<E>(initialCapacity);
-    }
+	public ArraySortedSet(int initialCapacity) {
+		this.comparator = null;
+		this.elements = new ArrayList<>(initialCapacity);
+	}
 
-    public ArraySortedSet(Comparator<? super E> comparator) {
-        this.comparator = comparator;
-        this.elements = new ArrayList<E>();
-    }
+	public ArraySortedSet(Comparator<? super E> comparator) {
+		this.comparator = comparator;
+		this.elements = new ArrayList<>();
+	}
 
-    public ArraySortedSet(Comparator<? super E> comparator, int initialCapacity) {
-        this.comparator = comparator;
-        this.elements = new ArrayList<E>(initialCapacity);
-    }
+	public ArraySortedSet(Comparator<? super E> comparator, int initialCapacity) {
+		this.comparator = comparator;
+		this.elements = new ArrayList<>(initialCapacity);
+	}
 
-    public ArraySortedSet(Collection<? extends E> c) {
-        this.comparator = null;
-        this.elements = new ArrayList<E>(c.size());
-        addAll(c);
-    }
+	public ArraySortedSet(Collection<? extends E> c) {
+		this.comparator = null;
+		this.elements = new ArrayList<>(c.size());
+		addAll(c);
+	}
 
-    public ArraySortedSet(SortedSet<E> s) {
-        this.comparator = s.comparator();
-        this.elements = new ArrayList<E>(s);
-    }
+	public ArraySortedSet(SortedSet<E> s) {
+		this.comparator = s.comparator();
+		this.elements = new ArrayList<>(s);
+	}
 
-    @SuppressWarnings("unchecked")
-    private int binarySearch(E elem) {
-        return
-            comparator==null
-            ? java.util.Collections.binarySearch((List)elements, elem)
-            : java.util.Collections.binarySearch(elements, elem, comparator)
-        ;
-    }
+	@SuppressWarnings("unchecked")
+	private int binarySearch(E elem) {
+		return
+			comparator==null
+			? java.util.Collections.binarySearch((List)elements, elem)
+			: java.util.Collections.binarySearch(elements, elem, comparator)
+		;
+	}
 
-    @SuppressWarnings("unchecked")
-    private int compare(E elem1, E elem2) {
-        return
-            comparator==null
-            ? ((Comparable)elem1).compareTo(elem2)
-            : comparator.compare(elem1, elem2)
-        ;
-    }
+	@SuppressWarnings("unchecked")
+	private int compare(E elem1, E elem2) {
+		return
+			comparator==null
+			? ((Comparable)elem1).compareTo(elem2)
+			: comparator.compare(elem1, elem2)
+		;
+	}
 
-    public void trimToSize() {
-        elements.trimToSize();
-    }
+	public void trimToSize() {
+		elements.trimToSize();
+	}
 
-    @Override
-    public Comparator<? super E> comparator() {
-        return comparator;
-    }
+	@Override
+	public Comparator<? super E> comparator() {
+		return comparator;
+	}
 
-    @Override
-    public SortedSet<E> subSet(E fromElement, E toElement) {
-        throw new UnsupportedOperationException("TODO: Not supported yet.");
-    }
+	@Override
+	public SortedSet<E> subSet(E fromElement, E toElement) {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
+	}
 
-    @Override
-    public SortedSet<E> headSet(E toElement) {
-        throw new UnsupportedOperationException("TODO: Not supported yet.");
-    }
+	@Override
+	public SortedSet<E> headSet(E toElement) {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
+	}
 
-    @Override
-    public SortedSet<E> tailSet(E fromElement) {
-        throw new UnsupportedOperationException("TODO: Not supported yet.");
-    }
+	@Override
+	public SortedSet<E> tailSet(E fromElement) {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
+	}
 
-    @Override
-    public E first() {
-        if(elements.isEmpty()) throw new NoSuchElementException();
-        return elements.get(0);
-    }
+	@Override
+	public E first() {
+		if(elements.isEmpty()) throw new NoSuchElementException();
+		return elements.get(0);
+	}
 
-    @Override
-    public E last() {
-        int size = elements.size();
-        if(size==0) throw new NoSuchElementException();
-        return elements.get(size-1);
-    }
+	@Override
+	public E last() {
+		int size = elements.size();
+		if(size==0) throw new NoSuchElementException();
+		return elements.get(size-1);
+	}
 
-    @Override
-    public int size() {
-        return elements.size();
-    }
+	@Override
+	public int size() {
+		return elements.size();
+	}
 
-    @Override
-    public boolean isEmpty() {
-        return elements.isEmpty();
-    }
+	@Override
+	public boolean isEmpty() {
+		return elements.isEmpty();
+	}
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean contains(Object o) {
-        if(o==null) return false;
-        // TODO: How can we check if the passed-in object is of an unrelated, unexpected class
-        // TODO: without passing around Class objects?
-        // TODO: with equals - just like ArraySet.
-        throw new RuntimeException("TODO: Finish method");
-        //return binarySearch((E)o)>=0;
-    }
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean contains(Object o) {
+		if(o==null) return false;
+		// TODO: How can we check if the passed-in object is of an unrelated, unexpected class
+		// TODO: without passing around Class objects?
+		// TODO: with equals - just like ArraySet.
+		throw new RuntimeException("TODO: Finish method");
+		//return binarySearch((E)o)>=0;
+	}
 
-    @Override
-    public Iterator<E> iterator() {
-        return elements.iterator();
-    }
+	@Override
+	public Iterator<E> iterator() {
+		return elements.iterator();
+	}
 
-    @Override
-    public Object[] toArray() {
-        return elements.toArray();
-    }
+	@Override
+	public Object[] toArray() {
+		return elements.toArray();
+	}
 
-    @Override
-    public <T> T[] toArray(T[] a) {
-        return elements.toArray(a);
-    }
+	@Override
+	public <T> T[] toArray(T[] a) {
+		return elements.toArray(a);
+	}
 
-    @Override
-    public boolean add(E e) {
-        int size = elements.size();
-        if(size==0) {
-            elements.add(e);
-            return true;
-        } else {
-            // Shortcut for adding last element
-            E last = elements.get(size-1);
-            int diff = compare(e, last);
-            if(diff>0) {
-                elements.add(e);
-                return true;
-            } else if(diff==0) {
-                // Already in set
-                return false;
-            } else {
-                int index = binarySearch(e);
-                if(index>=0) {
-                    // Already in set
-                    return false;
-                } else {
-                    throw new UnsupportedOperationException("May only add the last element.");
-                }
-            }
-        }
-    }
+	@Override
+	public boolean add(E e) {
+		int size = elements.size();
+		if(size==0) {
+			elements.add(e);
+			return true;
+		} else {
+			// Shortcut for adding last element
+			E last = elements.get(size-1);
+			int diff = compare(e, last);
+			if(diff>0) {
+				elements.add(e);
+				return true;
+			} else if(diff==0) {
+				// Already in set
+				return false;
+			} else {
+				int index = binarySearch(e);
+				if(index>=0) {
+					// Already in set
+					return false;
+				} else {
+					throw new UnsupportedOperationException("May only add the last element.");
+				}
+			}
+		}
+	}
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean remove(Object o) {
-        int size = elements.size();
-        if(size==0) return false;
-        // Shortcut for removing last element
-        E lastElem = elements.get(size-1);
-        // TODO: How can we check if the passed-in object is of an unrelated, unexpected class
-        // TODO: without passing around Class objects?
-        if(compare(lastElem, (E)o)==0) {
-            elements.remove(size-1);
-            return true;
-        } else {
-            if(contains(o)) throw new UnsupportedOperationException("May only remove the last element.");
-            return false;
-        }
-    }
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean remove(Object o) {
+		int size = elements.size();
+		if(size==0) return false;
+		// Shortcut for removing last element
+		E lastElem = elements.get(size-1);
+		// TODO: How can we check if the passed-in object is of an unrelated, unexpected class
+		// TODO: without passing around Class objects?
+		if(compare(lastElem, (E)o)==0) {
+			elements.remove(size-1);
+			return true;
+		} else {
+			if(contains(o)) throw new UnsupportedOperationException("May only remove the last element.");
+			return false;
+		}
+	}
 
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        for(Object o : c) if(!contains(o)) return false;
-        return true;
-    }
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		for(Object o : c) if(!contains(o)) return false;
+		return true;
+	}
 
-    @Override
-    public boolean addAll(Collection<? extends E> c) {
-        boolean modified = false;
-        for(E elem : c) if(add(elem)) modified = true;
-        return modified;
-    }
+	@Override
+	public boolean addAll(Collection<? extends E> c) {
+		boolean modified = false;
+		for(E elem : c) if(add(elem)) modified = true;
+		return modified;
+	}
 
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        boolean modified = false;
-        for(Object o : c) if(remove(o)) modified = true;
-        return modified;
-    }
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		boolean modified = false;
+		for(Object o : c) if(remove(o)) modified = true;
+		return modified;
+	}
 
-    @Override
-    public void clear() {
-        elements.clear();
-    }
+	@Override
+	public void clear() {
+		elements.clear();
+	}
 }

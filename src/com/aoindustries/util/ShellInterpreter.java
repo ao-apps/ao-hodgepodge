@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013, 2014  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013, 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -58,7 +58,7 @@ abstract public class ShellInterpreter implements Runnable {
 
 	private ShellInterpreter parent;
 
-	private final List<ShellInterpreter> jobs=new ArrayList<ShellInterpreter>();
+	private final List<ShellInterpreter> jobs=new ArrayList<>();
 
 	protected String status="Running";
 
@@ -74,8 +74,7 @@ abstract public class ShellInterpreter implements Runnable {
 
 		// Process any command line arguments
 		int skipped=0;
-		for(int c=0;c<args.length;c++) {
-			String arg=args[c];
+		for (String arg : args) {
 			if("-i".equals(arg)) {
 				isInteractive=true;
 				skipped++;
@@ -292,7 +291,7 @@ abstract public class ShellInterpreter implements Runnable {
 			handleCommandImpl(args);
 		} else {
 			// The arguments that have been read so far
-			List<String> arguments=new ArrayList<String>();
+			List<String> arguments=new ArrayList<>();
 
 			// The argument that is being read.
 			StringBuilder argument=new StringBuilder();
@@ -409,10 +408,9 @@ abstract public class ShellInterpreter implements Runnable {
 		// Make the parent of all children the parent of this, and add children to the parents processes
 		ShellInterpreter myparent=this.parent;
 		synchronized(jobs) {
-			for(int c=0;c<jobs.size();c++) {
-				ShellInterpreter shell=jobs.get(c);
+			for (ShellInterpreter shell : jobs) {
 				shell.parent=myparent;
-				if(myparent!=null) myparent.jobs.add(shell);
+				if(myparent!=null) myparent.jobs.add(shell); // Should this synchronize myparent.jobs, too?
 			}
 			jobs.clear();
 		}

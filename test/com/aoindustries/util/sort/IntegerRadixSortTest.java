@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -54,15 +54,15 @@ public class IntegerRadixSortTest extends TestCase {
 	private static final int RANDOM_RANGE = 0x100;
 	private static final int RANDOM_MULTIPLIER = 1; // 0x10000;
 
-    public IntegerRadixSortTest(String testName) {
-        super(testName);
-    }
+	public IntegerRadixSortTest(String testName) {
+		super(testName);
+	}
 
-    public static Test suite() {
-        return new TestSuite(IntegerRadixSortTest.class);
-    }
+	public static Test suite() {
+		return new TestSuite(IntegerRadixSortTest.class);
+	}
 
-    private static final Random random = new SecureRandom();
+	private static final Random random = new SecureRandom();
 
 	private static int getRandomValue() {
 		return
@@ -73,7 +73,7 @@ public class IntegerRadixSortTest extends TestCase {
 	}
 
 	@SuppressWarnings("unchecked")
-    private <N extends Number> void doTestListPerformance(
+	private <N extends Number> void doTestListPerformance(
 		List<N> randomValues,
 		int testSize,
 		int passes,
@@ -101,7 +101,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time experimental radix sort
-			List<N> expRadixResult = new ArrayList<N>(randomValues);
+			List<N> expRadixResult = new ArrayList<>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
@@ -143,7 +143,7 @@ public class IntegerRadixSortTest extends TestCase {
 			 */
 
 			// Time radix sort
-			List<N> oldRadixResult = new ArrayList<N>(randomValues);
+			List<N> oldRadixResult = new ArrayList<>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSort.getInstance().sort(oldRadixResult);
@@ -163,7 +163,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time Java sort
-			List<N> javaResult = new ArrayList<N>(randomValues);
+			List<N> javaResult = new ArrayList<>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				Collections.sort(javaResult, null);
@@ -202,9 +202,9 @@ public class IntegerRadixSortTest extends TestCase {
 			+ " / "
 			+ BigDecimal.valueOf(scaledExp, 3)
 		);
-    }
+	}
 
-    public void testListPerformance() {
+	public void testListPerformance() {
 		System.out.println("testListPerformance");
 		long[] totalOld = new long[1];
 		//long[] totalNew = new long[1];
@@ -213,7 +213,7 @@ public class IntegerRadixSortTest extends TestCase {
 		long[] avgSumOld = new long[1];
 		//long[] avgSumNew = new long[1];
 		long[] avgSumExp = new long[1];
-        List<Integer> randomValues = new ArrayList<Integer>(END_TEST_SIZE);
+		List<Integer> randomValues = new ArrayList<>(END_TEST_SIZE);
 		int tests = 0;
 		for(
 			int testSize = START_TEST_SIZE, passes = MAX_PASSES;
@@ -255,10 +255,10 @@ public class IntegerRadixSortTest extends TestCase {
 			+ " / "
 			+ BigDecimal.valueOf(avgSumExp[0] / tests, 3)
 		);
-    }
+	}
 
 	@SuppressWarnings("unchecked")
-    private <N extends Number> void doTestArrayPerformance(
+	private <N extends Number> void doTestArrayPerformance(
 		N[] randomValues,
 		int testSize,
 		int passes,
@@ -395,9 +395,9 @@ public class IntegerRadixSortTest extends TestCase {
 			+ " / "
 			+ BigDecimal.valueOf(scaledExp, 3)
 		);
-    }
+	}
 
-    public void testArrayPerformance() {
+	public void testArrayPerformance() {
 		System.out.println("testArrayPerformance");
 		long[] totalOld = new long[1];
 		//long[] totalNew = new long[1];
@@ -447,9 +447,9 @@ public class IntegerRadixSortTest extends TestCase {
 			+ " / "
 			+ BigDecimal.valueOf(avgSumExp[0] / tests, 3)
 		);
-    }
+	}
 
-    public void doTestIntListPerformance(
+	public void doTestIntListPerformance(
 		IntList randomValues,
 		int testSize,
 		int passes,
@@ -578,9 +578,9 @@ public class IntegerRadixSortTest extends TestCase {
 			+ " / "
 			+ BigDecimal.valueOf(scaledExp, 3)
 		);
-    }
+	}
 
-    public void testIntListPerformance() {
+	public void testIntListPerformance() {
 		System.out.println("testIntListPerformance");
 		long[] totalOld = new long[1];
 		//long[] totalNew = new long[1];
@@ -589,7 +589,7 @@ public class IntegerRadixSortTest extends TestCase {
 		long[] avgSumOld = new long[1];
 		//long[] avgSumNew = new long[1];
 		long[] avgSumExp = new long[1];
-        IntList randomValues = new IntArrayList(END_TEST_SIZE);
+		IntList randomValues = new IntArrayList(END_TEST_SIZE);
 		int tests = 0;
 		for(
 			int testSize = START_TEST_SIZE, passes = MAX_PASSES;
@@ -631,7 +631,7 @@ public class IntegerRadixSortTest extends TestCase {
 			+ " / "
 			+ BigDecimal.valueOf(avgSumExp[0] / tests, 3)
 		);
-    }
+	}
 
 	private void doTestIntArrayPerformance(
 		int[] randomValues,
@@ -773,9 +773,9 @@ public class IntegerRadixSortTest extends TestCase {
 			+ " / "
 			+ BigDecimal.valueOf(scaledExp, 3)
 		);
-    }
+	}
 
-    public void testIntArrayPerformance() {
+	public void testIntArrayPerformance() {
 		System.out.println("testIntArrayPerformance");
 		long[] totalOld = new long[1];
 		//long[] totalNew = new long[1];
@@ -825,5 +825,5 @@ public class IntegerRadixSortTest extends TestCase {
 			+ " / "
 			+ BigDecimal.valueOf(avgSumExp[0] / tests, 3)
 		);
-    }
+	}
 }

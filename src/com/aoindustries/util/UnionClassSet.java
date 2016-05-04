@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -49,116 +49,116 @@ import java.util.Set;
  */
 public class UnionClassSet<E> extends AbstractSet<E> {
 
-    /**
-     * May disable assertions more completely for benchmarking
-     */
-    private static final boolean ENABLE_ASSERTIONS = true;
+	/**
+	 * May disable assertions more completely for benchmarking
+	 */
+	private static final boolean ENABLE_ASSERTIONS = true;
 
-    private int size = 0;
+	private int size = 0;
 
-    /**
-     * Will never contain any empty sets.
-     */
-    private final Map<Class<?>, Set<? extends E>> added = new LinkedHashMap<Class<?>, Set<? extends E>>();
+	/**
+	 * Will never contain any empty sets.
+	 */
+	private final Map<Class<?>, Set<? extends E>> added = new LinkedHashMap<>();
 
-    public UnionClassSet() {
-    }
+	public UnionClassSet() {
+	}
 
-    public UnionClassSet(Collection<? extends E> c) {
-    	addAll(c);
-    }
+	public UnionClassSet(Collection<? extends E> c) {
+		addAll(c);
+	}
 
-    public UnionClassSet(Set<? extends E> set) {
-    	addAll(set);
-    }
+	public UnionClassSet(Set<? extends E> set) {
+		addAll(set);
+	}
 
-    @Override
-    public int size() {
-        return size;
-    }
+	@Override
+	public int size() {
+		return size;
+	}
 
-    @Override
-    public boolean contains(Object o) {
-        if(o==null) return false;
-        Set<? extends E> set = added.get(o.getClass());
-        return set==null ? false : set.contains(o);
-    }
+	@Override
+	public boolean contains(Object o) {
+		if(o==null) return false;
+		Set<? extends E> set = added.get(o.getClass());
+		return set==null ? false : set.contains(o);
+	}
 
-    @Override
-    public Iterator<E> iterator() {
-        final Iterator<Set<? extends E>> setIter = added.values().iterator();
-        return new Iterator<E>() {
-            private Iterator<? extends E> valIter = null;
+	@Override
+	public Iterator<E> iterator() {
+		final Iterator<Set<? extends E>> setIter = added.values().iterator();
+		return new Iterator<E>() {
+			private Iterator<? extends E> valIter = null;
 
-            @Override
-            public boolean hasNext() {
-                if(valIter==null) {
-                    if(setIter.hasNext()) {
-                        valIter = setIter.next().iterator();
-                        return true; // The sets are never empty
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return true; // valIter is null as soon as not has next
-                }
-            }
+			@Override
+			public boolean hasNext() {
+				if(valIter==null) {
+					if(setIter.hasNext()) {
+						valIter = setIter.next().iterator();
+						return true; // The sets are never empty
+					} else {
+						return false;
+					}
+				} else {
+					return true; // valIter is null as soon as not has next
+				}
+			}
 
-            @Override
-            public E next() {
-                if(valIter==null) {
-                    if(setIter.hasNext()) {
-                        valIter = setIter.next().iterator();
-                    } else {
-                        throw new NoSuchElementException();
-                    }
-                }
-                E val = valIter.next();
-                if(!valIter.hasNext()) valIter = null;
-                return val;
-            }
+			@Override
+			public E next() {
+				if(valIter==null) {
+					if(setIter.hasNext()) {
+						valIter = setIter.next().iterator();
+					} else {
+						throw new NoSuchElementException();
+					}
+				}
+				E val = valIter.next();
+				if(!valIter.hasNext()) valIter = null;
+				return val;
+			}
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
 
-        };
-    }
+		};
+	}
 
-    /**
-     * Must be a set.
-     *
-     * @see  #addAll(java.util.Set)
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean addAll(Collection<? extends E> c) {
-        if(c.isEmpty()) return false;
-        if(c instanceof Set) return addAll((Set<? extends E>)c);
-        else throw new UnsupportedOperationException("May only add sets");
-    }
+	/**
+	 * Must be a set.
+	 *
+	 * @see  #addAll(java.util.Set)
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean addAll(Collection<? extends E> c) {
+		if(c.isEmpty()) return false;
+		if(c instanceof Set) return addAll((Set<? extends E>)c);
+		else throw new UnsupportedOperationException("May only add sets");
+	}
 
-    private static boolean allSameClass(Class<?> clazz, Iterator<?> iter) {
-        while(iter.hasNext()) if(iter.next().getClass()!=clazz) return false;
-        return true;
-    }
+	private static boolean allSameClass(Class<?> clazz, Iterator<?> iter) {
+		while(iter.hasNext()) if(iter.next().getClass()!=clazz) return false;
+		return true;
+	}
 
-    public boolean addAll(Set<? extends E> set) {
-        int setSize = set.size();
-        if(setSize==0) return false;
-        Iterator<? extends E> iter = set.iterator();
-        Class<?> clazz = iter.next().getClass();
-        if(ENABLE_ASSERTIONS) assert allSameClass(clazz, iter) : "Not all objects are of the same exact class";
-        if(added.containsKey(clazz)) throw new IllegalArgumentException("Set already added for class: "+clazz);
-        size += setSize;
-        added.put(clazz, set);
-        return true;
-    }
+	public boolean addAll(Set<? extends E> set) {
+		int setSize = set.size();
+		if(setSize==0) return false;
+		Iterator<? extends E> iter = set.iterator();
+		Class<?> clazz = iter.next().getClass();
+		if(ENABLE_ASSERTIONS) assert allSameClass(clazz, iter) : "Not all objects are of the same exact class";
+		if(added.containsKey(clazz)) throw new IllegalArgumentException("Set already added for class: "+clazz);
+		size += setSize;
+		added.put(clazz, set);
+		return true;
+	}
 
-    @Override
-    public void clear() {
-        size = 0;
-        added.clear();
-    }
+	@Override
+	public void clear() {
+		size = 0;
+		added.clear();
+	}
 }

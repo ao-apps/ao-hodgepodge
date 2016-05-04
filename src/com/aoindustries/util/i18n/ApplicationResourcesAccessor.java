@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -39,116 +39,116 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ApplicationResourcesAccessor implements Serializable {
 
-    private static final long serialVersionUID = -8735217773587095120L;
+	private static final long serialVersionUID = -8735217773587095120L;
 
-    private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<String,ApplicationResourcesAccessor>();
+	private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<>();
 
-    public static ApplicationResourcesAccessor getInstance(String baseName) {
-        ApplicationResourcesAccessor existing = accessors.get(baseName);
-        if(existing==null) {
-            ApplicationResourcesAccessor newAccessor = new ApplicationResourcesAccessor(baseName);
-            existing = accessors.putIfAbsent(baseName, newAccessor);
-            if(existing==null) existing = newAccessor;
-        }
-        return existing;
-    }
+	public static ApplicationResourcesAccessor getInstance(String baseName) {
+		ApplicationResourcesAccessor existing = accessors.get(baseName);
+		if(existing==null) {
+			ApplicationResourcesAccessor newAccessor = new ApplicationResourcesAccessor(baseName);
+			existing = accessors.putIfAbsent(baseName, newAccessor);
+			if(existing==null) existing = newAccessor;
+		}
+		return existing;
+	}
 
-    final private String baseName;
+	final private String baseName;
 
-    private ApplicationResourcesAccessor(String baseName) {
-        this.baseName = baseName;
-    }
+	private ApplicationResourcesAccessor(String baseName) {
+		this.baseName = baseName;
+	}
 
-    private Object readResolve() {
-        return getInstance(baseName);
-    }
+	private Object readResolve() {
+		return getInstance(baseName);
+	}
 
-    /**
-     * Gets the baseName being accessed by this accessor.
-     */
-    public String getBaseName() {
-        return baseName;
-    }
+	/**
+	 * Gets the baseName being accessed by this accessor.
+	 */
+	public String getBaseName() {
+		return baseName;
+	}
 
-    /**
-     * Gets the bundle for the provided locale.
-     */
-    public ResourceBundle getResourceBundle(Locale locale) {
-        return ResourceBundle.getBundle(baseName, locale);
-    }
+	/**
+	 * Gets the bundle for the provided locale.
+	 */
+	public ResourceBundle getResourceBundle(Locale locale) {
+		return ResourceBundle.getBundle(baseName, locale);
+	}
 
-    /**
-     * <p>
-     * Gets the message.
+	/**
+	 * <p>
+	 * Gets the message.
 	 * If missing, will generate a struts-like value including the locale and key.
-     * </p>
-     * <p>
-     * Gets the message in the current thread's locale.
-     * </p>
-     *
-     * @see ThreadLocale
-     */
-    public String getMessage(String key) {
+	 * </p>
+	 * <p>
+	 * Gets the message in the current thread's locale.
+	 * </p>
+	 *
+	 * @see ThreadLocale
+	 */
+	public String getMessage(String key) {
 		return getMessage(ThreadLocale.get(), key);
-    }
-
-    /**
-     * <p>
-     * Gets the message.
-	 * If missing, will generate a struts-like value including the locale and key.
-     * </p>
-     */
-    public String getMessage(Locale locale, String key) {
-        String string = null;
-        try {
-            string = getResourceBundle(locale).getString(key);
-        } catch(MissingResourceException err) {
-            // string remains null
-        }
-        if(string==null) return "???"+locale.toString()+"."+key+"???";
-        return string;
-    }
+	}
 
 	/**
-     * <p>
-     * Gets the message.
+	 * <p>
+	 * Gets the message.
 	 * If missing, will generate a struts-like value including the locale and key.
-     * </p>
-     * <p>
-     * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
-     * </p>
-     * <p>
-     * Gets the message in the current thread's locale.
-     * </p>
-     *
-     * @see ThreadLocale
-     * @see  #getMessage(String,Locale,String)
-     */
-    public String getMessage(String key, Object... args) {
+	 * </p>
+	 */
+	public String getMessage(Locale locale, String key) {
+		String string = null;
+		try {
+			string = getResourceBundle(locale).getString(key);
+		} catch(MissingResourceException err) {
+			// string remains null
+		}
+		if(string==null) return "???"+locale.toString()+"."+key+"???";
+		return string;
+	}
+
+	/**
+	 * <p>
+	 * Gets the message.
+	 * If missing, will generate a struts-like value including the locale and key.
+	 * </p>
+	 * <p>
+	 * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
+	 * </p>
+	 * <p>
+	 * Gets the message in the current thread's locale.
+	 * </p>
+	 *
+	 * @see ThreadLocale
+	 * @see  #getMessage(String,Locale,String)
+	 */
+	public String getMessage(String key, Object... args) {
 		return getMessage(ThreadLocale.get(), key, args);
-    }
+	}
 
 	/**
-     * <p>
-     * Gets the message.
+	 * <p>
+	 * Gets the message.
 	 * If missing, will generate a struts-like value including the locale and key.
-     * </p>
-     * <p>
-     * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
-     * </p>
-     *
-     * @see  #getMessage(String,Locale,String)
-     */
-    public String getMessage(Locale locale, String key, Object... args) {
-        String string = null;
-        try {
-            string = getResourceBundle(locale).getString(key);
-        } catch(MissingResourceException err) {
-            // string remains null
-        }
-        if(string==null) return "???"+locale.toString()+"."+key+"???";
-        if(args.length==0) return string;
-        String newString = MessageFormatFactory.getMessageFormat(string, locale).format(args, new StringBuffer(string.length()<<1), null).toString();
+	 * </p>
+	 * <p>
+	 * Substitutes arguments in the text where it finds {0}, {1}, {2}, ...
+	 * </p>
+	 *
+	 * @see  #getMessage(String,Locale,String)
+	 */
+	public String getMessage(Locale locale, String key, Object... args) {
+		String string = null;
+		try {
+			string = getResourceBundle(locale).getString(key);
+		} catch(MissingResourceException err) {
+			// string remains null
+		}
+		if(string==null) return "???"+locale.toString()+"."+key+"???";
+		if(args.length==0) return string;
+		String newString = MessageFormatFactory.getMessageFormat(string, locale).format(args, new StringBuffer(string.length()<<1), null).toString();
 		// Copy any lookup markup to the newly generated string
 		BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
 		if(threadContext!=null) {
@@ -159,5 +159,5 @@ public class ApplicationResourcesAccessor implements Serializable {
 			);
 		}
 		return newString;
-    }
+	}
 }

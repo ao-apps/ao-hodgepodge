@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,21 +37,21 @@ import java.util.TreeSet;
  */
 public class SortedProperties extends Properties {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public SortedProperties() {
+	public SortedProperties() {
 	super();
-    }
+	}
 
-    public SortedProperties(Properties defaults) {
+	public SortedProperties(Properties defaults) {
 	super(defaults);
-    }
+	}
 
-    @Override
-    public Enumeration<Object> keys() {
-        SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ENGLISH));
-        Enumeration<Object> e = super.keys();
-        while(e.hasMoreElements()) sortedSet.add(e.nextElement());
-        return Collections.enumeration(sortedSet);
-    }
+	@Override
+	public Enumeration<Object> keys() {
+		SortedSet<Object> sortedSet = new TreeSet<>(Collator.getInstance(Locale.ENGLISH));
+		Enumeration<Object> e = super.keys();
+		while(e.hasMoreElements()) sortedSet.add(e.nextElement());
+		return Collections.enumeration(sortedSet);
+	}
 }

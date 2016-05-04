@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -108,16 +108,16 @@ public class OptimalIndexColorModel extends IndexColorModel {
 
 	public static OptimalIndexColorModel getOptimalIndexColorModel(BufferedImage image) {
 		// Sorted by color
-		Map<Integer,ColorCount> colorCounts = new HashMap<Integer,ColorCount>();
+		Map<Integer,ColorCount> colorCounts = new HashMap<>();
 
 		// Count the use of each color in the image
 		int width=image.getWidth();
 		int height=image.getHeight();
 		for(int y=0;y<height;y++) {
 			for(int x=0;x<width;x++) {
-				Integer color=Integer.valueOf(image.getRGB(x,y));
+				Integer color=image.getRGB(x,y);
 				ColorCount colorCount = colorCounts.get(color);
-				if(colorCount==null) colorCounts.put(color, colorCount=new ColorCount(color.intValue()));
+				if(colorCount==null) colorCounts.put(color, colorCount=new ColorCount(color));
 				colorCount.count++;
 			}
 		}
@@ -136,7 +136,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
 		}
 
 		// Sort the list based on number of times the pixels were used (most used on top)
-		List<ColorCount> colorCountList = new ArrayList<ColorCount>(colorCounts.values());
+		List<ColorCount> colorCountList = new ArrayList<>(colorCounts.values());
 		Collections.sort(colorCountList, ColorCountCountComparator.getInstance());
 
 		// Use at most the top 256 colors

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,46 +33,48 @@ import javax.swing.JButton;
  * @author  AO Industries, Inc.
  */
 public class EnterJButton extends JButton implements KeyListener {
-    
-    public EnterJButton() {
-        super();
-        init();
-    }
-    
-    public EnterJButton(String text) {
-        super(text);
-        init();
-    }
-    
-    public EnterJButton(String text, Icon icon) {
-        super(text, icon);
-        init();
-    }
-    
-    public EnterJButton(Action action) {
-        super(action);
-        init();
-    }
-    
-    public EnterJButton(Icon icon) {
-        super(icon);
-        init();
-    }
 
-    public void init() {
-        addKeyListener(this);
-    }
-    
-	@Override
-    public void keyTyped(KeyEvent e) {
-        if(e.getKeyChar()=='\n') fireActionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, getText()));
-    }
+	private static final long serialVersionUID = 1L;
+
+	public EnterJButton() {
+		super();
+		init();
+	}
+
+	public EnterJButton(String text) {
+		super(text);
+		init();
+	}
+
+	public EnterJButton(String text, Icon icon) {
+		super(text, icon);
+		init();
+	}
+
+	public EnterJButton(Action action) {
+		super(action);
+		init();
+	}
+
+	public EnterJButton(Icon icon) {
+		super(icon);
+		init();
+	}
+
+	public void init() {
+		addKeyListener(this);
+	}
 
 	@Override
-    public void keyPressed(KeyEvent e) {
-    }
-    
+	public void keyTyped(KeyEvent e) {
+		if(e.getKeyChar()=='\n') fireActionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, getText()));
+	}
+
 	@Override
-    public void keyReleased(KeyEvent e) {
-    }
+	public void keyPressed(KeyEvent e) {
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+	}
 }

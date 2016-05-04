@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -109,9 +109,9 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	 * This will use concurrency where appropriate (long lists/arrays on
 	 * multi-core systems).
 	 */
-    public static IntegerRadixSort getInstance() {
-        return defaultInstance;
-    }
+	public static IntegerRadixSort getInstance() {
+		return defaultInstance;
+	}
 
 	/**
 	 * Gets a single-threaded instance of IntegerRadixSort, that will not ever
@@ -148,7 +148,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	private IntegerRadixSort(ExecutorService executor) {
 		this.executor = executor;
-    }
+	}
 
 	@Override
 	public boolean isStable() {
@@ -615,7 +615,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				sizePerTask = size;
 			} else {
 				assert numTasks>=2 : "Must not have an executor when numTasks < 2";
-				runnableFutures = new ArrayList<Future<?>>(numTasks);
+				runnableFutures = new ArrayList<>(numTasks);
 				int spt = size / numTasks;
 				if((spt*numTasks)<size) spt++; // Round-up instead of down
 				sizePerTask = spt;
@@ -630,7 +630,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 			// May only use concurrent import for random access sources
 			if(executor!=null && source.useRandomAccess()) {
 				// Perform concurrent import
-				final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<Future<Source.ImportDataResult>>(numTasks);
+				final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<>(numTasks);
 				for(
 					int taskStart=0, toTaskNum=0;
 					taskStart<size;
@@ -701,6 +701,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 								final int finalTaskFromQueueStart = taskFromQueueStart;
 								final int taskFromQueueEnd = fromQueueNum + 1;
 								// Gather/scatter concurrent
+								assert runnableFutures != null;
 								runnableFutures.add(
 									executor.submit(
 										new Runnable() {
@@ -725,6 +726,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 							}
 						}
 						// Wait for each gather/scatter task to complete
+						assert runnableFutures != null;
 						waitForAll(runnableFutures);
 						runnableFutures.clear();
 					} else {
@@ -764,6 +766,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 						final int finalTaskOutIndex = taskOutIndex;
 						final int finalTaskFromQueueEnd = (fromQueueNum + 1) & PASS_MASK;
 						// Queue concurrent
+						assert runnableFutures != null;
 						runnableFutures.add(
 							executor.submit(
 								new Runnable() {
@@ -801,9 +804,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					0
 				);
 			}
-		} catch(InterruptedException e) {
-			throw new WrappedException(e);
-		} catch(ExecutionException e) {
+		} catch(InterruptedException | ExecutionException e) {
 			throw new WrappedException(e);
 		}
 	}
@@ -898,7 +899,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	}
 
 	@Override
-    public <N extends Number> void sort(List<N> list, SortStatistics stats) {
+	public <N extends Number> void sort(List<N> list, SortStatistics stats) {
 		if(list instanceof IntList) {
 			sort((IntList)list);
 		} else {
@@ -922,21 +923,21 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					radixSort(
 						size,
 						new SingleTaskNumberRadixTable<N>(size),
-						new NumberListSource<N>(size, list),
+						new NumberListSource<>(size, list),
 						null
 					);
 				} else {
 					radixSort(
 						size,
 						new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
-						new NumberListSource<N>(size, list),
+						new NumberListSource<>(size, list),
 						executor
 					);
 				}
 			}
 			if(stats!=null) stats.sortEnding();
 		}
-    }
+	}
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="N[]">
@@ -995,11 +996,11 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	}
 
 	@Override
-    public <N extends Number> void sort(N[] array, SortStatistics stats) {
+	public <N extends Number> void sort(N[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 		final int size = array.length;
 		if(size < MIN_RADIX_SORT_SIZE) {
-            if(stats!=null) stats.sortSwitchingAlgorithms();
+			if(stats!=null) stats.sortSwitchingAlgorithms();
 			Arrays.sort(array, IntValueComparator.getInstance());
 		} else {
 			if(stats!=null) {
@@ -1016,20 +1017,20 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				radixSort(
 					size,
 					new SingleTaskNumberRadixTable<N>(size),
-					new NumberArraySource<N>(size, array),
+					new NumberArraySource<>(size, array),
 					null
 				);
 			} else {
 				radixSort(
 					size,
 					new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
-					new NumberArraySource<N>(size, array),
+					new NumberArraySource<>(size, array),
 					executor
 				);
 			}
 		}
 		if(stats!=null) stats.sortEnding();
-    }
+	}
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="IntList">
@@ -1121,11 +1122,11 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	}
 
 	@Override
-    public void sort(IntList list, SortStatistics stats) {
+	public void sort(IntList list, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 		final int size = list.size();
 		if(size < MIN_RADIX_SORT_SIZE) {
-            if(stats!=null) stats.sortSwitchingAlgorithms();
+			if(stats!=null) stats.sortSwitchingAlgorithms();
 			Collections.sort(list, IntValueComparator.getInstance());
 		} else {
 			if(stats!=null) {
@@ -1155,7 +1156,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 			}
 		}
 		if(stats!=null) stats.sortEnding();
-    }
+	}
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="int[]">
@@ -1214,11 +1215,11 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	}
 
 	@Override
-    public void sort(int[] array, SortStatistics stats) {
+	public void sort(int[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 		final int size = array.length;
 		if(size < MIN_RADIX_SORT_SIZE) {
-            if(stats!=null) stats.sortSwitchingAlgorithms();
+			if(stats!=null) stats.sortSwitchingAlgorithms();
 			Arrays.sort(array);
 		} else {
 			if(stats!=null) {
@@ -1248,6 +1249,6 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 			}
 		}
 		if(stats!=null) stats.sortEnding();
-    }
+	}
 	// </editor-fold>
 }

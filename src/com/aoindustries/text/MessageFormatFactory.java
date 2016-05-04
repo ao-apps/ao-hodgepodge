@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -49,68 +49,68 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class MessageFormatFactory {
 
-    private static final ConcurrentMap<Locale,ConcurrentMap<String,UnmodifiableMessageFormat>> cache = new ConcurrentHashMap<Locale,ConcurrentMap<String,UnmodifiableMessageFormat>>();
+	private static final ConcurrentMap<Locale,ConcurrentMap<String,UnmodifiableMessageFormat>> cache = new ConcurrentHashMap<>();
 
-    /**
-     * Gets a message format for the provided format in the current thread locale.
-     *
-     * @return  a MessageFormat that may not be modified with any of its setters or other mutator methods.
-     * 
-     * @see ThreadLocale
-     */
-    public static UnmodifiableMessageFormat getMessageFormat(String pattern) {
-        return getMessageFormat(pattern, ThreadLocale.get());
-    }
+	/**
+	 * Gets a message format for the provided format in the current thread locale.
+	 *
+	 * @return  a MessageFormat that may not be modified with any of its setters or other mutator methods.
+	 * 
+	 * @see ThreadLocale
+	 */
+	public static UnmodifiableMessageFormat getMessageFormat(String pattern) {
+		return getMessageFormat(pattern, ThreadLocale.get());
+	}
 
-    /**
-     * Gets a message format for the provided format and locale.
-     *
-     * @return  a MessageFormat that may not be modified with any of its setters or other mutator methods.
-     */
-    public static UnmodifiableMessageFormat getMessageFormat(String pattern, Locale locale) {
-        ConcurrentMap<String,UnmodifiableMessageFormat> localeCache = cache.get(locale);
-        if(localeCache==null) {
-            localeCache = new ConcurrentHashMap<String,UnmodifiableMessageFormat>();
-            ConcurrentMap<String,UnmodifiableMessageFormat> existing = cache.putIfAbsent(locale, localeCache);
-            if(existing!=null) localeCache = existing;
-        }
-        UnmodifiableMessageFormat messageFormat = localeCache.get(pattern);
-        if(messageFormat==null) {
-            messageFormat = new UnmodifiableMessageFormat(pattern, locale);
-            UnmodifiableMessageFormat existing = localeCache.putIfAbsent(pattern, messageFormat);
-            if(existing!=null) messageFormat = existing;
-        }
-        return messageFormat;
-    }
+	/**
+	 * Gets a message format for the provided format and locale.
+	 *
+	 * @return  a MessageFormat that may not be modified with any of its setters or other mutator methods.
+	 */
+	public static UnmodifiableMessageFormat getMessageFormat(String pattern, Locale locale) {
+		ConcurrentMap<String,UnmodifiableMessageFormat> localeCache = cache.get(locale);
+		if(localeCache==null) {
+			localeCache = new ConcurrentHashMap<>();
+			ConcurrentMap<String,UnmodifiableMessageFormat> existing = cache.putIfAbsent(locale, localeCache);
+			if(existing!=null) localeCache = existing;
+		}
+		UnmodifiableMessageFormat messageFormat = localeCache.get(pattern);
+		if(messageFormat==null) {
+			messageFormat = new UnmodifiableMessageFormat(pattern, locale);
+			UnmodifiableMessageFormat existing = localeCache.putIfAbsent(pattern, messageFormat);
+			if(existing!=null) messageFormat = existing;
+		}
+		return messageFormat;
+	}
 
-    private MessageFormatFactory() {
-    }
+	private MessageFormatFactory() {
+	}
 
-    /*
-    public static void benchmark() {
-        Locale locale = Locale.getDefault();
-        int iterations = 1000000;
-        StringBuffer sb = new StringBuffer();
-        Object[] args = new Object[] {
-            "test", "message"
-        };
-        long startTime = System.nanoTime();
-        for(int i=0; i<iterations; i++) {
-            //sb.setLength(0);
-            new MessageFormat("This is a {0} {1}", locale); //.format(args, sb, null);
-        }
-        long midTime = System.nanoTime();
-        for(int i=0; i<iterations; i++) {
-            //sb.setLength(0);
-            MessageFormatFactory.getMessageFormat("This is a {0} {1}", locale); //.format(args, sb, null);
-        }
-        long endTime = System.nanoTime();
-        System.out.println("Constructor: "+BigDecimal.valueOf(midTime - startTime, 6));
-        System.out.println("Factory....: "+BigDecimal.valueOf(endTime - midTime, 6));
-    }
+	/*
+	public static void benchmark() {
+		Locale locale = Locale.getDefault();
+		int iterations = 1000000;
+		StringBuffer sb = new StringBuffer();
+		Object[] args = new Object[] {
+			"test", "message"
+		};
+		long startTime = System.nanoTime();
+		for(int i=0; i<iterations; i++) {
+			//sb.setLength(0);
+			new MessageFormat("This is a {0} {1}", locale); //.format(args, sb, null);
+		}
+		long midTime = System.nanoTime();
+		for(int i=0; i<iterations; i++) {
+			//sb.setLength(0);
+			MessageFormatFactory.getMessageFormat("This is a {0} {1}", locale); //.format(args, sb, null);
+		}
+		long endTime = System.nanoTime();
+		System.out.println("Constructor: "+BigDecimal.valueOf(midTime - startTime, 6));
+		System.out.println("Factory....: "+BigDecimal.valueOf(endTime - midTime, 6));
+	}
 
-    public static void main(String[] args) {
-        for(int c=0;c<100;c++) benchmark();
-    }
-     */
+	public static void main(String[] args) {
+		for(int c=0;c<100;c++) benchmark();
+	}
+	 */
 }

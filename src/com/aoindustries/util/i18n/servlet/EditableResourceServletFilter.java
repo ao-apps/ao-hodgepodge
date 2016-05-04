@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,8 @@
  */
 package com.aoindustries.util.i18n.servlet;
 
-import com.aoindustries.util.i18n.*;
 import com.aoindustries.servlet.http.Cookies;
+import com.aoindustries.util.i18n.EditableResourceBundle;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -42,70 +42,70 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class EditableResourceServletFilter implements Filter {
 
-    private static final String FILTER_ENABLED_REQUEST_ATTRIBUTE_KEY = EditableResourceServletFilter.class.getName()+".enabled";
+	private static final String FILTER_ENABLED_REQUEST_ATTRIBUTE_KEY = EditableResourceServletFilter.class.getName()+".enabled";
 
-    private String role;
+	private String role;
 
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        role = filterConfig.getInitParameter("role");
-    }
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+		role = filterConfig.getInitParameter("role");
+	}
 
-    @Override
-    public void doFilter(
-        ServletRequest request,
-        ServletResponse response,
-        FilterChain chain
-    ) throws IOException, ServletException {
-        // Makes sure only one locale filter is applied per request
-        if(
-            request.getAttribute(FILTER_ENABLED_REQUEST_ATTRIBUTE_KEY)==null
-            && (request instanceof HttpServletRequest)
-            && (response instanceof HttpServletResponse)
-        ) {
-            request.setAttribute(FILTER_ENABLED_REQUEST_ATTRIBUTE_KEY, Boolean.TRUE);
-            try {
-                HttpServletRequest httpRequest = (HttpServletRequest)request;
-                if("*".equals(role) || httpRequest.isUserInRole(role)) {
-                    try {
-                        // Check for cookie
-                        boolean modifyAllText = "visible".equals(Cookies.getCookie(httpRequest, EditableResourceBundle.VISIBILITY_COOKIE_NAME));
-                        // Generate common URL prefix
-                        StringBuilder url = new StringBuilder();
-                        url
-                            .append(httpRequest.isSecure() ? "https://" : "http://")
-                            .append(httpRequest.getServerName());
-                        int port = httpRequest.getServerPort();
-                        if(httpRequest.isSecure() ? (port!=443) : (port!=80)) url.append(':').append(port);
-                        url.append(httpRequest.getContextPath()).append('/');
-                        int baseUrlLen = url.length();
-                        // Generate value URL
-                        url.append("SetResourceBundleValue");
-                        String setValueUrl = url.toString();
-                        // Setup request for editing
-                        EditableResourceBundle.resetRequest(
-                            true,
-                            setValueUrl,
-                            modifyAllText
-                        );
-                        chain.doFilter(request, response);
-                    } finally {
-                        EditableResourceBundle.resetRequest(false, null, false);
-                    }
-                } else {
-                    // Not allowed to translate
-                    EditableResourceBundle.resetRequest(false, null, false);
-                    chain.doFilter(request, response);
-                }
-            } finally {
-                request.removeAttribute(FILTER_ENABLED_REQUEST_ATTRIBUTE_KEY);
-            }
-        } else {
-            chain.doFilter(request, response);
-        }
-    }
+	@Override
+	public void doFilter(
+		ServletRequest request,
+		ServletResponse response,
+		FilterChain chain
+	) throws IOException, ServletException {
+		// Makes sure only one locale filter is applied per request
+		if(
+			request.getAttribute(FILTER_ENABLED_REQUEST_ATTRIBUTE_KEY)==null
+			&& (request instanceof HttpServletRequest)
+			&& (response instanceof HttpServletResponse)
+		) {
+			request.setAttribute(FILTER_ENABLED_REQUEST_ATTRIBUTE_KEY, Boolean.TRUE);
+			try {
+				HttpServletRequest httpRequest = (HttpServletRequest)request;
+				if("*".equals(role) || httpRequest.isUserInRole(role)) {
+					try {
+						// Check for cookie
+						boolean modifyAllText = "visible".equals(Cookies.getCookie(httpRequest, EditableResourceBundle.VISIBILITY_COOKIE_NAME));
+						// Generate common URL prefix
+						StringBuilder url = new StringBuilder();
+						url
+							.append(httpRequest.isSecure() ? "https://" : "http://")
+							.append(httpRequest.getServerName());
+						int port = httpRequest.getServerPort();
+						if(httpRequest.isSecure() ? (port!=443) : (port!=80)) url.append(':').append(port);
+						url.append(httpRequest.getContextPath()).append('/');
+						int baseUrlLen = url.length();
+						// Generate value URL
+						url.append("SetResourceBundleValue");
+						String setValueUrl = url.toString();
+						// Setup request for editing
+						EditableResourceBundle.resetRequest(
+							true,
+							setValueUrl,
+							modifyAllText
+						);
+						chain.doFilter(request, response);
+					} finally {
+						EditableResourceBundle.resetRequest(false, null, false);
+					}
+				} else {
+					// Not allowed to translate
+					EditableResourceBundle.resetRequest(false, null, false);
+					chain.doFilter(request, response);
+				}
+			} finally {
+				request.removeAttribute(FILTER_ENABLED_REQUEST_ATTRIBUTE_KEY);
+			}
+		} else {
+			chain.doFilter(request, response);
+		}
+	}
 
-    @Override
-    public void destroy() {
-    }
+	@Override
+	public void destroy() {
+	}
 }

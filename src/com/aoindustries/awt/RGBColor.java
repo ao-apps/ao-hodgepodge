@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -69,9 +69,8 @@ final public class RGBColor {
 		// Load the colors if not already done
 		if (colors == null) {
 			// Load the colors
-			colors = new HashMap<String,Integer>();
-			BufferedReader in = new BufferedReader(new InputStreamReader(RGBColor.class.getResourceAsStream("rgb.txt")));
-			try {
+			colors = new HashMap<>();
+			try (BufferedReader in = new BufferedReader(new InputStreamReader(RGBColor.class.getResourceAsStream("rgb.txt")))) {
 				String line;
 				while ((line = in.readLine()) != null) {
 					int len = line.length();
@@ -82,11 +81,9 @@ final public class RGBColor {
 							try {
 								colors.put(
 									line.substring(13).trim(),
-									Integer.valueOf(
-										(Integer.parseInt(line.substring(0, 3).trim()) << 16)
-										| (Integer.parseInt(line.substring(4, 7).trim()) << 8)
-										| Integer.parseInt(line.substring(8, 11).trim())
-									)
+									(Integer.parseInt(line.substring(0, 3).trim()) << 16)
+									| (Integer.parseInt(line.substring(4, 7).trim()) << 8)
+									| Integer.parseInt(line.substring(8, 11).trim())
 								);
 							} catch (NumberFormatException err) {
 								throw new IOException("Unable to parse line: "+line, err);
@@ -94,15 +91,13 @@ final public class RGBColor {
 						}
 					}
 				}
-			} finally {
-				in.close();
 			}
 		}
 
 		// Look in the color hash first
 		name = name.toLowerCase(Locale.ENGLISH);
 		Integer I = colors.get(name);
-		if (I != null) return I.intValue();
+		if (I != null) return I;
 
 		int start = 0;
 		if (name.length() >= 1 && name.charAt(0) == '#') start = 1;

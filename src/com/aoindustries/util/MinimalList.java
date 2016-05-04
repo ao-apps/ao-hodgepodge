@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,19 +41,19 @@ import java.util.List;
  */
 public class MinimalList {
 
-    private MinimalList() {
-    }
+	private MinimalList() {
+	}
 
 	/**
 	 * Adds a new element to a list, returning the (possibly new) list.
 	 */
 	public static <E> List<E> add(List<E> list, E elem) {
-        if(list == null) {
+		if(list == null) {
 			// The first element is always a singletonList
 			list = Collections.singletonList(elem);
 		} else if(list.size()==1) {
 			// Is a singleton list
-			List<E> newList = new ArrayList<E>(8);
+			List<E> newList = new ArrayList<>(8);
 			newList.add(list.get(0));
 			newList.add(elem);
 			list = newList;
@@ -86,6 +86,6 @@ public class MinimalList {
 			return list;
 		}
 		// Create copy of list
-		return new ArrayList<E>(list);
+		return new ArrayList<>(list);
 	}
 }

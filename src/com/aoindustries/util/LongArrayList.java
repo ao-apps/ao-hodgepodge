@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -276,7 +276,7 @@ public class LongArrayList extends AbstractList<Long>
 	@Override
 	public Object[] toArray() {
 		Object[] result = new Object[size];
-		for(int c=0;c<size;c++) result[c] = Long.valueOf(elementData[c]);
+		for(int c=0;c<size;c++) result[c] = elementData[c];
 		return result;
 	}
 
@@ -341,7 +341,7 @@ public class LongArrayList extends AbstractList<Long>
 	public Long get(int index) {
 		RangeCheck(index);
 
-		return Long.valueOf(elementData[index]);
+		return elementData[index];
 	}
 
 	/**
@@ -371,7 +371,7 @@ public class LongArrayList extends AbstractList<Long>
 	 */
 	@Override
 	public Long set(int index, Long element) {
-		return Long.valueOf(set(index,element.longValue()));
+		return set(index,element.longValue());
 	}
 
 	/**
@@ -467,7 +467,7 @@ public class LongArrayList extends AbstractList<Long>
 	 */
 	@Override
 	public Long remove(int index) {
-		return Long.valueOf(removeAtIndex(index));
+		return removeAtIndex(index);
 	}
 
 	/**
@@ -582,7 +582,7 @@ public class LongArrayList extends AbstractList<Long>
 		int numNew = c.size();
 		ensureCapacity(size + numNew);  // Increments modCount
 		Iterator<? extends Long> iter=c.iterator();
-		while(iter.hasNext()) elementData[size++]=iter.next().longValue();
+		while(iter.hasNext()) elementData[size++]=iter.next();
 		return numNew != 0;
 	}
 
@@ -618,7 +618,7 @@ public class LongArrayList extends AbstractList<Long>
 
 		Iterator<? extends Long> iter=c.iterator();
 		int pos = index;
-		while(iter.hasNext()) elementData[pos++]=iter.next().longValue();
+		while(iter.hasNext()) elementData[pos++]=iter.next();
 		size += numNew;
 		return numNew != 0;
 	}

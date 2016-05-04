@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2014  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class Locales {
 
-    private Locales() {}
+	private Locales() {}
 
 	// Was getting NullPointerException on class init, trying cache in separate class.
 	// It might have been due to memory exhausted in Tomcat, but this won't hurt.
@@ -68,7 +68,7 @@ public class Locales {
 			}
 		}
 
-		private static final ConcurrentMap<CacheKey,Locale> locales = new ConcurrentHashMap<CacheKey,Locale>(16, 0.75f, 1);
+		private static final ConcurrentMap<CacheKey,Locale> locales = new ConcurrentHashMap<>(16, 0.75f, 1);
 
 		/**
 		 * @see  Locales#getCachedLocale(java.lang.String, java.lang.String, java.lang.String)
@@ -167,16 +167,16 @@ public class Locales {
 	}
 
 	/**
-     * Determines if the provided locale should be displayed from right to left.
-     */
-    public static boolean isRightToLeft(Locale locale) {
-        String language = locale.getLanguage();
-        return
-            "ar".equals(language)    // arabic
-            || "iw".equals(language) // hebrew
-            || "fa".equals(language) // persian
-        ;
-    }
+	 * Determines if the provided locale should be displayed from right to left.
+	 */
+	public static boolean isRightToLeft(Locale locale) {
+		String language = locale.getLanguage();
+		return
+			"ar".equals(language)    // arabic
+			|| "iw".equals(language) // hebrew
+			|| "fa".equals(language) // persian
+		;
+	}
 
 	/**
 	 * Some locale constants not provided directly by Java, along with those provided by Java.

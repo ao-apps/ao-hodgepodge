@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,12 +22,12 @@
  */
 package com.aoindustries.rmi;
 
-import com.aoindustries.lang.ObjectUtils;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.rmi.server.RMIClientSocketFactory;
+import java.util.Objects;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
@@ -36,47 +36,47 @@ import javax.net.ssl.SSLSocketFactory;
  * @author  AO Industries, Inc.
  */
 public class RMIClientSocketFactorySSL implements RMIClientSocketFactory, Serializable {
-    
-    private static final long serialVersionUID = 1;
 
-    final private String localAddress;
+	private static final long serialVersionUID = 1;
 
-    /**
-     * Will establish connections with the system default local address.
-     */
-    public RMIClientSocketFactorySSL() {
-        this.localAddress = null;
-    }
+	final private String localAddress;
 
-    /**
-     * Will establish connections with the provided local address.
-     */
-    public RMIClientSocketFactorySSL(String localAddress) {
-        this.localAddress = localAddress;
-    }
+	/**
+	 * Will establish connections with the system default local address.
+	 */
+	public RMIClientSocketFactorySSL() {
+		this.localAddress = null;
+	}
 
-    @Override
-    public boolean equals(Object O) {
-        return
-            O!=null
-            && (O instanceof RMIClientSocketFactorySSL)
-            && ObjectUtils.equals(localAddress, ((RMIClientSocketFactorySSL)O).localAddress)
-        ;
-    }
-    
-    @Override
-    public int hashCode() {
-        return localAddress==null ? 0 : localAddress.hashCode();
-    }
+	/**
+	 * Will establish connections with the provided local address.
+	 */
+	public RMIClientSocketFactorySSL(String localAddress) {
+		this.localAddress = localAddress;
+	}
 
-    @Override
-    public Socket createSocket(String host, int port) throws IOException {
-        SSLSocketFactory sslFact=(SSLSocketFactory)SSLSocketFactory.getDefault();
-        Socket regSocket = new Socket();
-        if(localAddress!=null) regSocket.bind(new InetSocketAddress(localAddress, 0));
-        regSocket.connect(new InetSocketAddress(host, port), 30000);
-        regSocket.setKeepAlive(true);
-        regSocket.setTcpNoDelay(true);
-        return sslFact.createSocket(regSocket, host, port, true);
-    }
+	@Override
+	public boolean equals(Object O) {
+		return
+			O!=null
+			&& (O instanceof RMIClientSocketFactorySSL)
+			&& Objects.equals(localAddress, ((RMIClientSocketFactorySSL)O).localAddress)
+		;
+	}
+
+	@Override
+	public int hashCode() {
+		return localAddress==null ? 0 : localAddress.hashCode();
+	}
+
+	@Override
+	public Socket createSocket(String host, int port) throws IOException {
+		SSLSocketFactory sslFact=(SSLSocketFactory)SSLSocketFactory.getDefault();
+		Socket regSocket = new Socket();
+		if(localAddress!=null) regSocket.bind(new InetSocketAddress(localAddress, 0));
+		regSocket.connect(new InetSocketAddress(host, port), 30000);
+		regSocket.setKeepAlive(true);
+		regSocket.setTcpNoDelay(true);
+		return sslFact.createSocket(regSocket, host, port, true);
+	}
 }

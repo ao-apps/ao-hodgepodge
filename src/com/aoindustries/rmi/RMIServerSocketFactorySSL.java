@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,11 +22,11 @@
  */
 package com.aoindustries.rmi;
 
-import com.aoindustries.lang.ObjectUtils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
+import java.util.Objects;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
 
@@ -37,44 +37,44 @@ import javax.net.ssl.SSLServerSocketFactory;
  */
 public class RMIServerSocketFactorySSL implements RMIServerSocketFactory {
 
-    final private String listenAddress;
+	final private String listenAddress;
 
-    /**
-     * Will listen on the default listen address.
-     */
-    public RMIServerSocketFactorySSL() {
-        this.listenAddress = null;
-    }
+	/**
+	 * Will listen on the default listen address.
+	 */
+	public RMIServerSocketFactorySSL() {
+		this.listenAddress = null;
+	}
 
-    /**
-     * Will listen on the provided listen address.
-     */
-    public RMIServerSocketFactorySSL(String listenAddress) {
-        this.listenAddress = listenAddress;
-    }
-    
-    @Override
-    public boolean equals(Object O) {
-        return
-            O!=null
-            && (O instanceof RMIServerSocketFactorySSL)
-            && ObjectUtils.equals(listenAddress, ((RMIServerSocketFactorySSL)O).listenAddress)
-        ;
-    }
-    
-    @Override
-    public int hashCode() {
-        return listenAddress==null ? 0 : listenAddress.hashCode();
-    }
+	/**
+	 * Will listen on the provided listen address.
+	 */
+	public RMIServerSocketFactorySSL(String listenAddress) {
+		this.listenAddress = listenAddress;
+	}
 
-    @Override
-    public ServerSocket createServerSocket(int port) throws IOException {
-        ServerSocketFactory factory = SSLServerSocketFactory.getDefault();
-        if(listenAddress==null) {
-            return factory.createServerSocket(port, 50);
-        } else {
-            InetAddress address=InetAddress.getByName(listenAddress);
-            return factory.createServerSocket(port, 50, address);
-        }
-    }
+	@Override
+	public boolean equals(Object O) {
+		return
+			O!=null
+			&& (O instanceof RMIServerSocketFactorySSL)
+			&& Objects.equals(listenAddress, ((RMIServerSocketFactorySSL)O).listenAddress)
+		;
+	}
+
+	@Override
+	public int hashCode() {
+		return listenAddress==null ? 0 : listenAddress.hashCode();
+	}
+
+	@Override
+	public ServerSocket createServerSocket(int port) throws IOException {
+		ServerSocketFactory factory = SSLServerSocketFactory.getDefault();
+		if(listenAddress==null) {
+			return factory.createServerSocket(port, 50);
+		} else {
+			InetAddress address=InetAddress.getByName(listenAddress);
+			return factory.createServerSocket(port, 50, address);
+		}
+	}
 }

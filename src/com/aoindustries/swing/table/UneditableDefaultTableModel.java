@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,16 +31,18 @@ import javax.swing.table.DefaultTableModel;
  */
 public class UneditableDefaultTableModel extends DefaultTableModel {
 
-    public UneditableDefaultTableModel(int rowCount, int columnCount) {
-        super(rowCount, columnCount);
-    }
+	private static final long serialVersionUID = 1L;
 
-    public UneditableDefaultTableModel(Object[] columnNames, int rowCount) {
-        super(columnNames, rowCount);
-    }
+	public UneditableDefaultTableModel(int rowCount, int columnCount) {
+		super(rowCount, columnCount);
+	}
 
-    @Override
-    public boolean isCellEditable(int row, int col) {
-        return false;
-    }
+	public UneditableDefaultTableModel(Object[] columnNames, int rowCount) {
+		super(columnNames, rowCount);
+	}
+
+	@Override
+	public boolean isCellEditable(int row, int col) {
+		return false;
+	}
 }

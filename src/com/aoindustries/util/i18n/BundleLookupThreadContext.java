@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,7 +36,7 @@ import java.util.IdentityHashMap;
  */
 final public class BundleLookupThreadContext {
 
-	private static final ThreadLocal<BundleLookupThreadContext> threadContext = new InheritableThreadLocal<BundleLookupThreadContext>();
+	private static final ThreadLocal<BundleLookupThreadContext> threadContext = new InheritableThreadLocal<>();
 
 	/**
 	 * Gets the current context or <code>null</code> if none set and none created.
@@ -66,7 +66,7 @@ final public class BundleLookupThreadContext {
 	 * @throws IllegalStateException   if the string has already been added to this context (as matched by identity)
 	 */
 	void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) throws IllegalStateException {
-		if(lookupResults==null) lookupResults = new IdentityHashMap<String, BundleLookupMarkup>();
+		if(lookupResults==null) lookupResults = new IdentityHashMap<>();
 		if(lookupResults.put(lookupResult, lookupMarkup)!=null) {
 			throw new IllegalStateException(
 				ApplicationResources.accessor.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")

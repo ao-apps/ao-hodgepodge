@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,9 +22,9 @@
  */
 package com.aoindustries.security;
 
+import com.aoindustries.math.LongLong;
 import static com.aoindustries.math.UnsignedLong.divide;
 import static com.aoindustries.security.Identifier.BASE;
-import com.aoindustries.math.LongLong;
 import com.aoindustries.util.persistent.PersistentCollections;
 import java.io.Serializable;
 import java.util.Random;
@@ -36,96 +36,96 @@ import java.util.Random;
  */
 public class SmallIdentifier implements Serializable, Comparable<SmallIdentifier> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * @see  #toString()
-     */
-    public static SmallIdentifier valueOf(String encoded) throws IllegalArgumentException {
-        return new SmallIdentifier(encoded);
-    }
+	/**
+	 * @see  #toString()
+	 */
+	public static SmallIdentifier valueOf(String encoded) throws IllegalArgumentException {
+		return new SmallIdentifier(encoded);
+	}
 
-    private final long value;
+	private final long value;
 
-    /**
-     * Creates a new, random Identifier using the default SecureRandom instance.
-     */
-    public SmallIdentifier() {
-        this(Identifier.random);
-    }
+	/**
+	 * Creates a new, random Identifier using the default SecureRandom instance.
+	 */
+	public SmallIdentifier() {
+		this(Identifier.random);
+	}
 
-    /**
-     * Creates a new, random Identifier using the provided Random source.
-     */
-    public SmallIdentifier(Random random) {
-        byte[] bytes = new byte[8];
-        random.nextBytes(bytes);
-        value = PersistentCollections.bufferToLong(bytes);
-    }
+	/**
+	 * Creates a new, random Identifier using the provided Random source.
+	 */
+	public SmallIdentifier(Random random) {
+		byte[] bytes = new byte[8];
+		random.nextBytes(bytes);
+		value = PersistentCollections.bufferToLong(bytes);
+	}
 
-    public SmallIdentifier(long value) {
-        this.value = value;
-    }
+	public SmallIdentifier(long value) {
+		this.value = value;
+	}
 
-    /**
-     * @see  #toString()
-     */
-    public SmallIdentifier(String encoded) throws IllegalArgumentException {
-        if(encoded.length()!=11) throw new IllegalArgumentException();
-        this.value = Identifier.decode(encoded);
-    }
+	/**
+	 * @see  #toString()
+	 */
+	public SmallIdentifier(String encoded) throws IllegalArgumentException {
+		if(encoded.length()!=11) throw new IllegalArgumentException();
+		this.value = Identifier.decode(encoded);
+	}
 
-    @Override
-    public boolean equals(Object O) {
-        if(!(O instanceof SmallIdentifier)) return false;
+	@Override
+	public boolean equals(Object O) {
+		if(!(O instanceof SmallIdentifier)) return false;
 		return equals((SmallIdentifier)O);
-    }
+	}
 
-    public boolean equals(SmallIdentifier other) {
+	public boolean equals(SmallIdentifier other) {
 		return
 			other!=null
 			&& value==other.value
 		;
-    }
+	}
 
 	@Override
-    public int hashCode() {
-        // The values should be well distributed, any set of 32 bits should be equally good.
-        return (int)value;
-    }
+	public int hashCode() {
+		// The values should be well distributed, any set of 32 bits should be equally good.
+		return (int)value;
+	}
 
-    /**
-     * The external representation is a string of characters encoded in base 57, with
-     * 11 characters for "value".
-     */
-    @Override
-    public String toString() {
-        return new String(
-            new char[] {
-                Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
-                Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
-                Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
-                Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
-                Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE)),
-                Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE)),
-                Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE)),
-                Identifier.getCharacter(divide(value, BASE * BASE * BASE)),
-                Identifier.getCharacter(divide(value, BASE * BASE)),
-                Identifier.getCharacter(divide(value, BASE)),
-                Identifier.getCharacter(value)
-            }
-        );
-    }
+	/**
+	 * The external representation is a string of characters encoded in base 57, with
+	 * 11 characters for "value".
+	 */
+	@Override
+	public String toString() {
+		return new String(
+			new char[] {
+				Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+				Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+				Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+				Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE * BASE)),
+				Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE * BASE)),
+				Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE * BASE)),
+				Identifier.getCharacter(divide(value, BASE * BASE * BASE * BASE)),
+				Identifier.getCharacter(divide(value, BASE * BASE * BASE)),
+				Identifier.getCharacter(divide(value, BASE * BASE)),
+				Identifier.getCharacter(divide(value, BASE)),
+				Identifier.getCharacter(value)
+			}
+		);
+	}
 
-    /**
-     * Unsigned ordering.
-     */
-    @Override
-    public int compareTo(SmallIdentifier other) {
-        return LongLong.compareUnsigned(value, other.value);
-    }
-    
-    public long getValue() {
-        return value;
-    }
+	/**
+	 * Unsigned ordering.
+	 */
+	@Override
+	public int compareTo(SmallIdentifier other) {
+		return LongLong.compareUnsigned(value, other.value);
+	}
+
+	public long getValue() {
+		return value;
+	}
 }

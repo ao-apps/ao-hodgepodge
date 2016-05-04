@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,36 +35,33 @@ import java.io.InputStream;
  */
 public final class MD5Utils {
 
-    /**
-     * Make no instances.
-     */
-    private MD5Utils() {
-    }
+	/**
+	 * Make no instances.
+	 */
+	private MD5Utils() {
+	}
 
 	/**
 	 * Gets the MD5 hashcode of a file.
 	 */
-    public static byte[] md5(String filename) throws IOException {
+	public static byte[] md5(String filename) throws IOException {
 		return md5(new File(filename));
 	}
 
 	/**
 	 * Gets the MD5 hashcode of a file.
 	 */
-    public static byte[] md5(File file) throws IOException {
-        InputStream in = new FileInputStream(file);
-        try {
+	public static byte[] md5(File file) throws IOException {
+		try (InputStream in = new FileInputStream(file)) {
 			return md5(in);
-        } finally {
-            in.close();
-        }
-    }
+		}
+	}
 
 	/**
 	 * Gets the MD5 hashcode of an input stream.
 	 */
-    public static byte[] md5(InputStream in) throws IOException {
-        MD5InputStream md5in=new MD5InputStream(in);
+	public static byte[] md5(InputStream in) throws IOException {
+		MD5InputStream md5in=new MD5InputStream(in);
 		byte[] trashBuffer = BufferManager.getBytes();
 		try {
 			while(md5in.read(trashBuffer, 0, BufferManager.BUFFER_SIZE) != -1) {
@@ -73,6 +70,6 @@ public final class MD5Utils {
 		} finally {
 			BufferManager.release(trashBuffer, false);
 		}
-        return md5in.hash();
-    }
+		return md5in.hash();
+	}
 }

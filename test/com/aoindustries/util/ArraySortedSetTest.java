@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,51 +38,51 @@ import junit.framework.TestSuite;
  */
 public class ArraySortedSetTest extends TestCase {
 
-    public ArraySortedSetTest(String testName) {
-        super(testName);
-    }
+	public ArraySortedSetTest(String testName) {
+		super(testName);
+	}
 
-    public static Test suite() {
-        return new TestSuite(ArraySortedSetTest.class);
-    }
+	public static Test suite() {
+		return new TestSuite(ArraySortedSetTest.class);
+	}
 
-    private static final Random random = new SecureRandom();
+	private static final Random random = new SecureRandom();
 
-    private void doTestPerformance() {
-        final int endTestSize = 1000000;
-        SortedSet<Integer> randomValues = new TreeSet<Integer>();
-        for(int testSize = 1; testSize<=endTestSize; testSize *= 10) {
-            // Generate testSize random ints
-            while(randomValues.size()<testSize) randomValues.add(random.nextInt());
-            List<Integer> randomList = new ArrayList<Integer>(randomValues);
-            // Time new
-            long startNanos = System.nanoTime();
-            TreeSet<Integer> treeSet = new TreeSet<Integer>(randomValues);
-            long timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": Created TreeSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
-            startNanos = System.nanoTime();
-            ArraySortedSet<Integer> arraySortedSet = new ArraySortedSet<Integer>(randomValues);
-            timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": Created ArraySortedSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
-            // Test contains
-            startNanos = System.nanoTime();
-            for(Integer value : randomList) {
-                if(!treeSet.contains(value)) throw new AssertionError();
-            }
-            timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": TreeSet contains in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
-            startNanos = System.nanoTime();
-            for(Integer value : randomList) {
-                if(!arraySortedSet.contains(value)) throw new AssertionError();
-            }
-            timeNanos = System.nanoTime() - startNanos;
-            System.out.println(testSize+": ArraySortedSet contains in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
+	private void doTestPerformance() {
+		final int endTestSize = 1000000;
+		SortedSet<Integer> randomValues = new TreeSet<>();
+		for(int testSize = 1; testSize<=endTestSize; testSize *= 10) {
+			// Generate testSize random ints
+			while(randomValues.size()<testSize) randomValues.add(random.nextInt());
+			List<Integer> randomList = new ArrayList<>(randomValues);
+			// Time new
+			long startNanos = System.nanoTime();
+			TreeSet<Integer> treeSet = new TreeSet<>(randomValues);
+			long timeNanos = System.nanoTime() - startNanos;
+			System.out.println(testSize+": Created TreeSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
+			startNanos = System.nanoTime();
+			ArraySortedSet<Integer> arraySortedSet = new ArraySortedSet<>(randomValues);
+			timeNanos = System.nanoTime() - startNanos;
+			System.out.println(testSize+": Created ArraySortedSet in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
+			// Test contains
+			startNanos = System.nanoTime();
+			for(Integer value : randomList) {
+				if(!treeSet.contains(value)) throw new AssertionError();
+			}
+			timeNanos = System.nanoTime() - startNanos;
+			System.out.println(testSize+": TreeSet contains in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
+			startNanos = System.nanoTime();
+			for(Integer value : randomList) {
+				if(!arraySortedSet.contains(value)) throw new AssertionError();
+			}
+			timeNanos = System.nanoTime() - startNanos;
+			System.out.println(testSize+": ArraySortedSet contains in "+BigDecimal.valueOf(timeNanos/1000, 3)+" ms");
 
-        }
-    }
+		}
+	}
 
-    public void testPerformance() {
-        final int numTests = 1;
-        for(int c=0;c<numTests;c++) doTestPerformance();
-    }
+	public void testPerformance() {
+		final int numTests = 1;
+		for(int c=0;c<numTests;c++) doTestPerformance();
+	}
 }

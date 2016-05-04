@@ -65,16 +65,16 @@ public class MultiBorderLayout extends BorderLayout {
 			if(CENTER.equals(name)) {
 				center = component;
 			} else if(NORTH.equals(name)) {
-				if (northComponents == null) northComponents = new ArrayList<Component>();
+				if (northComponents == null) northComponents = new ArrayList<>();
 				northComponents.add(component);
 			} else if(SOUTH.equals(name)) {
-				if (southComponents == null) southComponents = new ArrayList<Component>();
+				if (southComponents == null) southComponents = new ArrayList<>();
 				southComponents.add(component);
 			} else if(EAST.equals(name)) {
-				if (eastComponents == null) eastComponents = new ArrayList<Component>();
+				if (eastComponents == null) eastComponents = new ArrayList<>();
 				eastComponents.add(component);
 			} else if(WEST.equals(name)) {
-				if (westComponents == null) westComponents = new ArrayList<Component>();
+				if (westComponents == null) westComponents = new ArrayList<>();
 				westComponents.add(component);
 			} else {
 				throw new IllegalArgumentException("cannot add to layout: unknown constraint: " + name);

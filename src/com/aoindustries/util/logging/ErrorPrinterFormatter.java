@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,44 +37,44 @@ import java.util.logging.LogRecord;
  */
 public class ErrorPrinterFormatter extends Formatter {
 
-    private static final ErrorPrinterFormatter errorPrinterFormatter = new ErrorPrinterFormatter();
-    public static ErrorPrinterFormatter getInstance() {
-        return errorPrinterFormatter;
-    }
+	private static final ErrorPrinterFormatter errorPrinterFormatter = new ErrorPrinterFormatter();
+	public static ErrorPrinterFormatter getInstance() {
+		return errorPrinterFormatter;
+	}
 
-    private ErrorPrinterFormatter() {
-    }
+	private ErrorPrinterFormatter() {
+	}
 
-    public void format(LogRecord record, Appendable out) {
-        List<Object> extraInfo = new ArrayList<Object>(9); // At most 9 elements added below
-        String loggerName = record.getLoggerName();
-        if(loggerName!=null) extraInfo.add("record.loggerName="+loggerName);
-        extraInfo.add("record.level="+record.getLevel());
-        extraInfo.add("record.sequenceNumber="+record.getSequenceNumber());
-        String sourceClassName = record.getSourceClassName();
-        if(sourceClassName!=null) extraInfo.add("record.sourceClassName="+sourceClassName);
-        String sourceMethodName = record.getSourceMethodName();
-        if(sourceMethodName!=null) extraInfo.add("record.sourceMethodName="+sourceMethodName);
-        String message = record.getMessage();
-        if(message==null) message = "";
-        extraInfo.add("record.message="+message);
-        String formatted = formatMessage(record);
-        if(formatted==null) formatted = "";
-        if(!message.equals(formatted)) extraInfo.add("record.message.formatted="+formatted);
-        extraInfo.add("record.threadID="+record.getThreadID());
-        extraInfo.add("record.millis="+record.getMillis());
-        Throwable thrown = record.getThrown();
-        ErrorPrinter.printStackTraces(
-            thrown,
-            out,
-            extraInfo.toArray()
-        );
-    }
+	public void format(LogRecord record, Appendable out) {
+		List<Object> extraInfo = new ArrayList<>(9); // At most 9 elements added below
+		String loggerName = record.getLoggerName();
+		if(loggerName!=null) extraInfo.add("record.loggerName="+loggerName);
+		extraInfo.add("record.level="+record.getLevel());
+		extraInfo.add("record.sequenceNumber="+record.getSequenceNumber());
+		String sourceClassName = record.getSourceClassName();
+		if(sourceClassName!=null) extraInfo.add("record.sourceClassName="+sourceClassName);
+		String sourceMethodName = record.getSourceMethodName();
+		if(sourceMethodName!=null) extraInfo.add("record.sourceMethodName="+sourceMethodName);
+		String message = record.getMessage();
+		if(message==null) message = "";
+		extraInfo.add("record.message="+message);
+		String formatted = formatMessage(record);
+		if(formatted==null) formatted = "";
+		if(!message.equals(formatted)) extraInfo.add("record.message.formatted="+formatted);
+		extraInfo.add("record.threadID="+record.getThreadID());
+		extraInfo.add("record.millis="+record.getMillis());
+		Throwable thrown = record.getThrown();
+		ErrorPrinter.printStackTraces(
+			thrown,
+			out,
+			extraInfo.toArray()
+		);
+	}
 
-    @Override
-    public String format(LogRecord record) {
-        StringBuilder buffer = new StringBuilder(1024);
-        format(record, buffer);
-        return buffer.toString();
-    }
+	@Override
+	public String format(LogRecord record) {
+		StringBuilder buffer = new StringBuilder(1024);
+		format(record, buffer);
+		return buffer.toString();
+	}
 }

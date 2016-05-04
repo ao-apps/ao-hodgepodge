@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,21 +37,18 @@ import javax.servlet.ServletContext;
  */
 final public class PropertiesUtils {
 
-    /**
-     * Make no instances.
-     */
-    private PropertiesUtils() {}
+	/**
+	 * Make no instances.
+	 */
+	private PropertiesUtils() {}
 
 	/**
 	 * Loads properties from a file.
 	 */
 	public static Properties loadFromFile(File file) throws IOException {
 		Properties props = new Properties();
-		InputStream in = new BufferedInputStream(new FileInputStream(file));
-		try {
+		try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
 			props.load(in);
-		} finally {
-			in.close();
 		}
 		return props;
 	}
@@ -62,7 +59,7 @@ final public class PropertiesUtils {
 	public static Properties loadFromResource(Class<?> clazz, String resource) throws IOException {
 		Properties props = new Properties();
 		InputStream in = clazz.getResourceAsStream(resource);
-        if(in==null) throw new LocalizedIOException(accessor, "PropertiesUtils.readProperties.resourceNotFound", resource);
+		if(in==null) throw new LocalizedIOException(accessor, "PropertiesUtils.readProperties.resourceNotFound", resource);
 		try {
 			props.load(in);
 		} finally {
@@ -77,7 +74,7 @@ final public class PropertiesUtils {
 	public static Properties loadFromResource(ServletContext servletContext, String resource) throws IOException {
 		Properties props = new Properties();
 		InputStream in = servletContext.getResourceAsStream(resource);
-        if(in==null) throw new LocalizedIOException(accessor, "PropertiesUtils.readProperties.resourceNotFound", resource);
+		if(in==null) throw new LocalizedIOException(accessor, "PropertiesUtils.readProperties.resourceNotFound", resource);
 		try {
 			props.load(in);
 		} finally {

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -47,14 +47,14 @@ import java.util.Map;
  */
 public class MinimalMap {
 
-    private MinimalMap() {
-    }
+	private MinimalMap() {
+	}
 
 	/**
 	 * Puts a new element in a map, returning the (possibly new) map.
 	 */
 	public static <K,V> Map<K,V> put(Map<K,V> map, K key, V value) {
-        if(map == null) {
+		if(map == null) {
 			// The first entry is always a singletonMap
 			map = Collections.singletonMap(key, value);
 		} else if(map.size()==1) {
@@ -66,7 +66,7 @@ public class MinimalMap {
 				map = Collections.singletonMap(entryKey, value);
 			} else {
 				// Is a second property
-				map = new LinkedHashMap<K,V>(8);
+				map = new LinkedHashMap<>(8);
 				map.put(entryKey, entry.getValue());
 				map.put(key, value);
 			}
@@ -81,7 +81,7 @@ public class MinimalMap {
 	 * Removes an element from a map, returning the (possibly new) map.
 	 */
 	public static <K,V> Map<K,V> remove(final Map<K,V> map, final K key) {
-        if(map == null) {
+		if(map == null) {
 			// Empty map, nothing to remove
 			return null;
 		} else if(map.size()==1) {
@@ -144,7 +144,7 @@ public class MinimalMap {
 			return map.values();
 		} else {
 			// Wrap in an ArrayList
-			return new ArrayList<V>(map.values());
+			return new ArrayList<>(map.values());
 		}
 	}
 
@@ -162,6 +162,6 @@ public class MinimalMap {
 			return map;
 		}
 		// Create copy of map
-		return new LinkedHashMap<K,V>(map);
+		return new LinkedHashMap<>(map);
 	}
 }

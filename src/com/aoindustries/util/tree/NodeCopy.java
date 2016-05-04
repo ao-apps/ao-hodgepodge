@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,68 +37,68 @@ import java.util.List;
 */
 public class NodeCopy<E> implements Node<E> {
 
-    private final E value;
-    private final List<Node<E>> children;
+	private final E value;
+	private final List<Node<E>> children;
 
-    public NodeCopy(Node<E> node) throws IOException, SQLException {
-        this.value = node.getValue();
-        List<Node<E>> nodeChildren = node.getChildren();
-        if(nodeChildren==null) {
-            // No children allowed
-            children = null;
-        } else {
-            int size = nodeChildren.size();
-            if(size==0) {
-                // No children
-                children = Collections.emptyList();
-            } else if(size==1) {
-                // One child
-                Node<E> nodeCopy = new NodeCopy<E>(nodeChildren.get(0));
-                children = Collections.singletonList(nodeCopy);
-            } else {
-                // Multiple children
-                List<Node<E>> childrenCopy = new ArrayList<Node<E>>(size);
-                for(Node<E> child : nodeChildren) childrenCopy.add(new NodeCopy<E>(child));
-                children = Collections.unmodifiableList(childrenCopy);
-            }
-        }
-    }
+	public NodeCopy(Node<E> node) throws IOException, SQLException {
+		this.value = node.getValue();
+		List<Node<E>> nodeChildren = node.getChildren();
+		if(nodeChildren==null) {
+			// No children allowed
+			children = null;
+		} else {
+			int size = nodeChildren.size();
+			if(size==0) {
+				// No children
+				children = Collections.emptyList();
+			} else if(size==1) {
+				// One child
+				Node<E> nodeCopy = new NodeCopy<>(nodeChildren.get(0));
+				children = Collections.singletonList(nodeCopy);
+			} else {
+				// Multiple children
+				List<Node<E>> childrenCopy = new ArrayList<>(size);
+				for(Node<E> child : nodeChildren) childrenCopy.add(new NodeCopy<>(child));
+				children = Collections.unmodifiableList(childrenCopy);
+			}
+		}
+	}
 
-    public NodeCopy(Node<E> node, NodeFilter<E> nodeFilter) throws IOException, SQLException {
-        this.value = node.getValue();
-        List<Node<E>> nodeChildren = node.getChildren();
-        if(nodeChildren==null) {
-            // No children allowed
-            children = null;
-        } else {
-            // Apply filter
-            List<Node<E>> filteredChildren = new ArrayList<Node<E>>(nodeChildren.size());
-            for(Node<E> child : nodeChildren) if(!nodeFilter.isNodeFiltered(child)) filteredChildren.add(child);
+	public NodeCopy(Node<E> node, NodeFilter<E> nodeFilter) throws IOException, SQLException {
+		this.value = node.getValue();
+		List<Node<E>> nodeChildren = node.getChildren();
+		if(nodeChildren==null) {
+			// No children allowed
+			children = null;
+		} else {
+			// Apply filter
+			List<Node<E>> filteredChildren = new ArrayList<>(nodeChildren.size());
+			for(Node<E> child : nodeChildren) if(!nodeFilter.isNodeFiltered(child)) filteredChildren.add(child);
 
-            int size = filteredChildren.size();
-            if(size==0) {
-                // No children
-                children = Collections.emptyList();
-            } else if(size==1) {
-                // One child
-                Node<E> nodeCopy = new NodeCopy<E>(filteredChildren.get(0), nodeFilter);
-                children = Collections.singletonList(nodeCopy);
-            } else {
-                // Multiple children
-                List<Node<E>> childrenCopy = new ArrayList<Node<E>>(size);
-                for(Node<E> child : filteredChildren) childrenCopy.add(new NodeCopy<E>(child, nodeFilter));
-                children = Collections.unmodifiableList(childrenCopy);
-            }
-        }
-    }
+			int size = filteredChildren.size();
+			if(size==0) {
+				// No children
+				children = Collections.emptyList();
+			} else if(size==1) {
+				// One child
+				Node<E> nodeCopy = new NodeCopy<>(filteredChildren.get(0), nodeFilter);
+				children = Collections.singletonList(nodeCopy);
+			} else {
+				// Multiple children
+				List<Node<E>> childrenCopy = new ArrayList<>(size);
+				for(Node<E> child : filteredChildren) childrenCopy.add(new NodeCopy<>(child, nodeFilter));
+				children = Collections.unmodifiableList(childrenCopy);
+			}
+		}
+	}
 
-    @Override
-    public List<Node<E>> getChildren() {
-        return children;
-    }
+	@Override
+	public List<Node<E>> getChildren() {
+		return children;
+	}
 
-    @Override
-    public E getValue() {
-        return value;
-    }
+	@Override
+	public E getValue() {
+		return value;
+	}
 }

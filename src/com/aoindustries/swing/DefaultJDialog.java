@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,107 +22,116 @@
  */
 package com.aoindustries.swing;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 
 /**
  * @author  AO Industries, Inc.
  */
 public class DefaultJDialog extends JDialog implements WindowListener, ComponentListener {
 
-    public static final int
-        DEFAULT_MIN_WIDTH=800,
-        DEFAULT_MIN_HEIGHT=600
-    ;
+	public static final int
+		DEFAULT_MIN_WIDTH=800,
+		DEFAULT_MIN_HEIGHT=600
+	;
 
-    private final int minWidth, minHeight;
+	private static final long serialVersionUID = 1L;
 
-    public DefaultJDialog(JFrame parent, String title, boolean modal) {
-        this(parent, title, modal, DEFAULT_MIN_WIDTH, DEFAULT_MIN_HEIGHT);
-    }
-    
-    public DefaultJDialog(JFrame parent, String title, boolean modal, int minWidth, int minHeight) {
-        super(parent, title, modal);
-        this.minWidth=minWidth;
-        this.minHeight=minHeight;
-        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        addWindowListener(this);
-        addComponentListener(this);
-    }
+	private final int minWidth, minHeight;
 
-    final public void center(Component parent) {
-        Rectangle parentBounds=parent.getBounds();
-        Dimension size=getSize();
-        setBounds(
-            parentBounds.x+(parentBounds.width-size.width)/2, 
-            parentBounds.y+(parentBounds.height-size.height)/2, 
-            size.width,
-            size.height
-        );
-    }
+	public DefaultJDialog(JFrame parent, String title, boolean modal) {
+		this(parent, title, modal, DEFAULT_MIN_WIDTH, DEFAULT_MIN_HEIGHT);
+	}
 
-	@Override
-    public void windowClosing(WindowEvent e) {
-        Object source=e.getSource();
-        if(source==this) closeWindow();
-    }
-    
-    final public void closeWindow() {
-        setVisible(false);
-        dispose();
-    }
+	public DefaultJDialog(JFrame parent, String title, boolean modal, int minWidth, int minHeight) {
+		super(parent, title, modal);
+		this.minWidth=minWidth;
+		this.minHeight=minHeight;
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		addWindowListener(this);
+		addComponentListener(this);
+	}
+
+	final public void center(Component parent) {
+		Rectangle parentBounds=parent.getBounds();
+		Dimension size=getSize();
+		setBounds(
+			parentBounds.x+(parentBounds.width-size.width)/2, 
+			parentBounds.y+(parentBounds.height-size.height)/2, 
+			size.width,
+			size.height
+		);
+	}
 
 	@Override
-    public void windowOpened(WindowEvent e) {
-    }
+	public void windowClosing(WindowEvent e) {
+		Object source=e.getSource();
+		if(source==this) closeWindow();
+	}
+
+	final public void closeWindow() {
+		setVisible(false);
+		dispose();
+	}
 
 	@Override
-    public void windowClosed(WindowEvent e) {
-    }
+	public void windowOpened(WindowEvent e) {
+	}
 
 	@Override
-    public void windowIconified(WindowEvent e) {
-    }
+	public void windowClosed(WindowEvent e) {
+	}
 
 	@Override
-    public void windowDeiconified(WindowEvent e) {
-    }
+	public void windowIconified(WindowEvent e) {
+	}
 
 	@Override
-    public void windowActivated(WindowEvent e) {
-    }
+	public void windowDeiconified(WindowEvent e) {
+	}
 
 	@Override
-    public void windowDeactivated(WindowEvent e) {
-    }
-    
-	@Override
-    public void componentShown(ComponentEvent e) {
-    }
+	public void windowActivated(WindowEvent e) {
+	}
 
 	@Override
-    public void componentResized(ComponentEvent e) {
-        checkMin();
-    }
-
-    private void checkMin() {
-        int width=getWidth();
-        int height=getHeight();
-        if(width<minWidth || height<minHeight) setSize(Math.max(width, minWidth), Math.max(height, minHeight));
-    }
+	public void windowDeactivated(WindowEvent e) {
+	}
 
 	@Override
-    public void componentMoved(ComponentEvent e) {
-    }
+	public void componentShown(ComponentEvent e) {
+	}
 
 	@Override
-    public void componentHidden(ComponentEvent e) {
-    }
-    
-    @Override
-    public void pack() {
-        super.pack();
-        checkMin();
-    }
+	public void componentResized(ComponentEvent e) {
+		checkMin();
+	}
+
+	private void checkMin() {
+		int width=getWidth();
+		int height=getHeight();
+		if(width<minWidth || height<minHeight) setSize(Math.max(width, minWidth), Math.max(height, minHeight));
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
+	}
+
+	@Override
+	public void pack() {
+		super.pack();
+		checkMin();
+	}
 }

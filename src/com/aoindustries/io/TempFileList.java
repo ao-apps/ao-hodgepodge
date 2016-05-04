@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -45,7 +45,7 @@ import java.util.List;
  */
 public class TempFileList {
 
-	private final List<WeakReference<TempFile>> tempFiles = new ArrayList<WeakReference<TempFile>>();
+	private final List<WeakReference<TempFile>> tempFiles = new ArrayList<>();
 
 	private final String prefix;
 	private final String suffix;
@@ -86,18 +86,18 @@ public class TempFileList {
 	 */
 	public TempFile createTempFile() throws IOException {
 		TempFile tempFile = new TempFile(prefix, suffix, directory);
-		tempFiles.add(new WeakReference<TempFile>(tempFile));
+		tempFiles.add(new WeakReference<>(tempFile));
 		return tempFile;
 	}
 
 	/**
-     * Deletes all of the underlying temp files immediately.
+	 * Deletes all of the underlying temp files immediately.
 	 *
 	 * This list may still be used for additional temp files.
 	 *
 	 * @see  TempFile#delete()
-     */
-    public void delete() throws IOException {
+	 */
+	public void delete() throws IOException {
 		synchronized(tempFiles) {
 			for(WeakReference<TempFile> tempFileRef : tempFiles) {
 				TempFile tempFile = tempFileRef.get();
@@ -105,5 +105,5 @@ public class TempFileList {
 			}
 			tempFiles.clear();
 		}
-    }
+	}
 }

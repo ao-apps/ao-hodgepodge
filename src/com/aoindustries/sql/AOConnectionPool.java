@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,207 +41,197 @@ import java.util.logging.Logger;
  */
 final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
 
-    private final String driver;
-    private final String url;
-    private final String user;
-    private final String password;
+	private final String driver;
+	private final String url;
+	private final String user;
+	private final String password;
 
-    public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge, Logger logger) {
-    	super(AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, logger);
-        this.driver = driver;
-        this.url = url;
-        this.user = user;
-        this.password = password;
-    }
+	public AOConnectionPool(String driver, String url, String user, String password, int numConnections, long maxConnectionAge, Logger logger) {
+		super(AOConnectionPool.class.getName()+"?url=" + url+"&user="+user, numConnections, maxConnectionAge, logger);
+		this.driver = driver;
+		this.url = url;
+		this.user = user;
+		this.password = password;
+	}
 
-    @Override
-    protected void close(Connection conn) throws SQLException {
-        conn.close();
-    }
+	@Override
+	protected void close(Connection conn) throws SQLException {
+		conn.close();
+	}
 
-    /**
-     * Gets a read/write connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
-     * @return
-     * @throws SQLException
-     */
-    @Override
-    public Connection getConnection() throws SQLException {
-        return getConnection(Connection.TRANSACTION_READ_COMMITTED, false, 1);
-    }
+	/**
+	 * Gets a read/write connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public Connection getConnection() throws SQLException {
+		return getConnection(Connection.TRANSACTION_READ_COMMITTED, false, 1);
+	}
 
-    /**
-     * Gets a connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
-     * @param readOnly
-     * @return
-     * @throws SQLException
-     */
-    public Connection getConnection(boolean readOnly) throws SQLException {
-        return getConnection(Connection.TRANSACTION_READ_COMMITTED, readOnly, 1);
-    }
+	/**
+	 * Gets a connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
+	 * @param readOnly
+	 * @return
+	 * @throws SQLException
+	 */
+	public Connection getConnection(boolean readOnly) throws SQLException {
+		return getConnection(Connection.TRANSACTION_READ_COMMITTED, readOnly, 1);
+	}
 
-    /**
-     * Gets a connection to the database with a maximum connections of 1.
-     * @param isolationLevel
-     * @param readOnly
-     * @return
-     * @throws SQLException
-     */
-    public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {
-        return getConnection(isolationLevel, readOnly, 1);
-    }
+	/**
+	 * Gets a connection to the database with a maximum connections of 1.
+	 * @param isolationLevel
+	 * @param readOnly
+	 * @return
+	 * @throws SQLException
+	 */
+	public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {
+		return getConnection(isolationLevel, readOnly, 1);
+	}
 
-    public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
-        Connection conn=null;
-        try {
-            while(conn==null) {
-                conn=super.getConnection(maxConnections);
-                boolean isReadOnly = conn.isReadOnly();
-                if(isReadOnly!=readOnly) conn.setReadOnly(readOnly);
-            }
-            int currentIsolationLevel = conn.getTransactionIsolation();
-            if(currentIsolationLevel!=isolationLevel) conn.setTransactionIsolation(isolationLevel);
-            return conn;
-        } catch(SQLException err) {
-            if(conn!=null) {
-                try {
-                    releaseConnection(conn);
-                } catch(Exception err2) {
-                    // Will throw original error instead
-                }
-            }
-            throw err;
-        } catch(Exception err) {
-            if(conn!=null) {
-                try {
-                    releaseConnection(conn);
-                } catch(Exception err2) {
-                    // Will throw original error instead
-                }
-            }
-            throw new SQLException(err);
-        }
-    }
+	public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
+		Connection conn=null;
+		try {
+			while(conn==null) {
+				conn=super.getConnection(maxConnections);
+				boolean isReadOnly = conn.isReadOnly();
+				if(isReadOnly!=readOnly) conn.setReadOnly(readOnly);
+			}
+			int currentIsolationLevel = conn.getTransactionIsolation();
+			if(currentIsolationLevel!=isolationLevel) conn.setTransactionIsolation(isolationLevel);
+			return conn;
+		} catch(SQLException err) {
+			if(conn!=null) {
+				try {
+					releaseConnection(conn);
+				} catch(Exception err2) {
+					// Will throw original error instead
+				}
+			}
+			throw err;
+		} catch(Exception err) {
+			if(conn!=null) {
+				try {
+					releaseConnection(conn);
+				} catch(Exception err2) {
+					// Will throw original error instead
+				}
+			}
+			throw new SQLException(err);
+		}
+	}
 
-    private static final ConcurrentMap<String,Object> driversLoaded = new ConcurrentHashMap<String,Object>();
+	private static final ConcurrentMap<String,Object> driversLoaded = new ConcurrentHashMap<>();
 
-    /**
-     * Loads a driver at most once.
-     */
-    private static void loadDriver(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        if(!driversLoaded.containsKey(classname)) {
-            Object O = Class.forName(classname).newInstance();
-            driversLoaded.putIfAbsent(classname, O);
-        }
-    }
+	/**
+	 * Loads a driver at most once.
+	 */
+	private static void loadDriver(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		if(!driversLoaded.containsKey(classname)) {
+			Object O = Class.forName(classname).newInstance();
+			driversLoaded.putIfAbsent(classname, O);
+		}
+	}
 
-    @Override
-    protected Connection getConnectionObject() throws SQLException {
-        try {
-            if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-            loadDriver(driver);
-            Connection conn = DriverManager.getConnection(url, user, password);
-            boolean successful = false;
-            try {
-                if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-                if(conn.getClass().getName().startsWith("org.postgresql.")) {
-                    // getTransactionIsolation causes a round-trip to the database, this wrapper caches the value and avoids unnecessary sets
-                    // to eliminate unnecessary round-trips and improve performance over high-latency links.
-                    conn = new PostgresqlConnectionWrapper(conn);
-                }
-                successful = true;
-                return conn;
-            } finally {
-                if(!successful) conn.close();
-            }
-        } catch(SQLException err) {
-            logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", err);
-            throw err;
-        } catch (ClassNotFoundException err) {
-            SQLException sqlErr=new SQLException();
-            sqlErr.initCause(err);
-            logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
-            throw sqlErr;
-        } catch (InstantiationException err) {
-            SQLException sqlErr=new SQLException();
-            sqlErr.initCause(err);
-            logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
-            throw sqlErr;
-        } catch (IllegalAccessException err) {
-            SQLException sqlErr=new SQLException();
-            sqlErr.initCause(err);
-            logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
-            throw sqlErr;
-        }
-    }
+	@Override
+	protected Connection getConnectionObject() throws SQLException {
+		try {
+			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+			loadDriver(driver);
+			Connection conn = DriverManager.getConnection(url, user, password);
+			boolean successful = false;
+			try {
+				if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+				if(conn.getClass().getName().startsWith("org.postgresql.")) {
+					// getTransactionIsolation causes a round-trip to the database, this wrapper caches the value and avoids unnecessary sets
+					// to eliminate unnecessary round-trips and improve performance over high-latency links.
+					conn = new PostgresqlConnectionWrapper(conn);
+				}
+				successful = true;
+				return conn;
+			} finally {
+				if(!successful) conn.close();
+			}
+		} catch(SQLException err) {
+			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", err);
+			throw err;
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException err) {
+			SQLException sqlErr=new SQLException();
+			sqlErr.initCause(err);
+			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
+			throw sqlErr;
+		}
+	}
 
-    @Override
-    protected boolean isClosed(Connection conn) throws SQLException {
-        return conn.isClosed();
-    }
+	@Override
+	protected boolean isClosed(Connection conn) throws SQLException {
+		return conn.isClosed();
+	}
 
-    @Override
-    protected void printConnectionStats(Appendable out) throws IOException {
-        out.append("  <tr><th colspan='2'><span style='font-size:large;'>JDBC Driver</span></th></tr>\n"
-                + "  <tr><td>Driver:</td><td>");
-        EncodingUtils.encodeHtml(driver, false, false, out);
-        out.append("</td></tr>\n"
-                + "  <tr><td>URL:</td><td>");
-        EncodingUtils.encodeHtml(url, false, false, out);
-        out.append("</td></tr>\n"
-                + "  <tr><td>User:</td><td>");
-        EncodingUtils.encodeHtml(user, false, false, out);
-        out.append("</td></tr>\n"
-                + "  <tr><td>Password:</td><td>");
-        int len=password.length();
-        for(int c=0;c<len;c++) {
-            out.append('*');
-        }
-        out.append("</td></tr>\n");
-    }
+	@Override
+	protected void printConnectionStats(Appendable out) throws IOException {
+		out.append("  <tr><th colspan='2'><span style='font-size:large;'>JDBC Driver</span></th></tr>\n"
+				+ "  <tr><td>Driver:</td><td>");
+		EncodingUtils.encodeHtml(driver, false, false, out);
+		out.append("</td></tr>\n"
+				+ "  <tr><td>URL:</td><td>");
+		EncodingUtils.encodeHtml(url, false, false, out);
+		out.append("</td></tr>\n"
+				+ "  <tr><td>User:</td><td>");
+		EncodingUtils.encodeHtml(user, false, false, out);
+		out.append("</td></tr>\n"
+				+ "  <tr><td>Password:</td><td>");
+		int len=password.length();
+		for(int c=0;c<len;c++) {
+			out.append('*');
+		}
+		out.append("</td></tr>\n");
+	}
 
-    @Override
-    protected void resetConnection(Connection conn) throws SQLException {
-        if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-        // Dump all warnings to System.err and clear warnings
-        SQLWarning warning=conn.getWarnings();
-        if(warning!=null) {
-            logger.logp(Level.WARNING, AOConnectionPool.class.getName(), "resetConnection", null, warning);
-        }
-        conn.clearWarnings();
+	@Override
+	protected void resetConnection(Connection conn) throws SQLException {
+		if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+		// Dump all warnings to System.err and clear warnings
+		SQLWarning warning=conn.getWarnings();
+		if(warning!=null) {
+			logger.logp(Level.WARNING, AOConnectionPool.class.getName(), "resetConnection", null, warning);
+		}
+		conn.clearWarnings();
 
-        // Autocommit will always be turned on, regardless what a previous transaction might have done
-        if(!conn.getAutoCommit()) {
-            if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-            conn.setAutoCommit(true);
-        }
+		// Autocommit will always be turned on, regardless what a previous transaction might have done
+		if(!conn.getAutoCommit()) {
+			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+			conn.setAutoCommit(true);
+		}
 
-        // Restore to default transaction level
-        if(conn.getTransactionIsolation()!=Connection.TRANSACTION_READ_COMMITTED) {
-            if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        }
+		// Restore to default transaction level
+		if(conn.getTransactionIsolation()!=Connection.TRANSACTION_READ_COMMITTED) {
+			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		}
 
-        // Restore the connection to a read-only state
-        if(!conn.isReadOnly()) {
-            if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-            conn.setReadOnly(true);
-        }
-    }
+		// Restore the connection to a read-only state
+		if(!conn.isReadOnly()) {
+			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+			conn.setReadOnly(true);
+		}
+	}
 
-    @Override
-    protected SQLException newException(String message, Throwable cause) {
-        SQLException err=new SQLException(message);
-        if(cause!=null) err.initCause(cause);
-        return err;
-    }
+	@Override
+	protected SQLException newException(String message, Throwable cause) {
+		SQLException err=new SQLException(message);
+		if(cause!=null) err.initCause(cause);
+		return err;
+	}
 
-    @Override
-    protected SQLException newInterruptedException(String message, Throwable cause) {
-        return newException(message, cause);
-    }
+	@Override
+	protected SQLException newInterruptedException(String message, Throwable cause) {
+		return newException(message, cause);
+	}
 
-    @Override
-    public String toString() {
-        return "AOConnectionPool(url=\""+url+"\", user=\""+user+"\")";
-    }
+	@Override
+	public String toString() {
+		return "AOConnectionPool(url=\""+url+"\", user=\""+user+"\")";
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,11 +22,11 @@
  */
 package com.aoindustries.rmi;
 
-import com.aoindustries.lang.ObjectUtils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
+import java.util.Objects;
 
 /**
  * TCP server factory (non-SSL).
@@ -35,43 +35,43 @@ import java.rmi.server.RMIServerSocketFactory;
  */
 public class RMIServerSocketFactoryTCP implements RMIServerSocketFactory {
 
-    final private String listenAddress;
+	final private String listenAddress;
 
-    /**
-     * Will listen on the default listen address.
-     */
-    public RMIServerSocketFactoryTCP() {
-        this.listenAddress = null;
-    }
+	/**
+	 * Will listen on the default listen address.
+	 */
+	public RMIServerSocketFactoryTCP() {
+		this.listenAddress = null;
+	}
 
-    /**
-     * Will listen on the provided listen address.
-     */
-    public RMIServerSocketFactoryTCP(String listenAddress) {
-        this.listenAddress = listenAddress;
-    }
-    
-    @Override
-    public boolean equals(Object O) {
-        return
-            O!=null
-            && (O instanceof RMIServerSocketFactoryTCP)
-            && ObjectUtils.equals(listenAddress, ((RMIServerSocketFactoryTCP)O).listenAddress)
-        ;
-    }
-    
-    @Override
-    public int hashCode() {
-        return listenAddress==null ? 0 : listenAddress.hashCode();
-    }
+	/**
+	 * Will listen on the provided listen address.
+	 */
+	public RMIServerSocketFactoryTCP(String listenAddress) {
+		this.listenAddress = listenAddress;
+	}
 
-    @Override
-    public ServerSocket createServerSocket(int port) throws IOException {
-        if(listenAddress==null) {
-            return new ServerSocket(port, 50);
-        } else {
-            InetAddress address=InetAddress.getByName(listenAddress);
-            return new ServerSocket(port, 50, address);
-        }
-    }
+	@Override
+	public boolean equals(Object O) {
+		return
+			O!=null
+			&& (O instanceof RMIServerSocketFactoryTCP)
+			&& Objects.equals(listenAddress, ((RMIServerSocketFactoryTCP)O).listenAddress)
+		;
+	}
+
+	@Override
+	public int hashCode() {
+		return listenAddress==null ? 0 : listenAddress.hashCode();
+	}
+
+	@Override
+	public ServerSocket createServerSocket(int port) throws IOException {
+		if(listenAddress==null) {
+			return new ServerSocket(port, 50);
+		} else {
+			InetAddress address=InetAddress.getByName(listenAddress);
+			return new ServerSocket(port, 50, address);
+		}
+	}
 }

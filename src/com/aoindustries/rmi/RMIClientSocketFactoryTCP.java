@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,12 +22,12 @@
  */
 package com.aoindustries.rmi;
 
-import com.aoindustries.lang.ObjectUtils;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.rmi.server.RMIClientSocketFactory;
+import java.util.Objects;
 
 /**
  * TCP client factory (non-SSL).
@@ -35,46 +35,46 @@ import java.rmi.server.RMIClientSocketFactory;
  * @author  AO Industries, Inc.
  */
 public class RMIClientSocketFactoryTCP implements RMIClientSocketFactory, Serializable {
-    
-    private static final long serialVersionUID = -7065291578204407899L;
 
-    final private String localAddress;
+	private static final long serialVersionUID = -7065291578204407899L;
 
-    /**
-     * Will establish connections with the system default local address.
-     */
-    public RMIClientSocketFactoryTCP() {
-        this.localAddress = null;
-    }
+	final private String localAddress;
 
-    /**
-     * Will establish connections with the provided local address.
-     */
-    public RMIClientSocketFactoryTCP(String localAddress) {
-        this.localAddress = localAddress;
-    }
-    
-    @Override
-    public boolean equals(Object O) {
-        return
-            O!=null
-            && (O instanceof RMIClientSocketFactoryTCP)
-            && ObjectUtils.equals(localAddress, ((RMIClientSocketFactoryTCP)O).localAddress)
-        ;
-    }
-    
-    @Override
-    public int hashCode() {
-        return localAddress==null ? 0 : localAddress.hashCode();
-    }
+	/**
+	 * Will establish connections with the system default local address.
+	 */
+	public RMIClientSocketFactoryTCP() {
+		this.localAddress = null;
+	}
 
-    @Override
-    public Socket createSocket(String host, int port) throws IOException {
-        Socket socket=new Socket();
-        socket.setKeepAlive(true);
-        socket.setTcpNoDelay(true);
-        if(localAddress!=null) socket.bind(new InetSocketAddress(localAddress, 0));
-        socket.connect(new InetSocketAddress(host, port), 30000);
-        return socket;
-    }
+	/**
+	 * Will establish connections with the provided local address.
+	 */
+	public RMIClientSocketFactoryTCP(String localAddress) {
+		this.localAddress = localAddress;
+	}
+
+	@Override
+	public boolean equals(Object O) {
+		return
+			O!=null
+			&& (O instanceof RMIClientSocketFactoryTCP)
+			&& Objects.equals(localAddress, ((RMIClientSocketFactoryTCP)O).localAddress)
+		;
+	}
+
+	@Override
+	public int hashCode() {
+		return localAddress==null ? 0 : localAddress.hashCode();
+	}
+
+	@Override
+	public Socket createSocket(String host, int port) throws IOException {
+		Socket socket=new Socket();
+		socket.setKeepAlive(true);
+		socket.setTcpNoDelay(true);
+		if(localAddress!=null) socket.bind(new InetSocketAddress(localAddress, 0));
+		socket.connect(new InetSocketAddress(host, port), 30000);
+		return socket;
+	}
 }

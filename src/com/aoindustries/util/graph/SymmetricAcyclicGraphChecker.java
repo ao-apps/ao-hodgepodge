@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,77 +36,77 @@ import java.util.Set;
  */
 public class SymmetricAcyclicGraphChecker<V, EX extends Exception> implements GraphChecker<EX> {
 
-    private final SymmetricMultiGraph<V,?,? extends EX> graph;
-    private final boolean isForward;
+	private final SymmetricMultiGraph<V,?,? extends EX> graph;
+	private final boolean isForward;
 
-    public SymmetricAcyclicGraphChecker(SymmetricMultiGraph<V,?,? extends EX> graph, boolean isForward) {
-        this.graph = graph;
-        this.isForward = isForward;
-    }
+	public SymmetricAcyclicGraphChecker(SymmetricMultiGraph<V,?,? extends EX> graph, boolean isForward) {
+		this.graph = graph;
+		this.isForward = isForward;
+	}
 
-    private enum Color {WHITE, GRAY, BLACK};
+	private enum Color {WHITE, GRAY, BLACK};
 
-    /**
-     * Test the graph for cycles and makes sure that all connections are consistent with back connections.
-     *
-     * Cycle algorithm adapted from:
-     *     http://www.personal.kent.edu/~rmuhamma/Algorithms/MyAlgorithms/GraphAlgor/depthSearch.htm
-     *     http://www.eecs.berkeley.edu/~kamil/teaching/sp03/041403.pdf
-     *
-     * In the case of a multigraph, any number of edges one direction is considered a match to any number
-     * of edges back.  The number does not need to be equal.
-     *
-     * @throws AsymmetricException where the edges are not symmetric
-     * @throws CycleException if there is a cycle in the graph
-     */
-    @Override
-    public void checkGraph() throws AsymmetricException, CycleException, EX {
-        Set<V> vertices = graph.getVertices();
-        Map<V,Color> colors = new HashMap<V,Color>(vertices.size()*4/3+1);
-        Map<V,V> predecessors = new HashMap<V,V>(); // Could this be a simple sequence like TopologicalSorter?  Any benefit?
-        for(V v : vertices) {
-            if(!colors.containsKey(v)) doCheck(colors, predecessors, v);
-        }
-    }
+	/**
+	 * Test the graph for cycles and makes sure that all connections are consistent with back connections.
+	 *
+	 * Cycle algorithm adapted from:
+	 *     http://www.personal.kent.edu/~rmuhamma/Algorithms/MyAlgorithms/GraphAlgor/depthSearch.htm
+	 *     http://www.eecs.berkeley.edu/~kamil/teaching/sp03/041403.pdf
+	 *
+	 * In the case of a multigraph, any number of edges one direction is considered a match to any number
+	 * of edges back.  The number does not need to be equal.
+	 *
+	 * @throws AsymmetricException where the edges are not symmetric
+	 * @throws CycleException if there is a cycle in the graph
+	 */
+	@Override
+	public void checkGraph() throws AsymmetricException, CycleException, EX {
+		Set<V> vertices = graph.getVertices();
+		Map<V,Color> colors = new HashMap<>(vertices.size()*4/3+1);
+		Map<V,V> predecessors = new HashMap<>(); // Could this be a simple sequence like TopologicalSorter?  Any benefit?
+		for(V v : vertices) {
+			if(!colors.containsKey(v)) doCheck(colors, predecessors, v);
+		}
+	}
 
-    /**
-     * @throws CycleException if there is a cycle in the graph
-     */
-    private void doCheck(Map<V,Color> colors, Map<V,V> predecessors, V vertex) throws AsymmetricException, CycleException, EX {
-        colors.put(vertex, Color.GRAY);
-        for(Edge<V> vEdge : isForward ? graph.getEdgesFrom(vertex) : graph.getEdgesTo(vertex)) {
-            //if(!isForward) {
-            //    System.out.println("BREAKPOINT");
-            //}
-            V connected = isForward ? vEdge.getTo() : vEdge.getFrom();
-            // The directed edges should match
-            if(
-                !(
-                    isForward
-                    ? graph.getEdgesTo(connected).contains(new Edge<V>(vertex, connected))
-                    : graph.getEdgesFrom(connected).contains(new Edge<V>(connected, vertex))
-                )
-            ) {
-                throw new AsymmetricException(vertex, connected);
-            }
-            // Check for cycle
-            Color uMark = colors.get(connected);
-            if(Color.GRAY==uMark /*&& child.equals(predecessors.get(obj))*/) {
-                List<V> vertices = new ArrayList<V>();
-                vertices.add(connected);
-                V pred = vertex;
-                while(pred!=null) {
-                    vertices.add(pred);
-                    pred = pred.equals(connected) ? null : predecessors.get(pred);
-                }
-                throw new CycleException(AoCollections.optimalUnmodifiableList(vertices));
-            }
-            if(uMark==null) {
-                predecessors.put(connected, vertex);
-                doCheck(colors, predecessors, connected);
-            }
-        }
-        predecessors.remove(vertex);
-        colors.put(vertex, Color.BLACK);
-    }
+	/**
+	 * @throws CycleException if there is a cycle in the graph
+	 */
+	private void doCheck(Map<V,Color> colors, Map<V,V> predecessors, V vertex) throws AsymmetricException, CycleException, EX {
+		colors.put(vertex, Color.GRAY);
+		for(Edge<V> vEdge : isForward ? graph.getEdgesFrom(vertex) : graph.getEdgesTo(vertex)) {
+			//if(!isForward) {
+			//    System.out.println("BREAKPOINT");
+			//}
+			V connected = isForward ? vEdge.getTo() : vEdge.getFrom();
+			// The directed edges should match
+			if(
+				!(
+					isForward
+					? graph.getEdgesTo(connected).contains(new Edge<>(vertex, connected))
+					: graph.getEdgesFrom(connected).contains(new Edge<>(connected, vertex))
+				)
+			) {
+				throw new AsymmetricException(vertex, connected);
+			}
+			// Check for cycle
+			Color uMark = colors.get(connected);
+			if(Color.GRAY==uMark /*&& child.equals(predecessors.get(obj))*/) {
+				List<V> vertices = new ArrayList<>();
+				vertices.add(connected);
+				V pred = vertex;
+				while(pred!=null) {
+					vertices.add(pred);
+					pred = pred.equals(connected) ? null : predecessors.get(pred);
+				}
+				throw new CycleException(AoCollections.optimalUnmodifiableList(vertices));
+			}
+			if(uMark==null) {
+				predecessors.put(connected, vertex);
+				doCheck(colors, predecessors, connected);
+			}
+		}
+		predecessors.remove(vertex);
+		colors.put(vertex, Color.BLACK);
+	}
 }

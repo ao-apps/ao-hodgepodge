@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -40,38 +40,38 @@ import junit.framework.TestSuite;
  */
 public class CompressedIntTest extends TestCase {
 
-    public CompressedIntTest(String testName) {
-        super(testName);
-    }
+	public CompressedIntTest(String testName) {
+		super(testName);
+	}
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(CompressedIntTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite(CompressedIntTest.class);
+		return suite;
+	}
 
-    public void testRandomInts() throws IOException {
-        Random random = new SecureRandom();
-        List<Integer> values = new ArrayList<Integer>();
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        try {
-            for(int c=0;c<10000;c++) {
-                for(int power=1; power<=30; power++) {
-                    int value = random.nextInt(1<<power)-(1<<(power-1));
-                    values.add(value);
-                    CompressedDataOutputStream.writeCompressedInt(value, bout);
-                }
-            }
-        } finally {
-            bout.close();
-        }
-        // Read back and make sure matches
-        ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
-        try {
-            for(int value : values) {
-                assertEquals(value, CompressedDataInputStream.readCompressedInt(bin));
-            }
-        } finally {
-            bin.close();
-        }
-    }
+	public void testRandomInts() throws IOException {
+		Random random = new SecureRandom();
+		List<Integer> values = new ArrayList<>();
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		try {
+			for(int c=0;c<10000;c++) {
+				for(int power=1; power<=30; power++) {
+					int value = random.nextInt(1<<power)-(1<<(power-1));
+					values.add(value);
+					CompressedDataOutputStream.writeCompressedInt(value, bout);
+				}
+			}
+		} finally {
+			bout.close();
+		}
+		// Read back and make sure matches
+		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+		try {
+			for(int value : values) {
+				assertEquals(value, CompressedDataInputStream.readCompressedInt(bin));
+			}
+		} finally {
+			bin.close();
+		}
+	}
 }

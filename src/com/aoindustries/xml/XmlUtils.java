@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -52,22 +52,19 @@ import org.xml.sax.SAXException;
  */
 public final class XmlUtils {
 
-    /**
-     * Make no instances.
-     */
-    private XmlUtils() {
-    }
+	/**
+	 * Make no instances.
+	 */
+	private XmlUtils() {
+	}
 
 	/**
 	 * Fetches and parses an XML DOM from a URL.
 	 */
 	public static Document parseXml(URL url) throws IOException, ParserConfigurationException, SAXException {
 		URLConnection conn = url.openConnection();
-		InputStream in = conn.getInputStream();
-		try {
+		try (InputStream in = conn.getInputStream()) {
 			return parseXml(in);
-		} finally {
-			in.close();
 		}
 	}
 
@@ -215,9 +212,7 @@ public final class XmlUtils {
 			try {
 				writer.close();
 			} catch(IOException e) {
-				AssertionError error = new AssertionError("IOException should never be thrown from StringWriter");
-				error.initCause(e);
-				throw error;
+				throw new AssertionError("IOException should never be thrown from StringWriter", e);
 			}
 		}
 		return writer.toString();

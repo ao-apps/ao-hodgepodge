@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -42,153 +42,153 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 final public class BufferManager {
 
-    /**
-     * The maximum number of buffers to keep for reuse, per thread.
-     */
-    private static final int MAXIMUM_BUFFERS_PER_THREAD = 16;
+	/**
+	 * The maximum number of buffers to keep for reuse, per thread.
+	 */
+	private static final int MAXIMUM_BUFFERS_PER_THREAD = 16;
 
-    /**
-     * The size of buffers that are returned.
-     */
-    public static final int BUFFER_SIZE = 4096;
+	/**
+	 * The size of buffers that are returned.
+	 */
+	public static final int BUFFER_SIZE = 4096;
 
-    private static final ThreadLocal<List<byte[]>> bytes = new ThreadLocal<List<byte[]>>() {
-        @Override
-        public List<byte[]> initialValue() {
-            return new ArrayList<byte[]>(MAXIMUM_BUFFERS_PER_THREAD);
-        }
-    };
+	private static final ThreadLocal<List<byte[]>> bytes = new ThreadLocal<List<byte[]>>() {
+		@Override
+		public List<byte[]> initialValue() {
+			return new ArrayList<>(MAXIMUM_BUFFERS_PER_THREAD);
+		}
+	};
 
-    private static final ThreadLocal<List<char[]>> chars = new ThreadLocal<List<char[]>>() {
-        @Override
-        public List<char[]> initialValue() {
-            return new ArrayList<char[]>(MAXIMUM_BUFFERS_PER_THREAD);
-        }
-    };
+	private static final ThreadLocal<List<char[]>> chars = new ThreadLocal<List<char[]>>() {
+		@Override
+		public List<char[]> initialValue() {
+			return new ArrayList<>(MAXIMUM_BUFFERS_PER_THREAD);
+		}
+	};
 
-    /**
-     * Make no instances.
-     */
-    private BufferManager() {
-    }
+	/**
+	 * Make no instances.
+	 */
+	private BufferManager() {
+	}
 
-    /**
-     * Various statistics
-     */
-    private static AtomicLong
-        bytesCreates = new AtomicLong(),
-        bytesUses = new AtomicLong(),
-        charsCreates = new AtomicLong(),
-        charsUses = new AtomicLong()
-    ;
+	/**
+	 * Various statistics
+	 */
+	private static final AtomicLong
+		bytesCreates = new AtomicLong(),
+		bytesUses = new AtomicLong(),
+		charsCreates = new AtomicLong(),
+		charsUses = new AtomicLong()
+	;
 
-    /**
-     * Gets a <code>byte[]</code> of length <code>BUFFER_SIZE</code> that may
-     * be temporarily used for any purpose.  Once done with the buffer,
-     * <code>releaseBuffer</code> should be called, this is best accomplished
-     * in a <code>finally</code> block.
+	/**
+	 * Gets a <code>byte[]</code> of length <code>BUFFER_SIZE</code> that may
+	 * be temporarily used for any purpose.  Once done with the buffer,
+	 * <code>releaseBuffer</code> should be called, this is best accomplished
+	 * in a <code>finally</code> block.
 	 * The buffer is not necessarily zero-filled and may contain data from a previous use.
-     */
-    public static byte[] getBytes() {
-        bytesUses.getAndIncrement();
-        List<byte[]> myBytes = bytes.get();
-        int len = myBytes.size();
-        if(len==0) {
-            bytesCreates.getAndIncrement();
-            return new byte[BUFFER_SIZE];
-        }
-        return myBytes.remove(len-1);
-    }
+	 */
+	public static byte[] getBytes() {
+		bytesUses.getAndIncrement();
+		List<byte[]> myBytes = bytes.get();
+		int len = myBytes.size();
+		if(len==0) {
+			bytesCreates.getAndIncrement();
+			return new byte[BUFFER_SIZE];
+		}
+		return myBytes.remove(len-1);
+	}
 
-    /**
-     * Gets a <code>char[]</code> of length <code>BUFFER_SIZE</code> that may
-     * be temporarily used for any purpose.  Once done with the buffer,
-     * <code>releaseBuffer</code> should be called, this is best accomplished
-     * in a <code>finally</code> block.
+	/**
+	 * Gets a <code>char[]</code> of length <code>BUFFER_SIZE</code> that may
+	 * be temporarily used for any purpose.  Once done with the buffer,
+	 * <code>releaseBuffer</code> should be called, this is best accomplished
+	 * in a <code>finally</code> block.
 	 * The buffer is not necessarily zero-filled and may contain data from a previous use.
-     */
-    public static char[] getChars() {
-        charsUses.getAndIncrement();
-        List<char[]> myChars = chars.get();
-        int len = myChars.size();
-        if(len==0) {
-            charsCreates.getAndIncrement();
-            return new char[BUFFER_SIZE];
-        }
-        return myChars.remove(len-1);
-    }
+	 */
+	public static char[] getChars() {
+		charsUses.getAndIncrement();
+		List<char[]> myChars = chars.get();
+		int len = myChars.size();
+		if(len==0) {
+			charsCreates.getAndIncrement();
+			return new char[BUFFER_SIZE];
+		}
+		return myChars.remove(len-1);
+	}
 
 	/**
 	 * @deprecated  May obtain greater performance by avoiding zero fill on non-sensitive data.
 	 */
 	@Deprecated
-    public static void release(byte[] buffer) {
+	public static void release(byte[] buffer) {
 		release(buffer, true);
 	}
 
 	/**
-     * Releases a <code>byte[]</code> that was obtained by a call to
-     * <code>getBytes</code>.
-     *
-     * @param  buffer  the <code>byte[]</code> to release
+	 * Releases a <code>byte[]</code> that was obtained by a call to
+	 * <code>getBytes</code>.
+	 *
+	 * @param  buffer  the <code>byte[]</code> to release
 	 * @param  zeroFill  if the data in the buffer may be sensitive, it is best to zero-fill the buffer on release.
-     */
-    public static void release(byte[] buffer, boolean zeroFill) {
-        List<byte[]> myBytes = bytes.get();
-        assert buffer.length==BUFFER_SIZE;
-        assert !inList(myBytes, buffer); // Error if already in the buffer list
-        if(myBytes.size()<MAXIMUM_BUFFERS_PER_THREAD) {
+	 */
+	public static void release(byte[] buffer, boolean zeroFill) {
+		List<byte[]> myBytes = bytes.get();
+		assert buffer.length==BUFFER_SIZE;
+		assert !inList(myBytes, buffer); // Error if already in the buffer list
+		if(myBytes.size()<MAXIMUM_BUFFERS_PER_THREAD) {
 			if(zeroFill) Arrays.fill(buffer, 0, BUFFER_SIZE, (byte)0);
 			myBytes.add(buffer);
 		}
-    }
-    private static boolean inList(List<byte[]> myBytes, byte[] buffer) {
-        for(byte[] inList : myBytes) if(inList==buffer) return true;
-        return false;
-    }
+	}
+	private static boolean inList(List<byte[]> myBytes, byte[] buffer) {
+		for(byte[] inList : myBytes) if(inList==buffer) return true;
+		return false;
+	}
 
 	/**
 	 * @deprecated  May obtain greater performance by avoiding zero fill on non-sensitive data.
 	 */
 	@Deprecated
-    public static void release(char[] buffer) {
+	public static void release(char[] buffer) {
 		release(buffer, true);
 	}
 
 	/**
-     * Releases a <code>char[]</code> that was obtained by a call to
-     * <code>getChars</code>.
-     *
-     * @param  buffer  the <code>char[]</code> to release
+	 * Releases a <code>char[]</code> that was obtained by a call to
+	 * <code>getChars</code>.
+	 *
+	 * @param  buffer  the <code>char[]</code> to release
 	 * @param  zeroFill  if the data in the buffer may be sensitive, it is best to zero-fill the buffer on release.
-     */
-    public static void release(char[] buffer, boolean zeroFill) {
-        List<char[]> myChars = chars.get();
-        assert buffer.length==BUFFER_SIZE;
-        assert !inList(myChars, buffer); // Error if already in the buffer list
-        if(myChars.size()<MAXIMUM_BUFFERS_PER_THREAD) {
+	 */
+	public static void release(char[] buffer, boolean zeroFill) {
+		List<char[]> myChars = chars.get();
+		assert buffer.length==BUFFER_SIZE;
+		assert !inList(myChars, buffer); // Error if already in the buffer list
+		if(myChars.size()<MAXIMUM_BUFFERS_PER_THREAD) {
 			if(zeroFill) Arrays.fill(buffer, 0, BUFFER_SIZE, (char)0);
 			myChars.add(buffer);
 		}
-    }
-    private static boolean inList(List<char[]> myChars, char[] buffer) {
-        for(char[] inList : myChars) if(inList==buffer) return true;
-        return false;
-    }
+	}
+	private static boolean inList(List<char[]> myChars, char[] buffer) {
+		for(char[] inList : myChars) if(inList==buffer) return true;
+		return false;
+	}
 
-    public static long getByteBufferCreates() {
-        return bytesCreates.get();
-    }
+	public static long getByteBufferCreates() {
+		return bytesCreates.get();
+	}
 
-    public static long getByteBufferUses() {
-        return bytesUses.get();
-    }
+	public static long getByteBufferUses() {
+		return bytesUses.get();
+	}
 
-    public static long getCharBufferCreates() {
-        return charsCreates.get();
-    }
+	public static long getCharBufferCreates() {
+		return charsCreates.get();
+	}
 
-    public static long getCharBufferUses() {
-        return charsUses.get();
-    }
+	public static long getCharBufferUses() {
+		return charsUses.get();
+	}
 }

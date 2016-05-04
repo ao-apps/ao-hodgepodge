@@ -37,9 +37,9 @@ import javax.crypto.spec.PBEKeySpec;
  * @author  AO Industries, Inc.
  */
 public class HashedPassword {
-	
+
 	/** From http://crackstation.net/hashing-security.htm */
-    private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
+	private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
 	/** The number of bytes in the random salt. */
 	public static final int SALT_BYTES = 256 / 8;
@@ -92,9 +92,7 @@ public class HashedPassword {
 			} finally {
 				Arrays.fill(chars, (char)0);
 			}
-		} catch(InvalidKeySpecException e) {
-			throw new WrappedException(e);
-		} catch(NoSuchAlgorithmException e) {
+		} catch(InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new WrappedException(e);
 		}
 	}
@@ -108,11 +106,11 @@ public class HashedPassword {
 	 * @param iterations
 	 * @param hash  The provided parameter is zeroed 
 	 */
-    public HashedPassword(
+	public HashedPassword(
 		byte[] salt,
 		int iterations,
 		byte[] hash
-    ) {
+	) {
 		this.salt = Arrays.copyOf(salt, salt.length);
 		Arrays.fill(salt, (byte)0);
 		this.iterations = iterations;
@@ -139,7 +137,7 @@ public class HashedPassword {
 	/**
 	 * Checks if this matches the provided password.
 	 * Performs comparisons in length-constant time.
-     * {@link https://crackstation.net/hashing-security.htm}
+	 * {@link https://crackstation.net/hashing-security.htm}
 	 */
 	public boolean matches(String password) {
 		// Hash again with the original salt and iterations
@@ -155,19 +153,19 @@ public class HashedPassword {
 	}
 
 	/**
-     * Compares two byte arrays in length-constant time. This comparison method
-     * is used so that password hashes cannot be extracted from an on-line 
-     * system using a timing attack and then attacked off-line.
-     * {@link https://crackstation.net/hashing-security.htm}
+	 * Compares two byte arrays in length-constant time. This comparison method
+	 * is used so that password hashes cannot be extracted from an on-line 
+	 * system using a timing attack and then attacked off-line.
+	 * {@link https://crackstation.net/hashing-security.htm}
 	 *
-     * @param   a       the first byte array
-     * @param   b       the second byte array 
-     * @return          true if both byte arrays are the same, false if not
-     */
-    private static boolean slowEquals(byte[] a, byte[] b) {
-        int diff = a.length ^ b.length;
-        for(int i = 0; i < a.length && i < b.length; i++)
-            diff |= a[i] ^ b[i];
-        return diff == 0;
-    }
+	 * @param   a       the first byte array
+	 * @param   b       the second byte array 
+	 * @return          true if both byte arrays are the same, false if not
+	 */
+	private static boolean slowEquals(byte[] a, byte[] b) {
+		int diff = a.length ^ b.length;
+		for(int i = 0; i < a.length && i < b.length; i++)
+			diff |= a[i] ^ b[i];
+		return diff == 0;
+	}
 }

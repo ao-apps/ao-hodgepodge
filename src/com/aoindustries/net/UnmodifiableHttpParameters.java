@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -50,39 +50,39 @@ public class UnmodifiableHttpParameters implements HttpParameters {
 		return new UnmodifiableHttpParameters(wrapped);
 	}
 
-	private HttpParameters wrapped;
-	
+	private final HttpParameters wrapped;
+
 	private UnmodifiableHttpParameters(HttpParameters wrapped) {
 		this.wrapped = wrapped;
 	}
 
 	@Override
-    public String getParameter(String name) {
+	public String getParameter(String name) {
 		return wrapped.getParameter(name);
 	}
 
 	@Override
-    public Iterator<String> getParameterNames() {
+	public Iterator<String> getParameterNames() {
 		return AoCollections.unmodifiableIterator(wrapped.getParameterNames());
 	}
 
 	@Override
-    public List<String> getParameterValues(String name) {
+	public List<String> getParameterValues(String name) {
 		return Collections.unmodifiableList(wrapped.getParameterValues(name));
 	}
 
 	@Override
-    public Map<String,List<String>> getParameterMap() {
-        Map<String,List<String>> wrappedMap = wrapped.getParameterMap();
-        Map<String,List<String>> map = new LinkedHashMap<String,List<String>>(wrappedMap.size()*4/3+1);
-        for(Map.Entry<String,List<String>> entry : wrappedMap.entrySet()) {
-            map.put(
+	public Map<String,List<String>> getParameterMap() {
+		Map<String,List<String>> wrappedMap = wrapped.getParameterMap();
+		Map<String,List<String>> map = new LinkedHashMap<>(wrappedMap.size()*4/3+1);
+		for(Map.Entry<String,List<String>> entry : wrappedMap.entrySet()) {
+			map.put(
 				entry.getKey(),
 				Collections.unmodifiableList(
 					entry.getValue()
 				)
 			);
-        }
-        return Collections.unmodifiableMap(map);
+		}
+		return Collections.unmodifiableMap(map);
 	}
 }

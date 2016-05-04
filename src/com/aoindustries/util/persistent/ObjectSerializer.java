@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,40 +38,28 @@ import java.io.Serializable;
  */
 public class ObjectSerializer<E> extends BufferedSerializer<E> {
 
-    private final Class<E> type;
+	private final Class<E> type;
 
-    public ObjectSerializer(Class<E> type) {
-        if(!Serializable.class.isAssignableFrom(type)) throw new IllegalArgumentException("Class is not Serializable: "+type.getName());
-        this.type = type;
-    }
+	public ObjectSerializer(Class<E> type) {
+		if(!Serializable.class.isAssignableFrom(type)) throw new IllegalArgumentException("Class is not Serializable: "+type.getName());
+		this.type = type;
+	}
 
-    // @NotThreadSafe
-    @Override
-    protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException {
-        ObjectOutputStream oout = new ObjectOutputStream(buffer);
-        try {
-            oout.writeObject(value);
-        } finally {
-            oout.close();
-        }
-    }
+	// @NotThreadSafe
+	@Override
+	protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException {
+		try (ObjectOutputStream oout = new ObjectOutputStream(buffer)) {
+			oout.writeObject(value);
+		}
+	}
 
-    // @NotThreadSafe
-    @Override
-    public E deserialize(InputStream in) throws IOException {
-        ObjectInputStream oin = new ObjectInputStream(in);
-        try {
-            return type.cast(oin.readObject());
-        } catch(ClassNotFoundException err) {
-            IOException ioErr = new IOException();
-            ioErr.initCause(err);
-            throw ioErr;
-        } catch(ClassCastException err) {
-            IOException ioErr = new IOException();
-            ioErr.initCause(err);
-            throw ioErr;
-        } finally {
-            oin.close();
-        }
-    }
+	// @NotThreadSafe
+	@Override
+	public E deserialize(InputStream in) throws IOException {
+		try (ObjectInputStream oin = new ObjectInputStream(in)) {
+			return type.cast(oin.readObject());
+		} catch(ClassNotFoundException | ClassCastException err) {
+			throw new IOException(err);
+		}
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,28 +32,28 @@ import java.util.List;
 */
 public class Trees {
 
-    /**
-     * No instances.
-     */
-    private Trees() {}
+	/**
+	 * No instances.
+	 */
+	private Trees() {}
 
-    /**
-     * @see #emptyTree()
-     */
-    public static final Tree EMPTY_TREE = new EmptyTree();
+	/**
+	 * @see #emptyTree()
+	 */
+	public static final Tree<?> EMPTY_TREE = new EmptyTree();
 
-    /**
-     * Returns the empty list (immutable).
-     */
-    @SuppressWarnings({"unchecked"})
-    public static final <T> Tree<T> emptyTree() {
-        return (Tree<T>) EMPTY_TREE;
-    }
+	/**
+	 * Returns the empty list (immutable).
+	 */
+	@SuppressWarnings({"unchecked"})
+	public static final <T> Tree<T> emptyTree() {
+		return (Tree<T>) EMPTY_TREE;
+	}
 
-    private static class EmptyTree implements Tree {
+	private static class EmptyTree implements Tree<Object> {
 		@Override
-        public List<Node> getRootNodes() {
-            return Collections.emptyList();
-        }
-    }
+		public List<Node<Object>> getRootNodes() {
+			return Collections.emptyList();
+		}
+	}
 }

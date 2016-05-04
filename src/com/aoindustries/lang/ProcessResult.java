@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,162 +36,156 @@ import java.nio.charset.Charset;
  */
 public class ProcessResult {
 
-    /**
-     * Executes the provided command and gets the result in the system default character set.
-     */
-    public static ProcessResult exec(String[] command) throws IOException {
-        return getProcessResult(Runtime.getRuntime().exec(command), Charset.defaultCharset());
-    }
+	/**
+	 * Executes the provided command and gets the result in the system default character set.
+	 */
+	public static ProcessResult exec(String[] command) throws IOException {
+		return getProcessResult(Runtime.getRuntime().exec(command), Charset.defaultCharset());
+	}
 
-    /**
-     * Executes the provided command and gets the result in the provided character set.
-     */
-    public static ProcessResult exec(String[] command, Charset charset) throws IOException {
-        return getProcessResult(Runtime.getRuntime().exec(command), charset);
-    }
+	/**
+	 * Executes the provided command and gets the result in the provided character set.
+	 */
+	public static ProcessResult exec(String[] command, Charset charset) throws IOException {
+		return getProcessResult(Runtime.getRuntime().exec(command), charset);
+	}
 
-    /**
-     * Gets the result of the provided process in the system default character set.
-     */
-    public static ProcessResult getProcessResult(Process process) throws IOException {
-        return getProcessResult(process, Charset.defaultCharset());
-    }
+	/**
+	 * Gets the result of the provided process in the system default character set.
+	 */
+	public static ProcessResult getProcessResult(Process process) throws IOException {
+		return getProcessResult(process, Charset.defaultCharset());
+	}
 
-    /**
-     * Gets the result of the provided process in the provided character set.
-     */
-    public static ProcessResult getProcessResult(final Process process, final Charset charset) throws IOException {
-        // Close the input immediately
-        process.getOutputStream().close();
+	/**
+	 * Gets the result of the provided process in the provided character set.
+	 */
+	public static ProcessResult getProcessResult(final Process process, final Charset charset) throws IOException {
+		// Close the input immediately
+		process.getOutputStream().close();
 
-        // Read stdout in background thread
-        final StringBuilder stdout = new StringBuilder();
-        final IOException[] stdoutException = new IOException[1];
-        Thread stdoutThread = new Thread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Reader stdoutIn = new InputStreamReader(process.getInputStream(), charset);
-                        try {
-                            char[] buff = BufferManager.getChars();
-                            try {
-                                int count;
-                                while((count=stdoutIn.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-                                    synchronized(stdout) {
-                                        stdout.append(buff, 0, count);
-                                    }
-                                }
-                            } finally {
-                                BufferManager.release(buff, false);
-                            }
-                        } finally {
-                            stdoutIn.close();
-                        }
-                    } catch(IOException exc) {
-                        synchronized(stdoutException) {
-                            stdoutException[0] = exc;
-                        }
-                    }
-                }
-            }
-        );
-        stdoutThread.start();
+		// Read stdout in background thread
+		final StringBuilder stdout = new StringBuilder();
+		final IOException[] stdoutException = new IOException[1];
+		Thread stdoutThread = new Thread(
+			new Runnable() {
+				@Override
+				public void run() {
+					try {
+						try (Reader stdoutIn = new InputStreamReader(process.getInputStream(), charset)) {
+							char[] buff = BufferManager.getChars();
+							try {
+								int count;
+								while((count=stdoutIn.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+									synchronized(stdout) {
+										stdout.append(buff, 0, count);
+									}
+								}
+							} finally {
+								BufferManager.release(buff, false);
+							}
+						}
+					} catch(IOException exc) {
+						synchronized(stdoutException) {
+							stdoutException[0] = exc;
+						}
+					}
+				}
+			}
+		);
+		stdoutThread.start();
 
-        // Read stderr in background thread
-        final StringBuilder stderr = new StringBuilder();
-        final IOException[] stderrException = new IOException[1];
-        Thread stderrThread = new Thread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Reader stderrIn = new InputStreamReader(process.getErrorStream(), charset);
-                        try {
-                            char[] buff = BufferManager.getChars();
-                            try {
-                                int count;
-                                while((count=stderrIn.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-                                    synchronized(stderr) {
-                                        stderr.append(buff, 0, count);
-                                    }
-                                }
-                            } finally {
-                                BufferManager.release(buff, false);
-                            }
-                        } finally {
-                            stderrIn.close();
-                        }
-                    } catch(IOException exc) {
-                        synchronized(stderrException) {
-                            stderrException[0] = exc;
-                        }
-                    }
-                }
-            }
-        );
-        stderrThread.start();
+		// Read stderr in background thread
+		final StringBuilder stderr = new StringBuilder();
+		final IOException[] stderrException = new IOException[1];
+		Thread stderrThread = new Thread(
+			new Runnable() {
+				@Override
+				public void run() {
+					try {
+						try (Reader stderrIn = new InputStreamReader(process.getErrorStream(), charset)) {
+							char[] buff = BufferManager.getChars();
+							try {
+								int count;
+								while((count=stderrIn.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+									synchronized(stderr) {
+										stderr.append(buff, 0, count);
+									}
+								}
+							} finally {
+								BufferManager.release(buff, false);
+							}
+						}
+					} catch(IOException exc) {
+						synchronized(stderrException) {
+							stderrException[0] = exc;
+						}
+					}
+				}
+			}
+		);
+		stderrThread.start();
 
-        try {
-            // Wait for full read of stdout
-            stdoutThread.join();
+		try {
+			// Wait for full read of stdout
+			stdoutThread.join();
 
-            // Wait for full read of stderr
-            stderrThread.join();
+			// Wait for full read of stderr
+			stderrThread.join();
 
-            // Wait for process to exit
-            int exitVal = process.waitFor();
+			// Wait for process to exit
+			int exitVal = process.waitFor();
 
-            // Check for exceptions in threads
-            synchronized(stdoutException) {
-                if(stdoutException[0]!=null) throw stdoutException[0];
-            }
-            synchronized(stderrException) {
-                if(stderrException[0]!=null) throw stderrException[0];
-            }
+			// Check for exceptions in threads
+			synchronized(stdoutException) {
+				if(stdoutException[0]!=null) throw stdoutException[0];
+			}
+			synchronized(stderrException) {
+				if(stderrException[0]!=null) throw stderrException[0];
+			}
 
-            // Get output
-            String stdoutStr;
-            synchronized(stdout) {
-                stdoutStr = stdout.toString();
-            }
-            String stderrStr;
-            synchronized(stderr) {
-                stderrStr = stderr.toString();
-            }
+			// Get output
+			String stdoutStr;
+			synchronized(stdout) {
+				stdoutStr = stdout.toString();
+			}
+			String stderrStr;
+			synchronized(stderr) {
+				stderrStr = stderr.toString();
+			}
 
-            // Return results
-            return new ProcessResult(
-                exitVal,
-                stdoutStr,
-                stderrStr
-            );
-        } catch(InterruptedException err) {
-            IOException ioErr = new InterruptedIOException();
-            ioErr.initCause(err);
-            throw ioErr;
-        }
-    }
+			// Return results
+			return new ProcessResult(
+				exitVal,
+				stdoutStr,
+				stderrStr
+			);
+		} catch(InterruptedException err) {
+			IOException ioErr = new InterruptedIOException();
+			ioErr.initCause(err);
+			throw ioErr;
+		}
+	}
 
-    private final int exitVal;
-    private final String stdout;
-    private final String stderr;
+	private final int exitVal;
+	private final String stdout;
+	private final String stderr;
 
-    private ProcessResult(int exitVal, String stdout, String stderr) {
-        this.exitVal = exitVal;
-        this.stdout = stdout;
-        this.stderr = stderr;
-    }
+	private ProcessResult(int exitVal, String stdout, String stderr) {
+		this.exitVal = exitVal;
+		this.stdout = stdout;
+		this.stderr = stderr;
+	}
 
-    public int getExitVal() {
-        return exitVal;
-    }
+	public int getExitVal() {
+		return exitVal;
+	}
 
-    public String getStdout() {
-        return stdout;
-    }
+	public String getStdout() {
+		return stdout;
+	}
 
-    public String getStderr() {
-        return stderr;
-    }
+	public String getStderr() {
+		return stderr;
+	}
 }

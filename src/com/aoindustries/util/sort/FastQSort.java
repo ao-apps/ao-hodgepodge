@@ -53,14 +53,14 @@ import java.util.List;
  */
 final public class FastQSort extends BaseComparisonSortAlgorithm<Object> {
 
-    private static final FastQSort instance = new FastQSort();
+	private static final FastQSort instance = new FastQSort();
 
-    public static FastQSort getInstance() {
-        return instance;
-    }
+	public static FastQSort getInstance() {
+		return instance;
+	}
 
-    private FastQSort() {
-    }
+	private FastQSort() {
+	}
 
 	@Override
 	public boolean isStable() {
@@ -68,166 +68,174 @@ final public class FastQSort extends BaseComparisonSortAlgorithm<Object> {
 	}
 
 	@Override
-    public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-        if(stats!=null) stats.sortStarting();
-        int length=list.size();
-        if(quickSort(list, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
-            insertionSort(list, 0, length-1, comparator, stats);
-        } else {
-            // If quickSort fails, do a more constant-time HeapSort on the remaining data
-            if(stats!=null) stats.sortSwitchingAlgorithms();
-            HeapSort.heapSort(list, comparator, stats);
-        }
-        if(stats!=null) stats.sortEnding();
-    }
+	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
+		if(stats!=null) stats.sortStarting();
+		int length=list.size();
+		if(quickSort(list, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
+			insertionSort(list, 0, length-1, comparator, stats);
+		} else {
+			// If quickSort fails, do a more constant-time HeapSort on the remaining data
+			if(stats!=null) stats.sortSwitchingAlgorithms();
+			HeapSort.heapSort(list, comparator, stats);
+		}
+		if(stats!=null) stats.sortEnding();
+	}
 
 	@Override
-    public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-        if(stats!=null) stats.sortStarting();
-        int length=array.length;
-        if(quickSort(array, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
-            insertionSort(array, 0, length-1, comparator, stats);
-        } else {
-            // If quickSort fails, do a more constant-time HeapSort on the remaining data
-            if(stats!=null) stats.sortSwitchingAlgorithms();
-            HeapSort.heapSort(array, comparator, stats);
-        }
-        if(stats!=null) stats.sortEnding();
-    }
+	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
+		if(stats!=null) stats.sortStarting();
+		int length=array.length;
+		if(quickSort(array, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
+			insertionSort(array, 0, length-1, comparator, stats);
+		} else {
+			// If quickSort fails, do a more constant-time HeapSort on the remaining data
+			if(stats!=null) stats.sortSwitchingAlgorithms();
+			HeapSort.heapSort(array, comparator, stats);
+		}
+		if(stats!=null) stats.sortEnding();
+	}
 
-    /**
-     * This is a generic version of C.A.R Hoare's Quick Sort
-     * algorithm. This will handle arrays that are already
-     * sorted, and arrays with duplicate keys.<br />
-     *
-     * If you think of a one dimensional array as going from
-     * the lowest index on the left to the highest index on the right
-     * then the parameters to this function are lowest index or
-     * left and highest index or right. The first time you call
-     * this function it will be with the parameters 0, a.length - 1.
-     *
-     * @param a an integer array
-     * @param lo0 left boundary of array partition
-     * @param hi0 right boundary of array partition
-     *
-     * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
-     */
-    private static <T> boolean quickSort(List<T> list, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
-        int M=4;
+	/**
+	 * This is a generic version of C.A.R Hoare's Quick Sort
+	 * algorithm. This will handle arrays that are already
+	 * sorted, and arrays with duplicate keys.<br />
+	 *
+	 * If you think of a one dimensional array as going from
+	 * the lowest index on the left to the highest index on the right
+	 * then the parameters to this function are lowest index or
+	 * left and highest index or right. The first time you call
+	 * this function it will be with the parameters 0, a.length - 1.
+	 *
+	 * @param a an integer array
+	 * @param lo0 left boundary of array partition
+	 * @param hi0 right boundary of array partition
+	 *
+	 * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
+	 */
+	private static <T> boolean quickSort(List<T> list, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
+		int M=4;
 
-        if((r-l)>M) {
-            int i=(r+l)/2;
+		if((r-l)>M) {
+			int i=(r+l)/2;
 
-            if(compare(list, l, i, comparator, stats)>0) swap(list, l, i, stats);  // Tri-Median Methode!
-            if(compare(list, l, r, comparator, stats)>0) swap(list, l, r, stats);
-            if(compare(list, i, r, comparator, stats)>0) swap(list, i, r, stats);
+			if(compare(list, l, i, comparator, stats)>0) swap(list, l, i, stats);  // Tri-Median Methode!
+			if(compare(list, l, r, comparator, stats)>0) swap(list, l, r, stats);
+			if(compare(list, i, r, comparator, stats)>0) swap(list, i, r, stats);
 
-            int j=r-1;
-            swap(list, i, j, stats);
-            i=l;
-            T v=get(list, j, stats);
-            for(;;) {
-                while(compare(get(list, ++i, stats), v, comparator, stats)<0);
-                while(compare(get(list, --j, stats), v, comparator, stats)>0);
-                if(j<i) break;
-                swap(list, i, j, stats);
-            }
-            swap(list, i, r-1, stats);
+			int j=r-1;
+			swap(list, i, j, stats);
+			i=l;
+			T v=get(list, j, stats);
+			for(;;) {
+				while(compare(get(list, ++i, stats), v, comparator, stats)<0) {
+					// Empty while
+				}
+				while(compare(get(list, --j, stats), v, comparator, stats)>0) {
+					// Empty while
+				}
+				if(j<i) break;
+				swap(list, i, j, stats);
+			}
+			swap(list, i, r-1, stats);
 
-            int newRecursion=currentRecursion+1;
-            if(newRecursion>maxRecursion) return false;
-            if(stats!=null) stats.sortRecursing();
-            if(!quickSort(list, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
-            if(stats!=null) stats.sortUnrecursing();
+			int newRecursion=currentRecursion+1;
+			if(newRecursion>maxRecursion) return false;
+			if(stats!=null) stats.sortRecursing();
+			if(!quickSort(list, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
+			if(stats!=null) stats.sortUnrecursing();
 
-            if(stats!=null) stats.sortRecursing();
-            if(!quickSort(list, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
-            if(stats!=null) stats.sortUnrecursing();
-        }
-        return true;
-    } 
+			if(stats!=null) stats.sortRecursing();
+			if(!quickSort(list, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
+			if(stats!=null) stats.sortUnrecursing();
+		}
+		return true;
+	} 
 
-    /**
-     * This is a generic version of C.A.R Hoare's Quick Sort
-     * algorithm. This will handle arrays that are already
-     * sorted, and arrays with duplicate keys.<br />
-     *
-     * If you think of a one dimensional array as going from
-     * the lowest index on the left to the highest index on the right
-     * then the parameters to this function are lowest index or
-     * left and highest index or right. The first time you call
-     * this function it will be with the parameters 0, a.length - 1.
-     *
-     * @param a an integer array
-     * @param lo0 left boundary of array partition
-     * @param hi0 right boundary of array partition
-     *
-     * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
-     */
-    private static <T> boolean quickSort(T[] array, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
-        int M=4;
+	/**
+	 * This is a generic version of C.A.R Hoare's Quick Sort
+	 * algorithm. This will handle arrays that are already
+	 * sorted, and arrays with duplicate keys.<br />
+	 *
+	 * If you think of a one dimensional array as going from
+	 * the lowest index on the left to the highest index on the right
+	 * then the parameters to this function are lowest index or
+	 * left and highest index or right. The first time you call
+	 * this function it will be with the parameters 0, a.length - 1.
+	 *
+	 * @param a an integer array
+	 * @param lo0 left boundary of array partition
+	 * @param hi0 right boundary of array partition
+	 *
+	 * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
+	 */
+	private static <T> boolean quickSort(T[] array, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
+		int M=4;
 
-        if((r-l)>M) {
-            int i=(r+l)/2;
+		if((r-l)>M) {
+			int i=(r+l)/2;
 
-            if(compare(array, l, i, comparator, stats)>0) swap(array, l, i, stats);  // Tri-Median Methode!
-            if(compare(array, l, r, comparator, stats)>0) swap(array, l, r, stats);
-            if(compare(array, i, r, comparator, stats)>0) swap(array, i, r, stats);
+			if(compare(array, l, i, comparator, stats)>0) swap(array, l, i, stats);  // Tri-Median Methode!
+			if(compare(array, l, r, comparator, stats)>0) swap(array, l, r, stats);
+			if(compare(array, i, r, comparator, stats)>0) swap(array, i, r, stats);
 
-            int j=r-1;
-            swap(array, i, j, stats);
-            i=l;
-            T v=get(array, j, stats);
-            for(;;) {
-                while(compare(get(array, ++i, stats), v, comparator, stats)<0);
-                while(compare(get(array, --j, stats), v, comparator, stats)>0);
-                if(j<i) break;
-                swap(array, i, j, stats);
-            }
-            swap(array, i, r-1, stats);
+			int j=r-1;
+			swap(array, i, j, stats);
+			i=l;
+			T v=get(array, j, stats);
+			for(;;) {
+				while(compare(get(array, ++i, stats), v, comparator, stats)<0) {
+					// Empty while
+				}
+				while(compare(get(array, --j, stats), v, comparator, stats)>0) {
+					// Empty while
+				}
+				if(j<i) break;
+				swap(array, i, j, stats);
+			}
+			swap(array, i, r-1, stats);
 
-            int newRecursion=currentRecursion+1;
-            if(newRecursion>maxRecursion) return false;
-            if(stats!=null) stats.sortRecursing();
-            if(!quickSort(array, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
-            if(stats!=null) stats.sortUnrecursing();
+			int newRecursion=currentRecursion+1;
+			if(newRecursion>maxRecursion) return false;
+			if(stats!=null) stats.sortRecursing();
+			if(!quickSort(array, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
+			if(stats!=null) stats.sortUnrecursing();
 
-            if(stats!=null) stats.sortRecursing();
-            if(!quickSort(array, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
-            if(stats!=null) stats.sortUnrecursing();
-        }
-        return true;
-    } 
+			if(stats!=null) stats.sortRecursing();
+			if(!quickSort(array, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
+			if(stats!=null) stats.sortUnrecursing();
+		}
+		return true;
+	} 
 
-    static <T> void insertionSort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
-        for(int i=lo0+1;i<=hi0;i++) {
-            T v=get(list, i, stats);
-            int j=i;
-            T t;
-            while(
-                j>lo0
-                && compare(t=get(list, j-1, stats), v, comparator, stats)>0
-            ) {
-                set(list, j, t, stats);
-                j--;
-            }
-            set(list, j, v, stats);
-        }
-    }
+	static <T> void insertionSort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
+		for(int i=lo0+1;i<=hi0;i++) {
+			T v=get(list, i, stats);
+			int j=i;
+			T t;
+			while(
+				j>lo0
+				&& compare(t=get(list, j-1, stats), v, comparator, stats)>0
+			) {
+				set(list, j, t, stats);
+				j--;
+			}
+			set(list, j, v, stats);
+		}
+	}
 
-    static <T> void insertionSort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
-        for(int i=lo0+1;i<=hi0;i++) {
-            T v=get(array, i, stats);
-            int j=i;
-            T t;
-            while(
-                j>lo0
-                && compare(t=get(array, j-1, stats), v, comparator, stats)>0
-            ) {
-                set(array, j, t, stats);
-                j--;
-            }
-            set(array, j, v, stats);
-        }
-    }
+	static <T> void insertionSort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
+		for(int i=lo0+1;i<=hi0;i++) {
+			T v=get(array, i, stats);
+			int j=i;
+			T t;
+			while(
+				j>lo0
+				&& compare(t=get(array, j-1, stats), v, comparator, stats)>0
+			) {
+				set(array, j, t, stats);
+				j--;
+			}
+			set(array, j, v, stats);
+		}
+	}
 }

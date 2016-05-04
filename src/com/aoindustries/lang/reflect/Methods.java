@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,11 +33,11 @@ import java.lang.reflect.Method;
  */
 public final class Methods {
 
-    /**
-     * Make no instances.
-     */
-    private Methods() {
-    }
+	/**
+	 * Make no instances.
+	 */
+	private Methods() {
+	}
 
 	/**
 	 * Invokes the provided method on the given object.
@@ -67,11 +67,7 @@ public final class Methods {
 			Method method = target.getClass().getMethod(methodName, parameterTypes);
 			Object result = method.invoke(target, parameterValues);
 			return returnType.cast(result);
-		} catch(NoSuchMethodException e) {
-			throw new ReflectionException(e);
-		} catch(IllegalAccessException e) {
-			throw new ReflectionException(e);
-		} catch(InvocationTargetException e) {
+		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			throw new ReflectionException(e);
 		}
 	}

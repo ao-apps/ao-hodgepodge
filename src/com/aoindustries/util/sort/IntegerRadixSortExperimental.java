@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -70,12 +70,12 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 
 	private static final IntegerRadixSortExperimental instance = new IntegerRadixSortExperimental();
 
-    public static IntegerRadixSortExperimental getInstance() {
-        return instance;
-    }
+	public static IntegerRadixSortExperimental getInstance() {
+		return instance;
+	}
 
-    private IntegerRadixSortExperimental() {
-    }
+	private IntegerRadixSortExperimental() {
+	}
 
 	@Override
 	public boolean isStable() {
@@ -83,37 +83,35 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 	}
 
 	@Override
-    public <N extends Number> void sort(List<N> list, SortStatistics stats) {
-		IntegerRadixSort.getInstance().sort(list, stats);
-    }
-
-	@Override
-    public <N extends Number> void sort(N[] array, SortStatistics stats) {
-		IntegerRadixSort.getInstance().sort(array, stats);
-    }
-
-	@Override
-    public void sort(IntList list, SortStatistics stats) {
+	public <N extends Number> void sort(List<N> list, SortStatistics stats) {
 		IntegerRadixSort.getInstance().sort(list, stats);
 	}
 
 	@Override
-    public void sort(int[] array, SortStatistics stats) {
+	public <N extends Number> void sort(N[] array, SortStatistics stats) {
+		IntegerRadixSort.getInstance().sort(array, stats);
+	}
+
+	@Override
+	public void sort(IntList list, SortStatistics stats) {
+		IntegerRadixSort.getInstance().sort(list, stats);
+	}
+
+	@Override
+	public void sort(int[] array, SortStatistics stats) {
 		if(stats!=null) stats.sortStarting();
 			if(array.length < MIN_RADIX_SORT_SIZE) {
 				if(stats!=null) stats.sortSwitchingAlgorithms();
 				Arrays.sort(array);
 			} else {
 			if(ENABLE_CONCURRENCY) {
-				Queue<Future<?>> futures = new ConcurrentLinkedQueue<Future<?>>();
+				Queue<Future<?>> futures = new ConcurrentLinkedQueue<>();
 				sort(array, 0, array.length, 32-FIRST_BITS_PER_PASS, futures);
 				try {
 					while(!futures.isEmpty()) {
 						futures.remove().get();
 					}
-				} catch(InterruptedException e) {
-					throw new RuntimeException(e);
-				} catch(ExecutionException e) {
+				} catch(InterruptedException | ExecutionException e) {
 					throw new RuntimeException(e);
 				}
 			} else {
@@ -121,7 +119,7 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 			}
 		}
 		if(stats!=null) stats.sortEnding();
-    }
+	}
 
 	private static final int UNSIGNED_OFFSET = 0x80000000;
 

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,90 +36,90 @@ import junit.framework.TestSuite;
  */
 public class BlockBufferTinyBitmapFixedTest extends BlockBufferTestParent {
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(BlockBufferTinyBitmapFixedTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite(BlockBufferTinyBitmapFixedTest.class);
+		return suite;
+	}
 
-    public BlockBufferTinyBitmapFixedTest(String testName) {
-        super(testName);
-    }
+	public BlockBufferTinyBitmapFixedTest(String testName) {
+		super(testName);
+	}
 
-    @Override
-    public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
-        return new MappedPersistentBuffer(tempFile, protectionLevel);
-    }
+	@Override
+	public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+		return new MappedPersistentBuffer(tempFile, protectionLevel);
+	}
 
-    @Override
-    public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
-        return new FixedPersistentBlockBuffer(pbuffer, 1);
-    }
+	@Override
+	public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
+		return new FixedPersistentBlockBuffer(pbuffer, 1);
+	}
 
-    @Override
-    public long getAllocationSize(Random random) throws IOException {
-        return random.nextBoolean() ? 1 : 0;
-    }
+	@Override
+	public long getAllocationSize(Random random) throws IOException {
+		return random.nextBoolean() ? 1 : 0;
+	}
 
-    public void testAllocateOneMillion() throws Exception {
-        File tempFile = File.createTempFile("BlockBufferTinyBitmapFixedTest", null);
-        tempFile.deleteOnExit();
-        PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
-        try {
-            for(int c=0;c<1000000;c++) blockBuffer.allocate(1);
-        } finally {
-            blockBuffer.close();
-        }
-    }
+	public void testAllocateOneMillion() throws Exception {
+		File tempFile = File.createTempFile("BlockBufferTinyBitmapFixedTest", null);
+		tempFile.deleteOnExit();
+		PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
+		try {
+			for(int c=0;c<1000000;c++) blockBuffer.allocate(1);
+		} finally {
+			blockBuffer.close();
+		}
+	}
 
-    public void testAllocateDeallocateOneMillion() throws Exception {
-        File tempFile = File.createTempFile("BlockBufferTinyBitmapFixedTest", null);
-        tempFile.deleteOnExit();
-        PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
-        try {
-            final int numAdd = 1000000;
-            List<Long> ids = new ArrayList<Long>(numAdd);
-            long startNanos = System.nanoTime();
-            for(int c=0;c<numAdd;c++) ids.add(blockBuffer.allocate(1));
-            long endNanos = System.nanoTime();
-            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocating "+numAdd+" blocks in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
-            //System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Getting "+numAdd+" ids.");
-            //Iterator<Long> iter = blockBuffer.iterateBlockIds();
-            //int count = 0;
-            //while(iter.hasNext()) {
-            //    ids.add(iter.next());
-            //    count++;
-            //}
-            //assertEquals(numAdd, count);
-            long deallocCount = 0;
-            long deallocTime = 0;
-            long allocCount = 0;
-            long allocTime = 0;
-            for(int c=0;c<100;c++) {
-                // Remove random items
-                int numRemove = random.nextInt(Math.min(10000, ids.size()));
-                List<Long> removeList = new ArrayList<Long>(numRemove);
-                for(int d=0;d<numRemove;d++) {
-                    int index = random.nextInt(ids.size());
-                    removeList.add(ids.get(index));
-                    ids.set(index, ids.get(ids.size()-1));
-                    ids.remove(ids.size()-1);
-                }
-                //System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Shuffling.");
-                //Collections.shuffle(ids, new Random(random.nextLong()));
-                startNanos = System.nanoTime();
-                for(Long id : removeList) blockBuffer.deallocate(id);
-                deallocCount += numRemove;
-                deallocTime += System.nanoTime() - startNanos;
-                int numAddBack = random.nextInt(10000);
-                startNanos = System.nanoTime();
-                for(int d=0;d<numAddBack;d++) ids.add(blockBuffer.allocate(1));
-                allocCount += numAddBack;
-                allocTime += System.nanoTime() - startNanos;
-            }
-            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Deallocated "+deallocCount+" blocks in "+BigDecimal.valueOf(deallocTime/1000, 3)+" ms");
-            System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocated "+allocCount+" blocks in "+BigDecimal.valueOf(allocTime/1000, 3)+" ms");
-        } finally {
-            blockBuffer.close();
-        }
-    }
+	public void testAllocateDeallocateOneMillion() throws Exception {
+		File tempFile = File.createTempFile("BlockBufferTinyBitmapFixedTest", null);
+		tempFile.deleteOnExit();
+		PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
+		try {
+			final int numAdd = 1000000;
+			List<Long> ids = new ArrayList<>(numAdd);
+			long startNanos = System.nanoTime();
+			for(int c=0;c<numAdd;c++) ids.add(blockBuffer.allocate(1));
+			long endNanos = System.nanoTime();
+			System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocating "+numAdd+" blocks in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
+			//System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Getting "+numAdd+" ids.");
+			//Iterator<Long> iter = blockBuffer.iterateBlockIds();
+			//int count = 0;
+			//while(iter.hasNext()) {
+			//    ids.add(iter.next());
+			//    count++;
+			//}
+			//assertEquals(numAdd, count);
+			long deallocCount = 0;
+			long deallocTime = 0;
+			long allocCount = 0;
+			long allocTime = 0;
+			for(int c=0;c<100;c++) {
+				// Remove random items
+				int numRemove = random.nextInt(Math.min(10000, ids.size()));
+				List<Long> removeList = new ArrayList<>(numRemove);
+				for(int d=0;d<numRemove;d++) {
+					int index = random.nextInt(ids.size());
+					removeList.add(ids.get(index));
+					ids.set(index, ids.get(ids.size()-1));
+					ids.remove(ids.size()-1);
+				}
+				//System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Shuffling.");
+				//Collections.shuffle(ids, new Random(random.nextLong()));
+				startNanos = System.nanoTime();
+				for(Long id : removeList) blockBuffer.deallocate(id);
+				deallocCount += numRemove;
+				deallocTime += System.nanoTime() - startNanos;
+				int numAddBack = random.nextInt(10000);
+				startNanos = System.nanoTime();
+				for(int d=0;d<numAddBack;d++) ids.add(blockBuffer.allocate(1));
+				allocCount += numAddBack;
+				allocTime += System.nanoTime() - startNanos;
+			}
+			System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Deallocated "+deallocCount+" blocks in "+BigDecimal.valueOf(deallocTime/1000, 3)+" ms");
+			System.out.println("BlockBufferTinyBitmapFixedTest: testAllocateDeallocateOneMillion: Allocated "+allocCount+" blocks in "+BigDecimal.valueOf(allocTime/1000, 3)+" ms");
+		} finally {
+			blockBuffer.close();
+		}
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,15 +22,8 @@
  */
 package com.aoindustries.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -40,23 +33,20 @@ import junit.framework.TestSuite;
  */
 public class FindReplaceWriterTest extends TestCase {
 
-    public FindReplaceWriterTest(String testName) {
-        super(testName);
-    }
+	public FindReplaceWriterTest(String testName) {
+		super(testName);
+	}
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(FindReplaceWriterTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite(FindReplaceWriterTest.class);
+		return suite;
+	}
 
 	private static void doTest(String unix, String ... dos) throws IOException {
 		StringWriter buffer = new StringWriter(unix.length());
 		try {
-			FindReplaceWriter writer = new FindReplaceWriter(buffer, "\r\n", NativeToUnixWriter.UNIX_EOL);
-			try {
+			try (FindReplaceWriter writer = new FindReplaceWriter(buffer, "\r\n", NativeToUnixWriter.UNIX_EOL)) {
 				for(String s : dos) writer.write(s);
-			} finally {
-				writer.close();
 			}
 		} finally {
 			buffer.close();
@@ -89,5 +79,5 @@ public class FindReplaceWriterTest extends TestCase {
 			"Test multiline\nwith split write at end.\n",
 			"Test multiline\r", "\nwith split write at end.\r", "\n"
 		);
-    }
+	}
 }

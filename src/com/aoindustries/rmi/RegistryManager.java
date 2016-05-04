@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,25 +35,25 @@ import java.util.Map;
  */
 final public class RegistryManager {
 
-    /**
-     * Make no instances.
-     */
-    private RegistryManager() {}
+	/**
+	 * Make no instances.
+	 */
+	private RegistryManager() {}
 
-    private static final Map<Integer,Registry> registryCache = new HashMap<Integer,Registry>();
+	private static final Map<Integer,Registry> registryCache = new HashMap<>();
 
-    /**
-     * Creates a registry or returns the registry that is already using the port.
-     */
-    public static Registry createRegistry(int port, RMIClientSocketFactory csf, RMIServerSocketFactory ssf) throws RemoteException {
-        synchronized(registryCache) {
-            Integer portObj = Integer.valueOf(port);
-            Registry registry = registryCache.get(portObj);
-            if(registry==null) {
-                registry = LocateRegistry.createRegistry(port, csf, ssf);
-                registryCache.put(portObj, registry);
-            }
-            return registry;
-        }
-    }
+	/**
+	 * Creates a registry or returns the registry that is already using the port.
+	 */
+	public static Registry createRegistry(int port, RMIClientSocketFactory csf, RMIServerSocketFactory ssf) throws RemoteException {
+		synchronized(registryCache) {
+			Integer portObj = port;
+			Registry registry = registryCache.get(portObj);
+			if(registry==null) {
+				registry = LocateRegistry.createRegistry(port, csf, ssf);
+				registryCache.put(portObj, registry);
+			}
+			return registry;
+		}
+	}
 }

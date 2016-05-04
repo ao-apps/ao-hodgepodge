@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015  AO Industries, Inc.
+ * Copyright (C) 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -39,13 +39,13 @@ import javax.servlet.jsp.SkipPageException;
  */
 public class Dispatcher {
 
-    private Dispatcher() {
-    }
+	private Dispatcher() {
+	}
 
 	/**
 	 * Tracks the first servlet path seen, before any include/forward.
 	 */
-	private static final ThreadLocal<String> originalPage = new ThreadLocal<String>();
+	private static final ThreadLocal<String> originalPage = new ThreadLocal<>();
 
 	/**
 	 * Gets the current-thread original page or null if not set.
@@ -73,7 +73,7 @@ public class Dispatcher {
 	/**
 	 * Tracks the current dispatch page for correct page-relative paths.
 	 */
-	private static final ThreadLocal<String> dispatchedPage = new ThreadLocal<String>();
+	private static final ThreadLocal<String> dispatchedPage = new ThreadLocal<>();
 
 	/**
 	 * Gets the current-thread dispatched page or null if not set.

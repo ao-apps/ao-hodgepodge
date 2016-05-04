@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,227 +41,225 @@ import java.util.List;
  */
 public class FindReplaceProxy {
 
-    private static final Charset CHARSET = Charset.forName("ISO-8859-1");
+	private static final Charset CHARSET = Charset.forName("ISO-8859-1");
 
-    private FindReplaceProxy() {
-    }
+	private FindReplaceProxy() {
+	}
 
-    static class FindReplace {
-        private final String find;
-        private final byte[] findBytes;
-        private final String replace;
-        private final byte[] replaceBytes;
+	static class FindReplace {
+		private final String find;
+		private final byte[] findBytes;
+		private final String replace;
+		private final byte[] replaceBytes;
 
-        FindReplace(String find, String replace) {
-            this.find = find;
-            this.findBytes = find.getBytes(CHARSET);
-            this.replace = replace;
-            this.replaceBytes = replace.getBytes(CHARSET);
-        }
-    }
+		FindReplace(String find, String replace) {
+			this.find = find;
+			this.findBytes = find.getBytes(CHARSET);
+			this.replace = replace;
+			this.replaceBytes = replace.getBytes(CHARSET);
+		}
+	}
 
-    public static void main(String[] args) {
-        // Must have an even number of arguments
-        boolean showArgs = false;
-        if(((args.length-4)%3)!=0) {
-            showArgs = true;
-        } else {
-            try {
-                final int listenPort = Integer.parseInt(args[1]);
-                final int connectPort = Integer.parseInt(args[3]);
+	public static void main(String[] args) {
+		// Must have an even number of arguments
+		boolean showArgs = false;
+		if(((args.length-4)%3)!=0) {
+			showArgs = true;
+		} else {
+			try {
+				final int listenPort = Integer.parseInt(args[1]);
+				final int connectPort = Integer.parseInt(args[3]);
 
-                List<FindReplace> inFindReplaces = new ArrayList<FindReplace>();
-                List<FindReplace> outFindReplaces = new ArrayList<FindReplace>();
-                for(int pos=4; pos<args.length; pos+=3) {
-                    String find = args[pos];
-                    String replace = args[pos+1];
-                    String mode = args[pos+2];
-                    FindReplace findReplace = new FindReplace(find, replace);
-                    if("in".equals(mode)) inFindReplaces.add(findReplace);
-                    else if("out".equals(mode)) outFindReplaces.add(findReplace);
-                    else if("both".equals(mode)) {
-                        inFindReplaces.add(findReplace);
-                        outFindReplaces.add(findReplace);
-                    } else {
-                        showArgs = true;
-                        break;
-                    }
-                }
-                if(!showArgs) {
-                    while(true) {
-                        try {
-                            InetAddress listenAddress = InetAddress.getByName(args[0]);
-                            InetAddress connectAddress = InetAddress.getByName(args[2]);
-                            ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress);
-                            try {
-                                while(true) {
-                                    Socket socketIn = ss.accept();
-                                    new FindReplaceProxyThread(
-                                        socketIn,
+				List<FindReplace> inFindReplaces = new ArrayList<>();
+				List<FindReplace> outFindReplaces = new ArrayList<>();
+				for(int pos=4; pos<args.length; pos+=3) {
+					String find = args[pos];
+					String replace = args[pos+1];
+					String mode = args[pos+2];
+					FindReplace findReplace = new FindReplace(find, replace);
+					if("in".equals(mode)) inFindReplaces.add(findReplace);
+					else if("out".equals(mode)) outFindReplaces.add(findReplace);
+					else if("both".equals(mode)) {
+						inFindReplaces.add(findReplace);
+						outFindReplaces.add(findReplace);
+					} else {
+						showArgs = true;
+						break;
+					}
+				}
+				if(!showArgs) {
+					while(true) {
+						try {
+							InetAddress listenAddress = InetAddress.getByName(args[0]);
+							InetAddress connectAddress = InetAddress.getByName(args[2]);
+							try (ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress)) {
+								while(true) {
+									Socket socketIn = ss.accept();
+									new FindReplaceProxyThread(
+										socketIn,
 										listenAddress,
-                                        connectAddress,
-                                        connectPort,
-                                        Collections.unmodifiableList(inFindReplaces),
-                                        Collections.unmodifiableList(outFindReplaces)
-                                    ).start();
-                                }
-                            } finally {
-                                ss.close();
-                            }
-                        } catch(IOException e) {
-                            e.printStackTrace(System.err);
-                            try {
-                                Thread.sleep(1000);
-                            } catch(InterruptedException ie) {
-                                ie.printStackTrace(System.err);
-                            }
-                        }
-                    }
-                }
-            } catch(NumberFormatException e) {
-                System.err.println(e.toString());
-                showArgs = true;
-            }
-        }
-        if(showArgs) {
-            System.err.println("Usage: " + FindReplaceProxy.class.getName() + "listen_address listen_port connect_address connect_port [find replace {in|out|both}]...");
-            System.exit(1);
-        }
-    }
+										connectAddress,
+										connectPort,
+										Collections.unmodifiableList(inFindReplaces),
+										Collections.unmodifiableList(outFindReplaces)
+									).start();
+								}
+							}
+						} catch(IOException e) {
+							e.printStackTrace(System.err);
+							try {
+								Thread.sleep(1000);
+							} catch(InterruptedException ie) {
+								ie.printStackTrace(System.err);
+							}
+						}
+					}
+				}
+			} catch(NumberFormatException e) {
+				System.err.println(e.toString());
+				showArgs = true;
+			}
+		}
+		if(showArgs) {
+			System.err.println("Usage: " + FindReplaceProxy.class.getName() + "listen_address listen_port connect_address connect_port [find replace {in|out|both}]...");
+			System.exit(1);
+		}
+	}
 
-    static class FindReplaceProxyThread extends Thread {
-        private final Socket socketIn;
+	static class FindReplaceProxyThread extends Thread {
+		private final Socket socketIn;
 		private final InetAddress sourceAddress;
-        private final InetAddress connectAddress;
-        private final int connectPort;
-        private final List<FindReplace> inFindReplaces;
-        private final List<FindReplace> outFindReplaces;
+		private final InetAddress connectAddress;
+		private final int connectPort;
+		private final List<FindReplace> inFindReplaces;
+		private final List<FindReplace> outFindReplaces;
 
-        FindReplaceProxyThread(
-            Socket socketIn,
+		FindReplaceProxyThread(
+			Socket socketIn,
 			InetAddress sourceAddress,
-            InetAddress connectAddress,
-            int connectPort,
-            List<FindReplace> inFindReplaces,
-            List<FindReplace> outFindReplaces
-        ) {
-            this.socketIn = socketIn;
+			InetAddress connectAddress,
+			int connectPort,
+			List<FindReplace> inFindReplaces,
+			List<FindReplace> outFindReplaces
+		) {
+			this.socketIn = socketIn;
 			this.sourceAddress = sourceAddress;
-            this.connectAddress = connectAddress;
-            this.connectPort = connectPort;
-            this.inFindReplaces = inFindReplaces;
-            this.outFindReplaces = outFindReplaces;
-        }
+			this.connectAddress = connectAddress;
+			this.connectPort = connectPort;
+			this.inFindReplaces = inFindReplaces;
+			this.outFindReplaces = outFindReplaces;
+		}
 
-        @Override
-        public void run() {
-            try {
-                try {
-                    Socket socketOut = new Socket(connectAddress, connectPort, sourceAddress, 0);
-                    try {
-                        FindReplaceReadThread inThread = new FindReplaceReadThread(socketIn.getInputStream(), socketOut.getOutputStream(), inFindReplaces);
-                        try {
-                            inThread.start();
-                            FindReplaceReadThread outThread = new FindReplaceReadThread(socketOut.getInputStream(), socketIn.getOutputStream(), outFindReplaces);
-                            try {
-                                outThread.start();
-                            } finally {
-                                try {
-                                    inThread.join();
-                                } catch(InterruptedException e) {
-                                    e.printStackTrace(System.err);
-                                }
-                            }
-                        } finally {
-                            try {
-                                inThread.join();
-                            } catch(InterruptedException e) {
-                                e.printStackTrace(System.err);
-                            }
-                        }
-                    } finally {
-                        socketOut.close();
-                    }
-                } finally {
-                    socketIn.close();
-                }
-            } catch(IOException e) {
-                e.printStackTrace(System.err);
-            }
-        }
-    }
-    
-    static int indexOf(byte[] buff, int numBytes, byte[] findBytes, int pos) {
-        final int findLen = findBytes.length;
-        if(findLen>0) {
-            while((pos+findLen)<numBytes) {
-                boolean found = true;
-                for(int i=0; i < findLen; i++) {
-                    if(buff[pos+i]!=findBytes[i]) {
-                        found = false;
-                        break;
-                    }
-                }
-                if(found) return pos;
-                pos++;
-            }
-        }
-        return -1;
-    }
+		@Override
+		public void run() {
+			try {
+				try {
+					Socket socketOut = new Socket(connectAddress, connectPort, sourceAddress, 0);
+					try {
+						FindReplaceReadThread inThread = new FindReplaceReadThread(socketIn.getInputStream(), socketOut.getOutputStream(), inFindReplaces);
+						try {
+							inThread.start();
+							FindReplaceReadThread outThread = new FindReplaceReadThread(socketOut.getInputStream(), socketIn.getOutputStream(), outFindReplaces);
+							try {
+								outThread.start();
+							} finally {
+								try {
+									inThread.join();
+								} catch(InterruptedException e) {
+									e.printStackTrace(System.err);
+								}
+							}
+						} finally {
+							try {
+								inThread.join();
+							} catch(InterruptedException e) {
+								e.printStackTrace(System.err);
+							}
+						}
+					} finally {
+						socketOut.close();
+					}
+				} finally {
+					socketIn.close();
+				}
+			} catch(IOException e) {
+				e.printStackTrace(System.err);
+			}
+		}
+	}
 
-    static class FindReplaceReadThread extends Thread {
-        private final InputStream in;
-        private final OutputStream out;
-        private final List<FindReplace> findReplaces;
+	static int indexOf(byte[] buff, int numBytes, byte[] findBytes, int pos) {
+		final int findLen = findBytes.length;
+		if(findLen>0) {
+			while((pos+findLen)<numBytes) {
+				boolean found = true;
+				for(int i=0; i < findLen; i++) {
+					if(buff[pos+i]!=findBytes[i]) {
+						found = false;
+						break;
+					}
+				}
+				if(found) return pos;
+				pos++;
+			}
+		}
+		return -1;
+	}
 
-        FindReplaceReadThread(InputStream in, OutputStream out, List<FindReplace> findReplaces) {
-            this.in = in;
-            this.out = out;
-            this.findReplaces = findReplaces;
-        }
+	static class FindReplaceReadThread extends Thread {
+		private final InputStream in;
+		private final OutputStream out;
+		private final List<FindReplace> findReplaces;
 
-        @Override
-        public void run() {
-            try {
-                try {
-                    try {
-                        byte[] buff = new byte[4096];
-                        int numBytes;
-                        while((numBytes = in.read(buff, 0, 4096))!=-1) {
-                            // Do find/replace
-                            int pos = 0;
-                            while(pos<numBytes) {
-                                // Look for the matching find/replace with the lowest index
-                                int lowestIndex = -1;
-                                FindReplace lowestFindReplace = null;
-                                for(FindReplace findReplace : findReplaces) {
-                                    int index = indexOf(buff, numBytes, findReplace.findBytes, pos);
-                                    if(index!=-1 && (lowestIndex==-1 || index<lowestIndex)) {
-                                        lowestIndex = index;
-                                        lowestFindReplace = findReplace;
-                                    }
-                                }
-                                if(lowestIndex!=-1) {
-                                    out.write(buff, pos, lowestIndex - pos);
-                                    out.write(lowestFindReplace.replaceBytes);
-                                    pos = lowestIndex + lowestFindReplace.findBytes.length;
-                                } else {
-                                    // No more find/replace in this block
-                                    out.write(buff, pos, numBytes-pos);
-                                    pos = numBytes;
-                                }
-                            }
-                            out.flush();
-                        }
-                    } finally {
-                        out.close();
-                    }
-                } finally {
-                    in.close();
-                }
-            } catch(IOException e) {
-                e.printStackTrace(System.err);
-            }
-        }
-    }
+		FindReplaceReadThread(InputStream in, OutputStream out, List<FindReplace> findReplaces) {
+			this.in = in;
+			this.out = out;
+			this.findReplaces = findReplaces;
+		}
+
+		@Override
+		public void run() {
+			try {
+				try {
+					try {
+						byte[] buff = new byte[4096];
+						int numBytes;
+						while((numBytes = in.read(buff, 0, 4096))!=-1) {
+							// Do find/replace
+							int pos = 0;
+							while(pos<numBytes) {
+								// Look for the matching find/replace with the lowest index
+								int lowestIndex = -1;
+								FindReplace lowestFindReplace = null;
+								for(FindReplace findReplace : findReplaces) {
+									int index = indexOf(buff, numBytes, findReplace.findBytes, pos);
+									if(index!=-1 && (lowestIndex==-1 || index<lowestIndex)) {
+										lowestIndex = index;
+										lowestFindReplace = findReplace;
+									}
+								}
+								if(lowestIndex!=-1) {
+									assert lowestFindReplace != null;
+									out.write(buff, pos, lowestIndex - pos);
+									out.write(lowestFindReplace.replaceBytes);
+									pos = lowestIndex + lowestFindReplace.findBytes.length;
+								} else {
+									// No more find/replace in this block
+									out.write(buff, pos, numBytes-pos);
+									pos = numBytes;
+								}
+							}
+							out.flush();
+						}
+					} finally {
+						out.close();
+					}
+				} finally {
+					in.close();
+				}
+			} catch(IOException e) {
+				e.printStackTrace(System.err);
+			}
+		}
+	}
 }

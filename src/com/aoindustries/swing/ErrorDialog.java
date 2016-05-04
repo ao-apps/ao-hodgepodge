@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,51 +43,53 @@ import javax.swing.JTextArea;
  */
 public class ErrorDialog extends DefaultJDialog implements ActionListener {
 
-    private EnterJButton closeButton;
+	private static final long serialVersionUID = 1L;
 
-    public ErrorDialog(Component parent, String title, Throwable T) {
-        this(parent, title, T, null);
-    }
+	private EnterJButton closeButton;
 
-    public ErrorDialog(Component parent, String title, Throwable T, Object[] extraInfo) {
-        super((parent instanceof JFrame) ? (JFrame)parent : new JFrame(), title, true, 400, 300);
+	public ErrorDialog(Component parent, String title, Throwable T) {
+		this(parent, title, T, null);
+	}
 
-        Container contentPane=getContentPane();
-        contentPane.setLayout(new MultiBorderLayout());
-        contentPane.add(new JLabel(" "), BorderLayout.NORTH);
-        contentPane.add(new JLabel("An application error has occurred.  Please provide a", JLabel.CENTER), BorderLayout.NORTH);
-        contentPane.add(new JLabel("copy of this error to your system administrator.", JLabel.CENTER), BorderLayout.NORTH);
-        contentPane.add(new JLabel(" "), BorderLayout.NORTH);
+	public ErrorDialog(Component parent, String title, Throwable T, Object[] extraInfo) {
+		super((parent instanceof JFrame) ? (JFrame)parent : new JFrame(), title, true, 400, 300);
 
-        // Convert the error
-        CharArrayWriter cout=new CharArrayWriter();
-        PrintWriter pout=new PrintWriter(cout);
-        ErrorPrinter.printStackTraces(T, pout, extraInfo);
-        pout.flush();
-        String errorText=cout.toString();
+		Container contentPane=getContentPane();
+		contentPane.setLayout(new MultiBorderLayout());
+		contentPane.add(new JLabel(" "), BorderLayout.NORTH);
+		contentPane.add(new JLabel("An application error has occurred.  Please provide a", JLabel.CENTER), BorderLayout.NORTH);
+		contentPane.add(new JLabel("copy of this error to your system administrator.", JLabel.CENTER), BorderLayout.NORTH);
+		contentPane.add(new JLabel(" "), BorderLayout.NORTH);
 
-        // Setup the GUI
-        JTextArea textArea=new JTextArea(errorText, 25, 80);
-        textArea.setEditable(false);
-        textArea.setCaretPosition(0);
-        contentPane.add(new JScrollPane(textArea));
-        
-        JPanel buttonPanel=new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        contentPane.add(buttonPanel, BorderLayout.SOUTH);
-        closeButton=new EnterJButton("Close");
-        buttonPanel.add(closeButton);
-        closeButton.addActionListener(this);
-        closeButton.setToolTipText("Close this window.");
+		// Convert the error
+		CharArrayWriter cout=new CharArrayWriter();
+		PrintWriter pout=new PrintWriter(cout);
+		ErrorPrinter.printStackTraces(T, pout, extraInfo);
+		pout.flush();
+		String errorText=cout.toString();
 
-        pack();
-        center(parent);
-        
-        closeButton.requestFocus();
-    }
-    
+		// Setup the GUI
+		JTextArea textArea=new JTextArea(errorText, 25, 80);
+		textArea.setEditable(false);
+		textArea.setCaretPosition(0);
+		contentPane.add(new JScrollPane(textArea));
+
+		JPanel buttonPanel=new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+		contentPane.add(buttonPanel, BorderLayout.SOUTH);
+		closeButton=new EnterJButton("Close");
+		buttonPanel.add(closeButton);
+		closeButton.addActionListener(this);
+		closeButton.setToolTipText("Close this window.");
+
+		pack();
+		center(parent);
+
+		closeButton.requestFocus();
+	}
+
 	@Override
-    public void actionPerformed(ActionEvent e) {
-        Object source=e.getSource();
-        if(source==closeButton) closeWindow();
-    }
+	public void actionPerformed(ActionEvent e) {
+		Object source=e.getSource();
+		if(source==closeButton) closeWindow();
+	}
 }

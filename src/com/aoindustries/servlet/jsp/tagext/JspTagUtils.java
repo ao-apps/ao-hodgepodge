@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,8 @@
  */
 package com.aoindustries.servlet.jsp.tagext;
 
-import static com.aoindustries.servlet.jsp.tagext.ApplicationResources.accessor;
 import com.aoindustries.servlet.jsp.LocalizedJspException;
+import static com.aoindustries.servlet.jsp.tagext.ApplicationResources.accessor;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.JspTag;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
@@ -35,30 +35,30 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
  */
 public final class JspTagUtils {
 
-    /**
-     * Gets the class name (without package) for the given class.
-     */
-    private static String getClassName(Class<?> clazz) {
-        String name = clazz.getSimpleName();
-        int dotPos = name.lastIndexOf('.');
-        return dotPos==-1 ? name : name.substring(dotPos+1);
-    }
+	/**
+	 * Gets the class name (without package) for the given class.
+	 */
+	private static String getClassName(Class<?> clazz) {
+		String name = clazz.getSimpleName();
+		int dotPos = name.lastIndexOf('.');
+		return dotPos==-1 ? name : name.substring(dotPos+1);
+	}
 
-    /**
-     * Finds the first parent tag of the provided class (or subclass) or implementing the provided interface.
-     *
-     * @return  the parent tag
-     * @exception  JspException  if parent not found
-     */
-    public static <T> T findAncestor(JspTag from, Class<? extends T> clazz) throws JspException {
-        T parent = clazz.cast(SimpleTagSupport.findAncestorWithClass(from, clazz));
-        if(parent==null) throw new LocalizedJspException(accessor, "JspTagUtils.findAncestor.notFound", getClassName(from.getClass()), getClassName(clazz));
-        return parent;
-    }
+	/**
+	 * Finds the first parent tag of the provided class (or subclass) or implementing the provided interface.
+	 *
+	 * @return  the parent tag
+	 * @exception  JspException  if parent not found
+	 */
+	public static <T> T findAncestor(JspTag from, Class<? extends T> clazz) throws JspException {
+		T parent = clazz.cast(SimpleTagSupport.findAncestorWithClass(from, clazz));
+		if(parent==null) throw new LocalizedJspException(accessor, "JspTagUtils.findAncestor.notFound", getClassName(from.getClass()), getClassName(clazz));
+		return parent;
+	}
 
-    /**
-     * Make no instances.
-     */
-    private JspTagUtils() {
-    }
+	/**
+	 * Make no instances.
+	 */
+	private JspTagUtils() {
+	}
 }

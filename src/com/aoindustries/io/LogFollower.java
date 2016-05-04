@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,186 +43,177 @@ import java.io.RandomAccessFile;
  */
 public class LogFollower extends InputStream {
 
-    public static final int DEFAULT_POLL_INTERVAL=60*1000;
+	public static final int DEFAULT_POLL_INTERVAL=60*1000;
 
-    private final int pollInterval;
-    private final File file;
+	private final int pollInterval;
+	private final File file;
 
-    private volatile boolean closed;
+	private volatile boolean closed;
 
-    private final Object filePosLock = new Object();
-    private long filePos;
+	private final Object filePosLock = new Object();
+	private long filePos;
 
-    public LogFollower(String path) {
-        this(new File(path), DEFAULT_POLL_INTERVAL);
-    }
-    
-    public LogFollower(File file) {
-        this(file, DEFAULT_POLL_INTERVAL);
-    }
+	public LogFollower(String path) {
+		this(new File(path), DEFAULT_POLL_INTERVAL);
+	}
 
-    public LogFollower(String path, int pollInterval) {
-        this(new File(path), pollInterval);
-    }
+	public LogFollower(File file) {
+		this(file, DEFAULT_POLL_INTERVAL);
+	}
 
-    public LogFollower(File file, int pollInterval) {
-        this.pollInterval = pollInterval;
-        this.file = file;
-    }
+	public LogFollower(String path, int pollInterval) {
+		this(new File(path), pollInterval);
+	}
 
-    private void checkClosed() throws IOException {
-        if(closed) throw new IOException("LogFollower has been closed: "+file.getPath());
-    }
+	public LogFollower(File file, int pollInterval) {
+		this.pollInterval = pollInterval;
+		this.file = file;
+	}
 
-    /**
-     * Checks the current position in the file.
-     * Detects if the file has changed in length.
-     * If closed, throws an exception.
-     * If file doesn't exist, waits until it does exist.
-     */
-    private void detectFileChange() throws IOException {
-        checkClosed();
-        assert Thread.holdsLock(filePosLock);
-        while(!file.exists()) {
-            try {
-                System.err.println("File not found, waiting: " + file.getPath());
-                Thread.sleep(pollInterval);
-            } catch(InterruptedException e) {
-                InterruptedIOException newExc = new InterruptedIOException(e.getMessage());
-                newExc.initCause(e);
-                throw newExc;
-            }
-            checkClosed();
-        }
-        long fileLen = file.length();
-        if(fileLen<filePos) filePos = 0;
-    }
+	private void checkClosed() throws IOException {
+		if(closed) throw new IOException("LogFollower has been closed: "+file.getPath());
+	}
 
-    @Override
-    public int available() throws IOException {
-        checkClosed();
-        synchronized(filePosLock) {
-            detectFileChange();
-            long available = file.length() - filePos;
-            if(available < 0) available = 0;
-            else if(available>Integer.MAX_VALUE) available = Integer.MAX_VALUE;
-            return (int)available;
-        }
-    }
+	/**
+	 * Checks the current position in the file.
+	 * Detects if the file has changed in length.
+	 * If closed, throws an exception.
+	 * If file doesn't exist, waits until it does exist.
+	 */
+	private void detectFileChange() throws IOException {
+		checkClosed();
+		assert Thread.holdsLock(filePosLock);
+		while(!file.exists()) {
+			try {
+				System.err.println("File not found, waiting: " + file.getPath());
+				Thread.sleep(pollInterval);
+			} catch(InterruptedException e) {
+				InterruptedIOException newExc = new InterruptedIOException(e.getMessage());
+				newExc.initCause(e);
+				throw newExc;
+			}
+			checkClosed();
+		}
+		long fileLen = file.length();
+		if(fileLen<filePos) filePos = 0;
+	}
 
-    @Override
-    public void close() throws IOException {
-        closed = true;
-    }
+	@Override
+	public int available() throws IOException {
+		checkClosed();
+		synchronized(filePosLock) {
+			detectFileChange();
+			long available = file.length() - filePos;
+			if(available < 0) available = 0;
+			else if(available>Integer.MAX_VALUE) available = Integer.MAX_VALUE;
+			return (int)available;
+		}
+	}
 
-    public int getPollInterval() {
-        return pollInterval;
-    }
+	@Override
+	public void close() throws IOException {
+		closed = true;
+	}
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            close();
-        } finally {
-            super.finalize();
-        }
-    }
+	public int getPollInterval() {
+		return pollInterval;
+	}
 
-    @Override
-    public int read() throws IOException {
-        checkClosed();
-        while(true) {
-            synchronized(filePosLock) {
-                detectFileChange();
-                // Read to the end of the file
-                long ral = file.length();
-                if(ral>filePos) {
-                    RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
-                    try {
-                        randomAccess.seek(filePos++);
-                        return randomAccess.read();
-                    } finally {
-                        randomAccess.close();
-                    }
-                }
-            }
+	@Override
+	protected void finalize() throws Throwable {
+		try {
+			close();
+		} finally {
+			super.finalize();
+		}
+	}
 
-            // Sleep and try again
-            try {
-                Thread.sleep(pollInterval);
-            } catch(InterruptedException err) {
-                InterruptedIOException ioErr=new InterruptedIOException();
-                ioErr.initCause(err);
-                throw ioErr;
-            }
-        }
-    }
+	@Override
+	public int read() throws IOException {
+		checkClosed();
+		while(true) {
+			synchronized(filePosLock) {
+				detectFileChange();
+				// Read to the end of the file
+				long ral = file.length();
+				if(ral>filePos) {
+					try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
+						randomAccess.seek(filePos++);
+						return randomAccess.read();
+					}
+				}
+			}
 
-    @Override
-    public int read(byte[] b, int offset, int len) throws IOException {
-        checkClosed();
-        while(true) {
-            synchronized(filePosLock) {
-                detectFileChange();
-                // Read to the end of the file
-                long ral = file.length();
-                if(ral>filePos) {
-                    RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
-                    try {
-                        randomAccess.seek(filePos);
-                        long avail = randomAccess.length() - filePos;
-                        if(avail>len) avail = len;
-                        int actual = randomAccess.read(b, offset, (int)avail);
-                        filePos += actual;
-                        return actual;
-                    } finally {
-                        randomAccess.close();
-                    }
-                }
-            }
+			// Sleep and try again
+			try {
+				Thread.sleep(pollInterval);
+			} catch(InterruptedException err) {
+				InterruptedIOException ioErr=new InterruptedIOException();
+				ioErr.initCause(err);
+				throw ioErr;
+			}
+		}
+	}
 
-            // Sleep and try again
-            try {
-                Thread.sleep(pollInterval);
-            } catch(InterruptedException err) {
-                InterruptedIOException ioErr=new InterruptedIOException();
-                ioErr.initCause(err);
-                throw ioErr;
-            }
-        }
-    }
+	@Override
+	public int read(byte[] b, int offset, int len) throws IOException {
+		checkClosed();
+		while(true) {
+			synchronized(filePosLock) {
+				detectFileChange();
+				// Read to the end of the file
+				long ral = file.length();
+				if(ral>filePos) {
+					try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
+						randomAccess.seek(filePos);
+						long avail = randomAccess.length() - filePos;
+						if(avail>len) avail = len;
+						int actual = randomAccess.read(b, offset, (int)avail);
+						filePos += actual;
+						return actual;
+					}
+				}
+			}
 
-    @Override
-    public long skip(long n) throws IOException {
-        checkClosed();
-        while(true) {
-            synchronized(filePosLock) {
-                detectFileChange();
-                // Skip to the end of the file
-                long ral = file.length();
-                if(ral>filePos) {
-                    RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
-                    try {
-                        randomAccess.seek(filePos);
-                        long avail = randomAccess.length()-filePos;
-                        if(avail>n) avail = n;
-                        int actual = randomAccess.skipBytes((int)avail);
-                        filePos += actual;
-                        return actual;
-                    } finally {
-                        randomAccess.close();
-                    }
-                }
-            }
+			// Sleep and try again
+			try {
+				Thread.sleep(pollInterval);
+			} catch(InterruptedException err) {
+				InterruptedIOException ioErr=new InterruptedIOException();
+				ioErr.initCause(err);
+				throw ioErr;
+			}
+		}
+	}
 
-            // Sleep and try again
-            try {
-                Thread.sleep(pollInterval);
-            } catch(InterruptedException err) {
-                InterruptedIOException ioErr=new InterruptedIOException();
-                ioErr.initCause(err);
-                throw ioErr;
-            }
-        }
-    }
+	@Override
+	public long skip(long n) throws IOException {
+		checkClosed();
+		while(true) {
+			synchronized(filePosLock) {
+				detectFileChange();
+				// Skip to the end of the file
+				long ral = file.length();
+				if(ral>filePos) {
+					try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
+						randomAccess.seek(filePos);
+						long avail = randomAccess.length()-filePos;
+						if(avail>n) avail = n;
+						int actual = randomAccess.skipBytes((int)avail);
+						filePos += actual;
+						return actual;
+					}
+				}
+			}
+
+			// Sleep and try again
+			try {
+				Thread.sleep(pollInterval);
+			} catch(InterruptedException err) {
+				InterruptedIOException ioErr=new InterruptedIOException();
+				ioErr.initCause(err);
+				throw ioErr;
+			}
+		}
+	}
 }

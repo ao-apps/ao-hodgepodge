@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009, 2013  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,37 +36,36 @@ import java.math.BigDecimal;
  */
 public class BenchmarkCounterBlockDevice {
 
-    public BenchmarkCounterBlockDevice() {
-    }
+	public BenchmarkCounterBlockDevice() {
+	}
 
-    public static void main(String[] args) {
-        try {
-            if(args.length>0) {
-                final byte[] buff = BufferManager.getBytes();
-                try {
-                    for(int c=0;c<args.length;c++) {
-                        final String filename=args[c];
-                        long startTime = System.currentTimeMillis();
-                        RandomAccessFile raf=new RandomAccessFile(filename, "r");
-                        long length=raf.length();
-                        try {
-                            for(long pos=1;pos<length;pos+=(1024*4096+4096)) {
-                                raf.seek(pos);
-                                raf.readFully(buff, 0, BufferManager.BUFFER_SIZE);
-                            }
-                        } finally {
-                            raf.close();
-                        }
-                        System.out.println(filename+" scanned in "+BigDecimal.valueOf(System.currentTimeMillis()-startTime, 3)+" seconds");
-                    }
-                } finally {
-                    BufferManager.release(buff, false);
-                }
-            } else {
-                System.err.println("Usage: BenchmarkCounterBlockDevice filename [filename] [...]");
-            }
-        } catch(IOException err) {
-            ErrorPrinter.printStackTraces(err);
-        }
-    }
+	public static void main(String[] args) {
+		try {
+			if(args.length>0) {
+				final byte[] buff = BufferManager.getBytes();
+				try {
+					for (String filename : args) {
+						long startTime = System.currentTimeMillis();
+						RandomAccessFile raf=new RandomAccessFile(filename, "r");
+						long length=raf.length();
+						try {
+							for(long pos=1;pos<length;pos+=(1024*4096+4096)) {
+								raf.seek(pos);
+								raf.readFully(buff, 0, BufferManager.BUFFER_SIZE);
+							}
+						} finally {
+							raf.close();
+						}
+						System.out.println(filename+" scanned in "+BigDecimal.valueOf(System.currentTimeMillis()-startTime, 3)+" seconds");
+					}
+				} finally {
+					BufferManager.release(buff, false);
+				}
+			} else {
+				System.err.println("Usage: BenchmarkCounterBlockDevice filename [filename] [...]");
+			}
+		} catch(IOException err) {
+			ErrorPrinter.printStackTraces(err);
+		}
+	}
 }

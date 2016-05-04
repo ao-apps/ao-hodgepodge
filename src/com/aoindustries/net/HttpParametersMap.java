@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -42,79 +42,79 @@ public class HttpParametersMap implements MutableHttpParameters {
 
 	private static final String DEFAULT_ENCODING = "UTF-8";
 
-	private final Map<String,List<String>> map = new TreeMap<String,List<String>>();
-    private final Map<String,List<String>> unmodifiableMap = Collections.unmodifiableMap(map);
+	private final Map<String,List<String>> map = new TreeMap<>();
+	private final Map<String,List<String>> unmodifiableMap = Collections.unmodifiableMap(map);
 
-    /**
-     * Creates an empty set of parameters.
-     */
-    public HttpParametersMap() {
-    }
+	/**
+	 * Creates an empty set of parameters.
+	 */
+	public HttpParametersMap() {
+	}
 
-    /**
-     * Parses the provided URL-Encoded parameter string in the UTF-8 encoding.
-     */
-    public HttpParametersMap(String parameters) {
+	/**
+	 * Parses the provided URL-Encoded parameter string in the UTF-8 encoding.
+	 */
+	public HttpParametersMap(String parameters) {
 		try {
 			init(parameters, DEFAULT_ENCODING);
 		} catch(UnsupportedEncodingException e) {
 			throw new RuntimeException(DEFAULT_ENCODING + " should be supported on all platforms", e);
 		}
-    }
+	}
 
-    /**
-     * Parses the provided URL-Encoded parameter string.
-     * It is strongly recommended to use UTF-8 encoding.
-     */
-    public HttpParametersMap(String parameters, String encoding) throws UnsupportedEncodingException {
+	/**
+	 * Parses the provided URL-Encoded parameter string.
+	 * It is strongly recommended to use UTF-8 encoding.
+	 */
+	public HttpParametersMap(String parameters, String encoding) throws UnsupportedEncodingException {
 		init(parameters, encoding);
-    }
+	}
 
 	private void init(String parameters, String encoding) throws UnsupportedEncodingException {
-        for(String nameValue : StringUtility.splitString(parameters, '&')) {
-            int pos = nameValue.indexOf('=');
-            String name;
-            String value;
-            if(pos==-1) {
-                name = URLDecoder.decode(nameValue, encoding);
-                value = ""; // Servlet environment treats no equal sign same as value equal empty string - matching here
-            } else {
-                name = URLDecoder.decode(nameValue.substring(0, pos), encoding);
-                value = URLDecoder.decode(nameValue.substring(pos+1), encoding);
-            }
-            addParameter(name, value);
-        }
+		for(String nameValue : StringUtility.splitString(parameters, '&')) {
+			int pos = nameValue.indexOf('=');
+			String name;
+			String value;
+			if(pos==-1) {
+				name = URLDecoder.decode(nameValue, encoding);
+				value = ""; // Servlet environment treats no equal sign same as value equal empty string - matching here
+			} else {
+				name = URLDecoder.decode(nameValue.substring(0, pos), encoding);
+				value = URLDecoder.decode(nameValue.substring(pos+1), encoding);
+			}
+			addParameter(name, value);
+		}
 	}
 
 	@Override
-    public String getParameter(String name) {
-        List<String> values = map.get(name);
-        if(values==null) return null;
-        assert !values.isEmpty();
-        return values.get(0);
-    }
+	public String getParameter(String name) {
+		List<String> values = map.get(name);
+		if(values==null) return null;
+		assert !values.isEmpty();
+		return values.get(0);
+	}
 
-    @Override
-    public Iterator<String> getParameterNames() {
-        return unmodifiableMap.keySet().iterator();
-    }
+	@Override
+	public Iterator<String> getParameterNames() {
+		return unmodifiableMap.keySet().iterator();
+	}
 
-    @Override
-    public List<String> getParameterValues(String name) {
-        return unmodifiableMap.get(name);
-    }
+	@Override
+	public List<String> getParameterValues(String name) {
+		return unmodifiableMap.get(name);
+	}
 
-    @Override
-    public Map<String, List<String>> getParameterMap() {
-        return unmodifiableMap;
-    }
+	@Override
+	public Map<String, List<String>> getParameterMap() {
+		return unmodifiableMap;
+	}
 
-    @Override
-    public void addParameter(String name, String value) {
+	@Override
+	public void addParameter(String name, String value) {
 		NullArgumentException.checkNotNull(name, "name");
 		NullArgumentException.checkNotNull(value, "value");
-        List<String> values = map.get(name);
-        if(values==null) map.put(name, values = new ArrayList<String>());
-        values.add(value);
-    }
+		List<String> values = map.get(name);
+		if(values==null) map.put(name, values = new ArrayList<>());
+		values.add(value);
+	}
 }

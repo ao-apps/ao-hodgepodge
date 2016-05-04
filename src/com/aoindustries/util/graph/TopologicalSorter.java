@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,61 +41,61 @@ import java.util.Set;
  */
 public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V, EX> {
 
-    private final SymmetricMultiGraph<V,?,? extends EX> graph;
-    private final boolean isForward;
+	private final SymmetricMultiGraph<V,?,? extends EX> graph;
+	private final boolean isForward;
 
-    public TopologicalSorter(SymmetricMultiGraph<V,?,? extends EX> graph, boolean isForward) {
-        this.graph = graph;
-        this.isForward = isForward;
-    }
+	public TopologicalSorter(SymmetricMultiGraph<V,?,? extends EX> graph, boolean isForward) {
+		this.graph = graph;
+		this.isForward = isForward;
+	}
 
-    @Override
-    public List<V> sortGraph() throws CycleException, EX {
-        Set<V> vertices = graph.getVertices();
-        final int size = vertices.size();
-        Set<V> visited = new HashSet<V>(size*4/3+1);
-        LinkedHashSet<V> sequence = new LinkedHashSet<V>();
-        //L ← Empty list that will contain the sorted nodes
-        List<V> L = new ArrayList<V>(size);
-        //S ← Set of all nodes with no incoming edges
-        //for each node n in S do
-        for(V n : vertices) {
-            if(
-                // Getting edges can be expensive, while checking visited should always be cheap
-                !visited.contains(n)
-                // This check is looking for starting nodes
-                && (isForward ? graph.getEdgesTo(n) : graph.getEdgesFrom(n)).isEmpty()
-            ) {
-                topologicalSortVisit(n, L, visited, sequence);
-            }
-        }
-        return AoCollections.optimalUnmodifiableList(L);
-    }
+	@Override
+	public List<V> sortGraph() throws CycleException, EX {
+		Set<V> vertices = graph.getVertices();
+		final int size = vertices.size();
+		Set<V> visited = new HashSet<>(size*4/3+1);
+		LinkedHashSet<V> sequence = new LinkedHashSet<>();
+		//L ← Empty list that will contain the sorted nodes
+		List<V> L = new ArrayList<>(size);
+		//S ← Set of all nodes with no incoming edges
+		//for each node n in S do
+		for(V n : vertices) {
+			if(
+				// Getting edges can be expensive, while checking visited should always be cheap
+				!visited.contains(n)
+				// This check is looking for starting nodes
+				&& (isForward ? graph.getEdgesTo(n) : graph.getEdgesFrom(n)).isEmpty()
+			) {
+				topologicalSortVisit(n, L, visited, sequence);
+			}
+		}
+		return AoCollections.optimalUnmodifiableList(L);
+	}
 
-    //function visit(node n)
-    private void topologicalSortVisit(V n, List<V> L, Set<V> visited, LinkedHashSet<V> sequence) throws CycleException, EX {
-        //    if n has not been visited yet then
-        //        mark n as visited
-        if(visited.add(n)) {
-            //        for each node m with an edge from n to m do
-            for(Edge<V> e : (isForward ? graph.getEdgesFrom(n) : graph.getEdgesTo(n))) {
-                V m = isForward ? e.getTo() : e.getFrom();
-                //            visit(m)
-                if(!sequence.add(m)) {
-                    List<V> vertices = new ArrayList<V>();
-                    boolean found = false;
-                    for(V seq : sequence) {
-                        if(!found && seq.equals(m)) found = true;
-                        if(found) vertices.add(seq);
-                    }
-                    vertices.add(m);
-                    throw new CycleException(AoCollections.optimalUnmodifiableList(vertices));
-                }
-                topologicalSortVisit(m, L, visited, sequence);
-                sequence.remove(m);
-            }
-            //        add n to L
-            L.add(n);
-        }
-    }
+	//function visit(node n)
+	private void topologicalSortVisit(V n, List<V> L, Set<V> visited, LinkedHashSet<V> sequence) throws CycleException, EX {
+		//    if n has not been visited yet then
+		//        mark n as visited
+		if(visited.add(n)) {
+			//        for each node m with an edge from n to m do
+			for(Edge<V> e : (isForward ? graph.getEdgesFrom(n) : graph.getEdgesTo(n))) {
+				V m = isForward ? e.getTo() : e.getFrom();
+				//            visit(m)
+				if(!sequence.add(m)) {
+					List<V> vertices = new ArrayList<>();
+					boolean found = false;
+					for(V seq : sequence) {
+						if(!found && seq.equals(m)) found = true;
+						if(found) vertices.add(seq);
+					}
+					vertices.add(m);
+					throw new CycleException(AoCollections.optimalUnmodifiableList(vertices));
+				}
+				topologicalSortVisit(m, L, visited, sequence);
+				sequence.remove(m);
+			}
+			//        add n to L
+			L.add(n);
+		}
+	}
 }

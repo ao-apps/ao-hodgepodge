@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -58,258 +58,258 @@ import java.util.Random;
  */
 public class RandomFailBuffer extends AbstractPersistentBuffer {
 
-    /**
-     * The average number of calls between failures.
-     */
-    private enum FailureMethod {
-        capacity {
-            @Override
-            int getFailInterval() {
-                int failInterval = 5000;
-                assert (failInterval=500000)!=0; // Intentional assertion side-effect to reduce failure frequency due to higher buffer access rates
-                return failInterval;
-            }
-        },
-        setCapacity {
-            @Override
-            int getFailInterval() {
-                return 50;
-            }
-        },
-        getSome {
-            @Override
-            int getFailInterval() {
-                int failInterval = 5000;
-                assert (failInterval=50000)!=0; // Intentional assertion side-effect to reduce failure frequency due to higher buffer access rates
-                return failInterval;
-            }
-        },
-        put {
-            @Override
-            int getFailInterval() {
-                return 5000;
-            }
-        },
-        barrier {
-            @Override
-            int getFailInterval() {
-                return 5000;
-            }
-        };
-        abstract int getFailInterval();
-    }
+	/**
+	 * The average number of calls between failures.
+	 */
+	private enum FailureMethod {
+		capacity {
+			@Override
+			int getFailInterval() {
+				int failInterval = 5000;
+				assert (failInterval=500000)!=0; // Intentional assertion side-effect to reduce failure frequency due to higher buffer access rates
+				return failInterval;
+			}
+		},
+		setCapacity {
+			@Override
+			int getFailInterval() {
+				return 50;
+			}
+		},
+		getSome {
+			@Override
+			int getFailInterval() {
+				int failInterval = 5000;
+				assert (failInterval=50000)!=0; // Intentional assertion side-effect to reduce failure frequency due to higher buffer access rates
+				return failInterval;
+			}
+		},
+		put {
+			@Override
+			int getFailInterval() {
+				return 5000;
+			}
+		},
+		barrier {
+			@Override
+			int getFailInterval() {
+				return 5000;
+			}
+		};
+		abstract int getFailInterval();
+	}
 
-    /**
-     * The number of bytes per sector.  This should match the physical media
-     * on which normal buffers will resize.
-     */
-    private static final int SECTOR_SIZE = 512;
+	/**
+	 * The number of bytes per sector.  This should match the physical media
+	 * on which normal buffers will resize.
+	 */
+	private static final int SECTOR_SIZE = 512;
 
-    private final PersistentBuffer wrapped;
-    private final boolean allowFailures;
-    private final Random random = new SecureRandom();
-    private boolean isClosed = false;
+	private final PersistentBuffer wrapped;
+	private final boolean allowFailures;
+	private final Random random = new SecureRandom();
+	private boolean isClosed = false;
 
-    /**
-     * Keeps track of the last version of all sectors that have been written.  Each
-     * entry will be <code>SECTOR_SIZE</code> in length, even if at the end of the
-     * capacity.
-     */
-    private final Map<Long,byte[]> writeCache = new HashMap<Long,byte[]>();
+	/**
+	 * Keeps track of the last version of all sectors that have been written.  Each
+	 * entry will be <code>SECTOR_SIZE</code> in length, even if at the end of the
+	 * capacity.
+	 */
+	private final Map<Long,byte[]> writeCache = new HashMap<>();
 
-    /**
-     * Creates a read-write test buffer with protection level <code>NONE</code>.
-     */
-    public RandomFailBuffer(PersistentBuffer wrapped, boolean allowFailures) {
-        super(wrapped.getProtectionLevel());
-        this.wrapped = wrapped;
-        this.allowFailures = allowFailures;
-    }
+	/**
+	 * Creates a read-write test buffer with protection level <code>NONE</code>.
+	 */
+	public RandomFailBuffer(PersistentBuffer wrapped, boolean allowFailures) {
+		super(wrapped.getProtectionLevel());
+		this.wrapped = wrapped;
+		this.allowFailures = allowFailures;
+	}
 
-    /**
-     * Fails in a one-in-interval chance.
-     */
-    // @NotThreadSafe
-    private void randomFail(FailureMethod failureMethod) throws IOException {
-        if(allowFailures) {
-            if(random.nextInt(failureMethod.getFailInterval())==0) {
-                isClosed = true;
-                if(!writeCache.isEmpty()) {
-                    long capacity = wrapped.capacity();
-                    // Write current write cache in a partial state
-                    List<Long> sectors = new ArrayList<Long>(writeCache.keySet());
-                    Collections.shuffle(sectors, random);
-                    int numToWrite = random.nextInt(sectors.size());
-                    for(int c=0; c<numToWrite; c++) {
-                        long sector = sectors.get(c);
-                        long sectorEnd = sector+SECTOR_SIZE;
-                        if(sectorEnd>capacity) sectorEnd = capacity;
-                        wrapped.put(sector, writeCache.get(sector), 0, (int)(sectorEnd-sector));
-                    }
-                    writeCache.clear();
-                }
-                wrapped.barrier(true);
-                wrapped.close();
-                throw new IOException(failureMethod+": Random simulated failure.  The stream will be unusable to simulate power failure or software crash.");
-            }
-        }
-    }
+	/**
+	 * Fails in a one-in-interval chance.
+	 */
+	// @NotThreadSafe
+	private void randomFail(FailureMethod failureMethod) throws IOException {
+		if(allowFailures) {
+			if(random.nextInt(failureMethod.getFailInterval())==0) {
+				isClosed = true;
+				if(!writeCache.isEmpty()) {
+					long capacity = wrapped.capacity();
+					// Write current write cache in a partial state
+					List<Long> sectors = new ArrayList<>(writeCache.keySet());
+					Collections.shuffle(sectors, random);
+					int numToWrite = random.nextInt(sectors.size());
+					for(int c=0; c<numToWrite; c++) {
+						long sector = sectors.get(c);
+						long sectorEnd = sector+SECTOR_SIZE;
+						if(sectorEnd>capacity) sectorEnd = capacity;
+						wrapped.put(sector, writeCache.get(sector), 0, (int)(sectorEnd-sector));
+					}
+					writeCache.clear();
+				}
+				wrapped.barrier(true);
+				wrapped.close();
+				throw new IOException(failureMethod+": Random simulated failure.  The stream will be unusable to simulate power failure or software crash.");
+			}
+		}
+	}
 
-    // @NotThreadSafe
-    private void flushWriteCache() throws IOException {
-        if(!writeCache.isEmpty()) {
-            long capacity = wrapped.capacity();
-            // Write current write cache in full
-            for(Map.Entry<Long,byte[]> entry : writeCache.entrySet()) {
-                long sector = entry.getKey();
-                long sectorEnd = sector+SECTOR_SIZE;
-                if(sectorEnd>capacity) sectorEnd = capacity;
-                wrapped.put(sector, entry.getValue(), 0, (int)(sectorEnd-sector));
-            }
-            writeCache.clear();
-        }
-    }
+	// @NotThreadSafe
+	private void flushWriteCache() throws IOException {
+		if(!writeCache.isEmpty()) {
+			long capacity = wrapped.capacity();
+			// Write current write cache in full
+			for(Map.Entry<Long,byte[]> entry : writeCache.entrySet()) {
+				long sector = entry.getKey();
+				long sectorEnd = sector+SECTOR_SIZE;
+				if(sectorEnd>capacity) sectorEnd = capacity;
+				wrapped.put(sector, entry.getValue(), 0, (int)(sectorEnd-sector));
+			}
+			writeCache.clear();
+		}
+	}
 
-    // @NotThreadSafe
-    @Override
-    public boolean isClosed() {
-        return isClosed;
-    }
+	// @NotThreadSafe
+	@Override
+	public boolean isClosed() {
+		return isClosed;
+	}
 
-    // @NotThreadSafe
-    @Override
-    public void close() throws IOException {
-        flushWriteCache();
-        isClosed = true;
-        wrapped.close();
-    }
+	// @NotThreadSafe
+	@Override
+	public void close() throws IOException {
+		flushWriteCache();
+		isClosed = true;
+		wrapped.close();
+	}
 
-    /**
-     * Checks if closed and throws IOException if so.
-     */
-    // @NotThreadSafe
-    private void checkClosed() throws IOException {
-        if(isClosed) throw new IOException("RandomFailBuffer closed");
-    }
+	/**
+	 * Checks if closed and throws IOException if so.
+	 */
+	// @NotThreadSafe
+	private void checkClosed() throws IOException {
+		if(isClosed) throw new IOException("RandomFailBuffer closed");
+	}
 
-    // @NotThreadSafe
-    @Override
-    public long capacity() throws IOException {
-        checkClosed();
-        randomFail(FailureMethod.capacity);
-        return wrapped.capacity();
-    }
+	// @NotThreadSafe
+	@Override
+	public long capacity() throws IOException {
+		checkClosed();
+		randomFail(FailureMethod.capacity);
+		return wrapped.capacity();
+	}
 
-    // @NotThreadSafe
-    @Override
-    public void setCapacity(long newCapacity) throws IOException {
-        checkClosed();
-        randomFail(FailureMethod.setCapacity);
-        Iterator<Map.Entry<Long,byte[]>> entries = writeCache.entrySet().iterator();
-        while(entries.hasNext()) {
-            Map.Entry<Long,byte[]> entry = entries.next();
-            long sector = entry.getKey();
-            if(sector>=newCapacity) {
-                // Remove any cached writes that start >= newCapacity
-                entries.remove();
-            } else {
-                long sectorEnd = sector+SECTOR_SIZE;
-                if(newCapacity>=sector && newCapacity<sectorEnd) {
-                    // Also, zero-out any part of the last sector (beyond newCapacity) if it is a cached write
-                    Arrays.fill(entry.getValue(), (int)(newCapacity-sector), SECTOR_SIZE, (byte)0);
-                }
-            }
-        }
-        wrapped.setCapacity(newCapacity);
-    }
+	// @NotThreadSafe
+	@Override
+	public void setCapacity(long newCapacity) throws IOException {
+		checkClosed();
+		randomFail(FailureMethod.setCapacity);
+		Iterator<Map.Entry<Long,byte[]>> entries = writeCache.entrySet().iterator();
+		while(entries.hasNext()) {
+			Map.Entry<Long,byte[]> entry = entries.next();
+			long sector = entry.getKey();
+			if(sector>=newCapacity) {
+				// Remove any cached writes that start >= newCapacity
+				entries.remove();
+			} else {
+				long sectorEnd = sector+SECTOR_SIZE;
+				if(newCapacity>=sector && newCapacity<sectorEnd) {
+					// Also, zero-out any part of the last sector (beyond newCapacity) if it is a cached write
+					Arrays.fill(entry.getValue(), (int)(newCapacity-sector), SECTOR_SIZE, (byte)0);
+				}
+			}
+		}
+		wrapped.setCapacity(newCapacity);
+	}
 
-    // @NotThreadSafe
-    @Override
-    public int getSome(long position, final byte[] buff, int off, int len) throws IOException {
-        checkClosed();
-        if(position<0) throw new IllegalArgumentException("position<0: "+position);
-        if(off<0) throw new IllegalArgumentException("off<0: "+off);
-        if(len<0) throw new IllegalArgumentException("len<0: "+len);
-        final long end = position+len;
-        if(PersistentCollections.ASSERT) assert end<=capacity();
-        randomFail(FailureMethod.getSome);
-        int bytesRead = 0;
-        while(position<end) {
-            long sector = position&(-SECTOR_SIZE);
-            if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0 : "Sector not aligned";
-            int buffEnd = off + (SECTOR_SIZE+(int)(sector-position));
-            if(buffEnd>(off+len)) buffEnd = off+len;
-            int bytesToRead = buffEnd-off;
-            if(PersistentCollections.ASSERT) assert bytesToRead <= len;
-            byte[] cached = writeCache.get(sector);
-            int count;
-            if(cached!=null) {
-                System.arraycopy(cached, (int)(position-sector), buff, off, bytesToRead);
-                count = bytesToRead;
-            } else {
-                count = wrapped.getSome(position, buff, off, bytesToRead);
-            }
-            bytesRead += count;
-            if(count<bytesToRead) break;
-            position += count;
-            off += count;
-            len -= count;
-        }
-        return bytesRead;
-    }
+	// @NotThreadSafe
+	@Override
+	public int getSome(long position, final byte[] buff, int off, int len) throws IOException {
+		checkClosed();
+		if(position<0) throw new IllegalArgumentException("position<0: "+position);
+		if(off<0) throw new IllegalArgumentException("off<0: "+off);
+		if(len<0) throw new IllegalArgumentException("len<0: "+len);
+		final long end = position+len;
+		if(PersistentCollections.ASSERT) assert end<=capacity();
+		randomFail(FailureMethod.getSome);
+		int bytesRead = 0;
+		while(position<end) {
+			long sector = position&(-SECTOR_SIZE);
+			if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0 : "Sector not aligned";
+			int buffEnd = off + (SECTOR_SIZE+(int)(sector-position));
+			if(buffEnd>(off+len)) buffEnd = off+len;
+			int bytesToRead = buffEnd-off;
+			if(PersistentCollections.ASSERT) assert bytesToRead <= len;
+			byte[] cached = writeCache.get(sector);
+			int count;
+			if(cached!=null) {
+				System.arraycopy(cached, (int)(position-sector), buff, off, bytesToRead);
+				count = bytesToRead;
+			} else {
+				count = wrapped.getSome(position, buff, off, bytesToRead);
+			}
+			bytesRead += count;
+			if(count<bytesToRead) break;
+			position += count;
+			off += count;
+			len -= count;
+		}
+		return bytesRead;
+	}
 
-    // @NotThreadSafe
-    @Override
-    public void ensureZeros(long position, long len) throws IOException {
-        throw new NotImplementedException("Implement when first needed");
-    }
+	// @NotThreadSafe
+	@Override
+	public void ensureZeros(long position, long len) throws IOException {
+		throw new NotImplementedException("Implement when first needed");
+	}
 
-    // @NotThreadSafe
-    @Override
-    public void put(long position, byte[] buff, int off, int len) throws IOException {
-        checkClosed();
-        if(position<0) throw new IllegalArgumentException("position<0: "+position);
-        if(off<0) throw new IllegalArgumentException("off<0: "+off);
-        if(len<0) throw new IllegalArgumentException("len<0: "+len);
-        long capacity = capacity();
-        final long end = position+len;
-        if(PersistentCollections.ASSERT) assert end<=capacity;
-        randomFail(FailureMethod.put);
-        while(position<end) {
-            long sector = position&(-SECTOR_SIZE);
-            if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0 : "Sector not aligned";
-            int buffEnd = off + (SECTOR_SIZE+(int)(sector-position));
-            if(buffEnd>(off+len)) buffEnd = off+len;
-            int bytesToWrite = buffEnd-off;
-            byte[] cached = writeCache.get(sector);
-            if(cached==null) {
-                // Populate cache (consider capacity)
-                cached = new byte[SECTOR_SIZE];
-                long sectorEnd = sector+SECTOR_SIZE;
-                if(sectorEnd>capacity) sectorEnd = capacity;
-                wrapped.get(sector, cached, 0, (int)(sectorEnd-sector));
-                writeCache.put(sector, cached);
-            }
-            // Update cache only (do not write-through)
-            System.arraycopy(buff, off, cached, (int)(position-sector), bytesToWrite);
-            position += bytesToWrite;
-            off += bytesToWrite;
-            len -= bytesToWrite;
-        }
-    }
+	// @NotThreadSafe
+	@Override
+	public void put(long position, byte[] buff, int off, int len) throws IOException {
+		checkClosed();
+		if(position<0) throw new IllegalArgumentException("position<0: "+position);
+		if(off<0) throw new IllegalArgumentException("off<0: "+off);
+		if(len<0) throw new IllegalArgumentException("len<0: "+len);
+		long capacity = capacity();
+		final long end = position+len;
+		if(PersistentCollections.ASSERT) assert end<=capacity;
+		randomFail(FailureMethod.put);
+		while(position<end) {
+			long sector = position&(-SECTOR_SIZE);
+			if(PersistentCollections.ASSERT) assert (sector&(SECTOR_SIZE-1))==0 : "Sector not aligned";
+			int buffEnd = off + (SECTOR_SIZE+(int)(sector-position));
+			if(buffEnd>(off+len)) buffEnd = off+len;
+			int bytesToWrite = buffEnd-off;
+			byte[] cached = writeCache.get(sector);
+			if(cached==null) {
+				// Populate cache (consider capacity)
+				cached = new byte[SECTOR_SIZE];
+				long sectorEnd = sector+SECTOR_SIZE;
+				if(sectorEnd>capacity) sectorEnd = capacity;
+				wrapped.get(sector, cached, 0, (int)(sectorEnd-sector));
+				writeCache.put(sector, cached);
+			}
+			// Update cache only (do not write-through)
+			System.arraycopy(buff, off, cached, (int)(position-sector), bytesToWrite);
+			position += bytesToWrite;
+			off += bytesToWrite;
+			len -= bytesToWrite;
+		}
+	}
 
-    @Override
-    // @ThreadSafe
-    public ProtectionLevel getProtectionLevel() {
-        return wrapped.getProtectionLevel();
-    }
+	@Override
+	// @ThreadSafe
+	public ProtectionLevel getProtectionLevel() {
+		return wrapped.getProtectionLevel();
+	}
 
-    // @NotThreadSafe
-    @Override
-    public void barrier(boolean force) throws IOException {
-        checkClosed();
-        randomFail(FailureMethod.barrier);
-        flushWriteCache();
-        wrapped.barrier(force);
-    }
+	// @NotThreadSafe
+	@Override
+	public void barrier(boolean force) throws IOException {
+		checkClosed();
+		randomFail(FailureMethod.barrier);
+		flushWriteCache();
+		wrapped.barrier(force);
+	}
 }
