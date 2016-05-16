@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015  AO Industries, Inc.
+ * Copyright (C) 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -45,10 +45,13 @@ public class UrlUtils {
     /**
      * UTF-8 encodes the URL up to the first ?, if present.  Does not encode
      * any characters in the set { '?', ':', '/', ';', '#', '+' }.
-	 * 
+	 *
+	 * Encodes tel: (case-sensitive) urls by relacing spaces with hyphens.
+	 *
 	 * @see  #decodeUrlPath(java.lang.String) 
      */
     public static String encodeUrlPath(String href) throws UnsupportedEncodingException {
+		if(href.startsWith("tel:")) return href.replace(' ', '-');
         int len = href.length();
         int pos = 0;
         StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
@@ -76,10 +79,13 @@ public class UrlUtils {
 	/**
      * UTF-8 decodes the URL up to the first ?, if present.  Does not decode
      * any characters in the set { '?', ':', '/', ';', '#', '+' }.
+	 *
+	 * Does not decode tel: urls (case-sensitive).
 	 * 
 	 * @see  #encodeUrlPath(java.lang.String) 
      */
     public static String decodeUrlPath(String href) throws UnsupportedEncodingException {
+		if(href.startsWith("tel:")) return href;
         int len = href.length();
         int pos = 0;
         StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding

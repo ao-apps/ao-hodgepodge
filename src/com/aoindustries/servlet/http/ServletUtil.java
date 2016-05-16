@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -49,7 +49,7 @@ public class ServletUtil {
     /**
      * Converts a possibly-relative path to a context-relative absolute path.
      * Resolves ./ and ../ at the beginning of the URL but not in the middle of the URL.
-	 * If the URL begins with http:, https:, file:, mailto:, or cid:, it is not altered.
+	 * If the URL begins with http:, https:, file:, mailto:, tel:, or cid:, it is not altered.
 	 * 
 	 * @param  servletPath  Required when path might be altered.
      */
@@ -63,6 +63,7 @@ public class ServletUtil {
 			&& !relativeUrlPath.startsWith("https:")
 			&& !relativeUrlPath.startsWith("file:")
 			&& !relativeUrlPath.startsWith("mailto:")
+			&& !relativeUrlPath.startsWith("tel:")
 			&& !relativeUrlPath.startsWith("cid:")
 		) {
 			NullArgumentException.checkNotNull(servletPath, "servletPath");

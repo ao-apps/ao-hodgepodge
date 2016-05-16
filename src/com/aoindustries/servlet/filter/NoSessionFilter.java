@@ -350,6 +350,8 @@ public class NoSessionFilter implements Filter {
 									return url;
 								} else if(url.startsWith("mailto:")) {
 									return url;
+								} else if(url.startsWith("tel:")) {
+									return url;
 								} else if(url.startsWith("cid:")) {
 									return url;
 								} else {
@@ -394,7 +396,7 @@ public class NoSessionFilter implements Filter {
 									remaining = url.substring(8);
 								} else if(url.startsWith("javascript:")) {
 									return url;
-								} else if(url.startsWith("mailto:")) {
+								} else if(url.startsWith("tel:")) {
 									return url;
 								} else if(url.startsWith("cid:")) {
 									return url;
