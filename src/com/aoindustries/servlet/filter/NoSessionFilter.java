@@ -350,6 +350,8 @@ public class NoSessionFilter implements Filter {
 									return url;
 								} else if(url.startsWith("mailto:")) {
 									return url;
+								} else if(url.startsWith("telnet:")) {
+									return url;
 								} else if(url.startsWith("tel:")) {
 									return url;
 								} else if(url.startsWith("cid:")) {

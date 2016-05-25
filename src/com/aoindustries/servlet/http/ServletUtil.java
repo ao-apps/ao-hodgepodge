@@ -49,7 +49,7 @@ public class ServletUtil {
     /**
      * Converts a possibly-relative path to a context-relative absolute path.
      * Resolves ./ and ../ at the beginning of the URL but not in the middle of the URL.
-	 * If the URL begins with http:, https:, file:, mailto:, tel:, or cid:, it is not altered.
+	 * If the URL begins with http:, https:, file:, mailto:, telnet:, tel:, or cid:, it is not altered.
 	 * 
 	 * @param  servletPath  Required when path might be altered.
      */
@@ -63,6 +63,7 @@ public class ServletUtil {
 			&& !relativeUrlPath.startsWith("https:")
 			&& !relativeUrlPath.startsWith("file:")
 			&& !relativeUrlPath.startsWith("mailto:")
+			&& !relativeUrlPath.startsWith("telnet:")
 			&& !relativeUrlPath.startsWith("tel:")
 			&& !relativeUrlPath.startsWith("cid:")
 		) {
