@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -28,9 +28,18 @@ import java.nio.charset.Charset;
  * Defines some constants for handling standard character sets.
  *
  * @author  AO Industries, Inc.
+ * 
+ * @deprecated  Use java.nio.charset.StandardCharsets as of Java 1.7
+ * @see java.nio.charset.StandardCharsets
  */
+@Deprecated
 public class Charsets {
 
+	/**
+	 * @deprecated  Use java.nio.charset.StandardCharsets as of Java 1.7
+	 * @see java.nio.charset.StandardCharsets
+	 */
+	@Deprecated
     public static final Charset
         US_ASCII   = Charset.forName("US-ASCII"),
         ISO_8859_1 = Charset.forName("ISO-8859-1"),
