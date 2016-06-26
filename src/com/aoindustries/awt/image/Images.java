@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -121,16 +121,16 @@ final public class Images {
 	 */
 	public static Point findImage(int[] imagePixels, int imageWidth, int imageHeight, int[] findmePixels, int findmeWidth, int findmeHeight, double tolerance) {
 		final int searchWidth = imageWidth - findmeWidth;
-		if(searchWidth>0) {
+		if(searchWidth >= 0) {
 			final int searchHeight = imageHeight - findmeHeight;
-			if(searchHeight>0) {
+			if(searchHeight >= 0) {
 				// Each pixel can deviate by up to 255 for each primary color
 				final double maxDeviation = (double)3 * (double)255 * (double)findmeWidth * (double)findmeHeight;
 				final long maxMismatch = (long)(tolerance * maxDeviation);
 				// Get pixels all at once
-				for(int imageY=0; imageY<searchHeight; imageY++) {
+				for(int imageY = 0; imageY <= searchHeight; imageY++) {
 NextLocation :
-					for(int imageX=0; imageX<searchWidth; imageX++) {
+					for(int imageX = 0; imageX <= searchWidth; imageX++) {
 						long totalMismatch = 0;
 						int findMeIndex = 0;
 						for(int findmeY=0; findmeY<findmeHeight; findmeY++) {
