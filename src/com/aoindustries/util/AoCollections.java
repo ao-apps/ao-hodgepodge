@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.lang.ObjectUtils;
 import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.AbstractSet;
@@ -38,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -168,7 +168,7 @@ public class AoCollections {
 		}
 
 		@Override
-		public boolean contains(Object o) {return ObjectUtils.equals(o, element);}
+		public boolean contains(Object o) {return Objects.equals(o, element);}
 
 		@Override
 		public Comparator<? super E> comparator() {
@@ -177,19 +177,19 @@ public class AoCollections {
 
 		@Override
 		public SortedSet<E> subSet(E fromElement, E toElement) {
-			if(ObjectUtils.equals(element, fromElement) && ObjectUtils.equals(element, toElement)) return emptySortedSet();
+			if(Objects.equals(element, fromElement) && Objects.equals(element, toElement)) return emptySortedSet();
 			throw new IllegalArgumentException();
 		}
 
 		@Override
 		public SortedSet<E> headSet(E toElement) {
-			if(ObjectUtils.equals(element, toElement)) return emptySortedSet();
+			if(Objects.equals(element, toElement)) return emptySortedSet();
 			throw new IllegalArgumentException();
 		}
 
 		@Override
 		public SortedSet<E> tailSet(E fromElement) {
-			if(ObjectUtils.equals(element, fromElement)) return this;
+			if(Objects.equals(element, fromElement)) return this;
 			throw new IllegalArgumentException();
 		}
 
@@ -670,7 +670,7 @@ public class AoCollections {
 					int count = 0;
 					while(iter1.hasNext() && iter2.hasNext()) {
 						if(
-							!ObjectUtils.equals(
+							!Objects.equals(
 								iter1.next(),
 								iter2.next()
 							)
@@ -703,4 +703,70 @@ public class AoCollections {
 		}
 		return hashCode;
 	}
+
+	/**
+	 * Filters a list for all elements of a given class.
+	 */
+	public static <E,R extends E> List<R> filter(List<E> list, Class<R> clazz) {
+		if(list==null) return Collections.emptyList();
+		else {
+			/* Imperative version: */
+			List<R> results = new ArrayList<>();
+			for(E element : list) {
+				if(clazz.isInstance(element)) {
+					results.add(clazz.cast(element));
+				}
+			}
+			return Collections.unmodifiableList(results);
+			/* Functional version:
+			return Collections.unmodifiableList(
+				list
+					.stream()
+					.filter(e -> clazz.isInstance(e))
+					.map(e -> clazz.cast(e))
+					.collect(Collectors.toList())
+			);
+			 */
+		}
+	}
+//	private static <K,S,V extends S> Map<K,V> filter(Map<K,S> map, Class<V> clazz) {
+//		return filter(map, clazz, LinkedHashMap::new);
+//	}
+//	private static <K,V,R extends V> Map<K,R> filter(Map<K,V> map, Class<R> clazz, Supplier<Map<K,R>> mapSupplier) {
+//		if(map==null) return Collections.emptyMap();
+//		else {
+//			// Imperative version:
+////			Map<K,R> results = mapSupplier.get();
+////			for(Map.Entry<K,V> entry : map.entrySet()) {
+////				V value = entry.getValue();
+////				if(clazz.isInstance(value)) results.put(entry.getKey(), clazz.cast(value));
+////			}
+////			return Collections.unmodifiableMap(results);
+//			// Mixed functional/imperative:
+//			Map<K,R> results = mapSupplier.get();
+//			map.forEach(
+//				(key, value) -> {
+//					if(clazz.isInstance(value)) results.put(key, clazz.cast(value));
+//				}
+//			);
+//			return Collections.unmodifiableMap(results);
+//			// Functional version:
+////			return Collections.unmodifiableMap(
+////				map
+////					.entrySet()
+////					.stream()
+////					.filter(e -> e.getValue() instanceof Contact)
+////					.collect(
+////						Collectors.toMap(
+////							Map.Entry::getKey,
+////							e -> clazz.cast(e.getValue()),
+////							(u, v) -> {
+////								throw new AssertionError("Duplicate keys should not happen since we use key from original map");
+////							},
+////							mapSupplier
+////						)
+////					)
+////			);
+//		}
+//	}
 }
