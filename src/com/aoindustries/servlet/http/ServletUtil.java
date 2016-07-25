@@ -247,7 +247,7 @@ public class ServletUtil {
         href = getAbsolutePath(servletPath, href);
 
         // Encode URL path elements (like Japanese filenames)
-        href = UrlUtils.encodeUrlPath(href);
+        href = UrlUtils.encodeUrlPath(href, response.getCharacterEncoding());
 
         // Perform URL rewriting
         href = response.encodeRedirectURL(href);

@@ -65,6 +65,9 @@ import javax.servlet.http.HttpServletResponse;
  * Specifically, it only looks for URLs on a line-by-line basis and does not
  * support blackslash (\) escapes.
  * </p>
+ * <p>
+ * All files must be in the UTF-8 encoding.
+ * </p>
  */
 public class LastModifiedServlet extends HttpServlet {
 

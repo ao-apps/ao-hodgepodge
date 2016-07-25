@@ -43,14 +43,14 @@ public class UrlUtils {
     };
 
     /**
-     * UTF-8 encodes the URL up to the first ?, if present.  Does not encode
+     * Encodes the URL up to the first ?, if present.  Does not encode
      * any characters in the set { '?', ':', '/', ';', '#', '+' }.
 	 *
 	 * Encodes tel: (case-sensitive) urls by relacing spaces with hyphens.
 	 *
 	 * @see  #decodeUrlPath(java.lang.String) 
      */
-    public static String encodeUrlPath(String href) throws UnsupportedEncodingException {
+    public static String encodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
 		if(href.startsWith("tel:")) return href.replace(' ', '-');
         int len = href.length();
         int pos = 0;
@@ -58,10 +58,10 @@ public class UrlUtils {
         while(pos<len) {
             int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
             if(nextPos==-1) {
-                SB.append(URLEncoder.encode(href.substring(pos, len), "UTF-8"));
+                SB.append(URLEncoder.encode(href.substring(pos, len), encoding));
                 pos = len;
             } else {
-                SB.append(URLEncoder.encode(href.substring(pos, nextPos), "UTF-8"));
+                SB.append(URLEncoder.encode(href.substring(pos, nextPos), encoding));
                 char nextChar = href.charAt(nextPos);
                 if(nextChar=='?') {
                     // End encoding
@@ -77,14 +77,14 @@ public class UrlUtils {
     }
 
 	/**
-     * UTF-8 decodes the URL up to the first ?, if present.  Does not decode
+     * Decodes the URL up to the first ?, if present.  Does not decode
      * any characters in the set { '?', ':', '/', ';', '#', '+' }.
 	 *
 	 * Does not decode tel: urls (case-sensitive).
 	 * 
 	 * @see  #encodeUrlPath(java.lang.String) 
      */
-    public static String decodeUrlPath(String href) throws UnsupportedEncodingException {
+    public static String decodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
 		if(href.startsWith("tel:")) return href;
         int len = href.length();
         int pos = 0;
@@ -92,10 +92,10 @@ public class UrlUtils {
         while(pos<len) {
             int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
             if(nextPos==-1) {
-                SB.append(URLDecoder.decode(href.substring(pos, len), "UTF-8"));
+                SB.append(URLDecoder.decode(href.substring(pos, len), encoding));
                 pos = len;
             } else {
-                SB.append(URLDecoder.decode(href.substring(pos, nextPos), "UTF-8"));
+                SB.append(URLDecoder.decode(href.substring(pos, nextPos), encoding));
                 char nextChar = href.charAt(nextPos);
                 if(nextChar=='?') {
                     // End decoding

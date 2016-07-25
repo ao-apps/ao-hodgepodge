@@ -44,7 +44,7 @@ public class Base64Coder {
           for (int i=0; i<64; i++) map2[map1[i]] = (byte)i; }
 
     /**
-    * Encodes a string into Base64 format.
+    * Encodes a string into Base64 format with UTF-8 encoding.
     * No blanks or line breaks are inserted.
     * @param s  a String to be encoded.
     * @return   A String with the Base64 encoded data.

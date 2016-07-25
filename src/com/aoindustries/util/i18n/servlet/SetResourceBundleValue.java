@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,7 +27,6 @@ import com.aoindustries.util.i18n.Locales;
 import com.aoindustries.util.i18n.ModifiableResourceBundle;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javax.servlet.ServletConfig;
@@ -42,18 +41,6 @@ import javax.servlet.http.HttpServletResponse;
 public class SetResourceBundleValue extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Having trouble with XMLHttpRequest in Firefox 3 and UTF-8 encoding.  This is a workaround.
-     */
-    static String getUTF8Parameter(HttpServletRequest request, String name) throws UnsupportedEncodingException {
-        String value = request.getParameter(name);
-        //System.out.println("DEBUG: SetResourceBundleValue: value..............="+value);
-        if(value==null) return null;
-        //System.out.println("DEBUG: SetResourceBundleValue: Converted would be ="+new String(value.getBytes("iso-8859-1"), "UTF-8"));
-        // return new String(value.getBytes("iso-8859-1"), "UTF-8");
-        return value;
-    }
 
     public SetResourceBundleValue() {
     }
@@ -70,10 +57,10 @@ public class SetResourceBundleValue extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Must have the required role
         if("*".equals(role) || request.isUserInRole(role)) {
-            String baseName = getUTF8Parameter(request, "baseName");
-            Locale locale = Locales.parseLocale(getUTF8Parameter(request, "locale"));
-            String key = getUTF8Parameter(request, "key");
-            String value = getUTF8Parameter(request, "value");
+            String baseName = request.getParameter("baseName");
+            Locale locale = Locales.parseLocale(request.getParameter("locale"));
+            String key = request.getParameter("key");
+            String value = request.getParameter("value");
             //for(int c=0;c<value.length();c++) System.out.println(Integer.toHexString(value.charAt(c)));
             boolean modified = "true".equals(request.getParameter("modified"));
 
