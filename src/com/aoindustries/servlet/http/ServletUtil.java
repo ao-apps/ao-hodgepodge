@@ -27,13 +27,16 @@ import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.net.UrlUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -322,5 +325,106 @@ public class ServletUtil {
         } else {
 	        return requestUri;
 		}
+    }
+
+	public static final String METHOD_DELETE = "DELETE";
+    public static final String METHOD_HEAD = "HEAD";
+    public static final String METHOD_GET = "GET";
+    public static final String METHOD_OPTIONS = "OPTIONS";
+    public static final String METHOD_POST = "POST";
+    public static final String METHOD_PUT = "PUT";
+    public static final String METHOD_TRACE = "TRACE";
+
+    public static Method[] getAllDeclaredMethods(Class<?> stopClass, Class<?> c) {
+        if (c.equals(stopClass)) {
+            return null;
+        }
+        Method[] parentMethods = getAllDeclaredMethods(stopClass, c.getSuperclass());
+        Method[] thisMethods = c.getDeclaredMethods();
+        if ((parentMethods != null) && (parentMethods.length > 0)) {
+            Method[] allMethods = new Method[parentMethods.length + thisMethods.length];
+            System.arraycopy(
+				parentMethods, 0,
+				allMethods, 0,
+				parentMethods.length
+			);
+			System.arraycopy(
+				thisMethods, 0,
+				allMethods, parentMethods.length,
+				thisMethods.length
+			);
+	 	    thisMethods = allMethods;
+	 	}
+	 	return thisMethods;
+    }
+
+	/**
+	 * A reusable doOptions implementation for servlets.
+	 */
+    public static <S extends HttpServlet> void doOptions(
+		HttpServletResponse response,
+		Class<S> stopClass,
+		Class<? extends S> thisClass,
+		String doGet,
+		String doPost,
+		String doPut,
+		String doDelete,
+		Class<?>[] paramTypes
+	) {
+		boolean ALLOW_GET = false;
+		boolean ALLOW_HEAD = false;
+		boolean ALLOW_POST = false;
+		boolean ALLOW_PUT = false;
+		boolean ALLOW_DELETE = false;
+		boolean ALLOW_TRACE = true;
+		boolean ALLOW_OPTIONS = true;
+		for (
+			Method method
+			: getAllDeclaredMethods(stopClass, thisClass)
+		) {
+			if(Arrays.equals(paramTypes, method.getParameterTypes())) {
+				String methodName = method.getName();
+				if (doGet.equals(methodName)) {
+					ALLOW_GET = true;
+					ALLOW_HEAD = true;
+				} else if (doPost.equals(methodName)) {
+					ALLOW_POST = true;
+				} else if (doPut.equals(methodName)) {
+					ALLOW_PUT = true;
+				} else if (doDelete.equals(methodName)) {
+					ALLOW_DELETE = true;
+				}
+			}
+		}
+		StringBuilder allow = new StringBuilder();
+		if (ALLOW_GET) {
+			// if(allow.length() != 0) allow.append(", ");
+	 	    allow.append(METHOD_GET);
+		}
+	 	if (ALLOW_HEAD) {
+			if(allow.length() != 0) allow.append(", ");
+	 	    allow.append(METHOD_HEAD);
+		}
+	 	if (ALLOW_POST) {
+			if(allow.length() != 0) allow.append(", ");
+	 	    allow.append(METHOD_POST);
+		}
+	 	if (ALLOW_PUT) {
+			if(allow.length() != 0) allow.append(", ");
+	 	    allow.append(METHOD_PUT);
+		}
+	 	if (ALLOW_DELETE) {
+			if(allow.length() != 0) allow.append(", ");
+	 	    allow.append(METHOD_DELETE);
+		}
+	 	if (ALLOW_TRACE) {
+			if(allow.length() != 0) allow.append(", ");
+	 	    allow.append(METHOD_TRACE);
+		}
+	 	if (ALLOW_OPTIONS) {
+			if(allow.length() != 0) allow.append(", ");
+	 	    allow.append(METHOD_OPTIONS);
+		}
+	 	response.setHeader("Allow", allow.toString());
     }
 }
