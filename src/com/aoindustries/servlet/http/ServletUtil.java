@@ -33,6 +33,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,6 +46,16 @@ public class ServletUtil {
 
     private ServletUtil() {
     }
+
+	private static final String DEFAULT_REQUEST_ENCODING = "ISO-8859-1";
+
+	/**
+	 * Gets the request encoding or ISO-8859-1 when not available.
+	 */
+	public static String getRequestEncoding(ServletRequest request) {
+		String requestEncoding = request.getCharacterEncoding();
+		return requestEncoding != null ? requestEncoding : DEFAULT_REQUEST_ENCODING;
+	}
 
     /**
      * Converts a possibly-relative path to a context-relative absolute path.
