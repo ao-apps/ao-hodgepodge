@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,7 +37,7 @@ final public class HttpParametersUtils {
     /**
      * Adds all of the parameters to a URL.
      */
-    public static String addParams(String href, HttpParameters params) throws UnsupportedEncodingException {
+    public static String addParams(String href, HttpParameters params, String encoding) throws UnsupportedEncodingException {
         if(params!=null) {
             StringBuilder sb = new StringBuilder(href);
 			// First find any anchor and if has parameters
@@ -53,7 +53,7 @@ final public class HttpParametersUtils {
 				hasQuestion = href.lastIndexOf('?', anchorStart-1) != -1;
 			}
             for(Map.Entry<String,List<String>> entry : params.getParameterMap().entrySet()) {
-                String encodedName = URLEncoder.encode(entry.getKey(), "UTF-8");
+                String encodedName = URLEncoder.encode(entry.getKey(), encoding);
                 for(String value : entry.getValue()) {
                     if(hasQuestion) sb.append('&');
                     else {
@@ -62,7 +62,7 @@ final public class HttpParametersUtils {
                     }
                     sb.append(encodedName);
 					assert value!=null : "null values no longer supported to be consistent with servlet environment";
-                    sb.append('=').append(URLEncoder.encode(value, "UTF-8"));
+                    sb.append('=').append(URLEncoder.encode(value, encoding));
                 }
             }
 			if(anchor!=null) sb.append(anchor);

@@ -40,8 +40,6 @@ import java.util.TreeMap;
  */
 public class HttpParametersMap implements MutableHttpParameters {
 
-	private static final String DEFAULT_ENCODING = "UTF-8";
-
 	private final Map<String,List<String>> map = new TreeMap<>();
 	private final Map<String,List<String>> unmodifiableMap = Collections.unmodifiableMap(map);
 
@@ -49,17 +47,6 @@ public class HttpParametersMap implements MutableHttpParameters {
 	 * Creates an empty set of parameters.
 	 */
 	public HttpParametersMap() {
-	}
-
-	/**
-	 * Parses the provided URL-Encoded parameter string in the UTF-8 encoding.
-	 */
-	public HttpParametersMap(String parameters) {
-		try {
-			init(parameters, DEFAULT_ENCODING);
-		} catch(UnsupportedEncodingException e) {
-			throw new RuntimeException(DEFAULT_ENCODING + " should be supported on all platforms", e);
-		}
 	}
 
 	/**

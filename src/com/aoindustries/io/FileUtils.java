@@ -304,15 +304,14 @@ final public class FileUtils {
 
 	/**
 	 * Gets a File for a URL, retrieving the contents into a temporary file if needed.
-	 * Assumes URL is UTF-8 encoded.
 	 *
 	 * @param  deleteOnExit  when <code>true</code>, any newly created temp file will be flagged for deleteRecursive of exit
 	 */
-	public static File getFile(URL url, boolean deleteOnExit) throws IOException {
+	public static File getFile(URL url, String urlEncoding, boolean deleteOnExit) throws IOException {
 		if("file".equalsIgnoreCase(url.getProtocol())) {
 			String path = url.getFile();
 			if(path.length()>0) {
-				File file = new File(URLDecoder.decode(path, "UTF-8").replace('/', File.separatorChar));
+				File file = new File(URLDecoder.decode(path, urlEncoding).replace('/', File.separatorChar));
 				if(file.exists() && file.isFile()) return file;
 			}
 		}
