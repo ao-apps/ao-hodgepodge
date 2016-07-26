@@ -22,10 +22,19 @@
  */
 package com.aoindustries.net;
 
+import com.aoindustries.servlet.http.Dispatcher;
+import com.aoindustries.servlet.http.LastModifiedServlet;
+import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.util.StringUtility;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.PageContext;
 
 /**
  * Encoding helper utilities.
@@ -109,4 +118,80 @@ public class UrlUtils {
         }
         return SB.toString();
     }
+
+	/**
+	 * Performs all the proper URL conversions along with optionally adding a lastModified parameter.
+	 * This includes:
+	 * <ol>
+	 *   <li>Converting any page-relative path to a context-relative path starting with a slash (/)</li>
+	 *   <li>Adding any additional parameters</li>
+	 *   <li>Optionally adding lastModified parameter</li>
+	 *   <li>Converting any context-relative path to a site-relative path by prefixing contextPath</li>
+	 *   <li>Encoding any non-ASCII characters in the URL path</li>
+	 *   <li>Rewrite with response.encodeURL</li>
+	 * </ol>
+	 */
+	public static String buildUrl(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String href,
+		HttpParameters params,
+		boolean hrefAbsolute,
+		LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws MalformedURLException, UnsupportedEncodingException {
+		String responseEncoding = response.getCharacterEncoding();
+		String servletPath = Dispatcher.getCurrentPagePath(request);
+        href = ServletUtil.getAbsolutePath(servletPath, href);
+		href = HttpParametersUtils.addParams(href, params, responseEncoding);
+		href = LastModifiedServlet.addLastModified(servletContext, request, servletPath, href, addLastModified);
+		if(!hrefAbsolute && href.startsWith("/")) {
+			String contextPath = request.getContextPath();
+			if(contextPath.length()>0) href = contextPath + href;
+		}
+		href = encodeUrlPath(href, responseEncoding);
+		href= response.encodeURL(href);
+        if(hrefAbsolute && href.startsWith("/")) href = ServletUtil.getAbsoluteURL(request, href);
+		return href;
+	}
+
+	/**
+	 * @see  #buildUrl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, com.aoindustries.net.HttpParameters, boolean) 
+	 */
+	public static String buildUrl(
+		PageContext pageContext,
+		String href,
+		HttpParameters params,
+		boolean hrefAbsolute,
+		LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws MalformedURLException, UnsupportedEncodingException {
+		return buildUrl(
+			pageContext.getServletContext(),
+			(HttpServletRequest)pageContext.getRequest(),
+			(HttpServletResponse)pageContext.getResponse(),
+			href,
+			params,
+			hrefAbsolute,
+			addLastModified
+		);
+	}
+
+	/**
+	 * @see  #buildUrl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, com.aoindustries.net.HttpParameters, boolean) 
+	 */
+	public static String buildUrl(
+		JspContext jspContext,
+		String src,
+		HttpParameters params,
+		boolean srcAbsolute,
+		LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws MalformedURLException, UnsupportedEncodingException {
+		return buildUrl(
+			(PageContext)jspContext,
+			src,
+			params,
+			srcAbsolute,
+			addLastModified
+		);
+	}
 }
