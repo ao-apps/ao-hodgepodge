@@ -187,7 +187,7 @@ final public class FileUtils {
 	 * @exception  IOException  if mkdirs fails.
 	 */
 	public static File mkdirs(File directory) throws IOException {
-		if(!directory.mkdirs()) throw new IOException("Unable to create directory or any of its parents: "+directory.getPath());
+		if(!directory.mkdirs()) throw new IOException("Unable to create directory or one of its parents: "+directory.getPath());
 		return directory;
 	}
 

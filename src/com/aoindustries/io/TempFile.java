@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -47,7 +47,13 @@ public class TempFile {
 		this(prefix, suffix, null);
 	}
 
+	/**
+	 * Creates the temp directory if missing.
+	 */
 	public TempFile(String prefix, String suffix, File directory) throws IOException {
+		File checkDir = directory;
+		if(checkDir == null) checkDir = new File(System.getProperty("java.io.tmpdir"));
+		if(!checkDir.exists()) FileUtils.mkdirs(checkDir);
 		tempFile = File.createTempFile(prefix, suffix, directory);
 		tempFile.deleteOnExit();
 		path = tempFile.getPath();
