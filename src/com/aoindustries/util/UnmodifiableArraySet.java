@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2014  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -45,7 +45,7 @@ import java.util.NoSuchElementException;
  * </p>
  * <p>
  * This set will generally operate at O(log n) due to binary search.  In general, it will
- * not be as fast as the O(1) behavior or HashSet.  Here we give up speed to save space.
+ * not be as fast as the O(1) behavior of HashSet.  Here we give up speed to save space.
  * </p>
  * <p>
  * This set is not thread safe.

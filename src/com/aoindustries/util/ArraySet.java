@@ -42,7 +42,7 @@ import java.util.Iterator;
  * </p>
  * <p>
  * This set will generally operate at O(log n) due to binary search.  In general, it will
- * not be as fast as the O(1) behavior or HashSet.  Here we give up speed to save space.
+ * not be as fast as the O(1) behavior of HashSet.  Here we give up speed to save space.
  * </p>
  * <p>
  * This set is not thread safe.
