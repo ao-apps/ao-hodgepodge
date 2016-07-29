@@ -266,7 +266,13 @@ public class AoCollections {
 	 * Gets the optimal implementation for unmodifiable list.
 	 * If list is empty, uses <code>Collections.emptyList</code>.
 	 * If list has one element, uses <code>Collections.singletonList</code>.
-	 * Otherwise, wraps the list with <code>Collections.unmodifiableList</code>.
+	 * Otherwise, wraps the list with <code>Collections.unmodifiableList</code>,
+	 * and will also call "trimToSize" if the list is an ArrayList.
+	 *
+	 * @see Collections#emptyList()
+	 * @see Collections#singletonList(java.lang.Object)
+	 * @see ArrayList#trimToSize()
+	 * @see Collections#unmodifiableList(java.util.List)
 	 */
 	public static <T> List<T> optimalUnmodifiableList(List<T> list) {
 		int size = list.size();
@@ -274,6 +280,7 @@ public class AoCollections {
 		Class<?> clazz = list.getClass();
 		for(int i=0, len=unmodifiableListClasses.length; i<len; i++) if(unmodifiableListClasses[i]==clazz) return list;
 		if(size==1) return Collections.singletonList(list.get(0));
+		if(list instanceof ArrayList) ((ArrayList)list).trimToSize();
 		return Collections.unmodifiableList(list);
 	}
 
