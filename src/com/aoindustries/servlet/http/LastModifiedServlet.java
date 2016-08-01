@@ -531,7 +531,7 @@ public class LastModifiedServlet extends HttpServlet {
 					int questionPos = resourcePath.lastIndexOf('?');
 					resourcePath = questionPos==-1 ? resourcePath : resourcePath.substring(0, questionPos);
 				}
-				String extension = FileUtils.getExtension(resourcePath).toLowerCase(Locale.ENGLISH);
+				String extension = FileUtils.getExtension(resourcePath).toLowerCase(Locale.ROOT);
 				final boolean doAdd;
 				if(when == AddLastModifiedWhen.TRUE) {
 					// Always try to add

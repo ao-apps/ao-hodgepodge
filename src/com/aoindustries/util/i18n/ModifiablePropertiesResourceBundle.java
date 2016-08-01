@@ -333,7 +333,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 				private static final long serialVersionUID = 6953022173340009928L;
 				@Override
 				public Enumeration<Object> keys() {
-					SortedSet<Object> sortedSet = new TreeSet<>(Collator.getInstance(Locale.ENGLISH));
+					SortedSet<Object> sortedSet = new TreeSet<>(Collator.getInstance(Locale.ROOT));
 					Enumeration<Object> e = super.keys();
 					while(e.hasMoreElements()) sortedSet.add(e.nextElement());
 					return Collections.enumeration(sortedSet);

@@ -40,16 +40,16 @@ public class SortedProperties extends Properties {
 	private static final long serialVersionUID = 1L;
 
 	public SortedProperties() {
-	super();
+		super();
 	}
 
 	public SortedProperties(Properties defaults) {
-	super(defaults);
+		super(defaults);
 	}
 
 	@Override
 	public Enumeration<Object> keys() {
-		SortedSet<Object> sortedSet = new TreeSet<>(Collator.getInstance(Locale.ENGLISH));
+		SortedSet<Object> sortedSet = new TreeSet<>(Collator.getInstance(Locale.ROOT));
 		Enumeration<Object> e = super.keys();
 		while(e.hasMoreElements()) sortedSet.add(e.nextElement());
 		return Collections.enumeration(sortedSet);

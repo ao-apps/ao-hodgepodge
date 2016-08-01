@@ -27,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * Convenience static access to more locales than provided by the stock Locale class.
+ *
  * @author  AO Industries, Inc.
  */
 public class Locales {
@@ -74,8 +76,8 @@ public class Locales {
 		 * @see  Locales#getCachedLocale(java.lang.String, java.lang.String, java.lang.String)
 		 */
 		private static Locale getCachedLocale(String language, String country, String variant) {
-			language = language.toLowerCase(Locale.ENGLISH);
-			country = country.toUpperCase(Locale.ENGLISH);
+			language = language.toLowerCase(Locale.ROOT);
+			country = country.toUpperCase(Locale.ROOT);
 			CacheKey key = new CacheKey(language, country, variant);
 			Locale locale = locales.get(key);
 			if(locale == null) {
@@ -152,14 +154,14 @@ public class Locales {
 			int pos2 = indexOfSeparator(locale, pos+1);
 			if(pos2 == -1) {
 				return getCachedLocale(
-					locale.substring(0, pos).toLowerCase(Locale.ENGLISH),
-					locale.substring(pos + 1).toUpperCase(Locale.ENGLISH),
+					locale.substring(0, pos).toLowerCase(Locale.ROOT),
+					locale.substring(pos + 1).toUpperCase(Locale.ROOT),
 					""
 				);
 			} else {
 				return getCachedLocale(
-					locale.substring(0, pos).toLowerCase(Locale.ENGLISH),
-					locale.substring(pos + 1, pos2).toUpperCase(Locale.ENGLISH),
+					locale.substring(0, pos).toLowerCase(Locale.ROOT),
+					locale.substring(pos + 1, pos2).toUpperCase(Locale.ROOT),
 					locale.substring(pos2 + 1)
 				);
 			}

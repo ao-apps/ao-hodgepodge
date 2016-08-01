@@ -95,7 +95,7 @@ final public class RGBColor {
 		}
 
 		// Look in the color hash first
-		name = name.toLowerCase(Locale.ENGLISH);
+		name = name.toLowerCase(Locale.ROOT);
 		Integer I = colors.get(name);
 		if (I != null) return I;
 

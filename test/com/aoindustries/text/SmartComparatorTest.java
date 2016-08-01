@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,20 +36,20 @@ import junit.framework.TestSuite;
  */
 public class SmartComparatorTest extends TestCase {
 
-    public SmartComparatorTest(String testName) {
-        super(testName);
-    }
+	public SmartComparatorTest(String testName) {
+		super(testName);
+	}
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(SmartComparatorTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite(SmartComparatorTest.class);
+		return suite;
+	}
 
 	private SmartComparator comparator;
 
 	@Override
 	protected void setUp() throws Exception {
-		comparator = new SmartComparator(Locale.ENGLISH);
+		comparator = new SmartComparator(Locale.ROOT);
 	}
 
 	@Override
@@ -180,7 +180,7 @@ public class SmartComparatorTest extends TestCase {
 			"Dan-.", 0,
 			SmartComparator.TokenType.STRING, 0, 5
 		);
-    }
+	}
 
 	private static void doTestUnequal(SmartComparator comparator, String lower, String higher) {
 		assertTrue(comparator.compare(lower, higher) < 0);

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,22 +37,22 @@ import java.util.Locale;
  */
 public class TerminalWriter extends PrintWriter {
 
-    private static final char ESC=0x1b;
+	private static final char ESC=0x1b;
 
-    private static final char[]
-        CLEAR_SCREEN=new char[] {ESC, '[', 'H', ESC, '[', 'J'},
-        BOLD_ON=new char[] {ESC, '[', '1', 'm'},
-        ATTRIBUTES_OFF=new char[] {ESC, '[', 'm'}
-        //ECHO_OFF=new char[] {ESC, '[', '1', '2', 'h'},
-        //ECHO_ON=new char[] {ESC, '[', '1', '2', 'l'}
-    ;
+	private static final char[]
+		CLEAR_SCREEN=new char[] {ESC, '[', 'H', ESC, '[', 'J'},
+		BOLD_ON=new char[] {ESC, '[', '1', 'm'},
+		ATTRIBUTES_OFF=new char[] {ESC, '[', 'm'}
+		//ECHO_OFF=new char[] {ESC, '[', '1', '2', 'h'},
+		//ECHO_ON=new char[] {ESC, '[', '1', '2', 'l'}
+	;
 
-    // If this is not enough, could also check the TERM environment variable for expected values
-    private static final boolean supported=System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("linux");
+	// If this is not enough, could also check the TERM environment variable for expected values
+	private static final boolean supported=System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("linux");
 
-    public static boolean isSupported() {
-        return supported;
-    }
+	public static boolean isSupported() {
+		return supported;
+	}
 
 	private static String getVerboseOut(String lastVerboseString, String newVerboseString) {
 		final int lastLen = lastVerboseString.length();
@@ -76,10 +76,10 @@ public class TerminalWriter extends PrintWriter {
 
 		// Backspace to the first character that is different
 		for(int i=0; i<(lastLen - sameCount); i++) verboseOut.append('\b');
-		
+
 		// Append part of new output that is different
 		verboseOut.append(newVerboseString, sameCount, newLen);
-		
+
 		return verboseOut.toString();
 	}
 
@@ -115,65 +115,65 @@ public class TerminalWriter extends PrintWriter {
 
 	private boolean enabled=true;
 
-    public TerminalWriter(Writer out) {
-    	super(out);
-    }
+	public TerminalWriter(Writer out) {
+		super(out);
+	}
 
-    public TerminalWriter(Writer out, boolean autoFlush) {
-    	super(out, autoFlush);
-    }
+	public TerminalWriter(Writer out, boolean autoFlush) {
+		super(out, autoFlush);
+	}
 
-    public void attributesOff() throws IOException {
-        if(supported && enabled) {
-            flush();
-            out.write(ATTRIBUTES_OFF);
-            out.flush();
-        }
-    }
+	public void attributesOff() throws IOException {
+		if(supported && enabled) {
+			flush();
+			out.write(ATTRIBUTES_OFF);
+			out.flush();
+		}
+	}
 
-    public void boldOn() throws IOException {
-        if(supported && enabled) {
-            flush();
-            out.write(BOLD_ON);
-            out.flush();
-        }
-    }
+	public void boldOn() throws IOException {
+		if(supported && enabled) {
+			flush();
+			out.write(BOLD_ON);
+			out.flush();
+		}
+	}
 
-    /*
-    public void echoOff() throws IOException {
-        if(supported && enabled) {
-            flush();
-            out.write(ECHO_OFF);
-            out.flush();
-        }
-    }
+	/*
+	public void echoOff() throws IOException {
+		if(supported && enabled) {
+			flush();
+			out.write(ECHO_OFF);
+			out.flush();
+		}
+	}
 
-    public void echoOn() throws IOException {
-        if(supported && enabled) {
-            flush();
-            out.write(ECHO_ON);
-            out.flush();
-        }
-    }*/
+	public void echoOn() throws IOException {
+		if(supported && enabled) {
+			flush();
+			out.write(ECHO_ON);
+			out.flush();
+		}
+	}*/
 
-    public void clearScreen() throws IOException {
-        if(supported && enabled) {
-            flush();
-            out.write(CLEAR_SCREEN);
-            out.flush();
-        }
-    }
+	public void clearScreen() throws IOException {
+		if(supported && enabled) {
+			flush();
+			out.write(CLEAR_SCREEN);
+			out.flush();
+		}
+	}
 
-    public boolean isEnabled() {
-        return enabled;
-    }
+	public boolean isEnabled() {
+		return enabled;
+	}
 
-    /**
-     * Enables the special features of the terminal writer.
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+	/**
+	 * Enables the special features of the terminal writer.
+	 */
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
 
 	/**
 	 * @see  #progressOutput(java.lang.String, java.lang.String, java.io.Writer) 

@@ -133,7 +133,7 @@ public class MimeType {
 	private static final Map<String,String> hash = new HashMap<>();
 	static {
 		for(int c=0;c<types.length;c+=2) {
-			String extension = types[c].toLowerCase(Locale.ENGLISH);
+			String extension = types[c].toLowerCase(Locale.ROOT);
 			if(hash.put(extension, types[c+1])!=null) throw new AssertionError(MimeType.class.getName()+": extension found more than once: "+extension);
 		}
 	}
@@ -143,7 +143,7 @@ public class MimeType {
 	public static String getMimeType(String filename) {
 		int pos=filename.lastIndexOf('.');
 		if(pos!=-1) {
-			String type=hash.get(filename.substring(pos+1).toLowerCase(Locale.ENGLISH));
+			String type=hash.get(filename.substring(pos+1).toLowerCase(Locale.ROOT));
 			if(type!=null) return type;
 		}
 		return DEFAULT_MIME_TYPE;
