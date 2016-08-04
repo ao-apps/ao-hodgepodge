@@ -23,7 +23,7 @@
 package com.aoindustries.servlet;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
+// Java EE 7: import javax.servlet.WriteListener;
 
 /**
  * Discards all data.
@@ -119,19 +119,20 @@ public final class NullServletOutputStream extends ServletOutputStream {
 	public void println(double d) {
 	}
 
-	@Override
-	public boolean isReady() {
-		return true;
-	}
-
-	@Override
-	public void setWriteListener(WriteListener wl) {
-		throw new IllegalStateException("Implement when first required");
-		/*
-		try {
-			wl.onWritePossible();
-		} catch(IOException e) {
-			wl.onError(e);
-		}*/
-	}
+// Java EE 7:
+//	@Override
+//	public boolean isReady() {
+//		return true;
+//	}
+//
+//	@Override
+//	public void setWriteListener(WriteListener wl) {
+//		throw new IllegalStateException("Implement when first required");
+//		/*
+//		try {
+//			wl.onWritePossible();
+//		} catch(IOException e) {
+//			wl.onError(e);
+//		}*/
+//	}
 }
