@@ -164,8 +164,7 @@ public class ArraySortedSet<E> extends AbstractSet<E> implements SortedSet<E>, S
 		// TODO: How can we check if the passed-in object is of an unrelated, unexpected class
 		// TODO: without passing around Class objects?
 		// TODO: with equals - just like ArraySet.
-		throw new RuntimeException("TODO: Finish method");
-		//return binarySearch((E)o)>=0;
+		return binarySearch((E)o) >= 0;
 	}
 
 	@Override
