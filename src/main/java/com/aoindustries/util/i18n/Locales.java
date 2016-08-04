@@ -95,14 +95,26 @@ public class Locales {
 		// Preload all standard Java locales
 		static {
 			for(Locale locale : Locale.getAvailableLocales()) {
-				locales.put(
-					new CacheKey(
-						locale.getLanguage(),
-						locale.getCountry(),
-						locale.getVariant()
-					),
-					locale
-				);
+				// Ignore locales with script or extensions for preload, since the rest of this API is unaware of them
+				if(
+					locale.getScript().isEmpty()
+					&& locale.getExtensionKeys().isEmpty()
+				) {
+					//System.out.println("preload: " + locale.toString());
+					//System.out.println("preload.language     : " + locale.getLanguage());
+					//System.out.println("preload.country      : " + locale.getCountry());
+					//System.out.println("preload.variant      : " + locale.getVariant());
+					//System.out.println("preload.script       : " + locale.getScript());
+					//System.out.println("preload.extensionKeys: " + locale.getExtensionKeys());
+					locales.put(
+						new CacheKey(
+							locale.getLanguage(),
+							locale.getCountry(),
+							locale.getVariant()
+						),
+						locale
+					);
+				}
 			}
 		}
 		private LocaleCache() {
