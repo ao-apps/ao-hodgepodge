@@ -1,4 +1,3 @@
-# aocode-public
 Reusable Java library of general tools with minimal external dependencies.
 
 For questions or support, please contact:
