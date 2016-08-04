@@ -48,6 +48,9 @@ abstract public class BlockBufferTestParent extends TestCase {
 		super(testName);
 	}
 
+	private static final int TEST_LOOPS = 20;
+	private static final int TEST_REPORT_INTERVAL = 5;
+
 	static final Random random = new SecureRandom();
 
 	abstract public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException;
@@ -60,8 +63,8 @@ abstract public class BlockBufferTestParent extends TestCase {
 		PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
 		try {
 			Set<Long> allocatedIds = new HashSet<>();
-			for(int c=0;c<100;c++) {
-				if(((c+1)%10)==0) System.out.println(getClass()+": testAllocateDeallocate: Test loop "+(c+1)+" of 100");
+			for(int c=0;c<TEST_LOOPS;c++) {
+				if(((c+1)%TEST_REPORT_INTERVAL)==0) System.out.println(getClass()+": testAllocateDeallocate: Test loop "+(c+1)+" of " + TEST_LOOPS);
 				// Allocate some blocks, must not return duplicate ids.
 				for(int d=0;d<1000;d++) {
 					long id = blockBuffer.allocate(getAllocationSize(random));
@@ -151,7 +154,7 @@ abstract public class BlockBufferTestParent extends TestCase {
 		try {
 			SortedSet<Long> allocatedIds = new TreeSet<>();
 			SortedSet<Long> partialIds = new TreeSet<>(); // The ids that are added in this batch
-			final int iterations = 100;
+			final int iterations = TEST_LOOPS;
 			for(int c=0;c<iterations;c++) {
 				long startNanos = System.nanoTime();
 				partialIds.clear();
@@ -239,7 +242,7 @@ abstract public class BlockBufferTestParent extends TestCase {
 				}
 
 				long endNanos = System.nanoTime();
-				if((c%10)==9) System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": Tested block buffer failure recovery in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
+				if(((c+1)%TEST_REPORT_INTERVAL)==0) System.out.println(protectionLevel+": "+(c+1)+" of "+iterations+": Tested block buffer failure recovery in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
 			}
 		} finally {
 			FileUtils.delete(tempFile);

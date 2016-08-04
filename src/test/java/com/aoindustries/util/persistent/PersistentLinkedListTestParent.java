@@ -43,6 +43,8 @@ import junit.framework.TestCase;
  */
 abstract public class PersistentLinkedListTestParent extends TestCase {
 
+	private static final int TEST_LOOPS = 10;
+
 	public PersistentLinkedListTestParent(String testName) {
 		super(testName);
 	}
@@ -264,11 +266,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 			// Add in groups of 1000, timing the add
 			String[] toAdd = new String[1000];
 			for(int d=0;d<1000;d++) toAdd[d] = getRandomString(random, true);
-			for(int c=0;c<100;c++) {
+			for(int c=0;c<TEST_LOOPS;c++) {
 				long startNanos = System.nanoTime();
 				for(int d=0;d<1000;d++) linkedFileList.add(toAdd[d]);
 				long endNanos = System.nanoTime();
-				System.out.println((c+1)+" of 100: Added 1000 random strings in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
+				System.out.println((c+1)+" of "+TEST_LOOPS+": Added 1000 random strings in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
 			}
 			// Calculate the mean and standard deviation, compare for linear
 		} finally {
@@ -292,11 +294,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 			// Add in groups of 1000, timing the add
 			Integer[] toAdd = new Integer[1000];
 			for(int d=0;d<1000;d++) toAdd[d] = random.nextInt();
-			for(int c=0;c<100;c++) {
+			for(int c=0;c<TEST_LOOPS;c++) {
 				long startNanos = System.nanoTime();
 				for(int d=0;d<1000;d++) linkedFileList.add(toAdd[d]);
 				long endNanos = System.nanoTime();
-				System.out.println((c+1)+" of 100: Added 1000 random integers in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
+				System.out.println((c+1)+" of "+TEST_LOOPS+": Added 1000 random integers in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
 			}
 			// Calculate the mean and standard deviation, compare for linear
 		} finally {
@@ -318,11 +320,11 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
 		try {
 			// Add in groups of 1000, timing the add
-			for(int c=0;c<100;c++) {
+			for(int c=0;c<TEST_LOOPS;c++) {
 				long startNanos = System.nanoTime();
 				for(int d=0;d<1000;d++) linkedFileList.add(null);
 				long endNanos = System.nanoTime();
-				System.out.println((c+1)+" of 100: Added 1000 null Integer in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
+				System.out.println((c+1)+" of "+TEST_LOOPS+": Added 1000 null Integer in "+BigDecimal.valueOf((endNanos-startNanos)/1000, 3)+" ms");
 			}
 			// Calculate the mean and standard deviation, compare for linear
 		} finally {
@@ -343,8 +345,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		tempFile.deleteOnExit();
 		PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
 		try {
-			for(int c=0;c<=100;c++) {
-				if(c>0) for(int d=0;d<100;d++) linkedFileList.add(getRandomString(random, true));
+			for(int c=0;c<=10;c++) {
+				if(c>0) for(int d=0;d<1000;d++) linkedFileList.add(getRandomString(random, true));
 				long startNanos = System.nanoTime();
 				for(String value : linkedFileList) {
 					// Do nothing
@@ -370,8 +372,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		tempFile.deleteOnExit();
 		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
 		try {
-			for(int c=0;c<=100;c++) {
-				if(c>0) for(int d=0;d<100;d++) linkedFileList.add(random.nextInt());
+			for(int c=0;c<=10;c++) {
+				if(c>0) for(int d=0;d<1000;d++) linkedFileList.add(random.nextInt());
 				long startNanos = System.nanoTime();
 				for(Integer value : linkedFileList) {
 					// Do nothing
@@ -510,7 +512,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		tempFile.deleteOnExit();
 		try {
 			LinkedList<String> heapList = new LinkedList<>();
-			final int iterations = 100;
+			final int iterations = TEST_LOOPS;
 			for(int c=0;c<iterations;c++) {
 				long startNanos = System.nanoTime();
 				// addFirst
@@ -622,6 +624,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 							int batchSize = random.nextInt(95)+1;
 							if(batchSize>linkedFileList.size()) batchSize = linkedFileList.size();
 							for(int d=0;d<batchSize;d++) {
+								// This assigned value *is* used in catch block - ignore NetBeans warning
 								partial = linkedFileList.getFirst();
 								assertEquals(linkedFileList.removeFirst(), heapList.removeFirst());
 								partial = null;
