@@ -90,8 +90,8 @@
 		<connection>scm:git:git://github.com/aoindustries/aocode-public.git</connection>
 		<developerConnection>scm:git:git@github.com:aoindustries/aocode-public.git</developerConnection>
 		<url>http://github.com/aoindustries/aocode-public</url>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 	<!-- Servlet 3.0: See http://stackoverflow.com/questions/1979957/maven-dependency-for-servlet-3-0-api -->
 	<repositories>
 		<repository>
