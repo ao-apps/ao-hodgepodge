@@ -1,4 +1,7 @@
-To provide patches or gain CVS access, please contact:
+# aocode-public
+Reusable Java library of general tools with minimal external dependencies.
+
+For questions or support, please contact:
 
     AO Industries, Inc.
     7262 Bull Pen Cir
