@@ -7,6 +7,9 @@
   <version>1.0-SNAPSHOT</version>
   <name>aocode-public</name>
   <url>https://www.aoindustries.com/dev-tools/aocode-public/</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <!-- Servlet 3.0: See http://stackoverflow.com/questions/1979957/maven-dependency-for-servlet-3-0-api -->
   <repositories>
     <repository>
