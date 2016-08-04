@@ -465,7 +465,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 			if(heapValue!=null) {
 				//System.err.println("DEBUG: heapValue="+heapValue+", fileValue="+fileValue);
 				if(!heapValue.equals(fileValue)) {
-					assertTrue("Must be an exact match when partial is null", partial!=null);
+					assertTrue("Must be an exact match when partial is null: heapValue="+heapValue+", fileValue="+fileValue, partial!=null);
 					if(fileValue!=null) assertTrue("Value found in fileList that is not found in heapList: "+fileValue, heapList.contains(fileValue));
 					assertTrue("The only value that may be in the heap but not in the fileList is partial: partial="+partial+", fileValue="+fileValue, heapValue.equals(partial));
 					assertFalse("Refusing to remove partial twice", removedPartial);
@@ -622,9 +622,9 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 							int batchSize = random.nextInt(95)+1;
 							if(batchSize>linkedFileList.size()) batchSize = linkedFileList.size();
 							for(int d=0;d<batchSize;d++) {
-								//partial = linkedFileList.getFirst();
+								partial = linkedFileList.getFirst();
 								assertEquals(linkedFileList.removeFirst(), heapList.removeFirst());
-								//partial = null;
+								partial = null;
 							}
 						} finally {
 							linkedFileList.close();
