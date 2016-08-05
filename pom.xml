@@ -1,24 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+aocode-public - Reusable Java library of general tools with minimal external dependencies.
+Copyright (C) 2016  AO Industries, Inc.
+    support@aoindustries.com
+    7262 Bull Pen Cir
+    Mobile, AL 36695
+
+This file is part of aocode-public.
+
+aocode-public is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+aocode-public is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>com.aoindustries</groupId>
 	<artifactId>aocode-public</artifactId>
-	<packaging>jar</packaging>
 	<version>1.1-SNAPSHOT</version>
-	<name>aocode-public</name>
-	<url>https://www.aoindustries.com/dev-tools/aocode-public/</url>
-	<!-- SonaType parent POM -->
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>9</version>
-	</parent>
+	<packaging>jar</packaging>
+
+	<name>AO Code Public</name>
+	<url>https://www.aoindustries.com/docs/aocode-public/</url>
+    <description>Reusable Java library of general tools with minimal external dependencies.</description>
+
+	<scm>
+		<connection>scm:git:git://github.com/aoindustries/aocode-public.git</connection>
+		<developerConnection>scm:git:git@github.com:aoindustries/aocode-public.git</developerConnection>
+		<url>http://github.com/aoindustries/aocode-public</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<repositories>
+		<repository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus Snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<!-- Servlet 3.0: See http://stackoverflow.com/questions/1979957/maven-dependency-for-servlet-3-0-api -->
+		<repository>
+			<id>java.net2</id>
+			<name>Repository hosting the jee6 artifacts</name>
+			<url>http://download.java.net/maven/2</url>
+		</repository>
+	</repositories>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus Snapshots</name>
+			<url>${sonatypeOssDistMgmtSnapshotsUrl}</url>
+		</snapshotRepository>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<name>Nexus Release Repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
-			<!-- Newer plugin versions than those provided by SonaType parent POM (Current newest as of 2016-08-04) -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
 				<version>1.4.1</version>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>(,2.1.0),(2.1.0,2.2.0),(2.2.0,)</version>
+									<message>Maven 2.1.0 and 2.2.0 produce incorrect GPG signatures and checksums respectively.</message>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<!-- Java 1.7 -->
 			<plugin>
@@ -32,18 +108,28 @@
 			</plugin>
 		</plugins>
 		<pluginManagement>
-			<!-- Newer plugin versions than those provided by SonaType parent POM (Current newest as of 2016-08-04) -->
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.5.3</version>
+					<configuration>
+						<mavenExecutorId>forked-path</mavenExecutorId>
+						<useReleaseProfile>false</useReleaseProfile>
+						<arguments>${arguments} -Psonatype-oss-release</arguments>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
+		<arguments />
+	</properties>
+
 	<profiles>
-		<!-- Newer plugin versions than those provided by SonaType parent POM (Current newest as of 2016-08-04) -->
 		<profile>
 			<id>sonatype-oss-release</id>
 			<build>
@@ -52,16 +138,41 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
 						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
 						<version>2.9.1</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
 						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
@@ -86,21 +197,7 @@
 			</build>
 		</profile>
 	</profiles>
-	<!-- Git hosting by Github -->
-	<scm>
-		<connection>scm:git:git://github.com/aoindustries/aocode-public.git</connection>
-		<developerConnection>scm:git:git@github.com:aoindustries/aocode-public.git</developerConnection>
-		<url>http://github.com/aoindustries/aocode-public</url>
-		<tag>HEAD</tag>
-	</scm>
-	<!-- Servlet 3.0: See http://stackoverflow.com/questions/1979957/maven-dependency-for-servlet-3-0-api -->
-	<repositories>
-		<repository>
-			<id>java.net2</id>
-			<name>Repository hosting the jee6 artifacts</name>
-			<url>http://download.java.net/maven/2</url>
-		</repository>
-	</repositories>        
+
 	<dependencies>
 		<dependency>
 			<groupId>javax</groupId>
