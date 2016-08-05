@@ -19,14 +19,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
+along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.aoindustries</groupId>
 	<artifactId>aocode-public</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.1</version>
 	<packaging>jar</packaging>
 
 	<name>AO Code Public</name>
@@ -53,7 +53,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
 		<connection>scm:git:git://github.com/aoindustries/aocode-public.git</connection>
 		<developerConnection>scm:git:git@github.com:aoindustries/aocode-public.git</developerConnection>
 		<url>http://github.com/aoindustries/aocode-public</url>
-		<tag>HEAD</tag>
+		<tag>aocode-public-1.1</tag>
 	</scm>
 
 	<repositories>
