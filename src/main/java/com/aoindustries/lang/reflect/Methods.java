@@ -67,7 +67,11 @@ public final class Methods {
 			Method method = target.getClass().getMethod(methodName, parameterTypes);
 			Object result = method.invoke(target, parameterValues);
 			return returnType.cast(result);
-		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+		} catch(NoSuchMethodException e) {
+			throw new ReflectionException(e);
+		} catch(IllegalAccessException e) {
+			throw new ReflectionException(e);
+		} catch(InvocationTargetException e) {
 			throw new ReflectionException(e);
 		}
 	}

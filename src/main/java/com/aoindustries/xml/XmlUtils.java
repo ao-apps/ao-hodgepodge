@@ -63,8 +63,11 @@ public final class XmlUtils {
 	 */
 	public static Document parseXml(URL url) throws IOException, ParserConfigurationException, SAXException {
 		URLConnection conn = url.openConnection();
-		try (InputStream in = conn.getInputStream()) {
+		InputStream in = conn.getInputStream();
+		try {
 			return parseXml(in);
+		} finally {
+			in.close();
 		}
 	}
 
@@ -212,7 +215,10 @@ public final class XmlUtils {
 			try {
 				writer.close();
 			} catch(IOException e) {
-				throw new AssertionError("IOException should never be thrown from StringWriter", e);
+				// Java 1.7: direct constructor
+				AssertionError ae = new AssertionError("IOException should never be thrown from StringWriter");
+				ae.initCause(e);
+				throw ae;
 			}
 		}
 		return writer.toString();

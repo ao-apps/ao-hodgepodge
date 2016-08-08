@@ -52,8 +52,11 @@ public final class MD5Utils {
 	 * Gets the MD5 hashcode of a file.
 	 */
 	public static byte[] md5(File file) throws IOException {
-		try (InputStream in = new FileInputStream(file)) {
+		InputStream in = new FileInputStream(file);
+		try {
 			return md5(in);
+		} finally {
+			in.close();
 		}
 	}
 

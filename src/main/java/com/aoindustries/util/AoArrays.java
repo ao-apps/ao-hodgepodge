@@ -179,7 +179,7 @@ public class AoArrays {
 			return results;
 		} else {
 			// 3+ collections, use priority queue
-			PriorityQueue<AoCollections.PeekIterator<? extends V>> pq = new PriorityQueue<>(
+			PriorityQueue<AoCollections.PeekIterator<? extends V>> pq = new PriorityQueue<AoCollections.PeekIterator<? extends V>>(
 				numCollections,
 				new Comparator<AoCollections.PeekIterator<? extends V>>() {
 					@Override
@@ -353,12 +353,12 @@ public class AoArrays {
 	 * values on iteration and a size that doesn't match the number of unique values.
 	 * </p>
 	 */
-	@SafeVarargs
+	// Java 1.7: @SafeVarargs
 	public static <E> Set<E> asUnmodifiableSet(final E... array) {
 		final int len = array.length;
 		if(len==0) return Collections.emptySet();
 		if(len==1) return Collections.singleton(array[0]);
-		return new UnmodifiableArraySet<>(array);
+		return new UnmodifiableArraySet<E>(array);
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="indexOf and lastIndexOf (Object[])">

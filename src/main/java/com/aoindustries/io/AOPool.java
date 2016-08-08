@@ -189,7 +189,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	private final ThreadLocal<List<PooledConnection<C>>> currentThreadConnections = new ThreadLocal<List<PooledConnection<C>>>() {
 		@Override
 		public List<PooledConnection<C>> initialValue() {
-			return new ArrayList<>();
+			return new ArrayList<PooledConnection<C>>();
 		}
 	};
 
@@ -214,9 +214,9 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		this.maxConnectionAge = maxConnectionAge;
 		if(logger==null) throw new IllegalArgumentException("logger is null");
 		this.logger = logger;
-		allConnections = new ArrayList<>(poolSize);
-		availableConnections = new PriorityQueue<>(poolSize);
-		busyConnections = new HashSet<>(poolSize*4/3+1);
+		allConnections = new ArrayList<PooledConnection<C>>(poolSize);
+		availableConnections = new PriorityQueue<PooledConnection<C>>(poolSize);
+		busyConnections = new HashSet<PooledConnection<C>>(poolSize*4/3+1);
 		start();
 	}
 
@@ -231,7 +231,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			// Prevent any new connections
 			isClosed = true;
 			// Find any connections that are available and open
-			connsToClose = new ArrayList<>(availableConnections.size());
+			connsToClose = new ArrayList<C>(availableConnections.size());
 			for(PooledConnection<C> availableConnection : availableConnections) {
 				synchronized(availableConnection) {
 					C conn = availableConnection.connection;
@@ -348,7 +348,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 					// Nothing available, is there room to make a new connection?
 					if(allConnections.size()<poolSize) {
 						// Create a new one
-						pooledConnection = new PooledConnection<>();
+						pooledConnection = new PooledConnection<C>();
 						allConnections.add(pooledConnection);
 						busyConnections.add(pooledConnection);
 					} else {
@@ -767,7 +767,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 					if(isClosed) return;
 					// Find any connections that are available and been idle too long
 					int maxIdle = maxIdleTime;
-					connsToClose = new ArrayList<>(availableConnections.size());
+					connsToClose = new ArrayList<C>(availableConnections.size());
 					for(PooledConnection<C> availableConnection : availableConnections) {
 						synchronized(availableConnection) {
 							C conn = availableConnection.connection;

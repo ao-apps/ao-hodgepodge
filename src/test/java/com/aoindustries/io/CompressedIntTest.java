@@ -51,7 +51,7 @@ public class CompressedIntTest extends TestCase {
 
 	public void testRandomInts() throws IOException {
 		Random random = new SecureRandom();
-		List<Integer> values = new ArrayList<>();
+		List<Integer> values = new ArrayList<Integer>();
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		try {
 			for(int c=0;c<10000;c++) {

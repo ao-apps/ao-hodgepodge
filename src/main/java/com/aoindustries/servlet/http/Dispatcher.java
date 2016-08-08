@@ -45,7 +45,7 @@ public class Dispatcher {
 	/**
 	 * Tracks the first servlet path seen, before any include/forward.
 	 */
-	private static final ThreadLocal<String> originalPage = new ThreadLocal<>();
+	private static final ThreadLocal<String> originalPage = new ThreadLocal<String>();
 
 	/**
 	 * Gets the current-thread original page or null if not set.
@@ -73,7 +73,7 @@ public class Dispatcher {
 	/**
 	 * Tracks the current dispatch page for correct page-relative paths.
 	 */
-	private static final ThreadLocal<String> dispatchedPage = new ThreadLocal<>();
+	private static final ThreadLocal<String> dispatchedPage = new ThreadLocal<String>();
 
 	/**
 	 * Gets the current-thread dispatched page or null if not set.

@@ -91,7 +91,11 @@ public class GetOpt {
 		try {
 			Constructor<T> constructor = type.getConstructor(parseParamTypes);
 			return constructor.newInstance(value);
-		} catch(NoSuchMethodException | InstantiationException | IllegalAccessException err) {
+		} catch(NoSuchMethodException err) {
+			throw new IllegalArgumentException(err);
+		} catch(InstantiationException err) {
+			throw new IllegalArgumentException(err);
+		} catch(IllegalAccessException err) {
 			throw new IllegalArgumentException(err);
 		} catch(InvocationTargetException err) {
 			throw new WrappedException(err);
@@ -140,7 +144,7 @@ public class GetOpt {
 	 * The "--" will be included in the arguments returned.
 	 */
 	public static List<String> getArguments(String[] args) {
-		List<String> arguments = new ArrayList<>(args.length);
+		List<String> arguments = new ArrayList<String>(args.length);
 		int c = 0;
 		for(; c<args.length; c++) {
 			String arg = args[c];

@@ -53,7 +53,7 @@ public class MinimalList {
 			list = Collections.singletonList(elem);
 		} else if(list.size()==1) {
 			// Is a singleton list
-			List<E> newList = new ArrayList<>(8);
+			List<E> newList = new ArrayList<E>(8);
 			newList.add(list.get(0));
 			newList.add(elem);
 			list = newList;
@@ -86,6 +86,6 @@ public class MinimalList {
 			return list;
 		}
 		// Create copy of list
-		return new ArrayList<>(list);
+		return new ArrayList<E>(list);
 	}
 }

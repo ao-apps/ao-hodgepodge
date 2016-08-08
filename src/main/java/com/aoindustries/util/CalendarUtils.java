@@ -74,7 +74,10 @@ public class CalendarUtils {
 			formatDate(cal, result);
 			return result.toString();
 		} catch(IOException e) {
-			throw new AssertionError("IOException should never occur on StringBuilder", e);
+			// Java 1.7: direct constructor
+			AssertionError ae = new AssertionError("IOException should never occur on StringBuilder");
+			ae.initCause(e);
+			throw ae;
 		}
 	}
 

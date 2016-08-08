@@ -72,7 +72,8 @@ public class ProcessResult {
 				@Override
 				public void run() {
 					try {
-						try (Reader stdoutIn = new InputStreamReader(process.getInputStream(), charset)) {
+						Reader stdoutIn = new InputStreamReader(process.getInputStream(), charset);
+						try {
 							char[] buff = BufferManager.getChars();
 							try {
 								int count;
@@ -84,6 +85,8 @@ public class ProcessResult {
 							} finally {
 								BufferManager.release(buff, false);
 							}
+						} finally {
+							stdoutIn.close();
 						}
 					} catch(IOException exc) {
 						synchronized(stdoutException) {
@@ -103,7 +106,8 @@ public class ProcessResult {
 				@Override
 				public void run() {
 					try {
-						try (Reader stderrIn = new InputStreamReader(process.getErrorStream(), charset)) {
+						Reader stderrIn = new InputStreamReader(process.getErrorStream(), charset);
+						try {
 							char[] buff = BufferManager.getChars();
 							try {
 								int count;
@@ -115,6 +119,8 @@ public class ProcessResult {
 							} finally {
 								BufferManager.release(buff, false);
 							}
+						} finally {
+							stderrIn.close();
 						}
 					} catch(IOException exc) {
 						synchronized(stderrException) {

@@ -40,7 +40,7 @@ final public class RegistryManager {
 	 */
 	private RegistryManager() {}
 
-	private static final Map<Integer,Registry> registryCache = new HashMap<>();
+	private static final Map<Integer,Registry> registryCache = new HashMap<Integer,Registry>();
 
 	/**
 	 * Creates a registry or returns the registry that is already using the port.

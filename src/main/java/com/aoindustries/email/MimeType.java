@@ -130,7 +130,7 @@ public class MimeType {
 		"z", "application/x-compress",
 		"zip", "application/zip"
 	};
-	private static final Map<String,String> hash = new HashMap<>();
+	private static final Map<String,String> hash = new HashMap<String,String>();
 	static {
 		for(int c=0;c<types.length;c+=2) {
 			String extension = types[c].toLowerCase(Locale.ROOT);

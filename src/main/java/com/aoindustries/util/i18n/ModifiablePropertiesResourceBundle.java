@@ -115,17 +115,17 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 	/**
 	 * All queries are performed on the concurrent map.
 	 */
-	private final Map<String,String> valueMap = new ConcurrentHashMap<>();
+	private final Map<String,String> valueMap = new ConcurrentHashMap<String,String>();
 
 	/**
 	 * All validated queries are performed on this concurrent map.
 	 */
-	private final Map<String,Long> validatedMap = new ConcurrentHashMap<>();
+	private final Map<String,Long> validatedMap = new ConcurrentHashMap<String,Long>();
 
 	/**
 	 * All modified queries are performed on this concurrent map.
 	 */
-	private final Map<String,Long> modifiedMap = new ConcurrentHashMap<>();
+	private final Map<String,Long> modifiedMap = new ConcurrentHashMap<String,Long>();
 
 	/**
 	 * The properties file is only used for updates.
@@ -147,7 +147,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		private boolean isCommentLine = false;
 		private final StringBuilder currentComment = new StringBuilder();
 
-		private final List<String> comments = new ArrayList<>();
+		private final List<String> comments = new ArrayList<String>();
 
 		/**
 		 * Adds buffered comment to comments if non-empty.
@@ -333,7 +333,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 				private static final long serialVersionUID = 6953022173340009928L;
 				@Override
 				public Enumeration<Object> keys() {
-					SortedSet<Object> sortedSet = new TreeSet<>(Collator.getInstance(Locale.ROOT));
+					SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ROOT));
 					Enumeration<Object> e = super.keys();
 					while(e.hasMoreElements()) sortedSet.add(e.nextElement());
 					return Collections.enumeration(sortedSet);

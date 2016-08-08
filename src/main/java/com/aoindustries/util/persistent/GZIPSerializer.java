@@ -53,8 +53,11 @@ public class GZIPSerializer<E> implements Serializer<E> {
 		if(lastSerialized!=value) {
 			lastSerialized = null;
 			buffer.reset();
-			try (GZIPOutputStream gzout = new GZIPOutputStream(buffer)) {
+			GZIPOutputStream gzout = new GZIPOutputStream(buffer);
+			try {
 				wrapped.serialize(value, gzout);
+			} finally {
+				gzout.close();
 			}
 			lastSerialized = value;
 		}
@@ -83,8 +86,11 @@ public class GZIPSerializer<E> implements Serializer<E> {
 	// @NotThreadSafe
 	@Override
 	public E deserialize(InputStream in) throws IOException {
-		try (GZIPInputStream gzin = new GZIPInputStream(in)) {
+		GZIPInputStream gzin = new GZIPInputStream(in);
+		try {
 			return wrapped.deserialize(gzin);
+		} finally {
+			gzin.close();
 		}
 	}
 }

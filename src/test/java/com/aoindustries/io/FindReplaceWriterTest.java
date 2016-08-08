@@ -45,8 +45,11 @@ public class FindReplaceWriterTest extends TestCase {
 	private static void doTest(String unix, String ... dos) throws IOException {
 		StringWriter buffer = new StringWriter(unix.length());
 		try {
-			try (FindReplaceWriter writer = new FindReplaceWriter(buffer, "\r\n", NativeToUnixWriter.UNIX_EOL)) {
+			FindReplaceWriter writer = new FindReplaceWriter(buffer, "\r\n", NativeToUnixWriter.UNIX_EOL);
+			try {
 				for(String s : dos) writer.write(s);
+			} finally {
+				writer.close();
 			}
 		} finally {
 			buffer.close();

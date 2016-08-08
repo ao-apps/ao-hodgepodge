@@ -38,7 +38,7 @@ import javax.swing.SwingUtilities;
  *
  * @author  AO Industries, Inc.
  */
-public class SynchronizingListModel<E> extends DefaultListModel<E> {
+public class SynchronizingListModel<E> extends DefaultListModel {
 
 	private static final long serialVersionUID = -4928047430792677729L;
 

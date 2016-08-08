@@ -49,7 +49,7 @@ public class SortedProperties extends Properties {
 
 	@Override
 	public Enumeration<Object> keys() {
-		SortedSet<Object> sortedSet = new TreeSet<>(Collator.getInstance(Locale.ROOT));
+		SortedSet<Object> sortedSet = new TreeSet<Object>(Collator.getInstance(Locale.ROOT));
 		Enumeration<Object> e = super.keys();
 		while(e.hasMoreElements()) sortedSet.add(e.nextElement());
 		return Collections.enumeration(sortedSet);

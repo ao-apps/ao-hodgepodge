@@ -103,12 +103,12 @@ public class OptimalIndexColorModel extends IndexColorModel {
 	private static final int DROP_OFFSET=1000;
 
 	private OptimalIndexColorModel(int size, byte[] r, byte[] g, byte[] b, int trans) {
-	super(8, size, r, g, b, trans);
+		super(8, size, r, g, b, trans);
 	}
 
 	public static OptimalIndexColorModel getOptimalIndexColorModel(BufferedImage image) {
 		// Sorted by color
-		Map<Integer,ColorCount> colorCounts = new HashMap<>();
+		Map<Integer,ColorCount> colorCounts = new HashMap<Integer,ColorCount>();
 
 		// Count the use of each color in the image
 		int width=image.getWidth();
@@ -136,7 +136,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
 		}
 
 		// Sort the list based on number of times the pixels were used (most used on top)
-		List<ColorCount> colorCountList = new ArrayList<>(colorCounts.values());
+		List<ColorCount> colorCountList = new ArrayList<ColorCount>(colorCounts.values());
 		Collections.sort(colorCountList, ColorCountCountComparator.getInstance());
 
 		// Use at most the top 256 colors

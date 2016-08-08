@@ -44,7 +44,7 @@ public class MultiFileOutputStream extends OutputStream {
 	private final String suffix;
 	private final long fileSize;
 
-	private final List<File> files=new ArrayList<>();
+	private final List<File> files=new ArrayList<File>();
 	private FileOutputStream out=null;
 	private long bytesOut=0;
 
@@ -93,9 +93,12 @@ public class MultiFileOutputStream extends OutputStream {
 			len-=blockLen;
 			bytesOut+=blockLen;
 			if(bytesOut>=fileSize) {
-				try (FileOutputStream tempOut = out) {
+				FileOutputStream tempOut = out;
+				try {
 					out=null;
 					tempOut.flush();
+				} finally {
+					tempOut.close();
 				}
 			}
 		}
@@ -106,9 +109,12 @@ public class MultiFileOutputStream extends OutputStream {
 		out.write(b);
 		bytesOut+=1;
 		if(bytesOut>=fileSize) {
-			try (FileOutputStream tempOut = out) {
+			FileOutputStream tempOut = out;
+			try {
 				out=null;
 				tempOut.flush();
+			} finally {
+				tempOut.close();
 			}
 		}
 	}

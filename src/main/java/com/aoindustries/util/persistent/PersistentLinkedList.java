@@ -325,9 +325,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		long dataSize = getDataSize(ptr);
 		if(dataSize==DATA_SIZE_NULL) return null;
 
-		try (InputStream in = blockBuffer.getInputStream(ptr, DATA_OFFSET, dataSize)) {
+		InputStream in = blockBuffer.getInputStream(ptr, DATA_OFFSET, dataSize);
+		try {
 			// Read the object
 			return serializer.deserialize(in);
+		} finally {
+			in.close();
 		}
 	}
 	// </editor-fold>
@@ -399,8 +402,11 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 			PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
 			PersistentCollections.longToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);
 			blockBuffer.put(newPtr, 0, ioBuffer, 0, DATA_OFFSET);
-			try (OutputStream out = blockBuffer.getOutputStream(newPtr, DATA_OFFSET, dataSize)) {
+			OutputStream out = blockBuffer.getOutputStream(newPtr, DATA_OFFSET, dataSize);
+			try {
 				serializer.serialize(element, out);
+			} finally {
+				out.close();
 			}
 		}
 		// Barrier, to make sure always pointing to complete data
@@ -558,7 +564,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 			}
 
 			// Get the set of all allocated ids (except the meta data id).
-			Map<Long,Boolean> allocatedIds = new HashMap<>();
+			Map<Long,Boolean> allocatedIds = new HashMap<Long,Boolean>();
 			while(ids.hasNext()) allocatedIds.put(ids.next(), false);
 
 			// _head is the correct value

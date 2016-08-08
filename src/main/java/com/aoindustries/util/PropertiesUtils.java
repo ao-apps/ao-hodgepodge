@@ -47,8 +47,11 @@ final public class PropertiesUtils {
 	 */
 	public static Properties loadFromFile(File file) throws IOException {
 		Properties props = new Properties();
-		try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
+		InputStream in = new BufferedInputStream(new FileInputStream(file));
+		try {
 			props.load(in);
+		} finally {
+			in.close();
 		}
 		return props;
 	}

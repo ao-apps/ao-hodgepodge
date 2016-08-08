@@ -46,7 +46,7 @@ public class EditableResourceBundleSet {
 	 */
 	private final SortedSet<Locale> locales;
 
-	private final Map<Locale,EditableResourceBundle> bundles = new ConcurrentHashMap<>();
+	private final Map<Locale,EditableResourceBundle> bundles = new ConcurrentHashMap<Locale,EditableResourceBundle>();
 
 	/**
 	 * @param baseName the base name of the default locale's bundle.
@@ -54,7 +54,7 @@ public class EditableResourceBundleSet {
 	 */
 	public EditableResourceBundleSet(String baseName, Collection<Locale> locales) {
 		// The locales are sorted by language, country, then variant.
-		SortedSet<Locale> modifiableSet = new TreeSet<>(LocaleComparator.getInstance());
+		SortedSet<Locale> modifiableSet = new TreeSet<Locale>(LocaleComparator.getInstance());
 		modifiableSet.addAll(locales);
 		this.baseName = baseName;
 		this.locales = AoCollections.optimalUnmodifiableSortedSet(modifiableSet);

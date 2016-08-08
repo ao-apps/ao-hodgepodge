@@ -81,7 +81,8 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 				OutputStream out = getOutputStream(listenSocket, connectSocket);
 				if(bandwidth != null) out = new BitRateOutputStream(out, this);
 				try {
-					try (InputStream in = getInputStream(listenSocket, connectSocket)) {
+					InputStream in = getInputStream(listenSocket, connectSocket);
+					try {
 						long blockStartTime = verbose ? System.currentTimeMillis() : 0;
 						long blockByteCount = 0;
 						int ret;
@@ -106,6 +107,8 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 					} catch(SocketException err) {
 						// Normal socket closure
 						if(!"Socket closed".equals(err.getMessage())) throw err;
+					} finally {
+						in.close();
 					}
 				} finally {
 					out.close();

@@ -92,7 +92,9 @@ public class HashedPassword {
 			} finally {
 				Arrays.fill(chars, (char)0);
 			}
-		} catch(InvalidKeySpecException | NoSuchAlgorithmException e) {
+		} catch(InvalidKeySpecException e) {
+			throw new WrappedException(e);
+		} catch(NoSuchAlgorithmException e) {
 			throw new WrappedException(e);
 		}
 	}

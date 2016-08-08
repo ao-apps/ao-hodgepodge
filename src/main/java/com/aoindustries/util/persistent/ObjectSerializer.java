@@ -48,18 +48,26 @@ public class ObjectSerializer<E> extends BufferedSerializer<E> {
 	// @NotThreadSafe
 	@Override
 	protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException {
-		try (ObjectOutputStream oout = new ObjectOutputStream(buffer)) {
+		ObjectOutputStream oout = new ObjectOutputStream(buffer);
+		try {
 			oout.writeObject(value);
+		} finally {
+			oout.close();
 		}
 	}
 
 	// @NotThreadSafe
 	@Override
 	public E deserialize(InputStream in) throws IOException {
-		try (ObjectInputStream oin = new ObjectInputStream(in)) {
+		ObjectInputStream oin = new ObjectInputStream(in);
+		try {
 			return type.cast(oin.readObject());
-		} catch(ClassNotFoundException | ClassCastException err) {
+		} catch(ClassNotFoundException err) {
 			throw new IOException(err);
+		} catch(ClassCastException err) {
+			throw new IOException(err);
+		} finally {
+			oin.close();
 		}
 	}
 }

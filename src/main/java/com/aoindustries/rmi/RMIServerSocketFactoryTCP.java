@@ -22,11 +22,11 @@
  */
 package com.aoindustries.rmi;
 
+import com.aoindustries.lang.ObjectUtils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
-import java.util.Objects;
 
 /**
  * TCP server factory (non-SSL).
@@ -56,7 +56,7 @@ public class RMIServerSocketFactoryTCP implements RMIServerSocketFactory {
 		return
 			O!=null
 			&& (O instanceof RMIServerSocketFactoryTCP)
-			&& Objects.equals(listenAddress, ((RMIServerSocketFactoryTCP)O).listenAddress)
+			&& ObjectUtils.equals(listenAddress, ((RMIServerSocketFactoryTCP)O).listenAddress)
 		;
 	}
 

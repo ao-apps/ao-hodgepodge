@@ -24,6 +24,7 @@ package com.aoindustries.servlet.http;
 
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
+import com.aoindustries.lang.ObjectUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,7 +40,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -137,14 +137,14 @@ public class LastModifiedServlet extends HttpServlet {
 			if(!(obj instanceof HeaderAndPath)) return false;
 			HeaderAndPath other = (HeaderAndPath)obj;
 			return
-				Objects.equals(header, other.header)
+				ObjectUtils.equals(header, other.header)
 				&& path.equals(other.path)
 			;
 		}
 
 		@Override
 		public int hashCode() {
-			int hash = Objects.hashCode(header);
+			int hash = ObjectUtils.hashCode(header);
 			hash = hash * 31 + path.hashCode();
 			return hash;
 		}
@@ -168,7 +168,7 @@ public class LastModifiedServlet extends HttpServlet {
 			Map<HeaderAndPath,ParsedCssFile> cache = (Map<HeaderAndPath,ParsedCssFile>)servletContext.getAttribute(PARSE_CSS_FILE_CACHE_ATTRIBUTE_NAME);
 			if(cache == null) {
 				// Create new cache
-				cache = new HashMap<>();
+				cache = new HashMap<HeaderAndPath,ParsedCssFile>();
 				servletContext.setAttribute(PARSE_CSS_FILE_CACHE_ATTRIBUTE_NAME, cache);
 			}
 			synchronized(cache) {
@@ -187,13 +187,16 @@ public class LastModifiedServlet extends HttpServlet {
 					{
 						InputStream resourceIn = servletContext.getResourceAsStream(hap.path);
 						if(resourceIn==null) throw new FileNotFoundException(hap.path);
-						try (BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn, ENCODING))) {
+						BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn, ENCODING));
+						try {
 							cssContent = IoUtils.readFully(in);
+						} finally {
+							in.close();
 						}
 					}
 					// Replace values while capturing URLs
 					StringBuilder newContent = new StringBuilder(cssContent.length() << 1);
-					Map<HeaderAndPath,Long> referencedPaths = new HashMap<>();
+					Map<HeaderAndPath,Long> referencedPaths = new HashMap<HeaderAndPath,Long>();
 					Matcher matcher = urlPattern.matcher(cssContent);
 					int lastEnd = 0;
 					while(matcher.find()) {
@@ -331,7 +334,7 @@ public class LastModifiedServlet extends HttpServlet {
 		Map<HeaderAndPath,GetLastModifiedCacheValue> cache = (Map<HeaderAndPath,GetLastModifiedCacheValue>)servletContext.getAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME);
 		if(cache == null) {
 			// Create new cache
-			cache = new HashMap<>();
+			cache = new HashMap<HeaderAndPath,GetLastModifiedCacheValue>();
 			servletContext.setAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME, cache);
 		}
 		GetLastModifiedCacheValue cacheValue;
@@ -467,7 +470,7 @@ public class LastModifiedServlet extends HttpServlet {
 	/**
 	 * Fetched some {@link from http://en.wikipedia.org/wiki/List_of_file_formats}
 	 */
-	private static final Set<String> staticExtensions = new HashSet<>(
+	private static final Set<String> staticExtensions = new HashSet<String>(
 		Arrays.asList(
 			// CSS
 			"css",
@@ -596,15 +599,17 @@ public class LastModifiedServlet extends HttpServlet {
 				response.setContentType("text/css");
 				response.setCharacterEncoding(ENCODING);
 				response.setContentLength(rewrittenCss.length);
-				try (OutputStream out = response.getOutputStream()) {
-					out.write(rewrittenCss);
-				}
+				OutputStream out = response.getOutputStream();
+				out.write(rewrittenCss);
 			} else {
 				throw new ServletException("Unsupported file type: " + extension);
 			}
 		} catch(FileNotFoundException e) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-		} catch(IOException | RuntimeException e) {
+		} catch(IOException e) {
+			logger.log(Level.SEVERE, null, e);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		} catch(RuntimeException e) {
 			logger.log(Level.SEVERE, null, e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}

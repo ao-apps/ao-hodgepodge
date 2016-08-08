@@ -122,7 +122,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		}
 	}
 
-	private static final ConcurrentMap<String,Object> driversLoaded = new ConcurrentHashMap<>();
+	private static final ConcurrentMap<String,Object> driversLoaded = new ConcurrentHashMap<String,Object>();
 
 	/**
 	 * Loads a driver at most once.
@@ -156,7 +156,17 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		} catch(SQLException err) {
 			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", err);
 			throw err;
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException err) {
+		} catch (ClassNotFoundException err) {
+			SQLException sqlErr=new SQLException();
+			sqlErr.initCause(err);
+			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
+			throw sqlErr;
+		} catch (InstantiationException err) {
+			SQLException sqlErr=new SQLException();
+			sqlErr.initCause(err);
+			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
+			throw sqlErr;
+		} catch (IllegalAccessException err) {
 			SQLException sqlErr=new SQLException();
 			sqlErr.initCause(err);
 			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);

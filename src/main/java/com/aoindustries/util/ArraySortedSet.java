@@ -63,33 +63,33 @@ public class ArraySortedSet<E> extends AbstractSet<E> implements SortedSet<E>, S
 
 	public ArraySortedSet() {
 		this.comparator = null;
-		this.elements = new ArrayList<>();
+		this.elements = new ArrayList<E>();
 	}
 
 	public ArraySortedSet(int initialCapacity) {
 		this.comparator = null;
-		this.elements = new ArrayList<>(initialCapacity);
+		this.elements = new ArrayList<E>(initialCapacity);
 	}
 
 	public ArraySortedSet(Comparator<? super E> comparator) {
 		this.comparator = comparator;
-		this.elements = new ArrayList<>();
+		this.elements = new ArrayList<E>();
 	}
 
 	public ArraySortedSet(Comparator<? super E> comparator, int initialCapacity) {
 		this.comparator = comparator;
-		this.elements = new ArrayList<>(initialCapacity);
+		this.elements = new ArrayList<E>(initialCapacity);
 	}
 
 	public ArraySortedSet(Collection<? extends E> c) {
 		this.comparator = null;
-		this.elements = new ArrayList<>(c.size());
+		this.elements = new ArrayList<E>(c.size());
 		addAll(c);
 	}
 
 	public ArraySortedSet(SortedSet<E> s) {
 		this.comparator = s.comparator();
-		this.elements = new ArrayList<>(s);
+		this.elements = new ArrayList<E>(s);
 	}
 
 	@SuppressWarnings("unchecked")

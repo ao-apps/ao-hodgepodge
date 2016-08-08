@@ -105,13 +105,15 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 				Arrays.sort(array);
 			} else {
 			if(ENABLE_CONCURRENCY) {
-				Queue<Future<?>> futures = new ConcurrentLinkedQueue<>();
+				Queue<Future<?>> futures = new ConcurrentLinkedQueue<Future<?>>();
 				sort(array, 0, array.length, 32-FIRST_BITS_PER_PASS, futures);
 				try {
 					while(!futures.isEmpty()) {
 						futures.remove().get();
 					}
-				} catch(InterruptedException | ExecutionException e) {
+				} catch(InterruptedException e) {
+					throw new RuntimeException(e);
+				} catch(ExecutionException e) {
 					throw new RuntimeException(e);
 				}
 			} else {

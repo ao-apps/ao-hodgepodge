@@ -70,8 +70,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 	private void doTestCorrectnessString(int numElements) throws Exception {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
-		PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
-		LinkedList<String> linkedList = new LinkedList<>();
+		PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
+		LinkedList<String> linkedList = new LinkedList<String>();
 		try {
 			// Populate the list
 			for(int c=0;c<numElements;c++) {
@@ -136,7 +136,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 			assertEquals(linkedFileList, linkedList);
 			// Save and restore, checking matches
 			linkedFileList.close();
-			PersistentLinkedList<String> newFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.READ_ONLY), String.class);
+			PersistentLinkedList<String> newFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.READ_ONLY), String.class);
 			try {
 				assertEquals(newFileList, linkedList);
 			} finally {
@@ -164,8 +164,8 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 	private void doTestCorrectnessInteger(int numElements) throws Exception {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
-		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
-		LinkedList<Integer> linkedList = new LinkedList<>();
+		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
+		LinkedList<Integer> linkedList = new LinkedList<Integer>();
 		try {
 			// Populate the list
 			for(int c=0;c<numElements;c++) {
@@ -230,7 +230,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 			assertEquals(linkedFileList, linkedList);
 			// Save and restore, checking matches
 			linkedFileList.close();
-			PersistentLinkedList<Integer> newFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.READ_ONLY), Integer.class);
+			PersistentLinkedList<Integer> newFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.READ_ONLY), Integer.class);
 			try {
 				assertEquals(newFileList, linkedList);
 			} finally {
@@ -261,7 +261,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 	public void testAddRandomStrings() throws Exception {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
-		PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
+		PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
 		try {
 			// Add in groups of 1000, timing the add
 			String[] toAdd = new String[1000];
@@ -289,7 +289,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 	public void testAddRandomIntegers() throws Exception {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
-		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
+		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
 		try {
 			// Add in groups of 1000, timing the add
 			Integer[] toAdd = new Integer[1000];
@@ -317,7 +317,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 	public void testAddNull() throws Exception {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
-		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
+		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
 		try {
 			// Add in groups of 1000, timing the add
 			for(int c=0;c<TEST_LOOPS;c++) {
@@ -343,7 +343,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 	public void testStringIterationPerformance() throws Exception {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
-		PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
+		PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
 		try {
 			for(int c=0;c<=10;c++) {
 				if(c>0) for(int d=0;d<1000;d++) linkedFileList.add(getRandomString(random, true));
@@ -370,7 +370,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 	public void testIntegerIterationPerformance() throws Exception {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
-		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
+		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
 		try {
 			for(int c=0;c<=10;c++) {
 				if(c>0) for(int d=0;d<1000;d++) linkedFileList.add(random.nextInt());
@@ -397,7 +397,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 	public void testStringCircularListPerformance() throws Exception {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
-		PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
+		PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), String.class);
 		try {
 			for(int c=0;c<100000;c++) {
 				String newValue = getRandomString(random, true);
@@ -421,7 +421,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 	public void testIntegerCircularListPerformance() throws Exception {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
-		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
+		PersistentLinkedList<Integer> linkedFileList = new PersistentLinkedList<Integer>(getPersistentBuffer(tempFile, ProtectionLevel.NONE), Integer.class);
 		try {
 			for(int c=0;c<100000;c++) {
 				Integer newValue = random.nextInt();
@@ -511,7 +511,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 		File tempFile = File.createTempFile("PersistentLinkedListTest", null);
 		tempFile.deleteOnExit();
 		try {
-			LinkedList<String> heapList = new LinkedList<>();
+			LinkedList<String> heapList = new LinkedList<String>();
 			final int iterations = TEST_LOOPS;
 			for(int c=0;c<iterations;c++) {
 				long startNanos = System.nanoTime();
@@ -519,7 +519,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 				String partial = null;
 				try {
 					try {
-						PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
+						PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
 						try {
 							int batchSize = random.nextInt(100)+1;
 							for(int d=0;d<batchSize;d++) {
@@ -541,7 +541,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 				}
 				// Check consistency
 				{
-					PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, protectionLevel), String.class);
+					PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
 					try {
 						checkRecoveryConsistency(heapList, linkedFileList, partial);
 					} finally {
@@ -552,7 +552,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 				partial = null;
 				try {
 					try {
-						PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
+						PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
 						try {
 							int batchSize = random.nextInt(95)+1;
 							if(batchSize>linkedFileList.size()) batchSize = linkedFileList.size();
@@ -575,7 +575,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 				}
 				// Check consistency
 				{
-					PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, protectionLevel), String.class);
+					PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
 					try {
 						checkRecoveryConsistency(heapList, linkedFileList, partial);
 					} finally {
@@ -586,7 +586,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 				partial = null;
 				try {
 					try {
-						PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
+						PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
 						try {
 							int batchSize = random.nextInt(100)+1;
 							for(int d=0;d<batchSize;d++) {
@@ -608,7 +608,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 				}
 				// Check consistency
 				{
-					PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, protectionLevel), String.class);
+					PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
 					try {
 						checkRecoveryConsistency(heapList, linkedFileList, partial);
 					} finally {
@@ -619,7 +619,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 				partial = null;
 				try {
 					try {
-						PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
+						PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(new RandomFailBuffer(getPersistentBuffer(tempFile, protectionLevel), allowFailure), String.class);
 						try {
 							int batchSize = random.nextInt(95)+1;
 							if(batchSize>linkedFileList.size()) batchSize = linkedFileList.size();
@@ -642,7 +642,7 @@ abstract public class PersistentLinkedListTestParent extends TestCase {
 				}
 				// Check consistency
 				{
-					PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<>(getPersistentBuffer(tempFile, protectionLevel), String.class);
+					PersistentLinkedList<String> linkedFileList = new PersistentLinkedList<String>(getPersistentBuffer(tempFile, protectionLevel), String.class);
 					try {
 						checkRecoveryConsistency(heapList, linkedFileList, partial);
 					} finally {

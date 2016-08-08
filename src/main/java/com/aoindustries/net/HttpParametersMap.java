@@ -40,7 +40,7 @@ import java.util.TreeMap;
  */
 public class HttpParametersMap implements MutableHttpParameters {
 
-	private final Map<String,List<String>> map = new TreeMap<>();
+	private final Map<String,List<String>> map = new TreeMap<String,List<String>>();
 	private final Map<String,List<String>> unmodifiableMap = Collections.unmodifiableMap(map);
 
 	/**
@@ -101,7 +101,7 @@ public class HttpParametersMap implements MutableHttpParameters {
 		NullArgumentException.checkNotNull(name, "name");
 		NullArgumentException.checkNotNull(value, "value");
 		List<String> values = map.get(name);
-		if(values==null) map.put(name, values = new ArrayList<>());
+		if(values==null) map.put(name, values = new ArrayList<String>());
 		values.add(value);
 	}
 }
