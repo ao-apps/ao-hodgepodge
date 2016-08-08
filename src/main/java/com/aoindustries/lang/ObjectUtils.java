@@ -42,9 +42,9 @@ public final class ObjectUtils {
 	 * 
 	 * @see java.util.Objects#hashCode(java.lang.Object) as of Java 1.7
 	 * 
-	 * @deprecated  use java.util.Objects#hashCode(Object) as of Java 1.7
+	 * Java 1.8: deprecated  use java.util.Objects#hashCode(Object) as of Java 1.7
 	 */
-	@Deprecated
+	// Java 1.8: @Deprecated
 	public static int hashCode(Object obj) {
         return obj != null ? obj.hashCode() : 0;
 	}
@@ -54,9 +54,9 @@ public final class ObjectUtils {
 	 * 
 	 * @see java.util.Objects#hash(java.lang.Object...) as of Java 1.7
 	 * 
-	 * @deprecated  use java.util.Objects#hash as of Java 1.7
+	 * Java 1.8: deprecated  use java.util.Objects#hash as of Java 1.7
 	 */
-	@Deprecated
+	// Java 1.8: @Deprecated
     public static int hash(Object... values) {
         return Arrays.hashCode(values);
     }
@@ -65,9 +65,9 @@ public final class ObjectUtils {
 	 * 
 	 * @see java.util.Objects#equals(java.lang.Object, java.lang.Object) as of Java 1.7
 	 * 
-	 * @deprecated  use java.util.Objects#equals(Object, Object) as of Java 1.7
+	 * Java 1.8: deprecated  use java.util.Objects#equals(Object, Object) as of Java 1.7
 	 */
-	@Deprecated
+	// Java 1.8: @Deprecated
 	public static boolean equals(Object obj1, Object obj2) {
         return (obj1 == obj2) || (obj1 != null && obj1.equals(obj2));
 	}
