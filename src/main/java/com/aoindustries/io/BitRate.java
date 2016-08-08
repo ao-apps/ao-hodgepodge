@@ -22,11 +22,11 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.math.SafeMath;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A <code>BitRate</code> consists of a long quantity and an optional unit.
@@ -147,7 +147,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
 	public boolean equals(Object O) {
 		if(!(O instanceof BitRate)) return false;
 		BitRate other = (BitRate)O;
-		return quantity==other.quantity && Objects.equals(unit, other.unit);
+		return quantity==other.quantity && ObjectUtils.equals(unit, other.unit);
 	}
 
 	@Override

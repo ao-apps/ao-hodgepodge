@@ -52,12 +52,15 @@ public class LoggingProxy {
 	private static void log(File logFile, long connectionId, char separator, String line) {
 		synchronized(logFile) {
 			try {
-				try (Writer out = new FileWriter(logFile, true)) {
+				Writer out = new FileWriter(logFile, true);
+				try {
 					out.write(Long.toString(connectionId));
 					out.write(separator);
 					out.write(' ');
 					out.write(line);
 					out.write('\n');
+				} finally {
+					out.close();
 				}
 			} catch(IOException e) {
 				e.printStackTrace(System.err);
@@ -76,11 +79,14 @@ public class LoggingProxy {
 						InetAddress listenAddress = InetAddress.getByName(args[0]);
 						InetAddress connectAddress = InetAddress.getByName(args[2]);
 						File logFile = new File(args[4]);
-						try (ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress)) {
+						ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress);
+						try {
 							while(true) {
 								Socket socketIn = ss.accept();
 								new LoggingProxyThread(socketIn, connectionId++, connectAddress, connectPort, logFile).start();
 							}
+						} finally {
+							ss.close();
 						}
 					} catch(IOException e) {
 						e.printStackTrace(System.err);
@@ -122,7 +128,8 @@ public class LoggingProxy {
 				try {
 					log(logFile, connectionId, ':', "Connection accepted from " + socketIn.getRemoteSocketAddress()+":"+socketIn.getPort());
 					log(logFile, connectionId, ':', "Connecting to " + connectAddress+":"+connectPort);
-					try (Socket socketOut = new Socket(connectAddress, connectPort)) {
+					Socket socketOut = new Socket(connectAddress, connectPort);
+					try {
 						ReadLogWriteThread inThread = new ReadLogWriteThread(socketIn.getInputStream(), socketOut.getOutputStream(), connectionId, '<', logFile);
 						try {
 							inThread.start();
@@ -143,6 +150,8 @@ public class LoggingProxy {
 								e.printStackTrace(System.err);
 							}
 						}
+					} finally {
+						socketOut.close();
 					}
 				} finally {
 					socketIn.close();

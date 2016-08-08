@@ -45,7 +45,7 @@ import java.util.List;
  */
 public class TempFileList {
 
-	private final List<WeakReference<TempFile>> tempFiles = new ArrayList<>();
+	private final List<WeakReference<TempFile>> tempFiles = new ArrayList<WeakReference<TempFile>>();
 
 	private final String prefix;
 	private final String suffix;
@@ -86,7 +86,7 @@ public class TempFileList {
 	 */
 	public TempFile createTempFile() throws IOException {
 		TempFile tempFile = new TempFile(prefix, suffix, directory);
-		tempFiles.add(new WeakReference<>(tempFile));
+		tempFiles.add(new WeakReference<TempFile>(tempFile));
 		return tempFile;
 	}
 

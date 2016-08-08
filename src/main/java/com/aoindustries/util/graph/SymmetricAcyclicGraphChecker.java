@@ -62,8 +62,8 @@ public class SymmetricAcyclicGraphChecker<V, EX extends Exception> implements Gr
 	@Override
 	public void checkGraph() throws AsymmetricException, CycleException, EX {
 		Set<V> vertices = graph.getVertices();
-		Map<V,Color> colors = new HashMap<>(vertices.size()*4/3+1);
-		Map<V,V> predecessors = new HashMap<>(); // Could this be a simple sequence like TopologicalSorter?  Any benefit?
+		Map<V,Color> colors = new HashMap<V,Color>(vertices.size()*4/3+1);
+		Map<V,V> predecessors = new HashMap<V,V>(); // Could this be a simple sequence like TopologicalSorter?  Any benefit?
 		for(V v : vertices) {
 			if(!colors.containsKey(v)) doCheck(colors, predecessors, v);
 		}
@@ -83,8 +83,8 @@ public class SymmetricAcyclicGraphChecker<V, EX extends Exception> implements Gr
 			if(
 				!(
 					isForward
-					? graph.getEdgesTo(connected).contains(new Edge<>(vertex, connected))
-					: graph.getEdgesFrom(connected).contains(new Edge<>(connected, vertex))
+					? graph.getEdgesTo(connected).contains(new Edge<V>(vertex, connected))
+					: graph.getEdgesFrom(connected).contains(new Edge<V>(connected, vertex))
 				)
 			) {
 				throw new AsymmetricException(vertex, connected);
@@ -92,7 +92,7 @@ public class SymmetricAcyclicGraphChecker<V, EX extends Exception> implements Gr
 			// Check for cycle
 			Color uMark = colors.get(connected);
 			if(Color.GRAY==uMark /*&& child.equals(predecessors.get(obj))*/) {
-				List<V> vertices = new ArrayList<>();
+				List<V> vertices = new ArrayList<V>();
 				vertices.add(connected);
 				V pred = vertex;
 				while(pred!=null) {

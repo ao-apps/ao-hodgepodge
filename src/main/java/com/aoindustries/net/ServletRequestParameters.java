@@ -52,7 +52,7 @@ public class ServletRequestParameters implements HttpParameters {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Iterator<String> getParameterNames() {
-		return new EnumerationIterator<>(request.getParameterNames());
+		return new EnumerationIterator<String>(request.getParameterNames());
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class ServletRequestParameters implements HttpParameters {
 	@Override
 	public Map<String, List<String>> getParameterMap() {
 		@SuppressWarnings("unchecked") Map<String,String[]> requestMap = request.getParameterMap();
-		Map<String,List<String>> map = new LinkedHashMap<>(requestMap.size()*4/3+1);
+		Map<String,List<String>> map = new LinkedHashMap<String,List<String>>(requestMap.size()*4/3+1);
 		for(Map.Entry<String,String[]> entry : requestMap.entrySet()) {
 			map.put(
 				entry.getKey(),

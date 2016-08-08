@@ -44,7 +44,7 @@ final public class ImageSizeCache {
 		Dimension size;
 	}
 
-	private static final Map<String,CacheEntry> sizeCache = new HashMap<>();
+	private static final Map<String,CacheEntry> sizeCache = new HashMap<String,CacheEntry>();
 
 	public static Dimension getImageSize(File imageFile) throws IOException {
 		// Locate the CacheValue

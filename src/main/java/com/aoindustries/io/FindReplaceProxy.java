@@ -70,8 +70,8 @@ public class FindReplaceProxy {
 				final int listenPort = Integer.parseInt(args[1]);
 				final int connectPort = Integer.parseInt(args[3]);
 
-				List<FindReplace> inFindReplaces = new ArrayList<>();
-				List<FindReplace> outFindReplaces = new ArrayList<>();
+				List<FindReplace> inFindReplaces = new ArrayList<FindReplace>();
+				List<FindReplace> outFindReplaces = new ArrayList<FindReplace>();
 				for(int pos=4; pos<args.length; pos+=3) {
 					String find = args[pos];
 					String replace = args[pos+1];
@@ -92,7 +92,8 @@ public class FindReplaceProxy {
 						try {
 							InetAddress listenAddress = InetAddress.getByName(args[0]);
 							InetAddress connectAddress = InetAddress.getByName(args[2]);
-							try (ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress)) {
+							ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress);
+							try {
 								while(true) {
 									Socket socketIn = ss.accept();
 									new FindReplaceProxyThread(
@@ -104,6 +105,8 @@ public class FindReplaceProxy {
 										Collections.unmodifiableList(outFindReplaces)
 									).start();
 								}
+							} finally {
+								ss.close();
 							}
 						} catch(IOException e) {
 							e.printStackTrace(System.err);

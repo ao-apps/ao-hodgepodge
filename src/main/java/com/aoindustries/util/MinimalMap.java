@@ -66,7 +66,7 @@ public class MinimalMap {
 				map = Collections.singletonMap(entryKey, value);
 			} else {
 				// Is a second property
-				map = new LinkedHashMap<>(8);
+				map = new LinkedHashMap<K,V>(8);
 				map.put(entryKey, entry.getValue());
 				map.put(key, value);
 			}
@@ -144,7 +144,7 @@ public class MinimalMap {
 			return map.values();
 		} else {
 			// Wrap in an ArrayList
-			return new ArrayList<>(map.values());
+			return new ArrayList<V>(map.values());
 		}
 	}
 
@@ -162,6 +162,6 @@ public class MinimalMap {
 			return map;
 		}
 		// Create copy of map
-		return new LinkedHashMap<>(map);
+		return new LinkedHashMap<K,V>(map);
 	}
 }

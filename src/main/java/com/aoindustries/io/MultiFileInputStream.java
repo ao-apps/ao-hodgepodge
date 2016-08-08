@@ -101,8 +101,11 @@ public class MultiFileInputStream extends InputStream {
 		while(value==-1) {
 			value=in.read();
 			if(value==-1) {
-				try (FileInputStream tempIn = in) {
+				FileInputStream tempIn = in;
+				try {
 					in=null;
+				} finally {
+					tempIn.close();
 				}
 				if(nextFile>=files.length) return -1;
 				in=new FileInputStream(files[nextFile++]);
@@ -122,8 +125,11 @@ public class MultiFileInputStream extends InputStream {
 			while(count==-1) {
 				count=in.read(buff);
 				if(count==-1) {
-					try (FileInputStream tempIn = in) {
+					FileInputStream tempIn = in;
+					try {
 						in=null;
+					} finally {
+						tempIn.close();
 					}
 					if(nextFile>=files.length) return -1;
 					in=new FileInputStream(files[nextFile++]);
@@ -145,8 +151,11 @@ public class MultiFileInputStream extends InputStream {
 			while(count==-1) {
 				count=in.read(buff, off, len);
 				if(count==-1) {
-					try (FileInputStream tempIn = in) {
+					FileInputStream tempIn = in;
+					try {
 						in=null;
+					} finally {
+						tempIn.close();
 					}
 					if(nextFile>=files.length) return -1;
 					in=new FileInputStream(files[nextFile++]);
@@ -180,8 +189,11 @@ public class MultiFileInputStream extends InputStream {
 			while(count==-1) {
 				count=in.skip(n);
 				if(count==-1) {
-					try (FileInputStream tempIn = in) {
+					FileInputStream tempIn = in;
+					try {
 						in=null;
+					} finally {
+						tempIn.close();
 					}
 					if(nextFile>=files.length) return -1;
 					in=new FileInputStream(files[nextFile++]);

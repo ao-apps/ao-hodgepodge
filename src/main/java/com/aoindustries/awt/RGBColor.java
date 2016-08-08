@@ -69,8 +69,9 @@ final public class RGBColor {
 		// Load the colors if not already done
 		if (colors == null) {
 			// Load the colors
-			colors = new HashMap<>();
-			try (BufferedReader in = new BufferedReader(new InputStreamReader(RGBColor.class.getResourceAsStream("rgb.txt")))) {
+			colors = new HashMap<String,Integer>();
+			BufferedReader in = new BufferedReader(new InputStreamReader(RGBColor.class.getResourceAsStream("rgb.txt")));
+			try {
 				String line;
 				while ((line = in.readLine()) != null) {
 					int len = line.length();
@@ -91,6 +92,8 @@ final public class RGBColor {
 						}
 					}
 				}
+			} finally {
+				in.close();
 			}
 		}
 

@@ -74,7 +74,7 @@ public class UnmodifiableHttpParameters implements HttpParameters {
 	@Override
 	public Map<String,List<String>> getParameterMap() {
 		Map<String,List<String>> wrappedMap = wrapped.getParameterMap();
-		Map<String,List<String>> map = new LinkedHashMap<>(wrappedMap.size()*4/3+1);
+		Map<String,List<String>> map = new LinkedHashMap<String,List<String>>(wrappedMap.size()*4/3+1);
 		for(Map.Entry<String,List<String>> entry : wrappedMap.entrySet()) {
 			map.put(
 				entry.getKey(),

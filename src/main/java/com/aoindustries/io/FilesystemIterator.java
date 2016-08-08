@@ -117,23 +117,23 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 				if(currentDirectories==null) {
 					if(startPath.length()==0) {
 						// Starting at root will include the starting directory itself
-						(currentDirectories=new Stack<>()).push("");
-						(currentLists=new Stack<>()).push(getFilesystemRoots());
+						(currentDirectories=new Stack<String>()).push("");
+						(currentLists=new Stack<String[]>()).push(getFilesystemRoots());
 					} else {
 						if(isFilesystemRoot(startPath)) {
 							// Starting from a root, has no parent
-							(currentDirectories=new Stack<>()).push("");
-							(currentLists=new Stack<>()).push(new String[] {startPath});
+							(currentDirectories=new Stack<String>()).push("");
+							(currentLists=new Stack<String[]>()).push(new String[] {startPath});
 						} else {
 							// Starting at non root will include the starting directory itself
 							File startPathFile = new File(startPath);
 							String parent = startPathFile.getParent();
 							String name = startPathFile.getName();
-							(currentDirectories=new Stack<>()).push(parent);
-							(currentLists=new Stack<>()).push(new String[] {name});
+							(currentDirectories=new Stack<String>()).push(parent);
+							(currentLists=new Stack<String[]>()).push(new String[] {name});
 						}
 					}
-					(currentIndexes=new Stack<>()).push(0);
+					(currentIndexes=new Stack<Integer>()).push(0);
 				}
 				String currentDirectory;
 				String[] currentList=null;
@@ -274,7 +274,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 	 */
 	protected String[] getFilesystemRoots() throws IOException {
 		File[] fileRoots=File.listRoots();
-		List<String> tempRoots=new ArrayList<>(fileRoots.length);
+		List<String> tempRoots=new ArrayList<String>(fileRoots.length);
 		for (File fileRoot : fileRoots) {
 			String root = fileRoot.getPath();
 			// Only add if this root is used for at least one backup setting

@@ -36,7 +36,7 @@ import java.util.IdentityHashMap;
  */
 final public class BundleLookupThreadContext {
 
-	private static final ThreadLocal<BundleLookupThreadContext> threadContext = new InheritableThreadLocal<>();
+	private static final ThreadLocal<BundleLookupThreadContext> threadContext = new InheritableThreadLocal<BundleLookupThreadContext>();
 
 	/**
 	 * Gets the current context or <code>null</code> if none set and none created.
@@ -66,7 +66,7 @@ final public class BundleLookupThreadContext {
 	 * @throws IllegalStateException   if the string has already been added to this context (as matched by identity)
 	 */
 	void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) throws IllegalStateException {
-		if(lookupResults==null) lookupResults = new IdentityHashMap<>();
+		if(lookupResults==null) lookupResults = new IdentityHashMap<String,BundleLookupMarkup>();
 		if(lookupResults.put(lookupResult, lookupMarkup)!=null) {
 			throw new IllegalStateException(
 				ApplicationResources.accessor.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")

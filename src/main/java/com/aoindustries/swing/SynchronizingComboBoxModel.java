@@ -38,7 +38,7 @@ import javax.swing.SwingUtilities;
  *
  * @author  AO Industries, Inc.
  */
-public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
+public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel {
 
 	private static final long serialVersionUID = 2421298474426921512L;
 

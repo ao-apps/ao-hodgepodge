@@ -22,12 +22,12 @@
  */
 package com.aoindustries.rmi;
 
+import com.aoindustries.lang.ObjectUtils;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.rmi.server.RMIClientSocketFactory;
-import java.util.Objects;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
@@ -60,7 +60,7 @@ public class RMIClientSocketFactorySSL implements RMIClientSocketFactory, Serial
 		return
 			O!=null
 			&& (O instanceof RMIClientSocketFactorySSL)
-			&& Objects.equals(localAddress, ((RMIClientSocketFactorySSL)O).localAddress)
+			&& ObjectUtils.equals(localAddress, ((RMIClientSocketFactorySSL)O).localAddress)
 		;
 	}
 

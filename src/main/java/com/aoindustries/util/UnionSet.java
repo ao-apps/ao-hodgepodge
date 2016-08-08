@@ -55,13 +55,13 @@ public class UnionSet<E> extends AbstractSet<E> {
 	/**
 	 * Will never contain any empty sets.
 	 */
-	private final List<Set<? extends E>> added = new ArrayList<>();
+	private final List<Set<? extends E>> added = new ArrayList<Set<? extends E>>();
 
 	public UnionSet() {
 	}
 
 	public UnionSet(Collection<? extends E> c) {
-		combined = new HashSet<>(c.size()*4/3+1);
+		combined = new HashSet<E>(c.size()*4/3+1);
 		addAll(c);
 	}
 
@@ -75,7 +75,7 @@ public class UnionSet<E> extends AbstractSet<E> {
 				// Avoid rehash at the expense of possibly allocating more than needed when there are duplicates
 				int totalSize = 0;
 				for(Set<? extends E> set : added) totalSize += set.size();
-				combined = new HashSet<>(totalSize*4/3+1);
+				combined = new HashSet<E>(totalSize*4/3+1);
 			}
 			for(Set<? extends E> set : added) combined.addAll(set);
 			added.clear();
@@ -146,7 +146,7 @@ public class UnionSet<E> extends AbstractSet<E> {
 
 	@Override
 	public boolean add(E e) {
-		if(combined==null) combined = new HashSet<>();
+		if(combined==null) combined = new HashSet<E>();
 		return combined.add(e);
 	}
 
@@ -175,7 +175,7 @@ public class UnionSet<E> extends AbstractSet<E> {
 		if(c.isEmpty()) return false;
 		combine();
 		if(combined==null) {
-			combined = new HashSet<>(c);
+			combined = new HashSet<E>(c);
 			return true;
 		} else {
 			return combined.addAll(c);
@@ -190,7 +190,7 @@ public class UnionSet<E> extends AbstractSet<E> {
 	 */
 	public void addAll(Set<? extends E> set) {
 		if(set.size()<=MAXIMUM_COMBINE_SIZE) {
-			if(combined==null) combined = new HashSet<>(set);
+			if(combined==null) combined = new HashSet<E>(set);
 			else combined.addAll(set);
 		} else {
 			added.add(set);
@@ -203,7 +203,7 @@ public class UnionSet<E> extends AbstractSet<E> {
 	@Override
 	public boolean retainAll(Collection<?> c) {
 		combine();
-		if(combined==null) combined = new HashSet<>();
+		if(combined==null) combined = new HashSet<E>();
 		return combined.retainAll(c);
 	}
 
@@ -213,7 +213,7 @@ public class UnionSet<E> extends AbstractSet<E> {
 	@Override
 	public boolean removeAll(Collection<?> c) {
 		combine();
-		if(combined==null) combined = new HashSet<>();
+		if(combined==null) combined = new HashSet<E>();
 		return combined.removeAll(c);
 	}
 

@@ -22,7 +22,11 @@
  */
 package com.aoindustries.util.i18n;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -34,6 +38,55 @@ import java.util.concurrent.ConcurrentMap;
 public class Locales {
 
 	private Locales() {}
+
+	/**
+	 * Gets the script if Java 1.8 or "" if not Java 1.8.
+	 *
+	 * Java 1.8: Get rid of this and just call directly
+	 *
+	 * @see  Locale#getScript()
+	 */
+	static String getScript(Locale locale) {
+		try {
+			Method method = Locale.class.getMethod("getScript");
+			return (String)method.invoke(locale);
+		} catch(NoSuchMethodException e) {
+			return "";
+		} catch(IllegalAccessException e) {
+			AssertionError ae = new AssertionError("getScript() should be accessible");
+			ae.initCause(e);
+			throw ae;
+		} catch(InvocationTargetException e) {
+			AssertionError ae = new AssertionError("getScript() should not throw any exceptions");
+			ae.initCause(e);
+			throw ae;
+		}
+	}
+
+	/**
+	 * Gets the extension keys if Java 1.8 or "" if not Java 1.8.
+	 *
+	 * Java 1.8: Get rid of this and just call directly
+	 *
+	 * @see  Locale#getExtensionKeys()
+	 */
+	@SuppressWarnings("unchecked")
+	static Set<Character> getExtensionKeys(Locale locale) {
+		try {
+			Method method = Locale.class.getMethod("getExtensionKeys");
+			return (Set<Character>)method.invoke(locale);
+		} catch(NoSuchMethodException e) {
+			return Collections.emptySet();
+		} catch(IllegalAccessException e) {
+			AssertionError ae = new AssertionError("getExtensionKeys() should be accessible");
+			ae.initCause(e);
+			throw ae;
+		} catch(InvocationTargetException e) {
+			AssertionError ae = new AssertionError("getExtensionKeys() should not throw any exceptions");
+			ae.initCause(e);
+			throw ae;
+		}
+	}
 
 	// Was getting NullPointerException on class init, trying cache in separate class.
 	// It might have been due to memory exhausted in Tomcat, but this won't hurt.
@@ -70,7 +123,7 @@ public class Locales {
 			}
 		}
 
-		private static final ConcurrentMap<CacheKey,Locale> locales = new ConcurrentHashMap<>(16, 0.75f, 1);
+		private static final ConcurrentMap<CacheKey,Locale> locales = new ConcurrentHashMap<CacheKey,Locale>(16, 0.75f, 1);
 
 		/**
 		 * @see  Locales#getCachedLocale(java.lang.String, java.lang.String, java.lang.String)
@@ -97,8 +150,8 @@ public class Locales {
 			for(Locale locale : Locale.getAvailableLocales()) {
 				// Ignore locales with script or extensions for preload, since the rest of this API is unaware of them
 				if(
-					locale.getScript().isEmpty()
-					&& locale.getExtensionKeys().isEmpty()
+					getScript(locale).isEmpty()
+					&& getExtensionKeys(locale).isEmpty()
 				) {
 					//System.out.println("preload: " + locale.toString());
 					//System.out.println("preload.language     : " + locale.getLanguage());

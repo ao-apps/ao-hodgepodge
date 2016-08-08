@@ -41,7 +41,7 @@ public class ApplicationResourcesAccessor implements Serializable {
 
 	private static final long serialVersionUID = -8735217773587095120L;
 
-	private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<>();
+	private static final ConcurrentMap<String,ApplicationResourcesAccessor> accessors = new ConcurrentHashMap<String,ApplicationResourcesAccessor>();
 
 	public static ApplicationResourcesAccessor getInstance(String baseName) {
 		ApplicationResourcesAccessor existing = accessors.get(baseName);

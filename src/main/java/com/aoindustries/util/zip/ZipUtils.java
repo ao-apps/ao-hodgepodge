@@ -74,8 +74,11 @@ public class ZipUtils {
 	 * Recursively packages a directory into a file.
 	 */
 	public static void createZipFile(File sourceDirectory, File zipFile) throws IOException {
-		try (OutputStream out = new FileOutputStream(zipFile)) {
+		OutputStream out = new FileOutputStream(zipFile);
+		try {
 			createZipFile(sourceDirectory, out);
+		} finally {
+			out.close();
 		}
 	}
 
@@ -123,8 +126,11 @@ public class ZipUtils {
 			setZipEntryTime(zipEntry, file.lastModified());
 			zipOut.putNextEntry(zipEntry);
 			try {
-				try (InputStream in = new FileInputStream(file)) {
+				InputStream in = new FileInputStream(file);
+				try {
 					IoUtils.copy(in, zipOut);
+				} finally {
+					in.close();
 				}
 			} finally {
 				zipOut.closeEntry();
@@ -160,8 +166,9 @@ public class ZipUtils {
 		if(!destination.isDirectory()) throw new IOException("Not a directory: "+destination.getPath());
 		// Add trailing / to sourcePrefix if missing
 		if(!sourcePrefix.isEmpty() && !sourcePrefix.endsWith("/")) sourcePrefix += "/";
-		try (ZipFile zipFile = new ZipFile(sourceFile)) {
-			SortedMap<File,Long> directoryModifyTimes = new TreeMap<>(reverseFileComparator);
+		ZipFile zipFile = new ZipFile(sourceFile);
+		try {
+			SortedMap<File,Long> directoryModifyTimes = new TreeMap<File,Long>(reverseFileComparator);
 
 			// Pass one: create directories and files
 			Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -185,13 +192,19 @@ public class ZipUtils {
 								File directory = file.getParentFile();
 								if(!directory.exists()) directory.mkdirs();
 								if(file.exists()) throw new IOException("File exists: "+file.getPath());
-								try (InputStream in = zipFile.getInputStream(entry)) {
-									try (OutputStream out = new FileOutputStream(file)) {
+								InputStream in = zipFile.getInputStream(entry);
+								try {
+									OutputStream out = new FileOutputStream(file);
+									try {
 										long copyBytes = IoUtils.copy(in, out);
 										long size = entry.getSize();
 										if(size!=-1 && copyBytes!=size) throw new IOException("copyBytes!=size: "+copyBytes+"!="+size);
+									} finally {
+										out.close();
 									}
 									if(entryTime!=-1) file.setLastModified(entryTime);
+								} finally {
+									in.close();
 								}
 							}
 						}
@@ -204,6 +217,8 @@ public class ZipUtils {
 				//System.out.println("File: "+entry.getKey()+", mtime="+entry.getValue());
 				entry.getKey().setLastModified(entry.getValue());
 			}
+		} finally {
+			zipFile.close();
 		}
 	}
 
@@ -242,8 +257,11 @@ public class ZipUtils {
 	 * Copies all non-directory entries.
 	 */
 	public static void copyEntries(File file, ZipOutputStream zipOut, ZipEntryFilter filter) throws IOException {
-		try (ZipFile zipFile = new ZipFile(file)) {
+		ZipFile zipFile = new ZipFile(file);
+		try {
 			copyEntries(zipFile, zipOut, filter);
+		} finally {
+			zipFile.close();
 		}
 	}
 
@@ -267,8 +285,11 @@ public class ZipUtils {
 				if(time!=-1) newEntry.setTime(time);
 				zipOut.putNextEntry(newEntry);
 				try {
-					try (InputStream in = zipFile.getInputStream(entry)) {
+					InputStream in = zipFile.getInputStream(entry);
+					try {
 						IoUtils.copy(in, zipOut);
+					} finally {
+						in.close();
 					}
 				} finally {
 					zipOut.closeEntry();

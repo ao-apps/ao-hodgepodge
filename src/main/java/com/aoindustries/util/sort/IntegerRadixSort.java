@@ -615,7 +615,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				sizePerTask = size;
 			} else {
 				assert numTasks>=2 : "Must not have an executor when numTasks < 2";
-				runnableFutures = new ArrayList<>(numTasks);
+				runnableFutures = new ArrayList<Future<?>>(numTasks);
 				int spt = size / numTasks;
 				if((spt*numTasks)<size) spt++; // Round-up instead of down
 				sizePerTask = spt;
@@ -630,7 +630,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 			// May only use concurrent import for random access sources
 			if(executor!=null && source.useRandomAccess()) {
 				// Perform concurrent import
-				final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<>(numTasks);
+				final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<Future<Source.ImportDataResult>>(numTasks);
 				for(
 					int taskStart=0, toTaskNum=0;
 					taskStart<size;
@@ -804,7 +804,9 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					0
 				);
 			}
-		} catch(InterruptedException | ExecutionException e) {
+		} catch(InterruptedException e) {
+			throw new WrappedException(e);
+		} catch(ExecutionException e) {
 			throw new WrappedException(e);
 		}
 	}
@@ -923,14 +925,14 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					radixSort(
 						size,
 						new SingleTaskNumberRadixTable<N>(size),
-						new NumberListSource<>(size, list),
+						new NumberListSource<N>(size, list),
 						null
 					);
 				} else {
 					radixSort(
 						size,
 						new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
-						new NumberListSource<>(size, list),
+						new NumberListSource<N>(size, list),
 						executor
 					);
 				}
@@ -1017,14 +1019,14 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				radixSort(
 					size,
 					new SingleTaskNumberRadixTable<N>(size),
-					new NumberArraySource<>(size, array),
+					new NumberArraySource<N>(size, array),
 					null
 				);
 			} else {
 				radixSort(
 					size,
 					new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
-					new NumberArraySource<>(size, array),
+					new NumberArraySource<N>(size, array),
 					executor
 				);
 			}

@@ -103,7 +103,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 				E value = child.getValue();
 				SynchronizingMutableTreeNode<E> synchronizingNode;
 				if(index>=getChildCount()) {
-					synchronizingNode = new SynchronizingMutableTreeNode<>(value);
+					synchronizingNode = new SynchronizingMutableTreeNode<E>(value);
 					treeModel.insertNodeInto(synchronizingNode, this, index);
 				} else {
 					synchronizingNode = (SynchronizingMutableTreeNode<E>)getChildAt(index);
@@ -125,7 +125,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 							// synchronizingNode already contains the right node
 						} else {
 							// Otherwise, insert in the current index
-							synchronizingNode = new SynchronizingMutableTreeNode<>(value);
+							synchronizingNode = new SynchronizingMutableTreeNode<E>(value);
 							treeModel.insertNodeInto(synchronizingNode, this, index);
 						}
 					}

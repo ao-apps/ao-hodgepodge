@@ -137,9 +137,12 @@ public class LogFollower extends InputStream {
 				// Read to the end of the file
 				long ral = file.length();
 				if(ral>filePos) {
-					try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
+					RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
+					try {
 						randomAccess.seek(filePos++);
 						return randomAccess.read();
+					} finally {
+						randomAccess.close();
 					}
 				}
 			}
@@ -164,13 +167,16 @@ public class LogFollower extends InputStream {
 				// Read to the end of the file
 				long ral = file.length();
 				if(ral>filePos) {
-					try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
+					RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
+					try {
 						randomAccess.seek(filePos);
 						long avail = randomAccess.length() - filePos;
 						if(avail>len) avail = len;
 						int actual = randomAccess.read(b, offset, (int)avail);
 						filePos += actual;
 						return actual;
+					} finally {
+						randomAccess.close();
 					}
 				}
 			}
@@ -195,13 +201,16 @@ public class LogFollower extends InputStream {
 				// Skip to the end of the file
 				long ral = file.length();
 				if(ral>filePos) {
-					try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
+					RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
+					try {
 						randomAccess.seek(filePos);
 						long avail = randomAccess.length()-filePos;
 						if(avail>n) avail = n;
 						int actual = randomAccess.skipBytes((int)avail);
 						filePos += actual;
 						return actual;
+					} finally {
+						randomAccess.close();
 					}
 				}
 			}
