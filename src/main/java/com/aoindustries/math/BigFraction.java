@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -107,6 +107,7 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
             sum = sum==null ? result : sum.add(result);
         }
         // Must be same value and scale
+		assert sum != null;
         return sum.equals(total);
     }
 
@@ -134,8 +135,8 @@ public class BigFraction extends Number implements Serializable, Comparable<BigF
      *   <li>Each result will be zero or have a sign matching <code>total</code>.</li>
      * </ul>
      *
-     * @param total The total value to be distributed within the results, the sum must be equal to one.
-     * @param fractions The fractional amount of each result.  The array elements are unmodified.
+     * @param total The total value to be distributed within the results
+     * @param fractions The fractional amount of each result, the sum must be equal to one.  The array elements are unmodified.
      *
      * @return the results corresponding to each fractional amount.
      */
