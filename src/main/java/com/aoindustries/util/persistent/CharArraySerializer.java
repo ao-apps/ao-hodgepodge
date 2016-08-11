@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,64 +38,64 @@ import java.io.OutputStream;
  */
 public class CharArraySerializer implements Serializer<char[]> {
 
-    // @ThreadSafe
-    @Override
-    public boolean isFixedSerializedSize() {
-        return false;
-    }
+	// @ThreadSafe
+	@Override
+	public boolean isFixedSerializedSize() {
+		return false;
+	}
 
-    // @NotThreadSafe
-    @Override
-    public long getSerializedSize(char[] value) {
-        return 4+value.length/2;
-    }
+	// @NotThreadSafe
+	@Override
+	public long getSerializedSize(char[] value) {
+		return 4+value.length/2;
+	}
 
-    // @NotThreadSafe
-    @Override
-    public void serialize(char[] chars, OutputStream out) throws IOException {
-        byte[] bytes = BufferManager.getBytes();
-        try {
-            int len = chars.length;
-            PersistentCollections.intToBuffer(len, bytes);
-            out.write(bytes, 0, 4);
-            int pos = 0;
-            while(len>0) {
-                int count = BufferManager.BUFFER_SIZE/2;
-                if(len<count) count = len;
-                for(int charsIndex=0, bytesIndex = 0; charsIndex<count; charsIndex++, bytesIndex+=2) {
-                    PersistentCollections.charToBuffer(chars[pos+charsIndex], bytes, bytesIndex);
-                }
-                out.write(bytes, 0, count*2);
-                pos += count;
-                len -= count;
-            }
-        } finally {
-            BufferManager.release(bytes, false);
-        }
-    }
+	// @NotThreadSafe
+	@Override
+	public void serialize(char[] chars, OutputStream out) throws IOException {
+		byte[] bytes = BufferManager.getBytes();
+		try {
+			int len = chars.length;
+			PersistentCollections.intToBuffer(len, bytes);
+			out.write(bytes, 0, 4);
+			int pos = 0;
+			while(len>0) {
+				int count = BufferManager.BUFFER_SIZE/2;
+				if(len<count) count = len;
+				for(int charsIndex=0, bytesIndex = 0; charsIndex<count; charsIndex++, bytesIndex+=2) {
+					PersistentCollections.charToBuffer(chars[pos+charsIndex], bytes, bytesIndex);
+				}
+				out.write(bytes, 0, count*2);
+				pos += count;
+				len -= count;
+			}
+		} finally {
+			BufferManager.release(bytes, false);
+		}
+	}
 
-    // @NotThreadSafe
-    @Override
-    public char[] deserialize(InputStream in) throws IOException {
-        byte[] bytes = BufferManager.getBytes();
-        try {
-            IoUtils.readFully(in, bytes, 0, 4);
-            int len = PersistentCollections.bufferToInt(bytes);
-            char[] chars = new char[len];
-            int pos = 0;
-            while(len>0) {
-                int count = BufferManager.BUFFER_SIZE/2;
-                if(len<count) count = len;
-                IoUtils.readFully(in, bytes, pos, len);
-                for(int charsIndex=0, bytesIndex = 0; charsIndex<count; charsIndex++, bytesIndex+=2) {
-                    chars[pos+charsIndex] = PersistentCollections.bufferToChar(bytes, bytesIndex);
-                }
-                pos += count;
-                len -= count;
-            }
-            return chars;
-        } finally {
-            BufferManager.release(bytes, false);
-        }
-    }
+	// @NotThreadSafe
+	@Override
+	public char[] deserialize(InputStream in) throws IOException {
+		byte[] bytes = BufferManager.getBytes();
+		try {
+			IoUtils.readFully(in, bytes, 0, 4);
+			int len = PersistentCollections.bufferToInt(bytes);
+			char[] chars = new char[len];
+			int pos = 0;
+			while(len>0) {
+				int count = BufferManager.BUFFER_SIZE/2;
+				if(len<count) count = len;
+				IoUtils.readFully(in, bytes, pos, len);
+				for(int charsIndex=0, bytesIndex = 0; charsIndex<count; charsIndex++, bytesIndex+=2) {
+					chars[pos+charsIndex] = PersistentCollections.bufferToChar(bytes, bytesIndex);
+				}
+				pos += count;
+				len -= count;
+			}
+			return chars;
+		} finally {
+			BufferManager.release(bytes, false);
+		}
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012  AO Industries, Inc.
+ * Copyright (C) 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -30,21 +30,21 @@ package com.aoindustries.security;
  */
 public class NotAuthenticatedException extends SecurityException {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public NotAuthenticatedException() {
-        super();
-    }
-    
-    public NotAuthenticatedException(String message) {
-        super(message);
-    }
+	public NotAuthenticatedException() {
+		super();
+	}
 
-    public NotAuthenticatedException(Throwable cause) {
-        super(cause);
-    }
-    
-    public NotAuthenticatedException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public NotAuthenticatedException(String message) {
+		super(message);
+	}
+
+	public NotAuthenticatedException(Throwable cause) {
+		super(cause);
+	}
+
+	public NotAuthenticatedException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

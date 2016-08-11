@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,50 +38,50 @@ import java.util.Properties;
  */
 public class PropertiesVersions {
 
-    private static Properties readProperties(InputStream in) throws IOException {
-        Properties props = new Properties();
-        props.load(in);
-        return props;
-    }
+	private static Properties readProperties(InputStream in) throws IOException {
+		Properties props = new Properties();
+		props.load(in);
+		return props;
+	}
 
-    private final Properties properties;
+	private final Properties properties;
 
-    /**
-     * Loads properties from the classpath.
-     */
-    public PropertiesVersions(Class<?> clazz, String resource) throws IOException {
-        this(PropertiesUtils.loadFromResource(clazz, resource));
-    }
+	/**
+	 * Loads properties from the classpath.
+	 */
+	public PropertiesVersions(Class<?> clazz, String resource) throws IOException {
+		this(PropertiesUtils.loadFromResource(clazz, resource));
+	}
 
-    /**
-     * Loads properties from the provided inputstream.
-     */
-    public PropertiesVersions(InputStream in) throws IOException {
-        this(readProperties(in));
-    }
+	/**
+	 * Loads properties from the provided inputstream.
+	 */
+	public PropertiesVersions(InputStream in) throws IOException {
+		this(readProperties(in));
+	}
 
-    /**
-     * Uses the provided properties directly, no defensive copy is made.
-     */
-    public PropertiesVersions(Properties properties) {
-        this.properties = properties;
-    }
+	/**
+	 * Uses the provided properties directly, no defensive copy is made.
+	 */
+	public PropertiesVersions(Properties properties) {
+		this.properties = properties;
+	}
 
-    /**
-     * Gets the version number for the provided product.
-     */
-    public Version getVersion(String product) throws IllegalArgumentException {
-        String three = properties.getProperty(product);
-        if(three==null) throw new IllegalArgumentException(accessor.getMessage("PropertiesVersions.getVersion.productNotFound", product));
-        return Version.valueOf(three+"."+getBuild());
-    }
+	/**
+	 * Gets the version number for the provided product.
+	 */
+	public Version getVersion(String product) throws IllegalArgumentException {
+		String three = properties.getProperty(product);
+		if(three==null) throw new IllegalArgumentException(accessor.getMessage("PropertiesVersions.getVersion.productNotFound", product));
+		return Version.valueOf(three+"."+getBuild());
+	}
 
-    /**
-     * Gets the build number that is applied to all products.
-     */
-    public int getBuild() throws IllegalArgumentException {
-        String build = properties.getProperty("build.number");
-        if(build==null) throw new IllegalArgumentException(accessor.getMessage("PropertiesVersions.getVersion.buildNotFound"));
-        return Integer.parseInt(build);
-    }
+	/**
+	 * Gets the build number that is applied to all products.
+	 */
+	public int getBuild() throws IllegalArgumentException {
+		String build = properties.getProperty("build.number");
+		if(build==null) throw new IllegalArgumentException(accessor.getMessage("PropertiesVersions.getVersion.buildNotFound"));
+		return Integer.parseInt(build);
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,31 +37,31 @@ import java.io.OutputStream;
  */
 public class ShortSerializer implements Serializer<Short> {
 
-    // @ThreadSafe
-    @Override
-    public boolean isFixedSerializedSize() {
-        return true;
-    }
+	// @ThreadSafe
+	@Override
+	public boolean isFixedSerializedSize() {
+		return true;
+	}
 
-    // @NotThreadSafe
-    @Override
-    public long getSerializedSize(Short value) {
-        return 2;
-    }
+	// @NotThreadSafe
+	@Override
+	public long getSerializedSize(Short value) {
+		return 2;
+	}
 
-    private final byte[] buffer = new byte[2];
+	private final byte[] buffer = new byte[2];
 
-    // @NotThreadSafe
-    @Override
-    public void serialize(Short value, OutputStream out) throws IOException {
-        PersistentCollections.shortToBuffer(value, buffer);
-        out.write(buffer, 0, 2);
-    }
+	// @NotThreadSafe
+	@Override
+	public void serialize(Short value, OutputStream out) throws IOException {
+		PersistentCollections.shortToBuffer(value, buffer);
+		out.write(buffer, 0, 2);
+	}
 
-    // @NotThreadSafe
-    @Override
-    public Short deserialize(InputStream in) throws IOException {
-        IoUtils.readFully(in, buffer, 0, 2);
-        return PersistentCollections.bufferToShort(buffer);
-    }
+	// @NotThreadSafe
+	@Override
+	public Short deserialize(InputStream in) throws IOException {
+		IoUtils.readFully(in, buffer, 0, 2);
+		return PersistentCollections.bufferToShort(buffer);
+	}
 }

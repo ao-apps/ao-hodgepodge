@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,11 +33,11 @@ import java.io.Reader;
  */
 public class SkipLinesReader extends BufferedReader {
 
-    public SkipLinesReader(Reader in, int skipLines) throws IOException {
-        super(in);
-        for(int i=0; i<skipLines; i++) {
-            String line = readLine();
-            if(line==null) break;
-        }
-    }
+	public SkipLinesReader(Reader in, int skipLines) throws IOException {
+		super(in);
+		for(int i=0; i<skipLines; i++) {
+			String line = readLine();
+			if(line==null) break;
+		}
+	}
 }

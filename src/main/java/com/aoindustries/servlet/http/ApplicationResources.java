@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015  AO Industries, Inc.
+ * Copyright (C) 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,24 +36,24 @@ import java.util.Arrays;
  */
 public final class ApplicationResources extends EditableResourceBundle {
 
-    static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
-        ApplicationResources.class.getName(),
-        Arrays.asList(
-            Locales.ROOT,
-            Locales.JAPANESE
-        )
-    );
+	static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
+		ApplicationResources.class.getName(),
+		Arrays.asList(
+			Locales.ROOT,
+			Locales.JAPANESE
+		)
+	);
 
-    /**
-     * Do not use directly.
-     */
-    public ApplicationResources() {
-        super(
-            Locales.ROOT,
-            bundleSet,
-            new File(System.getProperty("user.home")+"/common/aoprod/cvswork/aocode-public/src/com/aoindustries/servlet/http/ApplicationResources.properties")
-        );
-    }
+	/**
+	 * Do not use directly.
+	 */
+	public ApplicationResources() {
+		super(
+			Locales.ROOT,
+			bundleSet,
+			new File(System.getProperty("user.home")+"/common/aoprod/cvswork/aocode-public/src/main/java/com/aoindustries/servlet/http/ApplicationResources.properties")
+		);
+	}
 
-    public static final ApplicationResourcesAccessor accessor = ApplicationResourcesAccessor.getInstance(bundleSet.getBaseName());
+	public static final ApplicationResourcesAccessor accessor = ApplicationResourcesAccessor.getInstance(bundleSet.getBaseName());
 }

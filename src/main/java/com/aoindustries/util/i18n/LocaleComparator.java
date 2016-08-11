@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,27 +33,27 @@ import java.util.Locale;
  */
 public class LocaleComparator implements Comparator<Locale>, Serializable {
 
-    private static final long serialVersionUID = 7238956708102131937L;
+	private static final long serialVersionUID = 7238956708102131937L;
 
-    private static final LocaleComparator instance = new LocaleComparator();
+	private static final LocaleComparator instance = new LocaleComparator();
 
-    public static LocaleComparator getInstance() {
-        return instance;
-    }
+	public static LocaleComparator getInstance() {
+		return instance;
+	}
 
-    private LocaleComparator() {
-    }
+	private LocaleComparator() {
+	}
 
-    private Object readResolve() {
-        return getInstance();
-    }
+	private Object readResolve() {
+		return getInstance();
+	}
 
-    @Override
-    public int compare(Locale l1, Locale l2) {
-        int diff = l1.getLanguage().compareToIgnoreCase(l2.getLanguage());
-        if(diff!=0) return diff;
-        diff = l1.getCountry().compareToIgnoreCase(l2.getCountry());
-        if(diff!=0) return diff;
-        return l1.getVariant().compareToIgnoreCase(l2.getVariant());
-    }
+	@Override
+	public int compare(Locale l1, Locale l2) {
+		int diff = l1.getLanguage().compareToIgnoreCase(l2.getLanguage());
+		if(diff!=0) return diff;
+		diff = l1.getCountry().compareToIgnoreCase(l2.getCountry());
+		if(diff!=0) return diff;
+		return l1.getVariant().compareToIgnoreCase(l2.getVariant());
+	}
 }

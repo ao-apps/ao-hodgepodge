@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,9 +31,9 @@ import java.util.Collection;
  */
 public interface SymmetricMultiGraph<V,E extends Edge<V>,EX extends Exception> extends MultiGraph<V,E,EX> {
 
-    /**
-     * Gets the edges to the provided vertex.  The vertex must be part of this
-     * graph, and the results are undefined if it is not.
-     */
-    Collection<E> getEdgesTo(V to) throws EX;
+	/**
+	 * Gets the edges to the provided vertex.  The vertex must be part of this
+	 * graph, and the results are undefined if it is not.
+	 */
+	Collection<E> getEdgesTo(V to) throws EX;
 }

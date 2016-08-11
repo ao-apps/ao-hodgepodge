@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,89 +38,89 @@ import java.io.InterruptedIOException;
  */
 public class BitRateInputStream extends FilterInputStream {
 
-    public final static long MAX_CATCHUP_TIME=2*1000;
+	public final static long MAX_CATCHUP_TIME=2*1000;
 
-    final private BitRateProvider provider;
+	final private BitRateProvider provider;
 
-    private long blockStart=-1;
-    private long catchupTime;
-    private long byteCount;
+	private long blockStart=-1;
+	private long catchupTime;
+	private long byteCount;
 
-    public BitRateInputStream(InputStream out, BitRateProvider provider) {
-        super(out);
-        this.provider=provider;
-    }
+	public BitRateInputStream(InputStream out, BitRateProvider provider) {
+		super(out);
+		this.provider=provider;
+	}
 
-    @Override
-    public void close() throws IOException {
-        in.close();
-        sleep();
-    }
-    
-    @Override
-    public int read() throws IOException {
-        if(blockStart==-1) blockStart=System.currentTimeMillis();
-        int b=in.read();
-        if(b!=-1) byteCount++;
-        sleepIfNeeded();
-        return b;
-    }
-    
-    @Override
-    public int read(byte[] buff) throws IOException {
-        if(blockStart==-1) blockStart=System.currentTimeMillis();
-        int count=in.read(buff);
-        if(count!=-1) byteCount+=count;
-        sleepIfNeeded();
-        return count;
-    }
-    
-    @Override
-    public int read(byte[] buff, int off, int len) throws IOException {
-        if(blockStart==-1) blockStart=System.currentTimeMillis();
-        int count=in.read(buff, off, len);
-        if(count!=-1) byteCount+=count;
-        sleepIfNeeded();
-        return count;
-    }
+	@Override
+	public void close() throws IOException {
+		in.close();
+		sleep();
+	}
 
-    private void sleepIfNeeded() throws IOException {
-        if(byteCount>provider.getBlockSize()) sleep();
-    }
-    
-    private void sleep() throws IOException {
-        if(byteCount>0) {
-            Long bps=provider.getBitRate();
-            if(bps!=null && bps>0) {
-                // Figure out the number of millis to sleep
-                long blockTime=(byteCount*8L*1000L)/bps;
-                long sleepyTime=blockTime-(System.currentTimeMillis()-blockStart);
+	@Override
+	public int read() throws IOException {
+		if(blockStart==-1) blockStart=System.currentTimeMillis();
+		int b=in.read();
+		if(b!=-1) byteCount++;
+		sleepIfNeeded();
+		return b;
+	}
 
-                if(sleepyTime>0) {
-                    if(catchupTime>sleepyTime) catchupTime-=sleepyTime;
-                    else {
-                        sleepyTime-=catchupTime;
-                        catchupTime=0;
-                        try {
-                            // Birdie - ti ger, nnnnnggggaaaa - sleeepy time
-                            Thread.sleep(sleepyTime);
-                        } catch(InterruptedException err) {
-                            InterruptedIOException ioErr=new InterruptedIOException();
-                            ioErr.initCause(err);
-                            throw ioErr;
-                        }
-                    }
-                } else {
-                    // Can't sleep the clowns will eat me.
-                    catchupTime-=sleepyTime;
-                    if(catchupTime>=MAX_CATCHUP_TIME) catchupTime=MAX_CATCHUP_TIME;
-                }
-            } else {
-                // currently flagged as unlimited bandwidth
-                catchupTime=0;
-            }
-            blockStart=System.currentTimeMillis();
-            byteCount=0;
-        }
-    }
+	@Override
+	public int read(byte[] buff) throws IOException {
+		if(blockStart==-1) blockStart=System.currentTimeMillis();
+		int count=in.read(buff);
+		if(count!=-1) byteCount+=count;
+		sleepIfNeeded();
+		return count;
+	}
+
+	@Override
+	public int read(byte[] buff, int off, int len) throws IOException {
+		if(blockStart==-1) blockStart=System.currentTimeMillis();
+		int count=in.read(buff, off, len);
+		if(count!=-1) byteCount+=count;
+		sleepIfNeeded();
+		return count;
+	}
+
+	private void sleepIfNeeded() throws IOException {
+		if(byteCount>provider.getBlockSize()) sleep();
+	}
+
+	private void sleep() throws IOException {
+		if(byteCount>0) {
+			Long bps=provider.getBitRate();
+			if(bps!=null && bps>0) {
+				// Figure out the number of millis to sleep
+				long blockTime=(byteCount*8L*1000L)/bps;
+				long sleepyTime=blockTime-(System.currentTimeMillis()-blockStart);
+
+				if(sleepyTime>0) {
+					if(catchupTime>sleepyTime) catchupTime-=sleepyTime;
+					else {
+						sleepyTime-=catchupTime;
+						catchupTime=0;
+						try {
+							// Birdie - ti ger, nnnnnggggaaaa - sleeepy time
+							Thread.sleep(sleepyTime);
+						} catch(InterruptedException err) {
+							InterruptedIOException ioErr=new InterruptedIOException();
+							ioErr.initCause(err);
+							throw ioErr;
+						}
+					}
+				} else {
+					// Can't sleep the clowns will eat me.
+					catchupTime-=sleepyTime;
+					if(catchupTime>=MAX_CATCHUP_TIME) catchupTime=MAX_CATCHUP_TIME;
+				}
+			} else {
+				// currently flagged as unlimited bandwidth
+				catchupTime=0;
+			}
+			blockStart=System.currentTimeMillis();
+			byteCount=0;
+		}
+	}
 }

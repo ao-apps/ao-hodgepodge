@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,23 +27,23 @@ package com.aoindustries.util.persistent;
  */
 public enum ProtectionLevel {
 
-    /**
-     * Read-only access.  Highest performance and protection.
-     */
-    READ_ONLY,
+	/**
+	 * Read-only access.  Highest performance and protection.
+	 */
+	READ_ONLY,
 
-    /**
-     * Offers no data protection.  Highest performance.
-     */
-    NONE,
+	/**
+	 * Offers no data protection.  Highest performance.
+	 */
+	NONE,
 
-    /**
-     * Prevents data corruption, but does not prevent data loss.  Moderate performance.
-     */
-    BARRIER,
+	/**
+	 * Prevents data corruption, but does not prevent data loss.  Moderate performance.
+	 */
+	BARRIER,
 
-    /**
-     * Prevents both data corruption and data loss.  Lowest performance.
-     */
-    FORCE
+	/**
+	 * Prevents both data corruption and data loss.  Lowest performance.
+	 */
+	FORCE
 }

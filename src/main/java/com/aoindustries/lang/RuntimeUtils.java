@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,10 +27,10 @@ package com.aoindustries.lang;
  */
 final public class RuntimeUtils {
 
-    /**
-     * Make no instances.
-     */
-    private RuntimeUtils() {}
+	/**
+	 * Make no instances.
+	 */
+	private RuntimeUtils() {}
 
 	private static final Object availableProcessorsLock = new Object();
 	private static long availableProcessorsLastRetrieved = Long.MIN_VALUE;

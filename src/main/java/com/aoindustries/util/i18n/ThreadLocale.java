@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,42 +32,42 @@ import java.util.concurrent.Callable;
  */
 final public class ThreadLocale {
 
-    private ThreadLocale() {}
+	private ThreadLocale() {}
 
-    private static final ThreadLocal<Locale> locale = new ThreadLocal<Locale>() {
-        @Override
-        protected Locale initialValue() {
-            return Locale.getDefault();
-        }
-    };
+	private static final ThreadLocal<Locale> locale = new ThreadLocal<Locale>() {
+		@Override
+		protected Locale initialValue() {
+			return Locale.getDefault();
+		}
+	};
 
-    /**
-     * Gets the current thread's locale or the system default if not yet set.
-     */
-    public static Locale get() {
-        return locale.get();
-    }
+	/**
+	 * Gets the current thread's locale or the system default if not yet set.
+	 */
+	public static Locale get() {
+		return locale.get();
+	}
 
-    /**
-     * Sets the current thread's locale.  The locale is not automatically
-     * restored.
-     */
-    public static void set(Locale locale) {
-        if(locale==null) throw new IllegalArgumentException("locale==null");
-        ThreadLocale.locale.set(locale);
-    }
+	/**
+	 * Sets the current thread's locale.  The locale is not automatically
+	 * restored.
+	 */
+	public static void set(Locale locale) {
+		if(locale==null) throw new IllegalArgumentException("locale==null");
+		ThreadLocale.locale.set(locale);
+	}
 
-    /**
-     * Changes the current thread locale and calls the Callable.  The locale is
-     * automatically restored.
-     */
-    public static <V> V set(Locale locale, Callable<V> callable) throws Exception {
-        Locale oldLocale = get();
-        try {
-            set(locale);
-            return callable.call();
-        } finally {
-            set(oldLocale);
-        }
-    }
+	/**
+	 * Changes the current thread locale and calls the Callable.  The locale is
+	 * automatically restored.
+	 */
+	public static <V> V set(Locale locale, Callable<V> callable) throws Exception {
+		Locale oldLocale = get();
+		try {
+			set(locale);
+			return callable.call();
+		} finally {
+			set(oldLocale);
+		}
+	}
 }

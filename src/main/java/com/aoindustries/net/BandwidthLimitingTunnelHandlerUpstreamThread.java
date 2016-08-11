@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,27 +37,27 @@ import java.net.Socket;
  */
 public class BandwidthLimitingTunnelHandlerUpstreamThread extends BandwidthLimitingTunnelHandlerThread {
 
-    public BandwidthLimitingTunnelHandlerUpstreamThread(
-        boolean verbose,
-        Long upstream_bandwidth,
-        Socket listenSocket,
-        Socket connectSocket
-    ) {
-        super(verbose, upstream_bandwidth, listenSocket, connectSocket);
-    }
+	public BandwidthLimitingTunnelHandlerUpstreamThread(
+		boolean verbose,
+		Long upstream_bandwidth,
+		Socket listenSocket,
+		Socket connectSocket
+	) {
+		super(verbose, upstream_bandwidth, listenSocket, connectSocket);
+	}
 
 	@Override
-    protected String getDirection() {
-        return "upstream";
-    }
+	protected String getDirection() {
+		return "upstream";
+	}
 
 	@Override
-    protected OutputStream getOutputStream(Socket listenSocket, Socket connectSocket) throws IOException {
-        return connectSocket.getOutputStream();
-    }
+	protected OutputStream getOutputStream(Socket listenSocket, Socket connectSocket) throws IOException {
+		return connectSocket.getOutputStream();
+	}
 
 	@Override
-    protected InputStream getInputStream(Socket listenSocket, Socket connectSocket) throws IOException {
-        return listenSocket.getInputStream();
-    }
+	protected InputStream getInputStream(Socket listenSocket, Socket connectSocket) throws IOException {
+		return listenSocket.getInputStream();
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,21 +27,21 @@ package com.aoindustries.util.graph;
  */
 public class LabeledEdge<V,L> extends Edge<V> {
 
-    protected final L label;
+	protected final L label;
 
-    public LabeledEdge(V from, V to, L label) {
-        super(from, to);
-        this.label = label;
-    }
-    /**
-     * The label of the edge.
-     */
-    final public L getLabel() {
-        return label;
-    }
+	public LabeledEdge(V from, V to, L label) {
+		super(from, to);
+		this.label = label;
+	}
+	/**
+	 * The label of the edge.
+	 */
+	final public L getLabel() {
+		return label;
+	}
 
-    @Override
-    public String toString() {
-        return super.toString()+" \""+label+'"';
-    }
+	@Override
+	public String toString() {
+		return super.toString()+" \""+label+'"';
+	}
 }

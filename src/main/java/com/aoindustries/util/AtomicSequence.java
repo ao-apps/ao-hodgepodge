@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,26 +32,26 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class AtomicSequence implements Sequence {
 
-    final private AtomicLong counter;
+	final private AtomicLong counter;
 
-    /**
-     * Starts at the value of 1.
-     */
-    public AtomicSequence() {
-        this(1);
-    }
+	/**
+	 * Starts at the value of 1.
+	 */
+	public AtomicSequence() {
+		this(1);
+	}
 
-    public AtomicSequence(long initialValue) {
-        counter = new AtomicLong(initialValue);
-    }
+	public AtomicSequence(long initialValue) {
+		counter = new AtomicLong(initialValue);
+	}
 
-    @Override
-    public long getNextSequenceValue() {
-        return counter.getAndIncrement();
-    }
+	@Override
+	public long getNextSequenceValue() {
+		return counter.getAndIncrement();
+	}
 
-    @Override
-    public void setNextSequenceValue(long nextValue) {
-        counter.set(nextValue);
-    }
+	@Override
+	public void setNextSequenceValue(long nextValue) {
+		counter.set(nextValue);
+	}
 }

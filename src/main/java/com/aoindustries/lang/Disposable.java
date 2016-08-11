@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -30,10 +30,10 @@ package com.aoindustries.lang;
  */
 public interface Disposable {
 
-    /**
-     * Disposes of this object instance.
-     *
-     * If already disposed, no action will be taken and no exception thrown.
-     */
-    void dispose();
+	/**
+	 * Disposes of this object instance.
+	 *
+	 * If already disposed, no action will be taken and no exception thrown.
+	 */
+	void dispose();
 }

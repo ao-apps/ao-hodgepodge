@@ -50,191 +50,191 @@ final public class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
 		return instance;
 	}
 
-    private QubbleSort() {
-    }
+	private QubbleSort() {
+	}
 
 	@Override
-    public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-        if(stats!=null) stats.sortStarting();
-        sort(list, 0, list.size()-1, comparator, stats);
-        if(stats!=null) stats.sortEnding();
-    }
+	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
+		if(stats!=null) stats.sortStarting();
+		sort(list, 0, list.size()-1, comparator, stats);
+		if(stats!=null) stats.sortEnding();
+	}
 
 	@Override
-    public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-        if(stats!=null) stats.sortStarting();
-        sort(array, 0, array.length-1, comparator, stats);
-        if(stats!=null) stats.sortEnding();
-    }
+	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
+		if(stats!=null) stats.sortStarting();
+		sort(array, 0, array.length-1, comparator, stats);
+		if(stats!=null) stats.sortEnding();
+	}
 
 	@Override
 	public boolean isStable() {
 		return false; // Not really sure since based on quicksort, safer to say not stable.
 	}
 
-    private static <T> void sort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
-        int lo = lo0;
-        int hi = hi0;
+	private static <T> void sort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
+		int lo = lo0;
+		int hi = hi0;
 
-        /*
-         *  Bubble sort if the number of elements is less than 6 
-         */
-        if ((hi-lo) <= 6) {
-            if(stats!=null) stats.sortRecursing();
-            bsort(list, lo, hi, comparator, stats);
-            if(stats!=null) stats.sortUnrecursing();
-            return;
-        }
+		/*
+		 *  Bubble sort if the number of elements is less than 6 
+		 */
+		if ((hi-lo) <= 6) {
+			if(stats!=null) stats.sortRecursing();
+			bsort(list, lo, hi, comparator, stats);
+			if(stats!=null) stats.sortUnrecursing();
+			return;
+		}
 
-        /*
-         *  Pick a pivot and move it out of the way
-         */
-        T pivot = get(list, (lo+hi)/2, stats);
-        set(list, (lo+hi)/2, get(list, hi, stats), stats);
-        set(list, hi, pivot, stats);
+		/*
+		 *  Pick a pivot and move it out of the way
+		 */
+		T pivot = get(list, (lo+hi)/2, stats);
+		set(list, (lo+hi)/2, get(list, hi, stats), stats);
+		set(list, hi, pivot, stats);
 
-        while(lo<hi) {
-            /*
-             *  Search forward from a[lo] until an element is found that
-             *  is greater than the pivot or lo >= hi 
-             */
-            while(
-                compare(get(list, lo, stats), pivot, comparator, stats) <= 0
-                && lo < hi
-            ) {
-                lo++;
-            }
+		while(lo<hi) {
+			/*
+			 *  Search forward from a[lo] until an element is found that
+			 *  is greater than the pivot or lo >= hi 
+			 */
+			while(
+				compare(get(list, lo, stats), pivot, comparator, stats) <= 0
+				&& lo < hi
+			) {
+				lo++;
+			}
 
-            /*
-             *  Search backward from a[hi] until element is found that
-             *  is less than the pivot, or hi <= lo 
-             */
-            while(
-                compare(pivot, get(list, hi, stats), comparator, stats) <= 0
-                && lo < hi 
-            ) {
-                hi--;
-            }
+			/*
+			 *  Search backward from a[hi] until element is found that
+			 *  is less than the pivot, or hi <= lo 
+			 */
+			while(
+				compare(pivot, get(list, hi, stats), comparator, stats) <= 0
+				&& lo < hi 
+			) {
+				hi--;
+			}
 
-            /*
-             *  Swap elements a[lo] and a[hi]
-             */
-            if( lo < hi ) swap(list, hi, lo, stats);
-        }
+			/*
+			 *  Swap elements a[lo] and a[hi]
+			 */
+			if( lo < hi ) swap(list, hi, lo, stats);
+		}
 
-        /*
-         *  Put the median in the "center" of the list
-         */
-        set(list, hi0, get(list, hi, stats), stats);
-        set(list, hi, pivot, stats);
+		/*
+		 *  Put the median in the "center" of the list
+		 */
+		set(list, hi0, get(list, hi, stats), stats);
+		set(list, hi, pivot, stats);
 
-        /*
-         *  Recursive calls, elements a[lo0] to a[lo-1] are less than or
-         *  equal to pivot, elements a[hi+1] to a[hi0] are greater than
-         *  pivot.
-         */
-        if(stats!=null) stats.sortRecursing();
-        sort(list, lo0, lo-1, comparator, stats);
-        if(stats!=null) stats.sortUnrecursing();
+		/*
+		 *  Recursive calls, elements a[lo0] to a[lo-1] are less than or
+		 *  equal to pivot, elements a[hi+1] to a[hi0] are greater than
+		 *  pivot.
+		 */
+		if(stats!=null) stats.sortRecursing();
+		sort(list, lo0, lo-1, comparator, stats);
+		if(stats!=null) stats.sortUnrecursing();
 
-        if(stats!=null) stats.sortRecursing();
-        sort(list, hi+1, hi0, comparator, stats);
-        if(stats!=null) stats.sortUnrecursing();
-    }
+		if(stats!=null) stats.sortRecursing();
+		sort(list, hi+1, hi0, comparator, stats);
+		if(stats!=null) stats.sortUnrecursing();
+	}
 
-    private static <T> void sort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
-        int lo = lo0;
-        int hi = hi0;
+	private static <T> void sort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
+		int lo = lo0;
+		int hi = hi0;
 
-        /*
-         *  Bubble sort if the number of elements is less than 6 
-         */
-        if ((hi-lo) <= 6) {
-            if(stats!=null) stats.sortRecursing();
-            bsort(array, lo, hi, comparator, stats);
-            if(stats!=null) stats.sortUnrecursing();
-            return;
-        }
+		/*
+		 *  Bubble sort if the number of elements is less than 6 
+		 */
+		if ((hi-lo) <= 6) {
+			if(stats!=null) stats.sortRecursing();
+			bsort(array, lo, hi, comparator, stats);
+			if(stats!=null) stats.sortUnrecursing();
+			return;
+		}
 
-        /*
-         *  Pick a pivot and move it out of the way
-         */
-        T pivot = get(array, (lo+hi)/2, stats);
-        set(array, (lo+hi)/2, get(array, hi, stats), stats);
-        set(array, hi, pivot, stats);
+		/*
+		 *  Pick a pivot and move it out of the way
+		 */
+		T pivot = get(array, (lo+hi)/2, stats);
+		set(array, (lo+hi)/2, get(array, hi, stats), stats);
+		set(array, hi, pivot, stats);
 
-        while(lo<hi) {
-            /*
-             *  Search forward from a[lo] until an element is found that
-             *  is greater than the pivot or lo >= hi 
-             */
-            while(
-                compare(get(array, lo, stats), pivot, comparator, stats) <= 0
-                && lo < hi
-            ) {
-                lo++;
-            }
+		while(lo<hi) {
+			/*
+			 *  Search forward from a[lo] until an element is found that
+			 *  is greater than the pivot or lo >= hi 
+			 */
+			while(
+				compare(get(array, lo, stats), pivot, comparator, stats) <= 0
+				&& lo < hi
+			) {
+				lo++;
+			}
 
-            /*
-             *  Search backward from a[hi] until element is found that
-             *  is less than the pivot, or hi <= lo 
-             */
-            while(
-                compare(pivot, get(array, hi, stats), comparator, stats) <= 0
-                && lo < hi 
-            ) {
-                hi--;
-            }
+			/*
+			 *  Search backward from a[hi] until element is found that
+			 *  is less than the pivot, or hi <= lo 
+			 */
+			while(
+				compare(pivot, get(array, hi, stats), comparator, stats) <= 0
+				&& lo < hi 
+			) {
+				hi--;
+			}
 
-            /*
-             *  Swap elements a[lo] and a[hi]
-             */
-            if( lo < hi ) swap(array, hi, lo, stats);
-        }
+			/*
+			 *  Swap elements a[lo] and a[hi]
+			 */
+			if( lo < hi ) swap(array, hi, lo, stats);
+		}
 
-        /*
-         *  Put the median in the "center" of the array
-         */
-        set(array, hi0, get(array, hi, stats), stats);
-        set(array, hi, pivot, stats);
+		/*
+		 *  Put the median in the "center" of the array
+		 */
+		set(array, hi0, get(array, hi, stats), stats);
+		set(array, hi, pivot, stats);
 
-        /*
-         *  Recursive calls, elements a[lo0] to a[lo-1] are less than or
-         *  equal to pivot, elements a[hi+1] to a[hi0] are greater than
-         *  pivot.
-         */
-        if(stats!=null) stats.sortRecursing();
-        sort(array, lo0, lo-1, comparator, stats);
-        if(stats!=null) stats.sortUnrecursing();
+		/*
+		 *  Recursive calls, elements a[lo0] to a[lo-1] are less than or
+		 *  equal to pivot, elements a[hi+1] to a[hi0] are greater than
+		 *  pivot.
+		 */
+		if(stats!=null) stats.sortRecursing();
+		sort(array, lo0, lo-1, comparator, stats);
+		if(stats!=null) stats.sortUnrecursing();
 
-        if(stats!=null) stats.sortRecursing();
-        sort(array, hi+1, hi0, comparator, stats);
-        if(stats!=null) stats.sortUnrecursing();
-    }
+		if(stats!=null) stats.sortRecursing();
+		sort(array, hi+1, hi0, comparator, stats);
+		if(stats!=null) stats.sortUnrecursing();
+	}
 
-    static <T> void bsort(List<T> list, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
-        for (int j=hi; j > lo; j--) {
-            for (int i=lo; i < j; i++) {
-                T O1=get(list, i, stats);
-                T O2=get(list, i+1, stats);
-                if(compare(O1, O2, comparator, stats)>0) {
-                    set(list, i+1, O1, stats);
-                    set(list, i, O2, stats);
-                }
-            }
-        }
-    }
+	static <T> void bsort(List<T> list, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
+		for (int j=hi; j > lo; j--) {
+			for (int i=lo; i < j; i++) {
+				T O1=get(list, i, stats);
+				T O2=get(list, i+1, stats);
+				if(compare(O1, O2, comparator, stats)>0) {
+					set(list, i+1, O1, stats);
+					set(list, i, O2, stats);
+				}
+			}
+		}
+	}
 
-    static <T> void bsort(T[] array, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
-        for (int j=hi; j > lo; j--) {
-            for (int i=lo; i < j; i++) {
-                T O1=get(array, i, stats);
-                T O2=get(array, i+1, stats);
-                if(compare(O1, O2, comparator, stats)>0) {
-                    set(array, i+1, O1, stats);
-                    set(array, i, O2, stats);
-                }
-            }
-        }
-    }
+	static <T> void bsort(T[] array, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
+		for (int j=hi; j > lo; j--) {
+			for (int i=lo; i < j; i++) {
+				T O1=get(array, i, stats);
+				T O2=get(array, i+1, stats);
+				if(compare(O1, O2, comparator, stats)>0) {
+					set(array, i+1, O1, stats);
+					set(array, i, O2, stats);
+				}
+			}
+		}
+	}
 }

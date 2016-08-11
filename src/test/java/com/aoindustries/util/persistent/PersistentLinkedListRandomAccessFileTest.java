@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,17 +34,17 @@ import junit.framework.TestSuite;
  */
 public class PersistentLinkedListRandomAccessFileTest extends PersistentLinkedListTestParent {
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(PersistentLinkedListRandomAccessFileTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite(PersistentLinkedListRandomAccessFileTest.class);
+		return suite;
+	}
 
-    public PersistentLinkedListRandomAccessFileTest(String testName) {
-        super(testName);
-    }
+	public PersistentLinkedListRandomAccessFileTest(String testName) {
+		super(testName);
+	}
 
 	@Override
-    protected PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception {
-        return new RandomAccessFileBuffer(tempFile, protectionLevel);
-    }
+	protected PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception {
+		return new RandomAccessFileBuffer(tempFile, protectionLevel);
+	}
 }

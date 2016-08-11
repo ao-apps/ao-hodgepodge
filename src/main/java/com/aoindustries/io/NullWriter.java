@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012  AO Industries, Inc.
+ * Copyright (C) 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,55 +29,55 @@ import java.io.Writer;
  */
 public final class NullWriter extends Writer {
 
-    private static final NullWriter instance = new NullWriter();
+	private static final NullWriter instance = new NullWriter();
 
-    public static NullWriter getInstance() {
-        return instance;
-    }
+	public static NullWriter getInstance() {
+		return instance;
+	}
 
-    private NullWriter() {
-    }
+	private NullWriter() {
+	}
 
-    @Override
-    public void write(int c) {
-    }
+	@Override
+	public void write(int c) {
+	}
 
-    @Override
-    public void write(char cbuf[]) {
-    }
+	@Override
+	public void write(char cbuf[]) {
+	}
 
-    @Override
-    public void write(char cbuf[], int off, int len) {
-    }
+	@Override
+	public void write(char cbuf[], int off, int len) {
+	}
 
-    @Override
-    public void write(String str) {
-    }
+	@Override
+	public void write(String str) {
+	}
 
-    @Override
-    public void write(String str, int off, int len) {
-    }
+	@Override
+	public void write(String str, int off, int len) {
+	}
 
-    @Override
-    public NullWriter append(CharSequence csq) {
-        return this;
-    }
+	@Override
+	public NullWriter append(CharSequence csq) {
+		return this;
+	}
 
-    @Override
-    public NullWriter append(CharSequence csq, int start, int end) {
-        return this;
-    }
+	@Override
+	public NullWriter append(CharSequence csq, int start, int end) {
+		return this;
+	}
 
-    @Override
-    public NullWriter append(char c) {
-        return this;
-    }
+	@Override
+	public NullWriter append(char c) {
+		return this;
+	}
 
-    @Override
-    public void flush() {
-    }
+	@Override
+	public void flush() {
+	}
 
-    @Override
-    public void close() {
-    }
+	@Override
+	public void close() {
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -40,42 +40,42 @@ import java.io.OutputStream;
  */
 abstract public class BufferedSerializer<E> implements Serializer<E> {
 
-    private E lastSerialized = null;
-    final private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+	private E lastSerialized = null;
+	final private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-    public BufferedSerializer() {
-    }
+	public BufferedSerializer() {
+	}
 
-    // @NotThreadSafe
-    private void serializeToBuffer(E value) throws IOException {
-        if(lastSerialized!=value) {
-            lastSerialized = null;
-            buffer.reset();
-            serialize(value, buffer);
-            lastSerialized = value;
-        }
-    }
+	// @NotThreadSafe
+	private void serializeToBuffer(E value) throws IOException {
+		if(lastSerialized!=value) {
+			lastSerialized = null;
+			buffer.reset();
+			serialize(value, buffer);
+			lastSerialized = value;
+		}
+	}
 
-    // @ThreadSafe
-    @Override
-    final public boolean isFixedSerializedSize() {
-        return false;
-    }
+	// @ThreadSafe
+	@Override
+	final public boolean isFixedSerializedSize() {
+		return false;
+	}
 
-    // @NotThreadSafe
-    @Override
-    final public long getSerializedSize(E value) throws IOException {
-        serializeToBuffer(value);
-        return buffer.size();
-    }
+	// @NotThreadSafe
+	@Override
+	final public long getSerializedSize(E value) throws IOException {
+		serializeToBuffer(value);
+		return buffer.size();
+	}
 
-    // @NotThreadSafe
-    @Override
-    final public void serialize(E value, OutputStream out) throws IOException {
-        serializeToBuffer(value);
-        buffer.writeTo(out);
-    }
+	// @NotThreadSafe
+	@Override
+	final public void serialize(E value, OutputStream out) throws IOException {
+		serializeToBuffer(value);
+		buffer.writeTo(out);
+	}
 
-    // @NotThreadSafe
-    abstract protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException;
+	// @NotThreadSafe
+	abstract protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException;
 }

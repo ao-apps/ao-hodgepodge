@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,21 +27,21 @@ package com.aoindustries.security;
  */
 public class AccountNotFoundException extends LoginException {
 
-    private static final long serialVersionUID = 6715770039654209688L;
+	private static final long serialVersionUID = 6715770039654209688L;
 
-    public AccountNotFoundException() {
-        super();
-    }
-    
-    public AccountNotFoundException(String message) {
-        super(message);
-    }
+	public AccountNotFoundException() {
+		super();
+	}
 
-    public AccountNotFoundException(Throwable cause) {
-        super(cause);
-    }
-    
-    public AccountNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public AccountNotFoundException(String message) {
+		super(message);
+	}
+
+	public AccountNotFoundException(Throwable cause) {
+		super(cause);
+	}
+
+	public AccountNotFoundException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

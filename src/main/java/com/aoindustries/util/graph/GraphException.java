@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,21 +29,21 @@ package com.aoindustries.util.graph;
  */
 public class GraphException extends RuntimeException {
 
-    private static final long serialVersionUID = -1829212989642756232L;
+	private static final long serialVersionUID = -1829212989642756232L;
 
-    public GraphException() {
-        super();
-    }
+	public GraphException() {
+		super();
+	}
 
-    public GraphException(String message) {
-        super(message);
-    }
+	public GraphException(String message) {
+		super(message);
+	}
 
-    public GraphException(Throwable cause) {
-        super(cause);
-    }
+	public GraphException(Throwable cause) {
+		super(cause);
+	}
 
-    public GraphException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public GraphException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

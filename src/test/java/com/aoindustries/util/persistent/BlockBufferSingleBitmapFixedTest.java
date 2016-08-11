@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,43 +33,43 @@ import junit.framework.TestSuite;
  */
 public class BlockBufferSingleBitmapFixedTest extends BlockBufferTestParent {
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(BlockBufferSingleBitmapFixedTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite(BlockBufferSingleBitmapFixedTest.class);
+		return suite;
+	}
 
-    public BlockBufferSingleBitmapFixedTest(String testName) {
-        super(testName);
-    }
-
-	@Override
-    public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
-        return new SparseBuffer(protectionLevel);
-    }
+	public BlockBufferSingleBitmapFixedTest(String testName) {
+		super(testName);
+	}
 
 	@Override
-    public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
-        return new FixedPersistentBlockBuffer(pbuffer, (1L<<30));
-    }
+	public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+		return new SparseBuffer(protectionLevel);
+	}
 
-    @Override
-    public long getAllocationSize(Random random) throws IOException {
-        return random.nextInt((1<<30)+1);
-    }
+	@Override
+	public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
+		return new FixedPersistentBlockBuffer(pbuffer, (1L<<30));
+	}
 
-    /**
-     * This test is not compatible with non-persistent {@link SparseBuffer}
-     */
-    @Override
-    public void testFailureRecoveryBarrier() {
-        // Skip test
-    }
+	@Override
+	public long getAllocationSize(Random random) throws IOException {
+		return random.nextInt((1<<30)+1);
+	}
 
-    /**
-     * This test is not compatible with non-persistent {@link SparseBuffer}
-     */
-    @Override
-    public void testFailureRecoveryForce() {
-        // Skip test
-    }
+	/**
+	 * This test is not compatible with non-persistent {@link SparseBuffer}
+	 */
+	@Override
+	public void testFailureRecoveryBarrier() {
+		// Skip test
+	}
+
+	/**
+	 * This test is not compatible with non-persistent {@link SparseBuffer}
+	 */
+	@Override
+	public void testFailureRecoveryForce() {
+		// Skip test
+	}
 }

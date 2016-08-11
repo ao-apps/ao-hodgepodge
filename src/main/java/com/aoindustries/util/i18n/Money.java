@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -44,190 +44,190 @@ import java.util.Currency;
  */
 final public class Money implements FastExternalizable, ObjectInputValidation, Comparable<Money> {
 
-    private Currency currency;
-    private long value;
-    private int scale;
+	private Currency currency;
+	private long value;
+	private int scale;
 
-    /**
-     * Will change the scale of the value to match the currency, but will not round.
-     * @throws NumberFormatException if unable to scale the value.
-     */
-    public Money(Currency currency, BigDecimal value) throws NumberFormatException {
-        this.currency = currency;
-        try {
-            int currencyScale = currency.getDefaultFractionDigits();
-            if(currencyScale!=-1) value = value.setScale(currencyScale);
-            this.scale = value.scale();
-            this.value = value.movePointRight(value.scale()).longValueExact();
-        } catch(ArithmeticException err) {
-            NumberFormatException newErr = new NumberFormatException(err.getMessage());
-            newErr.initCause(err);
-            throw newErr;
-        }
-        validate();
-    }
+	/**
+	 * Will change the scale of the value to match the currency, but will not round.
+	 * @throws NumberFormatException if unable to scale the value.
+	 */
+	public Money(Currency currency, BigDecimal value) throws NumberFormatException {
+		this.currency = currency;
+		try {
+			int currencyScale = currency.getDefaultFractionDigits();
+			if(currencyScale!=-1) value = value.setScale(currencyScale);
+			this.scale = value.scale();
+			this.value = value.movePointRight(value.scale()).longValueExact();
+		} catch(ArithmeticException err) {
+			NumberFormatException newErr = new NumberFormatException(err.getMessage());
+			newErr.initCause(err);
+			throw newErr;
+		}
+		validate();
+	}
 
-    public Money(Currency currency, long value, int scale) throws NumberFormatException {
-        this.currency = currency;
-        try {
-            int currencyScale = currency.getDefaultFractionDigits();
-            if(currencyScale!=-1 && currencyScale!=scale) {
-                value = BigDecimal.valueOf(value, scale).setScale(currencyScale).movePointRight(currencyScale).longValueExact();
-                scale = currencyScale;
-            }
-            this.value = value;
-            this.scale = scale;
-        } catch(ArithmeticException err) {
-            NumberFormatException newErr = new NumberFormatException(err.getMessage());
-            newErr.initCause(err);
-            throw newErr;
-        }
-        validate();
-    }
+	public Money(Currency currency, long value, int scale) throws NumberFormatException {
+		this.currency = currency;
+		try {
+			int currencyScale = currency.getDefaultFractionDigits();
+			if(currencyScale!=-1 && currencyScale!=scale) {
+				value = BigDecimal.valueOf(value, scale).setScale(currencyScale).movePointRight(currencyScale).longValueExact();
+				scale = currencyScale;
+			}
+			this.value = value;
+			this.scale = scale;
+		} catch(ArithmeticException err) {
+			NumberFormatException newErr = new NumberFormatException(err.getMessage());
+			newErr.initCause(err);
+			throw newErr;
+		}
+		validate();
+	}
 
-    private void validate() throws NumberFormatException {
-        int currencyScale = currency.getDefaultFractionDigits();
-        if(currencyScale!=-1 && currencyScale!=scale) throw new NumberFormatException("currency.scale!=value.scale: "+currencyScale+"!="+scale);
-    }
+	private void validate() throws NumberFormatException {
+		int currencyScale = currency.getDefaultFractionDigits();
+		if(currencyScale!=-1 && currencyScale!=scale) throw new NumberFormatException("currency.scale!=value.scale: "+currencyScale+"!="+scale);
+	}
 
-    /**
-     * Equal when has same currency, value, and scale.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if(!(o instanceof Money)) return false;
-        Money other = (Money)o;
-        return
-            currency==other.currency
-            && value==other.value
-            && scale==other.scale
-        ;
-    }
+	/**
+	 * Equal when has same currency, value, and scale.
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof Money)) return false;
+		Money other = (Money)o;
+		return
+			currency==other.currency
+			&& value==other.value
+			&& scale==other.scale
+		;
+	}
 
-    @Override
-    public int hashCode() {
-        int hash = currency.getCurrencyCode().hashCode();
-        hash = hash * 31 + (int)value;
-        hash = hash * 31 + scale;
-        return hash;
-    }
+	@Override
+	public int hashCode() {
+		int hash = currency.getCurrencyCode().hashCode();
+		hash = hash * 31 + (int)value;
+		hash = hash * 31 + scale;
+		return hash;
+	}
 
-    /**
-     * Sorts by currency code and then value.
-     *
-     * @see  CurrencyComparator
-     */
-    @Override
-    public int compareTo(Money other) {
-        int diff = CurrencyComparator.getInstance().compare(currency, other.currency);
-        if(diff!=0) return diff;
-        return getValue().compareTo(other.getValue());
-    }
+	/**
+	 * Sorts by currency code and then value.
+	 *
+	 * @see  CurrencyComparator
+	 */
+	@Override
+	public int compareTo(Money other) {
+		int diff = CurrencyComparator.getInstance().compare(currency, other.currency);
+		if(diff!=0) return diff;
+		return getValue().compareTo(other.getValue());
+	}
 
-    public Currency getCurrency() {
-        return currency;
-    }
+	public Currency getCurrency() {
+		return currency;
+	}
 
-    public BigDecimal getValue() {
-        return BigDecimal.valueOf(value, scale);
-    }
+	public BigDecimal getValue() {
+		return BigDecimal.valueOf(value, scale);
+	}
 
-    /**
-     * Gets the unscaled value of this currency.
-     */
-    public long getUnscaledValue() {
-        return value;
-    }
+	/**
+	 * Gets the unscaled value of this currency.
+	 */
+	public long getUnscaledValue() {
+		return value;
+	}
 
-    /**
-     * Gets the scale of this currency.
-     */
-    public int getScale() {
-        return scale;
-    }
+	/**
+	 * Gets the scale of this currency.
+	 */
+	public int getScale() {
+		return scale;
+	}
 
-    /**
-     * Displays the monetary value as currency symbol (in Locale-specific display) followed by value, such as $100.00
-     * or $-100.50.
-     */
-    @Override
-    public String toString() {
-        return currency.getSymbol(ThreadLocale.get())+getValue().toPlainString();
-    }
+	/**
+	 * Displays the monetary value as currency symbol (in Locale-specific display) followed by value, such as $100.00
+	 * or $-100.50.
+	 */
+	@Override
+	public String toString() {
+		return currency.getSymbol(ThreadLocale.get())+getValue().toPlainString();
+	}
 
-    public Money add(Money augend) throws ArithmeticException {
-        if(currency!=augend.currency) throw new ArithmeticException("currency!=augend.currency: "+currency+"!="+augend.currency);
-        return new Money(currency, getValue().add(augend.getValue()));
-    }
+	public Money add(Money augend) throws ArithmeticException {
+		if(currency!=augend.currency) throw new ArithmeticException("currency!=augend.currency: "+currency+"!="+augend.currency);
+		return new Money(currency, getValue().add(augend.getValue()));
+	}
 
-    /**
-     * Multiplies without rounding.
-     */
-    public Money multiply(BigDecimal multiplicand) throws ArithmeticException {
-        return multiply(multiplicand, RoundingMode.UNNECESSARY);
-    }
+	/**
+	 * Multiplies without rounding.
+	 */
+	public Money multiply(BigDecimal multiplicand) throws ArithmeticException {
+		return multiply(multiplicand, RoundingMode.UNNECESSARY);
+	}
 
-    /**
-     * Multiplies with rounding.
-     */
-    public Money multiply(BigDecimal multiplicand, RoundingMode roundingMode) throws ArithmeticException {
-        int currencyScale = currency.getDefaultFractionDigits();
-        if(currencyScale==-1) currencyScale = scale; // Use same scale if currency doesn't dictate
-        return new Money(currency, getValue().multiply(multiplicand).setScale(currencyScale, roundingMode));
-    }
+	/**
+	 * Multiplies with rounding.
+	 */
+	public Money multiply(BigDecimal multiplicand, RoundingMode roundingMode) throws ArithmeticException {
+		int currencyScale = currency.getDefaultFractionDigits();
+		if(currencyScale==-1) currencyScale = scale; // Use same scale if currency doesn't dictate
+		return new Money(currency, getValue().multiply(multiplicand).setScale(currencyScale, roundingMode));
+	}
 
-    /**
-     * Returns a monetary amount that is the negative of this amount.
-     */
-    public Money negate() {
-        return new Money(currency, getValue().negate());
-    }
+	/**
+	 * Returns a monetary amount that is the negative of this amount.
+	 */
+	public Money negate() {
+		return new Money(currency, getValue().negate());
+	}
 
-    // <editor-fold defaultstate="collapsed" desc="FastExternalizable">
-    private static final long serialVersionUID = 2287045704444180509L;
+	// <editor-fold defaultstate="collapsed" desc="FastExternalizable">
+	private static final long serialVersionUID = 2287045704444180509L;
 
-    public Money() {
-    }
+	public Money() {
+	}
 
-    @Override
-    public long getSerialVersionUID() {
-        return serialVersionUID;
-    }
+	@Override
+	public long getSerialVersionUID() {
+		return serialVersionUID;
+	}
 
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        FastObjectOutput fastOut = FastObjectOutput.wrap(out);
-        try {
-            fastOut.writeFastUTF(currency.getCurrencyCode());
-            fastOut.writeLong(value);
-            fastOut.writeInt(scale);
-        } finally {
-            fastOut.unwrap();
-        }
-    }
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		FastObjectOutput fastOut = FastObjectOutput.wrap(out);
+		try {
+			fastOut.writeFastUTF(currency.getCurrencyCode());
+			fastOut.writeLong(value);
+			fastOut.writeInt(scale);
+		} finally {
+			fastOut.unwrap();
+		}
+	}
 
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        if(currency!=null) throw new IllegalStateException();
-        FastObjectInput fastIn = FastObjectInput.wrap(in);
-        try {
-            currency = Currency.getInstance(fastIn.readFastUTF());
-            value = fastIn.readLong();
-            scale = fastIn.readInt();
-        } finally {
-            fastIn.unwrap();
-        }
-    }
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		if(currency!=null) throw new IllegalStateException();
+		FastObjectInput fastIn = FastObjectInput.wrap(in);
+		try {
+			currency = Currency.getInstance(fastIn.readFastUTF());
+			value = fastIn.readLong();
+			scale = fastIn.readInt();
+		} finally {
+			fastIn.unwrap();
+		}
+	}
 
-    @Override
-    public void validateObject() throws InvalidObjectException {
-        try {
-            validate();
-        } catch(NumberFormatException err) {
-            InvalidObjectException newErr = new InvalidObjectException(err.getMessage());
-            newErr.initCause(err);
-            throw newErr;
-        }
-    }
-    // </editor-fold>
+	@Override
+	public void validateObject() throws InvalidObjectException {
+		try {
+			validate();
+		} catch(NumberFormatException err) {
+			InvalidObjectException newErr = new InvalidObjectException(err.getMessage());
+			newErr.initCause(err);
+			throw newErr;
+		}
+	}
+	// </editor-fold>
 }

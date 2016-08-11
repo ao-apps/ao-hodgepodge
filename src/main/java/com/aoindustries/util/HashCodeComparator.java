@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,27 +32,27 @@ import java.util.Comparator;
  */
 final public class HashCodeComparator implements Comparator<Object>, Serializable {
 
-    private static final long serialVersionUID = 5468576960399075645L;
+	private static final long serialVersionUID = 5468576960399075645L;
 
-    private static final HashCodeComparator singleton = new HashCodeComparator();
+	private static final HashCodeComparator singleton = new HashCodeComparator();
 
-    public static HashCodeComparator getInstance() {
-        return singleton;
-    }
+	public static HashCodeComparator getInstance() {
+		return singleton;
+	}
 
-    private HashCodeComparator() {
-    }
+	private HashCodeComparator() {
+	}
 
-    private Object readResolve() {
-        return singleton;
-    }
+	private Object readResolve() {
+		return singleton;
+	}
 
-    @Override
-    public int compare(Object o1, Object o2) {
-        int hash1 = o1.hashCode();
-        int hash2 = o2.hashCode();
-        if(hash1<hash2) return -1;
-        if(hash1>hash2) return 1;
-        return 0;
-    }
+	@Override
+	public int compare(Object o1, Object o2) {
+		int hash1 = o1.hashCode();
+		int hash2 = o2.hashCode();
+		if(hash1<hash2) return -1;
+		if(hash1>hash2) return 1;
+		return 0;
+	}
 }

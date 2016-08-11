@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,35 +37,35 @@ import java.io.OutputStream;
  */
 public class ByteArraySerializer implements Serializer<byte[]> {
 
-    // @ThreadSafe
-    @Override
-    public boolean isFixedSerializedSize() {
-        return false;
-    }
+	// @ThreadSafe
+	@Override
+	public boolean isFixedSerializedSize() {
+		return false;
+	}
 
-    // @NotThreadSafe
-    @Override
-    public long getSerializedSize(byte[] value) {
-        return 4+value.length;
-    }
+	// @NotThreadSafe
+	@Override
+	public long getSerializedSize(byte[] value) {
+		return 4+value.length;
+	}
 
-    private final byte[] ioBuffer = new byte[4];
+	private final byte[] ioBuffer = new byte[4];
 
-    // @NotThreadSafe
-    @Override
-    public void serialize(byte[] value, OutputStream out) throws IOException {
-        PersistentCollections.intToBuffer(value.length, ioBuffer);
-        out.write(ioBuffer, 0, 4);
-        out.write(value);
-    }
+	// @NotThreadSafe
+	@Override
+	public void serialize(byte[] value, OutputStream out) throws IOException {
+		PersistentCollections.intToBuffer(value.length, ioBuffer);
+		out.write(ioBuffer, 0, 4);
+		out.write(value);
+	}
 
-    // @NotThreadSafe
-    @Override
-    public byte[] deserialize(InputStream in) throws IOException {
-        IoUtils.readFully(in, ioBuffer, 0, 4);
-        int length = PersistentCollections.bufferToInt(ioBuffer);
-        byte[] value = new byte[length];
-        IoUtils.readFully(in, value, 0, length);
-        return value;
-    }
+	// @NotThreadSafe
+	@Override
+	public byte[] deserialize(InputStream in) throws IOException {
+		IoUtils.readFully(in, ioBuffer, 0, 4);
+		int length = PersistentCollections.bufferToInt(ioBuffer);
+		byte[] value = new byte[length];
+		IoUtils.readFully(in, value, 0, length);
+		return value;
+	}
 }

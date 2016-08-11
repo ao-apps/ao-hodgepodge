@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013, 2014  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -39,27 +39,27 @@ import java.util.BitSet;
  */
 public class ZeroFile {
 
-    /**
-     * Flags - these should become commandline switches.
-     */
-    private static final boolean DEBUG = false;
-    private static final boolean PROGRESS = true;
-    private static final boolean DRY_RUN = false;
+	/**
+	 * Flags - these should become commandline switches.
+	 */
+	private static final boolean DEBUG = false;
+	private static final boolean PROGRESS = true;
+	private static final boolean DRY_RUN = false;
 
-    /**
-     * Must be power of two.
-     */
-    private static final int BLOCK_SIZE = 1048576;
+	/**
+	 * Must be power of two.
+	 */
+	private static final int BLOCK_SIZE = 1048576;
 
-    public ZeroFile() {
-    }
+	public ZeroFile() {
+	}
 
-    public static void main(String[] args) {
-        if(args.length!=2) {
-            System.err.println("usage: "+ZeroFile.class.getName()+" <mb_per_sec>[/<mb_per_sec_write>] <path>");
-            System.exit(1);
-        } else {
-            try {
+	public static void main(String[] args) {
+		if(args.length!=2) {
+			System.err.println("usage: "+ZeroFile.class.getName()+" <mb_per_sec>[/<mb_per_sec_write>] <path>");
+			System.exit(1);
+		} else {
+			try {
 				int bpsIn, bpsOut;
 				String bpsArg = args[0];
 				int slashPos = bpsArg.indexOf('/');
@@ -69,95 +69,95 @@ public class ZeroFile {
 					bpsIn = Integer.parseInt(bpsArg.substring(0, slashPos));
 					bpsOut = Integer.parseInt(bpsArg.substring(slashPos+1));
 				}
-                long bytesWritten;
-                File file = new File(args[1]);
-                if(DEBUG) System.err.println("Opening " + file);
-                RandomAccessFile raf = new RandomAccessFile(file, DRY_RUN ? "r" : "rw");
-                try {
-                    bytesWritten = zeroFile(bpsIn, bpsOut, raf);
-                } finally {
-                    if(DEBUG) System.err.println("Closing " + file);
-                    raf.close();
-                }
-                if(DEBUG) System.err.println("Wrote " + bytesWritten + " bytes");
-            } catch(IOException e) {
-                e.printStackTrace(System.err);
+				long bytesWritten;
+				File file = new File(args[1]);
+				if(DEBUG) System.err.println("Opening " + file);
+				RandomAccessFile raf = new RandomAccessFile(file, DRY_RUN ? "r" : "rw");
+				try {
+					bytesWritten = zeroFile(bpsIn, bpsOut, raf);
+				} finally {
+					if(DEBUG) System.err.println("Closing " + file);
+					raf.close();
+				}
+				if(DEBUG) System.err.println("Wrote " + bytesWritten + " bytes");
+			} catch(IOException e) {
+				e.printStackTrace(System.err);
 				System.exit(2);
-            }
-        }
-    }
+			}
+		}
+	}
 
-    private static long sleep(int bps, long lastTime) throws IOException {
-        try {
-            long millisPerBlock = 1000 / bps;
-            long sleepUntil = lastTime + millisPerBlock;
-            long currentTime = System.currentTimeMillis();
-            long sleepyTime = sleepUntil - currentTime;
-            if(sleepyTime<=0) {
-                // IO too slow or system time set to future
-                return currentTime;
-            } if(sleepyTime>millisPerBlock) {
-                // System time set to past
-                Thread.sleep(millisPerBlock);
-                return currentTime + millisPerBlock;
-            } else {
-                // Normal case
-                Thread.sleep(sleepyTime);
-                return currentTime + sleepyTime;
-            }
-        } catch(InterruptedException e) {
-            InterruptedIOException ioExc = new InterruptedIOException(e.getMessage());
-            ioExc.initCause(e);
-            throw ioExc;
-        }
-    }
+	private static long sleep(int bps, long lastTime) throws IOException {
+		try {
+			long millisPerBlock = 1000 / bps;
+			long sleepUntil = lastTime + millisPerBlock;
+			long currentTime = System.currentTimeMillis();
+			long sleepyTime = sleepUntil - currentTime;
+			if(sleepyTime<=0) {
+				// IO too slow or system time set to future
+				return currentTime;
+			} if(sleepyTime>millisPerBlock) {
+				// System time set to past
+				Thread.sleep(millisPerBlock);
+				return currentTime + millisPerBlock;
+			} else {
+				// Normal case
+				Thread.sleep(sleepyTime);
+				return currentTime + sleepyTime;
+			}
+		} catch(InterruptedException e) {
+			InterruptedIOException ioExc = new InterruptedIOException(e.getMessage());
+			ioExc.initCause(e);
+			throw ioExc;
+		}
+	}
 
 	/**
-     * Zeroes the provided random access file, only writing blocks that contain non-zero.
+	 * Zeroes the provided random access file, only writing blocks that contain non-zero.
 	 * Reads at the maximum provided bpsIn blocks per second.
 	 * Writes at the maximum provided bpsOut blocks per second.
-     * Returns the number of bytes written.
-     */
-    public static long zeroFile(int bpsIn, int bpsOut, RandomAccessFile raf) throws IOException {
-        // Initialize bitset
-        final long len = raf.length();
-        final int blocks;
-        {
-            long blocksLong = len / BLOCK_SIZE;
-            if((len&(BLOCK_SIZE-1))!=0) blocksLong++;
-            if(blocksLong>Integer.MAX_VALUE) throw new IOException("File too large: " + len);
-            blocks = (int)blocksLong;
-        }
-        BitSet dirtyBlocks = new BitSet(blocks);
+	 * Returns the number of bytes written.
+	 */
+	public static long zeroFile(int bpsIn, int bpsOut, RandomAccessFile raf) throws IOException {
+		// Initialize bitset
+		final long len = raf.length();
+		final int blocks;
+		{
+			long blocksLong = len / BLOCK_SIZE;
+			if((len&(BLOCK_SIZE-1))!=0) blocksLong++;
+			if(blocksLong>Integer.MAX_VALUE) throw new IOException("File too large: " + len);
+			blocks = (int)blocksLong;
+		}
+		BitSet dirtyBlocks = new BitSet(blocks);
 		int numDirtyBlocks = 0;
-        // Pass one: read for non zeros
-        long lastTime = System.currentTimeMillis();
-        byte[] buff = new byte[BLOCK_SIZE];
-        int blockIndex = 0;
+		// Pass one: read for non zeros
+		long lastTime = System.currentTimeMillis();
+		byte[] buff = new byte[BLOCK_SIZE];
+		int blockIndex = 0;
 		String lastVerboseString = "";
 		int block = 0;
-        for(long pos=0; pos<len; pos+=BLOCK_SIZE, blockIndex++) {
-            int blockSize;
-            {
-                long blockSizeLong = len-pos;
-                blockSize = blockSizeLong>BLOCK_SIZE ? BLOCK_SIZE : (int)blockSizeLong;
-            }
-            raf.seek(pos);
-            raf.readFully(buff, 0, blockSize);
+		for(long pos=0; pos<len; pos+=BLOCK_SIZE, blockIndex++) {
+			int blockSize;
+			{
+				long blockSizeLong = len-pos;
+				blockSize = blockSizeLong>BLOCK_SIZE ? BLOCK_SIZE : (int)blockSizeLong;
+			}
+			raf.seek(pos);
+			raf.readFully(buff, 0, blockSize);
 			block++;
-            lastTime = sleep(bpsIn, lastTime);
-            boolean allZero = true;
-            for(int i=0; i<blockSize; i++) {
-                if(buff[i]!=0) {
-                    allZero = false;
-                    break;
-                }
-            }
-            if(!allZero) {
+			lastTime = sleep(bpsIn, lastTime);
+			boolean allZero = true;
+			for(int i=0; i<blockSize; i++) {
+				if(buff[i]!=0) {
+					allZero = false;
+					break;
+				}
+			}
+			if(!allZero) {
 				dirtyBlocks.set(blockIndex);
 				numDirtyBlocks++;
 			}
-            if(PROGRESS) {
+			if(PROGRESS) {
 				lastVerboseString = TerminalWriter.progressOutput(
 					lastVerboseString,
 					StringUtility.getApproximateSize(pos+blockSize)
@@ -170,31 +170,31 @@ public class ZeroFile {
 				);
 				//System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": "+(allZero ? "Already zero" : "Dirty"));
 			}
-        }
+		}
 		if(PROGRESS) {
 			System.err.println();
 			lastVerboseString = "";
 		}
-        // Pass two: write dirty blocks
-        long bytesWritten = 0;
-        blockIndex = 0;
-        Arrays.fill(buff, (byte)0);
+		// Pass two: write dirty blocks
+		long bytesWritten = 0;
+		blockIndex = 0;
+		Arrays.fill(buff, (byte)0);
 		int written = 0;
-        for(long pos=0; pos<len; pos+=BLOCK_SIZE, blockIndex++) {
-            if(dirtyBlocks.get(blockIndex)) {
-                int blockSize;
-                {
-                    long blockSizeLong = len-pos;
-                    blockSize = blockSizeLong>BLOCK_SIZE ? BLOCK_SIZE : (int)blockSizeLong;
-                }
-                if(!DRY_RUN) {
-                    raf.seek(pos);
-                    raf.write(buff, 0, blockSize);
-                    lastTime = sleep(bpsOut, lastTime);
-                    bytesWritten += blockSize;
-                }
+		for(long pos=0; pos<len; pos+=BLOCK_SIZE, blockIndex++) {
+			if(dirtyBlocks.get(blockIndex)) {
+				int blockSize;
+				{
+					long blockSizeLong = len-pos;
+					blockSize = blockSizeLong>BLOCK_SIZE ? BLOCK_SIZE : (int)blockSizeLong;
+				}
+				if(!DRY_RUN) {
+					raf.seek(pos);
+					raf.write(buff, 0, blockSize);
+					lastTime = sleep(bpsOut, lastTime);
+					bytesWritten += blockSize;
+				}
 				written++;
-                if(PROGRESS) {
+				if(PROGRESS) {
 					lastVerboseString = TerminalWriter.progressOutput(
 						lastVerboseString,
 						StringUtility.getApproximateSize(bytesWritten)
@@ -205,12 +205,12 @@ public class ZeroFile {
 					);
 					// System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": Cleared");
 				}
-            }
-        }
+			}
+		}
 		if(PROGRESS) {
 			System.err.println();
 			lastVerboseString = "";
 		}
-        return bytesWritten;
-    }
+		return bytesWritten;
+	}
 }

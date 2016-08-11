@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,24 +33,24 @@ import java.util.Map;
  */
 public interface HttpParameters {
 
-    /**
-     * Gets the value for the provided parameter name or <code>null</code> if doesn't exist.
-     * If the parameter has multiple values, the first value is returned.
-     */
-    String getParameter(String name);
+	/**
+	 * Gets the value for the provided parameter name or <code>null</code> if doesn't exist.
+	 * If the parameter has multiple values, the first value is returned.
+	 */
+	String getParameter(String name);
 
-    /**
-     * Gets an unmodifiable interator of the parameter names.
-     */
-    Iterator<String> getParameterNames();
+	/**
+	 * Gets an unmodifiable interator of the parameter names.
+	 */
+	Iterator<String> getParameterNames();
 
-    /**
-     * Gets an unmodifiable view of all values for a multi-value parameter or <code>null</code> if has no values.
-     */
-    List<String> getParameterValues(String name);
+	/**
+	 * Gets an unmodifiable view of all values for a multi-value parameter or <code>null</code> if has no values.
+	 */
+	List<String> getParameterValues(String name);
 
-    /**
-     * Gets an unmodifiable map view of all parameters.
-     */
-    Map<String,List<String>> getParameterMap();
+	/**
+	 * Gets an unmodifiable map view of all parameters.
+	 */
+	Map<String,List<String>> getParameterMap();
 }

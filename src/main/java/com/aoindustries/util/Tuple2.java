@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,7 +41,7 @@ public class Tuple2<E1,E2> {
 	) {
 		this.element1 = element1;
 		this.element2 = element2;
-    }
+	}
 
 	@Override
 	public String toString() {

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,17 +27,17 @@ package com.aoindustries.util;
  */
 public final class ThreadUtility {
 
-    private ThreadUtility() {
-    }
+	private ThreadUtility() {
+	}
 
-    public static int getThreadCount() {
-        return getTopLevelThreadGroup().activeCount();
-    }
+	public static int getThreadCount() {
+		return getTopLevelThreadGroup().activeCount();
+	}
 
-    public static ThreadGroup getTopLevelThreadGroup() {
-        ThreadGroup TG=Thread.currentThread().getThreadGroup();
-        ThreadGroup parent;
-        while((parent=TG.getParent())!=null) TG=parent;
-        return TG;
-    }
+	public static ThreadGroup getTopLevelThreadGroup() {
+		ThreadGroup TG=Thread.currentThread().getThreadGroup();
+		ThreadGroup parent;
+		while((parent=TG.getParent())!=null) TG=parent;
+		return TG;
+	}
 }

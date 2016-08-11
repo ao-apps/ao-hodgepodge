@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,59 +34,59 @@ import java.util.ResourceBundle;
  */
 abstract public class ModifiableResourceBundle extends ResourceBundle {
 
-    public ModifiableResourceBundle() {
-    }
-
-    /**
-     * Removes a string.
-     */
-    public final void removeKey(String key) {
-        if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
-        handleRemoveKey(key);
-    }
-
-    /**
-     * This will only be called on modifiable bundles.
-     *
-     * @see #isModifiable()
-     */
-    protected abstract void handleRemoveKey(String key);
+	public ModifiableResourceBundle() {
+	}
 
 	/**
-     * @see #setObject(java.lang.String, java.lang.Object, boolean)
-     */
-    public final void setString(String key, String value, boolean modified) {
-        setObject(key, value, modified);
-    }
+	 * Removes a string.
+	 */
+	public final void removeKey(String key) {
+		if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
+		handleRemoveKey(key);
+	}
 
-    /**
-     * @see #setObject(java.lang.String, java.lang.Object, boolean)
-     */
-    public final void setStringArray(String key, String[] value, boolean modified) {
-        setObject(key, value, modified);
-    }
+	/**
+	 * This will only be called on modifiable bundles.
+	 *
+	 * @see #isModifiable()
+	 */
+	protected abstract void handleRemoveKey(String key);
 
-    /**
-     * Adds or updates the value associated with the provided key and sets
-     * the verified time to the current time.  If <code>modified</code>
-     * is <code>true</code>, the modified time will also be updated, which will
-     * cause other locales to require verification.
-     */
-    public final void setObject(String key, Object value, boolean modified) {
-        if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
-        handleSetObject(key, value, modified);
-    }
+	/**
+	 * @see #setObject(java.lang.String, java.lang.Object, boolean)
+	 */
+	public final void setString(String key, String value, boolean modified) {
+		setObject(key, value, modified);
+	}
 
-    /**
-     * Checks if this bundle is currently modifiable.
-     */
-    public abstract boolean isModifiable();
+	/**
+	 * @see #setObject(java.lang.String, java.lang.Object, boolean)
+	 */
+	public final void setStringArray(String key, String[] value, boolean modified) {
+		setObject(key, value, modified);
+	}
 
-    /**
-     * This will only be called on modifiable bundles.
-     *
-     * @see #isModifiable()
-     * @see #setObject(java.lang.String, java.lang.Object, boolean)
-     */
-    protected abstract void handleSetObject(String key, Object value, boolean modified);
+	/**
+	 * Adds or updates the value associated with the provided key and sets
+	 * the verified time to the current time.  If <code>modified</code>
+	 * is <code>true</code>, the modified time will also be updated, which will
+	 * cause other locales to require verification.
+	 */
+	public final void setObject(String key, Object value, boolean modified) {
+		if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
+		handleSetObject(key, value, modified);
+	}
+
+	/**
+	 * Checks if this bundle is currently modifiable.
+	 */
+	public abstract boolean isModifiable();
+
+	/**
+	 * This will only be called on modifiable bundles.
+	 *
+	 * @see #isModifiable()
+	 * @see #setObject(java.lang.String, java.lang.Object, boolean)
+	 */
+	protected abstract void handleSetObject(String key, Object value, boolean modified);
 }

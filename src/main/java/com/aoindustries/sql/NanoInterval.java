@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2008, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,36 +33,36 @@ import java.math.BigDecimal;
  */
 final public class NanoInterval implements Serializable, Comparable<NanoInterval> {
 
-    private static final long serialVersionUID = 1;
+	private static final long serialVersionUID = 1;
 
-    final private long intervalNanos;
+	final private long intervalNanos;
 
-    public NanoInterval(long intervalNanos) {
-        this.intervalNanos = intervalNanos;
-    }
+	public NanoInterval(long intervalNanos) {
+		this.intervalNanos = intervalNanos;
+	}
 
-    /**
-     * Gets the interval in nanoseconds.
-     */
-    public long getIntervalNanos() {
-        return intervalNanos;
-    }
-
-    @Override
-    public String toString() {
-        return toString(intervalNanos);
-    }
-
-    public static String toString(long intervalNanos) {
-        if(intervalNanos < 1000000) return accessor.getMessage("NanoInterval.toString.micro", BigDecimal.valueOf(intervalNanos, 3));
-        if(intervalNanos < 1000000000) return accessor.getMessage("NanoInterval.toString.milli", BigDecimal.valueOf(intervalNanos/1000, 3));
-        return accessor.getMessage("NanoInterval.toString.second", BigDecimal.valueOf(intervalNanos/1000000, 3));
-    }
+	/**
+	 * Gets the interval in nanoseconds.
+	 */
+	public long getIntervalNanos() {
+		return intervalNanos;
+	}
 
 	@Override
-    public int compareTo(NanoInterval o) {
-        if(intervalNanos<o.intervalNanos) return -1;
-        if(intervalNanos>o.intervalNanos) return 1;
-        return 0;
-    }
+	public String toString() {
+		return toString(intervalNanos);
+	}
+
+	public static String toString(long intervalNanos) {
+		if(intervalNanos < 1000000) return accessor.getMessage("NanoInterval.toString.micro", BigDecimal.valueOf(intervalNanos, 3));
+		if(intervalNanos < 1000000000) return accessor.getMessage("NanoInterval.toString.milli", BigDecimal.valueOf(intervalNanos/1000, 3));
+		return accessor.getMessage("NanoInterval.toString.second", BigDecimal.valueOf(intervalNanos/1000000, 3));
+	}
+
+	@Override
+	public int compareTo(NanoInterval o) {
+		if(intervalNanos<o.intervalNanos) return -1;
+		if(intervalNanos>o.intervalNanos) return 1;
+		return 0;
+	}
 }

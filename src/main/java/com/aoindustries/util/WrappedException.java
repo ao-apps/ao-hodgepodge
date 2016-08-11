@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,49 +27,49 @@ package com.aoindustries.util;
  */
 public class WrappedException extends RuntimeException {
 
-    private static final long serialVersionUID = -987777760527780052L;
+	private static final long serialVersionUID = -987777760527780052L;
 
-    private final Object[] extraInfo;
+	private final Object[] extraInfo;
 
-    /**
-     * @deprecated Please provide cause.
-     */
-    @Deprecated
-    public WrappedException() {
-        super();
-        this.extraInfo=null;
-    }
+	/**
+	 * @deprecated Please provide cause.
+	 */
+	@Deprecated
+	public WrappedException() {
+		super();
+		this.extraInfo=null;
+	}
 
-    /**
-     * @deprecated Please provide cause.
-     */
-    @Deprecated
-    public WrappedException(String message) {
-        super(message);
-        this.extraInfo=null;
-    }
+	/**
+	 * @deprecated Please provide cause.
+	 */
+	@Deprecated
+	public WrappedException(String message) {
+		super(message);
+		this.extraInfo=null;
+	}
 
-    public WrappedException(Throwable cause) {
-        super(cause);
-        this.extraInfo=null;
-    }
+	public WrappedException(Throwable cause) {
+		super(cause);
+		this.extraInfo=null;
+	}
 
-    public WrappedException(Throwable cause, Object[] extraInfo) {
-        super(cause);
-        this.extraInfo=extraInfo;
-    }
+	public WrappedException(Throwable cause, Object[] extraInfo) {
+		super(cause);
+		this.extraInfo=extraInfo;
+	}
 
-    public WrappedException(String message, Throwable cause) {
-        super(message, cause);
-        this.extraInfo=null;
-    }
+	public WrappedException(String message, Throwable cause) {
+		super(message, cause);
+		this.extraInfo=null;
+	}
 
-    public WrappedException(String message, Throwable cause, Object[] extraInfo) {
-        super(message, cause);
-        this.extraInfo=extraInfo;
-    }
-    
-    public Object[] getExtraInfo() {
-        return extraInfo;
-    }
+	public WrappedException(String message, Throwable cause, Object[] extraInfo) {
+		super(message, cause);
+		this.extraInfo=extraInfo;
+	}
+
+	public Object[] getExtraInfo() {
+		return extraInfo;
+	}
 }

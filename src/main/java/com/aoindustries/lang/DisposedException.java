@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,21 +29,21 @@ package com.aoindustries.lang;
  */
 public class DisposedException extends IllegalStateException {
 
-    private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 2L;
 
-    public DisposedException() {
-        super();
-    }
+	public DisposedException() {
+		super();
+	}
 
-    public DisposedException(String message) {
-        super(message);
-    }
+	public DisposedException(String message) {
+		super(message);
+	}
 
-    public DisposedException(Throwable cause) {
-        super(cause);
-    }
+	public DisposedException(Throwable cause) {
+		super(cause);
+	}
 
-    public DisposedException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public DisposedException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,14 +33,14 @@ import junit.framework.TestSuite;
  */
 public class SmallIdentifierTest extends TestCase {
 
-    public SmallIdentifierTest(String testName) {
-        super(testName);
-    }
+	public SmallIdentifierTest(String testName) {
+		super(testName);
+	}
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(SmallIdentifierTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite(SmallIdentifierTest.class);
+		return suite;
+	}
 
 	public void testDiscrepancyWithDatabaseFunction() {
 		SmallIdentifier parsed = new SmallIdentifier("bWMZti51JU8");

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,24 +35,24 @@ import java.util.Iterator;
  */
 public class EnumerationIterator<E> implements Iterator<E> {
 
-    private final Enumeration<E> enumerator;
+	private final Enumeration<E> enumerator;
 
-    public EnumerationIterator(Enumeration<E> enumerator) {
-        this.enumerator = enumerator;
-    }
+	public EnumerationIterator(Enumeration<E> enumerator) {
+		this.enumerator = enumerator;
+	}
 
-    @Override
-    public boolean hasNext() {
-        return enumerator.hasMoreElements();
-    }
+	@Override
+	public boolean hasNext() {
+		return enumerator.hasMoreElements();
+	}
 
-    @Override
-    public E next() {
-        return enumerator.nextElement();
-    }
+	@Override
+	public E next() {
+		return enumerator.nextElement();
+	}
 
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,43 +34,43 @@ import junit.framework.TestSuite;
  */
 public class PersistentLinkedListLargeMappedTest extends PersistentLinkedListTestParent {
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(PersistentLinkedListLargeMappedTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite(PersistentLinkedListLargeMappedTest.class);
+		return suite;
+	}
 
-    public PersistentLinkedListLargeMappedTest(String testName) {
-        super(testName);
-    }
+	public PersistentLinkedListLargeMappedTest(String testName) {
+		super(testName);
+	}
 
-    @Override
-    protected PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception {
-        return new LargeMappedPersistentBuffer(tempFile, protectionLevel);
-    }
+	@Override
+	protected PersistentBuffer getPersistentBuffer(File tempFile, ProtectionLevel protectionLevel) throws Exception {
+		return new LargeMappedPersistentBuffer(tempFile, protectionLevel);
+	}
 
-    /**
-     * Test larger files.
-     */
-    /*
-    public void testLargeList() throws Exception {
-        File tempFile = File.createTempFile("LinkedFileListTest", null);
-        tempFile.deleteOnExit();
-        PersistentLinkedList<byte[]> linkedFileList = new PersistentLinkedList<byte[]>(getPersistentBuffer(tempFile), false, false);
-        try {
-            byte[] buff = new byte[1024*1024];
-            System.out.println("Filling list");
-            for(int c=0;c<1024;c++) {
-                linkedFileList.add(buff);
-            }
-            System.out.println("Testing as circular list");
-            for(int c=0;c<1000000;c++) {
-                linkedFileList.removeLast();
-                linkedFileList.addFirst(buff);
-            }
-        } finally {
-            linkedFileList.close();
-            linkedFileList = null;
-            tempFile.delete();
-        }
-    }*/
+	/**
+	 * Test larger files.
+	 */
+	/*
+	public void testLargeList() throws Exception {
+		File tempFile = File.createTempFile("LinkedFileListTest", null);
+		tempFile.deleteOnExit();
+		PersistentLinkedList<byte[]> linkedFileList = new PersistentLinkedList<byte[]>(getPersistentBuffer(tempFile), false, false);
+		try {
+			byte[] buff = new byte[1024*1024];
+			System.out.println("Filling list");
+			for(int c=0;c<1024;c++) {
+				linkedFileList.add(buff);
+			}
+			System.out.println("Testing as circular list");
+			for(int c=0;c<1000000;c++) {
+				linkedFileList.removeLast();
+				linkedFileList.addFirst(buff);
+			}
+		} finally {
+			linkedFileList.close();
+			linkedFileList = null;
+			tempFile.delete();
+		}
+	}*/
 }

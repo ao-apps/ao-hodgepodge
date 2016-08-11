@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2013, 2015  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,134 +37,134 @@ import java.io.Writer;
  */
 final public class IoUtils {
 
-    /**
-     * Make no instances.
-     */
-    private IoUtils() {}
-
-    /**
-     * copies without flush.
-     *
-     * @see #copy(java.io.InputStream, java.io.OutputStream, boolean)
-     */
-    public static long copy(InputStream in, OutputStream out) throws IOException {
-        return copy(in, out, false);
-    }
-
-    /**
-     * Copies all information from one stream to another.  Internally reuses thread-local
-     * buffers to avoid initial buffer zeroing cost and later garbage collection overhead.
-     *
-     * @return  the number of bytes copied
-     *
-     * @see  BufferManager#getBytes()
-     */
-    public static long copy(InputStream in, OutputStream out, boolean flush) throws IOException {
-        byte[] buff = BufferManager.getBytes();
-        try {
-            long totalBytes = 0;
-            int numBytes;
-            while((numBytes = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-                out.write(buff, 0, numBytes);
-                if(flush) out.flush();
-                totalBytes += numBytes;
-            }
-            return totalBytes;
-        } finally {
-            BufferManager.release(buff, false);
-        }
-    }
-
-    /**
-     * Copies all information from one stream to another.  Internally reuses thread-local
-     * buffers to avoid initial buffer zeroing cost and later garbage collection overhead.
-     *
-     * @return  the number of bytes copied
-     *
-     * @see  BufferManager#getChars()
-     */
-    public static long copy(Reader in, Writer out) throws IOException {
-        char[] buff = BufferManager.getChars();
-        try {
-            long totalChars = 0;
-            int numChars;
-            while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-                out.write(buff, 0, numChars);
-                totalChars += numChars;
-            }
-            return totalChars;
-        } finally {
-            BufferManager.release(buff, false);
-        }
-    }
-
-    /**
-     * Copies all information from one stream to an appendable.
-     *
-     * @return  the number of bytes copied
-     *
-     * @see  BufferManager#getChars()
-     */
-    public static long copy(Reader in, Appendable out) throws IOException {
-		if(in == null) throw new NullArgumentException("in");
-		if(out == null) throw new NullArgumentException("out");
-        char[] buff = BufferManager.getChars();
-        try {
-            long totalChars = 0;
-            int numChars;
-            while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-				out.append(new String(buff, 0, numChars));
-                totalChars += numChars;
-            }
-            return totalChars;
-        } finally {
-            BufferManager.release(buff, false);
-        }
-    }
+	/**
+	 * Make no instances.
+	 */
+	private IoUtils() {}
 
 	/**
-     * Copies all information from one stream to another.  Internally reuses thread-local
-     * buffers to avoid initial buffer zeroing cost and later garbage collection overhead.
-     *
-     * @return  the number of bytes copied
-     *
-     * @see  BufferManager#getChars()
-     */
-    public static long copy(Reader in, StringBuilder out) throws IOException {
-        char[] buff = BufferManager.getChars();
-        try {
-            long totalChars = 0;
-            int numChars;
-            while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-                out.append(buff, 0, numChars);
-                totalChars += numChars;
-            }
-            return totalChars;
-        } finally {
-            BufferManager.release(buff, false);
-        }
-    }
+	 * copies without flush.
+	 *
+	 * @see #copy(java.io.InputStream, java.io.OutputStream, boolean)
+	 */
+	public static long copy(InputStream in, OutputStream out) throws IOException {
+		return copy(in, out, false);
+	}
 
-    /**
-     * readFully for any stream.
-     */
-    // @ThreadSafe
-    public static void readFully(InputStream in, byte[] buffer) throws IOException {
-        readFully(in, buffer, 0, buffer.length);
-    }
+	/**
+	 * Copies all information from one stream to another.  Internally reuses thread-local
+	 * buffers to avoid initial buffer zeroing cost and later garbage collection overhead.
+	 *
+	 * @return  the number of bytes copied
+	 *
+	 * @see  BufferManager#getBytes()
+	 */
+	public static long copy(InputStream in, OutputStream out, boolean flush) throws IOException {
+		byte[] buff = BufferManager.getBytes();
+		try {
+			long totalBytes = 0;
+			int numBytes;
+			while((numBytes = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+				out.write(buff, 0, numBytes);
+				if(flush) out.flush();
+				totalBytes += numBytes;
+			}
+			return totalBytes;
+		} finally {
+			BufferManager.release(buff, false);
+		}
+	}
 
-    /**
-     * readFully for any stream.
-     */
-    // @ThreadSafe
-    public static void readFully(InputStream in, byte[] buffer, int off, int len) throws IOException {
-        while(len>0) {
-            int count = in.read(buffer, off, len);
-            if(count==-1) throw new EOFException();
-            off += count;
-            len -= count;
-        }
-    }
+	/**
+	 * Copies all information from one stream to another.  Internally reuses thread-local
+	 * buffers to avoid initial buffer zeroing cost and later garbage collection overhead.
+	 *
+	 * @return  the number of bytes copied
+	 *
+	 * @see  BufferManager#getChars()
+	 */
+	public static long copy(Reader in, Writer out) throws IOException {
+		char[] buff = BufferManager.getChars();
+		try {
+			long totalChars = 0;
+			int numChars;
+			while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+				out.write(buff, 0, numChars);
+				totalChars += numChars;
+			}
+			return totalChars;
+		} finally {
+			BufferManager.release(buff, false);
+		}
+	}
+
+	/**
+	 * Copies all information from one stream to an appendable.
+	 *
+	 * @return  the number of bytes copied
+	 *
+	 * @see  BufferManager#getChars()
+	 */
+	public static long copy(Reader in, Appendable out) throws IOException {
+		if(in == null) throw new NullArgumentException("in");
+		if(out == null) throw new NullArgumentException("out");
+		char[] buff = BufferManager.getChars();
+		try {
+			long totalChars = 0;
+			int numChars;
+			while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+				out.append(new String(buff, 0, numChars));
+				totalChars += numChars;
+			}
+			return totalChars;
+		} finally {
+			BufferManager.release(buff, false);
+		}
+	}
+
+	/**
+	 * Copies all information from one stream to another.  Internally reuses thread-local
+	 * buffers to avoid initial buffer zeroing cost and later garbage collection overhead.
+	 *
+	 * @return  the number of bytes copied
+	 *
+	 * @see  BufferManager#getChars()
+	 */
+	public static long copy(Reader in, StringBuilder out) throws IOException {
+		char[] buff = BufferManager.getChars();
+		try {
+			long totalChars = 0;
+			int numChars;
+			while((numChars = in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
+				out.append(buff, 0, numChars);
+				totalChars += numChars;
+			}
+			return totalChars;
+		} finally {
+			BufferManager.release(buff, false);
+		}
+	}
+
+	/**
+	 * readFully for any stream.
+	 */
+	// @ThreadSafe
+	public static void readFully(InputStream in, byte[] buffer) throws IOException {
+		readFully(in, buffer, 0, buffer.length);
+	}
+
+	/**
+	 * readFully for any stream.
+	 */
+	// @ThreadSafe
+	public static void readFully(InputStream in, byte[] buffer, int off, int len) throws IOException {
+		while(len>0) {
+			int count = in.read(buffer, off, len);
+			if(count==-1) throw new EOFException();
+			off += count;
+			len -= count;
+		}
+	}
 
 	/**
 	 * Reads an input stream fully (to end of stream), returning a byte[] of the content read.

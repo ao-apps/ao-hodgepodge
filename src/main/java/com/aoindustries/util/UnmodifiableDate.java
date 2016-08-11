@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012  AO Industries, Inc.
+ * Copyright (C) 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,54 +31,54 @@ import java.util.Date;
  */
 final public class UnmodifiableDate extends Date {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public UnmodifiableDate() {
-        super();
-    }
+	public UnmodifiableDate() {
+		super();
+	}
 
-    public UnmodifiableDate(long date) {
-        super(date);
-    }
+	public UnmodifiableDate(long date) {
+		super(date);
+	}
 
-    @Deprecated
-    @Override
-    public void setYear(int year) {
-        throw new UnsupportedOperationException();
-    }
+	@Deprecated
+	@Override
+	public void setYear(int year) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Deprecated
-    @Override
-    public void setMonth(int month) {
-        throw new UnsupportedOperationException();
-    }
+	@Deprecated
+	@Override
+	public void setMonth(int month) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Deprecated
-    @Override
-    public void setDate(int date) {
-        throw new UnsupportedOperationException();
-    }
+	@Deprecated
+	@Override
+	public void setDate(int date) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Deprecated
-    @Override
-    public void setHours(int hours) {
-        throw new UnsupportedOperationException();
-    }
+	@Deprecated
+	@Override
+	public void setHours(int hours) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Deprecated
-    @Override
-    public void setMinutes(int minutes) {
-        throw new UnsupportedOperationException();
-    }
+	@Deprecated
+	@Override
+	public void setMinutes(int minutes) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Deprecated
-    @Override
-    public void setSeconds(int seconds) {
-        throw new UnsupportedOperationException();
-    }
+	@Deprecated
+	@Override
+	public void setSeconds(int seconds) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void setTime(long time) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void setTime(long time) {
+		throw new UnsupportedOperationException();
+	}
 }

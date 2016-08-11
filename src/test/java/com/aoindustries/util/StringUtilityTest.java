@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015  AO Industries, Inc.
+ * Copyright (C) 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,23 +33,23 @@ import junit.framework.TestSuite;
  */
 public class StringUtilityTest extends TestCase {
 
-    public StringUtilityTest(String testName) {
-        super(testName);
-    }
+	public StringUtilityTest(String testName) {
+		super(testName);
+	}
 
-    public static Test suite() {
-        return new TestSuite(StringUtilityTest.class);
-    }
+	public static Test suite() {
+		return new TestSuite(StringUtilityTest.class);
+	}
 
-    private static final Random random = new SecureRandom();
+	private static final Random random = new SecureRandom();
 
-    public void testConvertToFromHexInt() {
+	public void testConvertToFromHexInt() {
 		for(int i=0; i<1000; i++) {
 			int before = random.nextInt();
 			int after = StringUtility.convertIntArrayFromHex(StringUtility.convertToHex(before).toCharArray());
 			assertEquals(before, after);
 		}
-    }
+	}
 
 	public void testConvertToFromHexLong() {
 		for(int i=0; i<1000; i++) {
@@ -57,5 +57,5 @@ public class StringUtilityTest extends TestCase {
 			long after = StringUtility.convertLongArrayFromHex(StringUtility.convertToHex(before).toCharArray());
 			assertEquals(before, after);
 		}
-    }
+	}
 }

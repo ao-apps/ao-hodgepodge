@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012  AO Industries, Inc.
+ * Copyright (C) 2012, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,28 +34,28 @@ package com.aoindustries.util;
  */
 public class IdentityKey<T> {
 
-    private final T value;
+	private final T value;
 
-    public IdentityKey(T value) {
-        this.value = value;
-    }
+	public IdentityKey(T value) {
+		this.value = value;
+	}
 
-    @Override
-    public String toString() {
-        return value==null ? "null" : value.toString();
-    }
+	@Override
+	public String toString() {
+		return value==null ? "null" : value.toString();
+	}
 
-    @Override
-    public int hashCode() {
-        return System.identityHashCode(value);
-    }
+	@Override
+	public int hashCode() {
+		return System.identityHashCode(value);
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        return this==obj;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		return this==obj;
+	}
 
-    public T getValue() {
-        return value;
-    }
+	public T getValue() {
+		return value;
+	}
 }

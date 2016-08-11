@@ -167,14 +167,14 @@ NextLocation :
 	/**
 	 * Loads an image from a resource using the default toolkit.
 	 */
-    public static Image getImageFromResources(Class<?> clazz, String name) throws IOException {
+	public static Image getImageFromResources(Class<?> clazz, String name) throws IOException {
 		return getImageFromResources(clazz, name, Toolkit.getDefaultToolkit());
-    }
+	}
 
 	/**
 	 * Loads an image from a resource using the provided toolkit.
 	 */
-    public static Image getImageFromResources(Class<?> clazz, String name, Toolkit toolkit) throws IOException {
+	public static Image getImageFromResources(Class<?> clazz, String name, Toolkit toolkit) throws IOException {
 		byte[] imageData;
 		InputStream in = clazz.getResourceAsStream(name);
 		if(in==null) throw new IOException("Unable to find resource: "+name);
@@ -184,7 +184,7 @@ NextLocation :
 			in.close();
 		}
 		return toolkit.createImage(imageData);
-    }
+	}
 
 	private Images() {
 	}

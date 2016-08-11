@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,21 +27,21 @@ package com.aoindustries.security;
  */
 public class AccountDisabledException extends LoginException {
 
-    private static final long serialVersionUID = -8391056124540760616L;
+	private static final long serialVersionUID = -8391056124540760616L;
 
-    public AccountDisabledException() {
-        super();
-    }
+	public AccountDisabledException() {
+		super();
+	}
 
-    public AccountDisabledException(String message) {
-        super(message);
-    }
+	public AccountDisabledException(String message) {
+		super(message);
+	}
 
-    public AccountDisabledException(Throwable cause) {
-        super(cause);
-    }
-    
-    public AccountDisabledException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public AccountDisabledException(Throwable cause) {
+		super(cause);
+	}
+
+	public AccountDisabledException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

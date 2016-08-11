@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,12 +35,12 @@ import java.io.Externalizable;
  */
 public interface FastExternalizable extends Externalizable {
 
-    /**
-     * Gets the serialVersionUID for this object.
-     * Since FastExternalizable-aware containers are not special JVM constructs, they
-     * do not have access to the private and protected fields.
-     * It is assumed that two separate instances of the same class will always
-     * return the same serialVersionUID.
-     */
-    long getSerialVersionUID();
+	/**
+	 * Gets the serialVersionUID for this object.
+	 * Since FastExternalizable-aware containers are not special JVM constructs, they
+	 * do not have access to the private and protected fields.
+	 * It is assumed that two separate instances of the same class will always
+	 * return the same serialVersionUID.
+	 */
+	long getSerialVersionUID();
 }

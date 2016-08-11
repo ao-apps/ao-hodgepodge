@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,24 +32,24 @@ import java.util.Set;
  */
 public class TrivialGraph<V,E extends Edge<V>,EX extends Exception> implements SymmetricGraph<V,E,EX> {
 
-    private final Set<V> vertices;
+	private final Set<V> vertices;
 
-    public TrivialGraph(V vertex) {
-        this.vertices = Collections.singleton(vertex);
-    }
+	public TrivialGraph(V vertex) {
+		this.vertices = Collections.singleton(vertex);
+	}
 
-    @Override
-    public Set<V> getVertices() {
-        return vertices;
-    }
+	@Override
+	public Set<V> getVertices() {
+		return vertices;
+	}
 
-    @Override
-    public Set<E> getEdgesFrom(V from) {
-        return Collections.emptySet();
-    }
+	@Override
+	public Set<E> getEdgesFrom(V from) {
+		return Collections.emptySet();
+	}
 
-    @Override
-    public Set<E> getEdgesTo(V to) {
-        return Collections.emptySet();
-    }
+	@Override
+	public Set<E> getEdgesTo(V to) {
+		return Collections.emptySet();
+	}
 }

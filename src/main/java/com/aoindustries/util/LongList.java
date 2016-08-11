@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,15 +31,15 @@ import java.util.List;
  */
 public interface LongList extends LongCollection, List<Long> {
 
-    int indexOf(long elem);
+	int indexOf(long elem);
 
-    int lastIndexOf(long elem);
+	int lastIndexOf(long elem);
 
-    long getLong(int index);
+	long getLong(int index);
 
-    long set(int index, long element);
+	long set(int index, long element);
 
-    void add(int index, long element);
+	void add(int index, long element);
 
-    long removeAtIndex(int index);
+	long removeAtIndex(int index);
 }

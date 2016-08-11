@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2013  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -40,8 +40,8 @@ final public class JavaSort extends BaseComparisonSortAlgorithm<Object> {
 		return instance;
 	}
 
-    private JavaSort() {
-    }
+	private JavaSort() {
+	}
 
 	@Override
 	public boolean isStable() {
@@ -49,16 +49,16 @@ final public class JavaSort extends BaseComparisonSortAlgorithm<Object> {
 	}
 
 	@Override
-    public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-        if(stats!=null) stats.sortStarting();
-        Collections.sort(list, comparator);
-        if(stats!=null) stats.sortEnding();
-    }
+	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
+		if(stats!=null) stats.sortStarting();
+		Collections.sort(list, comparator);
+		if(stats!=null) stats.sortEnding();
+	}
 
 	@Override
-    public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-        if(stats!=null) stats.sortStarting();
-        Arrays.sort(array, comparator);
-        if(stats!=null) stats.sortEnding();
-    }
+	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
+		if(stats!=null) stats.sortStarting();
+		Arrays.sort(array, comparator);
+		if(stats!=null) stats.sortEnding();
+	}
 }

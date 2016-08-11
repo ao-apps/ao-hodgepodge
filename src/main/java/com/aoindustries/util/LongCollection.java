@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,11 +31,11 @@ import java.util.Collection;
  */
 public interface LongCollection extends Collection<Long> {
 
-    boolean contains(long elem);
+	boolean contains(long elem);
 
-    long[] toArrayLong();
+	long[] toArrayLong();
 
-    boolean add(long o);
+	boolean add(long o);
 
-    boolean removeByValue(long value);
+	boolean removeByValue(long value);
 }
