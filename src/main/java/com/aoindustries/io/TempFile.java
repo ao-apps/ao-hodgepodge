@@ -35,10 +35,10 @@ import java.io.IOException;
  * @author  AO Industries, Inc.
  */
 public class TempFile {
-	
+
 	private volatile File tempFile;
 	private final String path;
-	
+
 	public TempFile(String prefix) throws IOException {
 		this(prefix, null, null);
 	}
@@ -65,30 +65,30 @@ public class TempFile {
 	}
 
 	/**
-     * Deletes the underlying temp file immediately.
+	 * Deletes the underlying temp file immediately.
 	 * Subsequent calls will not delete the temp file, even if another file has the same path.
 	 * If already deleted, has no effect.
-     */
-    public void delete() throws IOException {
+	 */
+	public void delete() throws IOException {
 		File f = tempFile;
 		if(f!=null) {
-            FileUtils.delete(f);
-            tempFile = null;
-        }
-    }
+			FileUtils.delete(f);
+			tempFile = null;
+		}
+	}
 
 	/*
 	 * Deletes the underlying temp file on garbage collection.
 	 */
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            delete();
-        } finally {
-            super.finalize();
-        }
-    }
-	
+	@Override
+	protected void finalize() throws Throwable {
+		try {
+			delete();
+		} finally {
+			super.finalize();
+		}
+	}
+
 	/**
 	 * Gets the temp file.
 	 *

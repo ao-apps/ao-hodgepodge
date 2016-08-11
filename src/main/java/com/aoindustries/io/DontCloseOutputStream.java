@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,14 +34,14 @@ import java.io.OutputStream;
  */
 public class DontCloseOutputStream extends FilterOutputStream {
 
-    public DontCloseOutputStream(OutputStream out) {
-        super(out);
-    }
+	public DontCloseOutputStream(OutputStream out) {
+		super(out);
+	}
 
-    /**
-     * Does nothing on close to protect the wrapped OutputStream.
-     */
+	/**
+	 * Does nothing on close to protect the wrapped OutputStream.
+	 */
 	@Override
-    public void close() {
-    }
+	public void close() {
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,7 +34,7 @@ public interface ComparisonSortAlgorithm<E> extends SortAlgorithm<E> {
 
 	<T extends E> void sort(List<T> list, Comparator<? super T> comparator);
 
-    <T extends E> void sort(T[] array, Comparator<? super T> comparator);
+	<T extends E> void sort(T[] array, Comparator<? super T> comparator);
 
 	<T extends E> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats);
 

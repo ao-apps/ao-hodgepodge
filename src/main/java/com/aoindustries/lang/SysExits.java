@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -103,46 +103,46 @@ public final class SysExits {
 
 	/** addressee unknown */
 	public static final int EX_NOUSER = 67;
-	
+
 	/** host name unknown */
 	public static final int EX_NOHOST = 68;
-	
+
 	/** service unavailable */
 	public static final int EX_UNAVAILABLE = 69;
-	
+
 	/** internal software error */
 	public static final int EX_SOFTWARE = 70;
-	
+
 	/** system error (e.g., can't fork) */
 	public static final int EX_OSERR = 71;
-	
+
 	/** critical OS file missing */
 	public static final int EX_OSFILE = 72;
-	
+
 	/** can't create (user) output file */
 	public static final int EX_CANTCREAT = 73;
-	
+
 	/** input/output error */
 	public static final int EX_IOERR = 74;
-	
+
 	/** temp failure; user is invited to retry */
 	public static final int EX_TEMPFAIL = 75;
-	
+
 	/** remote error in protocol */
 	public static final int EX_PROTOCOL = 76;
-	
+
 	/** permission denied */
 	public static final int EX_NOPERM = 77;
-	
+
 	/** configuration error */
 	public static final int EX_CONFIG = 78;
 
 	/* maximum listed value */
 	public static final int EX__MAX = 78;
 
-    /**
-     * Make no instances.
-     */
-    private SysExits() {
-    }
+	/**
+	 * Make no instances.
+	 */
+	private SysExits() {
+	}
 }

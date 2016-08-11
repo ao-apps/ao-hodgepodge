@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,25 +27,25 @@ package com.aoindustries.util;
  */
 public final class InternUtils {
 
-    /**
-     * No instances
-     */
-    private InternUtils() {
-    }
+	/**
+	 * No instances
+	 */
+	private InternUtils() {
+	}
 
-    /**
-     * Interns the object, return null when null.
-     */
-    public static <T extends Internable<T>> T intern(T value) {
-        if(value==null) return null;
-        return value.intern();
-    }
+	/**
+	 * Interns the object, return null when null.
+	 */
+	public static <T extends Internable<T>> T intern(T value) {
+		if(value==null) return null;
+		return value.intern();
+	}
 
-    /**
-     * Null-safe intern: interns a String if it is not null, returns null if parameter is null.
-     */
-    public static String intern(String S) {
-        if(S==null) return null;
-        return S.intern();
-    }
+	/**
+	 * Null-safe intern: interns a String if it is not null, returns null if parameter is null.
+	 */
+	public static String intern(String S) {
+		if(S==null) return null;
+		return S.intern();
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,39 +29,39 @@ package com.aoindustries.lang;
  */
 public class NullArgumentException extends IllegalArgumentException {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Checks an argument and throws an exception if null.
-     */
-    public static <T> T checkNotNull(T argument) throws NullArgumentException {
-        return checkNotNull(argument, null);
-    }
+	/**
+	 * Checks an argument and throws an exception if null.
+	 */
+	public static <T> T checkNotNull(T argument) throws NullArgumentException {
+		return checkNotNull(argument, null);
+	}
 
-    /**
-     * Checks an argument and throws an exception if null.
-     */
-    public static <T> T checkNotNull(T argument, String argumentName) throws NullArgumentException {
-        if(argument==null) throw new NullArgumentException(argumentName);
-        return argument;
-    }
+	/**
+	 * Checks an argument and throws an exception if null.
+	 */
+	public static <T> T checkNotNull(T argument, String argumentName) throws NullArgumentException {
+		if(argument==null) throw new NullArgumentException(argumentName);
+		return argument;
+	}
 
-    private final String argument;
+	private final String argument;
 
-    public NullArgumentException(String argument) {
-        super(argument==null ? ApplicationResources.accessor.getMessage("NullArgumentException.message.noName") : ApplicationResources.accessor.getMessage("NullArgumentException.message", argument));
-        this.argument = argument;
-    }
+	public NullArgumentException(String argument) {
+		super(argument==null ? ApplicationResources.accessor.getMessage("NullArgumentException.message.noName") : ApplicationResources.accessor.getMessage("NullArgumentException.message", argument));
+		this.argument = argument;
+	}
 
-    @Override
-    public String getLocalizedMessage() {
-        return argument==null ? ApplicationResources.accessor.getMessage("NullArgumentException.message.noName") : ApplicationResources.accessor.getMessage("NullArgumentException.message", argument);
-    }
+	@Override
+	public String getLocalizedMessage() {
+		return argument==null ? ApplicationResources.accessor.getMessage("NullArgumentException.message.noName") : ApplicationResources.accessor.getMessage("NullArgumentException.message", argument);
+	}
 
-    /**
-     * Gets the name of the argument that was null.
-     */
-    public String getArgument() {
-        return argument;
-    }
+	/**
+	 * Gets the name of the argument that was null.
+	 */
+	public String getArgument() {
+		return argument;
+	}
 }

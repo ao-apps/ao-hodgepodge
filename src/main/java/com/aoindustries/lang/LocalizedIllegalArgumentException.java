@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,42 +33,42 @@ import java.io.Serializable;
  */
 public class LocalizedIllegalArgumentException extends IllegalArgumentException {
 
-    private static final long serialVersionUID = -4941714282849295887L;
+	private static final long serialVersionUID = -4941714282849295887L;
 
-    private final ApplicationResourcesAccessor accessor;
-    private final String key;
-    private final Serializable[] args;
+	private final ApplicationResourcesAccessor accessor;
+	private final String key;
+	private final Serializable[] args;
 
-    public LocalizedIllegalArgumentException(ApplicationResourcesAccessor accessor, String key) {
-        super(accessor.getMessage(key));
-        this.accessor = accessor;
-        this.key = key;
-        this.args = AoArrays.EMPTY_SERIALIZABLE_ARRAY;
-    }
+	public LocalizedIllegalArgumentException(ApplicationResourcesAccessor accessor, String key) {
+		super(accessor.getMessage(key));
+		this.accessor = accessor;
+		this.key = key;
+		this.args = AoArrays.EMPTY_SERIALIZABLE_ARRAY;
+	}
 
-    public LocalizedIllegalArgumentException(ApplicationResourcesAccessor accessor, String key, Serializable... args) {
-        super(accessor.getMessage(key, (Object[])args));
-        this.accessor = accessor;
-        this.key = key;
-        this.args = args;
-    }
+	public LocalizedIllegalArgumentException(ApplicationResourcesAccessor accessor, String key, Serializable... args) {
+		super(accessor.getMessage(key, (Object[])args));
+		this.accessor = accessor;
+		this.key = key;
+		this.args = args;
+	}
 
-    public LocalizedIllegalArgumentException(Throwable cause, ApplicationResourcesAccessor accessor, String key) {
-        super(accessor.getMessage(key), cause);
-        this.accessor = accessor;
-        this.key = key;
-        this.args = AoArrays.EMPTY_SERIALIZABLE_ARRAY;
-    }
+	public LocalizedIllegalArgumentException(Throwable cause, ApplicationResourcesAccessor accessor, String key) {
+		super(accessor.getMessage(key), cause);
+		this.accessor = accessor;
+		this.key = key;
+		this.args = AoArrays.EMPTY_SERIALIZABLE_ARRAY;
+	}
 
-    public LocalizedIllegalArgumentException(Throwable cause, ApplicationResourcesAccessor accessor, String key, Serializable... args) {
-        super(accessor.getMessage(key, (Object[])args), cause);
-        this.accessor = accessor;
-        this.key = key;
-        this.args = args;
-    }
+	public LocalizedIllegalArgumentException(Throwable cause, ApplicationResourcesAccessor accessor, String key, Serializable... args) {
+		super(accessor.getMessage(key, (Object[])args), cause);
+		this.accessor = accessor;
+		this.key = key;
+		this.args = args;
+	}
 
-    @Override
-    public String getLocalizedMessage() {
-        return accessor.getMessage(key, (Object[])args);
-    }
+	@Override
+	public String getLocalizedMessage() {
+		return accessor.getMessage(key, (Object[])args);
+	}
 }

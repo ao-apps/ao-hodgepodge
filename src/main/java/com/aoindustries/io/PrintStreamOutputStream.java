@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,39 +37,39 @@ import java.io.PrintStream;
  */
 public class PrintStreamOutputStream extends OutputStream {
 
-    final private PrintStream out;
+	final private PrintStream out;
 
-    public PrintStreamOutputStream(PrintStream out) {
-        this.out = out;
-    }
+	public PrintStreamOutputStream(PrintStream out) {
+		this.out = out;
+	}
 
 	@Override
-    public void write(int b) throws IOException {
-    	out.write(b);
-        if(out.checkError()) throw new IOException("Error in print stream");
-    }
+	public void write(int b) throws IOException {
+		out.write(b);
+		if(out.checkError()) throw new IOException("Error in print stream");
+	}
 
-    @Override
-    public void write(byte b[]) throws IOException {
-    	out.write(b);
-        if(out.checkError()) throw new IOException("Error in print stream");
-    }
+	@Override
+	public void write(byte b[]) throws IOException {
+		out.write(b);
+		if(out.checkError()) throw new IOException("Error in print stream");
+	}
 
-    @Override
-    public void write(byte b[], int off, int len) throws IOException {
-        out.write(b, off, len);
-        if(out.checkError()) throw new IOException("Error in print stream");
-    }
+	@Override
+	public void write(byte b[], int off, int len) throws IOException {
+		out.write(b, off, len);
+		if(out.checkError()) throw new IOException("Error in print stream");
+	}
 
-    @Override
-    public void flush() throws IOException {
-        out.flush();
-        if(out.checkError()) throw new IOException("Error in print stream");
-    }
+	@Override
+	public void flush() throws IOException {
+		out.flush();
+		if(out.checkError()) throw new IOException("Error in print stream");
+	}
 
-    @Override
-    public void close() throws IOException {
-        out.close();
-        if(out.checkError()) throw new IOException("Error in print stream");
-    }
+	@Override
+	public void close() throws IOException {
+		out.close();
+		if(out.checkError()) throw new IOException("Error in print stream");
+	}
 }

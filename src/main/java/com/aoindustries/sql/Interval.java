@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,49 +32,49 @@ import java.io.Serializable;
  */
 final public class Interval implements Serializable, Comparable<Interval> {
 
-    private static final long serialVersionUID = 1;
+	private static final long serialVersionUID = 1;
 
-    final private long interval;
+	final private long interval;
 
-    public Interval(long seconds) {
-        this.interval = seconds;
-    }
+	public Interval(long seconds) {
+		this.interval = seconds;
+	}
 
-    public Interval(long minutes, long seconds) {
-        this(
+	public Interval(long minutes, long seconds) {
+		this(
 			minutes * 60
 			+ seconds
 		);
-    }
+	}
 
-    public Interval(long hours, long minutes, long seconds) {
-        this(
+	public Interval(long hours, long minutes, long seconds) {
+		this(
 			hours * 3600
 			+ minutes * 60
 			+ seconds
 		);
-    }
+	}
 
 	/**
-     * Gets the interval in seconds.
-     */
-    public long getInterval() {
-        return interval;
-    }
+	 * Gets the interval in seconds.
+	 */
+	public long getInterval() {
+		return interval;
+	}
 
-    @Override
-    public String toString() {
-        return toString(interval);
-    }
+	@Override
+	public String toString() {
+		return toString(interval);
+	}
 
-    public static String toString(long interval) {
+	public static String toString(long interval) {
 		return StringUtility.getDecimalTimeLengthString(interval*1000, false);
 	}
 
 	@Override
-    public int compareTo(Interval o) {
-        if(interval<o.interval) return -1;
-        if(interval>o.interval) return 1;
-        return 0;
-    }
+	public int compareTo(Interval o) {
+		if(interval<o.interval) return -1;
+		if(interval>o.interval) return 1;
+		return 0;
+	}
 }

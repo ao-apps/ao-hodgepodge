@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,11 +29,11 @@ package com.aoindustries.lang;
  */
 public final class EnumUtils {
 
-    /**
-     * Make no instances.
-     */
-    private EnumUtils() {
-    }
+	/**
+	 * Make no instances.
+	 */
+	private EnumUtils() {
+	}
 
 	/**
 	 * Gets the greater of two enums.

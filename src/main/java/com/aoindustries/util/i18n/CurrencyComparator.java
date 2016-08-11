@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,23 +33,23 @@ import java.util.Currency;
  */
 public class CurrencyComparator implements Comparator<Currency>, Serializable {
 
-    private static final long serialVersionUID = -6360174337692570997L;
+	private static final long serialVersionUID = -6360174337692570997L;
 
-    private static final CurrencyComparator singleton = new CurrencyComparator();
+	private static final CurrencyComparator singleton = new CurrencyComparator();
 
-    public static CurrencyComparator getInstance() {
-        return singleton;
-    }
+	public static CurrencyComparator getInstance() {
+		return singleton;
+	}
 
-    private CurrencyComparator() {
-    }
+	private CurrencyComparator() {
+	}
 
-    private Object readResolve() {
-        return getInstance();
-    }
+	private Object readResolve() {
+		return getInstance();
+	}
 
-    @Override
-    public int compare(Currency o1, Currency o2) {
-        return o1.getCurrencyCode().compareTo(o2.getCurrencyCode());
-    }
+	@Override
+	public int compare(Currency o1, Currency o2) {
+		return o1.getCurrencyCode().compareTo(o2.getCurrencyCode());
+	}
 }

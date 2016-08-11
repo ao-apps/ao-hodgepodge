@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,27 +34,27 @@ import junit.framework.TestSuite;
  */
 public class BlockBufferRandomFailBufferNoFailTest extends BlockBufferTestParent {
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite(BlockBufferRandomFailBufferNoFailTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite(BlockBufferRandomFailBufferNoFailTest.class);
+		return suite;
+	}
 
-    public BlockBufferRandomFailBufferNoFailTest(String testName) {
-        super(testName);
-    }
-
-	@Override
-    public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
-        return new RandomFailBuffer(PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), protectionLevel, Long.MAX_VALUE), false);
-    }
+	public BlockBufferRandomFailBufferNoFailTest(String testName) {
+		super(testName);
+	}
 
 	@Override
-    public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
-        return new DynamicPersistentBlockBuffer(pbuffer);
-    }
+	public PersistentBuffer getBuffer(File tempFile, ProtectionLevel protectionLevel) throws IOException {
+		return new RandomFailBuffer(PersistentCollections.getPersistentBuffer(new RandomAccessFile(tempFile, "rw"), protectionLevel, Long.MAX_VALUE), false);
+	}
 
-    @Override
-    public long getAllocationSize(Random random) throws IOException {
-        return random.nextInt(4097);
-    }
+	@Override
+	public PersistentBlockBuffer getBlockBuffer(PersistentBuffer pbuffer) throws IOException {
+		return new DynamicPersistentBlockBuffer(pbuffer);
+	}
+
+	@Override
+	public long getAllocationSize(Random random) throws IOException {
+		return random.nextInt(4097);
+	}
 }

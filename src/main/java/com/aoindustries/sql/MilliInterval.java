@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2008, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,34 +33,34 @@ import java.math.BigDecimal;
  */
 final public class MilliInterval implements Serializable, Comparable<MilliInterval> {
 
-    private static final long serialVersionUID = 1;
+	private static final long serialVersionUID = 1;
 
-    final private long milliInterval;
+	final private long milliInterval;
 
-    public MilliInterval(long milliInterval) {
-        this.milliInterval = milliInterval;
-    }
+	public MilliInterval(long milliInterval) {
+		this.milliInterval = milliInterval;
+	}
 
-    /**
-     * Gets the interval in milliseconds.
-     */
-    public long getIntervalMillis() {
-        return milliInterval;
-    }
-
-    @Override
-    public String toString() {
-        return toString(milliInterval);
-    }
-
-    public static String toString(long interval) {
-        return accessor.getMessage("MilliInterval.toString", BigDecimal.valueOf(interval, 3));
+	/**
+	 * Gets the interval in milliseconds.
+	 */
+	public long getIntervalMillis() {
+		return milliInterval;
 	}
 
 	@Override
-    public int compareTo(MilliInterval o) {
-        if(milliInterval<o.milliInterval) return -1;
-        if(milliInterval>o.milliInterval) return 1;
-        return 0;
-    }
+	public String toString() {
+		return toString(milliInterval);
+	}
+
+	public static String toString(long interval) {
+		return accessor.getMessage("MilliInterval.toString", BigDecimal.valueOf(interval, 3));
+	}
+
+	@Override
+	public int compareTo(MilliInterval o) {
+		if(milliInterval<o.milliInterval) return -1;
+		if(milliInterval>o.milliInterval) return 1;
+		return 0;
+	}
 }

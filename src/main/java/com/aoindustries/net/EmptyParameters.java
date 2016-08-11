@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,32 +35,32 @@ import java.util.Map;
  */
 final public class EmptyParameters implements HttpParameters {
 
-    private static final EmptyParameters instance = new EmptyParameters();
+	private static final EmptyParameters instance = new EmptyParameters();
 
-    public static EmptyParameters getInstance() {
-        return instance;
-    }
+	public static EmptyParameters getInstance() {
+		return instance;
+	}
 
-    private EmptyParameters() {
-    }
+	private EmptyParameters() {
+	}
 
-    @Override
-    public String getParameter(String name) {
-        return null;
-    }
+	@Override
+	public String getParameter(String name) {
+		return null;
+	}
 
-    @Override
-    public Iterator<String> getParameterNames() {
-        return AoCollections.emptyIterator();
-    }
+	@Override
+	public Iterator<String> getParameterNames() {
+		return AoCollections.emptyIterator();
+	}
 
-    @Override
-    public List<String> getParameterValues(String name) {
-        return null;
-    }
+	@Override
+	public List<String> getParameterValues(String name) {
+		return null;
+	}
 
-    @Override
-    public Map<String, List<String>> getParameterMap() {
-        return Collections.emptyMap();
-    }
+	@Override
+	public Map<String, List<String>> getParameterMap() {
+		return Collections.emptyMap();
+	}
 }

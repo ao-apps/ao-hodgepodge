@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,33 +31,33 @@ import java.util.List;
  */
 public class CycleException extends GraphException {
 
-    private static final long serialVersionUID = 7713106090763335656L;
+	private static final long serialVersionUID = 7713106090763335656L;
 
-    private static String getMessage(List<?> vertices) {
-        StringBuilder SB = new StringBuilder();
-        SB.append("Cycle exists:\n");
-        for(Object v : vertices) {
-            SB.append("    ").append(v.getClass().getName()).append("(\"").append(v.toString()).append("\")\n");
-        }
-        return SB.toString();
-    }
+	private static String getMessage(List<?> vertices) {
+		StringBuilder SB = new StringBuilder();
+		SB.append("Cycle exists:\n");
+		for(Object v : vertices) {
+			SB.append("    ").append(v.getClass().getName()).append("(\"").append(v.toString()).append("\")\n");
+		}
+		return SB.toString();
+	}
 
-    private final List<?> vertices;
+	private final List<?> vertices;
 
-    /**
-     * No defensive copy is made.
-     */
-    CycleException(List<?> vertices) {
-        super(getMessage(vertices));
-        if(vertices.size()<2) throw new IllegalArgumentException("Cycle must have at least two vertices (could be the same vertex)");
-        if(!vertices.get(0).equals(vertices.get(vertices.size()-1))) throw new IllegalArgumentException("Cycle must start and end on the same vertex");
-        this.vertices = vertices;
-    }
+	/**
+	 * No defensive copy is made.
+	 */
+	CycleException(List<?> vertices) {
+		super(getMessage(vertices));
+		if(vertices.size()<2) throw new IllegalArgumentException("Cycle must have at least two vertices (could be the same vertex)");
+		if(!vertices.get(0).equals(vertices.get(vertices.size()-1))) throw new IllegalArgumentException("Cycle must start and end on the same vertex");
+		this.vertices = vertices;
+	}
 
-    /**
-     * Gets all vertices that are part of the cycle in the order they create the cycle.
-     */
-    public List<?> getVertices() {
-        return vertices;
-    }
+	/**
+	 * Gets all vertices that are part of the cycle in the order they create the cycle.
+	 */
+	public List<?> getVertices() {
+		return vertices;
+	}
 }

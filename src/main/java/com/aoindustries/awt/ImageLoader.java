@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,54 +36,54 @@ import java.util.logging.Logger;
  */
 final public class ImageLoader implements ImageConsumer {
 
-    private int status = 0;
+	private int status = 0;
 
-    private final Image image;
-    private final Logger logger;
+	private final Image image;
+	private final Logger logger;
 
-    public ImageLoader(Image image, Logger logger) {
-        this.image=image;
-        this.logger=logger;
-    }
-
-    @Override
-    synchronized public void imageComplete(int status) {
-        this.status|=status;
-        notify();
-    }
-
-    /**
-     * Loads an image and returns when a frame is done, the image is done, an error occurs, or the image is aborted.
-     */
-    public void loadImage() {
-        status=0;
-        image.getSource().startProduction(this);
-        while((status&(IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE))==0) {
-            try {
-            synchronized(this) {
-                wait();
-            }
-            } catch(InterruptedException err) {
-                logger.log(Level.WARNING, null, err);
-            }
-        }
-    }
-
-    @Override
-    public void setColorModel(ColorModel mode) {}
+	public ImageLoader(Image image, Logger logger) {
+		this.image=image;
+		this.logger=logger;
+	}
 
 	@Override
-    public void setDimensions(int width, int height) {}
+	synchronized public void imageComplete(int status) {
+		this.status|=status;
+		notify();
+	}
+
+	/**
+	 * Loads an image and returns when a frame is done, the image is done, an error occurs, or the image is aborted.
+	 */
+	public void loadImage() {
+		status=0;
+		image.getSource().startProduction(this);
+		while((status&(IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE))==0) {
+			try {
+				synchronized(this) {
+					wait();
+				}
+			} catch(InterruptedException err) {
+				logger.log(Level.WARNING, null, err);
+			}
+		}
+	}
 
 	@Override
-    public void setHints(int flags) {}
+	public void setColorModel(ColorModel mode) {}
 
 	@Override
-    public void setPixels(int x, int y, int width, int height, ColorModel model, byte[] pixels, int offset, int scansize) {}
+	public void setDimensions(int width, int height) {}
 
 	@Override
-    public void setPixels(int x, int y, int width, int height, ColorModel model, int[] pixels, int offset, int scansize) {}
+	public void setHints(int flags) {}
 
 	@Override
-    public void setProperties(Hashtable<?,?> properties) {}
+	public void setPixels(int x, int y, int width, int height, ColorModel model, byte[] pixels, int offset, int scansize) {}
+
+	@Override
+	public void setPixels(int x, int y, int width, int height, ColorModel model, int[] pixels, int offset, int scansize) {}
+
+	@Override
+	public void setProperties(Hashtable<?,?> properties) {}
 }

@@ -45,6 +45,6 @@ public final class ComparatorUtils {
 	// Java 1.7: @Deprecated
 	public static int compare(int i1, int i2) {
 		// Java 1.8: return Integer.compare(i1, i2);
-        return (i1 < i2) ? -1 : ((i1 == i2) ? 0 : 1);
+		return (i1 < i2) ? -1 : ((i1 == i2) ? 0 : 1);
 	}
 }

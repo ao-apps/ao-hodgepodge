@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,9 +29,9 @@ package com.aoindustries.util.graph;
  */
 public interface Weight<T> extends Comparable<T> {
 
-    /**
-     * Adds this weight to another weight, returning the new weight.
-     * This weight is not modified.
-     */
-    T add(T weight);
+	/**
+	 * Adds this weight to another weight, returning the new weight.
+	 * This weight is not modified.
+	 */
+	T add(T weight);
 }

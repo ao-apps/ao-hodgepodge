@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,24 +35,24 @@ import junit.framework.TestSuite;
  */
 public class WsEncoderTest extends TestCase {
 
-    public WsEncoderTest(String testName) {
-        super(testName);
-    }
+	public WsEncoderTest(String testName) {
+		super(testName);
+	}
 
-    public static Test suite() {
-        return new TestSuite(WsEncoderTest.class);
-    }
+	public static Test suite() {
+		return new TestSuite(WsEncoderTest.class);
+	}
 
-    public void testEncodeDecode() {
-        Random random = new SecureRandom();
-        StringBuilder SB = new StringBuilder();
-        for(int c=0;c<1000;c++) {
-            SB.setLength(0);
-            for(int d=0;d<100;d++) SB.append((char)random.nextInt(Character.MAX_VALUE+1));
-            String value = SB.toString();
-            String encoded = WsEncoder.encode(value);
-            String decoded = WsEncoder.decode(encoded);
-            assertEquals(value, decoded);
-        }
-    }
+	public void testEncodeDecode() {
+		Random random = new SecureRandom();
+		StringBuilder SB = new StringBuilder();
+		for(int c=0;c<1000;c++) {
+			SB.setLength(0);
+			for(int d=0;d<100;d++) SB.append((char)random.nextInt(Character.MAX_VALUE+1));
+			String value = SB.toString();
+			String encoded = WsEncoder.encode(value);
+			String decoded = WsEncoder.decode(encoded);
+			assertEquals(value, decoded);
+		}
+	}
 }

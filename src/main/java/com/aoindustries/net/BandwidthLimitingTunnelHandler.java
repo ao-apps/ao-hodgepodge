@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,31 +35,31 @@ import java.net.Socket;
  */
 public class BandwidthLimitingTunnelHandler {
 
-    //private boolean verbose;
-    //private String connect_address;
-    //private int connect_port;
-    //private Long upstream_bandwidth;
-    //private Long downstream_bandwidth;
-    //private Socket socket;
+	//private boolean verbose;
+	//private String connect_address;
+	//private int connect_port;
+	//private Long upstream_bandwidth;
+	//private Long downstream_bandwidth;
+	//private Socket socket;
 
-    public BandwidthLimitingTunnelHandler(
-        boolean verbose,
-        String connect_address,
-        int connect_port,
-        Long upstream_bandwidth,
-        Long downstream_bandwidth,
-        Socket socket
-    ) throws IOException {
-        //this.verbose = verbose;
-        //this.connect_address = connect_address;
-        //this.connect_port = connect_port;
-        //this.upstream_bandwidth = upstream_bandwidth;
-        //this.downstream_bandwidth = downstream_bandwidth;
-        //this.socket = socket;
-        
-        Socket connectSocket = new Socket(InetAddress.getByName(connect_address), connect_port);
+	public BandwidthLimitingTunnelHandler(
+		boolean verbose,
+		String connect_address,
+		int connect_port,
+		Long upstream_bandwidth,
+		Long downstream_bandwidth,
+		Socket socket
+	) throws IOException {
+		//this.verbose = verbose;
+		//this.connect_address = connect_address;
+		//this.connect_port = connect_port;
+		//this.upstream_bandwidth = upstream_bandwidth;
+		//this.downstream_bandwidth = downstream_bandwidth;
+		//this.socket = socket;
 
-        new BandwidthLimitingTunnelHandlerUpstreamThread(verbose, upstream_bandwidth, socket, connectSocket).start();
-        new BandwidthLimitingTunnelHandlerDownstreamThread(verbose, downstream_bandwidth, socket, connectSocket).start();
-    }
+		Socket connectSocket = new Socket(InetAddress.getByName(connect_address), connect_port);
+
+		new BandwidthLimitingTunnelHandlerUpstreamThread(verbose, upstream_bandwidth, socket, connectSocket).start();
+		new BandwidthLimitingTunnelHandlerDownstreamThread(verbose, downstream_bandwidth, socket, connectSocket).start();
+	}
 }

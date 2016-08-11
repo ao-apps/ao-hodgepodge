@@ -77,9 +77,9 @@ public class HashedKey implements Comparable<HashedKey> {
 	/**
 	 * @param hash  The provided parameter is zeroed 
 	 */
-    public HashedKey(
+	public HashedKey(
 		byte[] hash
-    ) {
+	) {
 		if(hash.length != HASH_BYTES) {
 			Arrays.fill(hash, (byte)0);
 			throw new IllegalArgumentException("Hash wrong length: " + hash.length);

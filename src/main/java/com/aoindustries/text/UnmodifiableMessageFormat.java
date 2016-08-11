@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,67 +34,67 @@ import java.util.Locale;
  */
 public class UnmodifiableMessageFormat extends MessageFormat {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private boolean initCompleted = false;
+	private boolean initCompleted = false;
 
 	/* Unused 2013-09-27
-    public UnmodifiableMessageFormat(String pattern) {
-        super(pattern);
-        initCompleted = true;
-    } */
+	public UnmodifiableMessageFormat(String pattern) {
+		super(pattern);
+		initCompleted = true;
+	} */
 
-    public UnmodifiableMessageFormat(String pattern, Locale locale) {
-        super(pattern, locale);
-        initCompleted = true;
-    }
+	public UnmodifiableMessageFormat(String pattern, Locale locale) {
+		super(pattern, locale);
+		initCompleted = true;
+	}
 
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public void setLocale(Locale locale) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * @throws UnsupportedOperationException
+	 */
+	@Override
+	public void setLocale(Locale locale) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * @throws UnsupportedOperationException except when called from constructor.
-     */
-    @Override
-    public void applyPattern(String pattern) throws UnsupportedOperationException {
-        if(initCompleted) throw new UnsupportedOperationException();
-        super.applyPattern(pattern);
-    }
+	/**
+	 * @throws UnsupportedOperationException except when called from constructor.
+	 */
+	@Override
+	public void applyPattern(String pattern) throws UnsupportedOperationException {
+		if(initCompleted) throw new UnsupportedOperationException();
+		super.applyPattern(pattern);
+	}
 
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public void setFormatsByArgumentIndex(Format[] newFormats) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * @throws UnsupportedOperationException
+	 */
+	@Override
+	public void setFormatsByArgumentIndex(Format[] newFormats) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public void setFormats(Format[] newFormats) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * @throws UnsupportedOperationException
+	 */
+	@Override
+	public void setFormats(Format[] newFormats) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public void setFormatByArgumentIndex(int argumentIndex, Format newFormat) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * @throws UnsupportedOperationException
+	 */
+	@Override
+	public void setFormatByArgumentIndex(int argumentIndex, Format newFormat) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public void setFormat(int formatElementIndex, Format newFormat) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * @throws UnsupportedOperationException
+	 */
+	@Override
+	public void setFormat(int formatElementIndex, Format newFormat) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
+	}
 }

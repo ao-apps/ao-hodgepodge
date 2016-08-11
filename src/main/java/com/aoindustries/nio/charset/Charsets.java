@@ -29,29 +29,29 @@ import java.nio.charset.Charset;
  *
  * @author  AO Industries, Inc.
  * 
- * @deprecated  Use java.nio.charset.StandardCharsets as of Java 1.7
- * @see java.nio.charset.StandardCharsets
+ * Java 1.7: deprecated  Use java.nio.charset.StandardCharsets as of Java 1.7
+ * @see java.nio.charset.StandardCharsets in Java 1.7
  */
-@Deprecated
+// Java .1.7: @Deprecated
 public class Charsets {
 
 	/**
-	 * @deprecated  Use java.nio.charset.StandardCharsets as of Java 1.7
-	 * @see java.nio.charset.StandardCharsets
+	 * Java 1.7: deprecated  Use java.nio.charset.StandardCharsets as of Java 1.7
+	 * @see java.nio.charset.StandardCharsets in Java 1.7
 	 */
-	@Deprecated
-    public static final Charset
-        US_ASCII   = Charset.forName("US-ASCII"),
-        ISO_8859_1 = Charset.forName("ISO-8859-1"),
-        UTF_8      = Charset.forName("UTF-8"),
-        UTF_16BE   = Charset.forName("UTF-16BE"),
-        UTF_16LE   = Charset.forName("UTF-16LE"),
-        UTF_16     = Charset.forName("UTF-16")
-    ;
+	// Java 1.7: @Deprecated
+	public static final Charset
+		US_ASCII   = Charset.forName("US-ASCII"),
+		ISO_8859_1 = Charset.forName("ISO-8859-1"),
+		UTF_8      = Charset.forName("UTF-8"),
+		UTF_16BE   = Charset.forName("UTF-16BE"),
+		UTF_16LE   = Charset.forName("UTF-16LE"),
+		UTF_16     = Charset.forName("UTF-16")
+	;
 
-    /**
-     * Make no instances.
-     */
-    private Charsets() {
-    }
+	/**
+	 * Make no instances.
+	 */
+	private Charsets() {
+	}
 }

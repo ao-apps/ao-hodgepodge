@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,173 +34,173 @@ import java.io.InterruptedIOException;
  */
 public class FifoFileInputStream extends InputStream {
 
-    private final FifoFile file;
-    private final Object statsLock=new Object();
-    private long fifoReadCount=0;
-    private long fifoReadBytes=0;
+	private final FifoFile file;
+	private final Object statsLock=new Object();
+	private long fifoReadCount=0;
+	private long fifoReadBytes=0;
 
-    FifoFileInputStream(FifoFile file) {
-        this.file=file;
-    }
+	FifoFileInputStream(FifoFile file) {
+		this.file=file;
+	}
 
-    /**
-     * Gets the number of reads performed on this stream.
-     */
-    public long getReadCount() {
-        synchronized(statsLock) {
-            return fifoReadCount;
-        }
-    }
+	/**
+	 * Gets the number of reads performed on this stream.
+	 */
+	public long getReadCount() {
+		synchronized(statsLock) {
+			return fifoReadCount;
+		}
+	}
 
-    /**
-     * Gets the number of bytes read from this stream.
-     */
-    public long getReadBytes() {
-        synchronized(statsLock) {
-            return fifoReadBytes;
-        }
-    }
+	/**
+	 * Gets the number of bytes read from this stream.
+	 */
+	public long getReadBytes() {
+		synchronized(statsLock) {
+			return fifoReadBytes;
+		}
+	}
 
-    /**
-     * Adds to the stats of this stream.
-     */
-    protected void addStats(long bytes) {
-        synchronized(statsLock) {
-            fifoReadCount++;
-            fifoReadBytes+=bytes;
-        }
-    }
+	/**
+	 * Adds to the stats of this stream.
+	 */
+	protected void addStats(long bytes) {
+		synchronized(statsLock) {
+			fifoReadCount++;
+			fifoReadBytes+=bytes;
+		}
+	}
 
-    /**
-     * Reads data from the file, blocks until the data is available.
-     */
+	/**
+	 * Reads data from the file, blocks until the data is available.
+	 */
 	@Override
-    public int read() throws IOException {
-        // Read from the queue
-        synchronized(file) {
-            while(true) {
-                long len=file.getLength();
-                if(len>=1) {
-                    long pos=file.getFirstIndex();
-                    file.file.seek(pos+16);
-                    int b=file.file.read();
-                    if(b==-1) throw new EOFException("Unexpected EOF");
-                    addStats(1);
-                    long newFirstIndex=pos+1;
-                    while(newFirstIndex>=file.maxFifoLength) newFirstIndex-=file.maxFifoLength;
-                    file.setFirstIndex(newFirstIndex);
-                    file.setLength(len-1);
-                    file.notify();
-                    return b;
-                }
-                try {
-                    file.wait();
-                } catch(InterruptedException err) {
-                    InterruptedIOException ioErr=new InterruptedIOException();
-                    ioErr.initCause(err);
-                    throw ioErr;
-                }
-            }
-        }
-    }
+	public int read() throws IOException {
+		// Read from the queue
+		synchronized(file) {
+			while(true) {
+				long len=file.getLength();
+				if(len>=1) {
+					long pos=file.getFirstIndex();
+					file.file.seek(pos+16);
+					int b=file.file.read();
+					if(b==-1) throw new EOFException("Unexpected EOF");
+					addStats(1);
+					long newFirstIndex=pos+1;
+					while(newFirstIndex>=file.maxFifoLength) newFirstIndex-=file.maxFifoLength;
+					file.setFirstIndex(newFirstIndex);
+					file.setLength(len-1);
+					file.notify();
+					return b;
+				}
+				try {
+					file.wait();
+				} catch(InterruptedException err) {
+					InterruptedIOException ioErr=new InterruptedIOException();
+					ioErr.initCause(err);
+					throw ioErr;
+				}
+			}
+		}
+	}
 
-    /**
-     * Reads data from the file, blocks until at least one byte is available.
-     */
-    @Override
-    public int read(byte[] b) throws IOException {
-        return read(b, 0, b.length);
-    }
+	/**
+	 * Reads data from the file, blocks until at least one byte is available.
+	 */
+	@Override
+	public int read(byte[] b) throws IOException {
+		return read(b, 0, b.length);
+	}
 
-    /**
-     * Reads data from the file, blocks until at least one byte is available.
-     */
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        // Read from the queue
-        synchronized(file) {
-            while(true) {
-                long fileLen=file.getLength();
-                if(fileLen>=1) {
-                    long pos=file.getFirstIndex();
-                    file.file.seek(pos+16);
-                    int readSize=fileLen>len?len:(int)fileLen;
-                    // When at the end of the file, read the remaining bytes
-                    if((pos+readSize)>file.maxFifoLength) readSize=(int)(file.maxFifoLength-pos);
+	/**
+	 * Reads data from the file, blocks until at least one byte is available.
+	 */
+	@Override
+	public int read(byte[] b, int off, int len) throws IOException {
+		// Read from the queue
+		synchronized(file) {
+			while(true) {
+				long fileLen=file.getLength();
+				if(fileLen>=1) {
+					long pos=file.getFirstIndex();
+					file.file.seek(pos+16);
+					int readSize=fileLen>len?len:(int)fileLen;
+					// When at the end of the file, read the remaining bytes
+					if((pos+readSize)>file.maxFifoLength) readSize=(int)(file.maxFifoLength-pos);
 
-                    // Read as many bytes as currently available
-                    int totalRead=file.file.read(b, off, readSize);
-                    if(totalRead==-1) throw new EOFException("Unexpected EOF");
-                    addStats(totalRead);
-                    long newFirstIndex=pos+totalRead;
-                    while(newFirstIndex>=file.maxFifoLength) newFirstIndex-=file.maxFifoLength;
-                    file.setFirstIndex(newFirstIndex);
-                    file.setLength(fileLen-totalRead);
-                    file.notify();
-                    return totalRead;
-                }
-                try {
-                    file.wait();
-                } catch(InterruptedException err) {
-                    InterruptedIOException ioErr=new InterruptedIOException();
-                    ioErr.initCause(err);
-                    throw ioErr;
-                }
-            }
-        }
-    }
-    
-    /**
-     * Skips data in the queue, blocks until at least one byte is skipped.
-     */
-    @Override
-    public long skip(long n) throws IOException {
-        // Skip in the queue
-        synchronized(file) {
-            while(true) {
-                long fileLen=file.getLength();
-                if(fileLen>=1) {
-                    long pos=file.getFirstIndex();
-                    long skipSize=fileLen>n?n:fileLen;
-                    // When at the end of the file, skip the remaining bytes
-                    if((pos+skipSize)>file.maxFifoLength) skipSize=file.maxFifoLength-pos;
+					// Read as many bytes as currently available
+					int totalRead=file.file.read(b, off, readSize);
+					if(totalRead==-1) throw new EOFException("Unexpected EOF");
+					addStats(totalRead);
+					long newFirstIndex=pos+totalRead;
+					while(newFirstIndex>=file.maxFifoLength) newFirstIndex-=file.maxFifoLength;
+					file.setFirstIndex(newFirstIndex);
+					file.setLength(fileLen-totalRead);
+					file.notify();
+					return totalRead;
+				}
+				try {
+					file.wait();
+				} catch(InterruptedException err) {
+					InterruptedIOException ioErr=new InterruptedIOException();
+					ioErr.initCause(err);
+					throw ioErr;
+				}
+			}
+		}
+	}
 
-                    // Skip as many bytes as currently available
-                    long totalSkipped=skipSize;
-                    long newFirstIndex=pos+skipSize;
-                    while(newFirstIndex>=file.maxFifoLength) newFirstIndex-=file.maxFifoLength;
-                    file.setFirstIndex(newFirstIndex);
-                    file.setLength(fileLen-skipSize);
-                    file.notify();
-                    return totalSkipped;
-                }
-                try {
-                    file.wait();
-                } catch(InterruptedException err) {
-                    InterruptedIOException ioErr=new InterruptedIOException();
-                    ioErr.initCause(err);
-                    throw ioErr;
-                }
-            }
-        }
-    }
+	/**
+	 * Skips data in the queue, blocks until at least one byte is skipped.
+	 */
+	@Override
+	public long skip(long n) throws IOException {
+		// Skip in the queue
+		synchronized(file) {
+			while(true) {
+				long fileLen=file.getLength();
+				if(fileLen>=1) {
+					long pos=file.getFirstIndex();
+					long skipSize=fileLen>n?n:fileLen;
+					// When at the end of the file, skip the remaining bytes
+					if((pos+skipSize)>file.maxFifoLength) skipSize=file.maxFifoLength-pos;
 
-    /**
-     * Determines the number of bytes that may be read without blocking.
-     */
-    @Override
-    public int available() throws IOException {
-        synchronized(file) {
-            long len=file.getLength();
-            return len>Integer.MAX_VALUE?Integer.MAX_VALUE:(int)len;
-        }
-    }
+					// Skip as many bytes as currently available
+					long totalSkipped=skipSize;
+					long newFirstIndex=pos+skipSize;
+					while(newFirstIndex>=file.maxFifoLength) newFirstIndex-=file.maxFifoLength;
+					file.setFirstIndex(newFirstIndex);
+					file.setLength(fileLen-skipSize);
+					file.notify();
+					return totalSkipped;
+				}
+				try {
+					file.wait();
+				} catch(InterruptedException err) {
+					InterruptedIOException ioErr=new InterruptedIOException();
+					ioErr.initCause(err);
+					throw ioErr;
+				}
+			}
+		}
+	}
 
-    /**
-     * @see  FifoFile#close()
-     */
-    @Override
-    public void close() throws IOException {
-        file.close();
-    }
+	/**
+	 * Determines the number of bytes that may be read without blocking.
+	 */
+	@Override
+	public int available() throws IOException {
+		synchronized(file) {
+			long len=file.getLength();
+			return len>Integer.MAX_VALUE?Integer.MAX_VALUE:(int)len;
+		}
+	}
+
+	/**
+	 * @see  FifoFile#close()
+	 */
+	@Override
+	public void close() throws IOException {
+		file.close();
+	}
 }

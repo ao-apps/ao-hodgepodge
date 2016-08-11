@@ -46,7 +46,7 @@ public final class ObjectUtils {
 	 */
 	// Java 1.7: @Deprecated
 	public static int hashCode(Object obj) {
-        return obj != null ? obj.hashCode() : 0;
+		return obj != null ? obj.hashCode() : 0;
 	}
 
 	/**
@@ -57,9 +57,9 @@ public final class ObjectUtils {
 	 * Java 1.7: deprecated  use java.util.Objects#hash as of Java 1.7
 	 */
 	// Java 1.7: @Deprecated
-    public static int hash(Object... values) {
-        return Arrays.hashCode(values);
-    }
+	public static int hash(Object... values) {
+		return Arrays.hashCode(values);
+	}
 	/**
 	 * Compares the equality of two objects, including their null states.
 	 * 
@@ -69,7 +69,7 @@ public final class ObjectUtils {
 	 */
 	// Java 1.7: @Deprecated
 	public static boolean equals(Object obj1, Object obj2) {
-        return (obj1 == obj2) || (obj1 != null && obj1.equals(obj2));
+		return (obj1 == obj2) || (obj1 != null && obj1.equals(obj2));
 	}
 
 	/**

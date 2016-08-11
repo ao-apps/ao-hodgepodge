@@ -33,16 +33,16 @@ import junit.framework.TestSuite;
  */
 public class LocalesTest extends TestCase {
 
-    public LocalesTest(String testName) {
-        super(testName);
-    }
+	public LocalesTest(String testName) {
+		super(testName);
+	}
 
-    public static Test suite() {
-        return new TestSuite(LocalesTest.class);
-    }
+	public static Test suite() {
+		return new TestSuite(LocalesTest.class);
+	}
 
-    public void testParseLocale() throws IOException {
-        for(Locale locale : Locale.getAvailableLocales()) {
+	public void testParseLocale() throws IOException {
+		for(Locale locale : Locale.getAvailableLocales()) {
 			// Ignore locales with script or extensions for preload, since the rest of this API is unaware of them
 			if(
 				Locales.getScript(locale).isEmpty()
@@ -52,6 +52,6 @@ public class LocalesTest extends TestCase {
 				//System.out.println(locale+"->"+parsed);
 				assertEquals(locale, parsed);
 			}
-        }
-    }
+		}
+	}
 }

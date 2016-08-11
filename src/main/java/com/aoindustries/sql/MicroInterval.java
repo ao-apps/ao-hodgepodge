@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,35 +33,35 @@ import java.math.BigDecimal;
  */
 final public class MicroInterval implements Serializable, Comparable<MicroInterval> {
 
-    private static final long serialVersionUID = 1;
+	private static final long serialVersionUID = 1;
 
-    final private long intervalMicros;
+	final private long intervalMicros;
 
-    public MicroInterval(long intervalMicros) {
-        this.intervalMicros = intervalMicros;
-    }
+	public MicroInterval(long intervalMicros) {
+		this.intervalMicros = intervalMicros;
+	}
 
-    /**
-     * Gets the interval in microseconds.
-     */
-    public long getIntervalMicros() {
-        return intervalMicros;
-    }
-
-    @Override
-    public String toString() {
-        return toString(intervalMicros);
-    }
-
-    public static String toString(long intervalMicros) {
-        if(intervalMicros < 1000000) return accessor.getMessage("MicroInterval.toString.milli", BigDecimal.valueOf(intervalMicros, 3));
-        return accessor.getMessage("MicroInterval.toString.second", BigDecimal.valueOf(intervalMicros/1000, 3));
-    }
+	/**
+	 * Gets the interval in microseconds.
+	 */
+	public long getIntervalMicros() {
+		return intervalMicros;
+	}
 
 	@Override
-    public int compareTo(MicroInterval o) {
-        if(intervalMicros<o.intervalMicros) return -1;
-        if(intervalMicros>o.intervalMicros) return 1;
-        return 0;
-    }
+	public String toString() {
+		return toString(intervalMicros);
+	}
+
+	public static String toString(long intervalMicros) {
+		if(intervalMicros < 1000000) return accessor.getMessage("MicroInterval.toString.milli", BigDecimal.valueOf(intervalMicros, 3));
+		return accessor.getMessage("MicroInterval.toString.second", BigDecimal.valueOf(intervalMicros/1000, 3));
+	}
+
+	@Override
+	public int compareTo(MicroInterval o) {
+		if(intervalMicros<o.intervalMicros) return -1;
+		if(intervalMicros>o.intervalMicros) return 1;
+		return 0;
+	}
 }

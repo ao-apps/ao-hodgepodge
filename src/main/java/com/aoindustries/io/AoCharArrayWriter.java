@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,66 +37,66 @@ public class AoCharArrayWriter
 	implements Writable
 {
 
-    public AoCharArrayWriter() {
-        super();
-    }
+	public AoCharArrayWriter() {
+		super();
+	}
 
-    public AoCharArrayWriter(int initialSize) {
-        super(initialSize);
-    }
+	public AoCharArrayWriter(int initialSize) {
+		super(initialSize);
+	}
 
-    public char[] getInternalCharArray() {
-        return this.buf;
-    }
-	
+	public char[] getInternalCharArray() {
+		return this.buf;
+	}
+
 	@Override
 	public boolean isFastToString() {
 		return false;
 	}
 
-    /**
-     * Converts a portion of the input data to a string.
+	/**
+	 * Converts a portion of the input data to a string.
 	 *
-     * @return the string.
-     */
-    public String toString(int off, int len) {
-        synchronized(lock) {
-            return new String(buf, off, len);
-        }
-    }
+	 * @return the string.
+	 */
+	public String toString(int off, int len) {
+		synchronized(lock) {
+			return new String(buf, off, len);
+		}
+	}
 
 	/**
-     * Writes a portion of the contents of the buffer to another character stream.
-     */
+	 * Writes a portion of the contents of the buffer to another character stream.
+	 */
 	@Override
-    public void writeTo(Writer out, long off, long len) throws IOException {
-        synchronized(lock) {
+	public void writeTo(Writer out, long off, long len) throws IOException {
+		synchronized(lock) {
 			if((off+len)>count) throw new IndexOutOfBoundsException();
-            out.write(
+			out.write(
 				buf,
 				SafeMath.castInt(off),
 				SafeMath.castInt(len)
 			);
-        }
-    }
+		}
+	}
 
 	@Override
 	public void writeTo(Encoder encoder, Writer out) throws IOException {
-        synchronized(lock) {
+		synchronized(lock) {
 			encoder.write(buf, 0, count, out);
-        }
+		}
 	}
 
 	@Override
 	public void writeTo(Encoder encoder, Writer out, long off, long len) throws IOException {
-        synchronized(lock) {
+		synchronized(lock) {
 			if((off+len)>count) throw new IndexOutOfBoundsException();
-            encoder.write(
+			encoder.write(
 				buf,
 				SafeMath.castInt(off),
 				SafeMath.castInt(len),
 				out
 			);
-        }
+		}
 	}
 }

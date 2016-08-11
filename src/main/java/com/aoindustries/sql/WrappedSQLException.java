@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,27 +32,27 @@ import java.sql.SQLException;
  */
 public class WrappedSQLException extends SQLException {
 
-    private static final long serialVersionUID = 1884080138318429559L;
+	private static final long serialVersionUID = 1884080138318429559L;
 
-    final private String sqlString;
+	final private String sqlString;
 
-    public WrappedSQLException(
-        SQLException initCause,
-        PreparedStatement pstmt
-    ) {
-        this(initCause, pstmt.toString());
-    }
-    
-    public WrappedSQLException(
-        SQLException initCause,
-        String sqlString
-    ) {
-        super(initCause.getMessage()+"\nSQL:\n"+sqlString, initCause.getSQLState(), initCause.getErrorCode());
-        initCause(initCause);
-        this.sqlString=sqlString;
-    }
+	public WrappedSQLException(
+		SQLException initCause,
+		PreparedStatement pstmt
+	) {
+		this(initCause, pstmt.toString());
+	}
 
-    public String getSqlString() {
-        return sqlString;
-    }
+	public WrappedSQLException(
+		SQLException initCause,
+		String sqlString
+	) {
+		super(initCause.getMessage()+"\nSQL:\n"+sqlString, initCause.getSQLState(), initCause.getErrorCode());
+		initCause(initCause);
+		this.sqlString=sqlString;
+	}
+
+	public String getSqlString() {
+		return sqlString;
+	}
 }

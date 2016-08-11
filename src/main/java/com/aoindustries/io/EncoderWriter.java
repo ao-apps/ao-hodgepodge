@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015  AO Industries, Inc.
+ * Copyright (C) 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,9 +38,9 @@ public class EncoderWriter extends FilterWriter {
 	private final Encoder encoder;
 
 	public EncoderWriter(Encoder encoder, Writer out) {
-        super(out);
+		super(out);
 		this.encoder = encoder;
-    }
+	}
 
 	public Encoder getEncoder() {
 		return encoder;
@@ -54,19 +54,19 @@ public class EncoderWriter extends FilterWriter {
 	}
 
 	/**
-     * @see  MediaEncoder#writePrefix(java.lang.Appendable)
-     */
-    public void writePrefix() throws IOException {
+	 * @see  MediaEncoder#writePrefix(java.lang.Appendable)
+	 */
+	public void writePrefix() throws IOException {
 		encoder.writePrefixTo(out);
-    }
+	}
 
 	@Override
-    public void write(int c) throws IOException {
+	public void write(int c) throws IOException {
 		encoder.write(c, out);
 	}
-	
+
 	@Override
-    public void write(char cbuf[]) throws IOException {
+	public void write(char cbuf[]) throws IOException {
 		encoder.write(cbuf, out);
 	}
 
@@ -76,7 +76,7 @@ public class EncoderWriter extends FilterWriter {
 	}
 
 	@Override
-    public void write(String str) throws IOException {
+	public void write(String str) throws IOException {
 		encoder.write(str, out);
 	}
 
@@ -86,7 +86,7 @@ public class EncoderWriter extends FilterWriter {
 	}
 
 	@Override
-    public EncoderWriter append(char c) throws IOException {
+	public EncoderWriter append(char c) throws IOException {
 		encoder.append(c, out);
 		return this;
 	}
@@ -98,15 +98,15 @@ public class EncoderWriter extends FilterWriter {
 	}
 
 	@Override
-    public EncoderWriter append(CharSequence csq, int start, int end) throws IOException {
+	public EncoderWriter append(CharSequence csq, int start, int end) throws IOException {
 		encoder.append(csq, start, end, out);
 		return this;
 	}
 
-    /**
+	/**
 	 * @see  MediaEncoder#writeSuffix(java.lang.Appendable)
-     */
-    public void writeSuffix() throws IOException {
+	 */
+	public void writeSuffix() throws IOException {
 		encoder.writeSuffixTo(out);
-    }
+	}
 }

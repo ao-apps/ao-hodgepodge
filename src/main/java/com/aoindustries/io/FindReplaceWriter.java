@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -72,7 +72,7 @@ public class FindReplaceWriter extends Writer {
 	}
 
 	@Override
-    public void write(int c) throws IOException {
+	public void write(int c) throws IOException {
 		char ch = (char)c; // Cast to char to ignore the high-order bits when comparing to the find text
 		if(ch == find[findMatched]) {
 			findMatched++;
@@ -87,47 +87,47 @@ public class FindReplaceWriter extends Writer {
 	}
 
 	@Override
-    public void write(char cbuf[], int off, int len) throws IOException  {
+	public void write(char cbuf[], int off, int len) throws IOException  {
 		while(len > 0) {
 			write(cbuf[off++]);
 			len--;
 		}
 	}
-	
+
 	@Override
-    public void write(String str, int off, int len) throws IOException {
+	public void write(String str, int off, int len) throws IOException {
 		while(len > 0) {
 			write(str.charAt(off++));
 			len--;
 		}
 	}
-	
+
 	@Override
-    public FindReplaceWriter append(CharSequence csq) throws IOException {
-        if(csq == null) {
-            write("null");
+	public FindReplaceWriter append(CharSequence csq) throws IOException {
+		if(csq == null) {
+			write("null");
 		} else {
 			append(csq, 0, csq.length());
 		}
 		return this;
 	}
-	
+
 	@Override
-    public FindReplaceWriter append(CharSequence csq, int start, int end) throws IOException {
+	public FindReplaceWriter append(CharSequence csq, int start, int end) throws IOException {
 		while(start < end) {
 			write(csq.charAt(start++));
 		}
 		return this;
 	}
-	
+
 	@Override
-    public FindReplaceWriter append(char c) throws IOException {
+	public FindReplaceWriter append(char c) throws IOException {
 		write(c);
 		return this;
 	}
 
 	@Override
-    public void flush() throws IOException {
+	public void flush() throws IOException {
 		out.flush();
 	}
 

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,29 +41,29 @@ abstract class BaseComparisonSortAlgorithm<E> extends BaseSortAlgorithm<E> imple
 	}
 
 	@Override
-    public <T extends E> void sort(T[] array) {
-        sort(array, null, null);
-    }
+	public <T extends E> void sort(T[] array) {
+		sort(array, null, null);
+	}
 
 	@Override
 	public <T extends E> void sort(List<T> list, SortStatistics stats) {
-        sort(list, null, stats);
+		sort(list, null, stats);
 	}
 
 	@Override
-    public <T extends E> void sort(T[] array, SortStatistics stats) {
-        sort(array, null, stats);
-    }
+	public <T extends E> void sort(T[] array, SortStatistics stats) {
+		sort(array, null, stats);
+	}
 
 	@Override
 	public <T extends E> void sort(List<T> list, Comparator<? super T> comparator) {
-        sort(list, comparator, null);
+		sort(list, comparator, null);
 	}
 
 	@Override
-    public <T extends E> void sort(T[] array, Comparator<? super T> comparator) {
-        sort(array, comparator, null);
-    }
+	public <T extends E> void sort(T[] array, Comparator<? super T> comparator) {
+		sort(array, comparator, null);
+	}
 
 	@Override
 	public abstract <T extends E> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats);

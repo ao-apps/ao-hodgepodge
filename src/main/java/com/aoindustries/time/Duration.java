@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -61,20 +61,20 @@ public class Duration implements Comparable<Duration>, Serializable, ObjectInput
 		validate();
 	}
 
-    private void validate() throws IllegalArgumentException {
+	private void validate() throws IllegalArgumentException {
 		if(nano < 0 || nano >= Instant.NANOS_PER_SECOND) throw new IllegalArgumentException("nanoseconds out of range 0-" + (Instant.NANOS_PER_SECOND - 1));
-    }
+	}
 
-    @Override
-    public void validateObject() throws InvalidObjectException {
-        try {
-            validate();
-        } catch(IllegalArgumentException err) {
-            InvalidObjectException newErr = new InvalidObjectException(err.getMessage());
-            newErr.initCause(err);
-            throw newErr;
-        }
-    }
+	@Override
+	public void validateObject() throws InvalidObjectException {
+		try {
+			validate();
+		} catch(IllegalArgumentException err) {
+			InvalidObjectException newErr = new InvalidObjectException(err.getMessage());
+			newErr.initCause(err);
+			throw newErr;
+		}
+	}
 
 	private Object readResolve() {
 		if(seconds == 0 && nano == 0) return ZERO;

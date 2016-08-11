@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2012, 2013  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,7 +34,7 @@ import java.util.TimeZone;
  */
 final public class UnmodifiableCalendar extends Calendar {
 
-    private static final long serialVersionUID = -8096789285108910128L;
+	private static final long serialVersionUID = -8096789285108910128L;
 
 	/**
 	 * Wraps the calendar if needed.
@@ -73,173 +73,173 @@ final public class UnmodifiableCalendar extends Calendar {
 	}
 	private final Calendar wrapped;
 
-    private UnmodifiableCalendar(Calendar wrapped) {
+	private UnmodifiableCalendar(Calendar wrapped) {
 		assert !(wrapped instanceof UnmodifiableCalendar);
-        this.wrapped = wrapped;
-    }
+		this.wrapped = wrapped;
+	}
 
 	@Override
-    public void add(int field, int amount) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean after(Object when) {
-        return wrapped.after(unwrap(when));
-    }
-
-    @Override
-    public boolean before(Object when) {
-        return wrapped.before(unwrap(when));
-    }
-
-    @Override
-    public UnmodifiableCalendar clone() {
-        return new UnmodifiableCalendar((Calendar)wrapped.clone());
-    }
+	public void add(int field, int amount) {
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
-    public int compareTo(Calendar anotherCalendar) {
+	public boolean after(Object when) {
+		return wrapped.after(unwrap(when));
+	}
+
+	@Override
+	public boolean before(Object when) {
+		return wrapped.before(unwrap(when));
+	}
+
+	@Override
+	public UnmodifiableCalendar clone() {
+		return new UnmodifiableCalendar((Calendar)wrapped.clone());
+	}
+
+	@Override
+	public int compareTo(Calendar anotherCalendar) {
 		return wrapped.compareTo(unwrap(anotherCalendar));
-    }
+	}
 
-    @Override
-    protected void complete() {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	protected void complete() {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    protected void computeFields() {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	protected void computeFields() {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    protected void computeTime() {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	protected void computeTime() {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        return wrapped.equals(unwrap(obj));
-    }
+	@Override
+	public boolean equals(Object obj) {
+		return wrapped.equals(unwrap(obj));
+	}
 
-    @Override
-    public int get(int field) {
-        return wrapped.get(field);
-    }
+	@Override
+	public int get(int field) {
+		return wrapped.get(field);
+	}
 
-    @Override
-    public int getActualMaximum(int field) {
-        return wrapped.getActualMaximum(field);
-    }
+	@Override
+	public int getActualMaximum(int field) {
+		return wrapped.getActualMaximum(field);
+	}
 
-    @Override
-    public int getActualMinimum(int field) {
-        return wrapped.getActualMinimum(field);
-    }
+	@Override
+	public int getActualMinimum(int field) {
+		return wrapped.getActualMinimum(field);
+	}
 
-    @Override
-    public String getDisplayName(int field, int style, Locale locale) {
-        return wrapped.getDisplayName(field, style, locale);
-    }
+	@Override
+	public String getDisplayName(int field, int style, Locale locale) {
+		return wrapped.getDisplayName(field, style, locale);
+	}
 
-    @Override
-    public Map<String, Integer> getDisplayNames(int field, int style, Locale locale) {
-        return wrapped.getDisplayNames(field, style, locale);
-    }
+	@Override
+	public Map<String, Integer> getDisplayNames(int field, int style, Locale locale) {
+		return wrapped.getDisplayNames(field, style, locale);
+	}
 
-    @Override
-    public int getFirstDayOfWeek() {
-        return wrapped.getFirstDayOfWeek();
-    }
+	@Override
+	public int getFirstDayOfWeek() {
+		return wrapped.getFirstDayOfWeek();
+	}
 
-    @Override
-    public int getGreatestMinimum(int field) {
-        return wrapped.getGreatestMinimum(field);
-    }
+	@Override
+	public int getGreatestMinimum(int field) {
+		return wrapped.getGreatestMinimum(field);
+	}
 
-    @Override
-    public int getLeastMaximum(int field) {
-        return wrapped.getLeastMaximum(field);
-    }
+	@Override
+	public int getLeastMaximum(int field) {
+		return wrapped.getLeastMaximum(field);
+	}
 
-    @Override
-    public int getMaximum(int field) {
-        return wrapped.getMaximum(field);
-    }
+	@Override
+	public int getMaximum(int field) {
+		return wrapped.getMaximum(field);
+	}
 
-    @Override
-    public int getMinimalDaysInFirstWeek() {
-        return wrapped.getMinimalDaysInFirstWeek();
-    }
+	@Override
+	public int getMinimalDaysInFirstWeek() {
+		return wrapped.getMinimalDaysInFirstWeek();
+	}
 
-    @Override
-    public int getMinimum(int field) {
-        return wrapped.getMinimum(field);
-    }
+	@Override
+	public int getMinimum(int field) {
+		return wrapped.getMinimum(field);
+	}
 
-    @Override
-    public long getTimeInMillis() {
-        return wrapped.getTimeInMillis();
-    }
+	@Override
+	public long getTimeInMillis() {
+		return wrapped.getTimeInMillis();
+	}
 
-    @Override
-    public TimeZone getTimeZone() {
-        return wrapped.getTimeZone();
-    }
+	@Override
+	public TimeZone getTimeZone() {
+		return wrapped.getTimeZone();
+	}
 
-    @Override
-    public int hashCode() {
-        return wrapped.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return wrapped.hashCode();
+	}
 
-    @Override
-    public boolean isLenient() {
-        return wrapped.isLenient();
-    }
+	@Override
+	public boolean isLenient() {
+		return wrapped.isLenient();
+	}
 
-    @Override
-    public void roll(int field, boolean up) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void roll(int field, boolean up) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void roll(int field, int amount) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void roll(int field, int amount) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void set(int field, int value) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void set(int field, int value) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void setFirstDayOfWeek(int value) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void setFirstDayOfWeek(int value) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void setLenient(boolean lenient) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void setLenient(boolean lenient) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void setMinimalDaysInFirstWeek(int value) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void setMinimalDaysInFirstWeek(int value) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void setTimeInMillis(long millis) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void setTimeInMillis(long millis) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void setTimeZone(TimeZone value) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void setTimeZone(TimeZone value) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public String toString() {
-        return wrapped.toString();
-    }
+	@Override
+	public String toString() {
+		return wrapped.toString();
+	}
 }

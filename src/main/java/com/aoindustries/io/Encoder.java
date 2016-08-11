@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015  AO Industries, Inc.
+ * Copyright (C) 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,32 +32,32 @@ import java.io.Writer;
  */
 public interface Encoder {
 
-    /**
-     * This is called before any data is written.
-     */
-    void writePrefixTo(Appendable out) throws IOException;
+	/**
+	 * This is called before any data is written.
+	 */
+	void writePrefixTo(Appendable out) throws IOException;
 
-    void write(int c, Writer out) throws IOException;
-	
-    void write(char cbuf[], Writer out) throws IOException;
+	void write(int c, Writer out) throws IOException;
+
+	void write(char cbuf[], Writer out) throws IOException;
 
 	void write(char cbuf[], int off, int len, Writer out) throws IOException;
 
-    void write(String str, Writer out) throws IOException;
+	void write(String str, Writer out) throws IOException;
 
 	void write(String str, int off, int len, Writer out) throws IOException;
 
-    Encoder append(char c, Appendable out) throws IOException;
+	Encoder append(char c, Appendable out) throws IOException;
 
 	Encoder append(CharSequence csq, Appendable out) throws IOException;
 
-    Encoder append(CharSequence csq, int start, int end, Appendable out) throws IOException;
+	Encoder append(CharSequence csq, int start, int end, Appendable out) throws IOException;
 
-    /**
-     * This is called when no more data will be written.
-     * This should also flush any internal buffers to <code>out</code>.  It
-     * should not, however, call flush on <code>out</code> itself.  This is
-     * to not interfere with any output buffering of <code>out</code>.
-     */
-    void writeSuffixTo(Appendable out) throws IOException;
+	/**
+	 * This is called when no more data will be written.
+	 * This should also flush any internal buffers to <code>out</code>.  It
+	 * should not, however, call flush on <code>out</code> itself.  This is
+	 * to not interfere with any output buffering of <code>out</code>.
+	 */
+	void writeSuffixTo(Appendable out) throws IOException;
 }

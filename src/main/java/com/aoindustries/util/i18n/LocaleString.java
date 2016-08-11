@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014  AO Industries, Inc.
+ * Copyright (C) 2014, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,7 +36,7 @@ public class LocaleString {
 	private final Locale locale;
 	private final String value;
 
-    public LocaleString(Locale locale, String value) {
+	public LocaleString(Locale locale, String value) {
 		this.locale = NullArgumentException.checkNotNull(locale, "locale");
 		this.value = NullArgumentException.checkNotNull(value, "value");
 	}

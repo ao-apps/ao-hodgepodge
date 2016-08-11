@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,32 +29,32 @@ package com.aoindustries.util;
  */
 public class IntsAndLongs {
 
-    private IntList ints;
-    private LongList longs;
+	private IntList ints;
+	private LongList longs;
 
-    public IntsAndLongs(IntList ints, LongList longs) {
-        if(ints.size()!=longs.size()) throw new AssertionError("ints.size()!=longs.size()");
-        this.ints=ints;
-        this.longs=longs;
-    }
+	public IntsAndLongs(IntList ints, LongList longs) {
+		if(ints.size()!=longs.size()) throw new AssertionError("ints.size()!=longs.size()");
+		this.ints=ints;
+		this.longs=longs;
+	}
 
-    public int size() {
-        return ints.size();
-    }
-    
-    public int getInt(int index) {
-        return ints.getInt(index);
-    }
-    
-    public long getLong(int index) {
-        return longs.getLong(index);
-    }
-    
-    public boolean contains(int value) {
-        return ints.contains(value);
-    }
+	public int size() {
+		return ints.size();
+	}
 
-    public int indexOf(int value) {
-        return ints.indexOf(value);
-    }
+	public int getInt(int index) {
+		return ints.getInt(index);
+	}
+
+	public long getLong(int index) {
+		return longs.getLong(index);
+	}
+
+	public boolean contains(int value) {
+		return ints.contains(value);
+	}
+
+	public int indexOf(int value) {
+		return ints.indexOf(value);
+	}
 }

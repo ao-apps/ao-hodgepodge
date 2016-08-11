@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,15 +31,15 @@ import java.util.List;
  */
 public interface IntList extends IntCollection, List<Integer> {
 
-    int indexOf(int elem);
+	int indexOf(int elem);
 
-    int lastIndexOf(int elem);
+	int lastIndexOf(int elem);
 
-    int getInt(int index);
+	int getInt(int index);
 
-    int set(int index, int element);
+	int set(int index, int element);
 
-    void add(int index, int element);
+	void add(int index, int element);
 
-    int removeAtIndex(int index);
+	int removeAtIndex(int index);
 }

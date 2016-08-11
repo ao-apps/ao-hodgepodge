@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2013  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,132 +33,132 @@ import java.io.PrintWriter;
  */
 final public class SortStatistics {
 
-    private long startTime;
-    private int currentRecursion;
+	private long startTime;
+	private int currentRecursion;
 
-    private long totalTime;
-    private long algorithmSwitches;
-    private long gets;
-    private long sets;
-    private long objectComparisons;
-    private long inListComparisons;
-    private long swaps;
-    private int maxRecursion;
+	private long totalTime;
+	private long algorithmSwitches;
+	private long gets;
+	private long sets;
+	private long objectComparisons;
+	private long inListComparisons;
+	private long swaps;
+	private int maxRecursion;
 
-    public SortStatistics() {
-        reset();
-    }
+	public SortStatistics() {
+		reset();
+	}
 
-    public void reset() {
-        startTime=-1;
-        currentRecursion=0;
-        totalTime=0;
-        algorithmSwitches=0;
-        gets=0;
-        sets=0;
-        objectComparisons=0;
-        inListComparisons=0;
-        swaps=0;
-        maxRecursion=0;
-    }
+	public void reset() {
+		startTime=-1;
+		currentRecursion=0;
+		totalTime=0;
+		algorithmSwitches=0;
+		gets=0;
+		sets=0;
+		objectComparisons=0;
+		inListComparisons=0;
+		swaps=0;
+		maxRecursion=0;
+	}
 
-    public void sortStarting() {
-        if(startTime!=-1) throw new RuntimeException("sortStarting already called");
-        startTime=System.currentTimeMillis();
-    }
+	public void sortStarting() {
+		if(startTime!=-1) throw new RuntimeException("sortStarting already called");
+		startTime=System.currentTimeMillis();
+	}
 
-    public void sortEnding() {
-        if(startTime==-1) throw new RuntimeException("sortStarting not yet called");
-        totalTime+=(System.currentTimeMillis()-startTime);
-        startTime=-1;
-    }
-    
-    public void sortRecursing() {
-        currentRecursion++;
-        if(currentRecursion>maxRecursion) maxRecursion=currentRecursion;
-    }
+	public void sortEnding() {
+		if(startTime==-1) throw new RuntimeException("sortStarting not yet called");
+		totalTime+=(System.currentTimeMillis()-startTime);
+		startTime=-1;
+	}
 
-    public void sortUnrecursing() {
-        currentRecursion--;
-    }
+	public void sortRecursing() {
+		currentRecursion++;
+		if(currentRecursion>maxRecursion) maxRecursion=currentRecursion;
+	}
 
-    public void sortSwitchingAlgorithms() {
-        algorithmSwitches++;
-    }
+	public void sortUnrecursing() {
+		currentRecursion--;
+	}
 
-    public long getAlgorithmSwitchCount() {
-        return algorithmSwitches;
-    }
+	public void sortSwitchingAlgorithms() {
+		algorithmSwitches++;
+	}
 
-    public void sortGetting() {
-        gets++;
-    }
+	public long getAlgorithmSwitchCount() {
+		return algorithmSwitches;
+	}
 
-    public void sortGetting(int increment) {
-        gets += increment;
-    }
+	public void sortGetting() {
+		gets++;
+	}
 
-    public long getGetCount() {
-        return gets;
-    }
+	public void sortGetting(int increment) {
+		gets += increment;
+	}
 
-    public void sortSetting() {
-        sets++;
-    }
+	public long getGetCount() {
+		return gets;
+	}
 
-    public void sortSetting(int increment) {
-        sets += increment;
-    }
+	public void sortSetting() {
+		sets++;
+	}
+
+	public void sortSetting(int increment) {
+		sets += increment;
+	}
 
 	public long getSetCount() {
-        return sets;
-    }
+		return sets;
+	}
 
-    public void sortObjectComparing() {
-        objectComparisons++;
-    }
+	public void sortObjectComparing() {
+		objectComparisons++;
+	}
 
-    public long getObjectComparisons() {
-        return objectComparisons;
-    }
+	public long getObjectComparisons() {
+		return objectComparisons;
+	}
 
-    public void sortInListComparing() {
-        inListComparisons++;
-    }
+	public void sortInListComparing() {
+		inListComparisons++;
+	}
 
-    public long getInListComparisons() {
-        return inListComparisons;
-    }
+	public long getInListComparisons() {
+		return inListComparisons;
+	}
 
-    public void sortSwapping() {
-        swaps++;
-    }
+	public void sortSwapping() {
+		swaps++;
+	}
 
-    public long getSwapCount() {
-        return swaps;
-    }
+	public long getSwapCount() {
+		return swaps;
+	}
 
-    public long getTotalTime() {
-        return totalTime;
-    }
+	public long getTotalTime() {
+		return totalTime;
+	}
 
-    public int getMaxRecursion() {
-        return maxRecursion;
-    }
+	public int getMaxRecursion() {
+		return maxRecursion;
+	}
 
-    public void printStats(PrintWriter out) {
-        out.print("Total Time...........: ");
-        if(totalTime>Integer.MAX_VALUE) out.println(StringUtility.getTimeLengthString(totalTime));
-        else {
-            out.print(SQLUtility.getMilliDecimal((int)totalTime));
-            out.println(" seconds");
-        }
-        out.print("Max Recursion........: "); out.println(maxRecursion);
-        out.print("Algorithm Switches...: "); out.println(algorithmSwitches);
-        out.print("Gets.................: "); out.println(gets);
-        out.print("Sets.................: "); out.println(sets);
-        out.print("In-List Swaps........: "); out.println(swaps);
-        out.print("Object Comparisons...: "); out.println(objectComparisons);
-        out.print("In-List Comparisons..: "); out.println(inListComparisons);
-    }
+	public void printStats(PrintWriter out) {
+		out.print("Total Time...........: ");
+		if(totalTime>Integer.MAX_VALUE) out.println(StringUtility.getTimeLengthString(totalTime));
+		else {
+			out.print(SQLUtility.getMilliDecimal((int)totalTime));
+			out.println(" seconds");
+		}
+		out.print("Max Recursion........: "); out.println(maxRecursion);
+		out.print("Algorithm Switches...: "); out.println(algorithmSwitches);
+		out.print("Gets.................: "); out.println(gets);
+		out.print("Sets.................: "); out.println(sets);
+		out.print("In-List Swaps........: "); out.println(swaps);
+		out.print("Object Comparisons...: "); out.println(objectComparisons);
+		out.print("In-List Comparisons..: "); out.println(inListComparisons);
+	}
 }

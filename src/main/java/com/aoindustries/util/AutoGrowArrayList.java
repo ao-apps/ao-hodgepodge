@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,42 +33,42 @@ import java.util.Collection;
  */
 public class AutoGrowArrayList<E> extends ArrayList<E> {
 
-    private static final long serialVersionUID = 4698056683308968140L;
+	private static final long serialVersionUID = 4698056683308968140L;
 
-    public AutoGrowArrayList() {
-        super();
-    }
+	public AutoGrowArrayList() {
+		super();
+	}
 
-    public AutoGrowArrayList(int initialCapacity) {
-        super(initialCapacity);
-    }
+	public AutoGrowArrayList(int initialCapacity) {
+		super(initialCapacity);
+	}
 
-    public AutoGrowArrayList(Collection<E> c) {
-        super(c);
-    }
+	public AutoGrowArrayList(Collection<E> c) {
+		super(c);
+	}
 
-    // @NotThreadSafe
-    @Override
-    public E set(int index, E element) {
-        int minSize = index+1;
-        ensureCapacity(minSize);
-        while(size()<minSize) add(null);
-        return super.set(index, element);
-    }
+	// @NotThreadSafe
+	@Override
+	public E set(int index, E element) {
+		int minSize = index+1;
+		ensureCapacity(minSize);
+		while(size()<minSize) add(null);
+		return super.set(index, element);
+	}
 
-    // @NotThreadSafe
-    @Override
-    public void add(int index, E element) {
-        ensureCapacity(index+1);
-        while(size()<index) add(null);
-        super.add(index, element);
-    }
+	// @NotThreadSafe
+	@Override
+	public void add(int index, E element) {
+		ensureCapacity(index+1);
+		while(size()<index) add(null);
+		super.add(index, element);
+	}
 
-    // @NotThreadSafe
-    @Override
-    public boolean addAll(int index, Collection<? extends E> c) {
-        ensureCapacity(index+c.size());
-        while(size()<index) add(null);
-        return super.addAll(index, c);
-    }
+	// @NotThreadSafe
+	@Override
+	public boolean addAll(int index, Collection<? extends E> c) {
+		ensureCapacity(index+c.size());
+		while(size()<index) add(null);
+		return super.addAll(index, c);
+	}
 }

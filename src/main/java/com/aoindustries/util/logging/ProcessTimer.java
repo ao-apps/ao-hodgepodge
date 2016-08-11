@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,83 +38,83 @@ import java.util.logging.Logger;
  */
 public class ProcessTimer implements Runnable {
 
-    final private Logger logger;
-    final private Random random;
-    final private String sourceClass;
-    final private String sourceMethod;
-    final private String subject;
-    final private String processDescription;
-    final private long startTime;
-    final private long maximumTime;
-    final private long reminderInterval;
-    private volatile Thread thread;
-    private volatile boolean isFinished;
-    private volatile boolean isSleeping;
+	final private Logger logger;
+	final private Random random;
+	final private String sourceClass;
+	final private String sourceMethod;
+	final private String subject;
+	final private String processDescription;
+	final private long startTime;
+	final private long maximumTime;
+	final private long reminderInterval;
+	private volatile Thread thread;
+	private volatile boolean isFinished;
+	private volatile boolean isSleeping;
 
-    public ProcessTimer(
-        Logger logger,
-        Random random,
-        String sourceClass,
-        String sourceMethod,
-        String subject,
-        String processDescription,
-        long maximumTime,
-        long reminderInterval
-    ) {
-        this.logger = logger;
-        this.random=random;
-        this.sourceClass = sourceClass;
-        this.sourceMethod = sourceMethod;
-        this.subject=subject;
-        this.processDescription=processDescription;
-        this.startTime=System.currentTimeMillis();
-        this.maximumTime=maximumTime;
-        this.reminderInterval=reminderInterval;
-    }
+	public ProcessTimer(
+		Logger logger,
+		Random random,
+		String sourceClass,
+		String sourceMethod,
+		String subject,
+		String processDescription,
+		long maximumTime,
+		long reminderInterval
+	) {
+		this.logger = logger;
+		this.random=random;
+		this.sourceClass = sourceClass;
+		this.sourceMethod = sourceMethod;
+		this.subject=subject;
+		this.processDescription=processDescription;
+		this.startTime=System.currentTimeMillis();
+		this.maximumTime=maximumTime;
+		this.reminderInterval=reminderInterval;
+	}
 
-    public void finished() {
-        isFinished = true;
-        if(isSleeping) {
-            Thread T=thread;
-            if(T!=null) T.interrupt();
-        }
-    }
+	public void finished() {
+		isFinished = true;
+		if(isSleeping) {
+			Thread T=thread;
+			if(T!=null) T.interrupt();
+		}
+	}
 
 	@Override
-    public void run() {
-        thread=Thread.currentThread();
-        try {
-            // Initial delay
-            try {
-                isSleeping=true;
-                Thread.sleep(maximumTime);
-            } catch(InterruptedException err) {
-                // Only normal when finish is called
-                if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
-            }
-            isSleeping=false;
-            if(!isFinished) {
-                logInfo(false);
-                // Reminder loop
-                while(!isFinished) {
-                    try {
-                        isSleeping=true;
-                        Thread.sleep(reminderInterval);
-                    } catch(InterruptedException err) {
-                        // Only normal when finish is called
-                        if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
-                    }
-                    isSleeping=false;
-                    if(!isFinished) logInfo(true);
-                }
-            }
-        } finally {
-            thread = null;
-        }
-    }
+	public void run() {
+		thread=Thread.currentThread();
+		try {
+			// Initial delay
+			try {
+				isSleeping=true;
+				Thread.sleep(maximumTime);
+			} catch(InterruptedException err) {
+				// Only normal when finish is called
+				if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
+			}
+			isSleeping=false;
+			if(!isFinished) {
+				logInfo(false);
+				// Reminder loop
+				while(!isFinished) {
+					try {
+						isSleeping=true;
+						Thread.sleep(reminderInterval);
+					} catch(InterruptedException err) {
+						// Only normal when finish is called
+						if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
+					}
+					isSleeping=false;
+					if(!isFinished) logInfo(true);
+				}
+			}
+		} finally {
+			thread = null;
+		}
+	}
 
-    private void logInfo(boolean isReminder) {
-        long currentTime=System.currentTimeMillis();
-        logger.logp(Level.INFO, sourceClass, sourceMethod, subject+": Process="+processDescription+", Duration="+StringUtility.getTimeLengthString(currentTime-startTime));
-    }
+	private void logInfo(boolean isReminder) {
+		long currentTime=System.currentTimeMillis();
+		logger.logp(Level.INFO, sourceClass, sourceMethod, subject+": Process="+processDescription+", Duration="+StringUtility.getTimeLengthString(currentTime-startTime));
+	}
 }

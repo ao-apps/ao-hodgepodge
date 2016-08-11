@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,14 +33,14 @@ import java.util.Set;
  */
 public interface MultiGraph<V,E extends Edge<V>,EX extends Exception> {
 
-    /**
-     * Gets the set of vertices for this graph.
-     */
-    Set<V> getVertices() throws EX;
+	/**
+	 * Gets the set of vertices for this graph.
+	 */
+	Set<V> getVertices() throws EX;
 
-    /**
-     * Gets the edges from the provided vertex.  The vertex must be part of this
-     * graph, and the results are undefined if it is not.
-     */
-    Collection<E> getEdgesFrom(V from) throws EX;
+	/**
+	 * Gets the edges from the provided vertex.  The vertex must be part of this
+	 * graph, and the results are undefined if it is not.
+	 */
+	Collection<E> getEdgesFrom(V from) throws EX;
 }

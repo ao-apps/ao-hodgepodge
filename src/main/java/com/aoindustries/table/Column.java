@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,53 +29,53 @@ package com.aoindustries.table;
  */
 public class Column implements Comparable<Column> {
 
-    private final String name;
-    private final IndexType indexType;
+	private final String name;
+	private final IndexType indexType;
 
-    public Column(String name, IndexType indexType) {
-        this.name = name;
-        this.indexType = indexType;
-    }
+	public Column(String name, IndexType indexType) {
+		this.name = name;
+		this.indexType = indexType;
+	}
 
-    /**
-     * Two column with the same name are equal.
-     */
-    @Override
-    public boolean equals(Object O) {
-        if(!(O instanceof Column)) return false;
-        Column other = (Column)O;
-        return name.equals(other.name);
-    }
+	/**
+	 * Two column with the same name are equal.
+	 */
+	@Override
+	public boolean equals(Object O) {
+		if(!(O instanceof Column)) return false;
+		Column other = (Column)O;
+		return name.equals(other.name);
+	}
 
-    /**
-     * Hashed by column name only.
-     */
-    @Override
-    public int hashCode() {
-        return name.hashCode();
-    }
+	/**
+	 * Hashed by column name only.
+	 */
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
 
-    /**
-     * Ordered by column name only.
-     */
-    @Override
-    public int compareTo(Column o) {
-        int diff = name.compareToIgnoreCase(o.name);
-        if(diff!=0) return diff;
-        return name.compareTo(o.name);
-    }
+	/**
+	 * Ordered by column name only.
+	 */
+	@Override
+	public int compareTo(Column o) {
+		int diff = name.compareToIgnoreCase(o.name);
+		if(diff!=0) return diff;
+		return name.compareTo(o.name);
+	}
 
-    @Override
-    public String toString() {
-        if(indexType!=IndexType.NONE) return name+" ("+indexType+')';
-        return name;
-    }
-    
-    public String getName() {
-        return name;
-    }
+	@Override
+	public String toString() {
+		if(indexType!=IndexType.NONE) return name+" ("+indexType+')';
+		return name;
+	}
 
-    public IndexType getIndexType() {
-        return indexType;
-    }
+	public String getName() {
+		return name;
+	}
+
+	public IndexType getIndexType() {
+		return indexType;
+	}
 }

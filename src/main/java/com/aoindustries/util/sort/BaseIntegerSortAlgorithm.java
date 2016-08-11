@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,14 +36,14 @@ abstract class BaseIntegerSortAlgorithm extends BaseSortAlgorithm<Number> implem
 	}
 
 	@Override
-    public void sort(IntList list) {
-        sort(list, null);
-    }
+	public void sort(IntList list) {
+		sort(list, null);
+	}
 
 	@Override
-    public void sort(int[] array) {
-        sort(array, null);
-    }
+	public void sort(int[] array) {
+		sort(array, null);
+	}
 
 	@Override
 	public abstract void sort(IntList list, SortStatistics stats);

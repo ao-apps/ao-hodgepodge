@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011  AO Industries, Inc.
+ * Copyright (C) 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,22 +27,22 @@ package com.aoindustries.util.graph;
  */
 public class WeightedEdge<V,W extends Weight<?>> extends Edge<V> {
 
-    protected final W weight;
+	protected final W weight;
 
-    public WeightedEdge(V from, V to, W weight) {
-        super(from, to);
-        this.weight = weight;
-    }
+	public WeightedEdge(V from, V to, W weight) {
+		super(from, to);
+		this.weight = weight;
+	}
 
-    /**
-     * The weight of the edge.
-     */
-    final public W getWeight() {
-        return weight;
-    }
+	/**
+	 * The weight of the edge.
+	 */
+	final public W getWeight() {
+		return weight;
+	}
 
-    @Override
-    public String toString() {
-        return super.toString()+" ("+weight+')';
-    }
+	@Override
+	public String toString() {
+		return super.toString()+" ("+weight+')';
+	}
 }

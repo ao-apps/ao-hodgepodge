@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,59 +32,59 @@ import java.io.OutputStream;
  */
 public class PaddingOutputStream extends FilterOutputStream {
 
-    private final int blockSize;
-    private final byte padding;
+	private final int blockSize;
+	private final byte padding;
 
-    private long byteCount = 0;
+	private long byteCount = 0;
 
-    public PaddingOutputStream(OutputStream out, int blockSize, byte padding) {
-        super(out);
-        this.blockSize = blockSize;
-        this.padding = padding;
-    }
+	public PaddingOutputStream(OutputStream out, int blockSize, byte padding) {
+		super(out);
+		this.blockSize = blockSize;
+		this.padding = padding;
+	}
 
-    @Override
-    public void write(int b) throws IOException {
-        out.write(b);
-        byteCount++;
-    }
+	@Override
+	public void write(int b) throws IOException {
+		out.write(b);
+		byteCount++;
+	}
 
-    @Override
-    public void write(byte[] b) throws IOException {
-        out.write(b);
-        byteCount += b.length;
-    }
+	@Override
+	public void write(byte[] b) throws IOException {
+		out.write(b);
+		byteCount += b.length;
+	}
 
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        out.write(b, off, len);
-        byteCount += len;
-    }
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+		out.write(b, off, len);
+		byteCount += len;
+	}
 
-    /**
-     * Pads and flushes without closing the underlying stream.
-     */
-    public void finish() throws IOException {
-        int lastBlockSize = (int)(byteCount % blockSize);
-        if(lastBlockSize!=0) {
-            while(lastBlockSize<blockSize) {
-                out.write(padding);
-                byteCount++;
-                lastBlockSize++;
-            }
-        }
-        out.flush();
-    }
+	/**
+	 * Pads and flushes without closing the underlying stream.
+	 */
+	public void finish() throws IOException {
+		int lastBlockSize = (int)(byteCount % blockSize);
+		if(lastBlockSize!=0) {
+			while(lastBlockSize<blockSize) {
+				out.write(padding);
+				byteCount++;
+				lastBlockSize++;
+			}
+		}
+		out.flush();
+	}
 
-    /**
-     * Pads, flushes, and closes the underlying stream.
-     */
-    @Override
-    public void close() throws IOException {
-        try {
-            finish();
-        } catch (IOException ignored) {
-        }
-        out.close();
-    }
+	/**
+	 * Pads, flushes, and closes the underlying stream.
+	 */
+	@Override
+	public void close() throws IOException {
+		try {
+			finish();
+		} catch (IOException ignored) {
+		}
+		out.close();
+	}
 }

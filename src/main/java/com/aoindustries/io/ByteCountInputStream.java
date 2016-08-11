@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,34 +35,34 @@ import java.io.InputStream;
  */
 public class ByteCountInputStream extends FilterInputStream {
 
-    private long count = 0;
+	private long count = 0;
 
-    public ByteCountInputStream(InputStream in) {
-        super(in);
-    }
+	public ByteCountInputStream(InputStream in) {
+		super(in);
+	}
 
 	@Override
-    public int read() throws IOException {
+	public int read() throws IOException {
 	int b = in.read();
-        count++;
-        return b;
-    }
+		count++;
+		return b;
+	}
 
 	@Override
-    public int read(byte b[]) throws IOException {
+	public int read(byte b[]) throws IOException {
 	int bytes = in.read(b);
-        count+=bytes;
-        return bytes;
-    }
+		count+=bytes;
+		return bytes;
+	}
 
 	@Override
-    public int read(byte b[], int off, int len) throws IOException {
+	public int read(byte b[], int off, int len) throws IOException {
 	int bytes = in.read(b, off, len);
-        count+=bytes;
-        return bytes;
-    }
-    
-    public long getCount() {
-        return count;
-    }
+		count+=bytes;
+		return bytes;
+	}
+
+	public long getCount() {
+		return count;
+	}
 }

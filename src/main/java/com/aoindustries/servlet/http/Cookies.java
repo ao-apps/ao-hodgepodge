@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,63 +32,63 @@ import javax.servlet.http.HttpServletResponse;
  */
 public final class Cookies {
 
-    private static final Logger logger = Logger.getLogger(Cookies.class.getName());
+	private static final Logger logger = Logger.getLogger(Cookies.class.getName());
 
-    private Cookies() {
-    }
+	private Cookies() {
+	}
 
-    /**
-     * Adds a cookie.
-     */
-    public static void addCookie(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        String cookieName,
-        String value,
-        String comment,
-        int maxAge,
-        boolean secure,
-        boolean contextOnlyPath
-    ) {
-        Cookie newCookie = new Cookie(cookieName, value);
-        if(comment!=null) newCookie.setComment(comment);
-        newCookie.setMaxAge(maxAge);
-        newCookie.setSecure(secure && request.isSecure());
-        String path;
-        if(contextOnlyPath) {
-            path = request.getContextPath() + "/";
-            //if(path.length()==0) path = "/";
-        } else {
-            path = "/";
-        }
-        newCookie.setPath(path);
-        response.addCookie(newCookie);
-    }
+	/**
+	 * Adds a cookie.
+	 */
+	public static void addCookie(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String cookieName,
+		String value,
+		String comment,
+		int maxAge,
+		boolean secure,
+		boolean contextOnlyPath
+	) {
+		Cookie newCookie = new Cookie(cookieName, value);
+		if(comment!=null) newCookie.setComment(comment);
+		newCookie.setMaxAge(maxAge);
+		newCookie.setSecure(secure && request.isSecure());
+		String path;
+		if(contextOnlyPath) {
+			path = request.getContextPath() + "/";
+			//if(path.length()==0) path = "/";
+		} else {
+			path = "/";
+		}
+		newCookie.setPath(path);
+		response.addCookie(newCookie);
+	}
 
-    /**
-     * Gets a cookie value given its name or <code>null</code> if not found.
-     */
-    public static String getCookie(HttpServletRequest request, String cookieName) {
-        Cookie[] cookies = request.getCookies();
-        if(cookies!=null) {
-            for(int c=cookies.length-1;c>=0;c--) {
-                Cookie cookie = cookies[c];
-                if(cookie.getName().equals(cookieName)) return cookie.getValue();
-            }
-        }
-        return null;
-    }
+	/**
+	 * Gets a cookie value given its name or <code>null</code> if not found.
+	 */
+	public static String getCookie(HttpServletRequest request, String cookieName) {
+		Cookie[] cookies = request.getCookies();
+		if(cookies!=null) {
+			for(int c=cookies.length-1;c>=0;c--) {
+				Cookie cookie = cookies[c];
+				if(cookie.getName().equals(cookieName)) return cookie.getValue();
+			}
+		}
+		return null;
+	}
 
-    /**
-     * Removes a cookie by adding it with maxAge of zero.
-     */
-    public static void removeCookie(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        String cookieName,
-        boolean secure,
-        boolean contextOnlyPath
-    ) {
-        addCookie(request, response, cookieName, "Removed", null, 0, secure, contextOnlyPath);
-    }
+	/**
+	 * Removes a cookie by adding it with maxAge of zero.
+	 */
+	public static void removeCookie(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String cookieName,
+		boolean secure,
+		boolean contextOnlyPath
+	) {
+		addCookie(request, response, cookieName, "Removed", null, 0, secure, contextOnlyPath);
+	}
 }

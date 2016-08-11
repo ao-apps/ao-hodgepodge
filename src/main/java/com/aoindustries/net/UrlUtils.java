@@ -44,80 +44,80 @@ import javax.servlet.jsp.PageContext;
  */
 public class UrlUtils {
 
-    private UrlUtils() {
-    }
+	private UrlUtils() {
+	}
 
-    private static final char[] noEncodeCharacters = {
-        '?', ':', '/', ';', '#', '+'
-    };
+	private static final char[] noEncodeCharacters = {
+		'?', ':', '/', ';', '#', '+'
+	};
 
-    /**
-     * Encodes the URL up to the first ?, if present.  Does not encode
-     * any characters in the set { '?', ':', '/', ';', '#', '+' }.
+	/**
+	 * Encodes the URL up to the first ?, if present.  Does not encode
+	 * any characters in the set { '?', ':', '/', ';', '#', '+' }.
 	 *
 	 * Encodes tel: (case-sensitive) urls by relacing spaces with hyphens.
 	 *
 	 * @see  #decodeUrlPath(java.lang.String) 
-     */
-    public static String encodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
+	 */
+	public static String encodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
 		if(href.startsWith("tel:")) return href.replace(' ', '-');
-        int len = href.length();
-        int pos = 0;
-        StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
-        while(pos<len) {
-            int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
-            if(nextPos==-1) {
-                SB.append(URLEncoder.encode(href.substring(pos, len), encoding));
-                pos = len;
-            } else {
-                SB.append(URLEncoder.encode(href.substring(pos, nextPos), encoding));
-                char nextChar = href.charAt(nextPos);
-                if(nextChar=='?') {
-                    // End encoding
-                    SB.append(href, nextPos, len);
-                    pos = len;
-                } else {
-                    SB.append(nextChar);
-                    pos = nextPos+1;
-                }
-            }
-        }
-        return SB.toString();
-    }
+		int len = href.length();
+		int pos = 0;
+		StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
+		while(pos<len) {
+			int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
+			if(nextPos==-1) {
+				SB.append(URLEncoder.encode(href.substring(pos, len), encoding));
+				pos = len;
+			} else {
+				SB.append(URLEncoder.encode(href.substring(pos, nextPos), encoding));
+				char nextChar = href.charAt(nextPos);
+				if(nextChar=='?') {
+					// End encoding
+					SB.append(href, nextPos, len);
+					pos = len;
+				} else {
+					SB.append(nextChar);
+					pos = nextPos+1;
+				}
+			}
+		}
+		return SB.toString();
+	}
 
 	/**
-     * Decodes the URL up to the first ?, if present.  Does not decode
-     * any characters in the set { '?', ':', '/', ';', '#', '+' }.
+	 * Decodes the URL up to the first ?, if present.  Does not decode
+	 * any characters in the set { '?', ':', '/', ';', '#', '+' }.
 	 *
 	 * Does not decode tel: urls (case-sensitive).
 	 * 
 	 * @see  #encodeUrlPath(java.lang.String) 
-     */
-    public static String decodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
+	 */
+	public static String decodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
 		if(href.startsWith("tel:")) return href;
-        int len = href.length();
-        int pos = 0;
-        StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
-        while(pos<len) {
-            int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
-            if(nextPos==-1) {
-                SB.append(URLDecoder.decode(href.substring(pos, len), encoding));
-                pos = len;
-            } else {
-                SB.append(URLDecoder.decode(href.substring(pos, nextPos), encoding));
-                char nextChar = href.charAt(nextPos);
-                if(nextChar=='?') {
-                    // End decoding
-                    SB.append(href, nextPos, len);
-                    pos = len;
-                } else {
-                    SB.append(nextChar);
-                    pos = nextPos+1;
-                }
-            }
-        }
-        return SB.toString();
-    }
+		int len = href.length();
+		int pos = 0;
+		StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
+		while(pos<len) {
+			int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
+			if(nextPos==-1) {
+				SB.append(URLDecoder.decode(href.substring(pos, len), encoding));
+				pos = len;
+			} else {
+				SB.append(URLDecoder.decode(href.substring(pos, nextPos), encoding));
+				char nextChar = href.charAt(nextPos);
+				if(nextChar=='?') {
+					// End decoding
+					SB.append(href, nextPos, len);
+					pos = len;
+				} else {
+					SB.append(nextChar);
+					pos = nextPos+1;
+				}
+			}
+		}
+		return SB.toString();
+	}
 
 	/**
 	 * Performs all the proper URL conversions along with optionally adding a lastModified parameter.
@@ -142,7 +142,7 @@ public class UrlUtils {
 	) throws MalformedURLException, UnsupportedEncodingException {
 		String responseEncoding = response.getCharacterEncoding();
 		String servletPath = Dispatcher.getCurrentPagePath(request);
-        href = ServletUtil.getAbsolutePath(servletPath, href);
+		href = ServletUtil.getAbsolutePath(servletPath, href);
 		href = HttpParametersUtils.addParams(href, params, responseEncoding);
 		href = LastModifiedServlet.addLastModified(servletContext, request, servletPath, href, addLastModified);
 		if(!hrefAbsolute && href.startsWith("/")) {
@@ -151,7 +151,7 @@ public class UrlUtils {
 		}
 		href = encodeUrlPath(href, responseEncoding);
 		href= response.encodeURL(href);
-        if(hrefAbsolute && href.startsWith("/")) href = ServletUtil.getAbsoluteURL(request, href);
+		if(hrefAbsolute && href.startsWith("/")) href = ServletUtil.getAbsoluteURL(request, href);
 		return href;
 	}
 

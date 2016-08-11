@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015  AO Industries, Inc.
+ * Copyright (C) 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -39,8 +39,8 @@ import javax.servlet.jsp.SkipPageException;
  */
 public class Includer {
 
-    private Includer() {
-    }
+	private Includer() {
+	}
 
 	/**
 	 * Since sendError does not work within included pages, the outermost include
@@ -122,7 +122,7 @@ public class Includer {
 			request.setAttribute(LOCATION_REQUEST_ATTRIBUTE_NAME, location);
 		}
 	}
-	
+
 	/**
 	 * Sends an error.  When not in an included page, calls sendError directly.
 	 * When inside of an include will set request attribute so outermost include can call sendError.

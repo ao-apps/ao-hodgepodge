@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013  AO Industries, Inc.
+ * Copyright (C) 2013, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,42 +34,42 @@ import javax.servlet.jsp.JspTagException;
  */
 public class LocalizedJspTagException extends JspTagException {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private final ApplicationResourcesAccessor accessor;
-    private final String key;
-    private final Serializable[] args;
+	private final ApplicationResourcesAccessor accessor;
+	private final String key;
+	private final Serializable[] args;
 
-    public LocalizedJspTagException(ApplicationResourcesAccessor accessor, String key) {
-        super(accessor.getMessage(key));
-        this.accessor = accessor;
-        this.key = key;
-        this.args = AoArrays.EMPTY_SERIALIZABLE_ARRAY;
-    }
+	public LocalizedJspTagException(ApplicationResourcesAccessor accessor, String key) {
+		super(accessor.getMessage(key));
+		this.accessor = accessor;
+		this.key = key;
+		this.args = AoArrays.EMPTY_SERIALIZABLE_ARRAY;
+	}
 
-    public LocalizedJspTagException(ApplicationResourcesAccessor accessor, String key, Serializable... args) {
-        super(accessor.getMessage(key, (Object[])args));
-        this.accessor = accessor;
-        this.key = key;
-        this.args = args;
-    }
+	public LocalizedJspTagException(ApplicationResourcesAccessor accessor, String key, Serializable... args) {
+		super(accessor.getMessage(key, (Object[])args));
+		this.accessor = accessor;
+		this.key = key;
+		this.args = args;
+	}
 
-    public LocalizedJspTagException(Throwable cause, ApplicationResourcesAccessor accessor, String key) {
-        super(accessor.getMessage(key), cause);
-        this.accessor = accessor;
-        this.key = key;
-        this.args = AoArrays.EMPTY_SERIALIZABLE_ARRAY;
-    }
+	public LocalizedJspTagException(Throwable cause, ApplicationResourcesAccessor accessor, String key) {
+		super(accessor.getMessage(key), cause);
+		this.accessor = accessor;
+		this.key = key;
+		this.args = AoArrays.EMPTY_SERIALIZABLE_ARRAY;
+	}
 
-    public LocalizedJspTagException(Throwable cause, ApplicationResourcesAccessor accessor, String key, Serializable... args) {
-        super(accessor.getMessage(key, (Object[])args), cause);
-        this.accessor = accessor;
-        this.key = key;
-        this.args = args;
-    }
+	public LocalizedJspTagException(Throwable cause, ApplicationResourcesAccessor accessor, String key, Serializable... args) {
+		super(accessor.getMessage(key, (Object[])args), cause);
+		this.accessor = accessor;
+		this.key = key;
+		this.args = args;
+	}
 
-    @Override
-    public String getLocalizedMessage() {
-        return accessor.getMessage(key, (Object[])args);
-    }
+	@Override
+	public String getLocalizedMessage() {
+		return accessor.getMessage(key, (Object[])args);
+	}
 }
