@@ -24,6 +24,7 @@ package com.aoindustries.servlet.http;
 
 import com.aoindustries.servlet.LocalizedServletException;
 import static com.aoindustries.servlet.http.ApplicationResources.accessor;
+import com.aoindustries.util.AoCollections;
 import java.io.IOException;
 import java.util.Map;
 import javax.servlet.RequestDispatcher;
@@ -110,7 +111,7 @@ public class Dispatcher {
 	 * Performs a forward, allowing page-relative paths and setting all values
 	 * compatible with &lt;ao:forward&gt; tag.
 	 *
-	 * @param  args  The arguments for the page, accessible as request-scope var "arg"
+	 * @param  args  The arguments for the page, make unmodifiable and accessible as request-scope var "arg"
 	 */
 	public static void forward(
 		ServletContext servletContext,
@@ -137,7 +138,10 @@ public class Dispatcher {
 				final Object oldArgs = request.getAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME);
 				try {
 					// Set new arguments
-					request.setAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME, args);
+					request.setAttribute(
+						Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME,
+						args==null ? null : AoCollections.optimalUnmodifiableMap(args)
+					);
 					// Perform dispatch
 					dispatcher.forward(request, response);
 				} finally {
@@ -170,7 +174,7 @@ public class Dispatcher {
 	 * Performs an include, allowing page-relative paths and setting all values
 	 * compatible with &lt;ao:include&gt; tag.
 	 *
-	 * @param  args  The arguments for the page, accessible as request-scope var "arg"
+	 * @param  args  The arguments for the page, make unmodifiable and accessible as request-scope var "arg"
 	 * 
 	 * @throws SkipPageException when the included page has been skipped due to a redirect.
 	 */
@@ -199,7 +203,10 @@ public class Dispatcher {
 				final Object oldArgs = request.getAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME);
 				try {
 					// Set new arguments
-					request.setAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME, args);
+					request.setAttribute(
+						Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME,
+						args==null ? null : AoCollections.optimalUnmodifiableMap(args)
+					);
 					// Perform dispatch
 					Includer.dispatchInclude(dispatcher, request, response);
 				} finally {
