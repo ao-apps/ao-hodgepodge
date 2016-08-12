@@ -25,6 +25,7 @@ package com.aoindustries.servlet.http;
 import com.aoindustries.servlet.LocalizedServletException;
 import static com.aoindustries.servlet.http.ApplicationResources.accessor;
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,6 +39,11 @@ import javax.servlet.jsp.SkipPageException;
  * @author  AO Industries, Inc.
  */
 public class Dispatcher {
+
+	/**
+	 * The name of the request-scope Map that will contain the arguments for the current page.
+	 */
+	public static final String ARG_MAP_REQUEST_ATTRIBUTE_NAME = "arg";
 
 	private Dispatcher() {
 	}
@@ -103,12 +109,15 @@ public class Dispatcher {
 	/**
 	 * Performs a forward, allowing page-relative paths and setting all values
 	 * compatible with &lt;ao:forward&gt; tag.
+	 *
+	 * @param  args  The arguments for the page, accessible as request-scope var "arg"
 	 */
 	public static void forward(
 		ServletContext servletContext,
 		String page,
 		HttpServletRequest request,
-		HttpServletResponse response
+		HttpServletResponse response,
+		Map<String,Object> args
 	) throws ServletException, IOException {
 		// Resolve the dispatcher
 		String contextRelativePath = ServletUtil.getAbsolutePath(getCurrentPagePath(request), page);
@@ -124,8 +133,17 @@ public class Dispatcher {
 			try {
 				// Store as new relative path source
 				dispatchedPage.set(contextRelativePath);
-				// Perform dispatch
-				dispatcher.forward(request, response);
+				// Keep old arguments to restore
+				final Object oldArgs = request.getAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME);
+				try {
+					// Set new arguments
+					request.setAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME, args);
+					// Perform dispatch
+					dispatcher.forward(request, response);
+				} finally {
+					// Restore any previous args
+					request.setAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME, oldArgs);
+				}
 			} finally {
 				dispatchedPage.set(oldDispatchPage);
 			}
@@ -137,8 +155,22 @@ public class Dispatcher {
 	}
 
 	/**
+	 * @see  #forward(javax.servlet.ServletContext, java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.Map)
+	 */
+	public static void forward(
+		ServletContext servletContext,
+		String page,
+		HttpServletRequest request,
+		HttpServletResponse response
+	) throws ServletException, IOException {
+		forward(servletContext, page, request, response, null);
+	}
+
+	/**
 	 * Performs an include, allowing page-relative paths and setting all values
 	 * compatible with &lt;ao:include&gt; tag.
+	 *
+	 * @param  args  The arguments for the page, accessible as request-scope var "arg"
 	 * 
 	 * @throws SkipPageException when the included page has been skipped due to a redirect.
 	 */
@@ -146,7 +178,8 @@ public class Dispatcher {
 		ServletContext servletContext,
 		String page,
 		HttpServletRequest request,
-		HttpServletResponse response
+		HttpServletResponse response,
+		Map<String,Object> args
 	) throws SkipPageException, ServletException, IOException {
 		// Resolve the dispatcher
 		String contextRelativePath = ServletUtil.getAbsolutePath(getCurrentPagePath(request), page);
@@ -162,8 +195,17 @@ public class Dispatcher {
 			try {
 				// Store as new relative path source
 				dispatchedPage.set(contextRelativePath);
-				// Perform dispatch
-				Includer.dispatchInclude(dispatcher, request, response);
+				// Keep old arguments to restore
+				final Object oldArgs = request.getAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME);
+				try {
+					// Set new arguments
+					request.setAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME, args);
+					// Perform dispatch
+					Includer.dispatchInclude(dispatcher, request, response);
+				} finally {
+					// Restore any previous args
+					request.setAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME, oldArgs);
+				}
 			} finally {
 				dispatchedPage.set(oldDispatchPage);
 			}
@@ -172,5 +214,17 @@ public class Dispatcher {
 				originalPage.set(null);
 			}
 		}
+	}
+
+	/**
+	 * @see  #include(javax.servlet.ServletContext, java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.Map)
+	 */
+	public static void include(
+		ServletContext servletContext,
+		String page,
+		HttpServletRequest request,
+		HttpServletResponse response
+	) throws SkipPageException, ServletException, IOException {
+		include(servletContext, page, request, response, null);
 	}
 }
