@@ -714,7 +714,7 @@ public class AoCollections {
 	/**
 	 * Filters a list for all elements of a given class.
 	 */
-	public static <E,R extends E> List<R> filter(List<E> list, Class<R> clazz) {
+	public static <E,R extends E> List<? extends R> filter(List<E> list, Class<R> clazz) {
 		if(list==null) return Collections.emptyList();
 		else {
 			/* Imperative version: */
