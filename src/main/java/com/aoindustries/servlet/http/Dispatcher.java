@@ -118,7 +118,7 @@ public class Dispatcher {
 		String page,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Map<String,Object> args
+		Map<String,?> args
 	) throws ServletException, IOException {
 		// Resolve the dispatcher
 		String contextRelativePath = ServletUtil.getAbsolutePath(getCurrentPagePath(request), page);
@@ -183,7 +183,7 @@ public class Dispatcher {
 		String page,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Map<String,Object> args
+		Map<String,?> args
 	) throws SkipPageException, ServletException, IOException {
 		// Resolve the dispatcher
 		String contextRelativePath = ServletUtil.getAbsolutePath(getCurrentPagePath(request), page);
