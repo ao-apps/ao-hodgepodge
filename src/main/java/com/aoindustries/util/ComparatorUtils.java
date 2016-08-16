@@ -44,7 +44,20 @@ public final class ComparatorUtils {
 	 */
 	// Java 1.7: @Deprecated
 	public static int compare(int i1, int i2) {
-		// Java 1.8: return Integer.compare(i1, i2);
+		// Java 1.7: return Integer.compare(i1, i2);
 		return (i1 < i2) ? -1 : ((i1 == i2) ? 0 : 1);
+	}
+
+	/**
+	 * Compares two booleans.
+	 * 
+	 * @see Boolean#compare(boolean,boolean) as of Java 1.7
+	 * 
+	 * Java 1.7: deprecated  use java.lang.Boolean#compare(boolean,boolean) as of Java 1.7
+	 */
+	// Java 1.7: @Deprecated
+	public static int compare(boolean b1, boolean b2) {
+		// Java 1.7: return Boolean.compare(b1, b2);
+		return (b1 == b2) ? 0 : (b1 ? 1 : -1);
 	}
 }
