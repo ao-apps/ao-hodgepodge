@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,6 +32,11 @@ import java.io.Writer;
  * @author  AO Industries, Inc.
  */
 public interface Writable  {
+
+	/**
+	 * Gets the number of characters represented by this Writable.
+	 */
+	long getLength() throws IOException;
 
 	/**
 	 * Checks if the writable will be able to be converted toString in an extremely efficient manner.
