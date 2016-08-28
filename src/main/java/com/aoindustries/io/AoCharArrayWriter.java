@@ -50,6 +50,11 @@ public class AoCharArrayWriter
 	}
 
 	@Override
+	public long getLength() {
+		return size();
+	}
+
+	@Override
 	public boolean isFastToString() {
 		return false;
 	}
