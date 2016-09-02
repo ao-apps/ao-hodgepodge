@@ -30,7 +30,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 
 	<groupId>com.aoindustries</groupId>
 	<artifactId>aocode-public</artifactId>
-	<version>1.7-SNAPSHOT</version>
+	<version>1.6.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>AO Code Public</name>
