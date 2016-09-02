@@ -30,7 +30,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 
 	<groupId>com.aoindustries</groupId>
 	<artifactId>aocode-public</artifactId>
-	<version>1.6.1-SNAPSHOT</version>
+	<version>1.6.1</version>
 	<packaging>jar</packaging>
 
 	<name>AO Code Public</name>
@@ -57,7 +57,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		<connection>scm:git:git://github.com/aoindustries/aocode-public.git</connection>
 		<developerConnection>scm:git:git@github.com:aoindustries/aocode-public.git</developerConnection>
 		<url>http://github.com/aoindustries/aocode-public</url>
-		<tag>HEAD</tag>
+		<tag>aocode-public-1.6.1</tag>
 	</scm>
 
 	<repositories>
@@ -144,6 +144,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<excludes>
 						<!-- Stay on Java EE Web API 6 -->
 						<exclude>javax.servlet:javax.servlet-api</exclude>
+						<exclude>javax.servlet.jsp:javax.servlet.jsp-api</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
@@ -224,6 +225,13 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
+			<version>2.2.1</version>
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
