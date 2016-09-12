@@ -36,6 +36,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 	<name>AO Code Public</name>
 	<url>https://www.aoindustries.com/docs/aocode-public/</url>
 	<description>Reusable Java library of general tools with minimal external dependencies.</description>
+	<inceptionYear>2000</inceptionYear>
 
 	<licenses>
 		<license>
@@ -43,6 +44,11 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			<url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
 		</license>
 	</licenses>
+
+	<organization>
+		<name>AO Industries, Inc.</name>
+		<url>https://www.aoindustries.com/</url>
+	</organization>
 
 	<developers>
 		<developer>
