@@ -60,4 +60,17 @@ public final class ComparatorUtils {
 		// Java 1.7: return Boolean.compare(b1, b2);
 		return (b1 == b2) ? 0 : (b1 ? 1 : -1);
 	}
+
+	/**
+	 * Compares two longs.
+	 * 
+	 * @see Long#compare(long,long) as of Java 1.7
+	 * 
+	 * Java 1.7: deprecated  use java.lang.Long#compare(long,long) as of Java 1.7
+	 */
+	// Java 1.7: @Deprecated
+	public static int compare(long l1, long l2) {
+		// Java 1.7: return Long.compare(l1, l2);
+		return (l1 < l2) ? -1 : ((l1 == l2) ? 0 : 1);
+	}
 }
