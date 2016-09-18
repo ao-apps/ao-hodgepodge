@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
@@ -52,48 +53,55 @@ public class Dispatcher {
 	/**
 	 * Tracks the first servlet path seen, before any include/forward.
 	 */
-	private static final ThreadLocal<String> originalPage = new ThreadLocal<String>();
+	private static final String ORIGINAL_PAGE_REQUEST_ATTRIBUTE = Dispatcher.class.getName() + ".originalPage";
 
 	/**
-	 * Gets the current-thread original page or null if not set.
+	 * Gets the current request original page or null if not set.
+	 *
+	 * @see  #getOriginalPagePath(javax.servlet.http.HttpServletRequest) for the version that uses current request as a default.
 	 */
-	public static String getOriginalPage() {
-		return originalPage.get();
+	public static String getOriginalPage(ServletRequest request) {
+		return (String)request.getAttribute(ORIGINAL_PAGE_REQUEST_ATTRIBUTE);
 	}
 
 	/**
-	 * Sets the current-thread original page.
+	 * Sets the current request original page.
 	 */
-	public static void setOriginalPage(String page) {
-		originalPage.set(page);
+	public static void setOriginalPage(ServletRequest request, String page) {
+		request.setAttribute(ORIGINAL_PAGE_REQUEST_ATTRIBUTE, page);
 	}
 
 	/**
 	 * Gets the original page path corresponding to the original request before any forward/include.
 	 * Assumes all forward/include done with ao taglib.
+	 * If no original page available, uses the servlet path from the provided request.
+	 * 
+	 * @see  #getOriginalPage(javax.servlet.ServletRequest)
 	 */
 	public static String getOriginalPagePath(HttpServletRequest request) {
-		String original = originalPage.get();
-		return original!=null ? original : request.getServletPath();
+		String original = getOriginalPage(request);
+		return (original != null) ? original : request.getServletPath();
 	}
 
 	/**
 	 * Tracks the current dispatch page for correct page-relative paths.
 	 */
-	private static final ThreadLocal<String> dispatchedPage = new ThreadLocal<String>();
+	private static final String DISPATCHED_PAGE_REQUEST_ATTRIBUTE = Dispatcher.class.getName() + ".dispatchedPage";
 
 	/**
 	 * Gets the current-thread dispatched page or null if not set.
+	 *
+	 * @see  #getCurrentPagePath(javax.servlet.http.HttpServletRequest) for the version that uses current request as a default.
 	 */
-	public static String getDispatchedPage() {
-		return dispatchedPage.get();
+	public static String getDispatchedPage(ServletRequest request) {
+		return (String)request.getAttribute(DISPATCHED_PAGE_REQUEST_ATTRIBUTE);
 	}
 
 	/**
 	 * Sets the current-thread dispatched page.
 	 */
-	public static void setDispatchedPage(String page) {
-		dispatchedPage.set(page);
+	public static void setDispatchedPage(ServletRequest request, String page) {
+		request.setAttribute(DISPATCHED_PAGE_REQUEST_ATTRIBUTE, page);
 	}
 
 	/**
@@ -103,8 +111,8 @@ public class Dispatcher {
 	 * This may be used as a substitute for HttpServletRequest.getServletPath() when the current page is needed instead of the originally requested servlet.
 	 */
 	public static String getCurrentPagePath(HttpServletRequest request) {
-		String dispatched = dispatchedPage.get();
-		return dispatched!=null ? dispatched : request.getServletPath();
+		String dispatched = getDispatchedPage(request);
+		return (dispatched != null) ? dispatched : request.getServletPath();
 	}
 
 	/**
@@ -125,15 +133,17 @@ public class Dispatcher {
 		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(contextRelativePath);
 		if(dispatcher==null) throw new LocalizedServletException(accessor, "Dispatcher.dispatcherNotFound", contextRelativePath);
 		// Track original page when first accessed
-		final String oldOriginal = originalPage.get();
+		final String oldOriginal = getOriginalPage(request);
 		try {
 			// Set original request path if not already set
-			if(oldOriginal==null) originalPage.set(request.getServletPath());
+			if(oldOriginal == null) {
+				setOriginalPage(request, request.getServletPath());
+			}
 			// Keep old dispatch page to restore
-			final String oldDispatchPage = dispatchedPage.get();
+			final String oldDispatchPage = getDispatchedPage(request);
 			try {
 				// Store as new relative path source
-				dispatchedPage.set(contextRelativePath);
+				setDispatchedPage(request, contextRelativePath);
 				// Keep old arguments to restore
 				final Object oldArgs = request.getAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME);
 				try {
@@ -149,11 +159,11 @@ public class Dispatcher {
 					request.setAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME, oldArgs);
 				}
 			} finally {
-				dispatchedPage.set(oldDispatchPage);
+				setDispatchedPage(request, oldDispatchPage);
 			}
 		} finally {
-			if(oldOriginal==null) {
-				originalPage.set(null);
+			if(oldOriginal == null) {
+				setOriginalPage(request, null);
 			}
 		}
 	}
@@ -190,15 +200,17 @@ public class Dispatcher {
 		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(contextRelativePath);
 		if(dispatcher==null) throw new LocalizedServletException(accessor, "Dispatcher.dispatcherNotFound", contextRelativePath);
 		// Track original page when first accessed
-		final String oldOriginal = originalPage.get();
+		final String oldOriginal = getOriginalPage(request);
 		try {
 			// Set original request path if not already set
-			if(oldOriginal==null) originalPage.set(request.getServletPath());
+			if(oldOriginal == null) {
+				setOriginalPage(request, request.getServletPath());
+			}
 			// Keep old dispatch page to restore
-			final String oldDispatchPage = dispatchedPage.get();
+			final String oldDispatchPage = getDispatchedPage(request);
 			try {
 				// Store as new relative path source
-				dispatchedPage.set(contextRelativePath);
+				setDispatchedPage(request, contextRelativePath);
 				// Keep old arguments to restore
 				final Object oldArgs = request.getAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME);
 				try {
@@ -214,11 +226,11 @@ public class Dispatcher {
 					request.setAttribute(Dispatcher.ARG_MAP_REQUEST_ATTRIBUTE_NAME, oldArgs);
 				}
 			} finally {
-				dispatchedPage.set(oldDispatchPage);
+				setDispatchedPage(request, oldDispatchPage);
 			}
 		} finally {
-			if(oldOriginal==null) {
-				originalPage.set(null);
+			if(oldOriginal == null) {
+				setOriginalPage(request, null);
 			}
 		}
 	}
