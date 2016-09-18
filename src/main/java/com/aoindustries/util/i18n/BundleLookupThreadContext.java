@@ -25,10 +25,16 @@ package com.aoindustries.util.i18n;
 import java.util.IdentityHashMap;
 
 /**
+ * <p>
  * Each thread has a markup context associated with it.  When set, bundle lookups
  * will be recorded with any markup-context appropriate prefixes and suffixes added.
  * This allows the use of a normal API while providing a mechanism for in-context
  * translation interfaces to better integrate with the underlying resource bundles.
+ * </p>
+ * <p>
+ * Under concurrent programming, one context can end up being accessed concurrently
+ * by multiple threads, thus BundleLookupThreadContext is a thread-safe implementation.
+ * </p>
  * <p>
  * Bundle lookups are not guaranteed to be recorded, such as when in-context translation
  * is disabled (production mode).
@@ -36,7 +42,7 @@ import java.util.IdentityHashMap;
  */
 final public class BundleLookupThreadContext {
 
-	private static final ThreadLocal<BundleLookupThreadContext> threadContext = new InheritableThreadLocal<BundleLookupThreadContext>();
+	static final ThreadLocal<BundleLookupThreadContext> threadContext = new ThreadLocal<BundleLookupThreadContext>();
 
 	/**
 	 * Gets the current context or <code>null</code> if none set and none created.
@@ -57,7 +63,7 @@ final public class BundleLookupThreadContext {
 		threadContext.set(null);
 	}
 
-	private IdentityHashMap<String,BundleLookupMarkup> lookupResults;
+	private final IdentityHashMap<String,BundleLookupMarkup> lookupResults = new IdentityHashMap<String,BundleLookupMarkup>();;
 
 	private BundleLookupThreadContext() {
 	}
@@ -66,11 +72,12 @@ final public class BundleLookupThreadContext {
 	 * @throws IllegalStateException   if the string has already been added to this context (as matched by identity)
 	 */
 	void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) throws IllegalStateException {
-		if(lookupResults==null) lookupResults = new IdentityHashMap<String,BundleLookupMarkup>();
-		if(lookupResults.put(lookupResult, lookupMarkup)!=null) {
-			throw new IllegalStateException(
-				ApplicationResources.accessor.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")
-			);
+		synchronized(lookupResults) {
+			if(lookupResults.put(lookupResult, lookupMarkup) != null) {
+				throw new IllegalStateException(
+					ApplicationResources.accessor.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")
+				);
+			}
 		}
 	}
 
@@ -78,7 +85,9 @@ final public class BundleLookupThreadContext {
 	 * Removes all lookups stored in this context.
 	 */
 	public void reset() {
-		if(lookupResults!=null) lookupResults.clear();
+		synchronized(lookupResults) {
+			lookupResults.clear();
+		}
 	}
 
 	/**
@@ -89,6 +98,8 @@ final public class BundleLookupThreadContext {
 	 * </p>
 	 */
 	public BundleLookupMarkup getLookupMarkup(String result) {
-		return lookupResults==null ? null : lookupResults.get(result);
+		synchronized(lookupResults) {
+			return lookupResults.get(result);
+		}
 	}
 }
