@@ -34,7 +34,7 @@ final public class ThreadLocale {
 
 	private ThreadLocale() {}
 
-	private static final ThreadLocal<Locale> locale = new ThreadLocal<Locale>() {
+	static final ThreadLocal<Locale> locale = new ThreadLocal<Locale>() {
 		@Override
 		protected Locale initialValue() {
 			return Locale.getDefault();
