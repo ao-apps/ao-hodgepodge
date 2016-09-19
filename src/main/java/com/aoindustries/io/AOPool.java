@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.ErrorPrinter;
 import com.aoindustries.util.StringUtility;
 import com.aoindustries.util.WrappedExceptions;
@@ -516,6 +515,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	/**
 	 * Prints complete statistics about connection pool use.
 	 */
+	@SuppressWarnings("deprecation")
 	public final void printStatisticsHTML(Appendable out) throws IOException, E {
 		// Get the data
 		boolean myIsClosed;
@@ -567,13 +567,13 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		printConnectionStats(out);
 		out.append("  <tr><td>Max Connection Pool Size:</td><td>").append(Integer.toString(poolSize)).append("</td></tr>\n"
 				+ "  <tr><td>Connection Clean Interval:</td><td>");
-		EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(delayTime), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(delayTime), out);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>Max Idle Time:</td><td>");
-		EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(maxIdleTime), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(maxIdleTime), out);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>Max Connection Age:</td><td>");
-		EncodingUtils.encodeHtml(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge), out);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>Is Closed:</td><td>").append(Boolean.toString(myIsClosed)).append("</td></tr>\n"
 				+ "</table>\n"
@@ -612,17 +612,17 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 					+ "    <td>").append(Integer.toString(c+1)).append("</td>\n"
 					+ "    <td>").append(isConnected?"Yes":"No").append("</td>\n"
 					+ "    <td>");
-			if(isConnected) EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(time-createTimes[c]), out);
+			if(isConnected) com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(time-createTimes[c]), out);
 			else out.append("&#160;");
 			out.append("    <td>").append(Long.toString(connCount)).append("</td>\n"
 					+ "    <td>").append(Long.toString(useCount)).append("</td>\n"
 					+ "    <td>");
-			EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTime), out);
+			com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTime), out);
 			out.append("</td>\n"
 					+ "    <td>").append(Float.toString(totalTime*100/(float)timeLen)).append("%</td>\n"
 					+ "    <td>").append(isBusy?"In Use":isConnected?"Idle":"Closed").append("</td>\n"
 					+ "    <td>");
-			EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(stateTime), out);
+			com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(stateTime), out);
 			out.append("</td>\n"
 					+ "    <td>").append(Long.toString(totalTime*1000/useCount)).append("&#181;s</td>\n"
 					+ "    <td>");
@@ -653,12 +653,12 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 				+ "    <td>").append(Long.toString(totalConnects)).append("</td>\n"
 				+ "    <td>").append(Long.toString(totalUses)).append("</td>\n"
 				+ "    <td>");
-		EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTotalTime), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTotalTime), out);
 		out.append("</td>\n"
 				+ "    <td>").append(Float.toString(timeLen==0 ? 0 : (totalTotalTime*100/(float)timeLen))).append("%</td>\n"
 				+ "    <td>").append(Integer.toString(totalBusy)).append("</td>\n"
 				+ "    <td>");
-		EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(timeLen), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(timeLen), out);
 		out.append("</td>\n"
 				+ "    <td>").append(Long.toString(totalUses==0 ? 0 : (totalTotalTime*1000/totalUses))).append("&#181;s</td>\n"
 				+ "    <td>&#160;</td>\n"
