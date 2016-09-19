@@ -31,10 +31,10 @@ package com.aoindustries.util.concurrent;
 public class ThreadLocalsRunnable implements Runnable {
 
 	private final Runnable task;
-	private final ThreadLocal[] threadLocals;
+	private final ThreadLocal<?>[] threadLocals;
 	private final Object[] values;
 
-	public ThreadLocalsRunnable(Runnable task, ThreadLocal ... threadLocals) {
+	public ThreadLocalsRunnable(Runnable task, ThreadLocal<?> ... threadLocals) {
 		this.task = task;
 		this.threadLocals = threadLocals;
 		int len = threadLocals.length;
@@ -46,9 +46,8 @@ public class ThreadLocalsRunnable implements Runnable {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void run() {
-		ThreadLocal[] tls = this.threadLocals;
+		ThreadLocal<?>[] tls = this.threadLocals;
 		int len = tls.length;
 		Object[] oldValues = new Object[len];
 		for(int i=0; i<len; i++) {
@@ -57,12 +56,16 @@ public class ThreadLocalsRunnable implements Runnable {
 		try {
 			Object[] vals = this.values;
 			for(int i=0; i<len; i++) {
-				tls[i].set(vals[i]);
+				@SuppressWarnings("unchecked")
+				ThreadLocal<Object> tl = (ThreadLocal<Object>)tls[i];
+				tl.set(vals[i]);
 			}
 			task.run();
 		} finally {
 			for(int i=0; i<len; i++) {
-				tls[i].set(oldValues[i]);
+				@SuppressWarnings("unchecked")
+				ThreadLocal<Object> tl = (ThreadLocal<Object>)tls[i];
+				tl.set(oldValues[i]);
 			}
 		}
 	}
