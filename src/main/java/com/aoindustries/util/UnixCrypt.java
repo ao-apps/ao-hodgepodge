@@ -129,22 +129,22 @@ public class UnixCrypt {
 
 	/* =====  Tables that are initialized at run time  ==================== */
 
-	private static byte[] A64TOI = new byte[128];	/* ascii-64 => 0..63 */
+	private static final byte[] A64TOI = new byte[128];	/* ascii-64 => 0..63 */
 
 	/* Initial key schedule permutation */
-	private static long[][] PC1ROT = new long[16][16];
+	private static final long[][] PC1ROT = new long[16][16];
 
 	/* Subsequent key schedule rotation permutations */
-	private static long[][][] PC2ROT = new long[2][16][16];
+	private static final long[][][] PC2ROT = new long[2][16][16];
 
 	/* Initial permutation/expansion table */
-	private static long[][] IE3264 = new long[8][16];
+	private static final long[][] IE3264 = new long[8][16];
 
 	/* Table that combines the S, P, and E operations.  */
-	private static long[][] SPE = new long[8][64];
+	private static final long[][] SPE = new long[8][64];
 
 	/* compressed/interleaved => final permutation table */
-	private static long[][] CF6464 = new long[16][16];
+	private static final long[][] CF6464 = new long[16][16];
 
 
 	/* ==================================== */
@@ -226,12 +226,12 @@ public class UnixCrypt {
 			perm[i] = P32Tr[ExpandTr[i]-1];
 		for (int t=0; t<8; t++) {
 			for (int j=0; j<64; j++) {
-				int k = (((j >> 0) & 0x01) << 5) | (((j >> 1) & 0x01) << 3) |
+				int k = (((j/* >> 0*/) & 0x01) << 5) | (((j >> 1) & 0x01) << 3) |
 					(((j >> 2) & 0x01) << 2) | (((j >> 3) & 0x01) << 1) |
-					(((j >> 4) & 0x01) << 0) | (((j >> 5) & 0x01) << 4);
+					(((j >> 4) & 0x01) /*<< 0*/) | (((j >> 5) & 0x01) << 4);
 				k = S[t][k];
-				k = (((k >> 3) & 0x01) << 0) | (((k >> 2) & 0x01) << 1) |
-					(((k >> 1) & 0x01) << 2) | (((k >> 0) & 0x01) << 3);
+				k = (((k >> 3) & 0x01) /*<< 0*/) | (((k >> 2) & 0x01) << 1) |
+					(((k >> 1) & 0x01) << 2) | (((k /*>> 0*/) & 0x01) << 3);
 				for (int i=0; i<32; i++) temp[i] = 0;
 				for (int i=0; i<4; i++) temp[4*t+i] = (byte)((k >> i) & 0x01);
 				long kk = 0;
@@ -284,7 +284,7 @@ public class UnixCrypt {
 		for (int i=2; --i>=0;) {
 			char c = (i < setting.length())? setting.charAt(i): '.';
 			cryptresult[i] = (byte)c;
-			salt = (salt<<6) | (int)(0x00ff&A64TOI[c]);
+			salt = (salt<<6) | (0x00ff&A64TOI[c]);
 		}
 
 		long rsltblock = des_cipher(constdatablock, salt, 25, KS);
@@ -394,7 +394,7 @@ public class UnixCrypt {
 	private static long perm3264(int c, long[][]p) {
 		long out = 0L;
 		for (int i=4; --i>=0; ) {
-			int t = (int)(0x00ff & c);
+			int t = (0x00ff & c);
 			c >>= 8;
 			long tp = p[i<<1][t&0x0f];
 			out |= tp;
