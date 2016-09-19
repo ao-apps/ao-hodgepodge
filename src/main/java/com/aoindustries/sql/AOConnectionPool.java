@@ -23,7 +23,6 @@
 package com.aoindustries.sql;
 
 import com.aoindustries.io.AOPool;
-import com.aoindustries.util.EncodingUtils;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -179,17 +178,18 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		return conn.isClosed();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void printConnectionStats(Appendable out) throws IOException {
 		out.append("  <tr><th colspan='2'><span style='font-size:large;'>JDBC Driver</span></th></tr>\n"
 				+ "  <tr><td>Driver:</td><td>");
-		EncodingUtils.encodeHtml(driver, false, false, out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(driver, false, false, out);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>URL:</td><td>");
-		EncodingUtils.encodeHtml(url, false, false, out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(url, false, false, out);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>User:</td><td>");
-		EncodingUtils.encodeHtml(user, false, false, out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(user, false, false, out);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>Password:</td><td>");
 		int len=password.length();
