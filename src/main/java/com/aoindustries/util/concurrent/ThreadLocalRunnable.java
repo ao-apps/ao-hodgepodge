@@ -31,24 +31,25 @@ package com.aoindustries.util.concurrent;
 public class ThreadLocalRunnable implements Runnable {
 
 	private final Runnable task;
-	private final ThreadLocal threadLocal;
+	private final ThreadLocal<?> threadLocal;
 	private final Object value;
 
-	public ThreadLocalRunnable(Runnable task, ThreadLocal threadLocal) {
+	public ThreadLocalRunnable(Runnable task, ThreadLocal<?> threadLocal) {
 		this.task = task;
 		this.threadLocal = threadLocal;
 		this.value = threadLocal.get();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void run() {
-		Object oldValue = threadLocal.get();
+		@SuppressWarnings("unchecked")
+		ThreadLocal<Object> tl = (ThreadLocal<Object>)threadLocal;
+		Object oldValue = tl.get();
 		try {
-			threadLocal.set(value);
+			tl.set(value);
 			task.run();
 		} finally {
-			threadLocal.set(oldValue);
+			tl.set(oldValue);
 		}
 	}
 }
