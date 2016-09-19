@@ -95,6 +95,7 @@ public final class StringUtility {
 	 *
 	 * @see #join(java.lang.Object[], java.lang.String)
 	 */
+	@Deprecated
 	public static String buildList(String[] list) {
 		return join(list, ", ");
 	}
@@ -289,6 +290,7 @@ public final class StringUtility {
 	 *
 	 * @deprecated Corrected spelling
 	 */
+	@Deprecated
 	public static int countOccurances(byte[] buff, String word) {
 		return countOccurrences(buff, word);
 	}
@@ -320,6 +322,7 @@ public final class StringUtility {
 	 *
 	 * @deprecated Corrected spelling
 	 */
+	@Deprecated
 	public static int countOccurances(String line, String word) {
 		return countOccurrences(line, word);
 	}
@@ -351,6 +354,7 @@ public final class StringUtility {
 	 *
 	 * @see  SQLUtility#escapeSQL(String)
 	 */
+	@Deprecated
 	public static String escapeSQL(String s) {
 		return SQLUtility.escapeSQL(s.replace('*', '%'));
 	}
@@ -383,6 +387,7 @@ public final class StringUtility {
 	 *
 	 * @see  SQLUtility#getDate(long)
 	 */
+	@Deprecated
 	public static String getDateString(long time) {
 		return getDateString(new Date(time));
 	}
@@ -392,6 +397,7 @@ public final class StringUtility {
 	 *
 	 * @see  SQLUtility#getDate(long)
 	 */
+	@Deprecated
 	public static String getDateString(Date date) {
 		synchronized(StringUtility.class) {
 			calendar.setTime(date);
@@ -405,6 +411,7 @@ public final class StringUtility {
 	 *
 	 * @see  SQLUtility#getDate(long)
 	 */
+	@Deprecated
 	public static String getDateStringMMDDYYYY(Date date) {
 		if(date==null) return "";
 		Calendar C=Calendar.getInstance();
@@ -425,6 +432,7 @@ public final class StringUtility {
 	 *
 	 * @see  SQLUtility#getDateTime(long)
 	 */
+	@Deprecated
 	public static String getDateStringSecond(long time) {
 		Date date=new Date(time);
 		Calendar C=Calendar.getInstance();
@@ -455,6 +463,7 @@ public final class StringUtility {
 	 *
 	 * @see  SQLUtility#getDateTime(long)
 	 */
+	@Deprecated
 	public static String getDateStringSecond(String time) {
 		return
 			time.substring(6,8)
@@ -476,6 +485,7 @@ public final class StringUtility {
 	 *
 	 * @see  List#toArray(Object[])
 	 */
+	@Deprecated
 	public static String[] getStringArray(List<?> V) {
 		if(V==null) return null;
 		int len = V.size();
@@ -597,6 +607,7 @@ public final class StringUtility {
 	 *
 	 * @see  Calendar
 	 */
+	@Deprecated
 	public static boolean isValidDate(String date) {
 		try {
 			convertStringDateToTime(date);
@@ -611,6 +622,7 @@ public final class StringUtility {
 	 *
 	 * @see  Calendar
 	 */
+	@Deprecated
 	public static boolean leapYear(int year) {
 		return year%4==0 && year%400==0;
 	}
@@ -620,6 +632,7 @@ public final class StringUtility {
 	 *
 	 * @deprecated  this method is slow and no longer supported
 	 */
+	@Deprecated
 	public static String removeChars(String S, char[] chars) {
 		int pos;
 		while((pos=indexOf(S, chars))!=-1) S=S.substring(0,pos)+S.substring(pos+1);
@@ -631,6 +644,7 @@ public final class StringUtility {
 	 *
 	 * @deprecated  this method is slow and no longer supported
 	 */
+	@Deprecated
 	public static String removeChars(String S, char ch) {
 		int pos;
 		while((pos=S.indexOf(ch))!=-1) S=S.substring(0,pos)+S.substring(pos+1);
