@@ -23,7 +23,6 @@
 package com.aoindustries.sql;
 
 import com.aoindustries.util.CalendarUtils;
-import com.aoindustries.util.EncodingUtils;
 import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -476,6 +475,7 @@ public class SQLUtility {
 		return S;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void printResultSetHTMLTable(ResultSet results, Appendable out, String title, boolean wordWrap) throws SQLException, IOException {
 		// Figure out the number of columns in the result set
 		ResultSetMetaData metaData=results.getMetaData();
@@ -484,13 +484,13 @@ public class SQLUtility {
 		out.append("<table style='border:1px;' cellspacing='0' cellpadding='2'>\n");
 		if(title!=null) {
 			out.append("  <tr><th colspan='").append(Integer.toString(columnCount)).append("'>");
-			EncodingUtils.encodeHtml(title, out);
+			com.aoindustries.util.EncodingUtils.encodeHtml(title, out);
 			out.append("</th></tr>\n");
 		}
 		out.append("  <tr>\n");
 		for(int c=0;c<columnCount;c++) {
 			out.append("    <th>");
-			EncodingUtils.encodeHtml(metaData.getColumnLabel(c+1), out);
+			com.aoindustries.util.EncodingUtils.encodeHtml(metaData.getColumnLabel(c+1), out);
 			out.append("</th>\n");
 		}
 		out.append("  </tr>\n");
@@ -500,7 +500,7 @@ public class SQLUtility {
 				String S=results.getString(c+1);
 				out.append(wordWrap?"    <td>":"    <td style='white-space:nowrap'>");
 				if(S!=null) {
-					EncodingUtils.encodeHtml(S, out);
+					com.aoindustries.util.EncodingUtils.encodeHtml(S, out);
 				}
 				out.append("</td>\n");
 			}
