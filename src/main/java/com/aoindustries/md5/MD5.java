@@ -54,62 +54,61 @@ import com.aoindustries.util.StringUtility;
  */
 
 /**
- * Contains internal state of the MD5 class
- */
-
-class MD5State {
-	/**
-	 * 128-byte state 
-	 */
-	final int state[];
-
-	/**
-	 * 64-bit character count (could be true Java long?)
-	 */
-	final int count[];
-
-	/**
-	 * 64-byte buffer (512 bits) for storing to-be-hashed characters
-	 */
-	final byte buffer[];
-
-	public MD5State() {
-		buffer = new byte[64];
-		count = new int[2];
-		state = new int[4];
-
-		state[0] = 0x67452301;
-		state[1] = 0xefcdab89;
-		state[2] = 0x98badcfe;
-		state[3] = 0x10325476;
-
-		count[0] = count[1] = 0;
-	}
-
-	/** Create this State as a copy of another state */
-	public MD5State (MD5State from) {
-		this();
-
-		int i;
-
-		for (i = 0; i < buffer.length; i++)
-			this.buffer[i] = from.buffer[i];
-
-		for (i = 0; i < state.length; i++)
-			this.state[i] = from.state[i];
-
-		for (i = 0; i < count.length; i++)
-			this.count[i] = from.count[i];
-	}
-}
-
-/**
  * Implementation of RSA's MD5 hash generator
  *
  * @version	$Revision: 1.2 $
  * @author	Santeri Paavolainen <sjpaavol@cc.helsinki.fi>
  */
 public class MD5 {
+	/**
+	 * Contains internal state of the MD5 class
+	 */
+	static class MD5State {
+		/**
+		 * 128-byte state 
+		 */
+		final int[] state;
+
+		/**
+		 * 64-bit character count (could be true Java long?)
+		 */
+		final int[] count;
+
+		/**
+		 * 64-byte buffer (512 bits) for storing to-be-hashed characters
+		 */
+		final byte[] buffer;
+
+		MD5State() {
+			buffer = new byte[64];
+			count = new int[2];
+			state = new int[4];
+
+			state[0] = 0x67452301;
+			state[1] = 0xefcdab89;
+			state[2] = 0x98badcfe;
+			state[3] = 0x10325476;
+
+			count[0] = count[1] = 0;
+		}
+
+		/** Create this State as a copy of another state */
+		MD5State (MD5State from) {
+			this();
+
+			int i;
+
+			for (i = 0; i < buffer.length; i++)
+				this.buffer[i] = from.buffer[i];
+
+			for (i = 0; i < state.length; i++)
+				this.state[i] = from.state[i];
+
+			for (i = 0; i < count.length; i++)
+				this.count[i] = from.count[i];
+		}
+	}
+
 	/**
 	 * MD5 state
 	 */
@@ -124,7 +123,7 @@ public class MD5 {
 	/** 
 	 * Padding for Final()
 	 */
-	private static final byte padding[] = {
+	private static final byte[] padding = {
 		(byte) 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -134,7 +133,7 @@ public class MD5 {
 	 * Initialize MD5 internal state (object can be reused just by
 	 * calling Init() after every Final()
 	 */
-	public synchronized void Init () {
+	final public synchronized void Init () {
 		state = new MD5State();
 		finals = null;
 	}
@@ -181,29 +180,29 @@ public class MD5 {
 		return rotate_left(a, s) + b;
 	}
 
-	private static int[] Decode (byte buffer[], int len, int shift) {
-		int		out[];
+	private static int[] Decode (byte[] buffer, int len, int shift) {
+		int[]	out;
 		int 	i, j;
 
 		out = new int[16];
 
 		for (i = j = 0; j < len; i++, j += 4) {
-			out[i] = ((int) (buffer[j + shift] & 0xff)) | 
-				(((int) (buffer[j + 1 + shift] & 0xff)) << 8) |
-				(((int) (buffer[j + 2 + shift] & 0xff)) << 16) | 
-				(((int) (buffer[j + 3 + shift] & 0xff)) << 24);
+			out[i] = (buffer[j + shift] & 0xff) | 
+				((buffer[j + 1 + shift] & 0xff) << 8) |
+				((buffer[j + 2 + shift] & 0xff) << 16) | 
+				((buffer[j + 3 + shift] & 0xff) << 24);
 		}
 
 		return out;
 	}
 
-	private static void Transform (MD5State state, byte buffer[], int shift) {
+	private static void Transform (MD5State state, byte[] buffer, int shift) {
 		int	
 			a = state.state[0],
 			b = state.state[1],
 			c = state.state[2],
-			d = state.state[3],
-			x[];
+			d = state.state[3];
+		int[] x;
 
 		x = Decode(buffer, 64, shift);
 
@@ -295,7 +294,7 @@ public class MD5 {
 	 * @param length	Use at maximum `length' bytes (absolute
 	 *			maximum is buffer.length)
 	 */
-	public void Update (MD5State stat, byte buffer[], int offset, int length) {
+	private void Update (MD5State stat, byte[] buffer, int offset, int length) {
 		int	index, partlen, i, start;
 
 		finals = null;
@@ -305,7 +304,7 @@ public class MD5 {
 			length = buffer.length - offset;
 
 		/* compute number of bytes mod 64 */
-		index = (int) (stat.count[0] >>> 3) & 0x3f;
+		index = (stat.count[0] >>> 3) & 0x3f;
 
 		if ((stat.count[0] += (length << 3)) <
 			(length << 3))
@@ -345,11 +344,11 @@ public class MD5 {
 	 * Plain update, updates this object
 	 */
 
-	public void Update (byte buffer[], int offset, int length) {
+	public void Update (byte[] buffer, int offset, int length) {
 		Update(this.state, buffer, offset, length);
 	}
 
-	public void Update (byte buffer[], int length) {
+	public void Update (byte[] buffer, int length) {
 		Update(this.state, buffer, 0, length);
 	}
 
@@ -358,7 +357,7 @@ public class MD5 {
 	 *
 	 * @param buffer	Array of bytes to use for updating the hash
 	 */
-	public void Update (byte buffer[]) {
+	public void Update (byte[] buffer) {
 		Update(buffer, 0, buffer.length);
 	}
 
@@ -368,7 +367,7 @@ public class MD5 {
 	 * @param b		Single byte to update the hash
 	 */
 	public void Update (byte b) {
-		byte buffer[] = new byte[1];
+		byte[] buffer = new byte[1];
 		buffer[0] = b;
 
 		Update(buffer, 1);
@@ -380,7 +379,7 @@ public class MD5 {
 	 * @param s		String to be update to hash (is used as
 	 *		       	s.getBytes())
 	 */
-	public void Update (String s) {
+	final public void Update (String s) {
 		byte[] chars=s.getBytes();
 		// Changed on 2004-04-10 due to getBytes(int,int,char[],byte) being deprecated
 		//byte	chars[];
@@ -401,9 +400,9 @@ public class MD5 {
 		Update((byte) (i & 0xff));
 	}
 
-	private byte[] Encode (int input[], int len) {
+	private byte[] Encode (int[] input, int len) {
 		int		i, j;
-		byte	out[];
+		byte[]	out;
 
 		out = new byte[len];
 
@@ -426,7 +425,7 @@ public class MD5 {
 	 * @return	Array of 16 bytes, the hash of all updated bytes
 	 */
 	public synchronized byte[] Final () {
-		byte	bits[];
+		byte[]	bits;
 		int		index, padlen;
 		MD5State	fin;
 
@@ -435,7 +434,7 @@ public class MD5 {
 
 			bits = Encode(fin.count, 8);
 
-			index = (int) ((fin.count[0] >>> 3) & 0x3f);
+			index = (fin.count[0] >>> 3) & 0x3f;
 			padlen = (index < 56) ? (56 - index) : (120 - index);
 
 			Update(fin, padding, 0, padlen);
@@ -456,7 +455,7 @@ public class MD5 {
 	 * @param hash	Array of bytes to convert to hex-string
 	 * @return	Generated hex string
 	 */
-	public static String asHex (byte hash[]) {
+	public static String asHex (byte[] hash) {
 		StringBuilder buf = new StringBuilder(hash.length * 2);
 		int i;
 
