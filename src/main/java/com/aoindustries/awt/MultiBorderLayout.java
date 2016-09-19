@@ -86,6 +86,7 @@ public class MultiBorderLayout extends BorderLayout {
 	 * @deprecated  replaced by <code>addLayoutComponent(Component, Object)</code>.
 	 */
 	@Override
+	@Deprecated
 	public void addLayoutComponent(String name, Component component) {
 		addLayoutComponent(component, name);
 	}
