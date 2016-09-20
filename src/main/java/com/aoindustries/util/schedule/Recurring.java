@@ -153,6 +153,9 @@ public abstract class Recurring {
 	@Override
 	abstract public boolean equals(Object o);
 
+	@Override
+	abstract public int hashCode();
+
 	abstract public String getRecurringDisplay();
 
 	/**
@@ -169,11 +172,17 @@ public abstract class Recurring {
 	 */
 	abstract public Iterator<Calendar> getScheduleIterator(Calendar from);
 
+	private static final int EVERYDAY_HASH_CODE = 0;
 	public static final Recurring EVERYDAY = new Recurring() {
 
 		@Override
 		public boolean equals(Object o) {
 			return o == EVERYDAY;
+		}
+
+		@Override
+		public int hashCode() {
+			return EVERYDAY_HASH_CODE;
 		}
 
 		@Override
@@ -207,11 +216,17 @@ public abstract class Recurring {
 		}
 	};
 
+	private static final int WEEKDAYS_HASH_CODE = EVERYDAY_HASH_CODE + 1;
 	public static final Recurring WEEKDAYS = new Recurring() {
 
 		@Override
 		public boolean equals(Object o) {
 			return o == WEEKDAYS;
+		}
+
+		@Override
+		public int hashCode() {
+			return WEEKDAYS_HASH_CODE;
 		}
 
 		@Override
@@ -282,6 +297,11 @@ public abstract class Recurring {
 		}
 
 		@Override
+		public int hashCode() {
+			return daysOfWeek.hashCode();
+		}
+
+		@Override
 		public String getRecurringDisplay() {
 			StringBuilder sb = new StringBuilder("On ");
 			boolean didOne = false;
@@ -338,11 +358,17 @@ public abstract class Recurring {
 		}
 	}
 
+	private static final int WEEKLY_HASH_CODE = WEEKDAYS_HASH_CODE + 1;
 	public static final Recurring WEEKLY = new Recurring() {
 
 		@Override
 		public boolean equals(Object o) {
 			return o == WEEKLY;
+		}
+
+		@Override
+		public int hashCode() {
+			return WEEKLY_HASH_CODE;
 		}
 
 		@Override
@@ -376,11 +402,17 @@ public abstract class Recurring {
 		}
 	};
 
+	private static final int MONTHLY_HASH_CODE = WEEKLY_HASH_CODE + 1;
 	public static final Recurring MONTHLY = new Recurring() {
 
 		@Override
 		public boolean equals(Object o) {
 			return o == MONTHLY;
+		}
+
+		@Override
+		public int hashCode() {
+			return MONTHLY_HASH_CODE;
 		}
 
 		@Override
@@ -435,6 +467,11 @@ public abstract class Recurring {
 		}
 
 		@Override
+		public int hashCode() {
+			return months.hashCode();
+		}
+
+		@Override
 		public String getRecurringDisplay() {
 			StringBuilder sb = new StringBuilder("In ");
 			boolean didOne = false;
@@ -481,11 +518,17 @@ public abstract class Recurring {
 		}
 	}
 
+	private static final int YEARLY_HASH_CODE = MONTHLY_HASH_CODE + 1;
 	public static final Recurring YEARLY = new Recurring() {
 
 		@Override
 		public boolean equals(Object o) {
 			return o == YEARLY;
+		}
+
+		@Override
+		public int hashCode() {
+			return YEARLY_HASH_CODE;
 		}
 
 		@Override
@@ -548,6 +591,11 @@ public abstract class Recurring {
 				increment == other.increment
 				&& field == other.field
 			;
+		}
+
+		@Override
+		public int hashCode() {
+			return increment * 31 + field;
 		}
 
 		@Override
