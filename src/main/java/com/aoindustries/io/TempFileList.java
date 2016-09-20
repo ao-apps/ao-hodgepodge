@@ -86,7 +86,9 @@ public class TempFileList {
 	 */
 	public TempFile createTempFile() throws IOException {
 		TempFile tempFile = new TempFile(prefix, suffix, directory);
-		tempFiles.add(new WeakReference<TempFile>(tempFile));
+		synchronized(tempFiles) {
+			tempFiles.add(new WeakReference<TempFile>(tempFile));
+		}
 		return tempFile;
 	}
 
