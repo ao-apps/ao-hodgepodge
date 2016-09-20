@@ -27,6 +27,8 @@ import static com.aoindustries.servlet.http.ApplicationResources.accessor;
 import com.aoindustries.util.AoCollections;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -41,6 +43,12 @@ import javax.servlet.jsp.SkipPageException;
  * @author  AO Industries, Inc.
  */
 public class Dispatcher {
+
+	private static final Logger logger = Logger.getLogger(Dispatcher.class.getName());
+	static {
+		// TODO: Remove for production
+		//logger.setLevel(Level.ALL);
+	}
 
 	/**
 	 * The name of the request-scope Map that will contain the arguments for the current page.
@@ -94,14 +102,31 @@ public class Dispatcher {
 	 * @see  #getCurrentPagePath(javax.servlet.http.HttpServletRequest) for the version that uses current request as a default.
 	 */
 	public static String getDispatchedPage(ServletRequest request) {
-		return (String)request.getAttribute(DISPATCHED_PAGE_REQUEST_ATTRIBUTE);
+		String dispatchedPage = (String)request.getAttribute(DISPATCHED_PAGE_REQUEST_ATTRIBUTE);
+		if(logger.isLoggable(Level.FINE)) logger.log(
+			Level.FINE,
+			"request={0}, dispatchedPage={1}",
+			new Object[] {
+				request,
+				dispatchedPage
+			}
+		);
+		return dispatchedPage;
 	}
 
 	/**
 	 * Sets the current-thread dispatched page.
 	 */
-	public static void setDispatchedPage(ServletRequest request, String page) {
-		request.setAttribute(DISPATCHED_PAGE_REQUEST_ATTRIBUTE, page);
+	public static void setDispatchedPage(ServletRequest request, String dispatchedPage) {
+		if(logger.isLoggable(Level.FINE)) logger.log(
+			Level.FINE,
+			"request={0}, dispatchedPage={1}",
+			new Object[] {
+				request,
+				dispatchedPage
+			}
+		);
+		request.setAttribute(DISPATCHED_PAGE_REQUEST_ATTRIBUTE, dispatchedPage);
 	}
 
 	/**
@@ -112,7 +137,28 @@ public class Dispatcher {
 	 */
 	public static String getCurrentPagePath(HttpServletRequest request) {
 		String dispatched = getDispatchedPage(request);
-		return (dispatched != null) ? dispatched : request.getServletPath();
+		if(dispatched != null) {
+			if(logger.isLoggable(Level.FINE)) logger.log(
+				Level.FINE,
+				"request={0}, dispatched={1}",
+				new Object[] {
+					request,
+					dispatched
+				}
+			);
+			return dispatched;
+		} else {
+			String servletPath = request.getServletPath();
+			if(logger.isLoggable(Level.FINE)) logger.log(
+				Level.FINE,
+				"request={0}. servletPath={1}",
+				new Object[] {
+					request,
+					servletPath
+				}
+			);
+			return servletPath;
+		}
 	}
 
 	/**
@@ -196,7 +242,27 @@ public class Dispatcher {
 		Map<String,?> args
 	) throws SkipPageException, ServletException, IOException {
 		// Resolve the dispatcher
-		String contextRelativePath = ServletUtil.getAbsolutePath(getCurrentPagePath(request), page);
+		String contextRelativePath;
+		{
+			String currentPagePath = getCurrentPagePath(request);
+			if(logger.isLoggable(Level.FINE)) logger.log(
+				Level.FINE,
+				"request={0}, currentPagePath={1}",
+				new Object[] {
+					request,
+					currentPagePath
+				}
+			);
+			contextRelativePath = ServletUtil.getAbsolutePath(currentPagePath, page);
+			if(logger.isLoggable(Level.FINE)) logger.log(
+				Level.FINE,
+				"request={0}, contextRelativePath={1}",
+				new Object[] {
+					request,
+					contextRelativePath
+				}
+			);
+		}
 		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(contextRelativePath);
 		if(dispatcher==null) throw new LocalizedServletException(accessor, "Dispatcher.dispatcherNotFound", contextRelativePath);
 		// Track original page when first accessed
@@ -204,11 +270,28 @@ public class Dispatcher {
 		try {
 			// Set original request path if not already set
 			if(oldOriginal == null) {
-				setOriginalPage(request, request.getServletPath());
+				String servletPath = request.getServletPath();
+				if(logger.isLoggable(Level.FINE)) logger.log(
+					Level.FINE,
+					"request={0}, servletPath={1}",
+					new Object[] {
+						request,
+						servletPath
+					}
+				);
+				setOriginalPage(request, servletPath);
 			}
 			// Keep old dispatch page to restore
 			final String oldDispatchPage = getDispatchedPage(request);
 			try {
+				if(logger.isLoggable(Level.FINE)) logger.log(
+					Level.FINE,
+					"request={0}, oldDispatchPage={1}",
+					new Object[] {
+						request,
+						oldDispatchPage
+					}
+				);
 				// Store as new relative path source
 				setDispatchedPage(request, contextRelativePath);
 				// Keep old arguments to restore
