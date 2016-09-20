@@ -23,6 +23,8 @@
 package com.aoindustries.servlet.http;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -38,6 +40,12 @@ import javax.servlet.jsp.SkipPageException;
  * @author  AO Industries, Inc.
  */
 public class Includer {
+
+	private static final Logger logger = Logger.getLogger(Includer.class.getName());
+	static {
+		// TODO: Remove for production
+		//logger.setLevel(Level.ALL);
+	}
 
 	private Includer() {
 	}
@@ -77,6 +85,13 @@ public class Includer {
 	 */
 	public static void dispatchInclude(RequestDispatcher dispatcher, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SkipPageException {
 		final boolean isOutmostInclude = request.getAttribute(IS_INCLUDED_REQUEST_ATTRIBUTE_NAME) == null;
+		if(logger.isLoggable(Level.FINE)) logger.log(
+			Level.FINE, "request={0}, isOutmostInclude={1}",
+			new Object[] {
+				request,
+				isOutmostInclude
+			}
+		);
 		try {
 			if(isOutmostInclude) request.setAttribute(IS_INCLUDED_REQUEST_ATTRIBUTE_NAME, true);
 			dispatcher.include(request, response);
