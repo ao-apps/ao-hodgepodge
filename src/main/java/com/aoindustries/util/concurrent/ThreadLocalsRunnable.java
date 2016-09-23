@@ -53,19 +53,25 @@ public class ThreadLocalsRunnable implements Runnable {
 		for(int i=0; i<len; i++) {
 			oldValues[i] = tls[i].get();
 		}
+		Object[] newValues = this.values;
 		try {
-			Object[] vals = this.values;
 			for(int i=0; i<len; i++) {
-				@SuppressWarnings("unchecked")
-				ThreadLocal<Object> tl = (ThreadLocal<Object>)tls[i];
-				tl.set(vals[i]);
+				Object newValue = newValues[i];
+				if(oldValues[i] != newValue) {
+					@SuppressWarnings("unchecked")
+					ThreadLocal<Object> tl = (ThreadLocal<Object>)tls[i];
+					tl.set(newValue);
+				}
 			}
 			task.run();
 		} finally {
 			for(int i=0; i<len; i++) {
-				@SuppressWarnings("unchecked")
-				ThreadLocal<Object> tl = (ThreadLocal<Object>)tls[i];
-				tl.set(oldValues[i]);
+				Object oldValue = oldValues[i];
+				if(oldValue != newValues[i]) {
+					@SuppressWarnings("unchecked")
+					ThreadLocal<Object> tl = (ThreadLocal<Object>)tls[i];
+					tl.set(oldValue);
+				}
 			}
 		}
 	}
