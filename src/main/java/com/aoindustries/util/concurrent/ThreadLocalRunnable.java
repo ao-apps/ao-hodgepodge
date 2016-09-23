@@ -45,11 +45,12 @@ public class ThreadLocalRunnable implements Runnable {
 		@SuppressWarnings("unchecked")
 		ThreadLocal<Object> tl = (ThreadLocal<Object>)threadLocal;
 		Object oldValue = tl.get();
+		Object newValue = value;
 		try {
-			tl.set(value);
+			if(oldValue != newValue) tl.set(newValue);
 			task.run();
 		} finally {
-			tl.set(oldValue);
+			if(oldValue != newValue) tl.set(oldValue);
 		}
 	}
 }
