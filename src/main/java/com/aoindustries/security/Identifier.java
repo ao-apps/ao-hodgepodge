@@ -112,7 +112,7 @@ public class Identifier implements Serializable, Comparable<Identifier> {
 			+ getValue(encoded.charAt(10))
 		;
 	}
-	static final Random random = new SecureRandom();
+	static final SecureRandom secureRandom = new SecureRandom();
 
 	private final long hi;
 	private final long lo;
@@ -121,7 +121,7 @@ public class Identifier implements Serializable, Comparable<Identifier> {
 	 * Creates a new, random Identifier using the default SecureRandom instance.
 	 */
 	public Identifier() {
-		this(random);
+		this(secureRandom);
 	}
 
 	/**

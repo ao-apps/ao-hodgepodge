@@ -51,7 +51,7 @@ public class SmallIdentifier implements Serializable, Comparable<SmallIdentifier
 	 * Creates a new, random Identifier using the default SecureRandom instance.
 	 */
 	public SmallIdentifier() {
-		this(Identifier.random);
+		this(Identifier.secureRandom);
 	}
 
 	/**
