@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -68,10 +68,13 @@ public abstract class Recurring {
 	 *     For "months", if the day is past the last day of the month, the last day of the month is used.
 	 *   </li>
 	 * </ul>
-	 * 
+	 *
+	 * @param  recurring  when null, returns null
+	 *
 	 * @throws IllegalArgumentException if unable to parse recurring
 	 */
 	public static Recurring parse(String recurring) throws IllegalArgumentException {
+		if(recurring == null) return null;
 		if("everyday".equalsIgnoreCase(recurring)) {
 			return EVERYDAY;
 		}
