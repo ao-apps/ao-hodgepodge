@@ -455,7 +455,7 @@ public class SQLUtility {
 	 * Removes the milliseconds from a time, rounds down every time.
 	 */
 	public static int negIntIfEmpty(String s) {
-		s = nullIfEmpty(s);
+		s = StringUtility.nullIfEmpty(s);
 		return (s==null?-1:Integer.parseInt(s));
 	}
 
@@ -463,16 +463,16 @@ public class SQLUtility {
 	 * Removes the milliseconds from a time, rounds down every time.
 	 */
 	public static long negLongIfEmpty(String s) {
-		s = nullIfEmpty(s);
+		s = StringUtility.nullIfEmpty(s);
 		return (s==null?-1l:Long.parseLong(s));
 	}
 
 	/**
-	 * Returns null if the string is null or empty.
+	 * @deprecated  Use {@link StringUtility#nullIfEmpty(java.lang.String)} instead
 	 */
-	public static String nullIfEmpty(String S) {
-		if(S==null || S.length()==0) return null;
-		return S;
+	@Deprecated
+	public static String nullIfEmpty(String value) {
+		return StringUtility.nullIfEmpty(value);
 	}
 
 	@SuppressWarnings("deprecation")

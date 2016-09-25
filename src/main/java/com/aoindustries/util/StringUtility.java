@@ -1386,4 +1386,11 @@ public final class StringUtility {
 		if(pos>maxCharacters) pos = maxCharacters;
 		return pos==value.length() ? value : (value.substring(0, pos) + '\u2026');
 	}
+
+	/**
+	 * Returns null if the string is null or empty.
+	 */
+	public static String nullIfEmpty(String value) {
+		return value==null || value.isEmpty() ? null : value;
+	}
 }
