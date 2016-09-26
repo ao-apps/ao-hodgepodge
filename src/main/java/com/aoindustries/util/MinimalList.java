@@ -88,4 +88,16 @@ public class MinimalList {
 		// Create copy of list
 		return new ArrayList<E>(list);
 	}
+
+	/**
+	 * Gets an unmodifiable wrapper around this list.
+	 * May or may not wrap this list itself.
+	 */
+	public static <E> List<E> unmodifiable(List<E> list) {
+		if(list==null) {
+			// Empty
+			return Collections.emptyList();
+		}
+		return AoCollections.optimalUnmodifiableList(list);
+	}
 }

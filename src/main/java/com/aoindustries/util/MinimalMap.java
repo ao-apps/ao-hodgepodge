@@ -164,4 +164,16 @@ public class MinimalMap {
 		// Create copy of map
 		return new LinkedHashMap<K,V>(map);
 	}
+
+	/**
+	 * Gets an unmodifiable wrapper around this list.
+	 * May or may not wrap this list itself.
+	 */
+	public static <K,V> Map<K,V> unmodifiable(Map<K,V> map) {
+		if(map==null) {
+			// Empty
+			return Collections.emptyMap();
+		}
+		return AoCollections.optimalUnmodifiableMap(map);
+	}
 }
