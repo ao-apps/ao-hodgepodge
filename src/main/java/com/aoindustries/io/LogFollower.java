@@ -50,7 +50,8 @@ public class LogFollower extends InputStream {
 
 	private volatile boolean closed;
 
-	private final Object filePosLock = new Object();
+	private static class FilePosLock {}
+	private final FilePosLock filePosLock = new FilePosLock();
 	private long filePos;
 
 	public LogFollower(String path) {

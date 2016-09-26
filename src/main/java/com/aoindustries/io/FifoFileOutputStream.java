@@ -34,7 +34,8 @@ import java.io.OutputStream;
 public class FifoFileOutputStream extends OutputStream {
 
 	private final FifoFile file;
-	private final Object statsLock=new Object();
+	private static class StatsLock {}
+	private final StatsLock statsLock=new StatsLock();
 	private long fifoWriteCount=0;
 	private long fifoWriteBytes=0;
 
