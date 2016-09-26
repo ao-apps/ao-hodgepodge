@@ -41,7 +41,8 @@ public class CorrectedGZIPInputStream extends GZIPInputStream {
 		super(in, size);
 	}
 
-	private final Object foundErrorLock=new Object();
+	private static class FoundErrorLock {}
+	private final FoundErrorLock foundErrorLock=new FoundErrorLock();
 	private boolean foundError=false;
 
 	@Override

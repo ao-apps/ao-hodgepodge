@@ -152,7 +152,8 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	/**
 	 * Lock for wait/notify
 	 */
-	private final Object poolLock = new Object();
+	private static class PoolLock {}
+	private final PoolLock poolLock = new PoolLock();
 
 	/**
 	 * All connections that have been created.

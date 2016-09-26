@@ -141,6 +141,8 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 
 	private static final Set<TwoCopyBarrierBuffer> shutdownBuffers = new HashSet<TwoCopyBarrierBuffer>();
 
+	private static class FieldLock {}
+
 	/**
 	 * TODO: Is there a way we can combine the force calls between all buffers?
 	 * 1) Use recursion to get lock on all individual buffers - or use newer locks
@@ -162,7 +164,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 			}
 			if(!toClose.isEmpty()) {
 				// These fields are shared by the invoked threads
-				final Object fieldLock = new Object();
+				final FieldLock fieldLock = new FieldLock();
 				final int[] counter = {1};
 				final long[] startTime = {System.currentTimeMillis() - 55000};
 				final boolean[] wrote = {false};
@@ -229,7 +231,8 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 	private final int sectorSize;
 	private final long asynchronousCommitDelay;
 	private final long synchronousCommitDelay;
-	private final Object cacheLock = new Object();
+	private static class CacheLock {}
+	private final CacheLock cacheLock = new CacheLock();
 
 	// All modifiable fields are protected by cacheLock
 

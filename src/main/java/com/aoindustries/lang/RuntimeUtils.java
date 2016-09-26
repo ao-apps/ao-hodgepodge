@@ -32,7 +32,8 @@ final public class RuntimeUtils {
 	 */
 	private RuntimeUtils() {}
 
-	private static final Object availableProcessorsLock = new Object();
+	private static class AvailableProcessorsLock {}
+	private static final AvailableProcessorsLock availableProcessorsLock = new AvailableProcessorsLock();
 	private static long availableProcessorsLastRetrieved = Long.MIN_VALUE;
 	private static int availableProcessors = 0;
 
