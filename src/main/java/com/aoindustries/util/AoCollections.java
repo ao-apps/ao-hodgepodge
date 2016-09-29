@@ -718,13 +718,13 @@ public class AoCollections {
 		if(list==null) return Collections.emptyList();
 		else {
 			/* Imperative version: */
-			List<R> results = new ArrayList<R>();
+			List<R> results = null;
 			for(E element : list) {
 				if(clazz.isInstance(element)) {
-					results.add(clazz.cast(element));
+					results = MinimalList.add(results, clazz.cast(element));
 				}
 			}
-			return Collections.unmodifiableList(results);
+			return MinimalList.unmodifiable(results);
 			/* Functional version:
 			return Collections.unmodifiableList(
 				list
