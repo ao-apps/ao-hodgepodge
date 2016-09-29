@@ -25,6 +25,7 @@ package com.aoindustries.servlet.http;
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
 import com.aoindustries.lang.ObjectUtils;
+import com.aoindustries.servlet.ServletContextCache;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -68,6 +69,8 @@ import javax.servlet.http.HttpServletResponse;
  * <p>
  * All files must be in the UTF-8 encoding.
  * </p>
+ *
+ * @see  ServletContextCache  This requires the cache be active
  */
 public class LastModifiedServlet extends HttpServlet {
 
@@ -351,8 +354,9 @@ public class LastModifiedServlet extends HttpServlet {
 			if(cacheValue.isValid(currentTime)) {
 				return cacheValue.lastModified;
 			} else {
+				ServletContextCache servletContextCache = ServletContextCache.getCache(servletContext);
 				long lastModified = 0;
-				String realPath = servletContext.getRealPath(hap.path);
+				String realPath = servletContextCache.getRealPath(hap.path);
 				if(realPath != null) {
 					// Use File first
 					lastModified = new File(realPath).lastModified();
@@ -360,7 +364,7 @@ public class LastModifiedServlet extends HttpServlet {
 				if(lastModified == 0) {
 					// Try URL
 					try {
-						URL resourceUrl = servletContext.getResource(hap.path);
+						URL resourceUrl = servletContextCache.getResource(hap.path);
 						if(resourceUrl != null) {
 							URLConnection conn = resourceUrl.openConnection();
 							conn.setAllowUserInteraction(false);

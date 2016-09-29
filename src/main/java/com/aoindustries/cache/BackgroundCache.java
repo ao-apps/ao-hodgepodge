@@ -167,6 +167,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 
 	final ReadWriteLock lock = new ReentrantReadWriteLock();
 
+	// TODO: ConcurrentMap + per-entry readwritelocks?
 	final Map<K,CacheEntry<K,V,E>> map = new HashMap<K,CacheEntry<K,V,E>>();
 
 	/**
@@ -246,7 +247,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 * @see  #get(java.lang.Object)
 	 * @see  #put(java.lang.Object, com.aoindustries.cache.BackgroundCache.Refresher)
 	 */
-	public Result<V,E> getOrPut(
+	public Result<V,E> get(
 		K key,
 		Refresher<? super K, ? extends V, ? extends E> refresher
 	) {
@@ -379,89 +380,89 @@ public class BackgroundCache<K,V,E extends Exception> {
 		writeLock.lock();
 		try {
 			map.put(key, entry);
-			timer.schedule(
-				new TimerTask() {
-					@Override
-					public void run() {
-						if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run()");
-						Thread currentThread = Thread.currentThread();
-						if(currentThread.getPriority() != TIMER_THREAD_PRIORITY) {
-							currentThread.setPriority(TIMER_THREAD_PRIORITY);
-							if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Set thread priority");
-						}
-						long currentTime;
-						boolean dropFromCache;
-						Lock readLock = lock.readLock();
-						readLock.lock();
-						try {
-							if(entry != map.get(key)) {
-								// This has been replaced, nothing to do
-								if(DEBUG_TIMER_TASK_REPLACED) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Replaced");
-								// Cancel this timer task
-								cancel();
-								return;
-							}
-							currentTime = System.currentTimeMillis();
-							dropFromCache =
-								// Expired expired
-								currentTime >= entry.expiration
-								// System time set to the past
-								|| currentTime < entry.refreshed
-							;
-							if(DEBUG_TIMER_TASK_DROPPING && dropFromCache) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropping due to time");
-						} finally {
-							readLock.unlock();
-						}
-						Result<V,E> newResult;
-						if(dropFromCache) {
-							newResult = null;
-						} else {
-							try {
-								newResult = runRefresher(refresher, key);
-							} catch(Throwable t) {
-								// Drop from cache when any unexpected exception happens
-								if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropping due to unexpected throwable: " + t);
-								dropFromCache = true;
-								newResult = null;
-								// Log unexpected exception
-								logger.log(Level.WARNING, "Unexpected exception in background cache refresh, dropping from cache", t);
-							}
-						}
-						Lock writeLock = lock.writeLock();
-						writeLock.lock();
-						try {
-							if(dropFromCache) {
-								// Make sure this has not already been replaced
-								CacheEntry<K,V,E> removed = map.remove(key);
-								if(removed != entry) {
-									// Whoops, removed what had replaced this key, put it back!
-									// (this should happen rarely so not checking first)
-									if(DEBUG_TIMER_TASK_REPLACED) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Found replacement during drop, putting it back: " + removed);
-									map.put(key, removed);
-								} else {
-									if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropped, size = " + map.size());
-								}
-								// Cancel this timer task
-								cancel();
-							} else {
-								// Update entry
-								assert newResult != null;
-								if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Updating entry with new result");
-								entry.result = newResult;
-								entry.refreshed = currentTime;
-								entry.accessedSinceRefresh = false;
-							}
-						} finally {
-							writeLock.unlock();
-						}
-					}
-				},
-				refreshInterval,
-				refreshInterval
-			);
 		} finally {
 			writeLock.unlock();
 		}
+		timer.schedule(
+			new TimerTask() {
+				@Override
+				public void run() {
+					if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run()");
+					Thread currentThread = Thread.currentThread();
+					if(currentThread.getPriority() != TIMER_THREAD_PRIORITY) {
+						currentThread.setPriority(TIMER_THREAD_PRIORITY);
+						if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Set thread priority");
+					}
+					long currentTime;
+					boolean dropFromCache;
+					Lock readLock = lock.readLock();
+					readLock.lock();
+					try {
+						if(entry != map.get(key)) {
+							// This has been replaced, nothing to do
+							if(DEBUG_TIMER_TASK_REPLACED) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Replaced");
+							// Cancel this timer task
+							cancel();
+							return;
+						}
+						currentTime = System.currentTimeMillis();
+						dropFromCache =
+							// Expired expired
+							currentTime >= entry.expiration
+							// System time set to the past
+							|| currentTime < entry.refreshed
+						;
+						if(DEBUG_TIMER_TASK_DROPPING && dropFromCache) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropping due to time");
+					} finally {
+						readLock.unlock();
+					}
+					Result<V,E> newResult;
+					if(dropFromCache) {
+						newResult = null;
+					} else {
+						try {
+							newResult = runRefresher(refresher, key);
+						} catch(Throwable t) {
+							// Drop from cache when any unexpected exception happens
+							if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropping due to unexpected throwable: " + t);
+							dropFromCache = true;
+							newResult = null;
+							// Log unexpected exception
+							logger.log(Level.WARNING, "Unexpected exception in background cache refresh, dropping from cache", t);
+						}
+					}
+					Lock writeLock = lock.writeLock();
+					writeLock.lock();
+					try {
+						if(dropFromCache) {
+							// Make sure this has not already been replaced
+							CacheEntry<K,V,E> removed = map.remove(key);
+							if(removed != entry) {
+								// Whoops, removed what had replaced this key, put it back!
+								// (this should happen rarely so not checking first)
+								if(DEBUG_TIMER_TASK_REPLACED) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Found replacement during drop, putting it back: " + removed);
+								map.put(key, removed);
+							} else {
+								if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropped, size = " + map.size());
+							}
+							// Cancel this timer task
+							cancel();
+						} else {
+							// Update entry
+							assert newResult != null;
+							if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Updating entry with new result");
+							entry.result = newResult;
+							entry.refreshed = currentTime;
+							entry.accessedSinceRefresh = false;
+						}
+					} finally {
+						writeLock.unlock();
+					}
+				}
+			},
+			refreshInterval,
+			refreshInterval
+		);
 	}
 
 	/**
