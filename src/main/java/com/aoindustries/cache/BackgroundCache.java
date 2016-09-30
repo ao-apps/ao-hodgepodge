@@ -22,20 +22,17 @@
  */
 package com.aoindustries.cache;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * <p>
- * A cache that is refreshed in the background, implementing only get, put, getOrPut, and size.
- * There is no remove, background cleaning is performed on the underlying map.
+ * A cache that is refreshed in the background, implementing only get, put, and size.
+ * There is no remove; background cleaning is performed on the underlying map.
  * </p>
  * <p>
  * When the system is sitting idle, all cache entries are expired and there is
@@ -49,7 +46,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	/**
 	 * Temporary debugging output where we want zero runtime costs.
 	 */
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	private static final boolean DEBUG_STOP = DEBUG;
 	private static final boolean DEBUG_EXTEND = DEBUG;
 	private static final boolean DEBUG_RUN_REFRESHER = false;
@@ -115,26 +112,25 @@ public class BackgroundCache<K,V,E extends Exception> {
 		/**
 		 * The last obtained result.
 		 */
-		Result<V,E> result;
+		volatile Result<V,E> result;
 
 		/**
 		 * The time the entry was last refreshed.
 		 */
-		long refreshed;
+		volatile long refreshed;
 
 		/**
-		 * Has this entry been accessed since the last refresh.
+		 * Has this entry been accessed since the last refresh?
 		 * Used to know when to extend expiration.
 		 */
-		boolean accessedSinceRefresh;
+		volatile boolean accessedSinceRefresh;
 
 		/**
 		 * The time this entry will expire.
 		 * When an entry is accessed, its expiration time is updated to be
 		 * based on its refreshed time.
 		 */
-		long expiration;
-
+		volatile long expiration;
 
 		/**
 		 * A cached result.
@@ -165,10 +161,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	final Timer timer;
 
-	final ReadWriteLock lock = new ReentrantReadWriteLock();
-
-	// TODO: ConcurrentMap + per-entry readwritelocks?
-	final Map<K,CacheEntry<K,V,E>> map = new HashMap<K,CacheEntry<K,V,E>>();
+	final ConcurrentMap<K,CacheEntry<K,V,E>> map = new ConcurrentHashMap<K,CacheEntry<K,V,E>>();
 
 	/**
 	 * @param name             The name resources are based on, such as background thread names.
@@ -228,13 +221,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	public void stop() {
 		if(DEBUG_STOP) System.err.println("BackgroundCache(" + name + ").stop()");
 		timer.cancel();
-		Lock writeLock = lock.writeLock();
-		writeLock.lock();
-		try {
-			map.clear();
-		} finally {
-			writeLock.unlock();
-		}
+		map.clear();
 	}
 
 	/**
@@ -261,41 +248,17 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 * Extends the expiration of the cache entry.
 	 */
 	public Result<V,E> get(K key) {
-		CacheEntry<K,V,E> entry;
-		Result<V,E> result;
-		boolean extendExpiration;
-		{
-			Lock readLock = lock.readLock();
-			readLock.lock();
-			try {
-				entry = map.get(key);
-				if(entry != null) {
-					result = entry.result;
-					extendExpiration = !entry.accessedSinceRefresh;
-				} else {
-					result = null;
-					extendExpiration = false;
-				}
-			} finally {
-				readLock.unlock();
+		CacheEntry<K,V,E> entry = map.get(key);
+		if(entry == null) {
+			return null;
+		} else {
+			if(!entry.accessedSinceRefresh) {
+				entry.accessedSinceRefresh = true;
+				entry.expiration = entry.refreshed + expirationAge;
+				if(DEBUG_EXTEND) System.err.println("BackgroundCache(" + name + ").get(" + key + "): Extended expiration");
 			}
+			return entry.result;
 		}
-		if(extendExpiration) {
-			assert entry != null;
-			Lock writeLock = lock.writeLock();
-			writeLock.lock();
-			try {
-				// Make sure another thread didn't already extend it
-				if(!entry.accessedSinceRefresh) {
-					if(DEBUG_EXTEND) System.err.println("BackgroundCache(" + name + ").get(" + key + "): Extending expiration");
-					entry.accessedSinceRefresh = true;
-					entry.expiration = entry.refreshed + expirationAge;
-				}
-			} finally {
-				writeLock.unlock();
-			}
-		}
-		return result;
 	}
 
 	Result<V,E> runRefresher(
@@ -363,6 +326,11 @@ public class BackgroundCache<K,V,E extends Exception> {
 
 	/**
 	 * Puts a new entry, replacing any existing.  Schedules refresh on the timer.
+	 * <p>
+	 * Any formerly scheduled timer is not canceled.  It will detect it has been
+	 * replaced when it is called and cancel itself.  This puts more of the load
+	 * on the background thread.
+	 * </p>
 	 */
 	private void put(
 		final K key,
@@ -376,13 +344,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 			currentTime,
 			currentTime + expirationAge
 		);
-		Lock writeLock = lock.writeLock();
-		writeLock.lock();
-		try {
-			map.put(key, entry);
-		} finally {
-			writeLock.unlock();
-		}
+		map.put(key, entry);
 		timer.schedule(
 			new TimerTask() {
 				@Override
@@ -393,70 +355,48 @@ public class BackgroundCache<K,V,E extends Exception> {
 						currentThread.setPriority(TIMER_THREAD_PRIORITY);
 						if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Set thread priority");
 					}
-					long currentTime;
-					boolean dropFromCache;
-					Lock readLock = lock.readLock();
-					readLock.lock();
-					try {
-						if(entry != map.get(key)) {
-							// This has been replaced, nothing to do
-							if(DEBUG_TIMER_TASK_REPLACED) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Replaced");
-							// Cancel this timer task
-							cancel();
-							return;
-						}
-						currentTime = System.currentTimeMillis();
-						dropFromCache =
+					if(entry != map.get(key)) {
+						// This has been replaced, cancel this timer task
+						if(DEBUG_TIMER_TASK_REPLACED) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Replaced");
+						cancel();
+					} else {
+						long currentTime = System.currentTimeMillis();
+						if(
 							// Expired expired
 							currentTime >= entry.expiration
 							// System time set to the past
 							|| currentTime < entry.refreshed
-						;
-						if(DEBUG_TIMER_TASK_DROPPING && dropFromCache) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropping due to time");
-					} finally {
-						readLock.unlock();
-					}
-					Result<V,E> newResult;
-					if(dropFromCache) {
-						newResult = null;
-					} else {
-						try {
-							newResult = runRefresher(refresher, key);
-						} catch(Throwable t) {
-							// Drop from cache when any unexpected exception happens
-							if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropping due to unexpected throwable: " + t);
-							dropFromCache = true;
-							newResult = null;
-							// Log unexpected exception
-							logger.log(Level.WARNING, "Unexpected exception in background cache refresh, dropping from cache", t);
-						}
-					}
-					Lock writeLock = lock.writeLock();
-					writeLock.lock();
-					try {
-						if(dropFromCache) {
+						) {
 							// Make sure this has not already been replaced
-							CacheEntry<K,V,E> removed = map.remove(key);
-							if(removed != entry) {
-								// Whoops, removed what had replaced this key, put it back!
-								// (this should happen rarely so not checking first)
-								if(DEBUG_TIMER_TASK_REPLACED) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Found replacement during drop, putting it back: " + removed);
-								map.put(key, removed);
-							} else {
-								if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropped, size = " + map.size());
+							if(map.remove(key, entry)) {
+								if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropped due to time, size = " + map.size());
 							}
 							// Cancel this timer task
 							cancel();
 						} else {
-							// Update entry
-							assert newResult != null;
-							if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Updating entry with new result");
-							entry.result = newResult;
-							entry.refreshed = currentTime;
-							entry.accessedSinceRefresh = false;
+							try {
+								// Update entry
+								entry.result = runRefresher(refresher, key);
+								entry.refreshed = currentTime;
+								entry.accessedSinceRefresh = false;
+								if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Updated entry with new result");
+							} catch(Throwable t) {
+								// Drop from cache when any unexpected exception happens
+								if(map.remove(key, entry)) {
+									if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropped due to unexpected throwable, size = " + map.size());
+								}
+								// Cancel this timer task
+								cancel();
+								// Log unexpected exception
+								if(logger.isLoggable(Level.WARNING)) {
+									logger.log(
+										Level.WARNING,
+										"BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Unexpected exception in background cache refresh, dropped from cache",
+										t
+									);
+								}
+							}
 						}
-					} finally {
-						writeLock.unlock();
 					}
 				}
 			},
@@ -469,12 +409,6 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 * Gets the current size of the cache.
 	 */
 	public int size() {
-		Lock readLock = lock.readLock();
-		readLock.lock();
-		try {
-			return map.size();
-		} finally {
-			readLock.unlock();
-		}
+		return map.size();
 	}
 }
