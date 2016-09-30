@@ -97,6 +97,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -117,6 +119,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -159,6 +163,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -282,6 +288,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -303,6 +311,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -347,6 +357,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -473,6 +485,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -493,6 +507,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -535,6 +551,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -657,6 +675,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -679,6 +699,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -725,6 +747,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 

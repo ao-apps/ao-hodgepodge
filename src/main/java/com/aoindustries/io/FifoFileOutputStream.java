@@ -90,6 +90,8 @@ public class FifoFileOutputStream extends OutputStream {
 				try {
 					file.wait();
 				} catch(InterruptedException err) {
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 					InterruptedIOException ioErr=new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
@@ -131,6 +133,8 @@ public class FifoFileOutputStream extends OutputStream {
 					try {
 						file.wait();
 					} catch(InterruptedException err) {
+						// Restore the interrupted status
+						Thread.currentThread().interrupt();
 						InterruptedIOException ioErr=new InterruptedIOException();
 						ioErr.initCause(err);
 						throw ioErr;

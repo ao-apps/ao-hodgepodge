@@ -114,6 +114,8 @@ public class FindReplaceProxy {
 								Thread.sleep(1000);
 							} catch(InterruptedException ie) {
 								ie.printStackTrace(System.err);
+								// Restore the interrupted status
+								Thread.currentThread().interrupt();
 							}
 						}
 					}
@@ -170,6 +172,8 @@ public class FindReplaceProxy {
 									inThread.join();
 								} catch(InterruptedException e) {
 									e.printStackTrace(System.err);
+									// Restore the interrupted status
+									Thread.currentThread().interrupt();
 								}
 							}
 						} finally {
@@ -177,6 +181,8 @@ public class FindReplaceProxy {
 								inThread.join();
 							} catch(InterruptedException e) {
 								e.printStackTrace(System.err);
+								// Restore the interrupted status
+								Thread.currentThread().interrupt();
 							}
 						}
 					} finally {

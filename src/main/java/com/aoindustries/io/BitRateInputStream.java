@@ -105,6 +105,8 @@ public class BitRateInputStream extends FilterInputStream {
 							// Birdie - ti ger, nnnnnggggaaaa - sleeepy time
 							Thread.sleep(sleepyTime);
 						} catch(InterruptedException err) {
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 							InterruptedIOException ioErr=new InterruptedIOException();
 							ioErr.initCause(err);
 							throw ioErr;

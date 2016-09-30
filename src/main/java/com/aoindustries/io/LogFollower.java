@@ -89,6 +89,8 @@ public class LogFollower extends InputStream {
 				System.err.println("File not found, waiting: " + file.getPath());
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException e) {
+				// Restore the interrupted status
+				Thread.currentThread().interrupt();
 				InterruptedIOException newExc = new InterruptedIOException(e.getMessage());
 				newExc.initCause(e);
 				throw newExc;
@@ -152,6 +154,8 @@ public class LogFollower extends InputStream {
 			try {
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException err) {
+				// Restore the interrupted status
+				Thread.currentThread().interrupt();
 				InterruptedIOException ioErr=new InterruptedIOException();
 				ioErr.initCause(err);
 				throw ioErr;
@@ -186,6 +190,8 @@ public class LogFollower extends InputStream {
 			try {
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException err) {
+				// Restore the interrupted status
+				Thread.currentThread().interrupt();
 				InterruptedIOException ioErr=new InterruptedIOException();
 				ioErr.initCause(err);
 				throw ioErr;
@@ -220,6 +226,8 @@ public class LogFollower extends InputStream {
 			try {
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException err) {
+				// Restore the interrupted status
+				Thread.currentThread().interrupt();
 				InterruptedIOException ioErr=new InterruptedIOException();
 				ioErr.initCause(err);
 				throw ioErr;

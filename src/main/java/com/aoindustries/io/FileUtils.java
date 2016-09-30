@@ -398,6 +398,8 @@ final public class FileUtils {
 				try {
 					Thread.sleep(4 << NUM_TRIES);
 				} catch(InterruptedException e2) {
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 					IOException ioErr = new InterruptedIOException();
 					ioErr.initCause(e2);
 					throw ioErr;

@@ -112,6 +112,8 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 						futures.remove().get();
 					}
 				} catch(InterruptedException e) {
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 					throw new RuntimeException(e);
 				} catch(ExecutionException e) {
 					throw new RuntimeException(e);

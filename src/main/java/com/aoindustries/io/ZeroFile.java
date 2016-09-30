@@ -106,6 +106,8 @@ public class ZeroFile {
 				return currentTime + sleepyTime;
 			}
 		} catch(InterruptedException e) {
+			// Restore the interrupted status
+			Thread.currentThread().interrupt();
 			InterruptedIOException ioExc = new InterruptedIOException(e.getMessage());
 			ioExc.initCause(e);
 			throw ioExc;

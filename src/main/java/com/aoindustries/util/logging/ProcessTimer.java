@@ -91,6 +91,8 @@ public class ProcessTimer implements Runnable {
 			} catch(InterruptedException err) {
 				// Only normal when finish is called
 				if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
+				// Restore the interrupted status
+				Thread.currentThread().interrupt();
 			}
 			isSleeping=false;
 			if(!isFinished) {
@@ -103,6 +105,8 @@ public class ProcessTimer implements Runnable {
 					} catch(InterruptedException err) {
 						// Only normal when finish is called
 						if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
+						// Restore the interrupted status
+						Thread.currentThread().interrupt();
 					}
 					isSleeping=false;
 					if(!isFinished) logInfo(true);
