@@ -356,6 +356,8 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 						try {
 							poolLock.wait();
 						} catch(InterruptedException err) {
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 							throw newInterruptedException(null, err);
 						}
 					}
@@ -761,6 +763,8 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 					sleep(delayTime);
 				} catch(InterruptedException err) {
 					logger.log(Level.WARNING, null, err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 				long time = System.currentTimeMillis();
 				List<C> connsToClose;

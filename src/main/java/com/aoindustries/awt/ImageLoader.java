@@ -55,16 +55,12 @@ final public class ImageLoader implements ImageConsumer {
 	/**
 	 * Loads an image and returns when a frame is done, the image is done, an error occurs, or the image is aborted.
 	 */
-	public void loadImage() {
-		status=0;
-		image.getSource().startProduction(this);
-		while((status&(IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE))==0) {
-			try {
-				synchronized(this) {
-					wait();
-				}
-			} catch(InterruptedException err) {
-				logger.log(Level.WARNING, null, err);
+	public void loadImage() throws InterruptedException {
+		synchronized(this) {
+			status=0;
+			image.getSource().startProduction(this);
+			while((status&(IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE))==0) {
+				wait();
 			}
 		}
 	}

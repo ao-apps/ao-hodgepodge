@@ -210,6 +210,8 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 							terminated = executorService.awaitTermination(3600, TimeUnit.SECONDS);
 						} catch(InterruptedException err) {
 							logger.log(Level.WARNING, null, err);
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 						}
 						if(!terminated) logger.info(size==1 ? "Waiting for the TwoCopyBarrierBuffer to close." : "Waiting for all "+size+" TwoCopyBarrierBuffers to close.");
 					}

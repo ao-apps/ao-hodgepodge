@@ -94,6 +94,8 @@ public class LoggingProxy {
 							Thread.sleep(1000);
 						} catch(InterruptedException ie) {
 							ie.printStackTrace(System.err);
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 						}
 					}
 				}
@@ -141,6 +143,8 @@ public class LoggingProxy {
 									inThread.join();
 								} catch(InterruptedException e) {
 									e.printStackTrace(System.err);
+									// Restore the interrupted status
+									Thread.currentThread().interrupt();
 								}
 							}
 						} finally {
@@ -148,6 +152,8 @@ public class LoggingProxy {
 								inThread.join();
 							} catch(InterruptedException e) {
 								e.printStackTrace(System.err);
+								// Restore the interrupted status
+								Thread.currentThread().interrupt();
 							}
 						}
 					} finally {

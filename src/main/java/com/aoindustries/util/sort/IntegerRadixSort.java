@@ -805,6 +805,8 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				);
 			}
 		} catch(InterruptedException e) {
+			// Restore the interrupted status
+			Thread.currentThread().interrupt();
 			throw new WrappedException(e);
 		} catch(ExecutionException e) {
 			throw new WrappedException(e);

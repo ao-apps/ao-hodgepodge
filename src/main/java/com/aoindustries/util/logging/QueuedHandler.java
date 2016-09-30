@@ -130,6 +130,8 @@ abstract public class QueuedHandler extends Handler {
 			consoleExecutor.awaitTermination(60, TimeUnit.SECONDS);
 		} catch(InterruptedException err) {
 			// Ignored
+			// Restore the interrupted status
+			Thread.currentThread().interrupt();
 		}
 		try {
 			// Wait up to one minute for tickets to complete its tasks
@@ -137,6 +139,8 @@ abstract public class QueuedHandler extends Handler {
 			consoleExecutor.awaitTermination(60, TimeUnit.SECONDS);
 		} catch(InterruptedException err) {
 			// Ignored
+			// Restore the interrupted status
+			Thread.currentThread().interrupt();
 		}
 	}
 

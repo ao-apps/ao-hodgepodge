@@ -203,6 +203,8 @@ public class ParallelDelete {
 							if(verboseQueue.isEmpty()) verboseOutput.flush();
 						} catch(InterruptedException err) {
 							// Normal during thread shutdown
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 						}
 					}
 				}
@@ -237,6 +239,8 @@ public class ParallelDelete {
 												done = true;
 											} catch(InterruptedException err) {
 												// Normal during thread shutdown
+												// Restore the interrupted status
+												Thread.currentThread().interrupt();
 											}
 										}
 									}
@@ -249,6 +253,8 @@ public class ParallelDelete {
 							}
 						} catch(InterruptedException err) {
 							// Normal during thread shutdown
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 						}
 					}
 				}
@@ -272,6 +278,8 @@ public class ParallelDelete {
 						try {
 							deleteQueue.put(new File(fullPath));
 						} catch(InterruptedException err) {
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 							IOException ioErr = new InterruptedIOException();
 							ioErr.initCause(err);
 							throw ioErr;
@@ -295,6 +303,8 @@ public class ParallelDelete {
 				try {
 					deleteThread.join();
 				} catch(InterruptedException err) {
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 					IOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
@@ -314,6 +324,8 @@ public class ParallelDelete {
 				try {
 					verboseThread.join();
 				} catch(InterruptedException err) {
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 					IOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;

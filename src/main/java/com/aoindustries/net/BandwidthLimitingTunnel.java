@@ -133,6 +133,8 @@ public class BandwidthLimitingTunnel implements Runnable {
 					Thread.sleep(10000);
 				} catch(InterruptedException err) {
 					ErrorPrinter.printStackTraces(err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 		}

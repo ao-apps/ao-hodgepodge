@@ -151,6 +151,8 @@ public class Benchmark {
 							threads[d].join();
 						} catch(InterruptedException err) {
 							ErrorPrinter.printStackTraces(err);
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 						}
 					}
 					double seekRate = (double)counter[0]/30L;
