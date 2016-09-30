@@ -93,47 +93,107 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 *
 	 * @see  #lock  All read/write access must be under the lock
 	 */
-	static class CacheEntry<K,V,E extends Exception> {
+	class CacheEntry extends TimerTask {
 
-		final Refresher<? super K,? extends V,? extends E> refresher;
+		private final K key;
+
+		private final Refresher<? super K,? extends V,? extends E> refresher;
 
 		/**
 		 * The last obtained result.
 		 */
-		volatile Result<V,E> result;
+		private volatile Result<V,E> result;
 
 		/**
 		 * The time the entry was last refreshed.
 		 */
-		volatile long refreshed;
+		private volatile long refreshed;
 
 		/**
 		 * Has this entry been accessed since the last refresh?
 		 * Used to know when to extend expiration.
 		 */
-		volatile boolean accessedSinceRefresh;
+		private volatile boolean accessedSinceRefresh;
 
 		/**
 		 * The time this entry will expire.
 		 * When an entry is accessed, its expiration time is updated to be
 		 * based on its refreshed time.
 		 */
-		volatile long expiration;
+		private volatile long expiration;
 
 		/**
 		 * A cached result.
 		 */
 		CacheEntry(
+			K key,
 			Refresher<? super K,? extends V,? extends E> refresher,
-			Result<V,E> result,
-			long refreshed,
-			long expiration
+			Result<V,E> result
 		) {
+			long currentTime = System.currentTimeMillis();
+			this.key = key;
 			this.refresher = refresher;
 			this.result = result;
-			this.refreshed = refreshed;
+			this.refreshed = currentTime;
 			this.accessedSinceRefresh = true; // Do not refresh immediately after creation
-			this.expiration = expiration;
+			this.expiration = currentTime + expirationAge;
+		}
+
+		/**
+		 * Gets the most recently obtained result.
+		 * Updates the expiration time as-needed.
+		 */
+		Result<V,E> getResult() {
+			if(!accessedSinceRefresh) {
+				accessedSinceRefresh = true;
+				expiration = refreshed + expirationAge;
+			}
+			return result;
+		}
+
+		@Override
+		public void run() {
+			Thread currentThread = Thread.currentThread();
+			if(currentThread.getPriority() != TIMER_THREAD_PRIORITY) {
+				currentThread.setPriority(TIMER_THREAD_PRIORITY);
+			}
+			if(this != map.get(key)) {
+				// This has been replaced, cancel this timer task
+				cancel();
+			} else {
+				long currentTime = System.currentTimeMillis();
+				if(
+					// Expired expired
+					currentTime >= expiration
+					// System time set to the past
+					|| currentTime < refreshed
+				) {
+					// Make sure this has not already been replaced
+					map.remove(key, this);
+					// Cancel this timer task
+					cancel();
+				} else {
+					try {
+						// Update entry
+						result = runRefresher(refresher, key);
+						refreshed = currentTime;
+						accessedSinceRefresh = false;
+					} catch(Throwable t) {
+						// Drop from cache when any unexpected exception happens
+						map.remove(key, this);
+						// Cancel this timer task
+						cancel();
+						// Log unexpected exception
+						if(logger.isLoggable(Level.WARNING)) {
+							logger.log(
+								Level.WARNING,
+								"BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Unexpected exception in background cache refresh, dropped from cache",
+								t
+							);
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -149,7 +209,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	final Timer timer;
 
-	final ConcurrentMap<K,CacheEntry<K,V,E>> map = new ConcurrentHashMap<K,CacheEntry<K,V,E>>();
+	final ConcurrentMap<K,CacheEntry> map = new ConcurrentHashMap<K,CacheEntry>();
 
 	/**
 	 * @param name             The name resources are based on, such as background thread names.
@@ -235,15 +295,11 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 * Extends the expiration of the cache entry.
 	 */
 	public Result<V,E> get(K key) {
-		CacheEntry<K,V,E> entry = map.get(key);
+		CacheEntry entry = map.get(key);
 		if(entry == null) {
 			return null;
 		} else {
-			if(!entry.accessedSinceRefresh) {
-				entry.accessedSinceRefresh = true;
-				entry.expiration = entry.refreshed + expirationAge;
-			}
-			return entry.result;
+			return entry.getResult();
 		}
 	}
 
@@ -312,68 +368,13 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 * </p>
 	 */
 	private void put(
-		final K key,
-		final Refresher<? super K,? extends V,? extends E> refresher,
+		K key,
+		Refresher<? super K,? extends V,? extends E> refresher,
 		Result<V,E> result
 	) {
-		long currentTime = System.currentTimeMillis();
-		final CacheEntry<K,V,E> entry = new CacheEntry<K,V,E>(
-			refresher,
-			result,
-			currentTime,
-			currentTime + expirationAge
-		);
+		CacheEntry entry = new CacheEntry(key, refresher, result);
 		map.put(key, entry);
-		timer.schedule(
-			new TimerTask() {
-				@Override
-				public void run() {
-					Thread currentThread = Thread.currentThread();
-					if(currentThread.getPriority() != TIMER_THREAD_PRIORITY) {
-						currentThread.setPriority(TIMER_THREAD_PRIORITY);
-					}
-					if(entry != map.get(key)) {
-						// This has been replaced, cancel this timer task
-						cancel();
-					} else {
-						long currentTime = System.currentTimeMillis();
-						if(
-							// Expired expired
-							currentTime >= entry.expiration
-							// System time set to the past
-							|| currentTime < entry.refreshed
-						) {
-							// Make sure this has not already been replaced
-							map.remove(key, entry);
-							// Cancel this timer task
-							cancel();
-						} else {
-							try {
-								// Update entry
-								entry.result = runRefresher(refresher, key);
-								entry.refreshed = currentTime;
-								entry.accessedSinceRefresh = false;
-							} catch(Throwable t) {
-								// Drop from cache when any unexpected exception happens
-								map.remove(key, entry);
-								// Cancel this timer task
-								cancel();
-								// Log unexpected exception
-								if(logger.isLoggable(Level.WARNING)) {
-									logger.log(
-										Level.WARNING,
-										"BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Unexpected exception in background cache refresh, dropped from cache",
-										t
-									);
-								}
-							}
-						}
-					}
-				}
-			},
-			refreshInterval,
-			refreshInterval
-		);
+		timer.schedule(entry, refreshInterval, refreshInterval);
 	}
 
 	/**
