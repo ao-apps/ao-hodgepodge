@@ -44,18 +44,6 @@ import java.util.logging.Logger;
 public class BackgroundCache<K,V,E extends Exception> {
 
 	/**
-	 * Temporary debugging output where we want zero runtime costs.
-	 */
-	private static final boolean DEBUG = true;
-	private static final boolean DEBUG_STOP = DEBUG;
-	private static final boolean DEBUG_EXTEND = DEBUG;
-	private static final boolean DEBUG_RUN_REFRESHER = false;
-	private static final boolean DEBUG_PUT = DEBUG;
-	private static final boolean DEBUG_TIMER_TASK = false;
-	private static final boolean DEBUG_TIMER_TASK_DROPPING = DEBUG;
-	private static final boolean DEBUG_TIMER_TASK_REPLACED = DEBUG;
-
-	/**
 	 * The thread priority used for the timer.
 	 */
 	private static final int TIMER_THREAD_PRIORITY = Thread.NORM_PRIORITY - 2;
@@ -107,7 +95,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	static class CacheEntry<K,V,E extends Exception> {
 
-		final Refresher<? super K, ? extends V, ? extends E> refresher;
+		final Refresher<? super K,? extends V,? extends E> refresher;
 
 		/**
 		 * The last obtained result.
@@ -136,7 +124,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 		 * A cached result.
 		 */
 		CacheEntry(
-			Refresher<? super K, ? extends V, ? extends E> refresher,
+			Refresher<? super K,? extends V,? extends E> refresher,
 			Result<V,E> result,
 			long refreshed,
 			long expiration
@@ -219,7 +207,6 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 * Repeated calls to stop are allowed.
 	 */
 	public void stop() {
-		if(DEBUG_STOP) System.err.println("BackgroundCache(" + name + ").stop()");
 		timer.cancel();
 		map.clear();
 	}
@@ -236,7 +223,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	public Result<V,E> get(
 		K key,
-		Refresher<? super K, ? extends V, ? extends E> refresher
+		Refresher<? super K,? extends V,? extends E> refresher
 	) {
 		Result<V,E> result = get(key);
 		if(result == null) result = put(key, refresher);
@@ -255,23 +242,18 @@ public class BackgroundCache<K,V,E extends Exception> {
 			if(!entry.accessedSinceRefresh) {
 				entry.accessedSinceRefresh = true;
 				entry.expiration = entry.refreshed + expirationAge;
-				if(DEBUG_EXTEND) System.err.println("BackgroundCache(" + name + ").get(" + key + "): Extended expiration");
 			}
 			return entry.result;
 		}
 	}
 
 	Result<V,E> runRefresher(
-		Refresher<? super K, ? extends V, ? extends E> refresher,
+		Refresher<? super K,? extends V,? extends E> refresher,
 		K key
 	) throws IllegalStateException {
-		if(DEBUG_RUN_REFRESHER) System.err.println("BackgroundCache(" + name + ").runRefresher(" + refresher + ", " + key + ")");
 		try {
-			V value = refresher.call(key);
-			if(DEBUG_RUN_REFRESHER) System.err.println("BackgroundCache(" + name + ").runRefresher(" + refresher + ", " + key + "): value = " + value);
-			return new Result<V,E>(value);
+			return new Result<V,E>(refresher.call(key));
 		} catch(Exception e) {
-			if(DEBUG_RUN_REFRESHER) System.err.println("BackgroundCache(" + name + ").runRefresher(" + refresher + ", " + key + "): e = " + e);
 			if(exceptionClass.isInstance(e)) {
 				return new Result<V,E>(exceptionClass.cast(e));
 			} else if(e instanceof RuntimeException) {
@@ -292,9 +274,8 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	public Result<V,E> put(
 		K key,
-		Refresher<? super K, ? extends V, ? extends E> refresher
+		Refresher<? super K,? extends V,? extends E> refresher
 	) {
-		if(DEBUG_PUT) System.err.println("BackgroundCache(" + name + ").put(" + key + ", " + refresher + ")");
 		Result<V,E> result = runRefresher(refresher, key);
 		put(key, refresher, result);
 		return result;
@@ -305,10 +286,9 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	public void put(
 		K key,
-		Refresher<? super K, ? extends V, ? extends E> refresher,
+		Refresher<? super K,? extends V,? extends E> refresher,
 		V value
 	) {
-		if(DEBUG_PUT) System.err.println("BackgroundCache(" + name + ").put(" + key + ", " + refresher + ", " + value + ")");
 		put(key, refresher, new Result<V,E>(value));
 	}
 
@@ -317,10 +297,9 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	public void put(
 		K key,
-		Refresher<? super K, ? extends V, ? extends E> refresher,
+		Refresher<? super K,? extends V,? extends E> refresher,
 		E exception
 	) {
-		if(DEBUG_PUT) System.err.println("BackgroundCache(" + name + ").put(" + key + ", " + refresher + ", " + exception + ")");
 		put(key, refresher, new Result<V,E>(exception));
 	}
 
@@ -334,7 +313,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	private void put(
 		final K key,
-		final Refresher<? super K, ? extends V, ? extends E> refresher,
+		final Refresher<? super K,? extends V,? extends E> refresher,
 		Result<V,E> result
 	) {
 		long currentTime = System.currentTimeMillis();
@@ -349,15 +328,12 @@ public class BackgroundCache<K,V,E extends Exception> {
 			new TimerTask() {
 				@Override
 				public void run() {
-					if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run()");
 					Thread currentThread = Thread.currentThread();
 					if(currentThread.getPriority() != TIMER_THREAD_PRIORITY) {
 						currentThread.setPriority(TIMER_THREAD_PRIORITY);
-						if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Set thread priority");
 					}
 					if(entry != map.get(key)) {
 						// This has been replaced, cancel this timer task
-						if(DEBUG_TIMER_TASK_REPLACED) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Replaced");
 						cancel();
 					} else {
 						long currentTime = System.currentTimeMillis();
@@ -368,9 +344,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 							|| currentTime < entry.refreshed
 						) {
 							// Make sure this has not already been replaced
-							if(map.remove(key, entry)) {
-								if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropped due to time, size = " + map.size());
-							}
+							map.remove(key, entry);
 							// Cancel this timer task
 							cancel();
 						} else {
@@ -379,12 +353,9 @@ public class BackgroundCache<K,V,E extends Exception> {
 								entry.result = runRefresher(refresher, key);
 								entry.refreshed = currentTime;
 								entry.accessedSinceRefresh = false;
-								if(DEBUG_TIMER_TASK) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Updated entry with new result");
 							} catch(Throwable t) {
 								// Drop from cache when any unexpected exception happens
-								if(map.remove(key, entry)) {
-									if(DEBUG_TIMER_TASK_DROPPING) System.err.println("BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Dropped due to unexpected throwable, size = " + map.size());
-								}
+								map.remove(key, entry);
 								// Cancel this timer task
 								cancel();
 								// Log unexpected exception
