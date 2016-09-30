@@ -187,7 +187,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 						if(logger.isLoggable(Level.WARNING)) {
 							logger.log(
 								Level.WARNING,
-								"BackgroundCache(" + name + ").TimerTask(" + key + ").run(): Unexpected exception in background cache refresh, dropped from cache",
+								"BackgroundCache(" + name + ").CacheEntry(" + key + ").run(): Unexpected exception in background cache refresh, dropped from cache",
 								t
 							);
 						}
