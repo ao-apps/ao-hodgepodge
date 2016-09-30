@@ -69,7 +69,7 @@ final public class ServletContextCache {
 
 	// <editor-fold defaultstate="collapsed" desc="getResource">
 	private final BackgroundCache<String,URL,MalformedURLException> getResourceCache = new BackgroundCache<String,URL,MalformedURLException>(
-		ServletContextCache.class.getName() + "-getResourceCache",
+		ServletContextCache.class.getName() + ".getResource",
 		MalformedURLException.class,
 		REFRESH_INTERVAL,
 		EXPIRATION_AGE,
@@ -108,7 +108,7 @@ final public class ServletContextCache {
 
 	// <editor-fold defaultstate="collapsed" desc="getRealPath">
 	private final BackgroundCache<String,String,RuntimeException> getRealPathCache = new BackgroundCache<String,String,RuntimeException>(
-		ServletContextCache.class.getName() + "-getRealPathCache",
+		ServletContextCache.class.getName() + ".getRealPath",
 		RuntimeException.class,
 		REFRESH_INTERVAL,
 		EXPIRATION_AGE,
