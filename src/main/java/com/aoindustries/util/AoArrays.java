@@ -48,6 +48,7 @@ public class AoArrays {
 	}
 
 	public static final byte[] EMPTY_BYTE_ARRAY = {};
+	public static final char[] EMPTY_CHAR_ARRAY = {};
 	public static final int[] EMPTY_INT_ARRAY = {};
 	public static final long[] EMPTY_LONG_ARRAY = {};
 	public static final Class<?>[] EMPTY_CLASS_ARRAY = {};
