@@ -22,47 +22,52 @@
  */
 package com.aoindustries.util;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Deque;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * <code>BufferManager</code> manages a reusable pool of <code>byte[]</code> and <code>char[]</code>
- * buffers.  The buffers are stored as <code>ThreadLocal</code> to avoid overhead in NUMA architectures.
+ * <p>
+ * <code>BufferManager</code> manages a reusable pool of <code>byte[]</code> and <code>char[]</code> buffers.
  * This avoids the repetitive allocation of memory for an operation that only needs a temporary buffer.
- *
- * The buffers are not cleared between invocations so the results of previous operations may be available
+ * The buffers are stored as <code>ThreadLocal</code> to maximize cache locality.
+ * </p>
+ * <p>
+ * Do not use if intra-thread security is more important than performance.
+ * </p>
+ * <p>
+ * The buffers are not necessarily cleared between invocations so the results of previous operations may be available
  * to additional callers.  On the scale of security versus performance, this is biased toward performance.
  * However, being thread local there remains some control over the visibility of the data.
- * 
- * Do not use if intra-thread security is more important than performance.
+ * </p>
+ * <p>
+ * Buffers must not be passed between threads, as each thread has an unlimited number of possible buffers.
+ * Giving a thread a buffer you didn't get from it could result in a memory leak.
+ * </p>
+ *
+ * TODO: Implement as concurrent queue/deque instead of thread locals?
  *
  * @author  AO Industries, Inc.
  */
 final public class BufferManager {
 
 	/**
-	 * The maximum number of buffers to keep for reuse, per thread.
-	 */
-	private static final int MAXIMUM_BUFFERS_PER_THREAD = 16;
-
-	/**
 	 * The size of buffers that are returned.
 	 */
 	public static final int BUFFER_SIZE = 4096;
 
-	private static final ThreadLocal<List<byte[]>> bytes = new ThreadLocal<List<byte[]>>() {
+	private static final ThreadLocal<Deque<byte[]>> bytes = new ThreadLocal<Deque<byte[]>>() {
 		@Override
-		public List<byte[]> initialValue() {
-			return new ArrayList<byte[]>(MAXIMUM_BUFFERS_PER_THREAD);
+		public Deque<byte[]> initialValue() {
+			return new ArrayDeque<byte[]>();
 		}
 	};
 
-	private static final ThreadLocal<List<char[]>> chars = new ThreadLocal<List<char[]>>() {
+	private static final ThreadLocal<Deque<char[]>> chars = new ThreadLocal<Deque<char[]>>() {
 		@Override
-		public List<char[]> initialValue() {
-			return new ArrayList<char[]>(MAXIMUM_BUFFERS_PER_THREAD);
+		public Deque<char[]> initialValue() {
+			return new ArrayDeque<char[]>();
 		}
 	};
 
@@ -91,13 +96,12 @@ final public class BufferManager {
 	 */
 	public static byte[] getBytes() {
 		bytesUses.getAndIncrement();
-		List<byte[]> myBytes = bytes.get();
-		int len = myBytes.size();
-		if(len==0) {
+		byte[] buffer = bytes.get().poll();
+		if(buffer == null) {
 			bytesCreates.getAndIncrement();
-			return new byte[BUFFER_SIZE];
+			buffer = new byte[BUFFER_SIZE];
 		}
-		return myBytes.remove(len-1);
+		return buffer;
 	}
 
 	/**
@@ -109,13 +113,12 @@ final public class BufferManager {
 	 */
 	public static char[] getChars() {
 		charsUses.getAndIncrement();
-		List<char[]> myChars = chars.get();
-		int len = myChars.size();
-		if(len==0) {
+		char[] buffer = chars.get().poll();
+		if(buffer == null) {
 			charsCreates.getAndIncrement();
-			return new char[BUFFER_SIZE];
+			buffer = new char[BUFFER_SIZE];
 		}
-		return myChars.remove(len-1);
+		return buffer;
 	}
 
 	/**
@@ -134,16 +137,14 @@ final public class BufferManager {
 	 * @param  zeroFill  if the data in the buffer may be sensitive, it is best to zero-fill the buffer on release.
 	 */
 	public static void release(byte[] buffer, boolean zeroFill) {
-		List<byte[]> myBytes = bytes.get();
-		assert buffer.length==BUFFER_SIZE;
-		assert !inList(myBytes, buffer); // Error if already in the buffer list
-		if(myBytes.size()<MAXIMUM_BUFFERS_PER_THREAD) {
-			if(zeroFill) Arrays.fill(buffer, 0, BUFFER_SIZE, (byte)0);
-			myBytes.add(buffer);
-		}
+		Deque<byte[]> myBytes = bytes.get();
+		if(buffer.length != BUFFER_SIZE) throw new IllegalArgumentException();
+		assert !inQueue(myBytes, buffer); // Error if already in the buffer list
+		if(zeroFill) Arrays.fill(buffer, 0, BUFFER_SIZE, (byte)0);
+		myBytes.add(buffer);
 	}
-	private static boolean inList(List<byte[]> myBytes, byte[] buffer) {
-		for(byte[] inList : myBytes) if(inList==buffer) return true;
+	private static boolean inQueue(Iterable<byte[]> myBytes, byte[] buffer) {
+		for(byte[] inQueue : myBytes) if(inQueue==buffer) return true;
 		return false;
 	}
 
@@ -163,16 +164,14 @@ final public class BufferManager {
 	 * @param  zeroFill  if the data in the buffer may be sensitive, it is best to zero-fill the buffer on release.
 	 */
 	public static void release(char[] buffer, boolean zeroFill) {
-		List<char[]> myChars = chars.get();
-		assert buffer.length==BUFFER_SIZE;
-		assert !inList(myChars, buffer); // Error if already in the buffer list
-		if(myChars.size()<MAXIMUM_BUFFERS_PER_THREAD) {
-			if(zeroFill) Arrays.fill(buffer, 0, BUFFER_SIZE, (char)0);
-			myChars.add(buffer);
-		}
+		Deque<char[]> myChars = chars.get();
+		if(buffer.length != BUFFER_SIZE) throw new IllegalArgumentException();
+		assert !inQueue(myChars, buffer); // Error if already in the buffer list
+		if(zeroFill) Arrays.fill(buffer, 0, BUFFER_SIZE, (char)0);
+		myChars.add(buffer);
 	}
-	private static boolean inList(List<char[]> myChars, char[] buffer) {
-		for(char[] inList : myChars) if(inList==buffer) return true;
+	private static boolean inQueue(Iterable<char[]> myChars, char[] buffer) {
+		for(char[] inQueue : myChars) if(inQueue == buffer) return true;
 		return false;
 	}
 
