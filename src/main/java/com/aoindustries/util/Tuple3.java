@@ -58,6 +58,7 @@ public class Tuple3<E1,E2,E3> {
 
 	@Override
 	public boolean equals(Object obj) {
+		if(this == obj) return true;
 		if(!(obj instanceof Tuple3<?,?,?>)) return false;
 		Tuple3<?,?,?> other = (Tuple3<?,?,?>)obj;
 		return
@@ -67,12 +68,17 @@ public class Tuple3<E1,E2,E3> {
 		;
 	}
 
+	private int hash;
 	@Override
 	public int hashCode() {
-		int hash = ObjectUtils.hashCode(element1);
-		hash = hash * 31 + ObjectUtils.hashCode(element2);
-		hash = hash * 31 + ObjectUtils.hashCode(element3);
-		return hash;
+		int h = this.hash;
+		if(h == 0) {
+			h = ObjectUtils.hashCode(element1);
+			h = h * 31 + ObjectUtils.hashCode(element2);
+			h = h * 31 + ObjectUtils.hashCode(element3);
+			this.hash = h;
+		}
+		return h;
 	}
 
 	public E1 getElement1() {
