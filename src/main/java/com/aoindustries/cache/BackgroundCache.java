@@ -22,6 +22,7 @@
  */
 package com.aoindustries.cache;
 
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -374,7 +375,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	) {
 		CacheEntry entry = new CacheEntry(key, refresher, result);
 		map.put(key, entry);
-		timer.schedule(entry, refreshInterval, refreshInterval);
+		timer.schedule(entry, new Date(System.currentTimeMillis() + refreshInterval), refreshInterval);
 	}
 
 	/**
