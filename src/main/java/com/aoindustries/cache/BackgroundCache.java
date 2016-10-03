@@ -207,6 +207,9 @@ public class BackgroundCache<K,V,E extends Exception> {
 	/**
 	 * Timer used for background refreshing and cleaning.
 	 * This uses daemon threads.
+	 *
+	 * TODO: Timer has a very old bug where it does not handle system time resets very well.
+	 *       Consider alternative.
 	 */
 	final Timer timer;
 
