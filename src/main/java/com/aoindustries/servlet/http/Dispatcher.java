@@ -45,10 +45,6 @@ import javax.servlet.jsp.SkipPageException;
 public class Dispatcher {
 
 	private static final Logger logger = Logger.getLogger(Dispatcher.class.getName());
-	static {
-		// TODO: Remove for production
-		//logger.setLevel(Level.ALL);
-	}
 
 	/**
 	 * The name of the request-scope Map that will contain the arguments for the current page.
