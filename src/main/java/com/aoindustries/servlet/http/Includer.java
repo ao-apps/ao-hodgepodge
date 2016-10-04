@@ -42,10 +42,6 @@ import javax.servlet.jsp.SkipPageException;
 public class Includer {
 
 	private static final Logger logger = Logger.getLogger(Includer.class.getName());
-	static {
-		// TODO: Remove for production
-		//logger.setLevel(Level.ALL);
-	}
 
 	private Includer() {
 	}
