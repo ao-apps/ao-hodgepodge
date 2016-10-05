@@ -30,7 +30,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 
 	<groupId>com.aoindustries</groupId>
 	<artifactId>aocode-public</artifactId>
-	<version>1.7.0</version>
+	<version>1.7.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>AOCode Public</name>
@@ -63,7 +63,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		<connection>scm:git:git://github.com/aoindustries/aocode-public.git</connection>
 		<developerConnection>scm:git:git@github.com:aoindustries/aocode-public.git</developerConnection>
 		<url>http://github.com/aoindustries/aocode-public</url>
-		<tag>aocode-public-1.7.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<repositories>
