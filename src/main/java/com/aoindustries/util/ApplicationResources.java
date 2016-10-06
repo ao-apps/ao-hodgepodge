@@ -56,5 +56,5 @@ public final class ApplicationResources extends EditableResourceBundle {
 		);
 	}
 
-	static final ApplicationResourcesAccessor accessor = ApplicationResourcesAccessor.getInstance(bundleSet.getBaseName());
+	public static final ApplicationResourcesAccessor accessor = ApplicationResourcesAccessor.getInstance(bundleSet.getBaseName());
 }
