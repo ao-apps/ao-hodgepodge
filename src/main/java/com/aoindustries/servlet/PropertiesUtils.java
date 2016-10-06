@@ -20,21 +20,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.util;
+package com.aoindustries.servlet;
 
 import com.aoindustries.io.LocalizedIOException;
 import static com.aoindustries.util.ApplicationResources.accessor;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import javax.servlet.ServletContext;
 
 /**
- * Property utilities.
- *
- * @see  com.aoindustries.servlet.PropertiesUtils  for use in servlet environment
+ * Property utilities for servlet environments.
+ * These methods moved here since they were causing a compile-time dependency on servlet APIs
+ * for non-servlet related projects.
  */
 final public class PropertiesUtils {
 
@@ -44,25 +42,11 @@ final public class PropertiesUtils {
 	private PropertiesUtils() {}
 
 	/**
-	 * Loads properties from a file.
+	 * Loads properties from a web resource.
 	 */
-	public static Properties loadFromFile(File file) throws IOException {
+	public static Properties loadFromResource(ServletContext servletContext, String resource) throws IOException {
 		Properties props = new Properties();
-		InputStream in = new BufferedInputStream(new FileInputStream(file));
-		try {
-			props.load(in);
-		} finally {
-			in.close();
-		}
-		return props;
-	}
-
-	/**
-	 * Loads properties from a classpath resource.
-	 */
-	public static Properties loadFromResource(Class<?> clazz, String resource) throws IOException {
-		Properties props = new Properties();
-		InputStream in = clazz.getResourceAsStream(resource);
+		InputStream in = servletContext.getResourceAsStream(resource);
 		if(in==null) throw new LocalizedIOException(accessor, "PropertiesUtils.readProperties.resourceNotFound", resource);
 		try {
 			props.load(in);
