@@ -227,4 +227,8 @@ public class Identifier implements Serializable, Comparable<Identifier> {
 	public long getLo() {
 		return lo;
 	}
+
+	public static void main(String[] args) {
+		System.out.println(new Identifier());
+	}
 }
