@@ -43,7 +43,7 @@ import java.util.List;
  * extended with TriMedian and InsertionSort by Denis Ahrens
  * with all the tips from Robert Sedgewick (Algorithms in C++).
  * It uses TriMedian and InsertionSort for lists shorts than 4.
- * <fuhrmann@cs.tu-berlin.de>
+ * &lt;fuhrmann@cs.tu-berlin.de&gt;
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/FastQSortAlgorithm.java.html'>Denis Ahrens' FastQSortAlgorithm</a>,
  * which was derived from Sun's example QSortAlgorithm.

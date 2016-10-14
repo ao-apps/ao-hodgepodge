@@ -80,7 +80,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	private static final int MIN_CONCURRENCY_SIZE = 1 << 16; // This is the break-even point on a Core i7-2600k (shows as 8 processors, but has 4 cores), might depend on the number of processors
 
 	/**
-	 * Where there are fewer than MIN_CONCURRENCY_PROCESSORS available processors,
+	 * When there are fewer than MIN_CONCURRENCY_PROCESSORS available processors,
 	 * the single-threaded implementation is used.
 	 */
 	private static final int MIN_CONCURRENCY_PROCESSORS = 2;
@@ -90,6 +90,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	 */
 	private static final int TASKS_PER_PROCESSOR = 2;
 
+	// TODO: Allow threads to shut down, like in ao-concurrent
 	private static final ExecutorService defaultExecutor = Executors.newCachedThreadPool(
 		new ThreadFactory() {
 			private final Sequence idSequence = new AtomicSequence();
