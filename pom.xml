@@ -191,6 +191,13 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 								</compilerArguments>
 							</configuration>
 						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<configuration>
+								<bootclasspath>${bootclasspath.jdk16}</bootclasspath>
+							</configuration>
+						</plugin>
 					</plugins>
 				</pluginManagement>
 			</build>
