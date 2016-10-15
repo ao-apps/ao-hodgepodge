@@ -241,8 +241,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<keywords>true</keywords><!-- Help internal search systems -->
 							<quiet>true</quiet>
 							<docfilessubdirs>true</docfilessubdirs>
+							<detectJavaApiLink>false</detectJavaApiLink>
 							<links>
-								<link>http://docs.oracle.com/javaee/6/api/</link>
+								<link>https://docs.oracle.com/javase/6/docs/api/</link>
+								<link>https://docs.oracle.com/javaee/6/api/</link>
 							</links>
 						</configuration>
 						<executions>
