@@ -23,6 +23,7 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.util.AoCollections;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -58,6 +59,14 @@ public class EditableResourceBundleSet {
 		modifiableSet.addAll(locales);
 		this.baseName = baseName;
 		this.locales = AoCollections.optimalUnmodifiableSortedSet(modifiableSet);
+	}
+
+	/**
+	 * @param baseName the base name of the default locale's bundle.
+	 * @param locales the set of all allowed locales.
+	 */
+	public EditableResourceBundleSet(String baseName, Locale ... locales) {
+		this(baseName, Arrays.asList(locales));
 	}
 
 	/**
