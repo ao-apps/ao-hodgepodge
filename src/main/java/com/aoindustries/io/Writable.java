@@ -41,50 +41,51 @@ public interface Writable  {
 	/**
 	 * Checks if the writable will be able to be converted toString in an extremely efficient manner.
 	 * This means without allocating any new buffer space or string copies.
-	 * Callers should prefer toString over writeTo when ifFastToString returns true.
+	 * Callers should prefer toString over writeTo when {@code isFastToString} returns true.
 	 * <p>
-	 * Note: As of Java 1.7.0_06, String.substring() now copies underlying buffers.
+	 * Note: As of Java 1.7.0_06, {@link String#substring(int, int)} and related operations now
+	 * copy underlying buffers.
 	 * </p>
 	 */
 	boolean isFastToString();
 
 	/**
-	 * Anything writable must have a <code>toString</code> consistent with what would be
-	 * written by the <code>writeTo</code> methods.  For larger amounts of data, it is
-	 * likely much more efficient to call the most appropriate <code>writeTo</code> method.
+	 * Anything writable must have a {@code toString} consistent with what would be
+	 * written by the {@code writeTo} methods.  For larger amounts of data, it is
+	 * likely much more efficient to call the most appropriate {@code writeTo} method.
 	 */
 	@Override
 	String toString();
 
 	/**
 	 * Writes a streamed version of the object's String representation.
-	 * What is written must be the same as if <code>out.write(this.toString())</code>
+	 * What is written must be the same as if {@code out.write(this.toString())}
 	 * were called, but may be a much more efficient implementation.
 	 */
 	void writeTo(Writer out) throws IOException;
 	
 	/**
 	 * Writes a streamed version of the object's String representation.
-	 * What is written must be the same as if <code>out.write(this.toString(), off, len)</code>
+	 * What is written must be the same as if {@code out.write(this.toString(), off, len)}
 	 * were called, but may be a much more efficient implementation.
 	 */
 	void writeTo(Writer out, long off, long len) throws IOException;
 
 	/**
 	 * Writes a streamed version of the object's String representation using the given encoder.
-	 * What is written must be the same as if <code>encoder.write(this.toString(), out)</code>
+	 * What is written must be the same as if {@code encoder.write(this.toString(), out)}
 	 * were called, but may be a much more efficient implementation.
 	 * 
-	 * @param  encoder  if null, no encoding is performed and will be the same as a call to <code>writeTo(Writer)</code>
+	 * @param  encoder  if {@code null}, no encoding is performed and will be the same as a call to {@link #writeTo(java.io.Writer)}
 	 */
 	void writeTo(Encoder encoder, Writer out) throws IOException;
 
 	/**
 	 * Writes a streamed version of the object's String representation using the given encoder.
-	 * What is written must be the same as if <code>encoder.write(this.toString(), off, len, out)</code>
+	 * What is written must be the same as if {@code encoder.write(this.toString(), off, len, out)}
 	 * were called, but may be a much more efficient implementation.
 	 * 
-	 * @param  encoder  if null, no encoding is performed and will be the same as a call to <code>writeTo(Writer,off,len)</code>
+	 * @param  encoder  if null, no encoding is performed and will be the same as a call to {@link #writeTo(java.io.Writer, long, long)}
 	 */
 	void writeTo(Encoder encoder, Writer out, long off, long len) throws IOException;
 }
