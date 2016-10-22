@@ -41,7 +41,7 @@ public final class ApplicationResources_ja extends EditableResourceBundle {
 		super(
 			Locales.JAPANESE,
 			ApplicationResources.bundleSet,
-			new File(System.getProperty("user.home")+"/common/aoprod/cvswork/aocode-public/src/main/java/com/aoindustries/servlet/jsp/tagext/ApplicationResources_ja.properties")
+			new File(System.getProperty("user.home")+"/maven2/ao/aocode-public/src/main/java/com/aoindustries/servlet/jsp/tagext/ApplicationResources_ja.properties")
 		);
 	}
 }
