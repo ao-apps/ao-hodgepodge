@@ -54,6 +54,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		<developer>
 			<name>AO Industries, Inc.</name>
 			<email>support@aoindustries.com</email>
+			<url>https://www.aoindustries.com/</url>
 			<organization>AO Industries, Inc.</organization>
 			<organizationUrl>https://www.aoindustries.com/</organizationUrl>
 		</developer>
@@ -62,7 +63,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 	<scm>
 		<connection>scm:git:git://github.com/aoindustries/aocode-public.git</connection>
 		<developerConnection>scm:git:git@github.com:aoindustries/aocode-public.git</developerConnection>
-		<url>http://github.com/aoindustries/aocode-public</url>
+		<url>https://github.com/aoindustries/aocode-public</url>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -125,6 +126,42 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						<source>1.6</source>
 						<target>1.6</target>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.0.1</version>
+					<configuration>
+						<useDefaultDelimiters>false</useDefaultDelimiters>
+						<delimiters>
+							<!-- ${*} is JSP EL and shell scripts, so avoiding it -->
+							<!-- #{*} is JSP EL deferred, so avoiding it -->
+							<!-- @{*} selected over @*@, as it gives our developers a more consistent
+								 representation with JSP EL and shell scriptis -->
+							<delimiter>@{*}</delimiter>
+						</delimiters>
+					</configuration>
+					<executions>
+						<execution>
+							<id>default-resources</id>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>copy-resources</goal>
+							</goals>
+							<configuration>
+								<resources>
+									<resource>
+										<directory>src/main/resources</directory>
+									</resource>
+									<resource>
+										<directory>src/main/resources-filtered</directory>
+										<filtering>true</filtering>
+									</resource>
+								</resources>
+								<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -308,6 +345,64 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 								<goals>
 									<goal>jar</goal>
 								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.4</version>
+						<executions>
+							<execution>
+								<id>build.currentYear</id>
+								<phase>initialize</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+								<configuration>
+									<timestampFormat>yyyy</timestampFormat>
+									<timestampPropertyName>build.currentYear</timestampPropertyName>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>book-filtered-resources</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<resources>
+										<resource>
+											<directory>src/main/book-filtered</directory>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+									<outputDirectory>${project.build.directory}/book</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<version>3.0.2</version>
+						<executions>
+							<execution>
+								<id>attach-book</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<configuration>
+									<classifier>book</classifier>
+									<classesDirectory>${project.build.directory}/book</classesDirectory>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
