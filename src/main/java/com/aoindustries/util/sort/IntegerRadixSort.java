@@ -45,7 +45,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * Although a very different implementation, this topic is discussed at
  * {@link http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html}
- * with source provided at {@link https://github.com/gorset/radix/blob/master/Radix.java}
+ * with source provided at <a href="https://github.com/gorset/radix/blob/master/Radix.java">https://github.com/gorset/radix/blob/master/Radix.java</a>.
  *
  * TODO: For concurrent implementation: Might get better performance (due to cache
  * locality of reference) by flattening the two-dimensional fixed dimensions of
