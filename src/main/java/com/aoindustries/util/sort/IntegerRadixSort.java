@@ -44,7 +44,7 @@ import java.util.concurrent.ThreadFactory;
  * A radix sort implementation for numeric data, sorting by its integer representation.
  *
  * Although a very different implementation, this topic is discussed at
- * {@link http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html}
+ * <a href="http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html">http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html</a>
  * with source provided at <a href="https://github.com/gorset/radix/blob/master/Radix.java">https://github.com/gorset/radix/blob/master/Radix.java</a>.
  *
  * TODO: For concurrent implementation: Might get better performance (due to cache
