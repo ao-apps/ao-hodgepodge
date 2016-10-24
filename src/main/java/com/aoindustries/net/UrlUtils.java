@@ -52,8 +52,9 @@ public class UrlUtils {
 	};
 
 	/**
-	 * Encodes the URL up to the first ?, if present.  Does not encode
-	 * any characters in the set { '?', ':', '/', ';', '#', '+' }.
+	 * Encodes the URL up to trailing '?' or '#' (the first found of the two).
+	 * To avoid ambiguity, parameters and anchors must have been correctly encoded by the caller.
+	 * Does not encode any characters in the set { '?', ':', '/', ';', '#', '+' }.
 	 *
 	 * Encodes tel: (case-sensitive) urls by relacing spaces with hyphens.
 	 *
@@ -63,25 +64,33 @@ public class UrlUtils {
 		if(href.startsWith("tel:")) return href.replace(' ', '-');
 		int len = href.length();
 		int pos = 0;
-		StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
-		while(pos<len) {
-			int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
-			if(nextPos==-1) {
-				SB.append(URLEncoder.encode(href.substring(pos, len), encoding));
-				pos = len;
+		int stopAt;
+		{
+			int anchorAt = href.lastIndexOf('#');
+			int paramsAt = href.lastIndexOf('?', (anchorAt==-1 ? len : anchorAt) - 1);
+			if(paramsAt == -1) {
+				stopAt = anchorAt == -1 ? len : anchorAt;
 			} else {
-				SB.append(URLEncoder.encode(href.substring(pos, nextPos), encoding));
-				char nextChar = href.charAt(nextPos);
-				if(nextChar=='?') {
-					// End encoding
-					SB.append(href, nextPos, len);
-					pos = len;
-				} else {
-					SB.append(nextChar);
-					pos = nextPos+1;
-				}
+				stopAt = paramsAt;
 			}
 		}
+		StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
+		while(pos < stopAt) {
+			int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
+			if(nextPos == -1) {
+				SB.append(URLEncoder.encode(href.substring(pos, stopAt), encoding));
+				pos = len;
+			} else {
+				if(nextPos > stopAt) nextPos = stopAt;
+				SB.append(URLEncoder.encode(href.substring(pos, nextPos), encoding));
+				if(nextPos < stopAt) {
+					char nextChar = href.charAt(nextPos++);
+					SB.append(nextChar);
+				}
+				pos = nextPos;
+			}
+		}
+		SB.append(href, stopAt, len);
 		return SB.toString();
 	}
 
