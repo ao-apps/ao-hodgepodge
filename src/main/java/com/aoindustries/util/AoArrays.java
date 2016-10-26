@@ -703,4 +703,21 @@ public class AoArrays {
 
 		return result;
 	}
+
+	/**
+	 * Gets the maximum non-null value, or {@code null} if no non-null value.
+	 */
+	public static <T extends Comparable<? super T>> T maxNonNull(T ... values) {
+		T max = null;
+		for(T value : values) {
+			if(
+				value != null
+				&& (
+					max == null
+					|| value.compareTo(max) > 0
+				)
+			) max = value;
+		}
+		return max;
+	}
 }
