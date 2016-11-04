@@ -34,12 +34,12 @@ public class UrlUtilsTest {
 	@Test
 	public void testEncodeUrlPath() throws UnsupportedEncodingException {
 		assertEquals(
-			"https://www.aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do",
-			UrlUtils.encodeUrlPath("https://www.aointernet.net/shared/ホスティング.do", "UTF-8")
+			"https://aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do",
+			UrlUtils.encodeUrlPath("https://aointernet.net/shared/ホスティング.do", "UTF-8")
 		);
 		assertEquals(
-			"https://www.aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do?param=value",
-			UrlUtils.encodeUrlPath("https://www.aointernet.net/shared/ホスティング.do?param=value", "UTF-8")
+			"https://aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do?param=value",
+			UrlUtils.encodeUrlPath("https://aointernet.net/shared/ホスティング.do?param=value", "UTF-8")
 		);
 		assertEquals(
 			"Checking not double-encoding after #",
