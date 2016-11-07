@@ -200,6 +200,30 @@ public final class XmlUtils {
 	}
 
 	/**
+	 * Gets the child element for a tag name or {@code null} if not found.
+	 * Is an error if more than once child is found for the given name.
+	 *
+	 * @throws  IllegalStateException  if there is more than one child element with the given name
+	 */
+	public static Element getChildElementByTagName(Element element, String childTagName) {
+		Element matched = null;
+		{
+			NodeList children = element.getChildNodes();
+			for(int index=0, len=children.getLength(); index<len; index++) {
+				Node child = children.item(index);
+				if(child instanceof Element) {
+					Element childElem = (Element)child;
+					if(childTagName.equals(childElem.getTagName())) {
+						if(matched != null) throw new IllegalStateException("More than one child found: " + childTagName);
+						matched = childElem;
+					}
+				}
+			}
+		}
+		return matched;
+	}
+
+	/**
 	 * @deprecated  Use {@link #toString(org.w3c.dom.Node)} instead.
 	 */
 	@Deprecated
