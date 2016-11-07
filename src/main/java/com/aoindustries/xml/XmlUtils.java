@@ -199,7 +199,15 @@ public final class XmlUtils {
 		};
 	}
 
+	/**
+	 * @deprecated  Use {@link #toString(org.w3c.dom.Node)} instead.
+	 */
+	@Deprecated
 	public static String toString(Document document) throws TransformerConfigurationException, TransformerException {
+		return toString((Node)document);
+	}
+
+	public static String toString(Node node) throws TransformerConfigurationException, TransformerException {
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		transformerFactory.setAttribute("indent-number", 4);
 		Transformer transformer = transformerFactory.newTransformer();
@@ -208,7 +216,7 @@ public final class XmlUtils {
 		StringWriter writer = new StringWriter();
 		try {
 			transformer.transform(
-				new DOMSource(document),
+				new DOMSource(node),
 				new StreamResult(writer)
 			);
 		} finally {
