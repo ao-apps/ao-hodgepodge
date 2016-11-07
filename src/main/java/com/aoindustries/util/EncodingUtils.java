@@ -26,6 +26,14 @@ import com.aoindustries.util.i18n.BundleLookupMarkup;
 import com.aoindustries.util.i18n.BundleLookupThreadContext;
 import com.aoindustries.util.i18n.MarkupType;
 import java.io.IOException;
+import java.io.StringWriter;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Node;
 
 /**
  * Provides encoding and escaping for various type of data.
@@ -51,6 +59,23 @@ public final class EncodingUtils {
 		if(value instanceof String) return (String)value;
 		// Otherwise, if A is null, then the result is "".
 		if(value == null) return "";
+		// Otherwise, if is a DOM node, serialize the output
+		if(value instanceof Node) {
+			try {
+				// Can use thread-local or pooled transformers if performance is ever an issue
+				TransformerFactory transFactory = TransformerFactory.newInstance();
+				Transformer transformer = transFactory.newTransformer();
+				StringWriter buffer = new StringWriter();
+				transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+				transformer.transform(
+					new DOMSource((Node)value),
+					new StreamResult(buffer)
+				);
+				return buffer.toString();
+			} catch(TransformerException e) {
+				throw new WrappedException(e);
+			}
+		}
 		// Otherwise, if A.toString() throws an exception, then raise an error
 		String str = value.toString();
 		// Otherwise, the result is A.toString();

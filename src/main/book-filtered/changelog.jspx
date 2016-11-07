@@ -37,6 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
+		dateModified="2016-11-06T19:39:49-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT')}">
@@ -52,6 +53,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<li>Project documentation moved to per-project book in <ao:a href="https://semanticcms.com/">SemanticCMS</ao:a> format.</li>
 					<li>Added changelog as top-level project link.</li>
 					<li>Added utility to find the maximum non-null value.</li>
+					<li>Added support for XML DOM Node in toString type coercion.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
