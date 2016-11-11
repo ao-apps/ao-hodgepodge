@@ -82,7 +82,7 @@ public class TempFileList {
 
 	/**
 	 * Creates a new temp file while adding it to the list of files that will
-	 * be explicitely deleted when this list is deleted.
+	 * be explicitly deleted when this list is deleted.
 	 */
 	public TempFile createTempFile() throws IOException {
 		TempFile tempFile = new TempFile(prefix, suffix, directory);

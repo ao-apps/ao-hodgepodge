@@ -27,7 +27,7 @@ import java.io.IOException;
 
 /**
  * Holds a reference to a temp file.  Automatically deletes the file with
- * a finalizer, on JVM shutdown, or when <code>delete()</code> is explicitely
+ * a finalizer, on JVM shutdown, or when <code>delete()</code> is explicitly
  * called.
  *
  * @see  TempFileList  for a way to confine instance lifetime to a narrower scope than automatic garbage collection
