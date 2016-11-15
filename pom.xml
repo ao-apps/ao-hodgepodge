@@ -33,7 +33,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 
 	<groupId>com.aoindustries</groupId>
 	<artifactId>aocode-public</artifactId>
-	<version>1.8.4-SNAPSHOT</version>
+	<version>1.8.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>AOCode Public</name>
