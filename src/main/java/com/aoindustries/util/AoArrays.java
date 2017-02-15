@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2013, 2014, 2016  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013, 2014, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,15 +26,20 @@ import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.util.AoCollections.PeekIterator;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 // import org.checkthread.annotations.ThreadSafe;
 
 /**
@@ -719,5 +724,80 @@ public class AoArrays {
 			) max = value;
 		}
 		return max;
+	}
+
+	/**
+	 * Sorts parallel arrays in-place.  Sorts by the first array and updates
+	 * all other arrays to match.
+	 * Uses the natural sorting of the objects.
+	 * All arrays must be the same length.
+	 * <p>
+	 * The time complexity isn't too bad. Looks something like
+	 * {@code O((M+1)*N*log(N))}, where {@code M} is the number of otherArrays
+	 * and {@code N} is the number of keys. No crazy worst-case issues, at least.
+	 * </p>
+	 *
+	 * @param  keys         the values used to sort, may be duplicate
+	 *
+	 * @param  otherArrays  the arrays to have reordered to match the sorting of
+	 *                      the keys array.
+	 *
+	 * @exception  IllegalArgumentException  if any of otherArrays have a length
+	 *                      different that the keys array.
+	 */
+	public static <E extends Comparable<? super E>> void sortParallelArrays(
+		E[] keys,
+		Object[] ... otherArrays
+	) {
+		int numKeys = keys.length;
+		int numOtherArrays = otherArrays.length;
+		for(Object[] otherArray : otherArrays) {
+			if(otherArray.length != numKeys) {
+				throw new IllegalArgumentException("Mismatched array lengths");
+			}
+		}
+		// A list of all indexes per key
+		// This also does the sorting within the TreeMap using natural ordering
+		SortedMap<E, List<Integer>> originalIndexesByKey = new TreeMap<E, List<Integer>>();
+
+		// Populate the map
+		for(int i = 0; i < numKeys; i++) {
+			E key = keys[i];
+			List<Integer> originalIndexes = originalIndexesByKey.get(key);
+			if(originalIndexes == null) {
+				// Optimization for the non-duplicate keys
+				originalIndexesByKey.put(key, Collections.singletonList(i));
+			} else {
+				if(originalIndexes.size() == 1) {
+					// Upgrade to ArrayList now that know have duplicate keys
+					originalIndexes = new ArrayList<Integer>(originalIndexes);
+					originalIndexesByKey.put(key, originalIndexes);
+				}
+				originalIndexes.add(i);
+			}
+		}
+
+		// Store back to keys and sort other arrays in a single traversal
+		Object[][] sortedOtherArrays = new Object[numOtherArrays][numKeys];
+		int pos = 0;
+		for(Map.Entry<E, List<Integer>> entry : originalIndexesByKey.entrySet()) {
+			E key = entry.getKey();
+			for(int index : entry.getValue()) {
+				keys[pos] = key;
+				for(int ooIndex = 0; ooIndex < numOtherArrays; ooIndex++) {
+					sortedOtherArrays[ooIndex][pos] = otherArrays[ooIndex][index];
+				}
+				pos++;
+			}
+		}
+		assert pos == numKeys : "Arrays should be full";
+
+		// Copy back to original arrays for in-place sort
+		for(int ooIndex = 0; ooIndex < numOtherArrays; ooIndex++) {
+			System.arraycopy(
+				sortedOtherArrays[ooIndex], 0,
+				otherArrays[ooIndex], 0,
+				numKeys);
+		}
 	}
 }
