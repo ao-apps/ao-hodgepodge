@@ -1,6 +1,6 @@
 <!--
 aocode-public - Reusable Java library of general tools with minimal external dependencies.
-Copyright (C) 2016  AO Industries, Inc.
+Copyright (C) 2016, 2017  AO Industries, Inc.
     support@aoindustries.com
     7262 Bull Pen Cir
     Mobile, AL 36695
@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2016-11-15T02:48:59-0600"
+		dateModified="2017-02-14T21:49:12-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -52,7 +52,11 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{documented.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{documented.scm.url}"
-			/>
+			>
+				<ul>
+					<li>New <code>AoArrays.sortParallelArrays</code> method to sort parallel arrays.</li>
+				</ul>
+			</changelog:release>
 		</c:if>
 
 		<changelog:release
