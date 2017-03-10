@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util;
 
+import java.lang.ref.SoftReference;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
@@ -44,8 +45,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>
  * Buffers should not be passed between threads.
  * Giving a thread a buffer you didn't get from it could result in a memory or information leak.
- * The number of buffers per thread is limited to avoid a complete runaway memory leak, but keeping
- * buffers to a single thread is optimal.
+ * Soft references are used to avoid full-on memory leaks, but keeping buffers to a single thread
+ * is optimal.
  * </p>
  * <p>
  * Under no circumstances should a buffer be released more than once.  This may result
@@ -69,22 +70,17 @@ final public class BufferManager {
 	 */
 	public static final int BUFFER_SIZE = 4096;
 
-	/**
-	 * The maximum number of retained buffers per thread.
-	 */
-	private static final int MAX_BUFFERS_PER_THREAD = 32;
-
-	private static final ThreadLocal<Deque<byte[]>> bytes = new ThreadLocal<Deque<byte[]>>() {
+	private static final ThreadLocal<Deque<SoftReference<byte[]>>> bytes = new ThreadLocal<Deque<SoftReference<byte[]>>>() {
 		@Override
-		public Deque<byte[]> initialValue() {
-			return new ArrayDeque<byte[]>(MAX_BUFFERS_PER_THREAD);
+		public Deque<SoftReference<byte[]>> initialValue() {
+			return new ArrayDeque<SoftReference<byte[]>>();
 		}
 	};
 
-	private static final ThreadLocal<Deque<char[]>> chars = new ThreadLocal<Deque<char[]>>() {
+	private static final ThreadLocal<Deque<SoftReference<char[]>>> chars = new ThreadLocal<Deque<SoftReference<char[]>>>() {
 		@Override
-		public Deque<char[]> initialValue() {
-			return new ArrayDeque<char[]>(MAX_BUFFERS_PER_THREAD);
+		public Deque<SoftReference<char[]>> initialValue() {
+			return new ArrayDeque<SoftReference<char[]>>();
 		}
 	};
 
@@ -100,12 +96,12 @@ final public class BufferManager {
 	private static final AtomicLong
 		bytesCreates = new AtomicLong(),
 		bytesUses = new AtomicLong(),
-		bytesDiscards = new AtomicLong(),
 		bytesZeroFills = new AtomicLong(),
+		bytesCollected = new AtomicLong(),
 		charsCreates = new AtomicLong(),
 		charsUses = new AtomicLong(),
-		charsDiscards = new AtomicLong(),
-		charsZeroFills = new AtomicLong()
+		charsZeroFills = new AtomicLong(),
+		charsCollected = new AtomicLong()
 	;
 
 	/**
@@ -117,12 +113,18 @@ final public class BufferManager {
 	 */
 	public static byte[] getBytes() {
 		bytesUses.getAndIncrement();
-		byte[] buffer = bytes.get().poll();
-		if(buffer == null) {
-			bytesCreates.getAndIncrement();
-			buffer = new byte[BUFFER_SIZE];
+		Deque<SoftReference<byte[]>> myBytes = bytes.get();
+		while(true) {
+			SoftReference<byte[]> bufferRef = myBytes.poll();
+			if(bufferRef != null) {
+				byte[] buffer = bufferRef.get();
+				if(buffer != null) return buffer;
+				bytesCollected.getAndIncrement();
+			} else {
+				bytesCreates.getAndIncrement();
+				return new byte[BUFFER_SIZE];
+			}
 		}
-		return buffer;
 	}
 
 	/**
@@ -134,12 +136,18 @@ final public class BufferManager {
 	 */
 	public static char[] getChars() {
 		charsUses.getAndIncrement();
-		char[] buffer = chars.get().poll();
-		if(buffer == null) {
-			charsCreates.getAndIncrement();
-			buffer = new char[BUFFER_SIZE];
+		Deque<SoftReference<char[]>> myChars = chars.get();
+		while(true) {
+			SoftReference<char[]> bufferRef = myChars.poll();
+			if(bufferRef != null) {
+				char[] buffer = bufferRef.get();
+				if(buffer != null) return buffer;
+				charsCollected.getAndIncrement();
+			} else {
+				charsCreates.getAndIncrement();
+				return new char[BUFFER_SIZE];
+			}
 		}
-		return buffer;
 	}
 
 	/**
@@ -158,21 +166,17 @@ final public class BufferManager {
 	 * @param  zeroFill  if the data in the buffer may be sensitive, it is best to zero-fill the buffer on release.
 	 */
 	public static void release(byte[] buffer, boolean zeroFill) {
-		Deque<byte[]> myBytes = bytes.get();
+		Deque<SoftReference<byte[]>> myBytes = bytes.get();
 		if(buffer.length != BUFFER_SIZE) throw new IllegalArgumentException();
 		assert !inQueue(myBytes, buffer); // Error if already in the buffer list
-		if(myBytes.size() >= MAX_BUFFERS_PER_THREAD) {
-			bytesDiscards.getAndIncrement();
-		} else {
-			if(zeroFill) {
-				bytesZeroFills.getAndIncrement();
-				Arrays.fill(buffer, 0, BUFFER_SIZE, (byte)0);
-			}
-			myBytes.add(buffer);
+		if(zeroFill) {
+			bytesZeroFills.getAndIncrement();
+			Arrays.fill(buffer, 0, BUFFER_SIZE, (byte)0);
 		}
+		myBytes.add(new SoftReference<byte[]>(buffer));
 	}
-	private static boolean inQueue(Iterable<byte[]> myBytes, byte[] buffer) {
-		for(byte[] inQueue : myBytes) if(inQueue==buffer) return true;
+	private static boolean inQueue(Iterable<SoftReference<byte[]>> myBytes, byte[] buffer) {
+		for(SoftReference<byte[]> inQueue : myBytes) if(inQueue.get() == buffer) return true;
 		return false;
 	}
 
@@ -192,21 +196,17 @@ final public class BufferManager {
 	 * @param  zeroFill  if the data in the buffer may be sensitive, it is best to zero-fill the buffer on release.
 	 */
 	public static void release(char[] buffer, boolean zeroFill) {
-		Deque<char[]> myChars = chars.get();
+		Deque<SoftReference<char[]>> myChars = chars.get();
 		if(buffer.length != BUFFER_SIZE) throw new IllegalArgumentException();
 		assert !inQueue(myChars, buffer); // Error if already in the buffer list
-		if(myChars.size() >= MAX_BUFFERS_PER_THREAD) {
-			charsDiscards.getAndIncrement();
-		} else {
-			if(zeroFill) {
-				charsZeroFills.getAndIncrement();
-				Arrays.fill(buffer, 0, BUFFER_SIZE, (char)0);
-			}
-			myChars.add(buffer);
+		if(zeroFill) {
+			charsZeroFills.getAndIncrement();
+			Arrays.fill(buffer, 0, BUFFER_SIZE, (char)0);
 		}
+		myChars.add(new SoftReference<char[]>(buffer));
 	}
-	private static boolean inQueue(Iterable<char[]> myChars, char[] buffer) {
-		for(char[] inQueue : myChars) if(inQueue == buffer) return true;
+	private static boolean inQueue(Iterable<SoftReference<char[]>> myChars, char[] buffer) {
+		for(SoftReference<char[]> inQueue : myChars) if(inQueue.get() == buffer) return true;
 		return false;
 	}
 
@@ -225,17 +225,17 @@ final public class BufferManager {
 	}
 
 	/**
-	 * Gets the number of time {@code byte[]} buffers have been discarded on release.
-	 */
-	public static long getByteBufferDiscards() {
-		return bytesDiscards.get();
-	}
-
-	/**
 	 * Gets the number of time {@code byte[]} buffers have been zero-filled on release.
 	 */
 	public static long getByteBufferZeroFills() {
 		return bytesZeroFills.get();
+	}
+
+	/**
+	 * Gets the number of {@code byte[]} buffers detected to have been garbage collected.
+	 */
+	public static long getByteBuffersCollected() {
+		return bytesCollected.get();
 	}
 
 	/**
@@ -253,16 +253,16 @@ final public class BufferManager {
 	}
 
 	/**
-	 * Gets the number of time {@code char[]} buffers have been discarded on release.
-	 */
-	public static long getCharBufferDiscards() {
-		return charsDiscards.get();
-	}
-
-	/**
 	 * Gets the number of time {@code char[]} buffers have been zero-filled on release.
 	 */
 	public static long getCharBufferZeroFills() {
 		return charsZeroFills.get();
+	}
+
+	/**
+	 * Gets the number of {@code char[]} buffers detected to have been garbage collected.
+	 */
+	public static long getCharBuffersCollected() {
+		return charsCollected.get();
 	}
 }
