@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -64,56 +64,24 @@ public class ProcessResult {
 		// Close the input immediately
 		process.getOutputStream().close();
 
-		// Read stdout in background thread
-		final StringBuilder stdout = new StringBuilder();
-		final IOException[] stdoutException = new IOException[1];
-		Thread stdoutThread = new Thread(
-			new Runnable() {
-				@Override
-				public void run() {
-					try {
-						Reader stdoutIn = new InputStreamReader(process.getInputStream(), charset);
-						try {
-							char[] buff = BufferManager.getChars();
-							try {
-								int count;
-								while((count=stdoutIn.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-									synchronized(stdout) {
-										stdout.append(buff, 0, count);
-									}
-								}
-							} finally {
-								BufferManager.release(buff, false);
-							}
-						} finally {
-							stdoutIn.close();
-						}
-					} catch(IOException exc) {
-						synchronized(stdoutException) {
-							stdoutException[0] = exc;
-						}
-					}
-				}
-			}
-		);
-		stdoutThread.start();
-
 		// Read stderr in background thread
-		final StringBuilder stderr = new StringBuilder();
+		final String[] stderrWrapper = new String[1];
 		final IOException[] stderrException = new IOException[1];
 		Thread stderrThread = new Thread(
 			new Runnable() {
 				@Override
 				public void run() {
+					StringBuilder stderrBuilder = null; // Instantiated when first needed
 					try {
 						Reader stderrIn = new InputStreamReader(process.getErrorStream(), charset);
 						try {
 							char[] buff = BufferManager.getChars();
 							try {
 								int count;
-								while((count=stderrIn.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-									synchronized(stderr) {
-										stderr.append(buff, 0, count);
+								while((count = stderrIn.read(buff, 0, BufferManager.BUFFER_SIZE)) != -1) {
+									if(count > 0) {
+										if(stderrBuilder == null) stderrBuilder = new StringBuilder(Math.max(count, 16));
+										stderrBuilder.append(buff, 0, count);
 									}
 								}
 							} finally {
@@ -126,6 +94,10 @@ public class ProcessResult {
 						synchronized(stderrException) {
 							stderrException[0] = exc;
 						}
+					} finally {
+						synchronized(stderrWrapper) {
+							stderrWrapper[0] = stderrBuilder==null ? "" : stderrBuilder.toString();
+						}
 					}
 				}
 			}
@@ -133,8 +105,30 @@ public class ProcessResult {
 		stderrThread.start();
 
 		try {
-			// Wait for full read of stdout
-			stdoutThread.join();
+			// Read stdout in current thread
+			StringBuilder stdoutBuilder = null; // Instantiated when first needed
+			IOException stdoutException = null;
+			try {
+				Reader stdoutIn = new InputStreamReader(process.getInputStream(), charset);
+				try {
+					char[] buff = BufferManager.getChars();
+					try {
+						int count;
+						while((count = stdoutIn.read(buff, 0, BufferManager.BUFFER_SIZE)) != -1) {
+							if(count > 0) {
+								if(stdoutBuilder == null) stdoutBuilder = new StringBuilder(Math.max(count, 16));
+								stdoutBuilder.append(buff, 0, count);
+							}
+						}
+					} finally {
+						BufferManager.release(buff, false);
+					}
+				} finally {
+					stdoutIn.close();
+				}
+			} catch(IOException exc) {
+				stdoutException = exc;
+			}
 
 			// Wait for full read of stderr
 			stderrThread.join();
@@ -143,28 +137,25 @@ public class ProcessResult {
 			int exitVal = process.waitFor();
 
 			// Check for exceptions in threads
-			synchronized(stdoutException) {
-				if(stdoutException[0]!=null) throw stdoutException[0];
-			}
+			if(stdoutException != null) throw stdoutException;
 			synchronized(stderrException) {
-				if(stderrException[0]!=null) throw stderrException[0];
+				if(stderrException[0] != null) throw stderrException[0];
 			}
 
 			// Get output
-			String stdoutStr;
-			synchronized(stdout) {
-				stdoutStr = stdout.toString();
+			String stdout = stdoutBuilder==null ? "" : stdoutBuilder.toString();
+			// Get error from background thread
+			String stderr;
+			synchronized(stderrWrapper) {
+				stderr = stderrWrapper[0];
 			}
-			String stderrStr;
-			synchronized(stderr) {
-				stderrStr = stderr.toString();
-			}
+			if(stderr == null) stderr = "";
 
 			// Return results
 			return new ProcessResult(
 				exitVal,
-				stdoutStr,
-				stderrStr
+				stdout,
+				stderr
 			);
 		} catch(InterruptedException err) {
 			// Restore the interrupted status
