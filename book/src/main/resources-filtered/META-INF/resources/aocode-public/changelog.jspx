@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-03-10T16:09:00-0600"
+		dateModified="2017-03-10T16:35:32-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -62,6 +62,13 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li>Delays the allocation of <code>StringBuilder</code> objects until needed.</li>
 							<li>Provides an appropriate starting buffer size to the <code>StringBuilder</code> objects.</li>
 							<li>Reduces the amount of <code>synchronization</code>.</li>
+						</ol>
+					</li>
+					<li><code>BufferManager</code> improvements:
+						<ol>
+							<li>Internally limits the number of per-thread buffers to avoid potential runaway memory leaks.</li>
+							<li>Provides additional statistics including the number of buffers discarded and zero-filled.</li>
+							<li>Javadoc comment improvements.</li>
 						</ol>
 					</li>
 				</ul>
