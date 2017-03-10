@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-02-15T02:49:13-0600"
+		dateModified="2017-03-10T16:09:00-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -56,6 +56,14 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<ul>
 					<li>New <code>AoArrays.sortParallelArrays</code> method to sort parallel arrays.</li>
 					<li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
+					<li><code>ProcessResult</code> improvements:
+						<ol>
+							<li>Now uses only one additional thread to read standard error.</li>
+							<li>Delays the allocation of <code>StringBuilder</code> objects until needed.</li>
+							<li>Provides an appropriate starting buffer size to the <code>StringBuilder</code> objects.</li>
+							<li>Reduces the amount of <code>synchronization</code>.</li>
+						</ol>
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
