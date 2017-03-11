@@ -56,17 +56,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<ul>
 					<li>New <code>AoArrays.sortParallelArrays</code> method to sort parallel arrays.</li>
 					<li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
-					<li><code>ProcessResult</code> improvements:
-						<ol>
-							<li>Now uses only one additional thread to read standard error.</li>
-							<li>Delays the allocation of <code>StringBuilder</code> objects until needed.</li>
-							<li>Provides an appropriate starting buffer size to the <code>StringBuilder</code> objects.</li>
-							<li>Reduces the amount of <code>synchronization</code>.</li>
-						</ol>
-					</li>
 					<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
 						<ol>
 							<li><code>com.aoindustries.lang.ObjectUtils</code></li>
+							<li><code>com.aoindustries.lang.ProcessResult</code></li>
 							<li><code>com.aoindustries.util.BufferManager</code></li>
 						</ol>
 					</li>
