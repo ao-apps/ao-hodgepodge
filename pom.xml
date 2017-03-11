@@ -61,6 +61,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<configuration>
 								<links>
 									<link>https://docs.oracle.com/javaee/6/api/</link>
+									<link>https://aoindustries.com/ao-lang/apidocs/</link>
 								</links>
 							</configuration>
 						</plugin>
