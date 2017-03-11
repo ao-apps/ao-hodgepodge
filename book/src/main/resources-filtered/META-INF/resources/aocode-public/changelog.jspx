@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-03-10T17:16:19-0600"
+		dateModified="2017-03-10T19:10:05-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -64,11 +64,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li>Reduces the amount of <code>synchronization</code>.</li>
 						</ol>
 					</li>
-					<li><code>BufferManager</code> improvements:
+					<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
 						<ol>
-							<li>Uses soft references to avoid potential runaway memory leaks.</li>
-							<li>Provides additional statistics including the number of buffers zero-filled and detected as garbage collected.</li>
-							<li>Javadoc comment improvements.</li>
+							<li><code>com.aoindustries.lang.ObjectUtils</code></li>
+							<li><code>com.aoindustries.util.BufferManager</code></li>
 						</ol>
 					</li>
 				</ul>
