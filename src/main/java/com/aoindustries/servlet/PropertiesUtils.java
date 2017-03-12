@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,7 +23,7 @@
 package com.aoindustries.servlet;
 
 import com.aoindustries.io.LocalizedIOException;
-import static com.aoindustries.util.ApplicationResources.accessor;
+import static com.aoindustries.util.ApplicationResourcesAccessor.accessor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;

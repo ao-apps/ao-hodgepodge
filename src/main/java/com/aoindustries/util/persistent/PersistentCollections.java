@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.IoUtils;
 import com.aoindustries.util.BufferManager;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -51,158 +52,135 @@ public class PersistentCollections {
 	private PersistentCollections() {
 	}
 
-	// <editor-fold desc="Protected byte[] manipulation methods">
-	// @ThreadSafe
+	// <editor-fold desc="byte[] manipulation methods">
+	/**
+	 * @deprecated Use {@link IoUtils#charToBuffer(char, byte[])} directly.
+	 */
+	@Deprecated
 	public static void charToBuffer(char ch, byte[] ioBuffer) {
-		ioBuffer[0] = (byte)(ch >>> 8);
-		ioBuffer[1] = (byte)ch;
+		IoUtils.charToBuffer(ch, ioBuffer);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#charToBuffer(char, byte[], int)} directly.
+	 */
+	@Deprecated
 	public static void charToBuffer(char ch, byte[] ioBuffer, int off) {
-		ioBuffer[off] = (byte)(ch >>> 8);
-		ioBuffer[off+1] = (byte)ch;
+		IoUtils.charToBuffer(ch, ioBuffer, off);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#bufferToChar(byte[])} directly.
+	 */
+	@Deprecated
 	public static char bufferToChar(byte[] ioBuffer) {
-		return
-			(char)(
-				(ioBuffer[0]<<8)
-				| (ioBuffer[1]&255)
-			)
-		;
+		return IoUtils.bufferToChar(ioBuffer);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#bufferToChar(byte[], int)} directly.
+	 */
+	@Deprecated
 	public static char bufferToChar(byte[] ioBuffer, int off) {
-		return
-			(char)(
-				(ioBuffer[off+0] << 8)
-				| (ioBuffer[off+1]&255)
-			)
-		;
+		return IoUtils.bufferToChar(ioBuffer, off);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#shortToBuffer(short, byte[])} directly.
+	 */
+	@Deprecated
 	public static void shortToBuffer(short s, byte[] ioBuffer) {
-		ioBuffer[0] = (byte)(s >>> 8);
-		ioBuffer[1] = (byte)s;
+		IoUtils.shortToBuffer(s, ioBuffer);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#shortToBuffer(short, byte[], int)} directly.
+	 */
+	@Deprecated
 	public static void shortToBuffer(short s, byte[] ioBuffer, int off) {
-		ioBuffer[off] = (byte)(s >>> 8);
-		ioBuffer[off+1] = (byte)s;
+		IoUtils.shortToBuffer(s, ioBuffer, off);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#bufferToShort(byte[])} directly.
+	 */
+	@Deprecated
 	public static short bufferToShort(byte[] ioBuffer) {
-		return
-			(short)(
-				(ioBuffer[0] << 8)
-				| (ioBuffer[1]&255)
-			)
-		;
+		return IoUtils.bufferToShort(ioBuffer);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#bufferToShort(byte[], int)} directly.
+	 */
+	@Deprecated
 	public static short bufferToShort(byte[] ioBuffer, int off) {
-		return
-			(short)(
-				(ioBuffer[off+0] << 8)
-				| (ioBuffer[off+1]&255)
-			)
-		;
+		return IoUtils.bufferToShort(ioBuffer, off);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#intToBuffer(int, byte[])} directly.
+	 */
+	@Deprecated
 	public static void intToBuffer(int i, byte[] ioBuffer) {
-		ioBuffer[0] = (byte)(i >>> 24);
-		ioBuffer[1] = (byte)(i >>> 16);
-		ioBuffer[2] = (byte)(i >>> 8);
-		ioBuffer[3] = (byte)i;
+		IoUtils.intToBuffer(i, ioBuffer);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#intToBuffer(int, byte[], int)} directly.
+	 */
+	@Deprecated
 	public static void intToBuffer(int i, byte[] ioBuffer, int off) {
-		ioBuffer[off] = (byte)(i >>> 24);
-		ioBuffer[off+1] = (byte)(i >>> 16);
-		ioBuffer[off+2] = (byte)(i >>> 8);
-		ioBuffer[off+3] = (byte)i;
+		IoUtils.intToBuffer(i, ioBuffer, off);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#bufferToInt(byte[])} directly.
+	 */
+	@Deprecated
 	public static int bufferToInt(byte[] ioBuffer) {
-		return
-			  (ioBuffer[0] << 24)
-			+ ((ioBuffer[1]&255) << 16)
-			+ ((ioBuffer[2]&255) << 8)
-			+ (ioBuffer[3]&255)
-		;
+		return IoUtils.bufferToInt(ioBuffer);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#bufferToInt(byte[], int)} directly.
+	 */
+	@Deprecated
 	public static int bufferToInt(byte[] ioBuffer, int off) {
-		return
-			  (ioBuffer[off] << 24)
-			+ ((ioBuffer[off+1]&255) << 16)
-			+ ((ioBuffer[off+2]&255) << 8)
-			+ (ioBuffer[off+3]&255)
-		;
+		return IoUtils.bufferToInt(ioBuffer, off);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#longToBuffer(long, byte[])} directly.
+	 */
+	@Deprecated
 	public static void longToBuffer(long l, byte[] ioBuffer) {
-		ioBuffer[0] = (byte)(l >>> 56);
-		ioBuffer[1] = (byte)(l >>> 48);
-		ioBuffer[2] = (byte)(l >>> 40);
-		ioBuffer[3] = (byte)(l >>> 32);
-		ioBuffer[4] = (byte)(l >>> 24);
-		ioBuffer[5] = (byte)(l >>> 16);
-		ioBuffer[6] = (byte)(l >>> 8);
-		ioBuffer[7] = (byte)l;
+		IoUtils.longToBuffer(l, ioBuffer);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#longToBuffer(long, byte[], int)} directly.
+	 */
+	@Deprecated
 	public static void longToBuffer(long l, byte[] ioBuffer, int off) {
-		ioBuffer[off] = (byte)(l >>> 56);
-		ioBuffer[off+1] = (byte)(l >>> 48);
-		ioBuffer[off+2] = (byte)(l >>> 40);
-		ioBuffer[off+3] = (byte)(l >>> 32);
-		ioBuffer[off+4] = (byte)(l >>> 24);
-		ioBuffer[off+5] = (byte)(l >>> 16);
-		ioBuffer[off+6] = (byte)(l >>> 8);
-		ioBuffer[off+7] = (byte)l;
+		IoUtils.longToBuffer(l, ioBuffer, off);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#bufferToLong(byte[])} directly.
+	 */
+	@Deprecated
 	public static long bufferToLong(byte[] ioBuffer) {
-		return
-			  ((ioBuffer[0]&255L) << 56)
-			+ ((ioBuffer[1]&255L) << 48)
-			+ ((ioBuffer[2]&255L) << 40)
-			+ ((ioBuffer[3]&255L) << 32)
-			+ ((ioBuffer[4]&255L) << 24)
-			+ ((ioBuffer[5]&255L) << 16)
-			+ ((ioBuffer[6]&255L) << 8)
-			+ (ioBuffer[7]&255L)
-		;
+		return IoUtils.bufferToLong(ioBuffer);
 	}
 
-	// @ThreadSafe
+	/**
+	 * @deprecated Use {@link IoUtils#bufferToLong(byte[], int)} directly.
+	 */
+	@Deprecated
 	public static long bufferToLong(byte[] ioBuffer, int off) {
-		return
-			  ((ioBuffer[off  ]&255L) << 56)
-			+ ((ioBuffer[off+1]&255L) << 48)
-			+ ((ioBuffer[off+2]&255L) << 40)
-			+ ((ioBuffer[off+3]&255L) << 32)
-			+ ((ioBuffer[off+4]&255L) << 24)
-			+ ((ioBuffer[off+5]&255L) << 16)
-			+ ((ioBuffer[off+6]&255L) << 8)
-			+ (ioBuffer[off+7]&255L)
-		;
+		return IoUtils.bufferToLong(ioBuffer, off);
 	}
+	// </editor-fold>
 
 	/**
 	 * The value is never modified therefore thread safe.
@@ -357,7 +335,6 @@ public class PersistentCollections {
 		}
 		if(count>0) buffer.put(zeros, 0, (int)count);
 	}*/
-	// </editor-fold>
 
 	/**
 	 * Selects the most efficient temporary <code>PersistentBuffer</code> for the current
