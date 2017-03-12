@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,6 +23,7 @@
 package com.aoindustries.util.i18n;
 
 import java.util.IdentityHashMap;
+import java.util.Locale;
 
 /**
  * <p>
@@ -61,6 +62,28 @@ final public class BundleLookupThreadContext {
 	 */
 	public static void removeThreadContext() {
 		threadContext.set(null);
+	}
+
+	/**
+	 * Register a listener on {@link ApplicationResourcesAccessor}
+	 */
+	static {
+		ApplicationResourcesAccessor.addListener(
+			new ApplicationResourcesAccessor.Listener() {
+				@Override
+				public void onGetMessage(ApplicationResourcesAccessor accessor, Locale locale, String key, Object[] args, String resource, String result) {
+					// Copy any lookup markup to the newly generated string
+					BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
+					if(threadContext != null) {
+						BundleLookupMarkup lookupMarkup = threadContext.getLookupMarkup(resource);
+						threadContext.addLookupMarkup(
+							result, // This string is already a new instance and therefore is already unique by identity
+							lookupMarkup
+						);
+					}
+				}
+			}
+		);
 	}
 
 	private final IdentityHashMap<String,BundleLookupMarkup> lookupResults = new IdentityHashMap<String,BundleLookupMarkup>();;

@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-03-10T19:10:05-0600"
+		dateModified="2017-03-12T17:54:37-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -54,13 +54,97 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				scmUrl="@{documented.scm.url}"
 			>
 				<ul>
-					<li>New <code>AoArrays.sortParallelArrays</code> method to sort parallel arrays.</li>
 					<li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
 					<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
 						<ol>
+							<li><code>com.aoindustries.io.AoByteArrayInputStream</code></li>
+							<li><code>com.aoindustries.io.AoByteArrayOutputStream</code></li>
+							<li><code>com.aoindustries.io.AoCharArrayWriter</code></li>
+							<li><code>com.aoindustries.io.Encoder</code></li>
+							<li><code>com.aoindustries.io.EncoderWriter</code></li>
+							<li><code>com.aoindustries.io.FastExternalizable</code></li>
+							<li><code>com.aoindustries.io.FastObjectInput</code></li>
+							<li><code>com.aoindustries.io.FastObjectOutput</code></li>
+							<li><code>com.aoindustries.io.FileUtils</code></li>
+							<li><code>com.aoindustries.io.IoUtils</code></li>
+							<li><code>com.aoindustries.io.LocalizedIOException</code></li>
+							<li><code>com.aoindustries.io.NullOutputStream</code></li>
+							<li><code>com.aoindustries.io.NullPrintWriter</code></li>
+							<li><code>com.aoindustries.io.NullWriter</code></li>
+							<li><code>com.aoindustries.io.SniffInputStream</code></li>
+							<li><code>com.aoindustries.io.Writable</code></li>
+							<li><code>com.aoindustries.io.WriterFacade</code></li>
+							<li><code>com.aoindustries.io.WriterOutputStream</code></li>
+							<li><code>com.aoindustries.lang.Disposable</code></li>
+							<li><code>com.aoindustries.lang.DisposedException</code></li>
+							<li><code>com.aoindustries.lang.EnumUtils</code></li>
+							<li><code>com.aoindustries.lang.LocalizedIllegalArgumentException</code></li>
+							<li><code>com.aoindustries.lang.NotImplementedException</code></li>
+							<li><code>com.aoindustries.lang.NullArgumentException</code></li>
 							<li><code>com.aoindustries.lang.ObjectUtils</code></li>
 							<li><code>com.aoindustries.lang.ProcessResult</code></li>
+							<li><code>com.aoindustries.lang.RuntimeUtils</code></li>
+							<li><code>com.aoindustries.lang.SysExits</code></li>
+							<li><code>com.aoindustries.lang.reflect.Methods</code></li>
+							<li><code>com.aoindustries.lang.reflect.ReflectionException</code></li>
+							<li><code>com.aoindustries.math.BigFraction</code></li>
+							<li><code>com.aoindustries.math.LongLong</code></li>
+							<li><code>com.aoindustries.math.NullMath</code></li>
+							<li><code>com.aoindustries.math.SafeMath</code></li>
+							<li><code>com.aoindustries.math.Statistics</code></li>
+							<li><code>com.aoindustries.math.UnsignedLong</code></li>
+							<li><code>com.aoindustries.nio.charset.Charsets</code></li>
+							<li><code>com.aoindustries.security.HashedKey</code></li>
+							<li><code>com.aoindustries.security.HashedPassword</code></li>
+							<li><code>com.aoindustries.security.Identifier</code></li>
+							<li><code>com.aoindustries.security.SmallIdentifier</code></li>
+							<li><code>com.aoindustries.sql.LocalizedSQLException</code></li>
+							<li><code>com.aoindustries.sql.UnmodifiableTimestamp</code></li>
+							<li><code>com.aoindustries.sql.WrappedSQLException</code></li>
+							<li><code>com.aoindustries.text.MessageFormatFactory</code></li>
+							<li><code>com.aoindustries.text.SmartComparator</code></li>
+							<li><code>com.aoindustries.text.UnmodifiableMessageFormat</code></li>
+							<li><code>com.aoindustries.time.Clock</code></li>
+							<li><code>com.aoindustries.time.Duration</code></li>
+							<li><code>com.aoindustries.time.Instant</code></li>
+							<li><code>com.aoindustries.util.AoArrays</code></li>
+							<li><code>com.aoindustries.util.AoCollections</code></li>
+							<li><code>com.aoindustries.util.AtomicSequence</code></li>
 							<li><code>com.aoindustries.util.BufferManager</code></li>
+							<li><code>com.aoindustries.util.CalendarUtils</code></li>
+							<li><code>com.aoindustries.util.ComparatorUtils</code></li>
+							<li><code>com.aoindustries.util.EnumerationIterator</code></li>
+							<li><code>com.aoindustries.util.ErrorPrinter</code></li>
+							<li><code>com.aoindustries.util.GetOpt</code></li>
+							<li><code>com.aoindustries.util.HashCodeComparator</code></li>
+							<li><code>com.aoindustries.util.IdentityKey</code></li>
+							<li><code>com.aoindustries.util.InternUtils</code></li>
+							<li><code>com.aoindustries.util.Internable</code></li>
+							<li><code>com.aoindustries.util.MinimalList</code></li>
+							<li><code>com.aoindustries.util.MinimalMap</code></li>
+							<li><code>com.aoindustries.util.PropertiesUtils</code></li>
+							<li><code>com.aoindustries.util.Sequence</code></li>
+							<li><code>com.aoindustries.util.SortedProperties</code></li>
+							<li><code>com.aoindustries.util.UnmodifiableCalendar</code></li>
+							<li><code>com.aoindustries.util.UnmodifiableDate</code></li>
+							<li><code>com.aoindustries.util.UnsynchronizedSequence</code></li>
+							<li><code>com.aoindustries.util.WrappedException</code></li>
+							<li><code>com.aoindustries.util.WrappedExceptions</code></li>
+							<li><code>com.aoindustries.util.concurrent.ThreadLocalCallable</code></li>
+							<li><code>com.aoindustries.util.concurrent.ThreadLocalRunnable</code></li>
+							<li><code>com.aoindustries.util.concurrent.ThreadLocalsCallable</code></li>
+							<li><code>com.aoindustries.util.concurrent.ThreadLocalsRunnable</code></li>
+							<li><code>com.aoindustries.util.i18n.ApplicationResourcesAccessor</code></li>
+							<li><code>com.aoindustries.util.i18n.CurrencyComparator</code></li>
+							<li><code>com.aoindustries.util.i18n.LocaleComparator</code></li>
+							<li><code>com.aoindustries.util.i18n.LocaleString</code></li>
+							<li><code>com.aoindustries.util.i18n.Locales</code></li>
+							<li><code>com.aoindustries.util.i18n.Money</code></li>
+							<li><code>com.aoindustries.util.i18n.ThreadLocale</code></li>
+							<li><code>com.aoindustries.util.zip.CorrectedGZIPInputStream</code></li>
+							<li><code>com.aoindustries.util.zip.ZipEntryFilter</code></li>
+							<li><code>com.aoindustries.util.zip.ZipUtils</code></li>
+							<li><code>com.aoindustries.xml.XmlUtils</code></li>
 						</ol>
 					</li>
 				</ul>
