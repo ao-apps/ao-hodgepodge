@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -54,7 +54,7 @@ public class FloatSerializer implements Serializer<Float> {
 	// @NotThreadSafe
 	@Override
 	public void serialize(Float value, OutputStream out) throws IOException {
-		PersistentCollections.intToBuffer(Float.floatToRawIntBits(value), buffer);
+		IoUtils.intToBuffer(Float.floatToRawIntBits(value), buffer);
 		out.write(buffer, 0, 4);
 	}
 
@@ -62,6 +62,6 @@ public class FloatSerializer implements Serializer<Float> {
 	@Override
 	public Float deserialize(InputStream in) throws IOException {
 		IoUtils.readFully(in, buffer, 0, 4);
-		return Float.intBitsToFloat(PersistentCollections.bufferToInt(buffer));
+		return Float.intBitsToFloat(IoUtils.bufferToInt(buffer));
 	}
 }

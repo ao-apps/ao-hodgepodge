@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.IoUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -101,7 +102,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
 	@Override
 	public int getInt(long position) throws IOException {
 		get(position, ioBuffer, 0, 4);
-		return PersistentCollections.bufferToInt(ioBuffer);
+		return IoUtils.bufferToInt(ioBuffer);
 	}
 
 	/**
@@ -113,7 +114,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
 	@Override
 	public long getLong(long position) throws IOException {
 		get(position, ioBuffer, 0, 8);
-		return PersistentCollections.bufferToLong(ioBuffer);
+		return IoUtils.bufferToLong(ioBuffer);
 	}
 
 	/**
@@ -138,7 +139,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
 	// @NotThreadSafe
 	@Override
 	public void putInt(long position, int value) throws IOException {
-		PersistentCollections.intToBuffer(value, ioBuffer);
+		IoUtils.intToBuffer(value, ioBuffer);
 		put(position, ioBuffer, 0, 4);
 	}
 
@@ -150,7 +151,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
 	// @NotThreadSafe
 	@Override
 	public void putLong(long position, long value) throws IOException {
-		PersistentCollections.longToBuffer(value, ioBuffer);
+		IoUtils.longToBuffer(value, ioBuffer);
 		put(position, ioBuffer, 0, 8);
 	}
 

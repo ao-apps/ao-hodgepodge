@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -56,14 +56,14 @@ public class CharArraySerializer implements Serializer<char[]> {
 		byte[] bytes = BufferManager.getBytes();
 		try {
 			int len = chars.length;
-			PersistentCollections.intToBuffer(len, bytes);
+			IoUtils.intToBuffer(len, bytes);
 			out.write(bytes, 0, 4);
 			int pos = 0;
 			while(len>0) {
 				int count = BufferManager.BUFFER_SIZE/2;
 				if(len<count) count = len;
 				for(int charsIndex=0, bytesIndex = 0; charsIndex<count; charsIndex++, bytesIndex+=2) {
-					PersistentCollections.charToBuffer(chars[pos+charsIndex], bytes, bytesIndex);
+					IoUtils.charToBuffer(chars[pos+charsIndex], bytes, bytesIndex);
 				}
 				out.write(bytes, 0, count*2);
 				pos += count;
@@ -80,7 +80,7 @@ public class CharArraySerializer implements Serializer<char[]> {
 		byte[] bytes = BufferManager.getBytes();
 		try {
 			IoUtils.readFully(in, bytes, 0, 4);
-			int len = PersistentCollections.bufferToInt(bytes);
+			int len = IoUtils.bufferToInt(bytes);
 			char[] chars = new char[len];
 			int pos = 0;
 			while(len>0) {
@@ -88,7 +88,7 @@ public class CharArraySerializer implements Serializer<char[]> {
 				if(len<count) count = len;
 				IoUtils.readFully(in, bytes, pos, len);
 				for(int charsIndex=0, bytesIndex = 0; charsIndex<count; charsIndex++, bytesIndex+=2) {
-					chars[pos+charsIndex] = PersistentCollections.bufferToChar(bytes, bytesIndex);
+					chars[pos+charsIndex] = IoUtils.bufferToChar(bytes, bytesIndex);
 				}
 				pos += count;
 				len -= count;

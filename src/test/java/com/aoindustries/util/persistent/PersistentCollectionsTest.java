@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2016  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.IoUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
@@ -62,8 +63,8 @@ public class PersistentCollectionsTest extends TestCase {
 		byte[] buff = new byte[2];
 		for(int i=0; i<ITERATIONS; i++) {
 			char value = (char)random.nextInt(Character.MAX_VALUE+1);
-			PersistentCollections.charToBuffer(value, buff);
-			char result = PersistentCollections.bufferToChar(buff);
+			IoUtils.charToBuffer(value, buff);
+			char result = IoUtils.bufferToChar(buff);
 			assertEquals(value, result);
 		}
 	}
@@ -72,8 +73,8 @@ public class PersistentCollectionsTest extends TestCase {
 		byte[] buff = new byte[2];
 		for(int i=0; i<ITERATIONS; i++) {
 			short value = (short)(random.nextInt(32768)-16384);
-			PersistentCollections.shortToBuffer(value, buff);
-			short result = PersistentCollections.bufferToShort(buff);
+			IoUtils.shortToBuffer(value, buff);
+			short result = IoUtils.bufferToShort(buff);
 			assertEquals(value, result);
 		}
 	}
@@ -82,8 +83,8 @@ public class PersistentCollectionsTest extends TestCase {
 		byte[] buff = new byte[4];
 		for(int i=0; i<ITERATIONS; i++) {
 			int value = random.nextInt();
-			PersistentCollections.intToBuffer(value, buff);
-			int result = PersistentCollections.bufferToInt(buff);
+			IoUtils.intToBuffer(value, buff);
+			int result = IoUtils.bufferToInt(buff);
 			assertEquals(value, result);
 		}
 	}
@@ -92,8 +93,8 @@ public class PersistentCollectionsTest extends TestCase {
 		byte[] buff = new byte[8];
 		for(int i=0; i<ITERATIONS; i++) {
 			long value = random.nextInt();
-			PersistentCollections.longToBuffer(value, buff);
-			long result = PersistentCollections.bufferToLong(buff);
+			IoUtils.longToBuffer(value, buff);
+			long result = IoUtils.bufferToLong(buff);
 			assertEquals(value, result);
 		}
 	}

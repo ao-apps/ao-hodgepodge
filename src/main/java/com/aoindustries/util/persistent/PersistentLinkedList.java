@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
+import com.aoindustries.io.IoUtils;
 import com.aoindustries.util.AoArrays;
 import com.aoindustries.util.WrappedException;
 import java.io.IOException;
@@ -391,16 +392,16 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		long newPtr;
 		if(element==null) {
 			newPtr = blockBuffer.allocate(DATA_OFFSET);
-			PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
-			PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
-			PersistentCollections.longToBuffer(DATA_SIZE_NULL, ioBuffer, DATA_SIZE_OFFSET);
+			IoUtils.longToBuffer(next, ioBuffer, NEXT_OFFSET);
+			IoUtils.longToBuffer(prev, ioBuffer, PREV_OFFSET);
+			IoUtils.longToBuffer(DATA_SIZE_NULL, ioBuffer, DATA_SIZE_OFFSET);
 			blockBuffer.put(newPtr, 0, ioBuffer, 0, DATA_OFFSET);
 		} else {
 			long dataSize = serializer.getSerializedSize(element);
 			newPtr = blockBuffer.allocate(DATA_OFFSET+dataSize);
-			PersistentCollections.longToBuffer(next, ioBuffer, NEXT_OFFSET);
-			PersistentCollections.longToBuffer(prev, ioBuffer, PREV_OFFSET);
-			PersistentCollections.longToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);
+			IoUtils.longToBuffer(next, ioBuffer, NEXT_OFFSET);
+			IoUtils.longToBuffer(prev, ioBuffer, PREV_OFFSET);
+			IoUtils.longToBuffer(dataSize, ioBuffer, DATA_SIZE_OFFSET);
 			blockBuffer.put(newPtr, 0, ioBuffer, 0, DATA_OFFSET);
 			OutputStream out = blockBuffer.getOutputStream(newPtr, DATA_OFFSET, dataSize);
 			try {
