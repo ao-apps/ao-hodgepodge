@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-03-12T17:54:37-0500"
+		dateModified="2017-03-24T13:58:01-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -146,6 +146,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li><code>com.aoindustries.util.zip.ZipUtils</code></li>
 							<li><code>com.aoindustries.xml.XmlUtils</code></li>
 						</ol>
+					</li>
+					<li>
+						New interfaces <code>CompressedReadable</code> and <code>CompressedWritable</code> for
+						code that only needs to handle one direction of <code>Streamable</code>.
 					</li>
 				</ul>
 			</changelog:release>
