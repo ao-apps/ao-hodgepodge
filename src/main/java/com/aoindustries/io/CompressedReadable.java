@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,17 +25,11 @@ package com.aoindustries.io;
 import java.io.IOException;
 
 /**
- * Indicates that an object may be sent across a
- * {@link CompressedDataInputStream} and
- * {@link CompressedDataOutputStream}.
+ * Something that can be read from a {@link CompressedDataInputStream}.
  *
  * @author  AO Industries, Inc.
  */
-public interface Streamable extends CompressedReadable, CompressedWritable {
+public interface CompressedReadable {
 
-	@Override
 	void read(CompressedDataInputStream in) throws IOException;
-
-	@Override
-	void write(CompressedDataOutputStream out, String clientVersion) throws IOException;
 }
