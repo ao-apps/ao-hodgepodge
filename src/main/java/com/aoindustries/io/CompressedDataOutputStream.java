@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -174,13 +174,24 @@ public class CompressedDataOutputStream extends DataOutputStream {
 		if(i!=null) writeInt(i);
 	}
 
-	public void writeNullEnum(Enum<?> e) throws IOException {
-		writeBoolean(e!=null);
-		if(e!=null) writeUTF(e.name());
-	}
-
 	public void writeNullLong(Long l) throws IOException {
 		writeBoolean(l!=null);
 		if(l!=null) writeLong(l);
+	}
+
+	/**
+	 * Writes an {@link Enum}, represented by its {@link Enum#name()}.
+	 */
+	public void writeEnum(Enum<?> e) throws IOException {
+		writeUTF(e.name());
+	}
+
+	/**
+	 * Writes an {@link Enum}, represented by its {@link Enum#name()},
+	 * supporting {@code null}.
+	 */
+	public void writeNullEnum(Enum<?> e) throws IOException {
+		writeBoolean(e != null);
+		if(e != null) writeUTF(e.name());
 	}
 }

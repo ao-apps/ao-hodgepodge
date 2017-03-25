@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -195,15 +195,30 @@ public class CompressedDataInputStream extends DataInputStream {
 		return readBoolean() ? readInt() : null;
 	}
 
+	public Long readNullLong() throws IOException {
+		return readBoolean() ? readLong() : null;
+	}
+
+	/**
+	 * Reads an {@link Enum}, represented by its {@link Enum#name()}.
+	 */
+	public <T extends Enum<T>> T readEnum(Class<T> enumType) throws IOException {
+		try {
+			return Enum.valueOf(enumType, readUTF());
+		} catch(IllegalArgumentException err) {
+			throw new IOException(err);
+		}
+	}
+
+	/**
+	 * Reads an {@link Enum}, represented by its {@link Enum#name()},
+	 * supporting {@code null}.
+	 */
 	public <T extends Enum<T>> T readNullEnum(Class<T> enumType) throws IOException {
 		try {
 			return readBoolean() ? Enum.valueOf(enumType, readUTF()) : null;
 		} catch(IllegalArgumentException err) {
 			throw new IOException(err);
 		}
-	}
-
-	public Long readNullLong() throws IOException {
-		return readBoolean() ? readLong() : null;
 	}
 }
