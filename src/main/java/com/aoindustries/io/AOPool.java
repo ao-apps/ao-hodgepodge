@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -70,7 +70,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	public static final int DEFAULT_SOCKET_SO_LINGER = 15;
 
 	/**
-	 * All access to the fields should be synchronized on the <code>PooledConnection</code> instance.
+	 * All updates to the fields must be synchronized on the {@link PooledConnection} instance.
 	 */
 	private static class PooledConnection<C> implements Comparable<PooledConnection<C>> {
 
@@ -81,42 +81,42 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		/**
 		 * The current connection.
 		 */
-		C connection;
+		volatile C connection;
 
 		/**
 		 * The time the connection was created
 		 */
-		long createTime;
+		volatile long createTime;
 
 		/**
 		 * Total time using the connection
 		 */
-		long totalTime;
+		final AtomicLong totalTime = new AtomicLong();
 
 		/**
 		 * The time getting the connection from the pool
 		 */
-		long startTime;
+		volatile long startTime;
 
 		/**
 		 * The time returning the connection to the pool
 		 */
-		long releaseTime;
+		volatile long releaseTime;
 
 		/**
 		 * Counts the number of times the connection is connected
 		 */
-		long connectCount;
+		final AtomicLong connectCount = new AtomicLong();
 
 		/**
 		 * Counts the number of times the connection is used
 		 */
-		long useCount;
+		final AtomicLong useCount = new AtomicLong();
 
 		/**
 		 * Keeps track of the stack trace at checkout for this connection.
 		 */
-		Throwable allocateStackTrace;
+		volatile Throwable allocateStackTrace;
 
 		/**
 		 * Older connections are sorted lower.
@@ -269,9 +269,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		int total = 0;
 		synchronized(poolLock) {
 			for(PooledConnection<C> pooledConnection : allConnections) {
-				synchronized(pooledConnection) {
-					if(pooledConnection.connection!=null) total++;
-				}
+				if(pooledConnection.connection!=null) total++;
 			}
 		}
 		return total;
@@ -316,9 +314,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			Throwable[] allocateStackTraces = new Throwable[useCount];
 			for(int c=0; c<useCount; c++) {
 				PooledConnection<C> threadConnection = threadConnections.get(c);
-				synchronized(threadConnection) {
-					allocateStackTraces[c] = threadConnection.allocateStackTrace;
-				}
+				allocateStackTraces[c] = threadConnection.allocateStackTrace;
 			}
 			// Throw an exception if over half the pool is used by this thread
 			if(useCount>=(poolSize/2)) throw newException("Thread attempting to allocate more than half of the connection pool: "+thisThread.toString(), new WrappedExceptions(allocateStackTraces));
@@ -380,20 +376,32 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			}
 			boolean doReset;
 			if(conn==null || isClosed(conn)) {
-				synchronized(pooledConnection) {
-					conn = pooledConnection.connection = getConnectionObject();
-					pooledConnection.createTime = currentTime;
-					pooledConnection.connectCount++;
+				// Connect without holding lock.
+				conn = getConnectionObject();
+				// Close new connection if the pool was closed during connect
+				boolean myIsClosed;
+				synchronized(poolLock) {
+					myIsClosed = isClosed;
 				}
+				if(myIsClosed) {
+					close(conn);
+					throw newException("Pool is closed", null);
+				}
+				synchronized(pooledConnection) {
+					pooledConnection.connection = conn;
+					pooledConnection.createTime = currentTime;
+				}
+				pooledConnection.connectCount.incrementAndGet();
 				doReset=true;
 			} else {
 				// Was already reset when released
 				doReset=false;
 			}
+			// TODO: Measure time used for creating this stack trace.  Is it worth it?
 			Throwable allocateStackTrace = new Throwable("StackTrace at getConnection(" + maxConnections + ") for Thread named \"" + thisThread.getName() + "\"");
 			synchronized(pooledConnection) {
 				pooledConnection.releaseTime = 0;
-				pooledConnection.useCount++;
+				pooledConnection.useCount.incrementAndGet();
 				pooledConnection.allocateStackTrace = allocateStackTrace;
 			}
 			if(doReset) resetConnection(conn);
@@ -442,7 +450,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		synchronized(pooledConnection) {
 			pooledConnection.releaseTime = currentTime;
 			useTime = currentTime - pooledConnection.startTime;
-			if(useTime>0) pooledConnection.totalTime += useTime;
+			if(useTime>0) pooledConnection.totalTime.addAndGet(useTime);
 			pooledConnection.allocateStackTrace = null;
 		}
 		// Remove from the pool
@@ -459,9 +467,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		long total = 0;
 		synchronized(poolLock) {
 			for(PooledConnection<C> conn : allConnections) {
-				synchronized(conn) {
-					total += conn.connectCount;
-				}
+				total += conn.connectCount.get();
 			}
 		}
 		return total;
@@ -488,9 +494,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		long total = 0;
 		synchronized(poolLock) {
 			for(PooledConnection<C> conn : allConnections) {
-				synchronized(conn) {
-					total += conn.totalTime;
-				}
+				total += conn.totalTime.get();
 			}
 		}
 		return total;
@@ -500,9 +504,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		long total = 0;
 		synchronized(poolLock) {
 			for(PooledConnection<C> conn : allConnections) {
-				synchronized(conn) {
-					total += conn.useCount;
-				}
+				total += conn.useCount.get();
 			}
 		}
 		return total;
@@ -549,17 +551,15 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			allocateStackTraces = new Throwable[numConnections];
 			for(int c=0;c<numConnections;c++) {
 				PooledConnection<C> pooledConnection = allConnections.get(c);
-				synchronized(pooledConnection) {
-					isConnecteds[c] = pooledConnection.connection != null;
-					createTimes[c] = pooledConnection.createTime;
-					connectCounts[c] = pooledConnection.connectCount;
-					useCounts[c] = pooledConnection.useCount;
-					totalTimes[c] = pooledConnection.totalTime;
-					isBusies[c] = busyConnections.contains(pooledConnection);
-					startTimes[c] = pooledConnection.startTime;
-					releaseTimes[c] = pooledConnection.releaseTime;
-					allocateStackTraces[c] = pooledConnection.allocateStackTrace;
-				}
+				isConnecteds[c] = pooledConnection.connection != null;
+				createTimes[c] = pooledConnection.createTime;
+				connectCounts[c] = pooledConnection.connectCount.get();
+				useCounts[c] = pooledConnection.useCount.get();
+				totalTimes[c] = pooledConnection.totalTime.get();
+				isBusies[c] = busyConnections.contains(pooledConnection);
+				startTimes[c] = pooledConnection.startTime;
+				releaseTimes[c] = pooledConnection.releaseTime;
+				allocateStackTraces[c] = pooledConnection.allocateStackTrace;
 			}
 		}
 		long time = System.currentTimeMillis();
@@ -707,11 +707,9 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 						pooledConnection.connection = null;
 					}
 				} else {
-					synchronized(pooledConnection) {
-						if(maxConnectionAge!=UNLIMITED_MAX_CONNECTION_AGE) {
-							long age = System.currentTimeMillis()-pooledConnection.createTime;
-							if(age<0 || age>=maxConnectionAge) closeConnection = true;
-						}
+					if(maxConnectionAge!=UNLIMITED_MAX_CONNECTION_AGE) {
+						long age = System.currentTimeMillis()-pooledConnection.createTime;
+						if(age<0 || age>=maxConnectionAge) closeConnection = true;
 					}
 					if(closeConnection) {
 						// Error on isClosed or max age reached, close the connection

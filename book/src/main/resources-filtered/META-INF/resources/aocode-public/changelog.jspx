@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-03-24T13:58:01-0500"
+		dateModified="2017-03-24T21:30:23-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -150,6 +150,13 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<li>
 						New interfaces <code>CompressedReadable</code> and <code>CompressedWritable</code> for
 						code that only needs to handle one direction of <code>Streamable</code>.
+					</li>
+					<li><code>AOPool</code> improvements:
+						<ol>
+							<li>More fine-grained locking through atomics.</li>
+							<li>No longer holding connection lock while connecting.</li>
+							<li>Non-blocking statistics methods.</li>
+						</ol>
 					</li>
 				</ul>
 			</changelog:release>
