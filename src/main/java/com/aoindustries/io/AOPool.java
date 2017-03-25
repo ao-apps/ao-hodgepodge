@@ -390,8 +390,8 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 				synchronized(pooledConnection) {
 					pooledConnection.connection = conn;
 					pooledConnection.createTime = currentTime;
+					pooledConnection.connectCount.incrementAndGet();
 				}
-				pooledConnection.connectCount.incrementAndGet();
 				doReset=true;
 			} else {
 				// Was already reset when released
