@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-03-24T21:30:23-0500"
+		dateModified="2017-03-25T12:27:46-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -157,6 +157,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li>No longer holding connection lock while connecting.</li>
 							<li>Non-blocking statistics methods.</li>
 						</ol>
+					</li>
+					<li>
+						<code>CompressedDataInputStream</code> and <code>CompressedDataInputStream</code> now
+						support streaming of <code>Enum</code>s.
 					</li>
 				</ul>
 			</changelog:release>
