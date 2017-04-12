@@ -362,6 +362,8 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			// Keep track of the maximum concurrency hit
 			int concurrency = busyConnections.size();
 			if(concurrency>maxConcurrency) maxConcurrency=concurrency;
+			// Notify any others that may be waiting
+			poolLock.notify();
 		}
 		threadConnections.add(pooledConnection);
 		// If anything goes wrong during the remainder of this method, need to release the connection

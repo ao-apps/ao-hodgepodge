@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-03-25T12:27:46-0500"
+		dateModified="2017-04-11T20:12:53-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -156,6 +156,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li>More fine-grained locking through atomics.</li>
 							<li>No longer holding connection lock while connecting.</li>
 							<li>Non-blocking statistics methods.</li>
+							<li>Bug fix: Notifying other threads on connection allocation.</li>
 						</ol>
 					</li>
 					<li>
