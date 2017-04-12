@@ -332,38 +332,41 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		// Find an available pooledConnection inside poolLock, actually connect outside poolLock below
 		PooledConnection<C> pooledConnection = null;
 		synchronized(poolLock) {
-			while(pooledConnection==null) {
-				if(Thread.interrupted()) throw newInterruptedException(null, null);
+			try {
+				while(pooledConnection==null) {
+					if(Thread.interrupted()) throw newInterruptedException(null, null);
 
-				if(allConnections.size() != (availableConnections.size() + busyConnections.size())) throw new AssertionError("allConnections.size!=(availableConnections.size+busyConnections.size)");
-				if(isClosed) throw newException("Pool is closed", null);
-				if(!availableConnections.isEmpty()) {
-					pooledConnection = availableConnections.remove();
-					busyConnections.add(pooledConnection);
-				} else {
-					// Nothing available, is there room to make a new connection?
-					if(allConnections.size()<poolSize) {
-						// Create a new one
-						pooledConnection = new PooledConnection<C>();
-						allConnections.add(pooledConnection);
+					if(allConnections.size() != (availableConnections.size() + busyConnections.size())) throw new AssertionError("allConnections.size!=(availableConnections.size+busyConnections.size)");
+					if(isClosed) throw newException("Pool is closed", null);
+					if(!availableConnections.isEmpty()) {
+						pooledConnection = availableConnections.remove();
 						busyConnections.add(pooledConnection);
 					} else {
-						// Wait for a connection to become available
-						try {
-							poolLock.wait();
-						} catch(InterruptedException err) {
-							// Restore the interrupted status
-							Thread.currentThread().interrupt();
-							throw newInterruptedException(null, err);
+						// Nothing available, is there room to make a new connection?
+						if(allConnections.size()<poolSize) {
+							// Create a new one
+							pooledConnection = new PooledConnection<C>();
+							allConnections.add(pooledConnection);
+							busyConnections.add(pooledConnection);
+						} else {
+							// Wait for a connection to become available
+							try {
+								poolLock.wait();
+							} catch(InterruptedException err) {
+								// Restore the interrupted status
+								Thread.currentThread().interrupt();
+								throw newInterruptedException(null, err);
+							}
 						}
 					}
 				}
+				// Keep track of the maximum concurrency hit
+				int concurrency = busyConnections.size();
+				if(concurrency>maxConcurrency) maxConcurrency=concurrency;
+				// Notify any others that may be waiting
+			} finally {
+				poolLock.notify();
 			}
-			// Keep track of the maximum concurrency hit
-			int concurrency = busyConnections.size();
-			if(concurrency>maxConcurrency) maxConcurrency=concurrency;
-			// Notify any others that may be waiting
-			poolLock.notify();
 		}
 		threadConnections.add(pooledConnection);
 		// If anything goes wrong during the remainder of this method, need to release the connection
@@ -457,8 +460,11 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		}
 		// Remove from the pool
 		synchronized(poolLock) {
-			if(busyConnections.remove(pooledConnection)) availableConnections.add(pooledConnection);
-			poolLock.notify();
+			try {
+				if(busyConnections.remove(pooledConnection)) availableConnections.add(pooledConnection);
+			} finally {
+				poolLock.notify();
+			}
 		}
 	}
 
