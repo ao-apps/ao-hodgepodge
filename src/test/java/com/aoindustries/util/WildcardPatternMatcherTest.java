@@ -33,6 +33,20 @@ import junit.framework.TestSuite;
  */
 public class WildcardPatternMatcherTest extends TestCase {
 
+	private static final String longString;
+	private static final String craftedLongString;
+	static {
+		// Got stupid slow at 10000
+		// At 1000, simple matcher was 4,000 times as fast as the regular expresions
+		StringBuilder longSB = new StringBuilder();
+		for(int i=0; i<100; i++) longSB.append("long string ");
+		longString = longSB.toString();
+		longSB.setLength(0);
+		for(int i=0; i<100; i++) longSB.append("jpepngifitif");
+		// 			".*(jpg|jpeg|png|gif|tiff)$",
+		craftedLongString = longSB.toString();
+	}
+
 	public WildcardPatternMatcherTest(String testName) {
 		super(testName);
 	}
@@ -47,7 +61,7 @@ public class WildcardPatternMatcherTest extends TestCase {
 		for(int testSize = 1; testSize <= endTestSize; testSize *= 100) {
 			// Time make matcher
 			long startNanos = System.nanoTime();
-			WildcardPatternMatcher wcMatcher = WildcardPatternMatcher.getInstance(patterns);
+			WildcardPatternMatcher wcMatcher = WildcardPatternMatcher.compile(patterns);
 			long timeNanos = System.nanoTime() - startNanos;
 			System.out.println("    " + testSize + ": Created WildcardPatternMatcher in " + BigDecimal.valueOf(timeNanos, 3) + " \u00B5s");
 			
@@ -55,7 +69,7 @@ public class WildcardPatternMatcherTest extends TestCase {
 			startNanos = System.nanoTime();
 			Pattern rePattern = Pattern.compile(regexp);
 			timeNanos = System.nanoTime() - startNanos;
-			System.out.println("    " + testSize + ": Created Pattern in " + BigDecimal.valueOf(timeNanos, 3) + " \u00B5s");
+			System.out.println("    " + testSize + ": Created Pattern                in " + BigDecimal.valueOf(timeNanos, 3) + " \u00B5s");
 
 			// Time use matcher
 			startNanos = System.nanoTime();
@@ -65,8 +79,8 @@ public class WildcardPatternMatcherTest extends TestCase {
 					wcMatcher.isMatch(text)
 				);
 			}
-			timeNanos = System.nanoTime() - startNanos;
-			System.out.println("    " + testSize + ": Uses of WildcardPatternMatcher in " + BigDecimal.valueOf(timeNanos/1000, 3) + " ms");
+			long wcTimeNanos = System.nanoTime() - startNanos;
+			System.out.println("    " + testSize + ": Uses of WildcardPatternMatcher in " + BigDecimal.valueOf(wcTimeNanos/1000, 3) + " ms");
 
 			// Time use pattern
 			startNanos = System.nanoTime();
@@ -77,8 +91,28 @@ public class WildcardPatternMatcherTest extends TestCase {
 				);
 			}
 			timeNanos = System.nanoTime() - startNanos;
-			System.out.println("    " + testSize + ": Uses of Pattern in " + BigDecimal.valueOf(timeNanos/1000, 3) + " ms");
+			System.out.println("    " + testSize + ": Uses of Pattern                in " + BigDecimal.valueOf(timeNanos/1000, 3) + " ms (" + ((float)((double)timeNanos / (double)wcTimeNanos)) + ')');
 		}
+	}
+
+	public void testMatchNoneShortString() {
+		doTestPerformance(
+			"Match none, short string",
+			"",
+			"a^",
+			"Short string",
+			false
+		);
+	}
+
+	public void testMatchNoneLongString() {
+		doTestPerformance(
+			"Match none, long string",
+			"",
+			"a^",
+			longString,
+			false
+		);
 	}
 
 	public void testMatchAllShortString() {
@@ -92,17 +126,102 @@ public class WildcardPatternMatcherTest extends TestCase {
 	}
 
 	public void testMatchAllLongString() {
-		StringBuilder longSB = new StringBuilder();
-		// Got stupid slow at 10000
-		// At 1000, simple matcher was 4,000 times as fast as the regular expresions
-		for(int i=0; i<100; i++) longSB.append("long string ");
-		String longString = longSB.toString();
 		doTestPerformance(
 			"Match all, long string",
 			"*",
 			".*",
 			longString,
 			true
+		);
+	}
+
+	public void testMatchPrefix() {
+		doTestPerformance(
+			"Match prefix",
+			"something*",
+			"^something.*",
+			"something that matches",
+			true
+		);
+	}
+
+	public void testNoMatchPrefix() {
+		doTestPerformance(
+			"No match prefix",
+			"something*",
+			"^something.*",
+			"Not something that matches",
+			false
+		);
+	}
+
+	public void testMatchSuffix() {
+		doTestPerformance(
+			"Match suffix",
+			"*something",
+			".*something$",
+			"matches this something",
+			true
+		);
+	}
+
+	public void testNoMatchSuffix() {
+		doTestPerformance(
+			"No match suffix",
+			"*something",
+			".*something$",
+			"not matches this something else",
+			false
+		);
+	}
+
+	public void testNoMatchSuffixLong() {
+		doTestPerformance(
+			"No match suffix, long string",
+			"*something",
+			".*something$",
+			longString,
+			false
+		);
+	}
+
+	public void testMatchPrefixSuffix() {
+		doTestPerformance(
+			"Match prefix and suffix",
+			"blargs*something",
+			"^blargs.*something$",
+			"blargssomething",
+			true
+		);
+	}
+
+	public void testNoMatchPrefixSuffix1() {
+		doTestPerformance(
+			"No match prefix and suffix 1",
+			"blargs*something",
+			"^blargs.*something$",
+			" blargssomething",
+			false
+		);
+	}
+
+	public void testNoMatchPrefixSuffix2() {
+		doTestPerformance(
+			"No match prefix and suffix 2",
+			"blargs*something",
+			"^blargs.*something$",
+			"blargssomething ",
+			false
+		);
+	}
+
+	public void testNoMatchPrefixSuffix3() {
+		doTestPerformance(
+			"No match prefix and suffix 3",
+			"blargs*something",
+			"^blargs.*something$",
+			"blargsomething",
+			false
 		);
 	}
 
@@ -155,4 +274,71 @@ public class WildcardPatternMatcherTest extends TestCase {
 			true
 		);
 	}
+
+	/*
+	 * This crafted string is indeed slow in regex, so slow that I'll leave this
+	 * test commented-out.
+	 *
+	 * 1000000: Uses of WildcardPatternMatcher in 52.211 ms
+	 * 1000000: Uses of Pattern                in 102805.092 ms (1969.0042)
+	 *
+	public void testNoMatchMultipleExtensionsCraftedLong() {
+		doTestPerformance(
+			"No match vs *.jpg, *.jpeg, *.png, *.gif, *.tiff, crafted long string",
+			"*.jpg, *.jpeg, *.png, *.gif, *.tiff",
+			".*(jpg|jpeg|png|gif|tiff)$",
+			craftedLongString,
+			false
+		);
+	}
+	 */
+
+	/*
+	 * This is indeed slow, but regex only 3.9290571 slower than wildcard.
+	 * Leaving commented-out for routine test speed.
+	 *
+	 * 1000000: Uses of WildcardPatternMatcher in 15758.539 ms
+	 * 1000000: Uses of Pattern                in 61916.204 ms (3.9290571)
+	 *
+	public void testNoMatchCrafted() {
+		doTestPerformance(
+			"No match vs crafted",
+			"*aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa*",
+			".*aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.*",
+			" aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			+ " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			+ " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			+ " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			+ " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			+ " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			+ " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
+			false
+		);
+	}
+	 */
+
+	/*
+	 * This is indeed slow, but regex only 3.2906272 slower than wildcard.
+	 * Leaving commented-out for routine test speed.
+	 *
+	 *1000000: Uses of WildcardPatternMatcher in 13691.655 ms
+	 *1000000: Uses of Pattern                in 45054.135 ms (3.2906272)
+	 *
+	public void testNoMatchCraftedLonger() {
+		int size = 200;
+		StringBuilder sb = new StringBuilder(size * 2);
+		for(int i = 0; i < size; i++) sb.append('a');
+		String findme = sb.substring(0, size);
+		sb.setCharAt(size - 1, ' ');
+		for(int i = 0; i < size; i++) sb.append(' ');
+		String findin = sb.toString();
+		doTestPerformance(
+			"No match vs crafted longer",
+			"*" + findme + "*",
+			".*" + findme + "*",
+			findin,
+			false
+		);
+	}
+	 */
 }

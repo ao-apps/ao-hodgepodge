@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-07-13T20:18:11-0500"
+		dateModified="2017-07-14T21:29:36-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -164,6 +164,30 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						support streaming of <code>Enum</code>s.
 					</li>
 					<li>Updated dependencies.</li>
+					<li><code>WildcardPatternMatcher</code> improvements:
+						<ol>
+							<li>Coalesces adjacent '*' into a single '*' during parsing.</li>
+							<li>Compiles patterns instead of interpreting them on the fly.</li>
+							<li>Supports any arbitrary patterns containing '*'.</li>
+							<li>Fast-path checks for none, all, prefix, suffix, and exact matches.</li>
+							<li>Added test suite to verify correctness and benchmark versus equivalent regular expressions.
+								<ol type="a">
+									<li>The typical performance is 8 to 10 times that of the regular expressions.</li>
+									<li>
+										Some operations, in particular suffix matching on long strings, can be as high as 2000 times the
+										performance of regular expressions.  This is not so uncommon, a typical use-case for
+										wildcard patterns is <code>"*.jpg"</code>.
+									</li>
+								</ol>
+							</li>
+							<li>
+								Like any typical "contains" or "indexOf" string operation, the infix matching can fall-flat when trying to
+								find long strings of repeating patterns within an almost-as-long string of repeating patterns
+								following by non-matching padding.  When strictly using prefix or suffix matching this
+								will never occur.
+							</li>
+						</ol>
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
