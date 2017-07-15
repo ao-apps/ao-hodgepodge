@@ -22,19 +22,33 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.lang.LocalizedIllegalArgumentException;
-import static com.aoindustries.util.ApplicationResourcesAccessor.accessor;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Matches simple wildcard patterns, supporting prefix, suffix, and exact value.
- * Supports:
+ * Matches simple wildcard patterns.  A wildcard pattern is any combination of '*'
+ * and textual values.  For example, some patterns would include:
  * <ul>
- *   <li>*            Match all</li>
- *   <li>*suffix      Suffix match</li>
- *   <li>prefix*      Prefix match</li>
- *   <li>exact_value  Exact match</li>
+ *   <li>""                     Match none</li>
+ *   <li>"*"                    Match all</li>
+ *   <li>"prefix*"              Prefix match</li>
+ *   <li>"*suffix"              Suffix match</li>
+ *   <li>"prefix*suffix"        Prefix and suffix match</li>
+ *   <li>"*infix*"              Infix match</li>
+ *   <li>"prefix*infix*"        Prefix and infix match</li>
+ *   <li>"*infix*suffix"        Infix and suffix match</li>
+ *   <li>"prefix*infix*suffix"  Prefix, infix, and suffix match</li>
+ *   <li>"exact_value"          Exact match</li>
  * </ul>
+ * <p>
+ * Any consecutive sequence of '*' are combined into a single '*'.
+ * </p>
+ * <p>
+ * All matchers are thread-safe.
+ * </p>
+ * <p>
+ * TODO: Support "**" as an escape for literal '*' in matching?  No longer collapse adjacent '*'?
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
@@ -55,16 +69,19 @@ abstract public class WildcardPatternMatcher {
 	/**
 	 * Gets the match none matcher.
 	 */
-	public static WildcardPatternMatcher getMatchNone() {
+	public static WildcardPatternMatcher matchNone() {
 		return matchNone;
 	}
 
-	private static final WildcardPatternMatcher matchAll = new WildcardPatternMatcher() {
-		@Override
-		public boolean isEmpty() {
-			return false;
-		}
+	/**
+	 * @deprecated   Please use {@link  #matchNone()} instead.
+	 */
+	@Deprecated
+	public static WildcardPatternMatcher getMatchNone() {
+		return matchNone();
+	}
 
+	private static final WildcardPatternMatcher matchAll = new WildcardPatternMatcher() {
 		@Override
 		public boolean isMatch(String paramName) {
 			return true;
@@ -74,79 +91,185 @@ abstract public class WildcardPatternMatcher {
 	/**
 	 * Gets the match all matcher.
 	 */
-	public static WildcardPatternMatcher getMatchAll() {
+	public static WildcardPatternMatcher matchAll() {
 		return matchAll;
 	}
 
 	/**
-	 * Gets the matcher for the comma and/or space separated patterns.
+	 * @deprecated   Please use {@link  #matchAll()} instead.
 	 */
-	public static WildcardPatternMatcher getInstance(String patterns) {
-		if(patterns==null || patterns.isEmpty()) {
+	@Deprecated
+	public static WildcardPatternMatcher getMatchAll() {
+		return matchAll();
+	}
+
+	/**
+	 * Gets the matcher for the comma and/or space separated patterns.
+	 * <p>
+	 * Any null or empty pattern matches none.
+	 * </p>
+	 */
+	public static WildcardPatternMatcher compile(String patterns) {
+		if(patterns == null || patterns.isEmpty()) {
 			return matchNone;
 		} else {
-			final List<String> list = StringUtility.splitStringCommaSpace(patterns);
+			List<String> list = StringUtility.splitStringCommaSpace(patterns);
 			// Match none shortcut
 			if(list.isEmpty()) return matchNone;
-			// Match all shortcut
-			if(list.size()==1 && "*".equals(list.get(0))) return matchAll;
-			// Otherwise, match list one-by-one
-			return new WildcardPatternMatcher() {
-				@Override
-				public boolean isEmpty() {
-					assert !list.isEmpty() : "Empty list should have returned matchNone above";
-					return false;
-				}
 
-				@Override
-				public boolean isMatch(String paramName) {
-					for(String pattern : list) {
-						final int patternLen = pattern.length();
-						if(patternLen>0) {
-							final int firstStar = pattern.indexOf('*');
-							if(firstStar==-1) {
-								// Exact match
-								if(paramName.equals(pattern)) return true;
-							} else if(patternLen==1) {
-								// Match all
-								return true;
+			// Parse into a series of individual matchers
+			final List<WildcardPatternMatcher> matchers = new ArrayList<WildcardPatternMatcher>(list.size());
+			for(String pattern : list) {
+				int end = pattern.length();
+				if(end > 0) {
+					// Beginning wildcards
+					int pos = 0;
+					final boolean startsWildcard;
+					if(pattern.charAt(0) == '*') {
+						startsWildcard = true;
+						pos++;
+						// Skip consecutive beginning
+						while(pos < end && pattern.charAt(pos) == '*') pos++;
+						if(pos >= end) {
+							// Is any number of '*' only, matchAll shortcut
+							return matchAll;
+						}
+					} else {
+						startsWildcard = false;
+					}
+					// Ending wildcards
+					final boolean endsWildcard;
+					if(pattern.charAt(end - 1) == '*') {
+						endsWildcard = true;
+						end--;
+						// Skip consecutive ending
+						while(end > pos && pattern.charAt(end - 1) == '*') end--;
+						assert end > pos;
+					} else {
+						endsWildcard = false;
+					}
+					// Split the remaining pattern on any internal '*'
+					final List<String> sequences = new ArrayList<String>();
+					while(pos < end) {
+						assert pattern.charAt(pos) != '*';
+						int starPos = pattern.indexOf('*', pos + 1);
+						if(starPos == -1 || starPos >= end) {
+							// Not more '*' found
+							sequences.add(pattern.substring(pos, end));
+							pos = end;
+						} else {
+							// Found
+							sequences.add(pattern.substring(pos, starPos));
+							pos = starPos + 1;
+							// Skip consecutive
+							while(pos < end && pattern.charAt(pos) == '*') pos++;
+						}
+					}
+					int seqCount = sequences.size();
+					assert seqCount >= 1;
+					if(seqCount == 1) {
+						final String sequence = sequences.get(0);
+						if(startsWildcard) {
+							if(endsWildcard) {
+								// *infix*
+								matchers.add(
+									new WildcardPatternMatcher() {
+										@Override
+										public boolean isMatch(String paramName) {
+											return paramName.contains(sequence);
+										}
+									}
+								);
 							} else {
-								final int lastStar = pattern.lastIndexOf('*');
-								// May not have two asterisks
-								if(firstStar!=lastStar) {
-									throw new LocalizedIllegalArgumentException(accessor, "WildcardPatternMatcher.invalidParameterFilter", pattern);
-								}
-								if(firstStar==0) {
-									// Suffix match
-									final int paramNameLen = paramName.length();
-									if(
-										paramNameLen >= (patternLen-1)
-										&& paramName.regionMatches(
-											paramNameLen-(patternLen-1),
-											pattern,
-											1,
-											patternLen-1
-										)
-										//paramName.endsWith(filter.substring(1))
-									) return true;
-								} else if(lastStar==(patternLen-1)) {
-									// Prefix match
-									if(
-										paramName.length() >= (patternLen-1)
-										&& paramName.regionMatches(
-											0,
-											pattern,
-											0,
-											patternLen-1
-										)
-										//paramName.startsWith(filter.substring(0, filterLen-1))
-									) return true;
-								} else {
-									// Asterisk in middle
-									throw new LocalizedIllegalArgumentException(accessor, "WildcardPatternMatcher.invalidParameterFilter", pattern);
-								}
+								// *suffix
+								matchers.add(
+									new WildcardPatternMatcher() {
+										@Override
+										public boolean isMatch(String paramName) {
+											return paramName.endsWith(sequence);
+										}
+									}
+								);
+							}
+						} else {
+							if(endsWildcard) {
+								// prefix*
+								matchers.add(
+									new WildcardPatternMatcher() {
+										@Override
+										public boolean isMatch(String paramName) {
+											return paramName.startsWith(sequence);
+										}
+									}
+								);
+							} else {
+								// exact
+								matchers.add(
+									new WildcardPatternMatcher() {
+										@Override
+										public boolean isMatch(String paramName) {
+											return paramName.equals(sequence);
+										}
+									}
+								);
 							}
 						}
+					} else {
+						matchers.add(
+							new WildcardPatternMatcher() {
+								@Override
+								public boolean isMatch(String paramName) {
+									int index = 0;
+									int indexEnd = sequences.size();
+									int pos = 0;
+									int end = paramName.length();
+									// Handle non-wildcard start
+									if(!startsWildcard) {
+										String prefix = sequences.get(0);
+										if(!paramName.startsWith(prefix)) {
+											return false;
+										}
+										index++;
+										pos += prefix.length();
+									}
+									// Handle non-wildcard end
+									if(!endsWildcard) {
+										indexEnd--;
+										String suffix = sequences.get(indexEnd);
+										if(!paramName.endsWith(suffix)) {
+											return false;
+										}
+										end -= suffix.length();
+									}
+									// Check if overlapping prefix and suffix matches
+									if(end < pos) return false;
+									// Handle any remaining infixes
+									while(index < indexEnd) {
+										String sequence = sequences.get(index++);
+										int sequenceLen = sequence.length();
+										assert sequenceLen > 0;
+										int foundAt = paramName.indexOf(sequence, pos);
+										if(foundAt == -1 || foundAt > (end - sequenceLen)) {
+											return false;
+										}
+										pos += sequenceLen;
+									}
+									return true;
+								}
+							}
+						);
+					}
+				}
+			}
+			if(matchers.isEmpty()) {
+				return matchNone;
+			}
+			if(matchers.size() == 1) return matchers.get(0);
+			return new WildcardPatternMatcher() {
+				@Override
+				public boolean isMatch(String paramName) {
+					for(WildcardPatternMatcher matcher : matchers) {
+						if(matcher.isMatch(paramName)) return true;
 					}
 					return false;
 				}
@@ -154,13 +277,24 @@ abstract public class WildcardPatternMatcher {
 		}
 	}
 
+	/**
+	 * @deprecated   Please use {@link  #compile(java.lang.String)} instead.
+	 */
+	@Deprecated
+	public static WildcardPatternMatcher getInstance(String patterns) {
+		return compile(patterns);
+	}
+
 	private WildcardPatternMatcher() {
 	}
 
 	/**
 	 * Checks if this is empty (has no patterns).
+	 * Any empty matcher does not match anything.
 	 */
-	abstract public boolean isEmpty();
+	public boolean isEmpty() {
+		return false;
+	}
 
 	abstract public boolean isMatch(String paramName);
 }
