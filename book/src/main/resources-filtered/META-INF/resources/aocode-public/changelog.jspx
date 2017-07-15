@@ -170,6 +170,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li>Compiles patterns instead of interpreting them on the fly.</li>
 							<li>Supports any arbitrary patterns containing '*'.</li>
 							<li>Fast-path checks for none, all, prefix, suffix, and exact matches.</li>
+							<li>Renamed methods to better represent the functionality.  Left deprecated methods for compatibility.</li>
 							<li>Added test suite to verify correctness and benchmark versus equivalent regular expressions.
 								<ol type="a">
 									<li>The typical performance is 8 to 10 times that of the regular expressions.</li>
