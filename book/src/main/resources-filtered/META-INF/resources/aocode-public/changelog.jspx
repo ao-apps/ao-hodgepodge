@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-07-14T21:29:36-0500"
+		dateModified="2017-07-19T18:18:38-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -52,146 +52,155 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{documented.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{documented.scm.url}"
-			>
-				<ul>
-					<li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
-					<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
-						<ol>
-							<li><code>com.aoindustries.io.AoByteArrayInputStream</code></li>
-							<li><code>com.aoindustries.io.AoByteArrayOutputStream</code></li>
-							<li><code>com.aoindustries.io.AoCharArrayWriter</code></li>
-							<li><code>com.aoindustries.io.Encoder</code></li>
-							<li><code>com.aoindustries.io.EncoderWriter</code></li>
-							<li><code>com.aoindustries.io.FastExternalizable</code></li>
-							<li><code>com.aoindustries.io.FastObjectInput</code></li>
-							<li><code>com.aoindustries.io.FastObjectOutput</code></li>
-							<li><code>com.aoindustries.io.FileUtils</code></li>
-							<li><code>com.aoindustries.io.IoUtils</code></li>
-							<li><code>com.aoindustries.io.LocalizedIOException</code></li>
-							<li><code>com.aoindustries.io.NullOutputStream</code></li>
-							<li><code>com.aoindustries.io.NullPrintWriter</code></li>
-							<li><code>com.aoindustries.io.NullWriter</code></li>
-							<li><code>com.aoindustries.io.SniffInputStream</code></li>
-							<li><code>com.aoindustries.io.Writable</code></li>
-							<li><code>com.aoindustries.io.WriterFacade</code></li>
-							<li><code>com.aoindustries.io.WriterOutputStream</code></li>
-							<li><code>com.aoindustries.lang.Disposable</code></li>
-							<li><code>com.aoindustries.lang.DisposedException</code></li>
-							<li><code>com.aoindustries.lang.EnumUtils</code></li>
-							<li><code>com.aoindustries.lang.LocalizedIllegalArgumentException</code></li>
-							<li><code>com.aoindustries.lang.NotImplementedException</code></li>
-							<li><code>com.aoindustries.lang.NullArgumentException</code></li>
-							<li><code>com.aoindustries.lang.ObjectUtils</code></li>
-							<li><code>com.aoindustries.lang.ProcessResult</code></li>
-							<li><code>com.aoindustries.lang.RuntimeUtils</code></li>
-							<li><code>com.aoindustries.lang.SysExits</code></li>
-							<li><code>com.aoindustries.lang.reflect.Methods</code></li>
-							<li><code>com.aoindustries.lang.reflect.ReflectionException</code></li>
-							<li><code>com.aoindustries.math.BigFraction</code></li>
-							<li><code>com.aoindustries.math.LongLong</code></li>
-							<li><code>com.aoindustries.math.NullMath</code></li>
-							<li><code>com.aoindustries.math.SafeMath</code></li>
-							<li><code>com.aoindustries.math.Statistics</code></li>
-							<li><code>com.aoindustries.math.UnsignedLong</code></li>
-							<li><code>com.aoindustries.nio.charset.Charsets</code></li>
-							<li><code>com.aoindustries.security.HashedKey</code></li>
-							<li><code>com.aoindustries.security.HashedPassword</code></li>
-							<li><code>com.aoindustries.security.Identifier</code></li>
-							<li><code>com.aoindustries.security.SmallIdentifier</code></li>
-							<li><code>com.aoindustries.sql.LocalizedSQLException</code></li>
-							<li><code>com.aoindustries.sql.UnmodifiableTimestamp</code></li>
-							<li><code>com.aoindustries.sql.WrappedSQLException</code></li>
-							<li><code>com.aoindustries.text.MessageFormatFactory</code></li>
-							<li><code>com.aoindustries.text.SmartComparator</code></li>
-							<li><code>com.aoindustries.text.UnmodifiableMessageFormat</code></li>
-							<li><code>com.aoindustries.time.Clock</code></li>
-							<li><code>com.aoindustries.time.Duration</code></li>
-							<li><code>com.aoindustries.time.Instant</code></li>
-							<li><code>com.aoindustries.util.AoArrays</code></li>
-							<li><code>com.aoindustries.util.AoCollections</code></li>
-							<li><code>com.aoindustries.util.AtomicSequence</code></li>
-							<li><code>com.aoindustries.util.BufferManager</code></li>
-							<li><code>com.aoindustries.util.CalendarUtils</code></li>
-							<li><code>com.aoindustries.util.ComparatorUtils</code></li>
-							<li><code>com.aoindustries.util.EnumerationIterator</code></li>
-							<li><code>com.aoindustries.util.ErrorPrinter</code></li>
-							<li><code>com.aoindustries.util.GetOpt</code></li>
-							<li><code>com.aoindustries.util.HashCodeComparator</code></li>
-							<li><code>com.aoindustries.util.IdentityKey</code></li>
-							<li><code>com.aoindustries.util.InternUtils</code></li>
-							<li><code>com.aoindustries.util.Internable</code></li>
-							<li><code>com.aoindustries.util.MinimalList</code></li>
-							<li><code>com.aoindustries.util.MinimalMap</code></li>
-							<li><code>com.aoindustries.util.PropertiesUtils</code></li>
-							<li><code>com.aoindustries.util.Sequence</code></li>
-							<li><code>com.aoindustries.util.SortedProperties</code></li>
-							<li><code>com.aoindustries.util.UnmodifiableCalendar</code></li>
-							<li><code>com.aoindustries.util.UnmodifiableDate</code></li>
-							<li><code>com.aoindustries.util.UnsynchronizedSequence</code></li>
-							<li><code>com.aoindustries.util.WrappedException</code></li>
-							<li><code>com.aoindustries.util.WrappedExceptions</code></li>
-							<li><code>com.aoindustries.util.concurrent.ThreadLocalCallable</code></li>
-							<li><code>com.aoindustries.util.concurrent.ThreadLocalRunnable</code></li>
-							<li><code>com.aoindustries.util.concurrent.ThreadLocalsCallable</code></li>
-							<li><code>com.aoindustries.util.concurrent.ThreadLocalsRunnable</code></li>
-							<li><code>com.aoindustries.util.i18n.ApplicationResourcesAccessor</code></li>
-							<li><code>com.aoindustries.util.i18n.CurrencyComparator</code></li>
-							<li><code>com.aoindustries.util.i18n.LocaleComparator</code></li>
-							<li><code>com.aoindustries.util.i18n.LocaleString</code></li>
-							<li><code>com.aoindustries.util.i18n.Locales</code></li>
-							<li><code>com.aoindustries.util.i18n.Money</code></li>
-							<li><code>com.aoindustries.util.i18n.ThreadLocale</code></li>
-							<li><code>com.aoindustries.util.zip.CorrectedGZIPInputStream</code></li>
-							<li><code>com.aoindustries.util.zip.ZipEntryFilter</code></li>
-							<li><code>com.aoindustries.util.zip.ZipUtils</code></li>
-							<li><code>com.aoindustries.xml.XmlUtils</code></li>
-						</ol>
-					</li>
-					<li>
-						New interfaces <code>CompressedReadable</code> and <code>CompressedWritable</code> for
-						code that only needs to handle one direction of <code>Streamable</code>.
-					</li>
-					<li><code>AOPool</code> improvements:
-						<ol>
-							<li>More fine-grained locking through atomics.</li>
-							<li>No longer holding connection lock while connecting.</li>
-							<li>Non-blocking statistics methods.</li>
-							<li>Bug fix: Notifying other threads on connection allocation.</li>
-						</ol>
-					</li>
-					<li>
-						<code>CompressedDataInputStream</code> and <code>CompressedDataInputStream</code> now
-						support streaming of <code>Enum</code>s.
-					</li>
-					<li>Updated dependencies.</li>
-					<li><code>WildcardPatternMatcher</code> improvements:
-						<ol>
-							<li>Coalesces adjacent '*' into a single '*' during parsing.</li>
-							<li>Compiles patterns instead of interpreting them on the fly.</li>
-							<li>Supports any arbitrary patterns containing '*'.</li>
-							<li>Fast-path checks for none, all, prefix, suffix, and exact matches.</li>
-							<li>Renamed methods to better represent the functionality.  Left deprecated methods for compatibility.</li>
-							<li>Added test suite to verify correctness and benchmark versus equivalent regular expressions.
-								<ol type="a">
-									<li>The typical performance is 8 to 10 times that of the regular expressions.</li>
-									<li>
-										Some operations, in particular suffix matching on long strings, can be as high as 2000 times the
-										performance of regular expressions.  This is not so uncommon, a typical use-case for
-										wildcard patterns is <code>"*.jpg"</code>.
-									</li>
-								</ol>
-							</li>
-							<li>
-								Like any typical "contains" or "indexOf" string operation, the infix matching can fall-flat when trying to
-								find long strings of repeating patterns within an almost-as-long string of repeating patterns
-								following by non-matching padding.  When strictly using prefix or suffix matching this
-								will never occur.
-							</li>
-						</ol>
-					</li>
-				</ul>
-			</changelog:release>
+			/>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="1.9.0"
+			datePublished="2017-07-19T18:18:38-0500"
+			groupId="@{documented.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{documented.scm.url}"
+		>
+			<ul>
+				<li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
+				<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
+					<ol>
+						<li><code>com.aoindustries.io.AoByteArrayInputStream</code></li>
+						<li><code>com.aoindustries.io.AoByteArrayOutputStream</code></li>
+						<li><code>com.aoindustries.io.AoCharArrayWriter</code></li>
+						<li><code>com.aoindustries.io.Encoder</code></li>
+						<li><code>com.aoindustries.io.EncoderWriter</code></li>
+						<li><code>com.aoindustries.io.FastExternalizable</code></li>
+						<li><code>com.aoindustries.io.FastObjectInput</code></li>
+						<li><code>com.aoindustries.io.FastObjectOutput</code></li>
+						<li><code>com.aoindustries.io.FileUtils</code></li>
+						<li><code>com.aoindustries.io.IoUtils</code></li>
+						<li><code>com.aoindustries.io.LocalizedIOException</code></li>
+						<li><code>com.aoindustries.io.NullOutputStream</code></li>
+						<li><code>com.aoindustries.io.NullPrintWriter</code></li>
+						<li><code>com.aoindustries.io.NullWriter</code></li>
+						<li><code>com.aoindustries.io.SniffInputStream</code></li>
+						<li><code>com.aoindustries.io.Writable</code></li>
+						<li><code>com.aoindustries.io.WriterFacade</code></li>
+						<li><code>com.aoindustries.io.WriterOutputStream</code></li>
+						<li><code>com.aoindustries.lang.Disposable</code></li>
+						<li><code>com.aoindustries.lang.DisposedException</code></li>
+						<li><code>com.aoindustries.lang.EnumUtils</code></li>
+						<li><code>com.aoindustries.lang.LocalizedIllegalArgumentException</code></li>
+						<li><code>com.aoindustries.lang.NotImplementedException</code></li>
+						<li><code>com.aoindustries.lang.NullArgumentException</code></li>
+						<li><code>com.aoindustries.lang.ObjectUtils</code></li>
+						<li><code>com.aoindustries.lang.ProcessResult</code></li>
+						<li><code>com.aoindustries.lang.RuntimeUtils</code></li>
+						<li><code>com.aoindustries.lang.SysExits</code></li>
+						<li><code>com.aoindustries.lang.reflect.Methods</code></li>
+						<li><code>com.aoindustries.lang.reflect.ReflectionException</code></li>
+						<li><code>com.aoindustries.math.BigFraction</code></li>
+						<li><code>com.aoindustries.math.LongLong</code></li>
+						<li><code>com.aoindustries.math.NullMath</code></li>
+						<li><code>com.aoindustries.math.SafeMath</code></li>
+						<li><code>com.aoindustries.math.Statistics</code></li>
+						<li><code>com.aoindustries.math.UnsignedLong</code></li>
+						<li><code>com.aoindustries.nio.charset.Charsets</code></li>
+						<li><code>com.aoindustries.security.HashedKey</code></li>
+						<li><code>com.aoindustries.security.HashedPassword</code></li>
+						<li><code>com.aoindustries.security.Identifier</code></li>
+						<li><code>com.aoindustries.security.SmallIdentifier</code></li>
+						<li><code>com.aoindustries.sql.LocalizedSQLException</code></li>
+						<li><code>com.aoindustries.sql.UnmodifiableTimestamp</code></li>
+						<li><code>com.aoindustries.sql.WrappedSQLException</code></li>
+						<li><code>com.aoindustries.text.MessageFormatFactory</code></li>
+						<li><code>com.aoindustries.text.SmartComparator</code></li>
+						<li><code>com.aoindustries.text.UnmodifiableMessageFormat</code></li>
+						<li><code>com.aoindustries.time.Clock</code></li>
+						<li><code>com.aoindustries.time.Duration</code></li>
+						<li><code>com.aoindustries.time.Instant</code></li>
+						<li><code>com.aoindustries.util.AoArrays</code></li>
+						<li><code>com.aoindustries.util.AoCollections</code></li>
+						<li><code>com.aoindustries.util.AtomicSequence</code></li>
+						<li><code>com.aoindustries.util.BufferManager</code></li>
+						<li><code>com.aoindustries.util.CalendarUtils</code></li>
+						<li><code>com.aoindustries.util.ComparatorUtils</code></li>
+						<li><code>com.aoindustries.util.EnumerationIterator</code></li>
+						<li><code>com.aoindustries.util.ErrorPrinter</code></li>
+						<li><code>com.aoindustries.util.GetOpt</code></li>
+						<li><code>com.aoindustries.util.HashCodeComparator</code></li>
+						<li><code>com.aoindustries.util.IdentityKey</code></li>
+						<li><code>com.aoindustries.util.InternUtils</code></li>
+						<li><code>com.aoindustries.util.Internable</code></li>
+						<li><code>com.aoindustries.util.MinimalList</code></li>
+						<li><code>com.aoindustries.util.MinimalMap</code></li>
+						<li><code>com.aoindustries.util.PropertiesUtils</code></li>
+						<li><code>com.aoindustries.util.Sequence</code></li>
+						<li><code>com.aoindustries.util.SortedProperties</code></li>
+						<li><code>com.aoindustries.util.UnmodifiableCalendar</code></li>
+						<li><code>com.aoindustries.util.UnmodifiableDate</code></li>
+						<li><code>com.aoindustries.util.UnsynchronizedSequence</code></li>
+						<li><code>com.aoindustries.util.WrappedException</code></li>
+						<li><code>com.aoindustries.util.WrappedExceptions</code></li>
+						<li><code>com.aoindustries.util.concurrent.ThreadLocalCallable</code></li>
+						<li><code>com.aoindustries.util.concurrent.ThreadLocalRunnable</code></li>
+						<li><code>com.aoindustries.util.concurrent.ThreadLocalsCallable</code></li>
+						<li><code>com.aoindustries.util.concurrent.ThreadLocalsRunnable</code></li>
+						<li><code>com.aoindustries.util.i18n.ApplicationResourcesAccessor</code></li>
+						<li><code>com.aoindustries.util.i18n.CurrencyComparator</code></li>
+						<li><code>com.aoindustries.util.i18n.LocaleComparator</code></li>
+						<li><code>com.aoindustries.util.i18n.LocaleString</code></li>
+						<li><code>com.aoindustries.util.i18n.Locales</code></li>
+						<li><code>com.aoindustries.util.i18n.Money</code></li>
+						<li><code>com.aoindustries.util.i18n.ThreadLocale</code></li>
+						<li><code>com.aoindustries.util.zip.CorrectedGZIPInputStream</code></li>
+						<li><code>com.aoindustries.util.zip.ZipEntryFilter</code></li>
+						<li><code>com.aoindustries.util.zip.ZipUtils</code></li>
+						<li><code>com.aoindustries.xml.XmlUtils</code></li>
+					</ol>
+				</li>
+				<li>
+					New interfaces <code>CompressedReadable</code> and <code>CompressedWritable</code> for
+					code that only needs to handle one direction of <code>Streamable</code>.
+				</li>
+				<li><code>AOPool</code> improvements:
+					<ol>
+						<li>More fine-grained locking through atomics.</li>
+						<li>No longer holding connection lock while connecting.</li>
+						<li>Non-blocking statistics methods.</li>
+						<li>Bug fix: Notifying other threads on connection allocation.</li>
+					</ol>
+				</li>
+				<li>
+					<code>CompressedDataInputStream</code> and <code>CompressedDataInputStream</code> now
+					support streaming of <code>Enum</code>s.
+				</li>
+				<li>Updated dependencies.</li>
+				<li><code>WildcardPatternMatcher</code> improvements:
+					<ol>
+						<li>Coalesces adjacent '*' into a single '*' during parsing.</li>
+						<li>Compiles patterns instead of interpreting them on the fly.</li>
+						<li>Supports any arbitrary patterns containing '*'.</li>
+						<li>Fast-path checks for none, all, prefix, suffix, and exact matches.</li>
+						<li>Renamed methods to better represent the functionality.  Left deprecated methods for compatibility.</li>
+						<li>Added test suite to verify correctness and benchmark versus equivalent regular expressions.
+							<ol type="a">
+								<li>The typical performance is 8 to 10 times that of the regular expressions.</li>
+								<li>
+									Some operations, in particular suffix matching on long strings, can be as high as 2000 times the
+									performance of regular expressions.  This is not so uncommon, a typical use-case for
+									wildcard patterns is <code>"*.jpg"</code>.
+								</li>
+							</ol>
+						</li>
+						<li>
+							Like any typical "contains" or "indexOf" string operation, the infix matching can fall-flat when trying to
+							find long strings of repeating patterns within an almost-as-long string of repeating patterns
+							following by non-matching padding.  When strictly using prefix or suffix matching this
+							will never occur.
+						</li>
+					</ol>
+				</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
