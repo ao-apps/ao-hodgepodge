@@ -472,7 +472,7 @@ public class LastModifiedServlet extends HttpServlet {
 	}
 
 	/**
-	 * Fetched some {@link from http://en.wikipedia.org/wiki/List_of_file_formats}
+	 * Fetched some from <a href="http://en.wikipedia.org/wiki/List_of_file_formats">http://en.wikipedia.org/wiki/List_of_file_formats</a>
 	 */
 	private static final Set<String> staticExtensions = new HashSet<String>(
 		Arrays.asList(
