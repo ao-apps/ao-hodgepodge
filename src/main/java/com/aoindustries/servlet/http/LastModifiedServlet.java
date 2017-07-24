@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -472,7 +472,7 @@ public class LastModifiedServlet extends HttpServlet {
 	}
 
 	/**
-	 * Fetched some {@link from http://en.wikipedia.org/wiki/List_of_file_formats}
+	 * Fetched some from <a href="http://en.wikipedia.org/wiki/List_of_file_formats">http://en.wikipedia.org/wiki/List_of_file_formats</a>
 	 */
 	private static final Set<String> staticExtensions = new HashSet<String>(
 		Arrays.asList(
