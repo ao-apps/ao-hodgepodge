@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.util.WrappedException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -42,7 +43,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 
 	final private String filenamePrefix;
 	final private String filenameExtension;
-	final private File file;
+	final private TempFileContext tempFileContext;
 	final private FixedRecordFile frf;
 	final private FileListObjectFactory<T> objectFactory;
 
@@ -59,8 +60,15 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 	) throws IOException {
 		this.filenamePrefix=filenamePrefix;
 		this.filenameExtension=filenameExtension;
-		this.file=getTempFile(filenamePrefix, filenameExtension);
-		this.frf=new FixedRecordFile(file, "rw", objectLength+1);
+		this.tempFileContext = new TempFileContext();
+		this.frf = new FixedRecordFile(
+			tempFileContext.createTempFile(
+				filenamePrefix + '_',
+				filenameExtension == null ? null : ("." + filenameExtension)
+			).getFile(),
+			"rw",
+			objectLength + 1
+		);
 		this.objectFactory=objectFactory;
 
 		this.inBuffer=new AoByteArrayInputStream(new byte[objectLength+1]);
@@ -274,11 +282,16 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 
 	public void close() throws IOException {
 		frf.close();
-		if(file.exists()) FileUtils.delete(file);
+		tempFileContext.close();
 	}
 
+	/**
+	 * @deprecated  Please use {@link TempFileContext}
+	 *              as {@link File#deleteOnExit()} is prone to memory leaks in long-running applications.
+	 */
+	@Deprecated
 	public static File getTempFile(String prefix, String extension) throws IOException {
-		if(extension==null) extension="tmp";
+		if(extension == null) extension = "tmp";
 		/* Now just using standard Java temporary files to avoid dependency no new ao-io-unix project.
 		try {
 			// First try to use Unix file because it creates the files with 600 permissions.
@@ -290,7 +303,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 			// This is OK if the library is not supported on this platform
 		}
 		 */
-		File f=File.createTempFile(prefix+'_', '.'+extension);
+		File f = File.createTempFile(prefix + '_', '.' + extension);
 		f.deleteOnExit();
 		return f;
 	}
