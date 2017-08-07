@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-07-19T18:18:38-0500"
+		dateModified="2017-08-07T01:46:57-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -53,7 +53,19 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{documented.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{documented.scm.url}"
-			/>
+			>
+				<ul>
+					<li>
+						Deprecated in favor of new <ao:a href="https://aoindustries.com/ao-tempfiles/apidocs/com/aoindustries/tempfiles/TempFileContext.html">TempFileContext</ao:a>
+						that does not suffer from a memory leak in long-running applications:
+						<ul>
+							<li><ao:a href="apidocs/com/aoindustries/io/TempFile.html">TempFile</ao:a></li>
+							<li><ao:a href="apidocs/com/aoindustries/io/TempFileList.html">TempFileList</ao:a></li>
+							<li><ao:a href="apidocs/com/aoindustries/io/FileList.html#getTempFile-java.lang.String-java.lang.String-">FileList.getTempFile(String prefix, String extension)</ao:a></li>
+						</ul>
+					</li>
+				</ul>
+			</changelog:release>
 		</c:if>
 
 		<changelog:release
