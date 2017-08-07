@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.tempfiles.TempFileContext;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -42,7 +43,11 @@ import java.util.List;
  * @see  TempFile
  *
  * @author  AO Industries, Inc.
+ *
+ * @deprecated  Please use {@link TempFileContext}
+ *              as {@link File#deleteOnExit()} is prone to memory leaks in long-running applications.
  */
+@Deprecated
 public class TempFileList {
 
 	private final List<WeakReference<TempFile>> tempFiles = new ArrayList<WeakReference<TempFile>>();

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,6 +25,7 @@ package com.aoindustries.util.persistent;
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
 import com.aoindustries.lang.NotImplementedException;
+import com.aoindustries.tempfiles.TempFileContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -226,10 +227,10 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 
+	private final TempFileContext tempFileContext;
 	private final File file;
 	private final File newFile;
 	private final File oldFile;
-	private final boolean deleteOnClose;
 	private final int sectorSize;
 	private final long asynchronousCommitDelay;
 	private final long synchronousCommitDelay;
@@ -273,16 +274,11 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 	 */
 	public TwoCopyBarrierBuffer() throws IOException {
 		super(ProtectionLevel.NONE);
-		file = File.createTempFile("TwoCopyBarrierBuffer", null);
-		file.deleteOnExit();
-		newFile = new File(file.getPath()+".new");
-		if(newFile.exists()) throw new IOException("File exists: "+newFile);
-		newFile.deleteOnExit();
-		oldFile = new File(file.getPath()+".old");
-		if(oldFile.exists()) throw new IOException("File exists: "+oldFile);
-		oldFile.deleteOnExit();
-		new FileOutputStream(oldFile).close();
-		deleteOnClose = true;
+		tempFileContext = new TempFileContext();
+		file = tempFileContext.createTempFile("TwoCopyBarrierBuffer").getFile();
+		newFile = tempFileContext.createTempFile("TwoCopyBarrierBuffer", ".new").getFile();
+		FileUtils.delete(newFile);
+		oldFile = tempFileContext.createTempFile("TwoCopyBarrierBuffer", ".old").getFile();
 		sectorSize = DEFAULT_SECTOR_SIZE;
 		asynchronousCommitDelay = DEFAULT_ASYNCHRONOUS_COMMIT_DELAY;
 		synchronousCommitDelay = DEFAULT_SYNCHRONOUS_COMMIT_DELAY;
@@ -344,10 +340,10 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 		if(sectorSize<1) throw new IllegalArgumentException("sectorSize<1: "+sectorSize);
 		if(asynchronousCommitDelay<0) throw new IllegalArgumentException("asynchronousCommitDelay<0: "+asynchronousCommitDelay);
 		if(synchronousCommitDelay<0) throw new IllegalArgumentException("synchronousCommitDelay<0: "+synchronousCommitDelay);
+		this.tempFileContext = null;
 		this.file = file;
 		newFile = new File(file.getPath()+".new");
 		oldFile = new File(file.getPath()+".old");
-		deleteOnClose = false;
 		this.sectorSize = sectorSize;
 		this.asynchronousCommitDelay = asynchronousCommitDelay;
 		this.synchronousCommitDelay = synchronousCommitDelay;
@@ -502,31 +498,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 			flushWriteCache(true);
 			isClosed = true;
 			//raf.close(); // Now closed by flushWriteCache
-			if(deleteOnClose) {
-				IOException ioErr = null;
-				if(newFile.exists()) {
-					try {
-						FileUtils.delete(newFile);
-					} catch(IOException e) {
-						ioErr = e;
-					}
-				}
-				if(oldFile.exists()) {
-					try {
-						FileUtils.delete(oldFile);
-					} catch(IOException e) {
-						ioErr = e;
-					}
-				}
-				if(file.exists()) {
-					try {
-						FileUtils.delete(file);
-					} catch(IOException e) {
-						ioErr = e;
-					}
-				}
-				if(ioErr!=null) throw ioErr;
-			}
+			if(tempFileContext != null) tempFileContext.close();
 		}
 	}
 

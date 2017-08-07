@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.aoindustries.util.persistent;
 
-import com.aoindustries.io.FileUtils;
+import com.aoindustries.tempfiles.TempFileContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -45,7 +45,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
 
 	//private static final Logger logger = Logger.getLogger(MappedPersistentBuffer.class.getName());
 
-	private final File tempFile;
+	private final TempFileContext tempFileContext;
 	private final RandomAccessFile raf;
 	private final FileChannel channel;
 	private MappedByteBuffer mappedBuffer;
@@ -59,9 +59,8 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
 	 */
 	public MappedPersistentBuffer() throws IOException {
 		super(ProtectionLevel.NONE);
-		tempFile = File.createTempFile("MappedPersistentBuffer", null);
-		tempFile.deleteOnExit();
-		raf = new RandomAccessFile(tempFile, "rw");
+		tempFileContext = new TempFileContext();
+		raf = new RandomAccessFile(tempFileContext.createTempFile("MappedPersistentBuffer").getFile(), "rw");
 		channel = raf.getChannel();
 		// Lock the file
 		channel.lock(0L, Long.MAX_VALUE, false);
@@ -101,7 +100,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
 	 */
 	public MappedPersistentBuffer(RandomAccessFile raf, ProtectionLevel protectionLevel) throws IOException {
 		super(protectionLevel);
-		this.tempFile = null;
+		this.tempFileContext = null;
 		this.raf = raf;
 		channel = raf.getChannel();
 		// Lock the file
@@ -130,7 +129,7 @@ public class MappedPersistentBuffer extends AbstractPersistentBuffer {
 	public void close() throws IOException {
 		closed = true;
 		raf.close();
-		if(tempFile!=null && tempFile.exists()) FileUtils.delete(tempFile);
+		if(tempFileContext != null) tempFileContext.close();
 	}
 
 	// @NotThreadSafe
