@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -51,12 +51,18 @@ final public class ServletContextCache {
 	 */
 	public static ServletContextCache getCache(ServletContext servletContext) {
 		ServletContextCache cache = (ServletContextCache)servletContext.getAttribute(ATTRIBUTE_KEY);
-		if(cache == null) throw new IllegalStateException("ServletContextCache not active in the provided ServletContext.  Add context listener to web.xml?");
-		assert cache.servletContext == servletContext;
+		if(cache == null) {
+			// It is possible this is called during context initialization before the listener
+			cache = new ServletContextCache(servletContext);
+			servletContext.setAttribute(ATTRIBUTE_KEY, cache);
+			//throw new IllegalStateException("ServletContextCache not active in the provided ServletContext.  Add context listener to web.xml?");
+		} else {
+			assert cache.servletContext == servletContext;
+		}
 		return cache;
 	}
 
-	private final ServletContext servletContext;
+	final ServletContext servletContext;
 
 	ServletContextCache(ServletContext servletContext) {
 		this.servletContext = servletContext;

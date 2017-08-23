@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -42,8 +42,14 @@ final public class ServletContextCacheListener implements ServletContextListener
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		ServletContext servletContext = event.getServletContext();
-		cache = new ServletContextCache(servletContext);
-		servletContext.setAttribute(ServletContextCache.ATTRIBUTE_KEY, cache);
+		// Might have been already created
+		cache = (ServletContextCache)servletContext.getAttribute(ServletContextCache.ATTRIBUTE_KEY);
+		if(cache == null) {
+			cache = new ServletContextCache(servletContext);
+			servletContext.setAttribute(ServletContextCache.ATTRIBUTE_KEY, cache);
+		} else {
+			assert cache.servletContext == servletContext;
+		}
 	}
 
 	@Override
