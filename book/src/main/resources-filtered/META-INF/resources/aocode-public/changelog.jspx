@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-08-07T01:46:57-0500"
+		dateModified="2017-08-23T02:14:18-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -64,6 +64,14 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li><ao:a href="apidocs/com/aoindustries/io/FileList.html#getTempFile-java.lang.String-java.lang.String-">FileList.getTempFile(String prefix, String extension)</ao:a></li>
 						</ul>
 					</li>
+					<li>
+						Improved <ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html">ServletContextCache</ao:a>
+						to still work correctly when accessed before initialized by
+						<ao:a href="apidocs/com/aoindustries/servlet/ServletContextCacheListener.html">ServletContextCacheListener</ao:a>.
+						This allows the caches to safely be used during application initialization.  This also
+						allows the cache to still work correctly without being initialized as a web listener, at the cost
+						of not stopping promptly when context destroyed.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
@@ -78,7 +86,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		>
 			<ul>
 				<li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
-				<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
+				<li>Moved the following classes to the new <core:link book="/ao-lang" page="/" /> project:
 					<ol>
 						<li><code>com.aoindustries.io.AoByteArrayInputStream</code></li>
 						<li><code>com.aoindustries.io.AoByteArrayOutputStream</code></li>
@@ -224,7 +232,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			scmUrl="@{documented.scm.url}"
 		>
 			<ul>
-				<li>New <core:link book="/ao-oss-parent" page="/index.jspx" /> POM to simplify <code>pom.xml</code> files.</li>
+				<li>New <core:link book="/ao-oss-parent" page="/" /> POM to simplify <code>pom.xml</code> files.</li>
 				<li>Project documentation moved to per-project book in <ao:a href="https://semanticcms.com/">SemanticCMS</ao:a> format.</li>
 				<li>Added changelog as top-level project link.</li>
 				<li>Added utility to find the maximum non-null value.</li>
