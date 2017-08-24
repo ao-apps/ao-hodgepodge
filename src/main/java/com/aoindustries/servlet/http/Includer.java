@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -108,7 +108,7 @@ public class Includer {
 				}
 			}
 			// Propagate effects of SkipPageException
-			if(request.getAttribute(PAGE_SKIPPED_REQUEST_ATTRIBUTE_NAME) != null) throw new SkipPageException();
+			if(request.getAttribute(PAGE_SKIPPED_REQUEST_ATTRIBUTE_NAME) != null) throw ServletUtil.SKIP_PAGE_EXCEPTION;
 		} finally {
 			if(isOutmostInclude) {
 				request.removeAttribute(IS_INCLUDED_REQUEST_ATTRIBUTE_NAME);

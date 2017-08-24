@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-08-23T02:14:18-0500"
+		dateModified="2017-08-23T23:29:47-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -71,6 +71,11 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						This allows the caches to safely be used during application initialization.  This also
 						allows the cache to still work correctly without being initialized as a web listener, at the cost
 						of not stopping promptly when context destroyed.
+					</li>
+					<li>
+						New constant <ao:a href="apidocs/com/aoindustries/servlet/http/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
+						to avoid the overhead of instantiating new <ao:a href="@{javac.link.javaeeApi.6}javax.servlet.jsp.SkipPageException">SkipPageException</ao:a>
+						repeatedly during routine operation.
 					</li>
 				</ul>
 			</changelog:release>
