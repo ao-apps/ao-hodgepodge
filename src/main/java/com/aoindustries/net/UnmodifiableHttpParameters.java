@@ -38,6 +38,8 @@ public class UnmodifiableHttpParameters implements HttpParameters {
 
 	/**
 	 * Wraps the given parameters to ensure they are unmodifiable.
+	 *
+	 * @return  {@code null} when wrapped is {@code null}, otherwise unmodifiable parameters
 	 */
 	public static HttpParameters wrap(HttpParameters wrapped) {
 		// Empty are unmodifiable
