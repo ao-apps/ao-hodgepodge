@@ -42,8 +42,10 @@ public class UnmodifiableHttpParameters implements HttpParameters {
 	 * @return  {@code null} when wrapped is {@code null}, otherwise unmodifiable parameters
 	 */
 	public static HttpParameters wrap(HttpParameters wrapped) {
+		// null remains null
+		if(wrapped == null) return null;
 		// Empty are unmodifiable
-		if(wrapped==EmptyParameters.getInstance()) return wrapped;
+		if(wrapped == EmptyParameters.getInstance()) return wrapped;
 		// ServletRequest parameters are unmodifiable already
 		if(wrapped instanceof ServletRequestParameters) return wrapped;
 		// Already wrapped
