@@ -221,4 +221,12 @@ public class CompressedDataInputStream extends DataInputStream {
 			throw new IOException(err);
 		}
 	}
+
+	public Boolean readNullBoolean() throws IOException {
+		byte b = readByte();
+		if(b == 255) return null;
+		if(b == 1) return Boolean.TRUE;
+		if(b == 0) return Boolean.FALSE;
+		throw new IOException("Invalid value for nullable boolean: " + b);
+	}
 }
