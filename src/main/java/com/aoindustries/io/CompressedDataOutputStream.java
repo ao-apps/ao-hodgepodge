@@ -194,4 +194,12 @@ public class CompressedDataOutputStream extends DataOutputStream {
 		writeBoolean(e != null);
 		if(e != null) writeUTF(e.name());
 	}
+
+	public void writeNullBoolean(Boolean b) throws IOException {
+		writeByte(
+			b == null ? 255
+			: b ? 1
+			: 0
+		);
+	}
 }

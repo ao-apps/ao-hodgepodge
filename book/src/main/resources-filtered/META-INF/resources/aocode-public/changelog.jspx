@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2017-08-27T09:31:29-0500"
+		dateModified="2017-10-31T01:25:52-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -78,6 +78,13 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						repeatedly during routine operation.
 					</li>
 					<li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
+					<li>
+						New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Boolean">Boolean</ao:a>:
+						<ul>
+							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullBoolean">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
+							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullBoolean">CompressedDataInputStream.readNullBoolean()</ao:a></li>
+						</ul>
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
