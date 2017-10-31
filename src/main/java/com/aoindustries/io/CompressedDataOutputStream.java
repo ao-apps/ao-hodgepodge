@@ -197,7 +197,7 @@ public class CompressedDataOutputStream extends DataOutputStream {
 
 	public void writeNullBoolean(Boolean b) throws IOException {
 		writeByte(
-			b == null ? 255
+			b == null ? (byte)-1
 			: b ? 1
 			: 0
 		);
