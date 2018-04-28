@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -50,7 +50,7 @@ public enum DayOfWeek {
 			case Calendar.THURSDAY  : return THURSDAY;
 			case Calendar.FRIDAY    : return FRIDAY;
 			case Calendar.SATURDAY  : return SATURDAY;
-			default : throw new AssertionError("Calendar and DayOfWeek mismatch");
+			default : throw new AssertionError("Calendar and DayOfWeek mismatch: calendarDayOfWeek = " + calendarDayOfWeek);
 		}
 	}
 
