@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -211,8 +211,6 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 							terminated = executorService.awaitTermination(3600, TimeUnit.SECONDS);
 						} catch(InterruptedException err) {
 							logger.log(Level.WARNING, null, err);
-							// Restore the interrupted status
-							Thread.currentThread().interrupt();
 						}
 						if(!terminated) logger.info(size==1 ? "Waiting for the TwoCopyBarrierBuffer to close." : "Waiting for all "+size+" TwoCopyBarrierBuffers to close.");
 					}

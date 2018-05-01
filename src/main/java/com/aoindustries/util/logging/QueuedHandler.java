@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -130,8 +130,6 @@ abstract public class QueuedHandler extends Handler {
 			consoleExecutor.awaitTermination(60, TimeUnit.SECONDS);
 		} catch(InterruptedException err) {
 			// Ignored
-			// Restore the interrupted status
-			Thread.currentThread().interrupt();
 		}
 		try {
 			// Wait up to one minute for tickets to complete its tasks
@@ -139,8 +137,6 @@ abstract public class QueuedHandler extends Handler {
 			consoleExecutor.awaitTermination(60, TimeUnit.SECONDS);
 		} catch(InterruptedException err) {
 			// Ignored
-			// Restore the interrupted status
-			Thread.currentThread().interrupt();
 		}
 	}
 

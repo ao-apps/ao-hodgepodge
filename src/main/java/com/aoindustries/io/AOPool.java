@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -353,8 +353,6 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 							try {
 								poolLock.wait();
 							} catch(InterruptedException err) {
-								// Restore the interrupted status
-								Thread.currentThread().interrupt();
 								throw newInterruptedException(null, err);
 							}
 						}
@@ -769,8 +767,6 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 					sleep(delayTime);
 				} catch(InterruptedException err) {
 					logger.log(Level.WARNING, null, err);
-					// Restore the interrupted status
-					Thread.currentThread().interrupt();
 				}
 				long time = System.currentTimeMillis();
 				List<C> connsToClose;

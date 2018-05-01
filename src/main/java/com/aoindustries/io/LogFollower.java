@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -89,8 +89,6 @@ public class LogFollower extends InputStream {
 				System.err.println("File not found, waiting: " + file.getPath());
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException e) {
-				// Restore the interrupted status
-				Thread.currentThread().interrupt();
 				InterruptedIOException newExc = new InterruptedIOException(e.getMessage());
 				newExc.initCause(e);
 				throw newExc;
@@ -154,8 +152,6 @@ public class LogFollower extends InputStream {
 			try {
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException err) {
-				// Restore the interrupted status
-				Thread.currentThread().interrupt();
 				InterruptedIOException ioErr=new InterruptedIOException();
 				ioErr.initCause(err);
 				throw ioErr;
@@ -190,8 +186,6 @@ public class LogFollower extends InputStream {
 			try {
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException err) {
-				// Restore the interrupted status
-				Thread.currentThread().interrupt();
 				InterruptedIOException ioErr=new InterruptedIOException();
 				ioErr.initCause(err);
 				throw ioErr;
@@ -226,8 +220,6 @@ public class LogFollower extends InputStream {
 			try {
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException err) {
-				// Restore the interrupted status
-				Thread.currentThread().interrupt();
 				InterruptedIOException ioErr=new InterruptedIOException();
 				ioErr.initCause(err);
 				throw ioErr;
