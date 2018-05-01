@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2016  AO Industries, Inc.
+ * Copyright (C) 2012, 2016, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -94,8 +94,6 @@ public class LoggingProxy {
 							Thread.sleep(1000);
 						} catch(InterruptedException ie) {
 							ie.printStackTrace(System.err);
-							// Restore the interrupted status
-							Thread.currentThread().interrupt();
 						}
 					}
 				}
@@ -143,8 +141,6 @@ public class LoggingProxy {
 									inThread.join();
 								} catch(InterruptedException e) {
 									e.printStackTrace(System.err);
-									// Restore the interrupted status
-									Thread.currentThread().interrupt();
 								}
 							}
 						} finally {
@@ -152,8 +148,6 @@ public class LoggingProxy {
 								inThread.join();
 							} catch(InterruptedException e) {
 								e.printStackTrace(System.err);
-								// Restore the interrupted status
-								Thread.currentThread().interrupt();
 							}
 						}
 					} finally {

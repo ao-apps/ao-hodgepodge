@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -203,8 +203,6 @@ public class ParallelDelete {
 							if(verboseQueue.isEmpty()) verboseOutput.flush();
 						} catch(InterruptedException err) {
 							// Normal during thread shutdown
-							// Restore the interrupted status
-							Thread.currentThread().interrupt();
 						}
 					}
 				}
@@ -239,8 +237,6 @@ public class ParallelDelete {
 												done = true;
 											} catch(InterruptedException err) {
 												// Normal during thread shutdown
-												// Restore the interrupted status
-												Thread.currentThread().interrupt();
 											}
 										}
 									}
@@ -253,8 +249,6 @@ public class ParallelDelete {
 							}
 						} catch(InterruptedException err) {
 							// Normal during thread shutdown
-							// Restore the interrupted status
-							Thread.currentThread().interrupt();
 						}
 					}
 				}
@@ -278,8 +272,6 @@ public class ParallelDelete {
 						try {
 							deleteQueue.put(new File(fullPath));
 						} catch(InterruptedException err) {
-							// Restore the interrupted status
-							Thread.currentThread().interrupt();
 							IOException ioErr = new InterruptedIOException();
 							ioErr.initCause(err);
 							throw ioErr;
@@ -303,8 +295,6 @@ public class ParallelDelete {
 				try {
 					deleteThread.join();
 				} catch(InterruptedException err) {
-					// Restore the interrupted status
-					Thread.currentThread().interrupt();
 					IOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
@@ -324,8 +314,6 @@ public class ParallelDelete {
 				try {
 					verboseThread.join();
 				} catch(InterruptedException err) {
-					// Restore the interrupted status
-					Thread.currentThread().interrupt();
 					IOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
