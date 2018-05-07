@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -130,6 +130,9 @@ public final class StringUtility {
 	 * of the resulting string, and the second to build the result.
 	 *
 	 * @throws ConcurrentModificationException if iteration is not consistent between passes
+	 *
+	 * @see  #join(java.lang.Iterable, java.lang.String, java.lang.Appendable)
+	 * @see  #join(java.lang.Object[], java.lang.String)
 	 */
 	public static String join(Iterable<?> objects, String delimiter) throws ConcurrentModificationException {
 		int delimiterLength = delimiter.length();
@@ -155,10 +158,29 @@ public final class StringUtility {
 
 	/**
 	 * Joins the string representation of objects on the provided delimiter.
+	 *
+	 * @see  #join(java.lang.Iterable, java.lang.String)
+	 * @see  #join(java.lang.Object[], java.lang.String, java.lang.Appendable)
+	 */
+	public static <A extends Appendable> A join(Iterable<?> objects, String delimiter, A out) throws IOException {
+		boolean didOne = false;
+		for(Object obj : objects) {
+			if(didOne) out.append(delimiter);
+			else didOne = true;
+			out.append(String.valueOf(obj));
+		}
+		return out;
+	}
+
+	/**
+	 * Joins the string representation of objects on the provided delimiter.
 	 * The iteration will be performed twice.  Once to compute the total length
 	 * of the resulting string, and the second to build the result.
 	 *
 	 * @throws ConcurrentModificationException if iteration is not consistent between passes
+	 *
+	 * @see  #join(java.lang.Object[], java.lang.String, java.lang.Appendable)
+	 * @see  #join(java.lang.Iterable, java.lang.String)
 	 */
 	public static String join(Object[] objects, String delimiter) throws ConcurrentModificationException {
 		int delimiterLength = delimiter.length();
@@ -180,6 +202,22 @@ public final class StringUtility {
 		}
 		if(totalLength!=sb.length()) throw new ConcurrentModificationException();
 		return sb.toString();
+	}
+
+	/**
+	 * Joins the string representation of objects on the provided delimiter.
+	 *
+	 * @see  #join(java.lang.Object[], java.lang.String)
+	 * @see  #join(java.lang.Iterable, java.lang.String, java.lang.Appendable)
+	 */
+	public static <A extends Appendable> A join(Object[] objects, String delimiter, A out) throws IOException {
+		boolean didOne = false;
+		for(Object obj : objects) {
+			if(didOne) out.append(delimiter);
+			else didOne = true;
+			out.append(String.valueOf(obj));
+		}
+		return out;
 	}
 
 	/**
