@@ -89,7 +89,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						New methods to join into arbitrary <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Appendable">Appendable</ao:a>:
 						<ul>
 							<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
-							<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html##join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
+							<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
 						</ul>
 					</li>
 				</ul>
