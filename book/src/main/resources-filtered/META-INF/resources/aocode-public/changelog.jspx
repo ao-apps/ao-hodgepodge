@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2018-05-06T22:45:53-0500"
+		dateModified="2018-05-07T20:33:17-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -74,7 +74,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					</li>
 					<li>
 						New constant <ao:a href="apidocs/com/aoindustries/servlet/http/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
-						to avoid the overhead of instantiating new <ao:a href="@{javac.link.javaeeApi.6}javax.servlet.jsp.SkipPageException">SkipPageException</ao:a>
+						to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax.servlet.jsp.SkipPageException">SkipPageException</ao:a>
 						repeatedly during routine operation.
 					</li>
 					<li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
