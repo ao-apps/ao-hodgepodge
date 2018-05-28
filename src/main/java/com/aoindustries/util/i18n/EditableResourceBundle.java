@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -956,10 +956,19 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					}
 					break;
 				case JAVASCRIPT :
+				case MYSQL :
+				case PSQL :
 					out
 						.append("/*")
 						.append(Long.toString(lookupId))
 						.append("*/")
+					;
+					break;
+				case SH :
+					out
+						.append("`#")
+						.append(Long.toString(lookupId))
+						.append('`')
 					;
 					break;
 				default :
@@ -1010,10 +1019,19 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 						}
 						break;
 					case JAVASCRIPT :
+					case MYSQL :
+					case PSQL :
 						encoder
 							.append("/*", out)
 							.append(Long.toString(lookupId), out)
 							.append("*/", out)
+						;
+						break;
+					case SH :
+						encoder
+							.append("`#", out)
+							.append(Long.toString(lookupId), out)
+							.append('`', out)
 						;
 						break;
 					default :
@@ -1049,6 +1067,9 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					}
 					break;
 				case JAVASCRIPT :
+				case MYSQL :
+				case PSQL :
+				case SH :
 					// No suffix
 					break;
 				default :
@@ -1086,6 +1107,9 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 						}
 						break;
 					case JAVASCRIPT :
+					case MYSQL :
+					case PSQL :
+					case SH :
 						// No suffix
 						break;
 					default :
