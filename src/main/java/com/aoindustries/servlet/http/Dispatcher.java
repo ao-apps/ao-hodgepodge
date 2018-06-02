@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2015, 2016, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -158,22 +158,17 @@ public class Dispatcher {
 	}
 
 	/**
-	 * Performs a forward, allowing page-relative paths and setting all values
-	 * compatible with &lt;ao:forward&gt; tag.
+	 * Performs a forward with the provided servlet path and associated dispatcher.
 	 *
 	 * @param  args  The arguments for the page, make unmodifiable and accessible as request-scope var "arg"
 	 */
 	public static void forward(
-		ServletContext servletContext,
-		String page,
+		String contextRelativePath,
+		RequestDispatcher dispatcher,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Map<String,?> args
 	) throws ServletException, IOException {
-		// Resolve the dispatcher
-		String contextRelativePath = ServletUtil.getAbsolutePath(getCurrentPagePath(request), page);
-		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(contextRelativePath);
-		if(dispatcher==null) throw new LocalizedServletException(accessor, "Dispatcher.dispatcherNotFound", contextRelativePath);
 		// Track original page when first accessed
 		final String oldOriginal = getOriginalPage(request);
 		try {
@@ -211,6 +206,40 @@ public class Dispatcher {
 	}
 
 	/**
+	 * @see  #forward(java.lang.String, javax.servlet.RequestDispatcher, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.Map)
+	 */
+	public static void forward(
+		String contextRelativePath,
+		RequestDispatcher dispatcher,
+		HttpServletRequest request,
+		HttpServletResponse response
+	) throws ServletException, IOException {
+		forward(contextRelativePath, dispatcher, request, response, null);
+	}
+
+	/**
+	 * Performs a forward, allowing page-relative paths and setting all values
+	 * compatible with &lt;ao:forward&gt; tag.
+	 *
+	 * @param  args  The arguments for the page, make unmodifiable and accessible as request-scope var "arg"
+	 *
+	 * @see #forward(java.lang.String, javax.servlet.RequestDispatcher, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.Map)
+	 */
+	public static void forward(
+		ServletContext servletContext,
+		String page,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Map<String,?> args
+	) throws ServletException, IOException {
+		// Resolve the dispatcher
+		String contextRelativePath = ServletUtil.getAbsolutePath(getCurrentPagePath(request), page);
+		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(contextRelativePath);
+		if(dispatcher==null) throw new LocalizedServletException(accessor, "Dispatcher.dispatcherNotFound", contextRelativePath);
+		forward(contextRelativePath, dispatcher, request, response, args);
+	}
+
+	/**
 	 * @see  #forward(javax.servlet.ServletContext, java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.Map)
 	 */
 	public static void forward(
@@ -223,44 +252,19 @@ public class Dispatcher {
 	}
 
 	/**
-	 * Performs an include, allowing page-relative paths and setting all values
-	 * compatible with &lt;ao:include&gt; tag.
+	 * Performs a forward with the provided servlet path and associated dispatcher.
 	 *
 	 * @param  args  The arguments for the page, make unmodifiable and accessible as request-scope var "arg"
 	 * 
 	 * @throws SkipPageException when the included page has been skipped due to a redirect.
 	 */
 	public static void include(
-		ServletContext servletContext,
-		String page,
+		String contextRelativePath,
+		RequestDispatcher dispatcher,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Map<String,?> args
 	) throws SkipPageException, ServletException, IOException {
-		// Resolve the dispatcher
-		String contextRelativePath;
-		{
-			String currentPagePath = getCurrentPagePath(request);
-			if(logger.isLoggable(Level.FINE)) logger.log(
-				Level.FINE,
-				"request={0}, currentPagePath={1}",
-				new Object[] {
-					request,
-					currentPagePath
-				}
-			);
-			contextRelativePath = ServletUtil.getAbsolutePath(currentPagePath, page);
-			if(logger.isLoggable(Level.FINE)) logger.log(
-				Level.FINE,
-				"request={0}, contextRelativePath={1}",
-				new Object[] {
-					request,
-					contextRelativePath
-				}
-			);
-		}
-		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(contextRelativePath);
-		if(dispatcher==null) throw new LocalizedServletException(accessor, "Dispatcher.dispatcherNotFound", contextRelativePath);
 		// Track original page when first accessed
 		final String oldOriginal = getOriginalPage(request);
 		try {
@@ -312,6 +316,62 @@ public class Dispatcher {
 				setOriginalPage(request, null);
 			}
 		}
+	}
+
+	/**
+	 * @see  #include(java.lang.String, javax.servlet.RequestDispatcher, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.Map)
+	 */
+	public static void include(
+		String contextRelativePath,
+		RequestDispatcher dispatcher,
+		HttpServletRequest request,
+		HttpServletResponse response
+	) throws SkipPageException, ServletException, IOException {
+		include(contextRelativePath, dispatcher, request, response, null);
+	}
+
+	/**
+	 * Performs an include, allowing page-relative paths and setting all values
+	 * compatible with &lt;ao:include&gt; tag.
+	 *
+	 * @param  args  The arguments for the page, make unmodifiable and accessible as request-scope var "arg"
+	 * 
+	 * @throws SkipPageException when the included page has been skipped due to a redirect.
+	 *
+	 * @see  #include(java.lang.String, javax.servlet.RequestDispatcher, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.Map)
+	 */
+	public static void include(
+		ServletContext servletContext,
+		String page,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Map<String,?> args
+	) throws SkipPageException, ServletException, IOException {
+		// Resolve the dispatcher
+		String contextRelativePath;
+		{
+			String currentPagePath = getCurrentPagePath(request);
+			if(logger.isLoggable(Level.FINE)) logger.log(
+				Level.FINE,
+				"request={0}, currentPagePath={1}",
+				new Object[] {
+					request,
+					currentPagePath
+				}
+			);
+			contextRelativePath = ServletUtil.getAbsolutePath(currentPagePath, page);
+			if(logger.isLoggable(Level.FINE)) logger.log(
+				Level.FINE,
+				"request={0}, contextRelativePath={1}",
+				new Object[] {
+					request,
+					contextRelativePath
+				}
+			);
+		}
+		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(contextRelativePath);
+		if(dispatcher==null) throw new LocalizedServletException(accessor, "Dispatcher.dispatcherNotFound", contextRelativePath);
+		include(contextRelativePath, dispatcher, request, response, args);
 	}
 
 	/**
