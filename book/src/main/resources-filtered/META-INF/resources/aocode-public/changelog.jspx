@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2018-05-28T15:59:32-0500"
+		dateModified="2018-06-02T00:01:00-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -74,7 +74,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					</li>
 					<li>
 						New constant <ao:a href="apidocs/com/aoindustries/servlet/http/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
-						to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax.servlet.jsp.SkipPageException">SkipPageException</ao:a>
+						to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
 						repeatedly during routine operation.
 					</li>
 					<li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
@@ -99,6 +99,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#PSQL">MarkupType.PSQL</ao:a> for the <ao:a href="https://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL <code>psql</code> command line</ao:a>.</li>
 							<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#SH">MarkupType.SH</ao:a> for shell script encoding.</li>
 						</ul>
+					</li>
+					<li>
+						<ao:a href="apidocs/com/aoindustries/servlet/http/Dispatcher">Dispatcher</ao:a> may now forward
+						and include to caller-provided <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
 					</li>
 				</ul>
 			</changelog:release>
