@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -45,6 +45,11 @@ import java.util.List;
  * </p>
  * <p>
  * All matchers are thread-safe.
+ * </p>
+ * <p>
+ * {@link WildcardPatternMatcher} are measured typically 2 to 100 times as fast as {@link Pattern},
+ * and have been measured up to 2000 times as fast in contrived scenarios (suffix match on long strings),
+ * and should never be slower in their limited use-case domain.
  * </p>
  * <p>
  * TODO: Support "**" as an escape for literal '*' in matching?  No longer collapse adjacent '*'?
@@ -296,5 +301,6 @@ abstract public class WildcardPatternMatcher {
 		return false;
 	}
 
+	// TODO: Rename "matches", deprecate old with "default" method in Java 1.8?
 	abstract public boolean isMatch(String paramName);
 }
