@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2017  AO Industries, Inc.
+ * Copyright (C) 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,7 +37,7 @@ public class WildcardPatternMatcherTest extends TestCase {
 	private static final String craftedLongString;
 	static {
 		// Got stupid slow at 10000
-		// At 1000, simple matcher was 4,000 times as fast as the regular expresions
+		// At 1000, simple matcher was 4,000 times as fast as the regular expressions
 		StringBuilder longSB = new StringBuilder();
 		for(int i=0; i<100; i++) longSB.append("long string ");
 		longString = longSB.toString();
