@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013, 2016, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -250,18 +250,48 @@ public class SQLUtility {
 
 	/**
 	 * Gets the database format for a date/time field.
-	 * If the time is <code>-1</code>, returns <code>null</code>
+	 *
+	 * @param  allowNull   When {@code true}, if the time is {@code -1}, returns {@code null}
 	 */
+	public static String getDateTime(long time, boolean allowNull) {
+		return allowNull && time == -1 ? null : new Timestamp(time).toString().substring(0, 19); // TODO: Not y10k compliant
+	}
+
+	/**
+	 * Gets the database format for a date/time field.
+	 *
+	 * @param time  if the time is {@code -1}, returns {@code null}
+	 *
+	 * @see  #getDateTime(long, boolean)
+	 *
+	 * @deprecated   Please use {@link #getDateTime(long, boolean)} to specify if {@code null} is allowed
+	 */
+	@Deprecated
 	public static String getDateTime(long time) {
-		return time==-1 ? null : new Timestamp(time).toString().substring(0, 19);
+		return getDateTime(time, true);
 	}
 
 	/**
 	 * Gets the database format for a time field.
-	 * If the time is <code>-1</code>, returns <code>null</code>
+	 *
+	 * @param  allowNull   When {@code true}, if the time is {@code -1}, returns {@code null}
 	 */
+	public static String getTime(long time, boolean allowNull) {
+		return allowNull && time == -1 ? null : new Timestamp(time).toString().substring(11, 19); // TODO: Not y10k compliant
+	}
+
+	/**
+	 * Gets the database format for a time field.
+	 *
+	 * @param time  if the time is {@code -1}, returns {@code null}
+	 *
+	 * @see  #getTime(long, boolean)
+	 *
+	 * @deprecated   Please use {@link #getTime(long, boolean)} to specify if {@code null} is allowed
+	 */
+	@Deprecated
 	public static String getTime(long time) {
-		return time==-1 ? null : new Timestamp(time).toString().substring(11, 19);
+		return getTime(time, true);
 	}
 
 	/**
