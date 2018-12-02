@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2015, 2016, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,6 +41,18 @@ public class CompressedDataOutputStream extends DataOutputStream {
 	}
 
 	/**
+	 * The minimum value of int that can be written via {@link #writeCompressedInt(int)}
+	 * or {@link #writeCompressedInt(int, java.io.OutputStream)}.
+	 */
+	public static final int MIN_COMPRESSED_INT_VALUE = -0x40000000;
+
+	/**
+	 * The maximum value of int that can be written via {@link #writeCompressedInt(int)}
+	 * or {@link #writeCompressedInt(int, java.io.OutputStream)}.
+	 */
+	public static final int MAX_COMPRESSED_INT_VALUE = 0x3fffffff;
+
+	/**
 	 * @see CompressedDataInputStream#readCompressedInt()
 	 */
 	public static void writeCompressedInt(int i, OutputStream out) throws IOException {
@@ -76,7 +88,7 @@ public class CompressedDataOutputStream extends DataOutputStream {
 			out.write((i&0xff00)>>>8);
 			out.write(i&0xff);
 		} else {
-			throw new IOException("Value out of range ("+(-0x40000000)+" to "+0x3fffffff+"): "+i);
+			throw new IOException("Value out of range (" + MIN_COMPRESSED_INT_VALUE + " to " + MAX_COMPRESSED_INT_VALUE + "): " + i);
 		}
 	}
 
