@@ -36,6 +36,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
+// Java 1.7: become AutoCloseable
 public class ProcessTimer implements Runnable {
 
 	final private Logger logger;
