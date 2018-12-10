@@ -132,7 +132,7 @@ public class ProcessTimer implements Runnable {
 	}
 
 	private void logInfo(boolean isReminder) {
-		long currentTime=System.currentTimeMillis();
-		logger.logp(Level.INFO, sourceClass, sourceMethod, subject+": Process="+processDescription+", Duration="+StringUtility.getTimeLengthString(currentTime-startTime));
+		long currentTime = System.currentTimeMillis();
+		if(logger.isLoggable(Level.INFO)) logger.logp(Level.INFO, sourceClass, sourceMethod, subject+": Process="+processDescription+", Duration="+StringUtility.getTimeLengthString(currentTime-startTime));
 	}
 }
