@@ -39,7 +39,6 @@ import java.util.logging.Logger;
 public class ProcessTimer implements Runnable {
 
 	final private Logger logger;
-	final private Random random;
 	final private String sourceClass;
 	final private String sourceMethod;
 	final private String subject;
@@ -53,7 +52,6 @@ public class ProcessTimer implements Runnable {
 
 	public ProcessTimer(
 		Logger logger,
-		Random random,
 		String sourceClass,
 		String sourceMethod,
 		String subject,
@@ -62,7 +60,6 @@ public class ProcessTimer implements Runnable {
 		long reminderInterval
 	) {
 		this.logger = logger;
-		this.random=random;
 		this.sourceClass = sourceClass;
 		this.sourceMethod = sourceMethod;
 		this.subject=subject;
@@ -70,6 +67,26 @@ public class ProcessTimer implements Runnable {
 		this.startTime=System.currentTimeMillis();
 		this.maximumTime=maximumTime;
 		this.reminderInterval=reminderInterval;
+	}
+
+	/**
+	 *
+	 * @see  #ProcessTimer(java.util.logging.Logger, java.lang.String, java.lang.String, java.lang.String, java.lang.String, long, long)
+	 *
+	 * @deprecated  The {@link Random} instance is unused.  Please use {@link #ProcessTimer(java.util.logging.Logger, java.lang.String, java.lang.String, java.lang.String, java.lang.String, long, long)} instead.
+	 */
+	@Deprecated
+	public ProcessTimer(
+		Logger logger,
+		Random random,
+		String sourceClass,
+		String sourceMethod,
+		String subject,
+		String processDescription,
+		long maximumTime,
+		long reminderInterval
+	) {
+		this(logger, sourceClass, sourceMethod, subject, processDescription, maximumTime, reminderInterval);
 	}
 
 	public void finished() {
