@@ -99,41 +99,43 @@ public class ProcessTimer implements Runnable {
 	public void finished() {
 		isFinished = true;
 		if(isSleeping) {
-			Thread T=thread;
-			if(T!=null) T.interrupt();
+			Thread T = thread;
+			if(T != null) T.interrupt();
 		}
 	}
 
 	@Override
 	public void run() {
-		thread=Thread.currentThread();
-		try {
-			// Initial delay
+		if(!isFinished) {
+			thread = Thread.currentThread();
 			try {
-				isSleeping=true;
-				Thread.sleep(maximumTime);
-			} catch(InterruptedException err) {
-				// Only normal when finish is called
-				if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
-			}
-			isSleeping=false;
-			if(!isFinished) {
-				logInfo(false);
-				// Reminder loop
-				while(!isFinished) {
-					try {
-						isSleeping=true;
-						Thread.sleep(reminderInterval);
-					} catch(InterruptedException err) {
-						// Only normal when finish is called
-						if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
-					}
-					isSleeping=false;
-					if(!isFinished) logInfo(true);
+				// Initial delay
+				try {
+					isSleeping=true;
+					Thread.sleep(maximumTime);
+				} catch(InterruptedException err) {
+					// Only normal when finish is called
+					if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
 				}
+				isSleeping=false;
+				if(!isFinished) {
+					logInfo(false);
+					// Reminder loop
+					while(!isFinished) {
+						try {
+							isSleeping = true;
+							Thread.sleep(reminderInterval);
+						} catch(InterruptedException err) {
+							// Only normal when finish is called
+							if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
+						}
+						isSleeping = false;
+						if(!isFinished) logInfo(true);
+					}
+				}
+			} finally {
+				thread = null;
 			}
-		} finally {
-			thread = null;
 		}
 	}
 
