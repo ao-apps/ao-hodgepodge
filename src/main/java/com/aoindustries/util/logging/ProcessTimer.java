@@ -36,6 +36,12 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
+
+// TODO: Rather than implementing Runnable and occupying a thread while waiting,
+//       this could take advantage of the ao-concurrent delayed executor functionality,
+//       but this would have to be moved to a different project to avoid picking-up
+//       a dependency.
+
 // Java 1.7: become AutoCloseable
 public class ProcessTimer implements Runnable {
 
