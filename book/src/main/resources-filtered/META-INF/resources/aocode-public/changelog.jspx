@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2018-06-02T00:01:00-0500"
+		dateModified="2018-12-18T10:23:33-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -79,14 +79,14 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					</li>
 					<li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
 					<li>
-						New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Boolean">Boolean</ao:a>:
+						New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Boolean.html">Boolean</ao:a>:
 						<ul>
 							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullBoolean">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
 							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullBoolean">CompressedDataInputStream.readNullBoolean()</ao:a></li>
 						</ul>
 					</li>
 					<li>
-						New methods to join into arbitrary <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Appendable">Appendable</ao:a>:
+						New methods to join into arbitrary <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Appendable.html">Appendable</ao:a>:
 						<ul>
 							<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
 							<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
