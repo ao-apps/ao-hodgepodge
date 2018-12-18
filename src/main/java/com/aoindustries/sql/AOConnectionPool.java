@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -142,6 +142,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 			boolean successful = false;
 			try {
 				if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+				// TODO: This hides the PgConnection, which prevents registering PGobject.  Find another way or don't worry about this and deprecate
 				if(conn.getClass().getName().startsWith("org.postgresql.")) {
 					// getTransactionIsolation causes a round-trip to the database, this wrapper caches the value and avoids unnecessary sets
 					// to eliminate unnecessary round-trips and improve performance over high-latency links.
