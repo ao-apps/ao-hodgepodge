@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 aocode-public - Reusable Java library of general tools with minimal external dependencies.
-Copyright (C) 2016, 2017, 2018  AO Industries, Inc.
+Copyright (C) 2016, 2017, 2018, 2019  AO Industries, Inc.
     support@aoindustries.com
     7262 Bull Pen Cir
     Mobile, AL 36695
@@ -74,19 +74,19 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					</li>
 					<li>
 						New constant <ao:a href="apidocs/com/aoindustries/servlet/http/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
-						to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
+						to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}/javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
 						repeatedly during routine operation.
 					</li>
 					<li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
 					<li>
-						New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Boolean.html">Boolean</ao:a>:
+						New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}/java/lang/Boolean.html">Boolean</ao:a>:
 						<ul>
 							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullBoolean">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
 							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullBoolean">CompressedDataInputStream.readNullBoolean()</ao:a></li>
 						</ul>
 					</li>
 					<li>
-						New methods to join into arbitrary <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Appendable.html">Appendable</ao:a>:
+						New methods to join into arbitrary <ao:a rel="nofollow" href="@{javac.link.javaApi}/java/lang/Appendable.html">Appendable</ao:a>:
 						<ul>
 							<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
 							<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
@@ -102,7 +102,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					</li>
 					<li>
 						<ao:a href="apidocs/com/aoindustries/servlet/http/Dispatcher">Dispatcher</ao:a> may now forward
-						and include to caller-provided <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
+						and include to caller-provided <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}/javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
 					</li>
 				</ul>
 			</changelog:release>
@@ -118,7 +118,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		>
 			<ul>
 				<li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
-				<li>Moved the following classes to the new <core:link book="/ao-lang" page="/" /> project:
+				<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
 					<ol>
 						<li><code>com.aoindustries.io.AoByteArrayInputStream</code></li>
 						<li><code>com.aoindustries.io.AoByteArrayOutputStream</code></li>
@@ -264,7 +264,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			scmUrl="@{documented.scm.url}"
 		>
 			<ul>
-				<li>New <core:link book="/ao-oss-parent" page="/" /> POM to simplify <code>pom.xml</code> files.</li>
+				<li>New <core:link book="/ao-oss-parent" page="/index.jspx" /> POM to simplify <code>pom.xml</code> files.</li>
 				<li>Project documentation moved to per-project book in <ao:a href="https://semanticcms.com/">SemanticCMS</ao:a> format.</li>
 				<li>Added changelog as top-level project link.</li>
 				<li>Added utility to find the maximum non-null value.</li>
