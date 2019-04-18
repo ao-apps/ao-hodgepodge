@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -138,12 +138,9 @@ public class LogFollower extends InputStream {
 				// Read to the end of the file
 				long ral = file.length();
 				if(ral>filePos) {
-					RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
-					try {
+					try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
 						randomAccess.seek(filePos++);
 						return randomAccess.read();
-					} finally {
-						randomAccess.close();
 					}
 				}
 			}
@@ -168,16 +165,13 @@ public class LogFollower extends InputStream {
 				// Read to the end of the file
 				long ral = file.length();
 				if(ral>filePos) {
-					RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
-					try {
+					try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
 						randomAccess.seek(filePos);
 						long avail = randomAccess.length() - filePos;
 						if(avail>len) avail = len;
 						int actual = randomAccess.read(b, offset, (int)avail);
 						filePos += actual;
 						return actual;
-					} finally {
-						randomAccess.close();
 					}
 				}
 			}
@@ -202,16 +196,13 @@ public class LogFollower extends InputStream {
 				// Skip to the end of the file
 				long ral = file.length();
 				if(ral>filePos) {
-					RandomAccessFile randomAccess = new RandomAccessFile(file, "r");
-					try {
+					try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
 						randomAccess.seek(filePos);
 						long avail = randomAccess.length()-filePos;
 						if(avail>n) avail = n;
 						int actual = randomAccess.skipBytes((int)avail);
 						filePos += actual;
 						return actual;
-					} finally {
-						randomAccess.close();
 					}
 				}
 			}

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2014, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2014, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -109,9 +109,7 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
 		public E getSingleton(Object target) {
 			try {
 				return (E)method.invoke(target);
-			} catch(IllegalAccessException exc) {
-				throw new RuntimeException(target+"."+method+"()", exc);
-			} catch(InvocationTargetException exc) {
+			} catch(IllegalAccessException | InvocationTargetException exc) {
 				throw new RuntimeException(target+"."+method+"()", exc);
 			}
 		}
@@ -151,9 +149,7 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
 		public Set<? extends E> getSet(Object target) {
 			try {
 				return (Set<E>)method.invoke(target);
-			} catch(IllegalAccessException exc) {
-				throw new RuntimeException(target+"."+method+"()", exc);
-			} catch(InvocationTargetException exc) {
+			} catch(IllegalAccessException | InvocationTargetException exc) {
 				throw new RuntimeException(target+"."+method+"()", exc);
 			}
 		}
@@ -264,12 +260,12 @@ public class UnionMethodSet<E> extends AbstractSet<E> {
 					} else {
 						// Add currentValue / currentSet to previous
 						if(currentSingleton!=null) {
-							if(previousSingletons==null) previousSingletons = new ArrayList<E>();
+							if(previousSingletons==null) previousSingletons = new ArrayList<>();
 							previousSingletons.add(currentSingleton);
 							currentSingleton = null;
 						}
 						if(currentSet!=null) {
-							if(previousSets==null) previousSets = new ArrayList<Set<? extends E>>();
+							if(previousSets==null) previousSets = new ArrayList<>();
 							previousSets.add(currentSet);
 							currentSet = null;
 						}

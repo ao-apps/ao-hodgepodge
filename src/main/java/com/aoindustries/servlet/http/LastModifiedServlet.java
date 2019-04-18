@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2016, 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,7 +24,6 @@ package com.aoindustries.servlet.http;
 
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
-import com.aoindustries.lang.ObjectUtils;
 import com.aoindustries.servlet.ServletContextCache;
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -140,14 +140,14 @@ public class LastModifiedServlet extends HttpServlet {
 			if(!(obj instanceof HeaderAndPath)) return false;
 			HeaderAndPath other = (HeaderAndPath)obj;
 			return
-				ObjectUtils.equals(header, other.header)
+				Objects.equals(header, other.header)
 				&& path.equals(other.path)
 			;
 		}
 
 		@Override
 		public int hashCode() {
-			int hash = ObjectUtils.hashCode(header);
+			int hash = Objects.hashCode(header);
 			hash = hash * 31 + path.hashCode();
 			return hash;
 		}
@@ -171,7 +171,7 @@ public class LastModifiedServlet extends HttpServlet {
 			Map<HeaderAndPath,ParsedCssFile> cache = (Map<HeaderAndPath,ParsedCssFile>)servletContext.getAttribute(PARSE_CSS_FILE_CACHE_ATTRIBUTE_NAME);
 			if(cache == null) {
 				// Create new cache
-				cache = new HashMap<HeaderAndPath,ParsedCssFile>();
+				cache = new HashMap<>();
 				servletContext.setAttribute(PARSE_CSS_FILE_CACHE_ATTRIBUTE_NAME, cache);
 			}
 			synchronized(cache) {
@@ -190,16 +190,13 @@ public class LastModifiedServlet extends HttpServlet {
 					{
 						InputStream resourceIn = servletContext.getResourceAsStream(hap.path);
 						if(resourceIn==null) throw new FileNotFoundException(hap.path);
-						BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn, ENCODING));
-						try {
+						try (BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn, ENCODING))) {
 							cssContent = IoUtils.readFully(in);
-						} finally {
-							in.close();
 						}
 					}
 					// Replace values while capturing URLs
 					StringBuilder newContent = new StringBuilder(cssContent.length() << 1);
-					Map<HeaderAndPath,Long> referencedPaths = new HashMap<HeaderAndPath,Long>();
+					Map<HeaderAndPath,Long> referencedPaths = new HashMap<>();
 					Matcher matcher = urlPattern.matcher(cssContent);
 					int lastEnd = 0;
 					while(matcher.find()) {
@@ -337,7 +334,7 @@ public class LastModifiedServlet extends HttpServlet {
 		Map<HeaderAndPath,GetLastModifiedCacheValue> cache = (Map<HeaderAndPath,GetLastModifiedCacheValue>)servletContext.getAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME);
 		if(cache == null) {
 			// Create new cache
-			cache = new HashMap<HeaderAndPath,GetLastModifiedCacheValue>();
+			cache = new HashMap<>();
 			servletContext.setAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME, cache);
 		}
 		GetLastModifiedCacheValue cacheValue;
@@ -474,7 +471,7 @@ public class LastModifiedServlet extends HttpServlet {
 	/**
 	 * Fetched some from <a href="http://en.wikipedia.org/wiki/List_of_file_formats">http://en.wikipedia.org/wiki/List_of_file_formats</a>
 	 */
-	private static final Set<String> staticExtensions = new HashSet<String>(
+	private static final Set<String> staticExtensions = new HashSet<>(
 		Arrays.asList(
 			// CSS
 			"css",
@@ -610,10 +607,7 @@ public class LastModifiedServlet extends HttpServlet {
 			}
 		} catch(FileNotFoundException e) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-		} catch(IOException e) {
-			logger.log(Level.SEVERE, null, e);
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		} catch(RuntimeException e) {
+		} catch(IOException | RuntimeException e) {
 			logger.log(Level.SEVERE, null, e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}

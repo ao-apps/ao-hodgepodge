@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -70,8 +70,8 @@ public class FindReplaceProxy {
 				final int listenPort = Integer.parseInt(args[1]);
 				final int connectPort = Integer.parseInt(args[3]);
 
-				List<FindReplace> inFindReplaces = new ArrayList<FindReplace>();
-				List<FindReplace> outFindReplaces = new ArrayList<FindReplace>();
+				List<FindReplace> inFindReplaces = new ArrayList<>();
+				List<FindReplace> outFindReplaces = new ArrayList<>();
 				for(int pos=4; pos<args.length; pos+=3) {
 					String find = args[pos];
 					String replace = args[pos+1];
@@ -92,8 +92,7 @@ public class FindReplaceProxy {
 						try {
 							InetAddress listenAddress = InetAddress.getByName(args[0]);
 							InetAddress connectAddress = InetAddress.getByName(args[2]);
-							ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress);
-							try {
+							try (ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress)) {
 								while(true) {
 									Socket socketIn = ss.accept();
 									new FindReplaceProxyThread(
@@ -105,8 +104,6 @@ public class FindReplaceProxy {
 										Collections.unmodifiableList(outFindReplaces)
 									).start();
 								}
-							} finally {
-								ss.close();
 							}
 						} catch(IOException e) {
 							e.printStackTrace(System.err);
@@ -157,8 +154,7 @@ public class FindReplaceProxy {
 		public void run() {
 			try {
 				try {
-					Socket socketOut = new Socket(connectAddress, connectPort, sourceAddress, 0);
-					try {
+					try (Socket socketOut = new Socket(connectAddress, connectPort, sourceAddress, 0)) {
 						FindReplaceReadThread inThread = new FindReplaceReadThread(socketIn.getInputStream(), socketOut.getOutputStream(), inFindReplaces);
 						try {
 							inThread.start();
@@ -179,8 +175,6 @@ public class FindReplaceProxy {
 								e.printStackTrace(System.err);
 							}
 						}
-					} finally {
-						socketOut.close();
 					}
 				} finally {
 					socketIn.close();

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -152,7 +152,7 @@ public class FixedPersistentBlockBuffer extends AbstractPersistentBlockBuffer /*
 	}
 
 	private long lowestFreeId = 0; // One direction scan used before knownFreeIds is populated
-	private final SortedSet<Long> knownFreeIds = new TreeSet<Long>();
+	private final SortedSet<Long> knownFreeIds = new TreeSet<>();
 
 	/**
 	 * Allocates a block.

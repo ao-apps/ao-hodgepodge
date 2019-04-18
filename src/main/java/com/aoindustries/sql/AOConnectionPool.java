@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -121,7 +121,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		}
 	}
 
-	private static final ConcurrentMap<String,Object> driversLoaded = new ConcurrentHashMap<String,Object>();
+	private static final ConcurrentMap<String,Object> driversLoaded = new ConcurrentHashMap<>();
 
 	/**
 	 * Loads a driver at most once.
@@ -156,17 +156,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		} catch(SQLException err) {
 			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", err);
 			throw err;
-		} catch (ClassNotFoundException err) {
-			SQLException sqlErr=new SQLException();
-			sqlErr.initCause(err);
-			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
-			throw sqlErr;
-		} catch (InstantiationException err) {
-			SQLException sqlErr=new SQLException();
-			sqlErr.initCause(err);
-			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
-			throw sqlErr;
-		} catch (IllegalAccessException err) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException err) {
 			SQLException sqlErr=new SQLException();
 			sqlErr.initCause(err);
 			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);

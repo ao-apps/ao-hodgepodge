@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -103,7 +103,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	 */
 	@Deprecated
 	public ArraySet() {
-		this.elements = new ArrayList<E>();
+		this.elements = new ArrayList<>();
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	 */
 	@Deprecated
 	public ArraySet(int initialCapacity) {
-		this.elements = new ArrayList<E>(initialCapacity);
+		this.elements = new ArrayList<>(initialCapacity);
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	 */
 	@Deprecated
 	public ArraySet(Collection<? extends E> c) {
-		this.elements = new ArrayList<E>(c.size());
+		this.elements = new ArrayList<>(c.size());
 		addAll(c);
 	}
 

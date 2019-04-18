@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -46,7 +46,7 @@ public class ErrorPrinterFormatter extends Formatter {
 	}
 
 	public void format(LogRecord record, Appendable out) {
-		List<Object> extraInfo = new ArrayList<Object>(9); // At most 9 elements added below
+		List<Object> extraInfo = new ArrayList<>(9); // At most 9 elements added below
 		String loggerName = record.getLoggerName();
 		if(loggerName!=null) extraInfo.add("record.loggerName="+loggerName);
 		extraInfo.add("record.level="+record.getLevel());

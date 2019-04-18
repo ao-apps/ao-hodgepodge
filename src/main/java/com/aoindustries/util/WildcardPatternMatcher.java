@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2017, 2018  AO Industries, Inc.
+ * Copyright (C) 2013, 2017, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -123,7 +123,7 @@ abstract public class WildcardPatternMatcher {
 			if(list.isEmpty()) return matchNone;
 
 			// Parse into a series of individual matchers
-			final List<WildcardPatternMatcher> matchers = new ArrayList<WildcardPatternMatcher>(list.size());
+			final List<WildcardPatternMatcher> matchers = new ArrayList<>(list.size());
 			for(String pattern : list) {
 				int end = pattern.length();
 				if(end > 0) {
@@ -154,7 +154,7 @@ abstract public class WildcardPatternMatcher {
 						endsWildcard = false;
 					}
 					// Split the remaining pattern on any internal '*'
-					final List<String> sequences = new ArrayList<String>();
+					final List<String> sequences = new ArrayList<>();
 					while(pos < end) {
 						assert pattern.charAt(pos) != '*';
 						int starPos = pattern.indexOf('*', pos + 1);

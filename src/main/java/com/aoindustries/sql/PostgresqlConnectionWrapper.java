@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import com.aoindustries.lang.reflect.Methods;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -309,45 +308,28 @@ public class PostgresqlConnectionWrapper implements Connection {
 		return conn.createStruct(typeName, attributes);
 	}
 
-	// Java 1.7: @Override
+	@Override
 	public int getNetworkTimeout() throws SQLException {
-		// Java 1.7: return conn.getNetworkTimeout();
-		return Methods.invoke(Integer.TYPE, conn, "getNetworkTimeout");
+		return conn.getNetworkTimeout();
 	}
 
-	// Java 1.7: @Override
+	@Override
 	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-		// Java 1.7: conn.setNetworkTimeout(executor, milliseconds);
-		Methods.invoke(
-			Void.TYPE,
-			conn,
-			"setNetworkTimeout",
-			new Class<?>[] {
-				Executor.class,
-				Integer.TYPE
-			},
-			new Object[] {
-				executor,
-				milliseconds
-			}
-		);
+		conn.setNetworkTimeout(executor, milliseconds);
 	}
 
-	// Java 1.7: @Override
+	@Override
 	public void setSchema(String schema) throws SQLException {
-		// Java 1.7: conn.setSchema(schema);
-		Methods.invoke(Void.TYPE, conn, "setSchema", String.class, schema);
+		conn.setSchema(schema);
 	}
 
-	// Java 1.7: @Override
+	@Override
 	public String getSchema() throws SQLException {
-		// Java 1.7: return conn.getSchema();
-		return Methods.invoke(String.class, conn, "getSchema");
+		return conn.getSchema();
 	}
 
-	// Java 1.7: @Override
+	@Override
 	public void abort(Executor executor) throws SQLException {
-		// Java 1.7: conn.abort(executor);
-		Methods.invoke(Void.TYPE, conn, "abort", Executor.class, executor);
+		conn.abort(executor);
 	}
 }

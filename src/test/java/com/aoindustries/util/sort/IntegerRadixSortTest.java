@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -101,7 +101,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time experimental radix sort
-			List<N> expRadixResult = new ArrayList<N>(randomValues);
+			List<N> expRadixResult = new ArrayList<>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
@@ -143,7 +143,7 @@ public class IntegerRadixSortTest extends TestCase {
 			 */
 
 			// Time radix sort
-			List<N> oldRadixResult = new ArrayList<N>(randomValues);
+			List<N> oldRadixResult = new ArrayList<>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				IntegerRadixSort.getInstance().sort(oldRadixResult);
@@ -163,7 +163,7 @@ public class IntegerRadixSortTest extends TestCase {
 			}
 
 			// Time Java sort
-			List<N> javaResult = new ArrayList<N>(randomValues);
+			List<N> javaResult = new ArrayList<>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				Collections.sort(javaResult, null);
@@ -213,7 +213,7 @@ public class IntegerRadixSortTest extends TestCase {
 		long[] avgSumOld = new long[1];
 		//long[] avgSumNew = new long[1];
 		long[] avgSumExp = new long[1];
-		List<Integer> randomValues = new ArrayList<Integer>(END_TEST_SIZE);
+		List<Integer> randomValues = new ArrayList<>(END_TEST_SIZE);
 		int tests = 0;
 		for(
 			int testSize = START_TEST_SIZE, passes = MAX_PASSES;

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -105,15 +105,13 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 				Arrays.sort(array);
 			} else {
 			if(ENABLE_CONCURRENCY) {
-				Queue<Future<?>> futures = new ConcurrentLinkedQueue<Future<?>>();
+				Queue<Future<?>> futures = new ConcurrentLinkedQueue<>();
 				sort(array, 0, array.length, 32-FIRST_BITS_PER_PASS, futures);
 				try {
 					while(!futures.isEmpty()) {
 						futures.remove().get();
 					}
-				} catch(InterruptedException e) {
-					throw new RuntimeException(e);
-				} catch(ExecutionException e) {
+				} catch(InterruptedException | ExecutionException e) {
 					throw new RuntimeException(e);
 				}
 			} else {

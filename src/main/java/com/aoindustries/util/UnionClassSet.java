@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -59,7 +59,7 @@ public class UnionClassSet<E> extends AbstractSet<E> {
 	/**
 	 * Will never contain any empty sets.
 	 */
-	private final Map<Class<?>, Set<? extends E>> added = new LinkedHashMap<Class<?>, Set<? extends E>>();
+	private final Map<Class<?>, Set<? extends E>> added = new LinkedHashMap<>();
 
 	public UnionClassSet() {
 	}

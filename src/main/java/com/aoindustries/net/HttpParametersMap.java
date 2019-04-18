@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -40,7 +40,7 @@ import java.util.TreeMap;
  */
 public class HttpParametersMap implements MutableHttpParameters {
 
-	private final Map<String,List<String>> map = new TreeMap<String,List<String>>();
+	private final Map<String,List<String>> map = new TreeMap<>();
 	private final Map<String,List<String>> unmodifiableMap = Collections.unmodifiableMap(map);
 
 	/**
@@ -101,7 +101,7 @@ public class HttpParametersMap implements MutableHttpParameters {
 		NullArgumentException.checkNotNull(name, "name");
 		NullArgumentException.checkNotNull(value, "value");
 		List<String> values = map.get(name);
-		if(values==null) map.put(name, values = new ArrayList<String>());
+		if(values==null) map.put(name, values = new ArrayList<>());
 		values.add(value);
 	}
 }

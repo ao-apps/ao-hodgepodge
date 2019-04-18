@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2016, 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -57,7 +57,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
 	private final TempFileContext tempFileContext;
 	private final RandomAccessFile raf;
 	private final FileChannel channel;
-	private final List<MappedByteBuffer> mappedBuffers = new ArrayList<MappedByteBuffer>();
+	private final List<MappedByteBuffer> mappedBuffers = new ArrayList<>();
 	private final List<Boolean> modifiedBuffers;
 	private boolean closed;
 
@@ -115,7 +115,7 @@ public class LargeMappedPersistentBuffer extends AbstractPersistentBuffer {
 		channel = raf.getChannel();
 		// Lock the file
 		channel.lock(0L, Long.MAX_VALUE, protectionLevel==ProtectionLevel.READ_ONLY);
-		if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) modifiedBuffers = new ArrayList<Boolean>();
+		if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) modifiedBuffers = new ArrayList<>();
 		else modifiedBuffers = null;
 		fillMappedBuffers();
 	}

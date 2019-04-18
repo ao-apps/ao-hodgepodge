@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.persistent;
 
-import com.aoindustries.lang.NotImplementedException;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -115,7 +114,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
 	 * entry will be <code>SECTOR_SIZE</code> in length, even if at the end of the
 	 * capacity.
 	 */
-	private final Map<Long,byte[]> writeCache = new HashMap<Long,byte[]>();
+	private final Map<Long,byte[]> writeCache = new HashMap<>();
 
 	/**
 	 * Creates a read-write test buffer with protection level <code>NONE</code>.
@@ -137,7 +136,7 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
 				if(!writeCache.isEmpty()) {
 					long capacity = wrapped.capacity();
 					// Write current write cache in a partial state
-					List<Long> sectors = new ArrayList<Long>(writeCache.keySet());
+					List<Long> sectors = new ArrayList<>(writeCache.keySet());
 					Collections.shuffle(sectors, random);
 					int numToWrite = random.nextInt(sectors.size());
 					for(int c=0; c<numToWrite; c++) {
@@ -260,8 +259,9 @@ public class RandomFailBuffer extends AbstractPersistentBuffer {
 
 	// @NotThreadSafe
 	@Override
+	@SuppressWarnings("deprecation")
 	public void ensureZeros(long position, long len) throws IOException {
-		throw new NotImplementedException("Implement when first needed");
+		throw new com.aoindustries.lang.NotImplementedException("Implement when first needed");
 	}
 
 	// @NotThreadSafe
