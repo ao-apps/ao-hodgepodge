@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -616,7 +616,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				sizePerTask = size;
 			} else {
 				assert numTasks>=2 : "Must not have an executor when numTasks < 2";
-				runnableFutures = new ArrayList<Future<?>>(numTasks);
+				runnableFutures = new ArrayList<>(numTasks);
 				int spt = size / numTasks;
 				if((spt*numTasks)<size) spt++; // Round-up instead of down
 				sizePerTask = spt;
@@ -631,7 +631,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 			// May only use concurrent import for random access sources
 			if(executor!=null && source.useRandomAccess()) {
 				// Perform concurrent import
-				final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<Future<Source.ImportDataResult>>(numTasks);
+				final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<>(numTasks);
 				for(
 					int taskStart=0, toTaskNum=0;
 					taskStart<size;
@@ -805,9 +805,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					0
 				);
 			}
-		} catch(InterruptedException e) {
-			throw new WrappedException(e);
-		} catch(ExecutionException e) {
+		} catch(InterruptedException | ExecutionException e) {
 			throw new WrappedException(e);
 		}
 	}
@@ -926,14 +924,14 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					radixSort(
 						size,
 						new SingleTaskNumberRadixTable<N>(size),
-						new NumberListSource<N>(size, list),
+						new NumberListSource<>(size, list),
 						null
 					);
 				} else {
 					radixSort(
 						size,
 						new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
-						new NumberListSource<N>(size, list),
+						new NumberListSource<>(size, list),
 						executor
 					);
 				}
@@ -1020,14 +1018,14 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				radixSort(
 					size,
 					new SingleTaskNumberRadixTable<N>(size),
-					new NumberArraySource<N>(size, array),
+					new NumberArraySource<>(size, array),
 					null
 				);
 			} else {
 				radixSort(
 					size,
 					new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
-					new NumberArraySource<N>(size, array),
+					new NumberArraySource<>(size, array),
 					executor
 				);
 			}

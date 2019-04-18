@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -101,11 +101,8 @@ public class MultiFileInputStream extends InputStream {
 		while(value==-1) {
 			value=in.read();
 			if(value==-1) {
-				FileInputStream tempIn = in;
-				try {
+				try (FileInputStream tempIn = in) {
 					in=null;
-				} finally {
-					tempIn.close();
 				}
 				if(nextFile>=files.length) return -1;
 				in=new FileInputStream(files[nextFile++]);
@@ -125,11 +122,8 @@ public class MultiFileInputStream extends InputStream {
 			while(count==-1) {
 				count=in.read(buff);
 				if(count==-1) {
-					FileInputStream tempIn = in;
-					try {
+					try (FileInputStream tempIn = in) {
 						in=null;
-					} finally {
-						tempIn.close();
 					}
 					if(nextFile>=files.length) return -1;
 					in=new FileInputStream(files[nextFile++]);
@@ -151,11 +145,8 @@ public class MultiFileInputStream extends InputStream {
 			while(count==-1) {
 				count=in.read(buff, off, len);
 				if(count==-1) {
-					FileInputStream tempIn = in;
-					try {
+					try (FileInputStream tempIn = in) {
 						in=null;
-					} finally {
-						tempIn.close();
 					}
 					if(nextFile>=files.length) return -1;
 					in=new FileInputStream(files[nextFile++]);
@@ -189,11 +180,8 @@ public class MultiFileInputStream extends InputStream {
 			while(count==-1) {
 				count=in.skip(n);
 				if(count==-1) {
-					FileInputStream tempIn = in;
-					try {
+					try (FileInputStream tempIn = in) {
 						in=null;
-					} finally {
-						tempIn.close();
 					}
 					if(nextFile>=files.length) return -1;
 					in=new FileInputStream(files[nextFile++]);

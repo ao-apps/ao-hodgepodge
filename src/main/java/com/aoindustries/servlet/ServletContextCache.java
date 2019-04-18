@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2016, 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -74,7 +74,7 @@ final public class ServletContextCache {
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="getResource">
-	private final BackgroundCache<String,URL,MalformedURLException> getResourceCache = new BackgroundCache<String,URL,MalformedURLException>(
+	private final BackgroundCache<String,URL,MalformedURLException> getResourceCache = new BackgroundCache<>(
 		ServletContextCache.class.getName() + ".getResource",
 		MalformedURLException.class,
 		REFRESH_INTERVAL,
@@ -113,7 +113,7 @@ final public class ServletContextCache {
 	// TODO: getRequestDispatcher?
 
 	// <editor-fold defaultstate="collapsed" desc="getRealPath">
-	private final BackgroundCache<String,String,RuntimeException> getRealPathCache = new BackgroundCache<String,String,RuntimeException>(
+	private final BackgroundCache<String,String,RuntimeException> getRealPathCache = new BackgroundCache<>(
 		ServletContextCache.class.getName() + ".getRealPath",
 		RuntimeException.class,
 		REFRESH_INTERVAL,

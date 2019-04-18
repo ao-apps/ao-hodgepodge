@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016, 2017, 2018  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016, 2017, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,7 +24,6 @@ package com.aoindustries.util.persistent;
 
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
-import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.tempfiles.TempFileContext;
 import java.io.File;
 import java.io.FileInputStream;
@@ -140,7 +139,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 
 	private static final Timer asynchronousCommitTimer = new Timer("TwoCopyBarrierBuffer.asynchronousCommitTimer");
 
-	private static final Set<TwoCopyBarrierBuffer> shutdownBuffers = new HashSet<TwoCopyBarrierBuffer>();
+	private static final Set<TwoCopyBarrierBuffer> shutdownBuffers = new HashSet<>();
 
 	private static class FieldLock {}
 
@@ -160,7 +159,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 			// Get a snapshot of all buffers
 			List<TwoCopyBarrierBuffer> toClose;
 			synchronized(shutdownBuffers) {
-				toClose = new ArrayList<TwoCopyBarrierBuffer>(shutdownBuffers);
+				toClose = new ArrayList<>(shutdownBuffers);
 				shutdownBuffers.clear();
 			}
 			if(!toClose.isEmpty()) {
@@ -252,10 +251,10 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 	 */
 	private SortedMap<Long,byte[]>
 		// Changes since the current (most up-to-date) file was last updated
-		currentWriteCache = new TreeMap<Long,byte[]>(),
+		currentWriteCache = new TreeMap<>(),
 		// Changes since the old (previous version) file was last updated.  This
 		// is a superset of <code>currentWriteCache</code>.
-		oldWriteCache = new TreeMap<Long,byte[]>()
+		oldWriteCache = new TreeMap<>()
 	;
 	private long capacity; // The underlying storage is not extended until commit time.
 	private RandomAccessFile raf; // Reads on non-cached data are read from here (this is the current file) - this is read-only
@@ -381,8 +380,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 		raf = new RandomAccessFile(file, "r");
 		capacity = raf.length();
 		long oldCapacity = oldFile.length();
-		InputStream oldIn = new FileInputStream(oldFile);
-		try {
+		try (InputStream oldIn = new FileInputStream(oldFile)) {
 			byte[] buff = new byte[sectorSize];
 			byte[] oldBuff = new byte[sectorSize];
 			for(long sector=0; sector<capacity; sector+=sectorSize) {
@@ -410,8 +408,6 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 					}
 				}
 			}
-		} finally {
-			oldIn.close();
 		}
 		synchronized(shutdownBuffers) {
 			shutdownBuffers.add(this);
@@ -429,8 +425,7 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 		if(!currentWriteCache.isEmpty()) {
 			if(protectionLevel==ProtectionLevel.READ_ONLY) throw new IOException("protectionLevel==ProtectionLevel.READ_ONLY");
 			FileUtils.rename(oldFile, newFile);
-			RandomAccessFile newRaf = new RandomAccessFile(newFile, "rw");
-			try {
+			try (RandomAccessFile newRaf = new RandomAccessFile(newFile, "rw")) {
 				long oldLength = newRaf.length();
 				if(capacity!=oldLength) {
 					newRaf.setLength(capacity);
@@ -450,8 +445,6 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 					newRaf.write(entry.getValue(), 0, (int)(sectorEnd - sector));
 				}
 				if(protectionLevel.compareTo(ProtectionLevel.BARRIER)>=0) newRaf.getChannel().force(false);
-			} finally {
-				newRaf.close();
 			}
 			raf.close();
 			FileUtils.rename(file, oldFile);
@@ -739,8 +732,9 @@ public class TwoCopyBarrierBuffer extends AbstractPersistentBuffer {
 
 	@Override
 	// @ThreadSafe
+	@SuppressWarnings("deprecation")
 	public void ensureZeros(long position, long len) throws IOException {
-		throw new NotImplementedException("TODO: Implement by using PersistentCollection.zero, passing to put sector aligned");
+		throw new com.aoindustries.lang.NotImplementedException("TODO: Implement by using PersistentCollection.zero, passing to put sector aligned");
 	}
 
 	// @ThreadSafe

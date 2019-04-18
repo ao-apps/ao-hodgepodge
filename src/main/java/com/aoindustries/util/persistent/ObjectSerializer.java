@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -48,26 +48,18 @@ public class ObjectSerializer<E> extends BufferedSerializer<E> {
 	// @NotThreadSafe
 	@Override
 	protected void serialize(E value, ByteArrayOutputStream buffer) throws IOException {
-		ObjectOutputStream oout = new ObjectOutputStream(buffer);
-		try {
+		try (ObjectOutputStream oout = new ObjectOutputStream(buffer)) {
 			oout.writeObject(value);
-		} finally {
-			oout.close();
 		}
 	}
 
 	// @NotThreadSafe
 	@Override
 	public E deserialize(InputStream in) throws IOException {
-		ObjectInputStream oin = new ObjectInputStream(in);
-		try {
+		try (ObjectInputStream oin = new ObjectInputStream(in)) {
 			return type.cast(oin.readObject());
-		} catch(ClassNotFoundException err) {
+		} catch(ClassNotFoundException | ClassCastException err) {
 			throw new IOException(err);
-		} catch(ClassCastException err) {
-			throw new IOException(err);
-		} finally {
-			oin.close();
 		}
 	}
 }

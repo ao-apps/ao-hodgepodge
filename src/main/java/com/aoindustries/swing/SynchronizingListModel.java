@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,7 +38,7 @@ import javax.swing.SwingUtilities;
  *
  * @author  AO Industries, Inc.
  */
-public class SynchronizingListModel<E> extends DefaultListModel {
+public class SynchronizingListModel<E> extends DefaultListModel<E> {
 
 	private static final long serialVersionUID = -4928047430792677729L;
 

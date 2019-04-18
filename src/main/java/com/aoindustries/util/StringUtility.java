@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -780,7 +780,7 @@ public final class StringUtility {
 	 * Splits a String into lines on any '\n' characters.  Also removes any ending '\r' characters if present
 	 */
 	public static List<String> splitLines(String S) {
-		List<String> V=new ArrayList<String>();
+		List<String> V=new ArrayList<>();
 		int start=0;
 		int pos;
 		while((pos=S.indexOf('\n', start))!=-1) {
@@ -959,7 +959,7 @@ public final class StringUtility {
 	public static List<String> splitString(String line, String delim) {
 		int delimLen = delim.length();
 		if(delimLen==0) throw new IllegalArgumentException("Delimiter may not be empty");
-		List<String> words = new ArrayList<String>();
+		List<String> words = new ArrayList<>();
 		int len = line.length();
 		int pos = 0;
 		while (pos < len) {
@@ -985,7 +985,7 @@ public final class StringUtility {
 	 * @param line java.lang.String
 	 */
 	public static List<String> splitStringCommaSpace(String line) {
-		List<String> words=new ArrayList<String>();
+		List<String> words=new ArrayList<>();
 		int len=line.length();
 		int pos=0;
 		while(pos<len) {
@@ -1016,10 +1016,7 @@ public final class StringUtility {
 			wordWrap(string, width, buffer);
 			return buffer.toString();
 		} catch(IOException e) {
-			// Java 1.7: direct constructor
-			AssertionError ae = new AssertionError("Should not get IOException from StringBuilder");
-			ae.initCause(e);
-			throw ae;
+			throw new AssertionError("Should not get IOException from StringBuilder", e);
 		}
 	}
 

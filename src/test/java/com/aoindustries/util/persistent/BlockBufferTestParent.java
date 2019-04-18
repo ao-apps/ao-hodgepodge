@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -62,7 +62,7 @@ abstract public class BlockBufferTestParent extends TestCase {
 		tempFile.deleteOnExit();
 		PersistentBlockBuffer blockBuffer = getBlockBuffer(getBuffer(tempFile, ProtectionLevel.NONE));
 		try {
-			Set<Long> allocatedIds = new HashSet<Long>();
+			Set<Long> allocatedIds = new HashSet<>();
 			for(int c=0;c<TEST_LOOPS;c++) {
 				if(((c+1)%TEST_REPORT_INTERVAL)==0) System.out.println(getClass()+": testAllocateDeallocate: Test loop "+(c+1)+" of " + TEST_LOOPS);
 				// Allocate some blocks, must not return duplicate ids.
@@ -73,7 +73,7 @@ abstract public class BlockBufferTestParent extends TestCase {
 
 				// Iterate the block ids.  Each must be allocated.  All allocated must
 				// be returned once and only once.
-				Set<Long> notReturnedIds = new HashSet<Long>(allocatedIds);
+				Set<Long> notReturnedIds = new HashSet<>(allocatedIds);
 				Iterator<Long> iter = blockBuffer.iterateBlockIds();
 				while(iter.hasNext()) {
 					Long id = iter.next();
@@ -82,7 +82,7 @@ abstract public class BlockBufferTestParent extends TestCase {
 				assertTrue(notReturnedIds.isEmpty());
 
 				// Randomly deallocate 900 of the entries
-				List<Long> ids = new ArrayList<Long>(allocatedIds);
+				List<Long> ids = new ArrayList<>(allocatedIds);
 				Collections.shuffle(ids, random);
 				for(int d=0;d<500;d++) {
 					long id = ids.get(d);
@@ -152,8 +152,8 @@ abstract public class BlockBufferTestParent extends TestCase {
 		File tempFile = File.createTempFile("BlockBufferTestParent", null);
 		tempFile.deleteOnExit();
 		try {
-			SortedSet<Long> allocatedIds = new TreeSet<Long>();
-			SortedSet<Long> partialIds = new TreeSet<Long>(); // The ids that are added in this batch
+			SortedSet<Long> allocatedIds = new TreeSet<>();
+			SortedSet<Long> partialIds = new TreeSet<>(); // The ids that are added in this batch
 			final int iterations = TEST_LOOPS;
 			for(int c=0;c<iterations;c++) {
 				long startNanos = System.nanoTime();
@@ -184,7 +184,7 @@ abstract public class BlockBufferTestParent extends TestCase {
 				// With failure or not, the allocation should be consistent
 				PersistentBlockBuffer recoveredBlockBuffer = getBlockBuffer(getBuffer(tempFile, protectionLevel));
 				try {
-					SortedSet<Long> recoveredIds = new TreeSet<Long>();
+					SortedSet<Long> recoveredIds = new TreeSet<>();
 					Iterator<Long> ids = recoveredBlockBuffer.iterateBlockIds();
 					while(ids.hasNext()) {
 						long recoveredId = ids.next();
@@ -197,7 +197,7 @@ abstract public class BlockBufferTestParent extends TestCase {
 				}
 				// Deallocate some with similar check as allocation above
 				if(!allocatedIds.isEmpty()) {
-					List<Long> randomizedIds = new ArrayList<Long>(allocatedIds);
+					List<Long> randomizedIds = new ArrayList<>(allocatedIds);
 					Collections.sort(randomizedIds);
 					partialIds.clear();
 					try {
@@ -229,7 +229,7 @@ abstract public class BlockBufferTestParent extends TestCase {
 				// With failure or not, the allocation should be consistent
 				recoveredBlockBuffer = getBlockBuffer(getBuffer(tempFile, protectionLevel));
 				try {
-					SortedSet<Long> recoveredIds = new TreeSet<Long>();
+					SortedSet<Long> recoveredIds = new TreeSet<>();
 					Iterator<Long> ids = recoveredBlockBuffer.iterateBlockIds();
 					while(ids.hasNext()) {
 						long recoveredId = ids.next();

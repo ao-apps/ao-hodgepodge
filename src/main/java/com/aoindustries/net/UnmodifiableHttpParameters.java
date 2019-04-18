@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -78,7 +78,7 @@ public class UnmodifiableHttpParameters implements HttpParameters {
 	@Override
 	public Map<String,List<String>> getParameterMap() {
 		Map<String,List<String>> wrappedMap = wrapped.getParameterMap();
-		Map<String,List<String>> map = new LinkedHashMap<String,List<String>>(wrappedMap.size()*4/3+1);
+		Map<String,List<String>> map = new LinkedHashMap<>(wrappedMap.size()*4/3+1);
 		for(Map.Entry<String,List<String>> entry : wrappedMap.entrySet()) {
 			map.put(
 				entry.getKey(),

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,7 +23,6 @@
 package com.aoindustries.servlet.http;
 
 import com.aoindustries.io.NullPrintWriter;
-import com.aoindustries.lang.NotImplementedException;
 import java.io.PrintWriter;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -46,7 +45,8 @@ public class NullHttpServletResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ServletOutputStream getOutputStream() {
-		throw new NotImplementedException();
+		throw new com.aoindustries.lang.NotImplementedException();
 	}
 }

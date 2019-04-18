@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2012, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -52,15 +52,12 @@ public class LoggingProxy {
 	private static void log(File logFile, long connectionId, char separator, String line) {
 		synchronized(logFile) {
 			try {
-				Writer out = new FileWriter(logFile, true);
-				try {
+				try (Writer out = new FileWriter(logFile, true)) {
 					out.write(Long.toString(connectionId));
 					out.write(separator);
 					out.write(' ');
 					out.write(line);
 					out.write('\n');
-				} finally {
-					out.close();
 				}
 			} catch(IOException e) {
 				e.printStackTrace(System.err);
@@ -79,14 +76,11 @@ public class LoggingProxy {
 						InetAddress listenAddress = InetAddress.getByName(args[0]);
 						InetAddress connectAddress = InetAddress.getByName(args[2]);
 						File logFile = new File(args[4]);
-						ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress);
-						try {
+						try (ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress)) {
 							while(true) {
 								Socket socketIn = ss.accept();
 								new LoggingProxyThread(socketIn, connectionId++, connectAddress, connectPort, logFile).start();
 							}
-						} finally {
-							ss.close();
 						}
 					} catch(IOException e) {
 						e.printStackTrace(System.err);
@@ -128,8 +122,7 @@ public class LoggingProxy {
 				try {
 					log(logFile, connectionId, ':', "Connection accepted from " + socketIn.getRemoteSocketAddress()+":"+socketIn.getPort());
 					log(logFile, connectionId, ':', "Connecting to " + connectAddress+":"+connectPort);
-					Socket socketOut = new Socket(connectAddress, connectPort);
-					try {
+					try (Socket socketOut = new Socket(connectAddress, connectPort)) {
 						ReadLogWriteThread inThread = new ReadLogWriteThread(socketIn.getInputStream(), socketOut.getOutputStream(), connectionId, '<', logFile);
 						try {
 							inThread.start();
@@ -150,8 +143,6 @@ public class LoggingProxy {
 								e.printStackTrace(System.err);
 							}
 						}
-					} finally {
-						socketOut.close();
 					}
 				} finally {
 					socketIn.close();

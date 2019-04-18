@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.lang.ObjectUtils;
+import java.util.Objects;
 
 /**
  * Three objects combined into a single.  Useful for returning three values combined.
@@ -62,9 +62,9 @@ public class Tuple3<E1,E2,E3> {
 		if(!(obj instanceof Tuple3<?,?,?>)) return false;
 		Tuple3<?,?,?> other = (Tuple3<?,?,?>)obj;
 		return
-			ObjectUtils.equals(element1, other.element1)
-			&& ObjectUtils.equals(element2, other.element2)
-			&& ObjectUtils.equals(element3, other.element3)
+			Objects.equals(element1, other.element1)
+			&& Objects.equals(element2, other.element2)
+			&& Objects.equals(element3, other.element3)
 		;
 	}
 
@@ -73,9 +73,9 @@ public class Tuple3<E1,E2,E3> {
 	public int hashCode() {
 		int h = this.hash;
 		if(h == 0) {
-			h = ObjectUtils.hashCode(element1);
-			h = h * 31 + ObjectUtils.hashCode(element2);
-			h = h * 31 + ObjectUtils.hashCode(element3);
+			h = Objects.hashCode(element1);
+			h = h * 31 + Objects.hashCode(element2);
+			h = h * 31 + Objects.hashCode(element3);
 			this.hash = h;
 		}
 		return h;

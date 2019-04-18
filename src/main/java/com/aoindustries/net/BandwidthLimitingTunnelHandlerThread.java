@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -81,8 +81,7 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 				OutputStream out = getOutputStream(listenSocket, connectSocket);
 				if(bandwidth != null) out = new BitRateOutputStream(out, this);
 				try {
-					InputStream in = getInputStream(listenSocket, connectSocket);
-					try {
+					try (InputStream in = getInputStream(listenSocket, connectSocket)) {
 						long blockStartTime = verbose ? System.currentTimeMillis() : 0;
 						long blockByteCount = 0;
 						int ret;
@@ -107,8 +106,6 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 					} catch(SocketException err) {
 						// Normal socket closure
 						if(!"Socket closed".equals(err.getMessage())) throw err;
-					} finally {
-						in.close();
 					}
 				} finally {
 					out.close();

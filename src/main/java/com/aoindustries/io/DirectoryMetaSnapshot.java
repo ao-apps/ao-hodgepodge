@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -94,7 +94,7 @@ final public class DirectoryMetaSnapshot {
 			startPath
 		);
 		final String expectedStart = startPath + File.separatorChar;
-		SortedMap<String,FileMetaSnapshot> newFiles = new TreeMap<String,FileMetaSnapshot>();
+		SortedMap<String,FileMetaSnapshot> newFiles = new TreeMap<>();
 		File file;
 		while((file=iter.getNextFile())!=null) {
 			if(file.isFile()) {

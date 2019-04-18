@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -44,7 +44,7 @@ public class MultiFileOutputStream extends OutputStream {
 	private final String suffix;
 	private final long fileSize;
 
-	private final List<File> files=new ArrayList<File>();
+	private final List<File> files=new ArrayList<>();
 	private FileOutputStream out=null;
 	private long bytesOut=0;
 
@@ -93,12 +93,9 @@ public class MultiFileOutputStream extends OutputStream {
 			len-=blockLen;
 			bytesOut+=blockLen;
 			if(bytesOut>=fileSize) {
-				FileOutputStream tempOut = out;
-				try {
+				try (FileOutputStream tempOut = out) {
 					out=null;
 					tempOut.flush();
-				} finally {
-					tempOut.close();
 				}
 			}
 		}
@@ -109,12 +106,9 @@ public class MultiFileOutputStream extends OutputStream {
 		out.write(b);
 		bytesOut+=1;
 		if(bytesOut>=fileSize) {
-			FileOutputStream tempOut = out;
-			try {
+			try (FileOutputStream tempOut = out) {
 				out=null;
 				tempOut.flush();
-			} finally {
-				tempOut.close();
 			}
 		}
 	}

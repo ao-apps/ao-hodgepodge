@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -213,7 +213,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	final Timer timer;
 
-	final ConcurrentMap<K,CacheEntry> map = new ConcurrentHashMap<K,CacheEntry>();
+	final ConcurrentMap<K,CacheEntry> map = new ConcurrentHashMap<>();
 
 	/**
 	 * @param name             The name resources are based on, such as background thread names.
@@ -312,16 +312,14 @@ public class BackgroundCache<K,V,E extends Exception> {
 		K key
 	) throws IllegalStateException {
 		try {
-			return new Result<V,E>(refresher.call(key));
+			return new Result<>(refresher.call(key));
 		} catch(Exception e) {
 			if(exceptionClass.isInstance(e)) {
-				return new Result<V,E>(exceptionClass.cast(e));
+				return new Result<>(exceptionClass.cast(e));
 			} else if(e instanceof RuntimeException) {
 				throw (RuntimeException)e;
 			} else {
-				AssertionError ae = new AssertionError("Unexpected exception type");
-				ae.initCause(e);
-				throw ae;
+				throw new AssertionError("Unexpected exception type", e);
 			}
 		}
 	}

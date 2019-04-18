@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -111,7 +111,7 @@ public class ParallelDelete {
 
 			System.exit(1);
 		} else {
-			List<File> directories = new ArrayList<File>(args.length);
+			List<File> directories = new ArrayList<>(args.length);
 			PrintStream verboseOutput = null;
 			boolean dryRun = false;
 			boolean optionsEnded = false;
@@ -145,7 +145,7 @@ public class ParallelDelete {
 		// The set of next files is kept in key order so that it can scale with O(n*log(n)) for larger numbers of directories
 		// as opposed to O(n^2) for a list.  This is similar to the fix for AWStats logresolvemerge provided by Dan Armstrong
 		// a couple of years ago.
-		final Map<String,List<FilesystemIterator>> nextFiles = new TreeMap<String,List<FilesystemIterator>>(
+		final Map<String,List<FilesystemIterator>> nextFiles = new TreeMap<>(
 			new Comparator<String>() {
 				@Override
 				public int compare(String S1, String S2) {
@@ -175,7 +175,7 @@ public class ParallelDelete {
 				if(nextFile!=null) {
 					String relPath = getRelativePath(nextFile, iterator);
 					List<FilesystemIterator> list = nextFiles.get(relPath);
-					if(list==null) nextFiles.put(relPath, list = new ArrayList<FilesystemIterator>(numDirectories));
+					if(list==null) nextFiles.put(relPath, list = new ArrayList<>(numDirectories));
 					list.add(iterator);
 				}
 			}
@@ -189,7 +189,7 @@ public class ParallelDelete {
 			verboseThreadRun = null;
 			verboseThread = null;
 		} else {
-			verboseQueue = new ArrayBlockingQueue<File>(VERBOSE_QUEUE_SIZE);
+			verboseQueue = new ArrayBlockingQueue<>(VERBOSE_QUEUE_SIZE);
 			verboseThreadRun = new boolean[] {true};
 			verboseThread = new Thread("ParallelDelete - Verbose Thread") {
 				@Override
@@ -211,7 +211,7 @@ public class ParallelDelete {
 			verboseThread.start();
 		}
 		try {
-			final BlockingQueue<File> deleteQueue = new ArrayBlockingQueue<File>(DELETE_QUEUE_SIZE);
+			final BlockingQueue<File> deleteQueue = new ArrayBlockingQueue<>(DELETE_QUEUE_SIZE);
 			final boolean[] deleteThreadRun = new boolean[] {true};
 			final IOException[] deleteException = new IOException[1];
 			Thread deleteThread = new Thread("ParallelDelete - Delete Thread") {
@@ -281,7 +281,7 @@ public class ParallelDelete {
 						if(nextFile!=null) {
 							String newRelPath = getRelativePath(nextFile, iterator);
 							List<FilesystemIterator> list = nextFiles.get(newRelPath);
-							if(list==null) nextFiles.put(newRelPath, list = new ArrayList<FilesystemIterator>(numDirectories));
+							if(list==null) nextFiles.put(newRelPath, list = new ArrayList<>(numDirectories));
 							list.add(iterator);
 						}
 					}

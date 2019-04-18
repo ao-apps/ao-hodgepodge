@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -78,7 +78,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		 * All uses must synchronize on this requestLookups field itself.
 		 * Use of LookupValue must also be synchronized on requestLookups.
 		 */
-		private final Map<LookupKey,LookupValue> requestLookups = new HashMap<LookupKey,LookupValue>();
+		private final Map<LookupKey,LookupValue> requestLookups = new HashMap<>();
 
 		private final String setValueUrl;
 
@@ -154,12 +154,12 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
 	private static class LookupValue {
 		private final long id;
-		private final List<Long> elementIds = new ArrayList<Long>();
+		private final List<Long> elementIds = new ArrayList<>();
 
 		/**
 		 * The set of locales that were queried.
 		 */
-		private final Map<Locale,LookupLocaleValue> locales = new HashMap<Locale,LookupLocaleValue>();
+		private final Map<Locale,LookupLocaleValue> locales = new HashMap<>();
 
 		private LookupValue(ThreadSettings threadSettings) {
 			assert Thread.holdsLock(threadSettings.requestLookups);
@@ -237,7 +237,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 			resetRequest(false, null, false);
 			if(!lookups.isEmpty()) {
 				// Sort by lookupValue.id to present the information in the same order as first seen in the request
-				List<LookupKey> lookupKeys = new ArrayList<LookupKey>(lookups.keySet());
+				List<LookupKey> lookupKeys = new ArrayList<>(lookups.keySet());
 				Collections.sort(
 					lookupKeys,
 					new Comparator<LookupKey>() {
@@ -249,7 +249,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 				);
 				if(setValueUrl != null) {
 					// Get the set of all locales
-					SortedSet<Locale> allLocales = new TreeSet<Locale>(LocaleComparator.getInstance());
+					SortedSet<Locale> allLocales = new TreeSet<>(LocaleComparator.getInstance());
 					for(LookupKey lookupKey : lookupKeys) allLocales.addAll(lookupKey.bundleSet.getLocales());
 
 					out.append("<div style='position:fixed; bottom:0px; left:50%; width:300px; margin-left:-150px; text-align:center'>\n");

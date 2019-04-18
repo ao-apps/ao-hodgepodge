@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -103,7 +103,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 				E value = child.getValue();
 				SynchronizingMutableTreeNode<E> synchronizingNode;
 				if(index>=getChildCount()) {
-					synchronizingNode = new SynchronizingMutableTreeNode<E>(value);
+					synchronizingNode = new SynchronizingMutableTreeNode<>(value);
 					treeModel.insertNodeInto(synchronizingNode, this, index);
 				} else {
 					synchronizingNode = (SynchronizingMutableTreeNode<E>)getChildAt(index);
@@ -125,7 +125,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 							// synchronizingNode already contains the right node
 						} else {
 							// Otherwise, insert in the current index
-							synchronizingNode = new SynchronizingMutableTreeNode<E>(value);
+							synchronizingNode = new SynchronizingMutableTreeNode<>(value);
 							treeModel.insertNodeInto(synchronizingNode, this, index);
 						}
 					}

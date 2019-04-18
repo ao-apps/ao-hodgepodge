@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -52,11 +52,8 @@ public final class MD5Utils {
 	 * Gets the MD5 hashcode of a file.
 	 */
 	public static byte[] md5(File file) throws IOException {
-		InputStream in = new FileInputStream(file);
-		try {
+		try (InputStream in = new FileInputStream(file)) {
 			return md5(in);
-		} finally {
-			in.close();
 		}
 	}
 
