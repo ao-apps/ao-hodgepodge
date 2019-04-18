@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2018-12-18T10:23:33-0600"
+		dateModified="2019-04-18T06:17:06-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -53,60 +53,70 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{documented.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{documented.scm.url}"
-			>
-				<ul>
-					<li>
-						Deprecated in favor of new <ao:a href="https://aoindustries.com/ao-tempfiles/apidocs/com/aoindustries/tempfiles/TempFileContext.html">TempFileContext</ao:a>
-						that does not suffer from a memory leak in long-running applications:
-						<ul>
-							<li><ao:a href="apidocs/com/aoindustries/io/TempFile.html">TempFile</ao:a></li>
-							<li><ao:a href="apidocs/com/aoindustries/io/TempFileList.html">TempFileList</ao:a></li>
-							<li><ao:a href="apidocs/com/aoindustries/io/FileList.html#getTempFile-java.lang.String-java.lang.String-">FileList.getTempFile(String prefix, String extension)</ao:a></li>
-						</ul>
-					</li>
-					<li>
-						Improved <ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html">ServletContextCache</ao:a>
-						to still work correctly when accessed before initialized by
-						<ao:a href="apidocs/com/aoindustries/servlet/ServletContextCacheListener.html">ServletContextCacheListener</ao:a>.
-						This allows the caches to safely be used during application initialization.  This also
-						allows the cache to still work correctly without being initialized as a web listener, at the cost
-						of not stopping promptly when context destroyed.
-					</li>
-					<li>
-						New constant <ao:a href="apidocs/com/aoindustries/servlet/http/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
-						to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
-						repeatedly during routine operation.
-					</li>
-					<li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
-					<li>
-						New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Boolean.html">Boolean</ao:a>:
-						<ul>
-							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullBoolean">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
-							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullBoolean">CompressedDataInputStream.readNullBoolean()</ao:a></li>
-						</ul>
-					</li>
-					<li>
-						New methods to join into arbitrary <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Appendable.html">Appendable</ao:a>:
-						<ul>
-							<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
-							<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
-						</ul>
-					</li>
-					<li>
-						New bundle lookup markup types:
-						<ul>
-							<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#MYSQL">MarkupType.MYSQL</ao:a> for the <ao:a href="https://dev.mysql.com/doc/en/mysql.html">MySQL <code>mysql</code> command line</ao:a>.</li>
-							<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#PSQL">MarkupType.PSQL</ao:a> for the <ao:a href="https://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL <code>psql</code> command line</ao:a>.</li>
-							<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#SH">MarkupType.SH</ao:a> for shell script encoding.</li>
-						</ul>
-					</li>
-					<li>
-						<ao:a href="apidocs/com/aoindustries/servlet/http/Dispatcher">Dispatcher</ao:a> may now forward
-						and include to caller-provided <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
-					</li>
-				</ul>
-			</changelog:release>
+			/>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="2.0.0"
+			datePublished="2019-04-18T06:17:06-0500"
+			groupId="@{documented.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{documented.scm.url}"
+		>
+			<ul>
+				<li>Minimum Java version changed from 1.6 to 1.7.</li>
+				<li>
+					Deprecated in favor of new <ao:a href="https://aoindustries.com/ao-tempfiles/apidocs/com/aoindustries/tempfiles/TempFileContext.html">TempFileContext</ao:a>
+					that does not suffer from a memory leak in long-running applications:
+					<ul>
+						<li><ao:a href="apidocs/com/aoindustries/io/TempFile.html">TempFile</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/TempFileList.html">TempFileList</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/FileList.html#getTempFile-java.lang.String-java.lang.String-">FileList.getTempFile(String prefix, String extension)</ao:a></li>
+					</ul>
+				</li>
+				<li>
+					Improved <ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html">ServletContextCache</ao:a>
+					to still work correctly when accessed before initialized by
+					<ao:a href="apidocs/com/aoindustries/servlet/ServletContextCacheListener.html">ServletContextCacheListener</ao:a>.
+					This allows the caches to safely be used during application initialization.  This also
+					allows the cache to still work correctly without being initialized as a web listener, at the cost
+					of not stopping promptly when context destroyed.
+				</li>
+				<li>
+					New constant <ao:a href="apidocs/com/aoindustries/servlet/http/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
+					to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
+					repeatedly during routine operation.
+				</li>
+				<li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
+				<li>
+					New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Boolean.html">Boolean</ao:a>:
+					<ul>
+						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullBoolean">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullBoolean">CompressedDataInputStream.readNullBoolean()</ao:a></li>
+					</ul>
+				</li>
+				<li>
+					New methods to join into arbitrary <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Appendable.html">Appendable</ao:a>:
+					<ul>
+						<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
+					</ul>
+				</li>
+				<li>
+					New bundle lookup markup types:
+					<ul>
+						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#MYSQL">MarkupType.MYSQL</ao:a> for the <ao:a href="https://dev.mysql.com/doc/en/mysql.html">MySQL <code>mysql</code> command line</ao:a>.</li>
+						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#PSQL">MarkupType.PSQL</ao:a> for the <ao:a href="https://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL <code>psql</code> command line</ao:a>.</li>
+						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#SH">MarkupType.SH</ao:a> for shell script encoding.</li>
+					</ul>
+				</li>
+				<li>
+					<ao:a href="apidocs/com/aoindustries/servlet/http/Dispatcher">Dispatcher</ao:a> may now forward
+					and include to caller-provided <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
+				</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
