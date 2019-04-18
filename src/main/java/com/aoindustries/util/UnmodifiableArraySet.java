@@ -134,6 +134,7 @@ public class UnmodifiableArraySet<E> extends AbstractSet<E> implements Externali
 	 * @see  HashCodeComparator to properly sort objects before adding to the set
 	 */
 	@SafeVarargs
+	@SuppressWarnings("varargs")
 	public UnmodifiableArraySet(E... elements) {
 		if(ASSERTIONS_ENABLED) assert inOrderAndUnique(elements);
 		this.elements = elements;
