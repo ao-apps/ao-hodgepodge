@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-04-18T06:17:06-0500"
+		dateModified="2019-05-20T21:09:00-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -53,7 +53,24 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{documented.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{documented.scm.url}"
-			/>
+			>
+				<ul>
+					<li>
+						New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Byte.html">Byte</ao:a>:
+						<ul>
+							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullByte-java.lang.Byte-">CompressedDataOutputStream.writeNullByte(Byte)</ao:a></li>
+							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullByte--">CompressedDataInputStream.readNullByte()</ao:a></li>
+						</ul>
+					</li>
+					<li>
+						New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Short.html">Short</ao:a>:
+						<ul>
+							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
+							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
+						</ul>
+					</li>
+				</ul>
+			</changelog:release>
 		</c:if>
 
 		<changelog:release
@@ -92,8 +109,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Boolean.html">Boolean</ao:a>:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullBoolean">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullBoolean">CompressedDataInputStream.readNullBoolean()</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullBoolean-java.lang.Boolean-">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullBoolean--">CompressedDataInputStream.readNullBoolean()</ao:a></li>
 					</ul>
 				</li>
 				<li>

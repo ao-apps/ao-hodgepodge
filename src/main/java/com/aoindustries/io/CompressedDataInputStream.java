@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -189,6 +189,14 @@ public class CompressedDataInputStream extends DataInputStream {
 	 */
 	public String readNullLongUTF() throws IOException {
 		return readBoolean() ? readLongUTF() : null;
+	}
+
+	public Byte readNullByte() throws IOException {
+		return readBoolean() ? readByte() : null;
+	}
+
+	public Short readNullShort() throws IOException {
+		return readBoolean() ? readShort() : null;
 	}
 
 	public Integer readNullInteger() throws IOException {

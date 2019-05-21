@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2015, 2016, 2017, 2018  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2015, 2016, 2017, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -179,6 +179,16 @@ public class CompressedDataOutputStream extends DataOutputStream {
 	public void writeNullLongUTF(String str) throws IOException {
 		writeBoolean(str!=null);
 		if(str!=null) writeLongUTF(str);
+	}
+
+	public void writeNullByte(Byte b) throws IOException {
+		writeBoolean(b != null);
+		if(b != null) writeByte(b);
+	}
+
+	public void writeNullShort(Short s) throws IOException {
+		writeBoolean(s != null);
+		if(s != null) writeShort(s);
 	}
 
 	public void writeNullInteger(Integer i) throws IOException {
