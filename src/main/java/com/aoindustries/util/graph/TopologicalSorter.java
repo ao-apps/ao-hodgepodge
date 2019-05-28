@@ -34,8 +34,9 @@ import java.util.Set;
  *
  * If forward, objects with no edges directed out are first.
  * If backward, objects with no edges directed in are first.
- *
- * <a href="http://en.wikipedia.org/wiki/Topological_sorting#Algorithms">http://en.wikipedia.org/wiki/Topological_sorting#Algorithms</a>
+ * <p>
+ * See <a href="https://wikipedia.org/wiki/Topological_sorting#Algorithms">https://wikipedia.org/wiki/Topological_sorting#Algorithms</a>
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
