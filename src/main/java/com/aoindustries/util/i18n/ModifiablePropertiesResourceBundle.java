@@ -191,7 +191,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 	}
 
 	/**
-	 * @param sourceFile  The source file(s).  If multiple source files are provided,
+	 * @param sourceFiles The source file(s).  If multiple source files are provided,
 	 *                    only one may exist and be both readable and writable.  If more than
 	 *                    one possible source file exists, will throw an IllegalStateException.
 	 */

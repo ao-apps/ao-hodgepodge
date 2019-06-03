@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,8 +37,9 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Allows any user with the role of translator to edit the translation of the site.
  * This is used in conjunction with the ResourceEditorTag.
- *
- * @see ResourceEditorTag
+ * <p>
+ * See <a href="https://aoindustries.com/ao-taglib/apidocs/index.html?com/aoindustries/taglib/ResourceEditorTag.html">ResourceEditorTag</a>
+ * </p>
  */
 public class EditableResourceServletFilter implements Filter {
 

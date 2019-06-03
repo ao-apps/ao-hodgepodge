@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -93,7 +93,9 @@ public final class EncodingUtils {
 	 * @param  value  the object to be escaped.  If value is <code>null</code>, nothing is written.
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-	 * @see  TextInXhtmlEncoder
+	 * <p>
+	 * See <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * </p>
 	 */
 	@Deprecated
 	public static void encodeHtml(Object value, Appendable out) throws IOException {
@@ -107,7 +109,9 @@ public final class EncodingUtils {
 	 * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-	 * @see  TextInXhtmlEncoder
+	 * <p>
+	 * See <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * </p>
 	 */
 	@Deprecated
 	public static void encodeHtml(CharSequence S, int start, int end, Appendable out) throws IOException {
@@ -116,7 +120,9 @@ public final class EncodingUtils {
 
 	/**
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-	 * @see  TextInXhtmlEncoder
+	 * <p>
+	 * See <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * </p>
 	 */
 	@Deprecated
 	public static String encodeHtml(Object value) throws IOException {
@@ -128,7 +134,9 @@ public final class EncodingUtils {
 
 	/**
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-	 * @see  TextInXhtmlEncoder
+	 * <p>
+	 * See <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * </p>
 	 */
 	@Deprecated
 	public static void encodeHtml(char ch, Appendable out) throws IOException {
@@ -137,7 +145,9 @@ public final class EncodingUtils {
 
 	/**
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-	 * @see  TextInXhtmlEncoder
+	 * <p>
+	 * See <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * </p>
 	 */
 	@Deprecated
 	public static void encodeHtml(Object value, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
@@ -166,7 +176,9 @@ public final class EncodingUtils {
 	 * @param make_nbsp  will write &amp;#160; for a space when another space follows
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-	 * @see  TextInXhtmlEncoder
+	 * <p>
+	 * See <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * </p>
 	 */
 	@Deprecated
 	public static void encodeHtml(CharSequence S, int start, int end, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
@@ -256,7 +268,9 @@ public final class EncodingUtils {
 	 * @return if value is null then null otherwise value escaped
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-	 * @see  TextInXhtmlEncoder
+	 * <p>
+	 * See <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * </p>
 	 */
 	@Deprecated
 	public static String encodeHtml(Object value, boolean make_br, boolean make_nbsp) throws IOException {
@@ -268,7 +282,9 @@ public final class EncodingUtils {
 
 	/**
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-	 * @see  TextInXhtmlEncoder
+	 * <p>
+	 * See <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * </p>
 	 */
 	@Deprecated
 	public static void encodeHtml(char ch, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {

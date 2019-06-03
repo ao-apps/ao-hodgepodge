@@ -60,7 +60,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 
 	/**
 	 * Gets a read/write connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
-	 * @return
+	 * @return The read/write connection to the database
 	 * @throws SQLException
 	 */
 	@Override
@@ -71,7 +71,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	/**
 	 * Gets a connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
 	 * @param readOnly
-	 * @return
+	 * @return The connection to the database
 	 * @throws SQLException
 	 */
 	public Connection getConnection(boolean readOnly) throws SQLException {
@@ -80,9 +80,9 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 
 	/**
 	 * Gets a connection to the database with a maximum connections of 1.
-	 * @param isolationLevel
-	 * @param readOnly
-	 * @return
+	 * @param isolationLevel The {@link Connection#setTransactionIsolation(int) transaction isolation level}
+	 * @param readOnly The {@link Connection#setReadOnly(boolean) read-only flag}
+	 * @return The connection to the database
 	 * @throws SQLException
 	 */
 	public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2015, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -58,7 +58,7 @@ public class UrlUtils {
 	 *
 	 * Encodes tel: (case-sensitive) urls by relacing spaces with hyphens.
 	 *
-	 * @see  #decodeUrlPath(java.lang.String) 
+	 * @see  #decodeUrlPath(java.lang.String, java.lang.String)
 	 */
 	public static String encodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
 		if(href.startsWith("tel:")) return href.replace(' ', '-');
@@ -100,7 +100,7 @@ public class UrlUtils {
 	 *
 	 * Does not decode tel: urls (case-sensitive).
 	 * 
-	 * @see  #encodeUrlPath(java.lang.String) 
+	 * @see  #encodeUrlPath(java.lang.String, java.lang.String)
 	 */
 	public static String decodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
 		if(href.startsWith("tel:")) return href;
@@ -165,7 +165,7 @@ public class UrlUtils {
 	}
 
 	/**
-	 * @see  #buildUrl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, com.aoindustries.net.HttpParameters, boolean) 
+	 * @see  #buildUrl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, com.aoindustries.net.HttpParameters, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)
 	 */
 	public static String buildUrl(
 		PageContext pageContext,
@@ -186,7 +186,7 @@ public class UrlUtils {
 	}
 
 	/**
-	 * @see  #buildUrl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, com.aoindustries.net.HttpParameters, boolean) 
+	 * @see  #buildUrl(javax.servlet.jsp.PageContext, java.lang.String, com.aoindustries.net.HttpParameters, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)
 	 */
 	public static String buildUrl(
 		JspContext jspContext,

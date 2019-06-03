@@ -43,7 +43,7 @@ import java.util.Set;
  *   <li>No set will contain <code>null</code></li>
  * </ol>
  *
- * @see  AoCollections#optimalUnmodifiableSet() This class is unmodifiable.
+ * @see  AoCollections#optimalUnmodifiableSet(java.util.Set) This class is unmodifiable.
  *
  * @author  AO Industries, Inc.
  */
