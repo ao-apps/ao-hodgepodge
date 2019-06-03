@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-05-20T21:09:00-0500"
+		dateModified="2019-06-03T14:09:04-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -68,6 +68,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
 							<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
 						</ul>
+					</li>
+					<li>Using managed dependencies:
+						<ol>
+							<li>This project uses transitive managed dependencies.</li>
+							<li>This project's managed dependencies may also be imported by other projects.</li>
+						</ol>
 					</li>
 				</ul>
 			</changelog:release>
