@@ -102,6 +102,7 @@ public class MultiFileInputStream extends InputStream {
 			value=in.read();
 			if(value==-1) {
 				try (FileInputStream tempIn = in) {
+					assert tempIn == in : "This assert is to avoid compiler warning: auto-closeable resource tempIn is never referenced in body of corresponding try statement";
 					in=null;
 				}
 				if(nextFile>=files.length) return -1;
@@ -123,6 +124,7 @@ public class MultiFileInputStream extends InputStream {
 				count=in.read(buff);
 				if(count==-1) {
 					try (FileInputStream tempIn = in) {
+						assert tempIn == in : "This assert is to avoid compiler warning: auto-closeable resource tempIn is never referenced in body of corresponding try statement";
 						in=null;
 					}
 					if(nextFile>=files.length) return -1;
@@ -146,6 +148,7 @@ public class MultiFileInputStream extends InputStream {
 				count=in.read(buff, off, len);
 				if(count==-1) {
 					try (FileInputStream tempIn = in) {
+						assert tempIn == in : "This assert is to avoid compiler warning: auto-closeable resource tempIn is never referenced in body of corresponding try statement";
 						in=null;
 					}
 					if(nextFile>=files.length) return -1;
@@ -181,6 +184,7 @@ public class MultiFileInputStream extends InputStream {
 				count=in.skip(n);
 				if(count==-1) {
 					try (FileInputStream tempIn = in) {
+						assert tempIn == in : "This assert is to avoid compiler warning: auto-closeable resource tempIn is never referenced in body of corresponding try statement";
 						in=null;
 					}
 					if(nextFile>=files.length) return -1;
