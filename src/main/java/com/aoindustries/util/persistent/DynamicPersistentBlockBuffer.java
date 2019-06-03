@@ -64,11 +64,6 @@ import java.util.logging.Logger;
  *     bit  7:   allocated flag
  * </p>
  * <p>
- * There is a selectable {@link FreeSpacePolicy}.  The persistent data will be compatible between
- * different free space policies.  It is safe to write the data with one policy and later open it
- * with a different policy.
- * </p>
- * <p>
  * This class is not thread-safe.
  * </p>
  *
@@ -306,7 +301,7 @@ public class DynamicPersistentBlockBuffer extends AbstractPersistentBlockBuffer 
 
 	/**
 	 * Tries to find existing free space for the provided block size.  If the free space
-	 * is available, will return the available space.  Otherwise, depending on free space policy,
+	 * is available, will return the available space.  Otherwise,
 	 * it will look for a larger free space and split it into two smaller pieces, returning
 	 * the first of the two pieces.
 	 *
