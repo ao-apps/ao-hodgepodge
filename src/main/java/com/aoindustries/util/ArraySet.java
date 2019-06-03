@@ -114,7 +114,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 		this.elements = new ArrayList<>(initialCapacity);
 	}
 
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.LINEAR,
 		bestConditions={GrowthCondition.GOOD_HASH_CODE},
@@ -166,6 +166,8 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	 * The sort order and uniqueness is only checked with assertions enabled.
 	 *
 	 * @see  HashCodeComparator to properly sort objects before adding to the set
+	 */
+	/*
 	@Complexity(
 		best=GrowthFunction.CONSTANT,
 		average=GrowthFunction.CONSTANT,
@@ -177,7 +179,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 		this.elements = elements;
 	}
 
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.LOGARITHMIC,
 		average=GrowthFunction.LOGARITHMIC,
@@ -205,7 +207,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.LOGARITHMIC,
 		bestConditions={GrowthCondition.GOOD_HASH_CODE},
@@ -249,7 +251,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	}
 
 	@Override
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.LINEAR,
 		average=GrowthFunction.LINEAR,
@@ -261,7 +263,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	}
 
 	@Override
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.LINEAR,
 		average=GrowthFunction.LINEAR,
@@ -272,7 +274,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	}
 
 	@Override
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.CONSTANT,
 		bestConditions={GrowthCondition.GOOD_HASH_CODE},
@@ -321,7 +323,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	}
 
 	@Override
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.CONSTANT,
 		bestConditions={GrowthCondition.GOOD_HASH_CODE},
@@ -344,7 +346,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	}
 
 	@Override
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.LINEAR,
 		bestConditions={GrowthCondition.GOOD_HASH_CODE},
@@ -358,7 +360,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	}
 
 	@Override
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.LINEAR,
 		bestConditions={GrowthCondition.GOOD_HASH_CODE},
@@ -378,7 +380,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	}
 
 	@Override
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.LINEAR,
 		bestConditions={GrowthCondition.GOOD_HASH_CODE},
@@ -393,7 +395,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 	}
 
 	@Override
-	/**
+	/*
 	@Complexity(
 		best=GrowthFunction.LINEAR,
 		average=GrowthFunction.LINEAR,

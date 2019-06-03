@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -55,7 +55,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
 	/**
 	 * Implemented as calls to <code>getSome(long,byte[],int,int)</code>
 	 *
-	 * @see  #read(long, byte[], int, int)
+	 * @see  #getSome(long, byte[], int, int)
 	 */
 	// @NotThreadSafe
 	@Override
@@ -71,7 +71,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
 	/**
 	 * Implemented as call to <code>readByte(long)</code>
 	 *
-	 * @see  #readByte(long)
+	 * @see  #get(long)
 	 */
 	// @NotThreadSafe
 	@Override
@@ -134,7 +134,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
 	/**
 	 * Implemented as call to <code>write(long,byte[],int,int)</code>
 	 *
-	 * @see  #write(long, byte[], int, int)
+	 * @see  #put(long, byte[], int, int)
 	 */
 	// @NotThreadSafe
 	@Override
@@ -146,7 +146,7 @@ abstract public class AbstractPersistentBuffer implements PersistentBuffer {
 	/**
 	 * Implemented as call to <code>write(long,byte[],int,int)</code>
 	 *
-	 * @see  #write(long, byte[], int, int)
+	 * @see  #put(long, byte[], int, int)
 	 */
 	// @NotThreadSafe
 	@Override

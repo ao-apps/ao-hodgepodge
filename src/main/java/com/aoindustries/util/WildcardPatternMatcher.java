@@ -24,6 +24,7 @@ package com.aoindustries.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Matches simple wildcard patterns.  A wildcard pattern is any combination of '*'

@@ -31,6 +31,7 @@ import java.io.OutputStream;
 import java.util.AbstractSequentialList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -823,7 +824,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 * Inserts the specified element at the beginning of this list.
 	 * Operates in log time for free space.
 	 *
-	 * @param e the element to add
+	 * @param element the element to add
 	 */
 	// @NotThreadSafe
 	public void addFirst(E element) {
@@ -843,7 +844,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 *
 	 * <p>This method is equivalent to {@link #add}.
 	 *
-	 * @param e the element to add
+	 * @param element the element to add
 	 */
 	// @NotThreadSafe
 	public void addLast(E element) {
@@ -1011,7 +1012,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 *
 	 * <p>This method is equivalent to {@link #addLast}.
 	 *
-	 * @param e element to be appended to this list
+	 * @param element element to be appended to this list
 	 * @return <tt>true</tt> (as specified by {@link Collection#add})
 	 */
 	@Override
@@ -1290,7 +1291,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 * Inserts the specified element at the front of this list.
 	 *
 	 * @param e the element to insert
-	 * @return <tt>true</tt> (as specified by {@link Deque#offerFirst})
+	 * @return <tt>true</tt> (as specified by {@link Deque#offerFirst(java.lang.Object)})
 	 * @since 1.6
 	 */
 	// @NotThreadSafe
@@ -1303,7 +1304,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 * Inserts the specified element at the end of this list.
 	 *
 	 * @param e the element to insert
-	 * @return <tt>true</tt> (as specified by {@link Deque#offerLast})
+	 * @return <tt>true</tt> (as specified by {@link Deque#offerLast(java.lang.Object)})
 	 * @since 1.6
 	 */
 	// @NotThreadSafe

@@ -178,7 +178,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	 *
 	 * @param  setValueUrl Must be non-null when <code>canEditResources</code> is true.
 	 *
-	 * @see  #printEditableResourceBundleLookups(Appendable)
+	 * @see  #printEditableResourceBundleLookups(com.aoindustries.io.Encoder, com.aoindustries.io.Encoder, java.lang.Appendable, int, boolean)
 	 */
 	public static void resetRequest(boolean canEditResources, String setValueUrl, boolean modifyAllText) {
 		//System.out.println("DEBUG: EditableResourceBundle: resetRequest: thread.id="+Thread.currentThread().getId()+", canEditResources="+canEditResources+", setValueUrl="+setValueUrl);
