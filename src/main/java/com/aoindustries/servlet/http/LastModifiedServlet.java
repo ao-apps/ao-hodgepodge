@@ -26,15 +26,12 @@ import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.IoUtils;
 import com.aoindustries.servlet.ServletContextCache;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -160,7 +157,7 @@ public class LastModifiedServlet extends HttpServlet {
 		 */
 		private static final String PARSE_CSS_FILE_CACHE_ATTRIBUTE_NAME = ParsedCssFile.class.getName()+".parseCssFile.cache";
 
-		private static final Pattern urlPattern = Pattern.compile(
+		private static final Pattern URL_PATTERN = Pattern.compile(
 			"url\\s*\\(\\s*['\"]?(\\S+)['\"]?\\s*\\)",
 			Pattern.CASE_INSENSITIVE
 		);
@@ -174,14 +171,15 @@ public class LastModifiedServlet extends HttpServlet {
 				cache = new HashMap<>();
 				servletContext.setAttribute(PARSE_CSS_FILE_CACHE_ATTRIBUTE_NAME, cache);
 			}
+			ServletContextCache servletContextCache = ServletContextCache.getCache(servletContext);
 			synchronized(cache) {
 				// Check the cache
-				final long lastModified = getCachedLastModified(servletContext, hap);
+				final long lastModified = servletContextCache.getLastModified(hap.path);
 				ParsedCssFile parsedCssFile = cache.get(hap);
 				if(
 					parsedCssFile != null
 					&& parsedCssFile.lastModified == lastModified
-					&& !parsedCssFile.hasModifiedUrl(servletContext)
+					&& !parsedCssFile.hasModifiedUrl(servletContextCache)
 				) {
 					return parsedCssFile;
 				} else {
@@ -197,7 +195,7 @@ public class LastModifiedServlet extends HttpServlet {
 					// Replace values while capturing URLs
 					StringBuilder newContent = new StringBuilder(cssContent.length() << 1);
 					Map<HeaderAndPath,Long> referencedPaths = new HashMap<>();
-					Matcher matcher = urlPattern.matcher(cssContent);
+					Matcher matcher = URL_PATTERN.matcher(cssContent);
 					int lastEnd = 0;
 					while(matcher.find()) {
 						int start = matcher.start(1);
@@ -221,7 +219,7 @@ public class LastModifiedServlet extends HttpServlet {
 							String resourcePath = ServletUtil.getAbsolutePath(hap.path, url);
 							if(resourcePath.startsWith("/")) {
 								HeaderAndPath resourceHap = new HeaderAndPath(hap.header, resourcePath);
-								long resourceModified = getCachedLastModified(servletContext, resourceHap);
+								long resourceModified = servletContextCache.getLastModified(resourceHap.path);
 								if(resourceModified != 0) {
 									referencedPaths.put(resourceHap, resourceModified);
 									int questionPos = url.lastIndexOf('?');
@@ -239,7 +237,7 @@ public class LastModifiedServlet extends HttpServlet {
 					}
 					if(lastEnd < cssContent.length()) newContent.append(cssContent, lastEnd, cssContent.length());
 					parsedCssFile = new ParsedCssFile(
-						servletContext,
+						servletContextCache,
 						lastModified,
 						newContent.toString().getBytes(ENCODING),
 						referencedPaths
@@ -271,7 +269,7 @@ public class LastModifiedServlet extends HttpServlet {
 		private final long newestLastModified;
 
 		private ParsedCssFile(
-			ServletContext servletContext,
+			ServletContextCache servletContextCache,
 			long lastModified,
 			byte[] rewrittenCssFile,
 			Map<HeaderAndPath,Long> referencedPaths
@@ -281,7 +279,7 @@ public class LastModifiedServlet extends HttpServlet {
 			this.rewrittenCssFile = rewrittenCssFile;
 			long newest = lastModified;
 			for(Map.Entry<HeaderAndPath,Long> entry : referencedPaths.entrySet()) {
-				long modified = getCachedLastModified(servletContext, entry.getKey());
+				long modified = servletContextCache.getLastModified(entry.getKey().path);
 				if(modified > newest) newest = modified;
 			}
 			this.newestLastModified = newest;
@@ -290,97 +288,13 @@ public class LastModifiedServlet extends HttpServlet {
 		/**
 		 * Checks if any of the referencedPaths have been modified.
 		 */
-		private boolean hasModifiedUrl(ServletContext servletContext) {
+		private boolean hasModifiedUrl(ServletContextCache servletContextCache) {
 			for(Map.Entry<HeaderAndPath,Long> entry : referencedPaths.entrySet()) {
-				if(getCachedLastModified(servletContext, entry.getKey()) != entry.getValue()) {
+				if(servletContextCache.getLastModified(entry.getKey().path) != entry.getValue()) {
 					return true;
 				}
 			}
 			return false;
-		}
-	}
-
-	private static class GetLastModifiedCacheValue {
-		private long cacheTime = Long.MIN_VALUE;
-		private long lastModified = Long.MIN_VALUE;
-
-		private GetLastModifiedCacheValue() {
-		}
-
-		/**
-		 * Determines if this cache value is valid for the given moment in time.
-		 */
-		private boolean isValid(long currentTime) {
-			long timeSince = currentTime - cacheTime;
-			return
-				 -CACHE_MAX_AGE <= timeSince
-				&& timeSince <= CACHE_MAX_AGE
-			;
-		}
-	}
-
-	/**
-	 * The attribute name used to store the cache.
-	 */
-	private static final String GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME = LastModifiedServlet.class.getName()+".getLastModified.cache";
-
-	/**
-	 * Gets a modified time from either a file or URL.
-	 * Caches results for up to a second.
-	 */
-	private static long getCachedLastModified(ServletContext servletContext, HeaderAndPath hap) {
-		// Get the cache
-		@SuppressWarnings("unchecked")
-		Map<HeaderAndPath,GetLastModifiedCacheValue> cache = (Map<HeaderAndPath,GetLastModifiedCacheValue>)servletContext.getAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME);
-		if(cache == null) {
-			// Create new cache
-			cache = new HashMap<>();
-			servletContext.setAttribute(GET_LAST_MODIFIED_CACHE_ATTRIBUTE_NAME, cache);
-		}
-		GetLastModifiedCacheValue cacheValue;
-		synchronized(cache) {
-			// Get the cache entry
-			cacheValue = cache.get(hap);
-			if(cacheValue==null) {
-				cacheValue = new GetLastModifiedCacheValue();
-				cache.put(hap, cacheValue);
-			}
-		}
-		synchronized(cacheValue) {
-			final long currentTime = System.currentTimeMillis();
-			if(cacheValue.isValid(currentTime)) {
-				return cacheValue.lastModified;
-			} else {
-				ServletContextCache servletContextCache = ServletContextCache.getCache(servletContext);
-				long lastModified = 0;
-				String realPath = servletContextCache.getRealPath(hap.path);
-				if(realPath != null) {
-					// Use File first
-					lastModified = new File(realPath).lastModified();
-				}
-				if(lastModified == 0) {
-					// Try URL
-					try {
-						URL resourceUrl = servletContextCache.getResource(hap.path);
-						if(resourceUrl != null) {
-							URLConnection conn = resourceUrl.openConnection();
-							conn.setAllowUserInteraction(false);
-							conn.setConnectTimeout(10);
-							conn.setDoInput(false);
-							conn.setDoOutput(false);
-							conn.setReadTimeout(10);
-							conn.setUseCaches(false);
-							lastModified = conn.getLastModified();
-						}
-					} catch(IOException e) {
-						// lastModified stays unmodified
-					}
-				}
-				// Store in cache
-				cacheValue.cacheTime = currentTime;
-				cacheValue.lastModified = lastModified;
-				return lastModified;
-			}
 		}
 	}
 
@@ -409,7 +323,7 @@ public class LastModifiedServlet extends HttpServlet {
 				return 0;
 			}
 		} else {
-			return getCachedLastModified(servletContext, hap);
+			return ServletContextCache.getLastModified(servletContext, hap.path);
 		}
 	}
 
@@ -446,13 +360,13 @@ public class LastModifiedServlet extends HttpServlet {
 
 		public static AddLastModifiedWhen valueOfLowerName(String lowerName) {
 			// Quick identity checks first
-			if("true"==lowerName) return TRUE;
-			if("false"==lowerName) return FALSE;
-			if("auto"==lowerName) return AUTO;
+			if("true"  == lowerName) return TRUE;
+			if("false" == lowerName) return FALSE;
+			if("auto"  == lowerName) return AUTO;
 			// .equals checks
-			if("true".equals(lowerName)) return TRUE;
+			if("true" .equals(lowerName)) return TRUE;
 			if("false".equals(lowerName)) return FALSE;
-			if("auto".equals(lowerName)) return AUTO;
+			if("auto" .equals(lowerName)) return AUTO;
 			// No match
 			throw new IllegalArgumentException(lowerName);
 		}

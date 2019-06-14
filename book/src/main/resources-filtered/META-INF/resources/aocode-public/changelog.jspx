@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-06-03T14:44:30-0500"
+		dateModified="2019-06-14T17:40:06-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -76,6 +76,14 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						</ol>
 					</li>
 					<li>Improved API docs linking.</li>
+					<li>
+						New methods to quickly get the last modified time of a web resource.
+						The result may be cached for up to one second.
+						<ul>
+							<li><ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html#getLastModified-java.lang.String-">ServletContextCache.getLastModified(String)</ao:a></li>
+							<li><ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html#getLastModified-javax.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
+						</ul>
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>

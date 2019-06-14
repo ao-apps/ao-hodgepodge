@@ -25,8 +25,13 @@ package com.aoindustries.servlet;
 import com.aoindustries.cache.BackgroundCache;
 import com.aoindustries.cache.BackgroundCache.Refresher;
 import com.aoindustries.cache.BackgroundCache.Result;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 
@@ -143,6 +148,97 @@ final public class ServletContextCache {
 	 */
 	public static String getRealPath(ServletContext servletContext, String path) {
 		return getCache(servletContext).getRealPath(path);
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="getLastModified">
+	private static class GetLastModifiedCacheValue {
+		/**
+		 * The number of milliseconds to keep cache entries.
+		 */
+		private static final long LAST_MODIFIED_CACHE_MAX_AGE = 1000L;
+
+		private long cacheTime = Long.MIN_VALUE;
+		private long lastModified = Long.MIN_VALUE;
+
+		private GetLastModifiedCacheValue() {
+		}
+
+		/**
+		 * Determines if this cache value is valid for the given moment in time.
+		 */
+		private boolean isValid(long currentTime) {
+			long timeSince = currentTime - cacheTime;
+			return
+				 -LAST_MODIFIED_CACHE_MAX_AGE <= timeSince
+				&& timeSince <= LAST_MODIFIED_CACHE_MAX_AGE
+			;
+		}
+	}
+
+	// TODO: BackgroundCache last modifieds, too?
+	private final ConcurrentMap<String,GetLastModifiedCacheValue> getLastModifiedCache = new ConcurrentHashMap<>();
+
+	/**
+	 * Gets a modified time from either a file or URL.
+	 * Caches results for up to a second.
+	 *
+	 * @return  The modified time or {@code 0L} when not known
+	 *
+	 * @see  #getRealPath(java.lang.String)
+	 * @see  File#lastModified()
+	 * @see  #getResource(java.lang.String)
+	 * @see  URLConnection#getLastModified()
+	 */
+	public long getLastModified(String path) {
+		GetLastModifiedCacheValue cacheValue = getLastModifiedCache.get(path);
+		if(cacheValue == null) {
+			cacheValue = new GetLastModifiedCacheValue();
+			GetLastModifiedCacheValue existingCacheValue = getLastModifiedCache.putIfAbsent(path, cacheValue);
+			if(existingCacheValue != null) cacheValue = existingCacheValue;
+		}
+		synchronized(cacheValue) {
+			final long currentTime = System.currentTimeMillis();
+			if(cacheValue.isValid(currentTime)) {
+				return cacheValue.lastModified;
+			} else {
+				long lastModified = 0;
+				String realPath = getRealPath(path);
+				if(realPath != null) {
+					// Use File first
+					lastModified = new File(realPath).lastModified();
+				}
+				if(lastModified == 0) {
+					// Try URL
+					try {
+						URL resourceUrl = getResource(path);
+						if(resourceUrl != null) {
+							URLConnection conn = resourceUrl.openConnection();
+							conn.setAllowUserInteraction(false);
+							conn.setConnectTimeout(10); // TODO: Are these timeouts appropriate to web-resource URLs?  Would they be different for background refresh versus interactive?
+							conn.setDoInput(false);
+							conn.setDoOutput(false);
+							conn.setReadTimeout(10); // TODO: Are these timeouts appropriate to web-resource URLs?  Would they be different for background refresh versus interactive?
+							conn.setUseCaches(false);
+							lastModified = conn.getLastModified();
+						}
+					} catch(IOException e) {
+						// lastModified stays unmodified
+					}
+				}
+				// Store in cache
+				cacheValue.cacheTime = currentTime;
+				cacheValue.lastModified = lastModified;
+				return lastModified;
+			}
+		}
+	}
+
+	/**
+	 * @see  #getLastModified(java.lang.String)
+	 */
+	public static long getLastModified(ServletContext servletContext, String path) {
+		return getCache(servletContext).getLastModified(path);
 	}
 	// </editor-fold>
 }
