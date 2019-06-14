@@ -30,8 +30,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 
@@ -152,36 +150,49 @@ final public class ServletContextCache {
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="getLastModified">
-	private static class GetLastModifiedCacheValue {
-		/**
-		 * The number of milliseconds to keep cache entries.
-		 */
-		private static final long LAST_MODIFIED_CACHE_MAX_AGE = 1000L;
+	private final BackgroundCache<String,Long,RuntimeException> getLastModifiedCache = new BackgroundCache<>(
+		ServletContextCache.class.getName() + ".getLastModified",
+		RuntimeException.class,
+		REFRESH_INTERVAL,
+		EXPIRATION_AGE,
+		logger
+	);
 
-		private long cacheTime = Long.MIN_VALUE;
-		private long lastModified = Long.MIN_VALUE;
-
-		private GetLastModifiedCacheValue() {
+	private final Refresher<String,Long,RuntimeException> getLastModifiedRefresher = new Refresher<String,Long,RuntimeException>() {
+		@Override
+		public Long call(String path) {
+			long lastModified = 0;
+			String realPath = getRealPath(path);
+			if(realPath != null) {
+				// Use File first
+				lastModified = new File(realPath).lastModified();
+			}
+			if(lastModified == 0) {
+				// Try URL
+				try {
+					URL resourceUrl = getResource(path);
+					if(resourceUrl != null) {
+						URLConnection conn = resourceUrl.openConnection();
+						conn.setAllowUserInteraction(false);
+						// Are these timeouts appropriate to web-resource URLs?
+						// Would they be different for background refresh versus interactive?
+						// conn.setConnectTimeout(10);
+						// conn.setReadTimeout(10);
+						conn.setDoInput(false);
+						conn.setDoOutput(false);
+						conn.setUseCaches(false);
+						lastModified = conn.getLastModified();
+					}
+				} catch(IOException e) {
+					// lastModified stays unmodified
+				}
+			}
+			return lastModified;
 		}
-
-		/**
-		 * Determines if this cache value is valid for the given moment in time.
-		 */
-		private boolean isValid(long currentTime) {
-			long timeSince = currentTime - cacheTime;
-			return
-				 -LAST_MODIFIED_CACHE_MAX_AGE <= timeSince
-				&& timeSince <= LAST_MODIFIED_CACHE_MAX_AGE
-			;
-		}
-	}
-
-	// TODO: BackgroundCache last modifieds, too?
-	private final ConcurrentMap<String,GetLastModifiedCacheValue> getLastModifiedCache = new ConcurrentHashMap<>();
+	};
 
 	/**
 	 * Gets a modified time from either a file or URL.
-	 * Caches results for up to a second.
 	 *
 	 * @return  The modified time or {@code 0L} when not known
 	 *
@@ -191,47 +202,10 @@ final public class ServletContextCache {
 	 * @see  URLConnection#getLastModified()
 	 */
 	public long getLastModified(String path) {
-		GetLastModifiedCacheValue cacheValue = getLastModifiedCache.get(path);
-		if(cacheValue == null) {
-			cacheValue = new GetLastModifiedCacheValue();
-			GetLastModifiedCacheValue existingCacheValue = getLastModifiedCache.putIfAbsent(path, cacheValue);
-			if(existingCacheValue != null) cacheValue = existingCacheValue;
-		}
-		synchronized(cacheValue) {
-			final long currentTime = System.currentTimeMillis();
-			if(cacheValue.isValid(currentTime)) {
-				return cacheValue.lastModified;
-			} else {
-				long lastModified = 0;
-				String realPath = getRealPath(path);
-				if(realPath != null) {
-					// Use File first
-					lastModified = new File(realPath).lastModified();
-				}
-				if(lastModified == 0) {
-					// Try URL
-					try {
-						URL resourceUrl = getResource(path);
-						if(resourceUrl != null) {
-							URLConnection conn = resourceUrl.openConnection();
-							conn.setAllowUserInteraction(false);
-							conn.setConnectTimeout(10); // TODO: Are these timeouts appropriate to web-resource URLs?  Would they be different for background refresh versus interactive?
-							conn.setDoInput(false);
-							conn.setDoOutput(false);
-							conn.setReadTimeout(10); // TODO: Are these timeouts appropriate to web-resource URLs?  Would they be different for background refresh versus interactive?
-							conn.setUseCaches(false);
-							lastModified = conn.getLastModified();
-						}
-					} catch(IOException e) {
-						// lastModified stays unmodified
-					}
-				}
-				// Store in cache
-				cacheValue.cacheTime = currentTime;
-				cacheValue.lastModified = lastModified;
-				return lastModified;
-			}
-		}
+		Result<Long,RuntimeException> result = getLastModifiedCache.get(path, getLastModifiedRefresher);
+		RuntimeException exception = result.getException();
+		if(exception != null) throw exception;
+		return result.getValue();
 	}
 
 	/**
