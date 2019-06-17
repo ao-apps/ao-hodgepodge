@@ -59,12 +59,17 @@ public class PostgresqlConnectionWrapper implements Connection {
 
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
+		if(iface.isInstance(this)) return iface.cast(this);
+		if(iface.isInstance(conn)) return iface.cast(conn);
 		return conn.unwrap(iface);
 	}
 
 	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		return conn.isWrapperFor(iface);
+		return
+			iface.isInstance(this)
+			|| iface.isInstance(conn)
+			|| conn.isWrapperFor(iface);
 	}
 
 	@Override

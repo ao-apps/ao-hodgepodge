@@ -142,7 +142,6 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 			boolean successful = false;
 			try {
 				if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-				// TODO: This hides the PgConnection, which prevents registering PGobject.  Find another way or don't worry about this and deprecate
 				if(conn.getClass().getName().startsWith("org.postgresql.")) {
 					// getTransactionIsolation causes a round-trip to the database, this wrapper caches the value and avoids unnecessary sets
 					// to eliminate unnecessary round-trips and improve performance over high-latency links.
