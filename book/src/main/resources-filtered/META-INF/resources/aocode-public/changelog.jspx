@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-06-14T17:58:45-0500"
+		dateModified="2019-06-17T06:39:22-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -83,6 +83,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li><ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html#getLastModified-javax.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
 						</ul>
 					</li>
+					<li>Improved implementation of <ao:a rel="nofollow" href="@{javac.link.javaApi}java/sql/Wrapper.html">java.sql.Wrapper</ao:a>.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
