@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-06-29T17:58:36-0500"
+		dateModified="2019-06-29T19:36:26-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -52,21 +52,30 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{documented.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{documented.scm.url}"
-			>
-				<ul>
-					<li>
-						<p>
-							Using <code>;-split-package:=first</code> of <ao:a href="http://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html">maven-bundle-plugin</ao:a>
-							to avoid bundling the classes in the split packages from
-							<core:link book="/ao-lang" page="/index.jspx" />.
-						</p>
-						<p>
-							These split packages are transitional.  In the future we will have more fine-grained projects.
-						</p>
-					</li>
-				</ul>
-			</changelog:release>
+			/>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="2.1.1"
+			datePublished="2019-06-29T19:36:26-0500"
+			groupId="@{documented.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{documented.scm.url}"
+		>
+			<ul>
+				<li>
+					<p>
+						Using <code>;-split-package:=first</code> of <ao:a href="http://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html">maven-bundle-plugin</ao:a>
+						to avoid bundling the classes in the split packages from
+						<core:link book="/ao-lang" page="/index.jspx" />.
+					</p>
+					<p>
+						These split packages are transitional.  In the future we will have more fine-grained projects.
+					</p>
+				</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
