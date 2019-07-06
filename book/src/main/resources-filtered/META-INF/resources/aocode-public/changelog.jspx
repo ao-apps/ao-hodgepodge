@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-06-29T19:36:26-0500"
+		dateModified="2019-07-06T12:04:09-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -52,7 +52,16 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{documented.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{documented.scm.url}"
-			/>
+			>
+				<ul>
+					<li>
+						New abstract class <ao:a href="apidocs/com/aoindustries/sql/ConnectionWrapper.html">ConnectionWrapper</ao:a>
+						split from <ao:a href="apidocs/com/aoindustries/sql/PostgresqlConnectionWrapper.html">PostgresqlConnectionWrapper</ao:a>
+						to be used by other implementations of <ao:a rel="nofollow" href="@{javac.link.javaApi}java/sql/Connection.html">Connection</ao:a>
+						wrapping.
+					</li>
+				</ul>
+			</changelog:release>
 		</c:if>
 
 		<changelog:release
