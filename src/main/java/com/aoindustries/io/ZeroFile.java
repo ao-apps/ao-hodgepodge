@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013, 2014, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -162,9 +162,9 @@ public class ZeroFile {
 					lastVerboseString,
 					StringUtility.getApproximateSize(pos+blockSize)
 					+ ": "
-					+ SQLUtility.getDecimal((long)block * 10000L / (long)blocks)
+					+ SQLUtility.formatDecimal2((long)block * 10000L / (long)blocks)
 					+ "% read, "
-					+ SQLUtility.getDecimal((long)numDirtyBlocks * 10000L / (long)block)
+					+ SQLUtility.formatDecimal2((long)numDirtyBlocks * 10000L / (long)block)
 					+ "% dirty",
 					System.err
 				);
@@ -199,7 +199,7 @@ public class ZeroFile {
 						lastVerboseString,
 						StringUtility.getApproximateSize(bytesWritten)
 						+ ": "
-						+ SQLUtility.getDecimal((long)written * 10000L / (long)numDirtyBlocks)
+						+ SQLUtility.formatDecimal2((long)written * 10000L / (long)numDirtyBlocks)
 						+ "% written",
 						System.err
 					);
