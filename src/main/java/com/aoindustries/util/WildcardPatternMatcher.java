@@ -79,14 +79,6 @@ abstract public class WildcardPatternMatcher {
 		return matchNone;
 	}
 
-	/**
-	 * @deprecated   Please use {@link  #matchNone()} instead.
-	 */
-	@Deprecated
-	public static WildcardPatternMatcher getMatchNone() {
-		return matchNone();
-	}
-
 	private static final WildcardPatternMatcher matchAll = new WildcardPatternMatcher() {
 		@Override
 		public boolean isMatch(String paramName) {
@@ -99,14 +91,6 @@ abstract public class WildcardPatternMatcher {
 	 */
 	public static WildcardPatternMatcher matchAll() {
 		return matchAll;
-	}
-
-	/**
-	 * @deprecated   Please use {@link  #matchAll()} instead.
-	 */
-	@Deprecated
-	public static WildcardPatternMatcher getMatchAll() {
-		return matchAll();
 	}
 
 	/**
@@ -281,14 +265,6 @@ abstract public class WildcardPatternMatcher {
 				}
 			};
 		}
-	}
-
-	/**
-	 * @deprecated   Please use {@link  #compile(java.lang.String)} instead.
-	 */
-	@Deprecated
-	public static WildcardPatternMatcher getInstance(String patterns) {
-		return compile(patterns);
 	}
 
 	private WildcardPatternMatcher() {

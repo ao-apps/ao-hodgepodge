@@ -75,26 +75,6 @@ public class ProcessTimer implements Runnable, AutoCloseable {
 		this.reminderInterval=reminderInterval;
 	}
 
-	/**
-	 *
-	 * @see  #ProcessTimer(java.util.logging.Logger, java.lang.String, java.lang.String, java.lang.String, java.lang.String, long, long)
-	 *
-	 * @deprecated  The {@link Random} instance is unused.  Please use {@link #ProcessTimer(java.util.logging.Logger, java.lang.String, java.lang.String, java.lang.String, java.lang.String, long, long)} instead.
-	 */
-	@Deprecated
-	public ProcessTimer(
-		Logger logger,
-		Random random,
-		String sourceClass,
-		String sourceMethod,
-		String subject,
-		String processDescription,
-		long maximumTime,
-		long reminderInterval
-	) {
-		this(logger, sourceClass, sourceMethod, subject, processDescription, maximumTime, reminderInterval);
-	}
-
 	@Override
 	public void close() {
 		isFinished = true;
@@ -102,14 +82,6 @@ public class ProcessTimer implements Runnable, AutoCloseable {
 			Thread T = thread;
 			if(T != null) T.interrupt();
 		}
-	}
-
-	/**
-	 * @deprecated  Call {@link #close()} via {@link AutoCloseable} instead.
-	 */
-	@Deprecated
-	public void finished() {
-		close();
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,17 +25,14 @@ package com.aoindustries.servlet.http;
 import com.aoindustries.io.Encoder;
 import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.net.UrlUtils;
-import com.aoindustries.servlet.ServletContextCache;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Enumeration;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -144,66 +141,6 @@ public class ServletUtil {
 	 */
 	public static String getAbsolutePath(HttpServletRequest request, String path) throws MalformedURLException {
 		return getAbsolutePath(request.getServletPath(), path);
-	}
-
-	/**
-	 * Gets the URL for the provided absolute path or <code>null</code> if no resource
-	 * is mapped to the path.
-	 *
-	 * @deprecated  Use regular methods directly
-	 *
-	 * @see  ServletContext#getResource(java.lang.String)
-	 * @see  ServletContextCache#getResource(java.lang.String)
-	 * @see  ServletContextCache#getResource(javax.servlet.ServletContext, java.lang.String)
-	 */
-	@Deprecated
-	public static URL getResource(ServletContext servletContext, String path) throws MalformedURLException {
-		return servletContext.getResource(path);
-	}
-
-	/**
-	 * Gets the URL for the provided possibly-relative path or <code>null</code> if no resource
-	 * is mapped to the path.
-	 *
-	 * @deprecated  Use regular methods directly
-	 *
-	 * @see  #getAbsoluteURL(javax.servlet.http.HttpServletRequest, java.lang.String)
-	 * @see  ServletContext#getResource(java.lang.String)
-	 * @see  ServletContextCache#getResource(java.lang.String)
-	 * @see  ServletContextCache#getResource(javax.servlet.ServletContext, java.lang.String)
-	 */
-	@Deprecated
-	public static URL getResource(ServletContext servletContext, HttpServletRequest request, String relativeUrlPath) throws MalformedURLException {
-		return servletContext.getResource(getAbsolutePath(request, relativeUrlPath));
-	}
-
-	/**
-	 * Checks if a resource with the possibly-relative path exists.
-	 *
-	 * @deprecated  Use regular methods directly
-	 *
-	 * @see  ServletContext#getResource(java.lang.String)
-	 * @see  ServletContextCache#getResource(java.lang.String)
-	 * @see  ServletContextCache#getResource(javax.servlet.ServletContext, java.lang.String)
-	 */
-	@Deprecated
-	public static boolean resourceExists(ServletContext servletContext, String path) throws MalformedURLException {
-		return getResource(servletContext, path)!=null;
-	}
-
-	/**
-	 * Checks if a resource with the possibly-relative path exists.
-	 *
-	 * @deprecated  Use regular methods directly
-	 *
-	 * @see  #getAbsoluteURL(javax.servlet.http.HttpServletRequest, java.lang.String)
-	 * @see  ServletContext#getResource(java.lang.String)
-	 * @see  ServletContextCache#getResource(java.lang.String)
-	 * @see  ServletContextCache#getResource(javax.servlet.ServletContext, java.lang.String)
-	 */
-	@Deprecated
-	public static boolean resourceExists(ServletContext servletContext, HttpServletRequest request, String relativeUrlPath) throws MalformedURLException {
-		return getResource(servletContext, request, relativeUrlPath)!=null;
 	}
 
 	/**
