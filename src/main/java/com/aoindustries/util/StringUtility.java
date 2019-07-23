@@ -22,20 +22,22 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.sql.SQLUtility;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
  * @author  AO Industries, Inc.
  */
 public final class StringUtility {
+
+	/**
+	 * Make no instances.
+	 */
+	private StringUtility() {
+	}
 
 	private static final String[] MONTHS = {
 		"Jan",
@@ -60,69 +62,9 @@ public final class StringUtility {
 		return MONTHS[month];
 	}
 
-	private static final Calendar calendar = Calendar.getInstance();
-
 	private static final char[] wordWrapChars = { ' ', '\t', '-', '=', ',', ';' };
 
 	private static final String lineSeparator = System.getProperty("line.separator");
-
-	/**
-	 * StringUtilitly constructor comment.
-	 */
-	private StringUtility() {
-	}
-
-	/**
-	 * Constructs a comma separated list from a <code>String[]</code>.
-	 *
-	 * @deprecated  This method is no longer used and will be removed.
-	 */
-	@Deprecated
-	public static String buildEmailList(String[] list) {
-		StringBuilder SB=new StringBuilder();
-		int len=list.length;
-		for(int c=0;c<len;c++) {
-			if(c==0) SB.append('<'); else SB.append(",<");
-			SB.append(list[c]).append('>');
-		}
-		return SB.toString();
-	}
-
-	/**
-	 * Constructs a comma separated list from a <code>String[]</code>.
-	 *
-	 * @deprecated Please use <code>join(objects, ", ")</code> instead.
-	 *
-	 * @see #join(java.lang.Object[], java.lang.String)
-	 */
-	@Deprecated
-	public static String buildList(String[] list) {
-		return join(list, ", ");
-	}
-
-	/**
-	 * Constructs a comma separated list from an <code>Object[]</code>.
-	 *
-	 * @deprecated Please use <code>join(objects, ", ")</code> instead.
-	 *
-	 * @see #join(java.lang.Object[], java.lang.String)
-	 */
-	@Deprecated
-	public static String buildList(Object[] objects) {
-		return join(objects, ", ");
-	}
-
-	/**
-	 * Constructs a comma separated list from an <code>Iterable</code>.
-	 *
-	 * @deprecated Please use <code>join(objects, ", ")</code> instead.
-	 *
-	 * @see #join(java.lang.Iterable, java.lang.String)
-	 */
-	@Deprecated
-	public static String buildList(Iterable<?> objects) {
-		return join(objects, ", ");
-	}
 
 	/**
 	 * Joins the string representation of objects on the provided delimiter.
@@ -220,31 +162,6 @@ public final class StringUtility {
 		return out;
 	}
 
-	/**
-	 * Compare one date to another, must be in the DDMMYYYY format.
-	 *
-	 * @return  <0  if the first date is before the second<br>
-	 *          0   if the dates are the same or the format is invalid<br>
-	 *          >0  if the first date is after the second
-	 */
-	public static int compareToDDMMYYYY(String date1, String date2) {
-		if(date1.length()!=8 || date2.length()!=8) return 0;
-		return compareToDDMMYYYY0(date1)-compareToDDMMYYYY0(date2);
-	}
-
-	private static int compareToDDMMYYYY0(String date) {
-		return
-			(date.charAt(4)-'0')*10000000
-			+(date.charAt(5)-'0')*1000000
-			+(date.charAt(6)-'0')*100000
-			+(date.charAt(7)-'0')*10000
-			+(date.charAt(0)-'0')*1000
-			+(date.charAt(1)-'0')*100
-			+(date.charAt(2)-'0')*10
-			+(date.charAt(3)-'0')
-		;
-	}
-
 	public static boolean containsIgnoreCase(String line, String word) {
 		int word_len=word.length();
 		int line_len=line.length();
@@ -261,44 +178,6 @@ public final class StringUtility {
 			return true;
 		}
 		return false;
-	}
-
-	public static long convertStringDateToTime(String date) throws IllegalArgumentException {
-		synchronized(StringUtility.class) {
-			if(date.length()<9) throw new IllegalArgumentException("Invalid date");
-			int day=Integer.parseInt(date.substring(0,2));
-			if(day<0||day>31) throw new IllegalArgumentException("Invalid date");
-			String monthString=date.substring(2,5);
-			int month=-1;
-			for(int c=0;c<MONTHS.length;c++) {
-				if(MONTHS[c].equalsIgnoreCase(monthString)) {
-					month=c;
-					break;
-				}
-			}
-			if(month==-1) throw new IllegalArgumentException("Invalid month: "+monthString);
-			if(day>30 && (month==1||month==3||month==5||month==8||month==10))
-				throw new IllegalArgumentException("Invalid date");
-			int year=Integer.parseInt(date.substring(5,9));
-			if(month==1) {
-				if(day>29) throw new IllegalArgumentException("Invalid date");	
-				if(day==29 && !leapYear(year)) throw new IllegalArgumentException("Invalid date");
-			}	
-			calendar.set(Calendar.DAY_OF_MONTH, day);
-			calendar.set(Calendar.MONTH, month);
-			calendar.set(Calendar.YEAR, year);
-			return calendar.getTime().getTime();
-		}
-	}
-
-	/**
-	 * Counts how many times a word appears in a line.  Case insensitive matching.
-	 *
-	 * @deprecated Corrected spelling
-	 */
-	@Deprecated
-	public static int countOccurances(byte[] buff, int len, String word) {
-		return countOccurrences(buff, len, word);
 	}
 
 	/**
@@ -325,16 +204,6 @@ public final class StringUtility {
 
 	/**
 	 * Counts how many times a word appears in a line.  Case insensitive matching.
-	 *
-	 * @deprecated Corrected spelling
-	 */
-	@Deprecated
-	public static int countOccurances(byte[] buff, String word) {
-		return countOccurrences(buff, word);
-	}
-
-	/**
-	 * Counts how many times a word appears in a line.  Case insensitive matching.
 	 */
 	public static int countOccurrences(byte[] buff, String word) {
 		int wordlen=word.length();
@@ -357,16 +226,6 @@ public final class StringUtility {
 
 	/**
 	 * Counts how many times a word appears in a line.  Case insensitive matching.
-	 *
-	 * @deprecated Corrected spelling
-	 */
-	@Deprecated
-	public static int countOccurances(String line, String word) {
-		return countOccurrences(line, word);
-	}
-
-	/**
-	 * Counts how many times a word appears in a line.  Case insensitive matching.
 	 */
 	public static int countOccurrences(String line, String word) {
 		int wordlen=word.length();
@@ -385,154 +244,6 @@ public final class StringUtility {
 			count++;
 		}
 		return count;
-	}
-
-	/**
-	 * @deprecated  Please use SQLUtility.escapeSQL(s.replace('*', '%'))
-	 *
-	 * @see  SQLUtility#escapeSQL(String)
-	 */
-	@Deprecated
-	public static String escapeSQL(String s) {
-		return SQLUtility.escapeSQL(s.replace('*', '%'));
-	}
-
-	/**
-	 * Converts a date in a the format MMDDYYYY to a <code>Date</code>.
-	 *
-	 * @param  date  a <code>String</code> containing the date in MMDDYYYY format.
-	 *
-	 * @return  <code>null</code> if <code>date</code> is <code>null</code>, a <code>java.sql.Date</code>
-	 *          otherwise
-	 */
-	public static java.sql.Date getDateMMDDYYYY(String date) throws NumberFormatException, IllegalArgumentException {
-		synchronized(StringUtility.class) {
-			int len = date.length();
-			if (len == 0) return null;
-			if (len != 8) throw new IllegalArgumentException("Date must be in MMDDYYYY format: " + date);
-			return new java.sql.Date(
-				new GregorianCalendar(
-					Integer.parseInt(date.substring(4, 8)),
-					Integer.parseInt(date.substring(0, 2))-1,
-					Integer.parseInt(date.substring(2, 4))
-				).getTime().getTime()
-			);
-		}
-	}
-
-	/**
-	 * @deprecated  Please use SQLUtility.getDate(long)
-	 *
-	 * @see  SQLUtility#getDate(long)
-	 */
-	@Deprecated
-	public static String getDateString(long time) {
-		return getDateString(new Date(time));
-	}
-
-	/**
-	 * @deprecated  Please use SQLUtility.getDate(date.getTime())
-	 *
-	 * @see  SQLUtility#getDate(long)
-	 */
-	@Deprecated
-	public static String getDateString(Date date) {
-		synchronized(StringUtility.class) {
-			calendar.setTime(date);
-			int day=calendar.get(Calendar.DATE);
-			return (day>=0 && day<=9 ? "0":"")+String.valueOf(calendar.get(Calendar.DATE))+MONTHS[calendar.get(Calendar.MONTH)]+calendar.get(Calendar.YEAR);
-		}
-	}
-
-	/**
-	 * @deprecated  Please use SQLUtility.getDate(date.getTime())
-	 *
-	 * @see  SQLUtility#getDate(long)
-	 */
-	@Deprecated
-	public static String getDateStringMMDDYYYY(Date date) {
-		if(date==null) return "";
-		Calendar C=Calendar.getInstance();
-		C.setTime(date);
-		int day=C.get(Calendar.DATE);
-		int month=C.get(Calendar.MONTH)+1;
-		return
-			(month>=0 && month<=9 ? "0":"")
-			+month
-			+(day>=0 && day<=9 ? "0":"")
-			+day
-			+C.get(Calendar.YEAR)
-		;
-	}
-
-	/**
-	 * @deprecated  Please use SQLUtility.getDateTime(long)
-	 *
-	 * @see  SQLUtility#getDateTime(long)
-	 */
-	@Deprecated
-	public static String getDateStringSecond(long time) {
-		Date date=new Date(time);
-		Calendar C=Calendar.getInstance();
-		C.setTime(date);
-		int day=C.get(Calendar.DATE);
-		int hour=C.get(Calendar.HOUR_OF_DAY);
-		int minute=C.get(Calendar.MINUTE);
-		int second=C.get(Calendar.SECOND);
-		return
-			(day>=0 && day<=9 ? "0":"")
-			+day
-			+MONTHS[C.get(Calendar.MONTH)]
-			+C.get(Calendar.YEAR)
-			+' '
-			+(hour>=0 && hour<=9 ? "0":"")
-			+hour
-			+':'
-			+(minute>=0 && minute<=9 ? "0":"")
-			+minute
-			+':'		
-			+(second>=0 && second<=9 ? "0":"")
-			+second
-		;
-	}
-
-	/**
-	 * @deprecated  Please use SQLUtility.getDateTime(long)
-	 *
-	 * @see  SQLUtility#getDateTime(long)
-	 */
-	@Deprecated
-	public static String getDateStringSecond(String time) {
-		return
-			time.substring(6,8)
-			+MONTHS[Integer.parseInt(time.substring(4,6))]
-			+time.substring(0,4)
-			+' '
-			+time.substring(8,10)
-			+':'
-			+time.substring(10,12)
-			+':'
-			+time.substring(12,14)
-		;        
-	}
-
-	/**
-	 * Creates a <code>String[]</code> by calling the toString() method of each object in a list.
-	 *
-	 * @deprecated  Please use List.toArray(Object[])
-	 *
-	 * @see  List#toArray(Object[])
-	 */
-	@Deprecated
-	public static String[] getStringArray(List<?> V) {
-		if(V==null) return null;
-		int len = V.size();
-		String[] SA = new String[len];
-		for (int c = 0; c < len; c++) {
-			Object O=V.get(c);
-			SA[c]=O==null?null:O.toString();
-		}
-		return SA;
 	}
 
 	public static String getTimeLengthString(long time) {
@@ -638,55 +349,6 @@ public final class StringUtility {
 			for(int d=0;d<clen;d++) if(ch==chars[d]) return c;
 		}
 		return -1;
-	}
-
-	/**
-	 * @deprecated  Please use Calendar class instead.
-	 *
-	 * @see  Calendar
-	 */
-	@Deprecated
-	public static boolean isValidDate(String date) {
-		try {
-			convertStringDateToTime(date);
-			return true;
-		} catch (IllegalArgumentException err) {
-			return false;
-		}
-	}
-
-	/**
-	 * @deprecated  Please use Calendar class instead.
-	 *
-	 * @see  Calendar
-	 */
-	@Deprecated
-	public static boolean leapYear(int year) {
-		return year%4==0 && year%400==0;
-	}
-
-	/**
-	 * Removes all occurrences of a <code>char</code> from a <code>String</code>
-	 *
-	 * @deprecated  this method is slow and no longer supported
-	 */
-	@Deprecated
-	public static String removeChars(String S, char[] chars) {
-		int pos;
-		while((pos=indexOf(S, chars))!=-1) S=S.substring(0,pos)+S.substring(pos+1);
-		return S;
-	}
-
-	/**
-	 * Removes all occurrences of a <code>char</code> from a <code>String</code>
-	 *
-	 * @deprecated  this method is slow and no longer supported
-	 */
-	@Deprecated
-	public static String removeChars(String S, char ch) {
-		int pos;
-		while((pos=S.indexOf(ch))!=-1) S=S.substring(0,pos)+S.substring(pos+1);
-		return S;
 	}
 
 	/**
@@ -1349,16 +1011,6 @@ public final class StringUtility {
 	}
 
 	/**
-	 * Null-safe intern: interns a String if it is not null, returns null if parameter is null.
-	 *
-	 * @deprecated  Use InternUtils instead.
-	 */
-	@Deprecated
-	public static String intern(String S) {
-		return InternUtils.intern(S);
-	}
-
-	/**
 	 * Finds the next of a substring like regular String.indexOf, but stops at a certain maximum index.
 	 * Like substring, will look up to the character one before toIndex.
 	 */
@@ -1374,13 +1026,13 @@ public final class StringUtility {
 
 		if (fromIndex >= sourceCount) {
 			return (targetCount == 0 ? sourceCount : -1);
-	}
+		}
 		if (fromIndex < 0) {
 			fromIndex = 0;
 		}
-	if (targetCount == 0) {
-		return fromIndex;
-	}
+		if (targetCount == 0) {
+			return fromIndex;
+		}
 
 		char first  = target.charAt(0);
 		int max = sourceCount - targetCount;
