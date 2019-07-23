@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-07-06T12:04:09-0500"
+		dateModified="2019-07-23T02:20:21-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -59,6 +59,32 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						split from <ao:a href="apidocs/com/aoindustries/sql/PostgresqlConnectionWrapper.html">PostgresqlConnectionWrapper</ao:a>
 						to be used by other implementations of <ao:a rel="nofollow" href="@{javac.link.javaApi}java/sql/Connection.html">Connection</ao:a>
 						wrapping.
+					</li>
+					<li>Removed some long-deprecated or otherwise long-unused methods:
+						<ol>
+							<li><code>com.aoindustries.util.StringUtility.buildEmailList(String[])</code></li>
+							<li><code>com.aoindustries.util.StringUtility.buildList(String[])</code></li>
+							<li><code>com.aoindustries.util.StringUtility.buildList(Object[])</code></li>
+							<li><code>com.aoindustries.util.StringUtility.buildList(Iterable)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.compareToDDMMYYYY(String, String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.convertStringDateToTime(String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.countOccurances(byte[], int, String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.countOccurances(byte[], String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.countOccurances(String, String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.escapeSQL(String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.getDateMMDDYYYY(String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.getDateString(long)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.getDateString(Date)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.getDateStringMMDDYYYY(Date)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.getDateStringSecond(long)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.getDateStringSecond(String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.getStringArray(List)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.intern(String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.isValidDate(String)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.leapYear(int)</code></li>
+							<li><code>com.aoindustries.util.StringUtility.removeChars(String, char[])</code></li>
+							<li><code>com.aoindustries.util.StringUtility.removeChars(String, char)</code></li>
+						</ol>
 					</li>
 				</ul>
 			</changelog:release>
