@@ -206,15 +206,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	}
 
 	/**
-	 * @ deprecated Please provide configuration values
-	 */
-	/*
-	@ Deprecated
-	public static void printEditableResourceBundleLookups(Appendable out) throws IOException {
-		printEditableResourceBundleLookups(out, 4, true);
-	}*/
-
-	/**
 	 * Prints the resource bundle lookup editor.  This should be called at the end of a request,
 	 * just before the body tag is closed.
 	 * <p>
