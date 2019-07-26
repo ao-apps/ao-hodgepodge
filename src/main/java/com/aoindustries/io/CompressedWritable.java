@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2017  AO Industries, Inc.
+ * Copyright (C) 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,5 +31,5 @@ import java.io.IOException;
  */
 public interface CompressedWritable {
 
-	void write(CompressedDataOutputStream out, String clientVersion) throws IOException;
+	void write(CompressedDataOutputStream out, String protocolVersion) throws IOException;
 }

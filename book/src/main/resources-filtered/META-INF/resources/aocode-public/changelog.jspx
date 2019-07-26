@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-07-26T02:41:43-0500"
+		dateModified="2019-07-26T05:11:48-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -150,6 +150,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<ao:a rel="nofollow" href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html">Instant</ao:a> in Java 8,
 							however the API remains <code>Timestamp</code>-only since the minimum Java version is still 1.7.
 						</p>
+					</li>
+					<li>
+						Added protocol version to reading in <code>Streamable</code> and <code>CompressedReadable</code>, because a server may be
+						reading objects streamed by older clients.  Protocol compatibility can be necessary both directions.
 					</li>
 				</ul>
 			</changelog:release>
