@@ -689,4 +689,39 @@ public class SQLUtility {
 		return ts;
 		 */
 	}
+
+	/**
+	 * Converts a number of seconds and nanoseconds into a new {@link UnmodifiableTimestamp}.
+	 */
+	// TODO: Experimental
+	public static <E extends Throwable> UnmodifiableTimestamp newUnmodifiableTimestamp(long seconds, int nanos, Class<E> exceptionType) throws E {
+		// Avoid underflow or overflow on conversion to millis
+		String message;
+		if(seconds > MAX_TIMESTAMP_SECONDS) {
+			message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
+		} else if(seconds < MIN_TIMESTAMP_SECONDS) {
+			message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
+		} else {
+			return new UnmodifiableTimestamp(seconds * 1000, nanos);
+		}
+		try {
+			throw exceptionType.getConstructor(String.class).newInstance(message);
+		} catch(ReflectiveOperationException e) {
+			throw new IllegalArgumentException(message, e);
+		}
+	}
+
+	/**
+	 * Converts a number of seconds and nanoseconds into a new {@link UnmodifiableTimestamp}.
+	 */
+	public static UnmodifiableTimestamp newUnmodifiableTimestamp(long seconds, int nanos) throws IllegalArgumentException {
+		// TODO: Experimental
+		return newUnmodifiableTimestamp(seconds, nanos, IllegalArgumentException.class);
+		/*
+		// Avoid underflow or overflow on conversion to millis
+		if(seconds > MAX_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS);
+		if(seconds < MIN_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS);
+		return new UnmodifiableTimestamp(seconds * 1000, nanos);
+		 */
+	}
 }

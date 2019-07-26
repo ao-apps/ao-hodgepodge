@@ -23,6 +23,7 @@
 package com.aoindustries.io;
 
 import com.aoindustries.sql.SQLUtility;
+import com.aoindustries.sql.UnmodifiableTimestamp;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -280,5 +281,45 @@ public class CompressedDataInputStream extends DataInputStream {
 	 */
 	public Timestamp readNullTimestamp() throws IOException {
 		return readBoolean() ? readTimestamp() : null;
+	}
+
+	/**
+	 * Reads an {@link UnmodifiableTimestamp}, maintaining the full nanosecond precision.
+	 * Time zone offset is not maintained.
+	 * <p>
+	 * See  {@link CompressedDataOutputStream#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
+	 * </p>
+	 */
+	public static UnmodifiableTimestamp readUnmodifiableTimestamp(DataInputStream in) throws IOException {
+		long seconds = in.readLong();
+		int nanos = readCompressedInt(in);
+		// TODO: Experimental
+		return SQLUtility.newUnmodifiableTimestamp(seconds, nanos, IOException.class);
+		/*
+		// Avoid underflow or overflow on conversion to millis
+		final long MAX_SECONDS = Long.MAX_VALUE / 1000;
+		final long MIN_SECONDS = Long.MIN_VALUE / 1000;
+		if(seconds > MAX_SECONDS) throw new IOException("seconds overflow: " + seconds + " > " + MAX_SECONDS);
+		if(seconds < MIN_SECONDS) throw new IOException("seconds underflow: " + seconds + " < " + MAX_SECONDS);
+		return new UnmodifiableTimestamp(seconds * 1000, nanos);
+		 */
+	}
+
+	/**
+	 * Writes an {@link UnmodifiableTimestamp}.
+	 *
+	 * @see  #readUnmodifiableTimestamp(java.io.DataInputStream)
+	 */
+	public UnmodifiableTimestamp readUnmodifiableTimestamp() throws IOException {
+		return readUnmodifiableTimestamp(this);
+	}
+
+	/**
+	 * Writes a possibly-{@code null} {@link UnmodifiableTimestamp}.
+	 *
+	 * @see  #readUnmodifiableTimestamp()
+	 */
+	public UnmodifiableTimestamp readNullUnmodifiableTimestamp() throws IOException {
+		return readBoolean() ? readUnmodifiableTimestamp() : null;
 	}
 }
