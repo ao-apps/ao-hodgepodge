@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.sql.SQLUtility;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -249,6 +250,9 @@ public class CompressedDataInputStream extends DataInputStream {
 	public static Timestamp readTimestamp(DataInputStream in) throws IOException {
 		long seconds = in.readLong();
 		int nanos = readCompressedInt(in);
+		// TODO: Experimental
+		return SQLUtility.newTimestamp(seconds, nanos, IOException.class);
+		/*
 		// Avoid underflow or overflow on conversion to millis
 		final long MAX_SECONDS = Long.MAX_VALUE / 1000;
 		final long MIN_SECONDS = Long.MIN_VALUE / 1000;
@@ -257,6 +261,7 @@ public class CompressedDataInputStream extends DataInputStream {
 		Timestamp ts = new Timestamp(seconds * 1000);
 		ts.setNanos(nanos);
 		return ts;
+		 */
 	}
 
 	/**

@@ -603,4 +603,78 @@ public class SQLUtility {
 		values.toArray(oa);
 		printTable(titles, oa, out, isInteractive, alignRights);
 	}
+
+	/**
+	 * The maximum number of seconds in a {@link Timestamp}.
+	 */
+	public static final long MAX_TIMESTAMP_SECONDS = Long.MAX_VALUE / 1000;
+
+	/**
+	 * The minimum number of seconds in a {@link Timestamp}.
+	 */
+	public static final long MIN_TIMESTAMP_SECONDS = Long.MIN_VALUE / 1000;
+
+	/**
+	 * Converts a number of seconds and nanoseconds into a given {@link Timestamp}.
+	 */
+	// TODO: Experimental
+	public static <E extends Throwable> void toTimestamp(long seconds, int nanos, Timestamp ts, Class<E> exceptionType) throws E {
+		// Avoid underflow or overflow on conversion to millis
+		String message;
+		if(seconds > MAX_TIMESTAMP_SECONDS) {
+			message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
+		} else if(seconds < MIN_TIMESTAMP_SECONDS) {
+			message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
+		} else {
+			ts.setTime(seconds * 1000);
+			ts.setNanos(nanos);
+			return;
+		}
+		try {
+			throw exceptionType.getConstructor(String.class).newInstance(message);
+		} catch(ReflectiveOperationException e) {
+			throw new IllegalArgumentException(message, e);
+		}
+	}
+
+	/**
+	 * Converts a number of seconds and nanoseconds into a given {@link Timestamp}.
+	 */
+	public static void toTimestamp(long seconds, int nanos, Timestamp ts) {
+		// TODO: Experimental
+		toTimestamp(seconds, nanos, ts, IllegalArgumentException.class);
+		/*
+		// Avoid underflow or overflow on conversion to millis
+		if(seconds > MAX_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS);
+		if(seconds < MIN_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS);
+		ts.setTime(seconds * 1000);
+		ts.setNanos(nanos);
+		 */
+	}
+
+	/**
+	 * Converts a number of seconds and nanoseconds into a new {@link Timestamp}.
+	 */
+	// TODO: Experimental
+	public static <E extends Throwable> Timestamp newTimestamp(long seconds, int nanos, Class<E> exceptionType) throws E {
+		Timestamp ts = new Timestamp(0);
+		toTimestamp(seconds, nanos, ts, exceptionType);
+		return ts;
+	}
+
+	/**
+	 * Converts a number of seconds and nanoseconds into a new {@link Timestamp}.
+	 */
+	public static Timestamp newTimestamp(long seconds, int nanos) {
+		// TODO: Experimental
+		return newTimestamp(seconds, nanos, IllegalArgumentException.class);
+		/*
+		// Avoid underflow or overflow on conversion to millis
+		if(seconds > MAX_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS);
+		if(seconds < MIN_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS);
+		Timestamp ts = new Timestamp(seconds * 1000);
+		ts.setNanos(nanos);
+		return ts;
+		 */
+	}
 }
