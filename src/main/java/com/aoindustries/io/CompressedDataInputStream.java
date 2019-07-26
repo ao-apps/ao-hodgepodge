@@ -26,6 +26,7 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 
 /**
  * Adds compressed data transfer to DataInputStream.  This class is not thread safe.
@@ -236,5 +237,43 @@ public class CompressedDataInputStream extends DataInputStream {
 		if(b == 1) return Boolean.TRUE;
 		if(b == 0) return Boolean.FALSE;
 		throw new IOException("Invalid value for nullable boolean: " + b);
+	}
+
+	/**
+	 * Reads a {@link Timestamp}, maintaining the full nanosecond precision.
+	 * Time zone offset is not maintained.
+	 * <p>
+	 * See  {@link CompressedDataOutputStream#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
+	 * </p>
+	 */
+	public static Timestamp readTimestamp(DataInputStream in) throws IOException {
+		long seconds = in.readLong();
+		int nanos = readCompressedInt(in);
+		// Avoid underflow or overflow on conversion to millis
+		final long MAX_SECONDS = Long.MAX_VALUE / 1000;
+		final long MIN_SECONDS = Long.MIN_VALUE / 1000;
+		if(seconds > MAX_SECONDS) throw new IOException("seconds overflow: " + seconds + " > " + MAX_SECONDS);
+		if(seconds < MIN_SECONDS) throw new IOException("seconds underflow: " + seconds + " < " + MAX_SECONDS);
+		Timestamp ts = new Timestamp(seconds * 1000);
+		ts.setNanos(nanos);
+		return ts;
+	}
+
+	/**
+	 * Writes a {@link Timestamp}.
+	 *
+	 * @see  #readTimestamp(java.io.DataInputStream)
+	 */
+	public Timestamp readTimestamp() throws IOException {
+		return readTimestamp(this);
+	}
+
+	/**
+	 * Writes a possibly-{@code null} {@link Timestamp}.
+	 *
+	 * @see  #readTimestamp()
+	 */
+	public Timestamp readNullTimestamp() throws IOException {
+		return readBoolean() ? readTimestamp() : null;
 	}
 }

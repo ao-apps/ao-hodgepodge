@@ -25,6 +25,7 @@ package com.aoindustries.io;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Timestamp;
 
 /**
  * Adds compressed data transfer to DataOutputStream.  This class is not
@@ -223,5 +224,47 @@ public class CompressedDataOutputStream extends DataOutputStream {
 			: b ? 1
 			: 0
 		);
+	}
+
+	/**
+	 * Writes a {@link Timestamp}, maintaining the full nanosecond precision.
+	 * Time zone offset is not maintained.
+	 * <p>
+	 * The wire protocol is {@link #writeLong(long)} number of seconds followed
+	 * by {@link #writeCompressedInt(int) compressed int} number of nanoseconds.
+	 * </p>
+	 * <p>
+	 * This is deliberately compatible with <code>Instant</code> that is part of Java 8.
+	 * Once Java 8 is our minimum Java version, many uses of {@link Timestamp} will
+	 * change to <code>Instant</code>.
+	 * </p>
+	 */
+	public static void writeTimestamp(Timestamp ts, DataOutputStream out) throws IOException {
+		// Java 1.8: Math.floorDiv
+		long millis = ts.getTime();
+		long seconds = millis / 1000;
+		if((millis % 1000) < 0) seconds--;
+		out.writeLong(seconds);
+		assert MAX_COMPRESSED_INT_VALUE >= 999999999 : "All nano range (0 - 999999999) will fit in compressed ints";
+		writeCompressedInt(ts.getNanos(), out);
+	}
+
+	/**
+	 * Writes a {@link Timestamp}.
+	 *
+	 * @see  #writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)
+	 */
+	public void writeTimestamp(Timestamp ts) throws IOException {
+		writeTimestamp(ts, this);
+	}
+
+	/**
+	 * Writes a possibly-{@code null} {@link Timestamp}.
+	 *
+	 * @see  #writeTimestamp(java.sql.Timestamp)
+	 */
+	public void writeNullTimestamp(Timestamp ts) throws IOException {
+		writeBoolean(ts != null);
+		if(ts != null) writeTimestamp(ts);
 	}
 }
