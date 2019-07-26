@@ -160,11 +160,23 @@ public class SQLUtility {
 	/**
 	 * @param timeZone  The time zone to use or {@code null} to use the default time zone
 	 *
-	 * @see  CalendarUtils#parseDateTime(java.lang.String, java.util.TimeZone)
+	 * @see  CalendarUtils#parseDateTime(java.lang.String, java.util.TimeZone, com.aoindustries.util.CalendarUtils.DateTimeProducer)
 	 */
 	public static Timestamp parseDateTime(String dateTime, TimeZone timeZone) throws IllegalArgumentException {
 		if(dateTime == null) return null;
-		return new Timestamp(CalendarUtils.parseDateTime(dateTime, timeZone).getTimeInMillis());
+		return CalendarUtils.parseDateTime(
+			dateTime,
+			timeZone,
+			new CalendarUtils.DateTimeProducer<Timestamp>() {
+				@Override
+				public Timestamp createDateTime(GregorianCalendar gcal, int nanos) {
+					long millis = gcal.getTimeInMillis();
+					long seconds = millis / 1000;
+					if((millis % 1000) < 0) seconds--;
+					return newTimestamp(seconds, nanos);
+				}
+			}
+		);
 	}
 
 	/**
@@ -665,7 +677,7 @@ public class SQLUtility {
 	/**
 	 * Converts a number of seconds and nanoseconds into a new {@link Timestamp}.
 	 */
-	public static Timestamp newTimestamp(long seconds, int nanos) {
+	public static Timestamp newTimestamp(long seconds, int nanos) throws IllegalArgumentException {
 		// TODO: Experimental
 		return newTimestamp(seconds, nanos, IllegalArgumentException.class);
 		/*
