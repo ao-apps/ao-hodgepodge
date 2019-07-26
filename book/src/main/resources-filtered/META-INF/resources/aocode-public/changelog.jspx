@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-07-23T06:18:38-0500"
+		dateModified="2019-07-26T02:41:43-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -138,6 +138,18 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li>Renamed <code>getMillis(String)</code> to <code>parseDecimal3(String)</code></li>
 							<li>Added <code>parseLongDecimal3(String)</code></li>
 						</ol>
+					</li>
+					<li>
+						<p>
+							New methods to read and write possibly nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/sql/Timestamp.html">Timestamp</ao:a>
+							in <ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html">CompressedDataOutputStream</ao:a>
+							and <ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html">CompressedDataInputStream</ao:a>.
+						</p>
+						<p>
+							These methods use a wire protocol deliberately compatible with
+							<ao:a rel="nofollow" href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html">Instant</ao:a> in Java 8,
+							however the API remains <code>Timestamp</code>-only since the minimum Java version is still 1.7.
+						</p>
 					</li>
 				</ul>
 			</changelog:release>
