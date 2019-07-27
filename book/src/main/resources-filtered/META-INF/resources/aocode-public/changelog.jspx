@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-07-26T05:11:48-0500"
+		dateModified="2019-07-27T03:26:54-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -155,6 +155,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						Added protocol version to reading in <code>Streamable</code> and <code>CompressedReadable</code>, because a server may be
 						reading objects streamed by older clients.  Protocol compatibility can be necessary both directions.
 					</li>
+					<li>New methods to read and write possibly nullable <code>Identifier</code> and <code>SmallIdentifier</code>.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
