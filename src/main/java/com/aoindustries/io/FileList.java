@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -117,6 +117,10 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 		} catch(IOException err) {
 			throw new WrappedException(err, new Object[] {"frf="+frf});
 		}
+	}
+
+	public int getRecordLength() {
+		return frf.getRecordLength();
 	}
 
 	@Override
