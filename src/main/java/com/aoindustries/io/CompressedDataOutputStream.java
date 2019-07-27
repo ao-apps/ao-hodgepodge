@@ -22,6 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.security.Identifier;
+import com.aoindustries.security.SmallIdentifier;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,6 +37,7 @@ import java.sql.Timestamp;
  *
  * @author  AO Industries, Inc.
  */
+// TODO; Rename "StreamableOutput"?
 public class CompressedDataOutputStream extends DataOutputStream {
 
 	public CompressedDataOutputStream(OutputStream out) {
@@ -266,5 +269,36 @@ public class CompressedDataOutputStream extends DataOutputStream {
 	public void writeNullTimestamp(Timestamp ts) throws IOException {
 		writeBoolean(ts != null);
 		if(ts != null) writeTimestamp(ts);
+	}
+
+	/**
+	 * Writes an {@link Identifier}.
+	 */
+	public void writeIdentifier(Identifier identifier) throws IOException {
+		writeLong(identifier.getHi());
+		writeLong(identifier.getLo());
+	}
+
+	/**
+	 * Writes a possibly-{@code null} {@link Identifier}.
+	 */
+	public void writeNullIdentifier(Identifier identifier) throws IOException {
+		writeBoolean(identifier != null);
+		if(identifier != null) writeIdentifier(identifier);
+	}
+
+	/**
+	 * Writes a {@link SmallIdentifier}.
+	 */
+	public void writeSmallIdentifier(SmallIdentifier identifier) throws IOException {
+		writeLong(identifier.getValue());
+	}
+
+	/**
+	 * Writes a possibly-{@code null} {@link SmallIdentifier}.
+	 */
+	public void writeNullSmallIdentifier(SmallIdentifier identifier) throws IOException {
+		writeBoolean(identifier != null);
+		if(identifier != null) writeSmallIdentifier(identifier);
 	}
 }

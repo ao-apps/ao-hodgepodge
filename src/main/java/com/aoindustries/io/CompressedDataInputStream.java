@@ -22,6 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.security.Identifier;
+import com.aoindustries.security.SmallIdentifier;
 import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.sql.UnmodifiableTimestamp;
 import java.io.DataInputStream;
@@ -35,6 +37,7 @@ import java.sql.Timestamp;
  *
  * @author  AO Industries, Inc.
  */
+// TODO; Rename "StreamableInput"?
 public class CompressedDataInputStream extends DataInputStream {
 
 	public CompressedDataInputStream(InputStream in) {
@@ -266,7 +269,7 @@ public class CompressedDataInputStream extends DataInputStream {
 	}
 
 	/**
-	 * Writes a {@link Timestamp}.
+	 * Reads a {@link Timestamp}.
 	 *
 	 * @see  #readTimestamp(java.io.DataInputStream)
 	 */
@@ -275,7 +278,7 @@ public class CompressedDataInputStream extends DataInputStream {
 	}
 
 	/**
-	 * Writes a possibly-{@code null} {@link Timestamp}.
+	 * Reads a possibly-{@code null} {@link Timestamp}.
 	 *
 	 * @see  #readTimestamp()
 	 */
@@ -306,7 +309,7 @@ public class CompressedDataInputStream extends DataInputStream {
 	}
 
 	/**
-	 * Writes an {@link UnmodifiableTimestamp}.
+	 * Reads an {@link UnmodifiableTimestamp}.
 	 *
 	 * @see  #readUnmodifiableTimestamp(java.io.DataInputStream)
 	 */
@@ -315,11 +318,39 @@ public class CompressedDataInputStream extends DataInputStream {
 	}
 
 	/**
-	 * Writes a possibly-{@code null} {@link UnmodifiableTimestamp}.
+	 * Reads a possibly-{@code null} {@link UnmodifiableTimestamp}.
 	 *
 	 * @see  #readUnmodifiableTimestamp()
 	 */
 	public UnmodifiableTimestamp readNullUnmodifiableTimestamp() throws IOException {
 		return readBoolean() ? readUnmodifiableTimestamp() : null;
+	}
+
+	/**
+	 * Reads an {@link Identifier}.
+	 */
+	public Identifier readIdentifier() throws IOException {
+		return new Identifier(readLong(), readLong());
+	}
+
+	/**
+	 * Reads a possibly-{@code null} {@link Identifier}.
+	 */
+	public Identifier readNullIdentifier() throws IOException {
+		return readBoolean() ? readIdentifier() : null;
+	}
+
+	/**
+	 * Reads a {@link SmallIdentifier}.
+	 */
+	public SmallIdentifier readSmallIdentifier() throws IOException {
+		return new SmallIdentifier(readLong());
+	}
+
+	/**
+	 * Reads a possibly-{@code null} {@link Identifier}.
+	 */
+	public SmallIdentifier readNullSmallIdentifier() throws IOException {
+		return readBoolean() ? readSmallIdentifier() : null;
 	}
 }
