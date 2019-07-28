@@ -43,6 +43,14 @@ public class SQLUtility {
 	}
 
 	/**
+	 * Enables the printing of unicode based tables instead of ASCII.
+	 * This is hard-coded for now, but this decision might be affected
+	 * later when readline is integrated.  There may be a way to automatically
+	 * determine which table format is best instead of assuming UNICODE.
+	 */
+	private static final boolean UNICODE_TABLES = true;
+
+	/**
 	 * @param timeZone  The time zone to use or {@code null} to use the default time zone
 	 *
 	 * @see  CalendarUtils#formatDate(java.util.Calendar)
@@ -460,6 +468,108 @@ public class SQLUtility {
 	}
 
 	/**
+	 * Prints a single row of interactive output
+	 *
+	 * @param  alignRights Will print all cells centered when this is {@code null} (used for header row)
+	 */
+	private static void printRow(
+		Object[] row,
+		Appendable out,
+		boolean[] alignRights,
+		String[] toStrings,
+		int[] lineCounts,
+		int[] lineValueIndexes,
+		int[] widest
+	) throws IOException {
+		int numCols = lineCounts.length;
+		
+		// Figure out how many lines of output this row will be
+		int maxLineCount = 1;
+		for(int col = 0; col < numCols; col++) {
+			int lineCount = 1;
+			String toString = Objects.toString(row[col], null);
+			if(toString != null) {
+				for(int i = 0, len = toString.length(); i < len; i++) {
+					if(toString.charAt(i) == '\n') lineCount++;
+				}
+			}
+			toStrings[col] = toString;
+			lineCounts[col] = lineCount;
+			lineValueIndexes[col] = 0;
+			if(lineCount > maxLineCount) maxLineCount = lineCount;
+		}
+
+		StringBuilder cell = new StringBuilder();
+		for(int line = 0; line < maxLineCount; line++) {
+			if(UNICODE_TABLES) out.append('│');
+			for(int col = 0; col < numCols; col++) {
+				int width = widest[col];
+				String toString = line < lineCounts[col] ? toStrings[col] : null;
+				int printed;
+				boolean cellNewline = false;
+				if(toString == null) {
+					printed = 0;
+				} else {
+					int toStringLen = toString.length();
+					if(toStringLen == 0) {
+						printed = 0;
+					} else {
+						// Print just this line of the output
+						int pos = lineValueIndexes[col];
+						cell.setLength(0);
+						int cellWidth = 0;
+						while(pos < toStringLen) {
+							int cp = toString.codePointAt(pos);
+							pos = toString.offsetByCodePoints(pos, 1);
+							if(cp == '\r') {
+								// Skip
+							} else if(cp == '\n') {
+								cellNewline = true;
+								break;
+							} else {
+								cell.appendCodePoint(cp);
+								cellWidth++;
+							}
+						}
+						lineValueIndexes[col] = pos;
+						if(cellWidth == 0) {
+							printed = 0;
+						} else {
+							if(alignRights == null) {
+								// Print centered
+								out.append(' ');
+								int before = (width - cellWidth) / 2;
+								for(int d = 0; d < before; d++) out.append(' ');
+								out.append(cell);
+								printed = 1 + before + cellWidth;
+							} else if(alignRights[col]) {
+								// Right align
+								int before = width - cellWidth + 1;
+								for(int e = 0; e < before; e++) out.append(' ');
+								out.append(cell);
+								printed = before + cellWidth;
+							} else {
+								// Left align
+								out.append(' ');
+								out.append(cell);
+								printed = 1 + cellWidth;
+							}
+						}
+					}
+				}
+				if(UNICODE_TABLES || col < (numCols - 1)) {
+					int after = width + 1 - printed;
+					for(int e = 0; e < after; e++) out.append(' ');
+					out.append(UNICODE_TABLES && cellNewline ? '↵' : ' ');
+					out.append(UNICODE_TABLES ? '│' : (line < lineCounts[col + 1]) ? '|' : ' ');
+				}
+			}
+			if(UNICODE_TABLES && numCols == 0) out.append('│');
+			out.append(EOL);
+		}
+	}
+
+	/**
 	 * Prints a table.
 	 *
 	 * @param titles  Optional titles to display
@@ -489,112 +599,54 @@ public class SQLUtility {
 				}
 			}
 
-			// TODO: Switch to unicode table output
+			// Arrays reused for each row
+			String[] toStrings = new String[numCols];
+			int[] lineCounts = new int[numCols];
+			int[] lineValueIndexes = new int[numCols];
 
+			if(UNICODE_TABLES) {
+				// Write top row
+				out.append('┌');
+				for(int c = 0; c < numCols; c++) {
+					if(c > 0) out.append('┬');
+					int width = widest[c];
+					for(int d = -2; d < width; d++) out.append('─');
+				}
+				out.append('┐');
+				out.append(EOL);
+			}
 			// The title is printed centered in its place
 			if(titles != null) {
-				for(int col = 0; col < numCols; col++) {
-					String title = Objects.toString(titles[col], "");
-					int titleLen = title.codePointCount(0, title.length());
-					int width = widest[col];
-					int before = (width - titleLen) / 2;
-					for(int d = 0; d <= before; d++) out.append(' ');
-					out.append(title);
-					if(col < (numCols - 1)) {
-						int after = width - titleLen - before;
-						for(int d = 0; d <= after; d++) out.append(' ');
-						out.append('|');
-					}
-				}
-				out.append(EOL);
+				printRow(titles, out, null, toStrings, lineCounts, lineValueIndexes, widest);
 
 				// Print the spacer lines
+				if(UNICODE_TABLES) out.append('├');
 				for(int c = 0; c < numCols; c++) {
 					int width = widest[c];
-					for(int d = -2; d < width; d++) out.append('-');
-					if(c < (numCols - 1)) out.append('+');
+					for(int d = -2; d < width; d++) out.append(UNICODE_TABLES ? '─' : '-');
+					if(c < (numCols - 1)) out.append(UNICODE_TABLES ? '┼' : '+');
 				}
+				if(UNICODE_TABLES) out.append('┤');
 				out.append(EOL);
 			}
 
 			// Print the values
-			String[] toStrings = new String[numCols];
-			int[] lineCounts = new int[numCols];
-			int[] lineValueIndexes = new int[numCols];
 			int rowCount = 0;
 			for(Object[] row : rows) {
 				if(row.length != numCols) throw new IllegalArgumentException("Wrong number of columns in row: " + row.length + " != " + numCols);
 				rowCount++;
-				// Figure out how many lines of output this row will be
-				int maxLineCount = 1;
-				for(int col = 0; col < numCols; col++) {
-					int lineCount = 1;
-					String toString = Objects.toString(row[col], null);
-					if(toString != null) {
-						for(int i = 0, len = toString.length(); i < len; i++) {
-							if(toString.charAt(i) == '\n') lineCount++;
-						}
-					}
-					toStrings[col] = toString;
-					lineCounts[col] = lineCount;
-					lineValueIndexes[col] = 0;
-					if(lineCount > maxLineCount) maxLineCount = lineCount;
+				printRow(row, out, alignRights, toStrings, lineCounts, lineValueIndexes, widest);
+			}
+			if(UNICODE_TABLES) {
+				// Write bottom row
+				out.append('└');
+				for(int c = 0; c < numCols; c++) {
+					if(c > 0) out.append('┴');
+					int width = widest[c];
+					for(int d = -2; d < width; d++) out.append('─');
 				}
-
-				StringBuilder cell = new StringBuilder();
-				for(int line = 0; line < maxLineCount; line++) {
-					for(int col = 0; col < numCols; col++) {
-						int width = widest[col];
-						String toString = line < lineCounts[col] ? toStrings[col] : null;
-						int printed;
-						if(toString == null) {
-							printed = 0;
-						} else {
-							int toStringLen = toString.length();
-							if(toStringLen == 0) {
-								printed = 0;
-							} else {
-								// Print just this line of the output
-								int pos = lineValueIndexes[col];
-								cell.setLength(0);
-								int cellWidth = 0;
-								while(pos < toStringLen) {
-									int cp = toString.codePointAt(pos);
-									pos = toString.offsetByCodePoints(pos, 1);
-									if(cp == '\r') {
-										// Skip
-									} else if(cp == '\n') {
-										break;
-									} else {
-										cell.appendCodePoint(cp);
-										cellWidth++;
-									}
-								}
-								lineValueIndexes[col] = pos;
-								if(cellWidth == 0) {
-									printed = 0;
-								} else {
-									if(alignRights[col]) {
-										int before = width - cellWidth + 1;
-										for(int e = 0; e < before; e++) out.append(' ');
-										out.append(cell);
-										printed = before + cellWidth;
-									} else {
-										out.append(' ');
-										out.append(cell);
-										printed = 1 + cellWidth;
-									}
-								}
-							}
-						}
-						if(col < (numCols - 1)) {
-							int after = width + 2 - printed;
-							for(int e = 0; e < after; e++) out.append(' ');
-							out.append(line < lineCounts[col + 1] ? '|' : ' ');
-						}
-					}
-					out.append(EOL);
-				}
+				out.append('┘');
+				out.append(EOL);
 			}
 			out.append("(");
 			out.append(Integer.toString(rowCount));
@@ -739,7 +791,6 @@ public class SQLUtility {
 	/**
 	 * Converts a number of seconds and nanoseconds into a given {@link Timestamp}.
 	 */
-	// TODO: Experimental
 	public static <E extends Throwable> void toTimestamp(long seconds, int nanos, Timestamp ts, Class<E> exceptionType) throws E {
 		// Avoid underflow or overflow on conversion to millis
 		String message;
@@ -763,21 +814,12 @@ public class SQLUtility {
 	 * Converts a number of seconds and nanoseconds into a given {@link Timestamp}.
 	 */
 	public static void toTimestamp(long seconds, int nanos, Timestamp ts) {
-		// TODO: Experimental
 		toTimestamp(seconds, nanos, ts, IllegalArgumentException.class);
-		/*
-		// Avoid underflow or overflow on conversion to millis
-		if(seconds > MAX_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS);
-		if(seconds < MIN_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS);
-		ts.setTime(seconds * 1000);
-		ts.setNanos(nanos);
-		 */
 	}
 
 	/**
 	 * Converts a number of seconds and nanoseconds into a new {@link Timestamp}.
 	 */
-	// TODO: Experimental
 	public static <E extends Throwable> Timestamp newTimestamp(long seconds, int nanos, Class<E> exceptionType) throws E {
 		Timestamp ts = new Timestamp(0);
 		toTimestamp(seconds, nanos, ts, exceptionType);
@@ -788,22 +830,12 @@ public class SQLUtility {
 	 * Converts a number of seconds and nanoseconds into a new {@link Timestamp}.
 	 */
 	public static Timestamp newTimestamp(long seconds, int nanos) throws IllegalArgumentException {
-		// TODO: Experimental
 		return newTimestamp(seconds, nanos, IllegalArgumentException.class);
-		/*
-		// Avoid underflow or overflow on conversion to millis
-		if(seconds > MAX_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS);
-		if(seconds < MIN_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS);
-		Timestamp ts = new Timestamp(seconds * 1000);
-		ts.setNanos(nanos);
-		return ts;
-		 */
 	}
 
 	/**
 	 * Converts a number of seconds and nanoseconds into a new {@link UnmodifiableTimestamp}.
 	 */
-	// TODO: Experimental
 	public static <E extends Throwable> UnmodifiableTimestamp newUnmodifiableTimestamp(long seconds, int nanos, Class<E> exceptionType) throws E {
 		// Avoid underflow or overflow on conversion to millis
 		String message;
@@ -825,13 +857,6 @@ public class SQLUtility {
 	 * Converts a number of seconds and nanoseconds into a new {@link UnmodifiableTimestamp}.
 	 */
 	public static UnmodifiableTimestamp newUnmodifiableTimestamp(long seconds, int nanos) throws IllegalArgumentException {
-		// TODO: Experimental
 		return newUnmodifiableTimestamp(seconds, nanos, IllegalArgumentException.class);
-		/*
-		// Avoid underflow or overflow on conversion to millis
-		if(seconds > MAX_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS);
-		if(seconds < MIN_TIMESTAMP_SECONDS) throw new IllegalArgumentException("seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS);
-		return new UnmodifiableTimestamp(seconds * 1000, nanos);
-		 */
 	}
 }
