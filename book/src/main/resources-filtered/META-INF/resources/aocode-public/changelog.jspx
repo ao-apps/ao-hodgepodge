@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-07-28T15:07:49-0500"
+		dateModified="2019-07-28T17:19:37-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -157,12 +157,17 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					</li>
 					<li>New methods to read and write possibly nullable <code>Identifier</code> and <code>SmallIdentifier</code>.</li>
 					<li><code>FileList</code> now implements <code>Closeable</code>.</li>
-					<li>
-						Created a variant of <code>SQLUtility.printTable(…)</code> that accepts <code><![CDATA[Iterable&lt;? extends Object[]&gt;]]></code>
-						for row data.  Deprecated the old variants as they forced the caller to combine all their cell values
-						into big collections or arrays, which are not conducive to displaying large, streaming datasets.
+					<li><code>SQLUtility.printTable(…)</code> improvements:
+						<ol>
+							<li>
+								Created a variant of <code>printTable(…)</code> that accepts <code><![CDATA[Iterable&lt;? extends Object[]&gt;]]></code>
+								for row data.  Deprecated the old variants as they forced the caller to combine all their cell values
+								into big collections or arrays, which is not conducive to displaying large, streamed datasets.
+							</li>
+							<li><code>printTable(…)</code> now uses code points to correctly align output with characters outside the Basic Multilingual Plane.</li>
+							<li>Implemented Unicode-formatted output when in interactive mode.</li>
+						</ol>
 					</li>
-					<li><code>SQLUtility.printTable(…)</code> now uses code points to correctly align values with surrage pairs.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
