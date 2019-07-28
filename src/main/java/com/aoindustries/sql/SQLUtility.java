@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Objects;
@@ -47,6 +48,14 @@ public class SQLUtility {
 	 * This is hard-coded for now, but this decision might be affected
 	 * later when readline is integrated.  There may be a way to automatically
 	 * determine which table format is best instead of assuming UNICODE.
+	 * <p>
+	 * When true, is similar to <code>psql</code> with <code>\pset linestyle unicode</code>
+	 * and <code>\pset border 2</code>
+	 * </p>
+	 * <p>
+	 * When false, is similar to <code>psql</code> with <code>\pset linestyle old-ascii</code>
+	 * and <code>\pset border 1</code>
+	 * </p>
 	 */
 	private static final boolean UNICODE_TABLES = true;
 
@@ -501,7 +510,11 @@ public class SQLUtility {
 
 		StringBuilder cell = new StringBuilder();
 		for(int line = 0; line < maxLineCount; line++) {
-			if(UNICODE_TABLES) out.append('│');
+			if(UNICODE_TABLES) {
+				out.append("│ ");
+			} else {
+				out.append(' ');
+			}
 			for(int col = 0; col < numCols; col++) {
 				int width = widest[col];
 				String toString = line < lineCounts[col] ? toStrings[col] : null;
@@ -537,34 +550,32 @@ public class SQLUtility {
 						} else {
 							if(alignRights == null) {
 								// Print centered
-								out.append(' ');
 								int before = (width - cellWidth) / 2;
 								for(int d = 0; d < before; d++) out.append(' ');
 								out.append(cell);
-								printed = 1 + before + cellWidth;
+								printed = before + cellWidth;
 							} else if(alignRights[col]) {
 								// Right align
-								int before = width - cellWidth + 1;
-								for(int e = 0; e < before; e++) out.append(' ');
+								for(int e = cellWidth; e < width; e++) out.append(' ');
 								out.append(cell);
-								printed = before + cellWidth;
+								printed = width;
 							} else {
 								// Left align
-								out.append(' ');
 								out.append(cell);
-								printed = 1 + cellWidth;
+								printed = cellWidth;
 							}
 						}
 					}
 				}
-				if(UNICODE_TABLES || col < (numCols - 1)) {
-					int after = width + 1 - printed;
-					for(int e = 0; e < after; e++) out.append(' ');
+				boolean hasMoreColumns = col < (numCols - 1);
+				if(UNICODE_TABLES || hasMoreColumns) {
+					for(int e = printed; e < width; e++) out.append(' ');
 					out.append(UNICODE_TABLES && cellNewline ? '↵' : ' ');
 					out.append(UNICODE_TABLES ? '│' : (line < lineCounts[col + 1]) ? '|' : ' ');
+					if(hasMoreColumns) out.append(' ');
 				}
 			}
-			if(UNICODE_TABLES && numCols == 0) out.append('│');
+			if(UNICODE_TABLES && numCols == 0) out.append(" │");
 			out.append(EOL);
 		}
 	}
@@ -579,6 +590,12 @@ public class SQLUtility {
 	 *                Must provide consistent output when iterated twice for interactive mode.
 	 */
 	public static void printTable(Object[] titles, Iterable<? extends Object[]> rows, Appendable out, boolean isInteractive, boolean[] alignRights) throws IOException {
+		// TODO: Test
+		if(Math.random() < 0.5) {
+			titles = new Object[0];
+			rows = Collections.emptyList();
+			alignRights = new boolean[0];
+		}
 		int numCols = alignRights.length;
 		if(titles != null && titles.length != numCols) throw new IllegalArgumentException("Wrong number of titles: " + titles.length + " != " + numCols);
 		if(isInteractive) {
@@ -606,28 +623,40 @@ public class SQLUtility {
 
 			if(UNICODE_TABLES) {
 				// Write top row
-				out.append('┌');
+				out.append("┌─");
 				for(int c = 0; c < numCols; c++) {
-					if(c > 0) out.append('┬');
+					if(c > 0) out.append("─┬─");
 					int width = widest[c];
-					for(int d = -2; d < width; d++) out.append('─');
+					for(int d = 0; d < width; d++) out.append('─');
 				}
-				out.append('┐');
+				out.append("─┐");
 				out.append(EOL);
 			}
 			// The title is printed centered in its place
 			if(titles != null) {
-				printRow(titles, out, null, toStrings, lineCounts, lineValueIndexes, widest);
-
-				// Print the spacer lines
-				if(UNICODE_TABLES) out.append('├');
-				for(int c = 0; c < numCols; c++) {
-					int width = widest[c];
-					for(int d = -2; d < width; d++) out.append(UNICODE_TABLES ? '─' : '-');
-					if(c < (numCols - 1)) out.append(UNICODE_TABLES ? '┼' : '+');
+				if(titles.length > 0) {
+					printRow(titles, out, null, toStrings, lineCounts, lineValueIndexes, widest);
 				}
-				if(UNICODE_TABLES) out.append('┤');
-				out.append(EOL);
+
+				if(UNICODE_TABLES || titles.length > 0) {
+					// Print the spacer line
+					if(UNICODE_TABLES) {
+						out.append("├─");
+					} else {
+						out.append('-');
+					}
+					for(int c = 0; c < numCols; c++) {
+						if(c > 0) out.append(UNICODE_TABLES ? "─┼─" : "-+-");
+						int width = widest[c];
+						for(int d = 0; d < width; d++) out.append(UNICODE_TABLES ? '─' : '-');
+					}
+					if(UNICODE_TABLES) {
+						out.append("─┤");
+					} else {
+						out.append('-');
+					}
+					out.append(EOL);
+				}
 			}
 
 			// Print the values
@@ -639,20 +668,20 @@ public class SQLUtility {
 			}
 			if(UNICODE_TABLES) {
 				// Write bottom row
-				out.append('└');
+				out.append("└─");
 				for(int c = 0; c < numCols; c++) {
-					if(c > 0) out.append('┴');
+					if(c > 0) out.append("─┴─");
 					int width = widest[c];
-					for(int d = -2; d < width; d++) out.append('─');
+					for(int d = 0; d < width; d++) out.append('─');
 				}
-				out.append('┘');
+				out.append("─┘");
 				out.append(EOL);
 			}
 			out.append("(");
-			out.append(Integer.toString(rowCount));
+			out.append(rowCount == 0 ? "No" : Integer.toString(rowCount));
 			out.append(rowCount == 1?" row)":" rows)");
 			out.append(EOL);
-			out.append(EOL);
+			if(UNICODE_TABLES || rowCount > 0) out.append(EOL);
 		} else {
 			// This output simply prints stuff in a way that can be read back in, using single quotes
 
