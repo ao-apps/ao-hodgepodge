@@ -28,6 +28,8 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.Objects;
 import java.util.TimeZone;
 
 /**
@@ -434,160 +436,188 @@ public class SQLUtility {
 
 	private static final String EOL = System.getProperty("line.separator");
 
-	public static void printTable(Object[] titles, Object[] values, Appendable out, boolean isInteractive, boolean[] alignRights) throws IOException {
+	/**
+	 * Gets the width for a string, handling newlines.
+	 */
+	private static int getWidth(String value) {
+		int widest = 0;
+		if(value != null) {
+			int width = 0;
+			for(int i = 0, len = value.length(); i < len; i = value.offsetByCodePoints(i, 1)) {
+				int cp = value.codePointAt(i);
+				if(cp != '\r') {
+					if(cp == '\n') {
+						if(width > widest) widest = width;
+						width = 0;
+					} else {
+						width++;
+					}
+				}
+			}
+			if(width > widest) widest = width;
+		}
+		return widest;
+	}
+
+	/**
+	 * Prints a table.
+	 *
+	 * @param titles  Optional titles to display
+	 *
+	 * @param values  Iterated once in non-interactive mode.
+	 *                Iterated twice in interactive mode (first to find widest columns, then to display output).
+	 *                Must provide consistent output when iterated twice for interactive mode.
+	 */
+	public static void printTable(Object[] titles, Iterable<? extends Object[]> rows, Appendable out, boolean isInteractive, boolean[] alignRights) throws IOException {
+		int numCols = alignRights.length;
+		if(titles != null && titles.length != numCols) throw new IllegalArgumentException("Wrong number of titles: " + titles.length + " != " + numCols);
 		if(isInteractive) {
 			// Find the widest for each column, taking the line wraps into account and skipping the '\r' characters
-			int columns=titles.length;
-			int[] widest=new int[columns];
-			int rows=values.length/columns;
-			for(int c=-1;c<rows;c++) {
-				Object[] row=c==-1?titles:values;
-				int valuePos=c==-1?0:c*columns;
-				for(int d=0;d<columns;d++) {
-					Object r=row[d+valuePos];
-					if(r!=null) {
-						String S=r.toString();
-						int Slen=S.length();
-						int width=0;
-						int pos=0;
-						while(pos<Slen) {
-							char ch=S.charAt(pos++);
-							if(ch!='\r') {
-								if(ch=='\n') {
-									if(width>widest[d]) widest[d]=width;
-									width=0;
-								} else width++;
-							}
-						}
-						if(width>widest[d]) widest[d]=width;
-					}
+			int[] widest = new int[numCols];
+			// Titles first
+			if(titles != null) {
+				for(int col = 0; col < numCols; col++) {
+					widest[col] = getWidth(Objects.toString(titles[col], null));
 				}
 			}
+			// Then rows
+			for(Object[] row : rows) {
+				if(row.length != numCols) throw new IllegalArgumentException("Wrong number of columns in row: " + row.length + " != " + numCols);
+				for(int col = 0; col < numCols; col++) {
+					int width = getWidth(Objects.toString(row[col], null));
+					if(width > widest[col]) widest[col] = width;
+				}
+			}
+
+			// TODO: Switch to unicode table output
 
 			// The title is printed centered in its place
-			for(int c=0;c<columns;c++) {
-				String title=titles[c].toString();
-				int titleLen=title.length();
-				int width=widest[c];
-				int before=(width-titleLen)/2;
-				for(int d=0;d<=before;d++) out.append(' ');
-				out.append(title);
-				if(c<(columns-1)) {
-					int after=width-titleLen-before;
-					for(int d=0;d<=after;d++) out.append(' ');
-					out.append('|');
+			if(titles != null) {
+				for(int col = 0; col < numCols; col++) {
+					String title = Objects.toString(titles[col], "");
+					int titleLen = title.codePointCount(0, title.length());
+					int width = widest[col];
+					int before = (width - titleLen) / 2;
+					for(int d = 0; d <= before; d++) out.append(' ');
+					out.append(title);
+					if(col < (numCols - 1)) {
+						int after = width - titleLen - before;
+						for(int d = 0; d <= after; d++) out.append(' ');
+						out.append('|');
+					}
 				}
-			}
-			out.append(EOL);
+				out.append(EOL);
 
-			// Print the spacer lines
-			for(int c=0;c<columns;c++) {
-				int width=widest[c];
-				for(int d=-2;d<width;d++) out.append('-');
-				if(c<(columns-1)) out.append('+');
+				// Print the spacer lines
+				for(int c = 0; c < numCols; c++) {
+					int width = widest[c];
+					for(int d = -2; d < width; d++) out.append('-');
+					if(c < (numCols - 1)) out.append('+');
+				}
+				out.append(EOL);
 			}
-			out.append(EOL);
 
 			// Print the values
-			int[] lineCounts=new int[columns];
-			int[] lineValueIndexes=new int[columns];
-			int valuePos=0;
-			for(int c=0;c<rows;c++) {
+			String[] toStrings = new String[numCols];
+			int[] lineCounts = new int[numCols];
+			int[] lineValueIndexes = new int[numCols];
+			int rowCount = 0;
+			for(Object[] row : rows) {
+				if(row.length != numCols) throw new IllegalArgumentException("Wrong number of columns in row: " + row.length + " != " + numCols);
+				rowCount++;
 				// Figure out how many lines of output this row will be
-				int maxLineCount=1;
-				for(int d=0;d<columns;d++) {
-					int lineCount=1;
-					Object value=values[valuePos+d];
-					if(value!=null) {
-						String val=value.toString();
-						int valLen=val.length();
-						for(int e=0;e<valLen;e++) if(val.charAt(e)=='\n') lineCount++;
+				int maxLineCount = 1;
+				for(int col = 0; col < numCols; col++) {
+					int lineCount = 1;
+					String toString = Objects.toString(row[col], null);
+					if(toString != null) {
+						for(int i = 0, len = toString.length(); i < len; i++) {
+							if(toString.charAt(i) == '\n') lineCount++;
+						}
 					}
-					lineCounts[d]=lineCount;
-					lineValueIndexes[d]=0;
-					if(lineCount>maxLineCount) maxLineCount=lineCount;
+					toStrings[col] = toString;
+					lineCounts[col] = lineCount;
+					lineValueIndexes[col] = 0;
+					if(lineCount > maxLineCount) maxLineCount = lineCount;
 				}
 
-				for(int line=0;line<maxLineCount;line++) {
-					for(int d=0;d<columns;d++) {
-						int width=widest[d];
-						Object value=line<lineCounts[d]?values[valuePos+d]:null;
+				StringBuilder cell = new StringBuilder();
+				for(int line = 0; line < maxLineCount; line++) {
+					for(int col = 0; col < numCols; col++) {
+						int width = widest[col];
+						String toString = line < lineCounts[col] ? toStrings[col] : null;
 						int printed;
-						if(value==null) printed=0;
-						else {
-							boolean rightAlign=alignRights[d];
-							String val=value.toString();
-							int valLen=val.length();
-							if(valLen==0) printed=0;
-							else {
-								// Find just this line of the output
-								int startPos=lineValueIndexes[d];
-								boolean trimmed=false;
-								int pos=startPos;
-								while(pos<valLen) {
-									char ch=val.charAt(pos++);
-									if(ch=='\n') {
-										val=val.substring(startPos, pos-1);
-										valLen=val.length();
-										trimmed=true;
+						if(toString == null) {
+							printed = 0;
+						} else {
+							int toStringLen = toString.length();
+							if(toStringLen == 0) {
+								printed = 0;
+							} else {
+								// Print just this line of the output
+								int pos = lineValueIndexes[col];
+								cell.setLength(0);
+								int cellWidth = 0;
+								while(pos < toStringLen) {
+									int cp = toString.codePointAt(pos);
+									pos = toString.offsetByCodePoints(pos, 1);
+									if(cp == '\r') {
+										// Skip
+									} else if(cp == '\n') {
 										break;
+									} else {
+										cell.appendCodePoint(cp);
+										cellWidth++;
 									}
 								}
-								if(!trimmed) {
-									val=val.substring(startPos);
-									valLen=val.length();
-								}
-								lineValueIndexes[d]=pos;
-								if(valLen==0) printed=0;
-								else {
-									if(rightAlign) {
-										int before=width-valLen+1;
-										for(int e=0;e<before;e++) out.append(' ');
-										out.append(val);
-										printed=before+valLen;
+								lineValueIndexes[col] = pos;
+								if(cellWidth == 0) {
+									printed = 0;
+								} else {
+									if(alignRights[col]) {
+										int before = width - cellWidth + 1;
+										for(int e = 0; e < before; e++) out.append(' ');
+										out.append(cell);
+										printed = before + cellWidth;
 									} else {
 										out.append(' ');
-										out.append(val);
-										printed=valLen+1;
+										out.append(cell);
+										printed = 1 + cellWidth;
 									}
 								}
 							}
 						}
-						if(d<(columns-1)) {
-							int after=width+2-printed;
-							for(int e=0;e<after;e++) out.append(' ');
-							out.append(line<lineCounts[d+1]?'|':' ');
+						if(col < (numCols - 1)) {
+							int after = width + 2 - printed;
+							for(int e = 0; e < after; e++) out.append(' ');
+							out.append(line < lineCounts[col + 1] ? '|' : ' ');
 						}
 					}
 					out.append(EOL);
 				}
-				valuePos+=columns;
 			}
 			out.append("(");
-			out.append(Integer.toString(rows));
-			out.append(rows==1?" row)":" rows)");
+			out.append(Integer.toString(rowCount));
+			out.append(rowCount == 1?" row)":" rows)");
 			out.append(EOL);
 			out.append(EOL);
 		} else {
 			// This output simply prints stuff in a way that can be read back in, using single quotes
-			// Find the widest for each column
-			int columns=titles.length;
-			int rows=values.length/columns;
 
 			// Print the values
-			int valuePos=0;
-			for(int c=0;c<rows;c++) {
-				for(int d=0;d<columns;d++) {
-					Object value=values[valuePos++];
-					String S=value==null?"":value.toString();
-					int vlen=S.length();
+			for(Object[] row : rows) {
+				if(row.length != numCols) throw new IllegalArgumentException("Wrong number of columns in row: " + row.length + " != " + numCols);
+				for(int col = 0; col < numCols; col++) {
+					Object value = row[col];
+					String toString = Objects.toString(value, "");
+					int len = toString.length();
 
-					boolean needsQuotes=vlen==0;
+					boolean needsQuotes = len == 0; // Always quote the empty string
 					if(!needsQuotes) {
-						for(int e=0;e<vlen;e++) {
-							char ch=S.charAt(e);
-							if(ch<=' ' || ch=='\\' || ch=='\'' || ch=='"') {
-								needsQuotes=true;
+						for(int e = 0; e < len; e++) {
+							char ch = toString.charAt(e);
+							if(ch <= ' ' || ch == '\\' || ch == '\'' || ch == '"') {
+								needsQuotes = true;
 								break;
 							}
 						}
@@ -595,25 +625,105 @@ public class SQLUtility {
 
 					if(needsQuotes) {
 						out.append('\'');
-						for(int e=0;e<vlen;e++) {
-							char ch=S.charAt(e);
-							if(ch=='\'') out.append('\\');
+						for(int e = 0; e < len; e++) {
+							char ch = toString.charAt(e);
+							if(ch == '\'') out.append('\\');
 							out.append(ch);
 						}
 						out.append('\'');
-					} else out.append(S);
-					if(d<(columns-1)) out.append(' ');
+					} else {
+						out.append(toString);
+					}
+					if(col < (numCols - 1)) out.append(' ');
 				}
 				out.append(EOL);
 			}
 		}
 	}
 
-	public static void printTable(Object[] titles, Collection<Object> values, Appendable out, boolean isInteractive, boolean[] alignRights) throws IOException {
-		int size=values.size();
-		Object[] oa=new Object[size];
-		values.toArray(oa);
-		printTable(titles, oa, out, isInteractive, alignRights);
+	/**
+	 * @param values  One element for each row and column
+	 *
+	 * @deprecated  Please use {@link #printTable(java.lang.Object[], java.lang.Iterable, java.lang.Appendable, boolean, boolean[])}
+	 *              when possible, as it may provide for more efficiency on large datasets.
+	 */
+	@Deprecated
+	public static void printTable(Object[] titles, final Collection<Object> values, Appendable out, boolean isInteractive, final boolean[] alignRights) throws IOException {
+		final int numCols = alignRights.length;
+		printTable(
+			titles,
+			new Iterable<Object[]>() {
+				@Override
+				public Iterator<Object[]> iterator() {
+					return new Iterator<Object[]>() {
+						Iterator<Object> valuesIter = values.iterator();
+
+						@Override
+						public boolean hasNext() {
+							return valuesIter.hasNext();
+						}
+
+						@Override
+						public Object[] next() {
+							Object[] row = new Object[numCols];
+							for(int i = 0; i < numCols; i++) row[i] = valuesIter.next();
+							return row;
+						}
+
+						@Override
+						public void remove() {
+							throw new UnsupportedOperationException();
+						}
+					};
+				}
+			},
+			out,
+			isInteractive,
+			alignRights
+		);
+	}
+
+	/**
+	 * @param values  One element for each row and column
+	 *
+	 * @deprecated  Please use {@link #printTable(java.lang.Object[], java.lang.Iterable, java.lang.Appendable, boolean, boolean[])}
+	 *              when possible, as it may provide for more efficiency on large datasets.
+	 */
+	@Deprecated
+	public static void printTable(Object[] titles, final Object[] values, Appendable out, boolean isInteractive, boolean[] alignRights) throws IOException {
+		final int numCols = alignRights.length;
+		printTable(
+			titles,
+			new Iterable<Object[]>() {
+				@Override
+				public Iterator<Object[]> iterator() {
+					return new Iterator<Object[]>() {
+						int index = 0;
+
+						@Override
+						public boolean hasNext() {
+							return index < values.length;
+						}
+
+						@Override
+						public Object[] next() {
+							Object[] row = new Object[numCols];
+							System.arraycopy(values, index, row, 0, numCols);
+							index += numCols;
+							return row;
+						}
+
+						@Override
+						public void remove() {
+							throw new UnsupportedOperationException();
+						}
+					};
+				}
+			},
+			out,
+			isInteractive,
+			alignRights
+		);
 	}
 
 	/**
