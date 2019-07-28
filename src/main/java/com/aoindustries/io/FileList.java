@@ -24,6 +24,7 @@ package com.aoindustries.io;
 
 import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.util.WrappedException;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -39,7 +40,7 @@ import java.util.RandomAccess;
  *
  * @author  AO Industries, Inc.
  */
-public class FileList<T extends FileListObject> extends AbstractList<T> implements RandomAccess {
+public class FileList<T extends FileListObject> extends AbstractList<T> implements RandomAccess, Closeable {
 
 	final private String filenamePrefix;
 	final private String filenameExtension;
@@ -284,6 +285,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 		}
 	}
 
+	@Override
 	public void close() throws IOException {
 		frf.close();
 		tempFileContext.close();

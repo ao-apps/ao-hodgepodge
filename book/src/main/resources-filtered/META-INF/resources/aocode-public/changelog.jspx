@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-07-27T03:26:54-0500"
+		dateModified="2019-07-28T13:15:49-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -156,6 +156,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						reading objects streamed by older clients.  Protocol compatibility can be necessary both directions.
 					</li>
 					<li>New methods to read and write possibly nullable <code>Identifier</code> and <code>SmallIdentifier</code>.</li>
+					<li><code>FileList</code> now implements <code>Closeable</code>.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
