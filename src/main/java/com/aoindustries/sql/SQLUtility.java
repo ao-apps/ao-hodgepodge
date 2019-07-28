@@ -590,12 +590,6 @@ public class SQLUtility {
 	 *                Must provide consistent output when iterated twice for interactive mode.
 	 */
 	public static void printTable(Object[] titles, Iterable<? extends Object[]> rows, Appendable out, boolean isInteractive, boolean[] alignRights) throws IOException {
-		// TODO: Test
-		if(Math.random() < 0.5) {
-			titles = new Object[0];
-			rows = Collections.emptyList();
-			alignRights = new boolean[0];
-		}
 		int numCols = alignRights.length;
 		if(titles != null && titles.length != numCols) throw new IllegalArgumentException("Wrong number of titles: " + titles.length + " != " + numCols);
 		if(isInteractive) {
