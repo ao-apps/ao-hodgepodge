@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-07-28T17:19:37-0500"
+		dateModified="2019-07-29T01:25:48-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -167,6 +167,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li><code>printTable(…)</code> now uses code points to correctly align output with characters outside the Basic Multilingual Plane.</li>
 							<li>Implemented Unicode-formatted output when in interactive mode.</li>
 						</ol>
+					</li>
+					<li>
+						New method <code>FifoFile.flush()</code> that may be used to flush the fifo file.
+						This makes sense here because reads also update the underlying fifo persistence.
 					</li>
 				</ul>
 			</changelog:release>
