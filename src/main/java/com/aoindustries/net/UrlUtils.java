@@ -193,15 +193,88 @@ public class UrlUtils {
 	}
 
 	/**
+	 * Percent-encodes special characters only.
+	 */
+	private static void encodeRfc3968ReservedCharactersOnly(String value, String encoding, StringBuilder SB) {
+		int len = value.length();
+		for(int i = 0; i < len; i++) {
+			char ch = value.charAt(i);
+			switch(ch) {
+				// gen-delims
+				case ':' :
+					SB.append("%3A");
+					break;
+				case '/' :
+					SB.append("%2F");
+					break;
+				case '?' :
+					SB.append("%3F");
+					break;
+				case '#' :
+					SB.append("%23");
+					break;
+				case '[' :
+					SB.append("%5B");
+					break;
+				case ']' :
+					SB.append("%5D");
+					break;
+				case '@' :
+					SB.append("%40");
+					break;
+				// sub-delims
+				case '!' :
+					SB.append("%21");
+					break;
+				case '$' :
+					SB.append("%24");
+					break;
+				case '&' :
+					SB.append("%26");
+					break;
+				case '\'' :
+					SB.append("%27");
+					break;
+				case '(' :
+					SB.append("%28");
+					break;
+				case ')' :
+					SB.append("%29");
+					break;
+				case '*' :
+					SB.append("%2A");
+					break;
+				case '+' :
+					SB.append("%20");
+					break;
+				case ',' :
+					SB.append("%2C");
+					break;
+				case ';' :
+					SB.append("%3B");
+					break;
+				case '=' :
+					SB.append("%3D");
+					break;
+				// percent-encoded itself
+				case '%' :
+					SB.append("%25");
+					break;
+				default :
+					SB.append(ch);
+			}
+		}
+	}
+
+	/**
 	 * Decodes the URL up to the first ?, if present.
 	 * Does not decode any characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * <p>
+	 * Characters that are percent-decoded into a reserve character are left percent-encoded to avoid ambiguity.
+	 * </p>
 	 *
 	 * @see  #encodeUrlPath(java.lang.String, java.lang.String)
-	 *
-	 * @deprecated  This method is deprecated, as decoding to a String in this simple fashion can result in ambiguous URL meanings, such
-	 *              as a path element of an encoded slash (%2F) becoming a slash (/), which changes its meaning when interpreted and/or re-encoded.
 	 */
-	@Deprecated
 	public static String decodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
 		int len = href.length();
 		int pos = 0;
@@ -209,10 +282,10 @@ public class UrlUtils {
 		while(pos < len) {
 			int nextPos = StringUtility.indexOf(href, rfc3986ReservedCharacters, pos);
 			if(nextPos == -1) {
-				SB.append(URLDecoder.decode(href.substring(pos, len), encoding));
+				encodeRfc3968ReservedCharactersOnly(URLDecoder.decode(href.substring(pos, len), encoding), encoding, SB);
 				pos = len;
 			} else {
-				SB.append(URLDecoder.decode(href.substring(pos, nextPos), encoding));
+				encodeRfc3968ReservedCharactersOnly(URLDecoder.decode(href.substring(pos, nextPos), encoding), encoding, SB);
 				char nextChar = href.charAt(nextPos);
 				if(nextChar == '?') {
 					// End decoding
