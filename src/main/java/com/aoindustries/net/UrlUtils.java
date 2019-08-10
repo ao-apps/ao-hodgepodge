@@ -245,7 +245,7 @@ public class UrlUtils {
 					SB.append("%2A");
 					break;
 				case '+' :
-					SB.append("%20");
+					SB.append("%2B");
 					break;
 				case ',' :
 					SB.append("%2C");
