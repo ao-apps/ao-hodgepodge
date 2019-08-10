@@ -38,7 +38,6 @@ import javax.servlet.jsp.PageContext;
 
 /**
  * Encoding helper utilities.
- * TODO: Rename to EncodingUtils once com.aoindustries.util.EncodingUtils has been eliminated.
  *
  * @author  AO Industries, Inc.
  */
@@ -47,75 +46,150 @@ public class UrlUtils {
 	private UrlUtils() {
 	}
 
-	private static final char[] noEncodeCharacters = {
-		'?', ':', '/', ';', '#', '+'
+	/**
+	 * Checks if a URL starts with the given scheme.
+	 *
+	 * @param scheme  The scheme to look for, not including colon.
+	 *                For example {@code "http"}.
+	 */
+	public static boolean isScheme(String href, String scheme) {
+		int len = scheme.length();
+		if((len + 1) > href.length()) return false;
+		for(int i = 0; i < len; i++) {
+			char ch1 = href.charAt(i);
+			char ch2 = href.charAt(i);
+			// Convert to lower-case, ASCII-only
+			if(ch1 >= 'A' && ch1 <= 'Z') ch1 += 'a' - 'A';
+			if(ch2 >= 'A' && ch2 <= 'Z') ch2 += 'a' - 'A';
+			if(ch1 != ch2) return false;
+		}
+		// Must be followed by a colon
+		return href.charAt(len) == ':';
+	}
+
+	/**
+	 * Gets the scheme for a URL, or {@code null} when no scheme found.
+	 * The scheme must start the URL, and contain only (A-Z, a-z) before the first colon (:)
+	 * found.  The scheme is normalized to lower-case.  An empty scheme will not be returned.
+	 *
+	 * @return  The scheme, not including colon, or {@code null} when not found.
+	 *          For example {@code "http"}.
+	 */
+	public static final String getScheme(String href) {
+		int len = href.length();
+		// Find the colon, returning null if any non-A-Z,a-z is found on the way
+		int colonPos = -1;
+		for(int i = 0; i < len; i++) {
+			char ch = href.charAt(i);
+			if(ch == ':') {
+				colonPos = i;
+				break;
+			} else if(
+				(ch < 'a' || ch > 'z')
+				&& (ch < 'A' || ch > 'Z')
+			) {
+				return null;
+			}
+		}
+		// Empty scheme
+		if(colonPos == 0) return null;
+		// Normalize to lower-case
+		char[] scheme = new char[colonPos];
+		for(int i = 0; i < colonPos; i++) {
+			char ch = href.charAt(i);
+			// Convert to lower-case, ASCII-only
+			if(ch >= 'A' && ch <= 'Z') {
+				ch += 'a' - 'A';
+			} else {
+				assert ch >= 'a' && ch <= 'z';
+			}
+			scheme[i] = ch;
+		}
+		return String.valueOf(scheme);
+	}
+
+	/**
+	 * The characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 *
+	 * @deprecated  Only used by {@link #decodeUrlPath(java.lang.String, java.lang.String)}
+	 */
+	@Deprecated
+	private static final char[] rfc3986ReservedCharacters = {
+		// gen-delims
+		':', '/', '?', '#', '[', ']', '@',
+		// sub-delims
+		'!', '$', '&', '\'', '(',  ')',
+		'*', '+', ',', ';', '='
 	};
 
 	/**
-	 * Encodes the URL up to trailing '?' or '#' (the first found of the two).
-	 * To avoid ambiguity, parameters and anchors must have been correctly encoded by the caller.
-	 * Does not encode any characters in the set { '?', ':', '/', ';', '#', '+' }.
-	 *
-	 * Encodes tel: (case-sensitive) urls by relacing spaces with hyphens.
+	 * The characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * along with a percent (%)
+	 */
+	private static final char[] rfc3986ReservedCharacters_and_percent;
+	static {
+		rfc3986ReservedCharacters_and_percent = new char[rfc3986ReservedCharacters.length + 1];
+		System.arraycopy(rfc3986ReservedCharacters, 0, rfc3986ReservedCharacters_and_percent, 0, rfc3986ReservedCharacters.length);
+		// percent-encoded itself
+		rfc3986ReservedCharacters_and_percent[rfc3986ReservedCharacters.length] = '%';
+	};
+
+	/**
+	 * Encodes the characters in the URL,
+	 * not including any characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * <p>
+	 * Additionally, for <code>tel:</code> (case-insensitive) urls, replaces spaces (and non-breaking spaces) with hyphens.
+	 * </p>
 	 *
 	 * @see  #decodeUrlPath(java.lang.String, java.lang.String)
 	 */
 	public static String encodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
-		if(href.startsWith("tel:")) return href.replace(' ', '-');
+		if(isScheme(href, "tel")) {
+			href = href.replace(' ', '-');
+			href = href.replace('\u00A0', '-'); // non-breaking space
+		}
 		int len = href.length();
 		int pos = 0;
-		int stopAt;
-		{
-			int anchorAt = href.lastIndexOf('#');
-			int paramsAt = href.lastIndexOf('?', (anchorAt==-1 ? len : anchorAt) - 1);
-			if(paramsAt == -1) {
-				stopAt = anchorAt == -1 ? len : anchorAt;
-			} else {
-				stopAt = paramsAt;
-			}
-		}
-		StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
-		while(pos < stopAt) {
-			int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
+		StringBuilder SB = new StringBuilder(href.length() + 16);
+		while(pos < len) {
+			int nextPos = StringUtility.indexOf(href, rfc3986ReservedCharacters_and_percent, pos);
 			if(nextPos == -1) {
-				SB.append(URLEncoder.encode(href.substring(pos, stopAt), encoding));
+				SB.append(URLEncoder.encode(href.substring(pos, len), encoding));
 				pos = len;
 			} else {
-				if(nextPos > stopAt) nextPos = stopAt;
-				SB.append(URLEncoder.encode(href.substring(pos, nextPos), encoding));
-				if(nextPos < stopAt) {
-					char nextChar = href.charAt(nextPos++);
-					SB.append(nextChar);
+				if(nextPos != pos) SB.append(URLEncoder.encode(href.substring(pos, nextPos), encoding));
+				if(nextPos < len) {
+					SB.append(href.charAt(nextPos++));
 				}
 				pos = nextPos;
 			}
 		}
-		SB.append(href, stopAt, len);
 		return SB.toString();
 	}
 
 	/**
-	 * Decodes the URL up to the first ?, if present.  Does not decode
-	 * any characters in the set { '?', ':', '/', ';', '#', '+' }.
+	 * Decodes the URL up to the first ?, if present.
+	 * Does not decode any characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
 	 *
-	 * Does not decode tel: urls (case-sensitive).
-	 * 
 	 * @see  #encodeUrlPath(java.lang.String, java.lang.String)
+	 *
+	 * @deprecated  This method is deprecated, as decoding to a String in this simple fashion can result in ambiguous URL meanings, such
+	 *              as a path element of an encoded slash (%2F) becoming a slash (/), which changes its meaning when interpreted and/or re-encoded.
 	 */
+	@Deprecated
 	public static String decodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
-		if(href.startsWith("tel:")) return href;
 		int len = href.length();
 		int pos = 0;
-		StringBuilder SB = new StringBuilder(href.length()*2); // Leave a little room for encoding
-		while(pos<len) {
-			int nextPos = StringUtility.indexOf(href, noEncodeCharacters, pos);
-			if(nextPos==-1) {
+		StringBuilder SB = new StringBuilder(href.length());
+		while(pos < len) {
+			int nextPos = StringUtility.indexOf(href, rfc3986ReservedCharacters, pos);
+			if(nextPos == -1) {
 				SB.append(URLDecoder.decode(href.substring(pos, len), encoding));
 				pos = len;
 			} else {
 				SB.append(URLDecoder.decode(href.substring(pos, nextPos), encoding));
 				char nextChar = href.charAt(nextPos);
-				if(nextChar=='?') {
+				if(nextChar == '?') {
 					// End decoding
 					SB.append(href, nextPos, len);
 					pos = len;
@@ -136,7 +210,7 @@ public class UrlUtils {
 	 *   <li>Adding any additional parameters</li>
 	 *   <li>Optionally adding lastModified parameter</li>
 	 *   <li>Converting any context-relative path to a site-relative path by prefixing contextPath</li>
-	 *   <li>Encoding any non-ASCII characters in the URL path</li>
+	 *   <li>Encoding any URL path characters not defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a></li>
 	 *   <li>Rewrite with response.encodeURL</li>
 	 * </ol>
 	 */
