@@ -193,9 +193,9 @@ public class UrlUtils {
 	}
 
 	/**
-	 * Percent-encodes special characters only.
+	 * Percent-encodes reserved characters (or percent) only.
 	 */
-	private static void encodeRfc3968ReservedCharactersOnly(String value, String encoding, StringBuilder SB) {
+	private static void encodeRfc3968ReservedCharacters_or_percent(String value, String encoding, StringBuilder SB) {
 		int len = value.length();
 		for(int i = 0; i < len; i++) {
 			char ch = value.charAt(i);
@@ -284,12 +284,12 @@ public class UrlUtils {
 			if(nextPos == -1) {
 				// TODO: A specialized form of decode that skips decoding to reserved characters would be better than decode/re-encode.
 				//       This implementation is less precise, such as converting lower-case percent-encoded to upper-case.
-				encodeRfc3968ReservedCharactersOnly(URLDecoder.decode(href.substring(pos, len), encoding), encoding, SB);
+				encodeRfc3968ReservedCharacters_or_percent(URLDecoder.decode(href.substring(pos, len), encoding), encoding, SB);
 				pos = len;
 			} else {
 				// TODO: A specialized form of decode that skips decoding to reserved characters would be better than decode/re-encode.
 				//       This implementation is less precise, such as converting lower-case percent-encoded to upper-case.
-				encodeRfc3968ReservedCharactersOnly(URLDecoder.decode(href.substring(pos, nextPos), encoding), encoding, SB);
+				encodeRfc3968ReservedCharacters_or_percent(URLDecoder.decode(href.substring(pos, nextPos), encoding), encoding, SB);
 				char nextChar = href.charAt(nextPos);
 				if(nextChar == '?') {
 					// End decoding
