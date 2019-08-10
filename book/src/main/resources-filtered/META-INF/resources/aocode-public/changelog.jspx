@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-08-10T13:14:53-0500"
+		dateModified="2019-08-10T14:22:49-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -187,9 +187,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<li><code>UrlUtils.encodeUrlPath(String, String)</code> now correctly encodes space as <code>%20</code> instead of <code>+</code>.</li>
 					<li><code>UrlUtils.encodeUrlPath(String, String)</code> now determines query string or anchor by first ? or #, accordingly, instead of last.</li>
 					<li>
-						<code>UrlUtils.decodeUrlPath(String, String)</code> is now deprecated.
-						Decoding to a String in this simple fashion can result in ambiguous URL meanings, such
-						as a path element of an encoded slash (%2F) becoming a slash (/), which changes its meaning when interpreted and/or re-encoded.
+						<code>UrlUtils.decodeUrlPath(String, String)</code> now re-encodes characters that decode to reserved characters
+						to avoid ambiguity.
 					</li>
 					<li>
 						Case-insensitive matching of URL schemes.  Previously, URL schemes were matched case-sensitive,
