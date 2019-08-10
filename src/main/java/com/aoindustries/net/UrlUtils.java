@@ -282,9 +282,13 @@ public class UrlUtils {
 		while(pos < len) {
 			int nextPos = StringUtility.indexOf(href, rfc3986ReservedCharacters, pos);
 			if(nextPos == -1) {
+				// TODO: A specialized form of decode that skips decoding to reserved characters would be better than decode/re-encode.
+				//       This implementation is less precise, such as converting lower-case percent-encoded to upper-case.
 				encodeRfc3968ReservedCharactersOnly(URLDecoder.decode(href.substring(pos, len), encoding), encoding, SB);
 				pos = len;
 			} else {
+				// TODO: A specialized form of decode that skips decoding to reserved characters would be better than decode/re-encode.
+				//       This implementation is less precise, such as converting lower-case percent-encoded to upper-case.
 				encodeRfc3968ReservedCharactersOnly(URLDecoder.decode(href.substring(pos, nextPos), encoding), encoding, SB);
 				char nextChar = href.charAt(nextPos);
 				if(nextChar == '?') {
