@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-07-29T01:25:48-0500"
+		dateModified="2019-08-10T05:26:43-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -171,6 +171,35 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<li>
 						New method <code>FifoFile.flush()</code> that may be used to flush the fifo file.
 						This makes sense here because reads also update the underlying fifo persistence.
+					</li>
+					<li>
+						<p>
+							<code>UrlUtils.encodeUrlPath(String, String)</code> now skips encoding the full set of
+							the characters defined in <ao:a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</ao:a>.
+							Previously, only a partial subset of these characters were added as-needed.  We have now
+							improved the implementation to match the specification.
+						</p>
+						<p>
+							This method also encodes the entire URL, not stopping at '?' or '#'.  Since the
+							entire set of reserved characters is skipped, this should not be in conflict with
+							any already-encoded parameters or anchors, but also allows the conversion from
+							Unicode to URL-encoded with the parameters and anchor, too, as long as the
+							values do not conflict with any reserved characters.
+						</p>
+						<p>
+							This means "mailto:" links will now maintain the "@" in the email address, instead of it being
+							incorrectly percent-encoded.
+						</p>
+					</li>
+					<li>
+						<code>UrlUtils.decodeUrlPath(String, String)</code> is now deprecated.
+						Decoding to a String in this simple fashion can result in ambiguous URL meanings, such
+						as a path element of an encoded slash (%2F) becoming a slash (/), which changes its meaning when interpreted and/or re-encoded.
+					</li>
+					<li>
+						Case-insensitive matching of URL schemes.  Previously, URL schemes were matched case-sensitive,
+						while the spec is case-insensitive.  This has been OK given we only use lower-case schemes within our
+						code and tools, but this is now a correct implementation.
 					</li>
 				</ul>
 			</changelog:release>
