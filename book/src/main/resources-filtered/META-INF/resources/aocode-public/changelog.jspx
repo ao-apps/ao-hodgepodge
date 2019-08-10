@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-08-10T05:26:43-0500"
+		dateModified="2019-08-10T13:14:53-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -180,17 +180,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							improved the implementation to match the specification.
 						</p>
 						<p>
-							This method also encodes the entire URL, not stopping at '?' or '#'.  Since the
-							entire set of reserved characters is skipped, this should not be in conflict with
-							any already-encoded parameters or anchors, but also allows the conversion from
-							Unicode to URL-encoded with the parameters and anchor, too, as long as the
-							values do not conflict with any reserved characters.
-						</p>
-						<p>
 							This means "mailto:" links will now maintain the "@" in the email address, instead of it being
 							incorrectly percent-encoded.
 						</p>
 					</li>
+					<li><code>UrlUtils.encodeUrlPath(String, String)</code> now correctly encodes space as <code>%20</code> instead of <code>+</code>.</li>
+					<li><code>UrlUtils.encodeUrlPath(String, String)</code> now determines query string or anchor by first ? or #, accordingly, instead of last.</li>
 					<li>
 						<code>UrlUtils.decodeUrlPath(String, String)</code> is now deprecated.
 						Decoding to a String in this simple fashion can result in ambiguous URL meanings, such

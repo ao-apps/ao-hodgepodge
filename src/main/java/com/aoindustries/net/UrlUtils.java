@@ -26,6 +26,7 @@ import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.LastModifiedServlet;
 import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.util.StringUtility;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
@@ -135,8 +136,10 @@ public class UrlUtils {
 	};
 
 	/**
-	 * Encodes the characters in the URL,
+	 * Encodes the characters in the URL up to trailing '?' or '#' (the first found of the two),
 	 * not including any characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * To avoid ambiguity, parameters and anchors must have been correctly encoded by the caller.
+	 * </p>
 	 * <p>
 	 * Additionally, for <code>tel:</code> (case-insensitive) urls, replaces spaces (and non-breaking spaces) with hyphens.
 	 * </p>
@@ -150,21 +153,43 @@ public class UrlUtils {
 		}
 		int len = href.length();
 		int pos = 0;
-		StringBuilder SB = new StringBuilder(href.length() + 16);
-		while(pos < len) {
-			int nextPos = StringUtility.indexOf(href, rfc3986ReservedCharacters_and_percent, pos);
-			if(nextPos == -1) {
-				SB.append(URLEncoder.encode(href.substring(pos, len), encoding));
-				pos = len;
+		int stopAt;
+		{
+			int paramsAt = href.indexOf('?');
+			if(paramsAt != -1) {
+				stopAt = paramsAt;
 			} else {
-				if(nextPos != pos) SB.append(URLEncoder.encode(href.substring(pos, nextPos), encoding));
-				if(nextPos < len) {
-					SB.append(href.charAt(nextPos++));
+				int anchorAt = href.indexOf('#');
+				if(anchorAt != -1) {
+					stopAt = anchorAt;
+				} else {
+					stopAt = len;
 				}
-				pos = nextPos;
 			}
 		}
-		return SB.toString();
+		try {
+			StringBuilder SB = new StringBuilder(href.length() + 16);
+			while(pos < stopAt) {
+				int nextPos = StringUtility.indexOf(href, rfc3986ReservedCharacters_and_percent, pos);
+				if(nextPos == -1) {
+					StringUtility.replace(URLEncoder.encode(href.substring(pos, stopAt), encoding), "+", "%20", SB);
+					pos = len;
+				} else {
+					if(nextPos > stopAt) nextPos = stopAt;
+					if(nextPos != pos) {
+						StringUtility.replace(URLEncoder.encode(href.substring(pos, nextPos), encoding), "+", "%20", SB);
+					}
+					if(nextPos < stopAt) {
+						SB.append(href.charAt(nextPos++));
+					}
+					pos = nextPos;
+				}
+			}
+			SB.append(href, stopAt, len);
+			return SB.toString();
+		} catch(IOException e) {
+			throw new AssertionError("IOException should not occur on StringBuilder", e);
+		}
 	}
 
 	/**
