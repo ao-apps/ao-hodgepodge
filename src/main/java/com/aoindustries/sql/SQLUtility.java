@@ -584,9 +584,9 @@ public class SQLUtility {
 	 *
 	 * @param titles  Optional titles to display
 	 *
-	 * @param values  Iterated once in non-interactive mode.
-	 *                Iterated twice in interactive mode (first to find widest columns, then to display output).
-	 *                Must provide consistent output when iterated twice for interactive mode.
+	 * @param rows  Iterated once in non-interactive mode.
+	 *              Iterated twice in interactive mode (first to find widest columns, then to display output).
+	 *              Must provide consistent output when iterated twice for interactive mode.
 	 */
 	public static void printTable(Object[] titles, Iterable<? extends Object[]> rows, Appendable out, boolean isInteractive, boolean[] alignRights) throws IOException {
 		int numCols = alignRights.length;
