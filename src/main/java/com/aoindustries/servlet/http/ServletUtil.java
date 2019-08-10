@@ -82,8 +82,8 @@ public class ServletUtil {
 	/**
 	 * Converts a possibly-relative path to a context-relative absolute path.
 	 * Resolves ./ and ../ at the beginning of the URL but not in the middle of the URL.
-	 * If the URL begins with http:, https:, file:, mailto:, telnet:, tel:, or cid:, it is not altered.
-	 * 
+	 * If the URL begins with http:, https:, file:, javascript:, mailto:, telnet:, tel:, or cid:, (case-insensitive) it is not altered.
+	 *
 	 * @param  servletPath  Required when path might be altered.
 	 */
 	public static String getAbsolutePath(String servletPath, String relativeUrlPath) throws MalformedURLException {
@@ -92,13 +92,14 @@ public class ServletUtil {
 			relativeUrlPath.length() > 0
 			&& (firstChar=relativeUrlPath.charAt(0)) != '/'
 			&& firstChar != '#' // Skip anchor-only paths
-			&& !relativeUrlPath.startsWith("http:")
-			&& !relativeUrlPath.startsWith("https:")
-			&& !relativeUrlPath.startsWith("file:")
-			&& !relativeUrlPath.startsWith("mailto:")
-			&& !relativeUrlPath.startsWith("telnet:")
-			&& !relativeUrlPath.startsWith("tel:")
-			&& !relativeUrlPath.startsWith("cid:")
+			&& !UrlUtils.isScheme(relativeUrlPath, "http")
+			&& !UrlUtils.isScheme(relativeUrlPath, "https")
+			&& !UrlUtils.isScheme(relativeUrlPath, "file")
+			&& !UrlUtils.isScheme(relativeUrlPath, "javascript")
+			&& !UrlUtils.isScheme(relativeUrlPath, "mailto")
+			&& !UrlUtils.isScheme(relativeUrlPath, "telnet")
+			&& !UrlUtils.isScheme(relativeUrlPath, "tel")
+			&& !UrlUtils.isScheme(relativeUrlPath, "cid")
 		) {
 			NullArgumentException.checkNotNull(servletPath, "servletPath");
 			int slashPos = servletPath.lastIndexOf('/');
