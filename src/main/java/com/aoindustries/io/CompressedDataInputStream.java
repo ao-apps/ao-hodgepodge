@@ -254,18 +254,7 @@ public class CompressedDataInputStream extends DataInputStream {
 	public static Timestamp readTimestamp(DataInputStream in) throws IOException {
 		long seconds = in.readLong();
 		int nanos = readCompressedInt(in);
-		// TODO: Experimental
 		return SQLUtility.newTimestamp(seconds, nanos, IOException.class);
-		/*
-		// Avoid underflow or overflow on conversion to millis
-		final long MAX_SECONDS = Long.MAX_VALUE / 1000;
-		final long MIN_SECONDS = Long.MIN_VALUE / 1000;
-		if(seconds > MAX_SECONDS) throw new IOException("seconds overflow: " + seconds + " > " + MAX_SECONDS);
-		if(seconds < MIN_SECONDS) throw new IOException("seconds underflow: " + seconds + " < " + MAX_SECONDS);
-		Timestamp ts = new Timestamp(seconds * 1000);
-		ts.setNanos(nanos);
-		return ts;
-		 */
 	}
 
 	/**
@@ -296,16 +285,7 @@ public class CompressedDataInputStream extends DataInputStream {
 	public static UnmodifiableTimestamp readUnmodifiableTimestamp(DataInputStream in) throws IOException {
 		long seconds = in.readLong();
 		int nanos = readCompressedInt(in);
-		// TODO: Experimental
 		return SQLUtility.newUnmodifiableTimestamp(seconds, nanos, IOException.class);
-		/*
-		// Avoid underflow or overflow on conversion to millis
-		final long MAX_SECONDS = Long.MAX_VALUE / 1000;
-		final long MIN_SECONDS = Long.MIN_VALUE / 1000;
-		if(seconds > MAX_SECONDS) throw new IOException("seconds overflow: " + seconds + " > " + MAX_SECONDS);
-		if(seconds < MIN_SECONDS) throw new IOException("seconds underflow: " + seconds + " < " + MAX_SECONDS);
-		return new UnmodifiableTimestamp(seconds * 1000, nanos);
-		 */
 	}
 
 	/**
