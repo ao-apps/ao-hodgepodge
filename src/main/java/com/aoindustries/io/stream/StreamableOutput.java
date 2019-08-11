@@ -37,7 +37,6 @@ import java.sql.Timestamp;
  *
  * @author  AO Industries, Inc.
  */
-// TODO; Rename "StreamableOutput"?
 public class StreamableOutput extends DataOutputStream {
 
 	public StreamableOutput(OutputStream out) {
