@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Queue;
 import java.util.logging.Logger;
 // import org.checkthread.annotations.NotThreadSafe;
 
@@ -85,14 +84,13 @@ import java.util.logging.Logger;
  * </p>
  *
  * <pre>
- * TODO: In Java 1.6 support Deque interface instead of just Queue
  * TODO: Add corrupt flag, set on exceptions?  Cause immediate crash recovery?
  * TODO: Similar thing for the underlying block buffers and byte buffers?
  * </pre>
  *
  * @author  AO Industries, Inc.
  */
-public class PersistentLinkedList<E> extends AbstractSequentialList<E> implements List<E>, Queue<E> {
+public class PersistentLinkedList<E> extends AbstractSequentialList<E> implements List<E>, Deque<E> {
 
 	private static final Logger logger = Logger.getLogger(PersistentLinkedList.class.getName());
 
@@ -750,6 +748,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 * @throws NoSuchElementException if this list is empty
 	 */
 	// @NotThreadSafe
+	@Override
 	public E getFirst() {
 		long head=getHead();
 		if(head==END_PTR) throw new NoSuchElementException();
@@ -768,6 +767,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 * @throws NoSuchElementException if this list is empty
 	 */
 	// @NotThreadSafe
+	@Override
 	public E getLast()  {
 		long tail=getTail();
 		if(tail==END_PTR) throw new NoSuchElementException();
@@ -786,6 +786,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 * @throws NoSuchElementException if this list is empty
 	 */
 	// @NotThreadSafe
+	@Override
 	public E removeFirst() {
 		long head = getHead();
 		if(head==END_PTR) throw new NoSuchElementException();
@@ -807,6 +808,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 * @throws NoSuchElementException if this list is empty
 	 */
 	// @NotThreadSafe
+	@Override
 	public E removeLast() {
 		long tail = getTail();
 		if(tail==END_PTR) throw new NoSuchElementException();
@@ -827,6 +829,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 * @param element the element to add
 	 */
 	// @NotThreadSafe
+	@Override
 	public void addFirst(E element) {
 		try {
 			modCount++;
@@ -847,6 +850,7 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	 * @param element the element to add
 	 */
 	// @NotThreadSafe
+	@Override
 	public void addLast(E element) {
 		try {
 			modCount++;
@@ -858,17 +862,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * Returns <tt>true</tt> if this list contains the specified element.
-	 * More formally, returns <tt>true</tt> if and only if this list contains
-	 * at least one element <tt>e</tt> such that
-	 * <tt>(o==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;o.equals(e))</tt>.
-	 *
-	 * @param o element whose presence in this list is to be tested
-	 * @return <tt>true</tt> if this list contains the specified element
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public boolean contains(Object o) {
 		return indexOf(o) != -1;
 	}
@@ -903,21 +898,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		//return ptr;
 	}
 
-	/**
-	 * Removes the first occurrence of the specified element from this list,
-	 * if it is present.  If this list does not contain the element, it is
-	 * unchanged.  More formally, removes the element with the lowest index
-	 * <tt>i</tt> such that
-	 * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>
-	 * (if such an element exists).  Returns <tt>true</tt> if this list
-	 * contained the specified element (or equivalently, if this list
-	 * changed as a result of the call).
-	 *
-	 * @param o element to be removed from this list, if present
-	 * @return <tt>true</tt> if this list contained the specified element
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public boolean remove(Object o) {
 		try {
 			if(o==null) {
@@ -943,20 +925,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * Appends all of the elements in the specified collection to the end of
-	 * this list, in the order that they are returned by the specified
-	 * collection's iterator.  The behavior of this operation is undefined if
-	 * the specified collection is modified while the operation is in
-	 * progress.  (Note that this will occur if the specified collection is
-	 * this list, and it's nonempty.)
-	 *
-	 * @param c collection containing elements to be added to this list
-	 * @return <tt>true</tt> if this list changed as a result of the call
-	 * @throws NullPointerException if the specified collection is null
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		if(c.isEmpty()) return false;
 		modCount++;
@@ -964,23 +934,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		return true;
 	}
 
-	/**
-	 * Inserts all of the elements in the specified collection into this
-	 * list, starting at the specified position.  Shifts the element
-	 * currently at that position (if any) and any subsequent elements to
-	 * the right (increases their indices).  The new elements will appear
-	 * in the list in the order that they are returned by the
-	 * specified collection's iterator.
-	 *
-	 * @param index index at which to insert the first element
-	 *              from the specified collection
-	 * @param c collection containing elements to be added to this list
-	 * @return <tt>true</tt> if this list changed as a result of the call
-	 * @throws IndexOutOfBoundsException {@inheritDoc}
-	 * @throws NullPointerException if the specified collection is null
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public boolean addAll(int index, Collection<? extends E> c) {
 		if(index==_size) return addAll(c);
 		if(c.isEmpty()) return false;
@@ -1007,16 +962,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		return _size > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)_size;
 	}
 
-	/**
-	 * Appends the specified element to the end of this list.
-	 *
-	 * <p>This method is equivalent to {@link #addLast}.
-	 *
-	 * @param element element to be appended to this list
-	 * @return <tt>true</tt> (as specified by {@link Collection#add})
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public boolean add(E element) {
 		addLast(element);
 		return true;
@@ -1026,8 +973,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 	/**
 	 * Clears the list.
 	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public void clear() {
 		try {
 			modCount++;
@@ -1050,15 +997,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * Returns the element at the specified position in this list.
-	 *
-	 * @param index index of the element to return
-	 * @return the element at the specified position in this list
-	 * @throws IndexOutOfBoundsException {@inheritDoc}
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public E get(int index) {
 		try {
 			return getElement(getPointerForIndex(index));
@@ -1090,17 +1030,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * Replaces the element at the specified position in this list with the
-	 * specified element.
-	 *
-	 * @param index index of the element to replace
-	 * @param element element to be stored at the specified position
-	 * @return the element previously at the specified position
-	 * @throws IndexOutOfBoundsException {@inheritDoc}
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public E set(int index, E element) {
 		try {
 			long ptr = getPointerForIndex(index);
@@ -1112,17 +1043,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * Inserts the specified element at the specified position in this list.
-	 * Shifts the element currently at that position (if any) and any
-	 * subsequent elements to the right (adds one to their indices).
-	 *
-	 * @param index index at which the specified element is to be inserted
-	 * @param element element to be inserted
-	 * @throws IndexOutOfBoundsException {@inheritDoc}
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public void add(int index, E element) {
 		modCount++;
 		try {
@@ -1135,17 +1057,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * Removes the element at the specified position in this list.  Shifts any
-	 * subsequent elements to the left (subtracts one from their indices).
-	 * Returns the element that was removed from the list.
-	 *
-	 * @param index the index of the element to be removed
-	 * @return the element previously at the specified position
-	 * @throws IndexOutOfBoundsException {@inheritDoc}
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public E remove(int index) {
 		modCount++;
 		try {
@@ -1158,19 +1071,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * Returns the index of the first occurrence of the specified element
-	 * in this list, or -1 if this list does not contain the element.
-	 * More formally, returns the lowest index <tt>i</tt> such that
-	 * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
-	 * or -1 if there is no such index.
-	 *
-	 * @param o element to search for
-	 * @return the index of the first occurrence of the specified element in
-	 *         this list, or -1 if this list does not contain the element
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public int indexOf(Object o) {
 		try {
 			int index = 0;
@@ -1191,19 +1093,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * Returns the index of the last occurrence of the specified element
-	 * in this list, or -1 if this list does not contain the element.
-	 * More formally, returns the highest index <tt>i</tt> such that
-	 * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
-	 * or -1 if there is no such index.
-	 *
-	 * @param o element to search for
-	 * @return the index of the last occurrence of the specified element in
-	 *         this list, or -1 if this list does not contain the element
-	 */
-	@Override
 	// @NotThreadSafe
+	@Override
 	public int lastIndexOf(Object o) {
 		try {
 			long index = _size;
@@ -1237,23 +1128,12 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		return getFirst();
 	}
 
-	/**
-	 * Retrieves, but does not remove, the head (first element) of this list.
-	 * @return the head of this list
-	 * @throws NoSuchElementException if this list is empty
-	 * @since 1.5
-	 */
 	// @NotThreadSafe
 	@Override
 	public E element() {
 		return getFirst();
 	}
 
-	/**
-	 * Retrieves and removes the head (first element) of this list
-	 * @return the head of this list, or <tt>null</tt> if this list is empty
-	 * @since 1.5
-	 */
 	// @NotThreadSafe
 	@Override
 	public E poll() {
@@ -1261,172 +1141,84 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		return removeFirst();
 	}
 
-	/**
-	 * Retrieves and removes the head (first element) of this list.
-	 *
-	 * @return the head of this list
-	 * @throws NoSuchElementException if this list is empty
-	 * @since 1.5
-	 */
 	// @NotThreadSafe
 	@Override
 	public E remove() {
 		return removeFirst();
 	}
 
-	/**
-	 * Adds the specified element as the tail (last element) of this list.
-	 *
-	 * @param e the element to add
-	 * @return <tt>true</tt> (as specified by {@link Queue#offer})
-	 * @since 1.5
-	 */
 	// @NotThreadSafe
 	@Override
 	public boolean offer(E e) {
 		return add(e);
 	}
 
-	/**
-	 * Inserts the specified element at the front of this list.
-	 *
-	 * @param e the element to insert
-	 * @return <tt>true</tt> (as specified by {@link Deque#offerFirst(java.lang.Object)})
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public boolean offerFirst(E e) {
 		addFirst(e);
 		return true;
 	}
 
-	/**
-	 * Inserts the specified element at the end of this list.
-	 *
-	 * @param e the element to insert
-	 * @return <tt>true</tt> (as specified by {@link Deque#offerLast(java.lang.Object)})
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public boolean offerLast(E e) {
 		addLast(e);
 		return true;
 	}
 
-	/**
-	 * Retrieves, but does not remove, the first element of this list,
-	 * or returns <tt>null</tt> if this list is empty.
-	 *
-	 * @return the first element of this list, or <tt>null</tt>
-	 *         if this list is empty
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public E peekFirst() {
 		if(_size==0)
 			return null;
 		return getFirst();
 	}
 
-	/**
-	 * Retrieves, but does not remove, the last element of this list,
-	 * or returns <tt>null</tt> if this list is empty.
-	 *
-	 * @return the last element of this list, or <tt>null</tt>
-	 *         if this list is empty
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public E peekLast() {
 		if(_size==0)
 			return null;
 		return getLast();
 	}
 
-	/**
-	 * Retrieves and removes the first element of this list,
-	 * or returns <tt>null</tt> if this list is empty.
-	 *
-	 * @return the first element of this list, or <tt>null</tt> if
-	 *     this list is empty
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public E pollFirst() {
 		if(_size==0)
 			return null;
 		return removeFirst();
 	}
 
-	/**
-	 * Retrieves and removes the last element of this list,
-	 * or returns <tt>null</tt> if this list is empty.
-	 *
-	 * @return the last element of this list, or <tt>null</tt> if
-	 *     this list is empty
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public E pollLast() {
 		if (_size==0)
 			return null;
 		return removeLast();
 	}
 
-	/**
-	 * Pushes an element onto the stack represented by this list.  In other
-	 * words, inserts the element at the front of this list.
-	 *
-	 * <p>This method is equivalent to {@link #addFirst}.
-	 *
-	 * @param e the element to push
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public void push(E e) {
 		addFirst(e);
 	}
 
-	/**
-	 * Pops an element from the stack represented by this list.  In other
-	 * words, removes and returns the first element of this list.
-	 *
-	 * <p>This method is equivalent to {@link #removeFirst()}.
-	 *
-	 * @return the element at the front of this list (which is the top
-	 *         of the stack represented by this list)
-	 * @throws NoSuchElementException if this list is empty
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public E pop() {
 		return removeFirst();
 	}
 
-	/**
-	 * Removes the first occurrence of the specified element in this
-	 * list (when traversing the list from head to tail).  If the list
-	 * does not contain the element, it is unchanged.
-	 *
-	 * @param o element to be removed from this list, if present
-	 * @return <tt>true</tt> if the list contained the specified element
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public boolean removeFirstOccurrence(Object o) {
 		return remove(o);
 	}
 
-	/**
-	 * Removes the last occurrence of the specified element in this
-	 * list (when traversing the list from head to tail).  If the list
-	 * does not contain the element, it is unchanged.
-	 *
-	 * @param o element to be removed from this list, if present
-	 * @return <tt>true</tt> if the list contained the specified element
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public boolean removeLastOccurrence(Object o) {
 		try {
 			if(o==null) {
@@ -1452,27 +1244,6 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * Returns a list-iterator of the elements in this list (in proper
-	 * sequence), starting at the specified position in the list.
-	 * Obeys the general contract of <tt>List.listIterator(int)</tt>.<p>
-	 *
-	 * The list-iterator is <i>fail-fast</i>: if the list is structurally
-	 * modified at any time after the Iterator is created, in any way except
-	 * through the list-iterator's own <tt>remove</tt> or <tt>add</tt>
-	 * methods, the list-iterator will throw a
-	 * <tt>ConcurrentModificationException</tt>.  Thus, in the face of
-	 * concurrent modification, the iterator fails quickly and cleanly, rather
-	 * than risking arbitrary, non-deterministic behavior at an undetermined
-	 * time in the future.
-	 *
-	 * @param index index of the first element to be returned from the
-	 *              list-iterator (by a call to <tt>next</tt>)
-	 * @return a ListIterator of the elements in this list (in proper
-	 *         sequence), starting at the specified position in the list
-	 * @throws IndexOutOfBoundsException {@inheritDoc}
-	 * @see List#listIterator(int)
-	 */
 	// @NotThreadSafe
 	@Override
 	public ListIterator<E> listIterator(int index) {
@@ -1614,10 +1385,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	/**
-	 * @since 1.6
-	 */
 	// @NotThreadSafe
+	@Override
 	public Iterator<E> descendingIterator() {
 		return new DescendingIterator();
 	}
@@ -1642,8 +1411,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	@Override
 	// @NotThreadSafe
+	@Override
 	public Object[] toArray() {
 		try {
 			if(_size>Integer.MAX_VALUE) throw new RuntimeException("Too many elements in list to create Object[]: "+_size);
@@ -1656,8 +1425,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	@Override
 	// @NotThreadSafe
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T[] toArray(T[] a) {
 		if(_size>Integer.MAX_VALUE) throw new RuntimeException("Too many elements in list to fill or create array: "+_size);
@@ -1677,8 +1446,8 @@ public class PersistentLinkedList<E> extends AbstractSequentialList<E> implement
 		}
 	}
 
-	@Override
 	// @NotThreadSafe
+	@Override
 	protected void finalize() throws Throwable {
 		try {
 			close();
