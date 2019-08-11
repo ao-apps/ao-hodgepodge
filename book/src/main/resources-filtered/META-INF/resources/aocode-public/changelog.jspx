@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-08-10T14:22:49-0500"
+		dateModified="2019-08-11T08:09:39-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -194,6 +194,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						Case-insensitive matching of URL schemes.  Previously, URL schemes were matched case-sensitive,
 						while the spec is case-insensitive.  This has been OK given we only use lower-case schemes within our
 						code and tools, but this is now a correct implementation.
+					</li>
+					<li>
+						<code>PersistentLinkedList</code> now implements
+						<ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Deque.html">Deque</ao:a>
+						instead of
+						<ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Queue.html">Queue</ao:a>.
 					</li>
 				</ul>
 			</changelog:release>
