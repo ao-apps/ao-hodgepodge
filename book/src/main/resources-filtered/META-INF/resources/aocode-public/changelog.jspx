@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-08-11T08:09:39-0500"
+		dateModified="2019-08-11T08:38:10-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -139,11 +139,20 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li>Added <code>parseLongDecimal3(String)</code></li>
 						</ol>
 					</li>
+					<li>Renamed <code>Compressed*</code> to <code>Streamable*</code> and moved to new <code>com.aoindustries.io.stream</code> package:
+						<ol>
+							<li>Renamed <code>CompressedDataInputStream</code> to <ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html">StreamableInput</ao:a>.</li>
+							<li>Renamed <code>CompressedDataOutputStream</code> to <ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html">StreamableOutput</ao:a>.</li>
+							<li>Renamed <code>CompressedReadable</code> to <ao:a href="apidocs/com/aoindustries/io/stream/StreamReadable.html">StreamReadable</ao:a>.</li>
+							<li>Renamed <code>CompressedWritable</code> to <ao:a href="apidocs/com/aoindustries/io/stream/StreamWritable.html">StreamWritable</ao:a>.</li>
+							<li>Moved <code>Streamable</code> to <ao:a href="apidocs/com/aoindustries/io/stream/Streamable.html">Streamable</ao:a>.</li>
+						</ol>
+					</li>
 					<li>
 						<p>
 							New methods to read and write possibly nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/sql/Timestamp.html">Timestamp</ao:a>
-							in <ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html">CompressedDataOutputStream</ao:a>
-							and <ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html">CompressedDataInputStream</ao:a>.
+							in <ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html">StreamableOutput</ao:a>
+							and <ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html">StreamableInput</ao:a>.
 						</p>
 						<p>
 							These methods use a wire protocol deliberately compatible with
@@ -239,15 +248,15 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Byte.html">Byte</ao:a>:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullByte-java.lang.Byte-">CompressedDataOutputStream.writeNullByte(Byte)</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullByte--">CompressedDataInputStream.readNullByte()</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html#writeNullByte-java.lang.Byte-">CompressedDataOutputStream.writeNullByte(Byte)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html#readNullByte--">CompressedDataInputStream.readNullByte()</ao:a></li>
 					</ul>
 				</li>
 				<li>
 					New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Short.html">Short</ao:a>:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
 					</ul>
 				</li>
 				<li>Using managed dependencies:
@@ -305,8 +314,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Boolean.html">Boolean</ao:a>:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataOutputStream.html#writeNullBoolean-java.lang.Boolean-">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/io/CompressedDataInputStream.html#readNullBoolean--">CompressedDataInputStream.readNullBoolean()</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html#writeNullBoolean-java.lang.Boolean-">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html#readNullBoolean--">CompressedDataInputStream.readNullBoolean()</ao:a></li>
 					</ul>
 				</li>
 				<li>
@@ -446,7 +455,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					</ol>
 				</li>
 				<li>
-					<code>CompressedDataInputStream</code> and <code>CompressedDataInputStream</code> now
+					<code>CompressedDataOutputStream</code> and <code>CompressedDataInputStream</code> now
 					support streaming of <code>Enum</code>s.
 				</li>
 				<li>Updated dependencies.</li>

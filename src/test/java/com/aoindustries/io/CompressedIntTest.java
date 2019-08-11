@@ -22,6 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.io.stream.StreamableInput;
+import com.aoindustries.io.stream.StreamableOutput;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,7 +60,7 @@ public class CompressedIntTest extends TestCase {
 				for(int power=1; power<=30; power++) {
 					int value = random.nextInt(1<<power)-(1<<(power-1));
 					values.add(value);
-					CompressedDataOutputStream.writeCompressedInt(value, bout);
+					StreamableOutput.writeCompressedInt(value, bout);
 				}
 			}
 		} finally {
@@ -68,7 +70,7 @@ public class CompressedIntTest extends TestCase {
 		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
 		try {
 			for(int value : values) {
-				assertEquals(value, CompressedDataInputStream.readCompressedInt(bin));
+				assertEquals(value, StreamableInput.readCompressedInt(bin));
 			}
 		} finally {
 			bin.close();

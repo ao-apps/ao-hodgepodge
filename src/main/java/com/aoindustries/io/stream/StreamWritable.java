@@ -20,16 +20,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.io.stream;
 
 import java.io.IOException;
 
 /**
- * Something that can be read from a {@link CompressedDataInputStream}.
+ * Something that can be written to a {@link StreamableInput}.
  *
  * @author  AO Industries, Inc.
  */
-public interface CompressedReadable {
+public interface StreamWritable {
 
-	void read(CompressedDataInputStream in, String protocolVersion) throws IOException;
+	void write(StreamableOutput out, String protocolVersion) throws IOException;
 }
