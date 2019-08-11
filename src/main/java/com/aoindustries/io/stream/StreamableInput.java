@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.io.stream;
 
 import com.aoindustries.security.Identifier;
 import com.aoindustries.security.SmallIdentifier;
@@ -37,10 +37,9 @@ import java.sql.Timestamp;
  *
  * @author  AO Industries, Inc.
  */
-// TODO; Rename "StreamableInput"?
-public class CompressedDataInputStream extends DataInputStream {
+public class StreamableInput extends DataInputStream {
 
-	public CompressedDataInputStream(InputStream in) {
+	public StreamableInput(InputStream in) {
 		super(in);
 	}
 
@@ -248,7 +247,7 @@ public class CompressedDataInputStream extends DataInputStream {
 	 * Reads a {@link Timestamp}, maintaining the full nanosecond precision.
 	 * Time zone offset is not maintained.
 	 * <p>
-	 * See  {@link CompressedDataOutputStream#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
+	 * See  {@link StreamableOutput#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
 	 * </p>
 	 */
 	public static Timestamp readTimestamp(DataInputStream in) throws IOException {
@@ -279,7 +278,7 @@ public class CompressedDataInputStream extends DataInputStream {
 	 * Reads an {@link UnmodifiableTimestamp}, maintaining the full nanosecond precision.
 	 * Time zone offset is not maintained.
 	 * <p>
-	 * See  {@link CompressedDataOutputStream#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
+	 * See  {@link StreamableOutput#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
 	 * </p>
 	 */
 	public static UnmodifiableTimestamp readUnmodifiableTimestamp(DataInputStream in) throws IOException {

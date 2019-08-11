@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.io;
+package com.aoindustries.io.stream;
 
 import com.aoindustries.security.Identifier;
 import com.aoindustries.security.SmallIdentifier;
@@ -33,14 +33,14 @@ import java.sql.Timestamp;
  * Adds compressed data transfer to DataOutputStream.  This class is not
  * thread safe.
  *
- * @see CompressedDataInputStream
+ * @see StreamableInput
  *
  * @author  AO Industries, Inc.
  */
 // TODO; Rename "StreamableOutput"?
-public class CompressedDataOutputStream extends DataOutputStream {
+public class StreamableOutput extends DataOutputStream {
 
-	public CompressedDataOutputStream(OutputStream out) {
+	public StreamableOutput(OutputStream out) {
 		super(out);
 	}
 
@@ -57,7 +57,7 @@ public class CompressedDataOutputStream extends DataOutputStream {
 	public static final int MAX_COMPRESSED_INT_VALUE = 0x3fffffff;
 
 	/**
-	 * @see CompressedDataInputStream#readCompressedInt()
+	 * @see StreamableInput#readCompressedInt()
 	 */
 	public static void writeCompressedInt(int i, OutputStream out) throws IOException {
 		int t;
