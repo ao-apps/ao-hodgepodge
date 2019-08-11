@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.net;
 
-import com.aoindustries.util.AoCollections;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +50,7 @@ final public class EmptyParameters implements HttpParameters {
 
 	@Override
 	public Iterator<String> getParameterNames() {
-		return AoCollections.emptyIterator();
+		return Collections.emptyIterator();
 	}
 
 	@Override
