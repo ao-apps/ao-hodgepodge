@@ -358,14 +358,14 @@ public final class StringUtility {
 	public static String replace(String string, char ch, String replacement) {
 		int pos = string.indexOf(ch);
 		if (pos == -1) return string;
-		StringBuilder sb = new StringBuilder();
+		int len = string.length();
+		StringBuilder sb = new StringBuilder(len + 16);
 		int lastpos = 0;
 		do {
 			sb.append(string, lastpos, pos).append(replacement);
 			lastpos = pos + 1;
 			pos = string.indexOf(ch, lastpos);
 		} while (pos != -1);
-		int len = string.length();
 		if(lastpos<len) sb.append(string, lastpos, len);
 		return sb.toString();
 	}
@@ -377,7 +377,8 @@ public final class StringUtility {
 	public static String replace(String string, String find, String replacement) {
 		int pos = string.indexOf(find);
 		if (pos == -1) return string;
-		StringBuilder sb = new StringBuilder();
+		int len = string.length();
+		StringBuilder sb = new StringBuilder(len + 16);
 		int lastpos = 0;
 		int findLen = find.length();
 		do {
@@ -385,7 +386,6 @@ public final class StringUtility {
 			lastpos = pos + findLen;
 			pos = string.indexOf(find, lastpos);
 		} while (pos != -1);
-		int len = string.length();
 		if(lastpos<len) sb.append(string, lastpos, len);
 		return sb.toString();
 	}
