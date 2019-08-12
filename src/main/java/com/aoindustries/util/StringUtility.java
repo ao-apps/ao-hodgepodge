@@ -352,56 +352,75 @@ public final class StringUtility {
 	}
 
 	/**
-	 * Replaces all occurrences of a character with a String
+	 * Replaces all occurrences of a character with a String.
+	 * Please consider the variant with the {@link Appendable} for higher performance.
 	 */
 	public static String replace(String string, char ch, String replacement) {
 		int pos = string.indexOf(ch);
 		if (pos == -1) return string;
-		StringBuilder SB = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		int lastpos = 0;
 		do {
-			SB.append(string, lastpos, pos).append(replacement);
+			sb.append(string, lastpos, pos).append(replacement);
 			lastpos = pos + 1;
 			pos = string.indexOf(ch, lastpos);
 		} while (pos != -1);
 		int len = string.length();
-		if(lastpos<len) SB.append(string, lastpos, len);
-		return SB.toString();
+		if(lastpos<len) sb.append(string, lastpos, len);
+		return sb.toString();
 	}
 
 	/**
-	 * Replaces all occurrences of a String with a String
-	 * Please consider the variant with the Appendable for higher performance.
+	 * Replaces all occurrences of a String with a String.
+	 * Please consider the variant with the {@link Appendable} for higher performance.
 	 */
-	public static String replace(final String string, final String find, final String replacement) {
+	public static String replace(String string, String find, String replacement) {
 		int pos = string.indexOf(find);
-		//System.out.println(string+": "+find+" at "+pos);
 		if (pos == -1) return string;
-		StringBuilder SB = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		int lastpos = 0;
-		final int findLen = find.length();
+		int findLen = find.length();
 		do {
-			SB.append(string, lastpos, pos).append(replacement);
+			sb.append(string, lastpos, pos).append(replacement);
 			lastpos = pos + findLen;
 			pos = string.indexOf(find, lastpos);
 		} while (pos != -1);
 		int len = string.length();
-		if(lastpos<len) SB.append(string, lastpos, len);
-		return SB.toString();
+		if(lastpos<len) sb.append(string, lastpos, len);
+		return sb.toString();
+	}
+
+	/**
+	 * Replaces all occurrences of a character with a String, appends the replacement
+	 * to <code>out</code>.
+	 */
+	public static void replace(String string, char find, String replacement, Appendable out) throws IOException {
+		int pos = string.indexOf(find);
+		if (pos == -1) {
+			out.append(string);
+		} else {
+			int lastpos = 0;
+			do {
+				out.append(string, lastpos, pos).append(replacement);
+				lastpos = pos + 1;
+				pos = string.indexOf(find, lastpos);
+			} while (pos != -1);
+			int len = string.length();
+			if(lastpos<len) out.append(string, lastpos, len);
+		}
 	}
 
 	/**
 	 * Replaces all occurrences of a String with a String, appends the replacement
 	 * to <code>out</code>.
 	 */
-	public static void replace(final String string, final String find, final String replacement, final Appendable out) throws IOException {
+	public static void replace(String string, String find, String replacement, Appendable out) throws IOException {
 		int pos = string.indexOf(find);
-		//System.out.println(string+": "+find+" at "+pos);
 		if (pos == -1) {
 			out.append(string);
 		} else {
 			int lastpos = 0;
-			final int findLen = find.length();
+			int findLen = find.length();
 			do {
 				out.append(string, lastpos, pos).append(replacement);
 				lastpos = pos + findLen;
@@ -415,7 +434,7 @@ public final class StringUtility {
 	/**
 	 * Replaces all occurrences of a String with a String.
 	 */
-	public static void replace(final StringBuffer sb, final String find, final String replacement) {
+	public static void replace(StringBuffer sb, String find, String replacement) {
 		int pos = 0;
 		while(pos<sb.length()) {
 			pos = sb.indexOf(find, pos);
@@ -428,7 +447,7 @@ public final class StringUtility {
 	/**
 	 * Replaces all occurrences of a String with a String.
 	 */
-	public static void replace(final StringBuilder sb, final String find, final String replacement) {
+	public static void replace(StringBuilder sb, String find, String replacement) {
 		int pos = 0;
 		while(pos<sb.length()) {
 			pos = sb.indexOf(find, pos);
