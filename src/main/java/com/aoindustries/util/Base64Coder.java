@@ -1,6 +1,6 @@
 package com.aoindustries.util;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Obtained from: http://www.source-code.biz/snippets/java/Base64Coder.java.txt
@@ -44,17 +44,13 @@ public class Base64Coder {
 		  for (int i=0; i<64; i++) map2[map1[i]] = (byte)i; }
 
 	/**
-	* Encodes a string into Base64 format with UTF-8 encoding.
+	* Encodes a string into Base64 format with {@link StandardCharsets#UTF_8} encoding.
 	* No blanks or line breaks are inserted.
 	* @param s  a String to be encoded.
 	* @return   A String with the Base64 encoded data.
 	*/
 	public static String encodeString (String s) {
-		try {
-			return new String(encode(s.getBytes("UTF-8")));
-		} catch(UnsupportedEncodingException exc) {
-			throw new RuntimeException(exc);
-		}
+		return new String(encode(s.getBytes(StandardCharsets.UTF_8)));
 	}
 
 	/**
