@@ -22,23 +22,33 @@
  */
 package com.aoindustries.net;
 
-import com.aoindustries.servlet.http.Dispatcher;
-import com.aoindustries.servlet.http.LastModifiedServlet;
-import com.aoindustries.servlet.http.ServletUtil;
+import com.aoindustries.io.Encoder;
 import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspContext;
-import javax.servlet.jsp.PageContext;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Encoding helper utilities.
+ * URL helper utilities.
+ * <p>
+ * TODO: Have variants of encode (and possibly decode) that accepts and object
+ * and works similarly (streaming) to Coercion.  This class might have to
+ * move to ao-encoding to do so.  Might also become a full streaming
+ * implementation, then.
+ * </p>
+ * <p>
+ * TODO: Find something that does this well already. 
+ * <a href="https://jena.apache.org/documentation/notes/iri.html">jena-iri</a>?
+ * <a href="https://github.com/xbib/net>org.xbib:net-url</a>?
+ * <a href="https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/client/utils/URIBuilder.html">URIBuilder</a>?
+ * </p>
+ * 
+ * @see SplitUrl
+ * @see UriComponent
  *
  * @author  AO Industries, Inc.
  */
@@ -48,40 +58,94 @@ public class UrlUtils {
 	}
 
 	/**
-	 * Checks if a URL starts with the given scheme.
+	 * The default encoding is <code>{@link StandardCharsets#UTF_8}</code> per
+	 * <a href="https://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars">B.2.1 Non-ASCII characters in URI attribute values</a>.
+	 */
+	public static final Charset ENCODING = StandardCharsets.UTF_8;
+
+	/**
+	 * The characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 */
+	private static final char[] rfc3986ReservedCharacters = {
+		// gen-delims
+		':', '/', '?', '#', '[', ']', '@',
+		// sub-delims
+		'!', '$', '&', '\'', '(',  ')',
+		'*', '+', ',', ';', '='
+	};
+
+	/**
+	 * The characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (and '%' for already percent-encoded).
+	 */
+	private static final char[] rfc3986ReservedCharacters_and_percent = {
+		// gen-delims
+		':', '/', '?', '#', '[', ']', '@',
+		// sub-delims
+		'!', '$', '&', '\'', '(',  ')',
+		'*', '+', ',', ';', '=',
+		// already percent-encoded
+		'%'
+	};
+
+	/**
+	 * Checks if a URI starts with the given scheme.
 	 *
 	 * @param scheme  The scheme to look for, not including colon.
 	 *                For example {@code "http"}.
 	 */
-	public static boolean isScheme(String href, String scheme) {
+	public static boolean isScheme(String uri, String scheme) {
+		if(uri == null) return false;
 		int len = scheme.length();
-		if((len + 1) > href.length()) return false;
+		if((len + 1) > uri.length()) return false;
 		for(int i = 0; i < len; i++) {
-			char ch1 = href.charAt(i);
-			char ch2 = href.charAt(i);
+			char ch1 = uri.charAt(i);
+			char ch2 = scheme.charAt(i);
 			// Convert to lower-case, ASCII-only
 			if(ch1 >= 'A' && ch1 <= 'Z') ch1 += 'a' - 'A';
 			if(ch2 >= 'A' && ch2 <= 'Z') ch2 += 'a' - 'A';
 			if(ch1 != ch2) return false;
 		}
 		// Must be followed by a colon
-		return href.charAt(len) == ':';
+		return uri.charAt(len) == ':';
 	}
 
 	/**
-	 * Gets the scheme for a URL, or {@code null} when no scheme found.
-	 * The scheme must start the URL, and contain only (A-Z, a-z) before the first colon (:)
-	 * found.  The scheme is normalized to lower-case.  An empty scheme will not be returned.
+	 * Checks if a URI has a scheme, including a possibly empty scheme (starts with ':')
+	 */
+	public static boolean hasScheme(String uri) {
+		if(uri == null) return false;
+		for(int i = 0, len = uri.length(); i < len; i++) {
+			char ch = uri.charAt(i);
+			if(ch == ':') {
+				return true;
+			} else if(
+				(ch < 'a' || ch > 'z')
+				&& (ch < 'A' || ch > 'Z')
+			) {
+				// ASCII-only
+				return false;
+			}
+		}
+		// No colon found
+		return false;
+	}
+
+	/**
+	 * Gets the scheme for a URI, or {@code null} when no scheme found.
+	 * The scheme must start the URI, and contain only (A-Z, a-z) before the first colon (:)
+	 * found.  The scheme is normalized to lower-case.  An empty scheme will be returned if the URI starts with (':').
 	 *
 	 * @return  The scheme, not including colon, or {@code null} when not found.
 	 *          For example {@code "http"}.
 	 */
-	public static final String getScheme(String href) {
-		int len = href.length();
+	public static final String getScheme(String uri) {
+		if(uri == null) return null;
+		int len = uri.length();
 		// Find the colon, returning null if any non-A-Z,a-z is found on the way
 		int colonPos = -1;
 		for(int i = 0; i < len; i++) {
-			char ch = href.charAt(i);
+			char ch = uri.charAt(i);
 			if(ch == ':') {
 				colonPos = i;
 				break;
@@ -89,15 +153,18 @@ public class UrlUtils {
 				(ch < 'a' || ch > 'z')
 				&& (ch < 'A' || ch > 'Z')
 			) {
+				// ASCII-only
 				return null;
 			}
 		}
+		// No colon found
+		if(colonPos == -1) return null;
 		// Empty scheme
-		if(colonPos == 0) return null;
+		if(colonPos == 0) return "";
 		// Normalize to lower-case
 		char[] scheme = new char[colonPos];
 		for(int i = 0; i < colonPos; i++) {
-			char ch = href.charAt(i);
+			char ch = uri.charAt(i);
 			// Convert to lower-case, ASCII-only
 			if(ch >= 'A' && ch <= 'Z') {
 				ch += 'a' - 'A';
@@ -110,273 +177,986 @@ public class UrlUtils {
 	}
 
 	/**
-	 * The characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
-	 *
-	 * @deprecated  Only used by {@link #decodeUrlPath(java.lang.String, java.lang.String)}
+	 * Finds the path end within a URI.  The path end is the index of the first '?' or '#', or the length of the URI
+	 * when neither found.
+	 */
+	public static int getPathEnd(String uri) {
+		int foundAt = StringUtility.indexOf(uri, new char[] {'?', '#'});
+		return foundAt != -1 ? foundAt : uri.length();
+	}
+
+	/**
+	 * @deprecated  Please use {@link com.aoindustries.servlet.http.ServletUtil#buildUrl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, com.aoindustries.net.HttpParameters, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)} directly.
 	 */
 	@Deprecated
-	private static final char[] rfc3986ReservedCharacters = {
-		// gen-delims
-		':', '/', '?', '#', '[', ']', '@',
-		// sub-delims
-		'!', '$', '&', '\'', '(',  ')',
-		'*', '+', ',', ';', '='
-	};
+	public static String buildUrl(
+		javax.servlet.ServletContext servletContext,
+		javax.servlet.http.HttpServletRequest request,
+		javax.servlet.http.HttpServletResponse response,
+		String url,
+		HttpParameters params,
+		boolean urlAbsolute,
+		com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws MalformedURLException {
+		return com.aoindustries.servlet.http.ServletUtil.buildUrl(servletContext, request, response, url, params, urlAbsolute, addLastModified);
+	}
 
 	/**
-	 * The characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
-	 * along with a percent (%)
+	 * @deprecated  Please use {@link com.aoindustries.servlet.http.ServletUtil#buildUrl(javax.servlet.jsp.PageContext, java.lang.String, com.aoindustries.net.HttpParameters, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)} directly.
 	 */
-	private static final char[] rfc3986ReservedCharacters_and_percent;
-	static {
-		rfc3986ReservedCharacters_and_percent = new char[rfc3986ReservedCharacters.length + 1];
-		System.arraycopy(rfc3986ReservedCharacters, 0, rfc3986ReservedCharacters_and_percent, 0, rfc3986ReservedCharacters.length);
-		// percent-encoded itself
-		rfc3986ReservedCharacters_and_percent[rfc3986ReservedCharacters.length] = '%';
-	};
+	@Deprecated
+	public static String buildUrl(
+		javax.servlet.jsp.PageContext pageContext,
+		String url,
+		HttpParameters params,
+		boolean urlAbsolute,
+		com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws MalformedURLException {
+		return com.aoindustries.servlet.http.ServletUtil.buildUrl(pageContext, url, params, urlAbsolute, addLastModified);
+	}
 
 	/**
-	 * Encodes the characters in the URL up to trailing '?' or '#' (the first found of the two),
-	 * not including any characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
-	 * To avoid ambiguity, parameters and anchors must have been correctly encoded by the caller.
+	 * @deprecated  Please use {@link com.aoindustries.servlet.http.ServletUtil#buildUrl(javax.servlet.jsp.JspContext, java.lang.String, com.aoindustries.net.HttpParameters, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)} directly.
+	 */
+	@Deprecated
+	public static String buildUrl(
+		javax.servlet.jsp.JspContext jspContext,
+		String url,
+		HttpParameters params,
+		boolean srcAbsolute,
+		com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws MalformedURLException {
+		return com.aoindustries.servlet.http.ServletUtil.buildUrl(jspContext, url, params, srcAbsolute, addLastModified);
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
 	 * </p>
 	 * <p>
-	 * Additionally, for <code>tel:</code> (case-insensitive) urls, replaces spaces (and non-breaking spaces) with hyphens.
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
 	 * </p>
 	 *
-	 * @see  #decodeUrlPath(java.lang.String, java.lang.String)
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 *
+	 * @see #decodeURIComponent(java.lang.String, java.lang.String)
 	 */
-	public static String encodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
-		if(isScheme(href, "tel")) {
-			href = href.replace(' ', '-');
-			href = href.replace('\u00A0', '-'); // non-breaking space
+	public static String encodeURIComponent(String s, String encoding) throws UnsupportedEncodingException {
+		return (s == null) ? null : StringUtility.replace(URLEncoder.encode(s, encoding), '+', "%20");
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #decodeURIComponent(java.lang.String)
+	 */
+	public static String encodeURIComponent(String s) {
+		try {
+			return encodeURIComponent(s, ENCODING.name());
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
 		}
-		int len = href.length();
-		int pos = 0;
-		int stopAt;
-		{
-			int paramsAt = href.indexOf('?');
-			if(paramsAt != -1) {
-				stopAt = paramsAt;
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 *
+	 * @see #decodeURIComponent(java.lang.String, java.lang.String, java.lang.Appendable)
+	 */
+	public static void encodeURIComponent(String s, String encoding, Appendable out) throws UnsupportedEncodingException, IOException {
+		if(s != null) StringUtility.replace(URLEncoder.encode(s, encoding), '+', "%20", out);
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #decodeURIComponent(java.lang.String, java.lang.Appendable)
+	 */
+	public static void encodeURIComponent(String s, Appendable out) throws IOException {
+		try {
+			encodeURIComponent(s, ENCODING.name(), out);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 * @param encoder  An optional encoder the output is applied through
+	 *
+	 * @see #decodeURIComponent(java.lang.String, java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 */
+	public static void encodeURIComponent(String s, String encoding, Appendable out, Encoder encoder) throws UnsupportedEncodingException, IOException {
+		if(s != null) {
+			if(encoder == null) {
+				encodeURIComponent(s, encoding, out);
 			} else {
-				int anchorAt = href.indexOf('#');
-				if(anchorAt != -1) {
-					stopAt = anchorAt;
-				} else {
-					stopAt = len;
-				}
+				StringUtility.replace(URLEncoder.encode(s, encoding), '+', "%20", out, encoder);
 			}
 		}
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoder  An optional encoder the output is applied through
+	 *
+	 * @see #decodeURIComponent(java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 */
+	public static void encodeURIComponent(String s, Appendable out, Encoder encoder) throws IOException {
 		try {
-			StringBuilder SB = new StringBuilder(href.length() + 16);
-			while(pos < stopAt) {
-				int nextPos = StringUtility.indexOf(href, rfc3986ReservedCharacters_and_percent, pos);
+			encodeURIComponent(s, ENCODING.name(), out, encoder);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 *
+	 * @see #decodeURIComponent(java.lang.String, java.lang.String, java.lang.StringBuilder)
+	 */
+	public static void encodeURIComponent(String s, String encoding, StringBuilder sb) throws UnsupportedEncodingException {
+		if(s != null) {
+			try {
+				StringUtility.replace(URLEncoder.encode(s, encoding), '+', "%20", sb);
+			} catch(UnsupportedEncodingException e) {
+				throw e;
+			} catch(IOException e) {
+				throw new AssertionError("IOException should not occur on StringBuilder", e);
+			}
+		}
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #decodeURIComponent(java.lang.String, java.lang.StringBuilder)
+	 */
+	public static void encodeURIComponent(String s, StringBuilder sb) {
+		try {
+			encodeURIComponent(s, ENCODING.name(), sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 *
+	 * @see #decodeURIComponent(java.lang.String, java.lang.String, java.lang.StringBuffer)
+	 */
+	public static void encodeURIComponent(String s, String encoding, StringBuffer sb) throws UnsupportedEncodingException {
+		if(s != null) {
+			try {
+				StringUtility.replace(URLEncoder.encode(s, encoding), '+', "%20", sb);
+			} catch(UnsupportedEncodingException e) {
+				throw e;
+			} catch(IOException e) {
+				throw new AssertionError("IOException should not occur on StringBuffer", e);
+			}
+		}
+	}
+
+	/**
+	 * Encodes a value for use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLEncoder#encode(java.lang.String, java.lang.String)} then replaces
+	 * '+' with "%20".
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #decodeURIComponent(java.lang.String, java.lang.StringBuffer)
+	 */
+	public static void encodeURIComponent(String s, StringBuffer sb) {
+		try {
+			encodeURIComponent(s, ENCODING.name(), sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 *
+	 * @see #encodeURIComponent(java.lang.String, java.lang.String)
+	 */
+	public static String decodeURIComponent(String s, String encoding) throws UnsupportedEncodingException {
+		return (s == null) ? null : URLDecoder.decode(s, encoding);
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #encodeURIComponent(java.lang.String)
+	 */
+	public static String decodeURIComponent(String s) {
+		try {
+			return decodeURIComponent(s, ENCODING.name());
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 *
+	 * @see #encodeURIComponent(java.lang.String, java.lang.String, java.lang.Appendable)
+	 */
+	public static void decodeURIComponent(String s, String encoding, Appendable out) throws UnsupportedEncodingException, IOException {
+		if(s != null) out.append(URLDecoder.decode(s, encoding));
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #encodeURIComponent(java.lang.String, java.lang.Appendable)
+	 */
+	public static void decodeURIComponent(String s, Appendable out) throws IOException {
+		try {
+			decodeURIComponent(s, ENCODING.name(), out);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 * @param encoder  An optional encoder the output is applied through
+	 *
+	 * @see #encodeURIComponent(java.lang.String, java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 */
+	public static void decodeURIComponent(String s, String encoding, Appendable out, Encoder encoder) throws UnsupportedEncodingException, IOException {
+		if(s != null) {
+			if(encoder == null) {
+				decodeURIComponent(s, encoding, out);
+			} else {
+				encoder.append(URLDecoder.decode(s, encoding), out);
+			}
+		}
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoder  An optional encoder the output is applied through
+	 *
+	 * @see #encodeURIComponent(java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 */
+	public static void decodeURIComponent(String s, Appendable out, Encoder encoder) throws IOException {
+		try {
+			decodeURIComponent(s, ENCODING.name(), out, encoder);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 *
+	 * @see #encodeURIComponent(java.lang.String, java.lang.String, java.lang.StringBuilder)
+	 */
+	public static void decodeURIComponent(String s, String encoding, StringBuilder sb) throws UnsupportedEncodingException {
+		if(s != null) sb.append(URLDecoder.decode(s, encoding));
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #encodeURIComponent(java.lang.String, java.lang.StringBuilder)
+	 */
+	public static void decodeURIComponent(String s, StringBuilder sb) {
+		try {
+			decodeURIComponent(s, ENCODING.name(), sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in a given encoding.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoding  The name of a supported {@linkplain Charset character encoding}.
+	 *
+	 * @see #encodeURIComponent(java.lang.String, java.lang.String, java.lang.StringBuffer)
+	 */
+	public static void decodeURIComponent(String s, String encoding, StringBuffer sb) throws UnsupportedEncodingException {
+		if(s != null) sb.append(URLDecoder.decode(s, encoding));
+	}
+
+	/**
+	 * Decodes a value from its use in a path component or fragment in the default encoding <code>{@link #ENCODING}</code>.
+	 * <p>
+	 * This uses {@link URLDecoder#decode(java.lang.String, java.lang.String)}.
+	 * </p>
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent">decodeURIComponent() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #encodeURIComponent(java.lang.String, java.lang.StringBuffer)
+	 */
+	public static void decodeURIComponent(String s, StringBuffer sb) {
+		try {
+			decodeURIComponent(s, ENCODING.name(), sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in a given encoding.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (and '%' for already percent-encoded).
+	 * </p>
+	 * <p>
+	 * Additionally, for <code>tel:</code> (case-insensitive) scheme, transforms spaces to hyphens.
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @return  The encoded URI or {@code url} when not modified
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.String)
+	 *
+	 * @deprecated  Please perform any <code>tel:</code> transformations elsewhere and use {@link #encodeURI(java.lang.String, java.lang.String)} directly.
+	 */
+	@Deprecated
+	public static String encodeUrlPath(String uri, String documentEncoding) throws UnsupportedEncodingException {
+		if(uri == null) return null;
+		if(isScheme(uri, "tel")) {
+			uri = uri.replace(' ', '-');
+		}
+		return encodeURI(uri, documentEncoding);
+	}
+
+	/**
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in a given encoding.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (and '%' for already percent-encoded).
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @return  The encoded URI or {@code url} when not modified
+	 *
+	 * @see #decodeURI(java.lang.String, java.lang.String)
+	 */
+	public static String encodeURI(String uri, String documentEncoding) throws UnsupportedEncodingException {
+		if(uri == null) return null;
+		StringBuilder sb = new StringBuilder(uri.length() + 16);
+		encodeURI(uri, documentEncoding, sb);
+		if(sb.length() == uri.length()) {
+			assert uri.equals(sb.toString());
+			return uri;
+		} else {
+			return sb.toString();
+		}
+	}
+
+	/**
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (and '%' for already percent-encoded).
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @return  The encoded URI or {@code url} when not modified
+	 *
+	 * @see #decodeURI(java.lang.String)
+	 */
+	public static String encodeURI(String uri) {
+		try {
+			return encodeURI(uri, ENCODING.name());
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in a given encoding.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (or '%' for already percent-encoded).
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @see #decodeURI(java.lang.String, java.lang.String, java.lang.Appendable)
+	 */
+	public static void encodeURI(String uri, String documentEncoding, Appendable out) throws UnsupportedEncodingException, IOException {
+		encodeURI(uri, documentEncoding, out, null);
+	}
+
+	/**
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (or '%' for already percent-encoded).
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #decodeURI(java.lang.String, java.lang.Appendable)
+	 */
+	public static void encodeURI(String uri, Appendable out) throws IOException {
+		try {
+			encodeURI(uri, ENCODING.name(), out);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in a given encoding.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (or '%' for already percent-encoded).
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 * <p>
+	 * TODO: Support <a href="https://tools.ietf.org/html/rfc2368">mailto:</a> scheme specifically?
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 * @param encoder  An optional encoder the output is applied through
+	 *
+	 * @see #decodeURI(java.lang.String, java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 */
+	public static void encodeURI(String uri, String documentEncoding, Appendable out, Encoder encoder) throws UnsupportedEncodingException, IOException {
+		if(uri != null) {
+			int len = uri.length();
+			int pos = 0;
+			UriComponent stage = UriComponent.BASE;
+			while(pos < len) {
+				int nextPos = StringUtility.indexOf(uri, rfc3986ReservedCharacters_and_percent, pos);
 				if(nextPos == -1) {
-					StringUtility.replace(URLEncoder.encode(href.substring(pos, stopAt), encoding), "+", "%20", SB);
+					stage.encodeUnreserved(uri, pos, len, documentEncoding, out, encoder);
 					pos = len;
 				} else {
-					if(nextPos > stopAt) nextPos = stopAt;
 					if(nextPos != pos) {
-						StringUtility.replace(URLEncoder.encode(href.substring(pos, nextPos), encoding), "+", "%20", SB);
+						stage.encodeUnreserved(uri, pos, nextPos, documentEncoding, out, encoder);
 					}
-					if(nextPos < stopAt) {
-						SB.append(href.charAt(nextPos++));
+					char reserved = uri.charAt(nextPos++);
+					stage = stage.nextStage(reserved);
+					if(encoder == null) {
+						out.append(reserved);
+					} else {
+						encoder.append(reserved, out);
 					}
 					pos = nextPos;
 				}
 			}
-			SB.append(href, stopAt, len);
-			return SB.toString();
+		}
+	}
+
+	/**
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (or '%' for already percent-encoded).
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoder  An optional encoder the output is applied through
+	 *
+	 * @see #decodeURI(java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 */
+	public static void encodeURI(String uri, Appendable out, Encoder encoder) throws IOException {
+		try {
+			encodeURI(uri, ENCODING.name(), out, encoder);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in a given encoding.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (or '%' for already percent-encoded).
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @see #decodeURI(java.lang.String, java.lang.String, java.lang.StringBuilder)
+	 */
+	public static void encodeURI(String uri, String documentEncoding, StringBuilder sb) throws UnsupportedEncodingException {
+		try {
+			encodeURI(uri, documentEncoding, sb, null);
+		} catch(UnsupportedEncodingException e) {
+			throw e;
 		} catch(IOException e) {
 			throw new AssertionError("IOException should not occur on StringBuilder", e);
 		}
 	}
 
 	/**
-	 * Percent-encodes reserved characters (or percent) only.
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (or '%' for already percent-encoded).
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #decodeURI(java.lang.String, java.lang.StringBuilder)
 	 */
-	private static void encodeRfc3968ReservedCharacters_or_percent(String value, String encoding, StringBuilder SB) {
-		int len = value.length();
-		for(int i = 0; i < len; i++) {
-			char ch = value.charAt(i);
-			switch(ch) {
-				// gen-delims
-				case ':' :
-					SB.append("%3A");
-					break;
-				case '/' :
-					SB.append("%2F");
-					break;
-				case '?' :
-					SB.append("%3F");
-					break;
-				case '#' :
-					SB.append("%23");
-					break;
-				case '[' :
-					SB.append("%5B");
-					break;
-				case ']' :
-					SB.append("%5D");
-					break;
-				case '@' :
-					SB.append("%40");
-					break;
-				// sub-delims
-				case '!' :
-					SB.append("%21");
-					break;
-				case '$' :
-					SB.append("%24");
-					break;
-				case '&' :
-					SB.append("%26");
-					break;
-				case '\'' :
-					SB.append("%27");
-					break;
-				case '(' :
-					SB.append("%28");
-					break;
-				case ')' :
-					SB.append("%29");
-					break;
-				case '*' :
-					SB.append("%2A");
-					break;
-				case '+' :
-					SB.append("%2B");
-					break;
-				case ',' :
-					SB.append("%2C");
-					break;
-				case ';' :
-					SB.append("%3B");
-					break;
-				case '=' :
-					SB.append("%3D");
-					break;
-				// percent-encoded itself
-				case '%' :
-					SB.append("%25");
-					break;
-				default :
-					SB.append(ch);
-			}
+	public static void encodeURI(String uri, StringBuilder sb) {
+		try {
+			encodeURI(uri, ENCODING.name(), sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
 		}
 	}
 
 	/**
-	 * Decodes the URL up to the first ?, if present.
-	 * Does not decode any characters defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in a given encoding.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (or '%' for already percent-encoded).
 	 * <p>
-	 * Characters that are percent-decoded into a reserve character are left percent-encoded to avoid ambiguity.
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
 	 * </p>
 	 *
-	 * @see  #encodeUrlPath(java.lang.String, java.lang.String)
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @see #decodeURI(java.lang.String, java.lang.String, java.lang.StringBuffer)
 	 */
-	public static String decodeUrlPath(String href, String encoding) throws UnsupportedEncodingException {
-		int len = href.length();
-		int pos = 0;
-		StringBuilder SB = new StringBuilder(href.length());
-		while(pos < len) {
-			int nextPos = StringUtility.indexOf(href, rfc3986ReservedCharacters, pos);
-			if(nextPos == -1) {
-				// TODO: A specialized form of decode that skips decoding to reserved characters would be better than decode/re-encode.
-				//       This implementation is less precise, such as converting lower-case percent-encoded to upper-case.
-				encodeRfc3968ReservedCharacters_or_percent(URLDecoder.decode(href.substring(pos, len), encoding), encoding, SB);
-				pos = len;
-			} else {
-				// TODO: A specialized form of decode that skips decoding to reserved characters would be better than decode/re-encode.
-				//       This implementation is less precise, such as converting lower-case percent-encoded to upper-case.
-				encodeRfc3968ReservedCharacters_or_percent(URLDecoder.decode(href.substring(pos, nextPos), encoding), encoding, SB);
-				char nextChar = href.charAt(nextPos);
-				if(nextChar == '?') {
-					// End decoding
-					SB.append(href, nextPos, len);
+	public static void encodeURI(String uri, String documentEncoding, StringBuffer sb) throws UnsupportedEncodingException {
+		try {
+			encodeURI(uri, documentEncoding, sb, null);
+		} catch(UnsupportedEncodingException e) {
+			throw e;
+		} catch(IOException e) {
+			throw new AssertionError("IOException should not occur on StringBuffer", e);
+		}
+	}
+
+	/**
+	 * Encodes a URI to <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Encodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>
+	 * (or '%' for already percent-encoded).
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI">encodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #decodeURI(java.lang.String, java.lang.StringBuffer)
+	 */
+	public static void encodeURI(String uri, StringBuffer sb) {
+		try {
+			encodeURI(uri, ENCODING.name(), sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @deprecated  Please use {@link #decodeURI(java.lang.String, java.lang.String)} directly.
+	 */
+	@Deprecated
+	public static String decodeUrlPath(String uri, String documentEncoding) throws UnsupportedEncodingException {
+		return decodeURI(uri, documentEncoding);
+	}
+
+	/**
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in a given encoding.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @return  The decoded URI or {@code url} when not modified
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.String)
+	 */
+	public static String decodeURI(String uri, String documentEncoding) throws UnsupportedEncodingException {
+		if(uri == null) return null;
+		StringBuilder sb = new StringBuilder(uri.length());
+		decodeURI(uri, documentEncoding, sb);
+		if(sb.length() == uri.length()) {
+			assert uri.equals(sb.toString());
+			return uri;
+		} else {
+			return sb.toString();
+		}
+	}
+
+	/**
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @return  The decoded URI or {@code url} when not modified
+	 *
+	 * @see #encodeURI(java.lang.String)
+	 */
+	public static String decodeURI(String uri) {
+		try {
+			return decodeURI(uri, ENCODING.name());
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in a given encoding.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.String, java.lang.Appendable)
+	 */
+	public static void decodeURI(String uri, String documentEncoding, Appendable out) throws UnsupportedEncodingException, IOException {
+		decodeURI(uri, documentEncoding, out, null);
+	}
+
+	/**
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.Appendable)
+	 */
+	public static void decodeURI(String uri, Appendable out) throws IOException {
+		try {
+			decodeURI(uri, ENCODING.name(), out);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in a given encoding.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 * <p>
+	 * TODO: Support <a href="https://tools.ietf.org/html/rfc2368">mailto:</a> scheme specifically?
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 * @param encoder  An optional encoder the output is applied through
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 */
+	public static void decodeURI(String uri, String documentEncoding, Appendable out, Encoder encoder) throws UnsupportedEncodingException, IOException {
+		if(uri != null) {
+			int len = uri.length();
+			int pos = 0;
+			UriComponent stage = UriComponent.BASE;
+			while(pos < len) {
+				int nextPos = StringUtility.indexOf(uri, rfc3986ReservedCharacters, pos);
+				if(nextPos == -1) {
+					stage.decodeUnreserved(uri, pos, len, documentEncoding, out, encoder);
 					pos = len;
 				} else {
-					SB.append(nextChar);
-					pos = nextPos+1;
+					if(nextPos != pos) {
+						stage.decodeUnreserved(uri, pos, nextPos, documentEncoding, out, encoder);
+					}
+					char reserved = uri.charAt(nextPos++);
+					stage = stage.nextStage(reserved);
+					if(encoder == null) {
+						out.append(reserved);
+					} else {
+						encoder.append(reserved, out);
+					}
+					pos = nextPos;
 				}
 			}
 		}
-		return SB.toString();
 	}
 
 	/**
-	 * Performs all the proper URL conversions along with optionally adding a lastModified parameter.
-	 * This includes:
-	 * <ol>
-	 *   <li>Converting any page-relative path to a context-relative path starting with a slash (/)</li>
-	 *   <li>Adding any additional parameters</li>
-	 *   <li>Optionally adding lastModified parameter</li>
-	 *   <li>Converting any context-relative path to a site-relative path by prefixing contextPath</li>
-	 *   <li>Encoding any URL path characters not defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a></li>
-	 *   <li>Rewrite with response.encodeURL</li>
-	 * </ol>
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param encoder  An optional encoder the output is applied through
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
 	 */
-	public static String buildUrl(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String href,
-		HttpParameters params,
-		boolean hrefAbsolute,
-		LastModifiedServlet.AddLastModifiedWhen addLastModified
-	) throws MalformedURLException, UnsupportedEncodingException {
-		String responseEncoding = response.getCharacterEncoding();
-		String servletPath = Dispatcher.getCurrentPagePath(request);
-		href = ServletUtil.getAbsolutePath(servletPath, href);
-		href = HttpParametersUtils.addParams(href, params, responseEncoding);
-		href = LastModifiedServlet.addLastModified(servletContext, request, servletPath, href, addLastModified);
-		if(!hrefAbsolute && href.startsWith("/")) {
-			String contextPath = request.getContextPath();
-			if(contextPath.length()>0) href = contextPath + href;
+	public static void decodeURI(String uri, Appendable out, Encoder encoder) throws IOException {
+		try {
+			decodeURI(uri, ENCODING.name(), out, encoder);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
 		}
-		href = encodeUrlPath(href, responseEncoding);
-		href= response.encodeURL(href);
-		if(hrefAbsolute && href.startsWith("/")) href = ServletUtil.getAbsoluteURL(request, href);
-		return href;
 	}
 
 	/**
-	 * @see  #buildUrl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, com.aoindustries.net.HttpParameters, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in a given encoding.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.String, java.lang.StringBuilder)
 	 */
-	public static String buildUrl(
-		PageContext pageContext,
-		String href,
-		HttpParameters params,
-		boolean hrefAbsolute,
-		LastModifiedServlet.AddLastModifiedWhen addLastModified
-	) throws MalformedURLException, UnsupportedEncodingException {
-		return buildUrl(
-			pageContext.getServletContext(),
-			(HttpServletRequest)pageContext.getRequest(),
-			(HttpServletResponse)pageContext.getResponse(),
-			href,
-			params,
-			hrefAbsolute,
-			addLastModified
-		);
+	public static void decodeURI(String uri, String documentEncoding, StringBuilder sb) throws UnsupportedEncodingException {
+		try {
+			decodeURI(uri, documentEncoding, sb, null);
+		} catch(UnsupportedEncodingException e) {
+			throw e;
+		} catch(IOException e) {
+			throw new AssertionError("IOException should not occur on StringBuilder", e);
+		}
 	}
 
 	/**
-	 * @see  #buildUrl(javax.servlet.jsp.PageContext, java.lang.String, com.aoindustries.net.HttpParameters, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.StringBuilder)
 	 */
-	public static String buildUrl(
-		JspContext jspContext,
-		String src,
-		HttpParameters params,
-		boolean srcAbsolute,
-		LastModifiedServlet.AddLastModifiedWhen addLastModified
-	) throws MalformedURLException, UnsupportedEncodingException {
-		return buildUrl(
-			(PageContext)jspContext,
-			src,
-			params,
-			srcAbsolute,
-			addLastModified
-		);
+	public static void decodeURI(String uri, StringBuilder sb) {
+		try {
+			decodeURI(uri, ENCODING.name(), sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
+	}
+
+	/**
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in a given encoding.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}, only used for the query.
+	 *                          When any encoding other than {@link StandardCharsets#UTF_8},
+	 *                          the query string is left unaltered.
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.String, java.lang.StringBuffer)
+	 */
+	public static void decodeURI(String uri, String documentEncoding, StringBuffer sb) throws UnsupportedEncodingException {
+		try {
+			decodeURI(uri, documentEncoding, sb, null);
+		} catch(UnsupportedEncodingException e) {
+			throw e;
+		} catch(IOException e) {
+			throw new AssertionError("IOException should not occur on StringBuffer", e);
+		}
+	}
+
+	/**
+	 * Decodes a URI to <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</a> in the default encoding <code>{@link #ENCODING}</code>.
+	 * Decodes the characters in the URI, not including any characters defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a>.
+	 * Furthermore, characters that would decode to a reserved character are left percent-encoded to avoid ambiguity.
+	 * <p>
+	 * See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a>
+	 * </p>
+	 *
+	 * @see #encodeURI(java.lang.String, java.lang.StringBuffer)
+	 */
+	public static void decodeURI(String uri, StringBuffer sb) {
+		try {
+			decodeURI(uri, ENCODING.name(), sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + ENCODING + ") should always exist", e);
+		}
 	}
 }

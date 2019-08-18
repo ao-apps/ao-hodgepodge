@@ -22,7 +22,6 @@
  */
 package com.aoindustries.net;
 
-import java.io.UnsupportedEncodingException;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -32,19 +31,36 @@ public class UrlUtilsTest {
 	}
 
 	@Test
-	public void testEncodeUrlPath() throws UnsupportedEncodingException {
+	public void testEncodeURI() {
 		assertEquals(
-			"https://aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do",
-			UrlUtils.encodeUrlPath("https://aointernet.net/shared/ホスティング.do", "UTF-8")
+			"https://aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do?%E8%8A%B1=true",
+			UrlUtils.encodeURI("https://aointernet.net/shared/ホスティング.do?花=true")
 		);
 		assertEquals(
-			"https://aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do?param=value",
-			UrlUtils.encodeUrlPath("https://aointernet.net/shared/ホスティング.do?param=value", "UTF-8")
+			"https://aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do?param=%E8%8A%B1",
+			UrlUtils.encodeURI("https://aointernet.net/shared/ホスティング.do?param=花")
 		);
 		assertEquals(
 			"Checking not double-encoding after #",
-			"https://search.maven.org/#search|gav|1|g:%22@com.aoindustries%22%20AND%20a:%22@aocode-public%22",
-			UrlUtils.encodeUrlPath("https://search.maven.org/#search|gav|1|g:%22@com.aoindustries%22%20AND%20a:%22@aocode-public%22", "UTF-8")
+			"https://search.maven.org/#search%7Cgav%7C1%7Cg:%22@com.aoindustries%22%20AND%20a:%22@aocode-public%22",
+			UrlUtils.encodeURI("https://search.maven.org/#search|gav|1|g:%22@com.aoindustries%22%20AND%20a:%22@aocode-public%22")
+		);
+	}
+
+	@Test
+	public void testDecodeURI() {
+		assertEquals(
+			"https://aointernet.net/shared/ホスティング.do?花=true",
+			UrlUtils.decodeURI("https://aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do?%E8%8A%B1=true")
+		);
+		assertEquals(
+			"https://aointernet.net/shared/ホスティング.do?param=花",
+			UrlUtils.decodeURI("https://aointernet.net/shared/%E3%83%9B%E3%82%B9%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0.do?param=%E8%8A%B1")
+		);
+		assertEquals(
+			"Checking not double-encoding after #",
+			"https://search.maven.org/#search|gav|1|g:\"@com.aoindustries\" AND a:\"@aocode-public\"",
+			UrlUtils.decodeURI("https://search.maven.org/#search%7Cgav%7C1%7Cg:%22@com.aoindustries%22%20AND%20a:%22@aocode-public%22")
 		);
 	}
 }
