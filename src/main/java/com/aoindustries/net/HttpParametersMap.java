@@ -25,12 +25,13 @@ package com.aoindustries.net;
 import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.util.StringUtility;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -50,26 +51,35 @@ public class HttpParametersMap implements MutableHttpParameters {
 	}
 
 	/**
-	 * Parses the provided URL-Encoded parameter string.
-	 * It is strongly recommended to use UTF-8 encoding.
+	 * Parses the provided URL-Encoded parameter string in a given encoding.
+	 *
+	 * @param queryString  The URL-encoded parameter string or {@code null} or {@code ""} for none
+	 * @param documentEncoding  The name of a supported {@linkplain Charset character encoding}.
 	 */
-	public HttpParametersMap(String parameters, String encoding) throws UnsupportedEncodingException {
-		init(parameters, encoding);
+	public HttpParametersMap(String queryString, String documentEncoding) throws UnsupportedEncodingException {
+		if(queryString != null) {
+			for(String nameValue : StringUtility.splitString(queryString, '&')) {
+				int pos = nameValue.indexOf('=');
+				String name;
+				String value;
+				if(pos == -1) {
+					name = UrlUtils.decodeURIComponent(nameValue, documentEncoding);
+					value = ""; // Servlet environment treats no equal sign same as value equal empty string - matching here
+				} else {
+					name = UrlUtils.decodeURIComponent(nameValue.substring(0, pos), documentEncoding);
+					value = UrlUtils.decodeURIComponent(nameValue.substring(pos + 1), documentEncoding);
+				}
+				addParameter(name, value);
+			}
+		}
 	}
 
-	private void init(String parameters, String encoding) throws UnsupportedEncodingException {
-		for(String nameValue : StringUtility.splitString(parameters, '&')) {
-			int pos = nameValue.indexOf('=');
-			String name;
-			String value;
-			if(pos==-1) {
-				name = URLDecoder.decode(nameValue, encoding);
-				value = ""; // Servlet environment treats no equal sign same as value equal empty string - matching here
-			} else {
-				name = URLDecoder.decode(nameValue.substring(0, pos), encoding);
-				value = URLDecoder.decode(nameValue.substring(pos+1), encoding);
-			}
-			addParameter(name, value);
+	@Override
+	public String toString() {
+		try {
+			return Objects.toString(HttpParametersUtils.toQueryString(this, UrlUtils.ENCODING.name()), "");
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + UrlUtils.ENCODING + ") should always exist", e);
 		}
 	}
 
@@ -97,11 +107,20 @@ public class HttpParametersMap implements MutableHttpParameters {
 	}
 
 	@Override
-	public void addParameter(String name, String value) {
+	final public void addParameter(String name, String value) {
 		NullArgumentException.checkNotNull(name, "name");
 		NullArgumentException.checkNotNull(value, "value");
 		List<String> values = map.get(name);
 		if(values==null) map.put(name, values = new ArrayList<>());
 		values.add(value);
+	}
+
+	@Override
+	public void addParameters(String name, Iterable<? extends String> values) {
+		if(values != null) {
+			for(String value : values) {
+				addParameter(name, value);
+			}
+		}
 	}
 }
