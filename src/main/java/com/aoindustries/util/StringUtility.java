@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util;
 
+import com.aoindustries.io.Encoder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -428,6 +429,55 @@ public final class StringUtility {
 			} while (pos != -1);
 			int len = string.length();
 			if(lastpos<len) out.append(string, lastpos, len);
+		}
+	}
+
+	/**
+	 * Replaces all occurrences of a character with a String, appends the replacement
+	 * to <code>out</code>.
+	 */
+	public static void replace(String string, char find, String replacement, Appendable out, Encoder encoder) throws IOException {
+		if(encoder == null) {
+			replace(string, find, replacement, out);
+		} else {
+			int pos = string.indexOf(find);
+			if (pos == -1) {
+				encoder.append(string, out);
+			} else {
+				int lastpos = 0;
+				do {
+					encoder.append(string, lastpos, pos, out).append(replacement, out);
+					lastpos = pos + 1;
+					pos = string.indexOf(find, lastpos);
+				} while (pos != -1);
+				int len = string.length();
+				if(lastpos<len) encoder.append(string, lastpos, len, out);
+			}
+		}
+	}
+
+	/**
+	 * Replaces all occurrences of a String with a String, appends the replacement
+	 * to <code>out</code>.
+	 */
+	public static void replace(String string, String find, String replacement, Appendable out, Encoder encoder) throws IOException {
+		if(encoder == null) {
+			replace(string, find, replacement, out);
+		} else {
+			int pos = string.indexOf(find);
+			if (pos == -1) {
+				encoder.append(string, out);
+			} else {
+				int lastpos = 0;
+				int findLen = find.length();
+				do {
+					encoder.append(string, lastpos, pos, out).append(replacement, out);
+					lastpos = pos + findLen;
+					pos = string.indexOf(find, lastpos);
+				} while (pos != -1);
+				int len = string.length();
+				if(lastpos<len) encoder.append(string, lastpos, len, out);
+			}
 		}
 	}
 
