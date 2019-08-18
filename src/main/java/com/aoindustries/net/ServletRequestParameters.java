@@ -23,12 +23,14 @@
 package com.aoindustries.net;
 
 import com.aoindustries.util.EnumerationIterator;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.servlet.ServletRequest;
 
 /**
@@ -42,6 +44,15 @@ public class ServletRequestParameters implements HttpParameters {
 
 	public ServletRequestParameters(ServletRequest request) {
 		this.request = request;
+	}
+
+	@Override
+	public String toString() {
+		try {
+			return Objects.toString(HttpParametersUtils.toQueryString(this, UrlUtils.ENCODING.name()), "");
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError("Standard encoding (" + UrlUtils.ENCODING + ") should always exist", e);
+		}
 	}
 
 	@Override

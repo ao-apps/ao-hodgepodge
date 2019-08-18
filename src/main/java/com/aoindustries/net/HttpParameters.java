@@ -34,6 +34,15 @@ import java.util.Map;
 public interface HttpParameters {
 
 	/**
+	 * Gets the query string encoded in the default encoding {@link UrlUtils#ENCODING},
+	 * not including the '?' prefix.
+	 *
+	 * @see HttpParametersUtils#toQueryString(com.aoindustries.net.HttpParameters)
+	 */
+	@Override
+	String toString();
+
+	/**
 	 * Gets the value for the provided parameter name or <code>null</code> if doesn't exist.
 	 * If the parameter has multiple values, the first value is returned.
 	 */
