@@ -48,6 +48,7 @@ import java.nio.charset.Charset;
  * </p>
  *
  * @see UriComponent
+ * @see UrlUtils
  *
  * @author  AO Industries, Inc.
  */
@@ -138,7 +139,6 @@ public class SplitUrl {
 	/**
 	 * @see  UrlUtils#hasScheme(java.lang.String)
 	 */
-	// TODO: write test for this method
 	public boolean hasScheme() {
 		return UrlUtils.hasScheme(url);
 	}
@@ -535,7 +535,6 @@ public class SplitUrl {
 	 *
 	 * @return  The new split URL or {@code this} when unmodified.
 	 */
-	// TODO: write test for this method
 	public SplitUrl setBase(String base) {
 		int baseLen = base.length();
 		int pathEnd = getPathEnd();
@@ -836,7 +835,6 @@ public class SplitUrl {
 	 *
 	 * @see  HttpParametersUtils#addParams(java.lang.String, com.aoindustries.net.HttpParameters, java.lang.String)
 	 */
-	// TODO: write test for this method
 	public SplitUrl addParameters(HttpParameters params, String documentEncoding) throws UnsupportedEncodingException {
 		if(params == null) {
 			return this;
@@ -854,7 +852,6 @@ public class SplitUrl {
 	 *
 	 * @return  The new split URL or {@code this} when unmodified.
 	 */
-	// TODO: write test for this method
 	public SplitUrl setEncodedFragment(String encodedFragment) {
 		if(encodedFragment == null) {
 			// Removing fragment
@@ -922,7 +919,6 @@ public class SplitUrl {
 	 * @deprecated  This is an incomplete implementation - recommend using {@code org.xbib.net.URL}
 	 *              or {@code org.apache.http.client.utils.URIBuilder}
 	 */
-	// TODO: write test for this method
 	@Deprecated
 	public SplitUrl setFragment(String fragment) {
 		return setEncodedFragment(UrlUtils.encodeURIComponent(fragment));
