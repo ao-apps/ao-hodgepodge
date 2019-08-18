@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,36 +22,208 @@
  */
 package com.aoindustries.servlet.http;
 
-import java.util.logging.Logger;
+import com.aoindustries.net.UrlUtils;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Helper utility to get and set cookies
+ * Helper utility to set, get, remove, encode, and decode cookies.
  */
 public final class Cookies {
-
-	private static final Logger logger = Logger.getLogger(Cookies.class.getName());
 
 	private Cookies() {
 	}
 
 	/**
-	 * Adds a cookie.
+	 * Encodes the name of a cookie via {@link UrlUtils#encodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The encoded name
+	 *
+	 * @see Cookie#Cookie(java.lang.String, java.lang.String)
 	 */
-	public static void addCookie(
+	public static String encodeName(String name) {
+		return UrlUtils.encodeURIComponent(name);
+	}
+
+	/**
+	 * Encodes the value of a cookie via {@link UrlUtils#encodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The encoded value
+	 *
+	 * @see Cookie#Cookie(java.lang.String, java.lang.String)
+	 */
+	public static String encodeValue(String value) {
+		return UrlUtils.encodeURIComponent(value);
+	}
+
+	/**
+	 * Encodes the comment of a cookie via {@link UrlUtils#encodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The encoded comment
+	 *
+	 * @see Cookie#setComment(java.lang.String)
+	 */
+	public static String encodeComment(String comment) {
+		return UrlUtils.encodeURIComponent(comment);
+	}
+
+	/**
+	 * Encodes the path of a cookie via {@link UrlUtils#encodeURI(java.lang.String)}.
+	 *
+	 * @return  The encoded path
+	 *
+	 * @see Cookie#setPath(java.lang.String)
+	 */
+	public static String encodePath(String path) {
+		return UrlUtils.encodeURI(path);
+	}
+
+	/**
+	 * Gets the name of a cookie, decoded via {@link UrlUtils#decodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The decoded name
+	 *
+	 * @see Cookie#getName()
+	 */
+	public static String decodeName(String name) {
+		return UrlUtils.decodeURIComponent(name);
+	}
+
+	/**
+	 * Gets the value of a cookie, decoded via {@link UrlUtils#decodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The decoded value
+	 *
+	 * @see Cookie#getValue()
+	 */
+	public static String decodeValue(String value) {
+		return UrlUtils.decodeURIComponent(value);
+	}
+
+	/**
+	 * Gets the comment of a cookie, decoded via {@link UrlUtils#decodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The decoded comment
+	 *
+	 * @see Cookie#getComment()
+	 */
+	public static String decodeComment(String comment) {
+		return UrlUtils.decodeURIComponent(comment);
+	}
+
+	/**
+	 * Gets the path of a cookie, decoded via {@link UrlUtils#decodeURI(java.lang.String)}.
+	 *
+	 * @return  The decoded path
+	 *
+	 * @see Cookie#getPath()
+	 */
+	public static String decodePath(String path) {
+		return UrlUtils.decodeURI(path);
+	}
+
+	/**
+	 * Creates a new cookie, but does not add it to any response.
+	 * Encodes name and value via {@link UrlUtils#encodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The new cookie
+	 *
+	 * @see Cookie#Cookie(java.lang.String, java.lang.String)
+	 */
+	public static Cookie newCookie(String name, String value) {
+		return new Cookie(
+			encodeName(name),
+			encodeValue(value)
+		);
+	}
+
+	/**
+	 * Sets the comment of a cookie, encoded via {@link UrlUtils#encodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The encoded comment
+	 *
+	 * @see Cookie#setComment(java.lang.String)
+	 */
+	public static String setComment(Cookie cookie, String comment) {
+		String encodedComment = encodeComment(comment);
+		cookie.setComment(encodedComment);
+		return encodedComment;
+	}
+
+	/**
+	 * Sets the path of a cookie, encoded via {@link UrlUtils#encodeURI(java.lang.String)}.
+	 *
+	 * @return  The encoded path
+	 *
+	 * @see Cookie#setPath(java.lang.String)
+	 */
+	public static String setPath(Cookie cookie, String path) {
+		String encodedPath = encodePath(path);
+		cookie.setPath(encodedPath);
+		return encodedPath;
+	}
+
+	/**
+	 * Gets the name of a cookie, decoded via {@link UrlUtils#decodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The decoded name
+	 *
+	 * @see Cookie#getName()
+	 */
+	public static String getName(Cookie cookie) {
+		return decodeName(cookie.getName());
+	}
+
+	/**
+	 * Gets the value of a cookie, decoded via {@link UrlUtils#decodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The decoded value
+	 *
+	 * @see Cookie#getValue()
+	 */
+	public static String getValue(Cookie cookie) {
+		return decodeValue(cookie.getValue());
+	}
+
+	/**
+	 * Gets the comment of a cookie, decoded via {@link UrlUtils#decodeURIComponent(java.lang.String)}.
+	 *
+	 * @return  The decoded comment
+	 *
+	 * @see Cookie#getComment()
+	 */
+	public static String getComment(Cookie cookie) {
+		return decodeComment(cookie.getComment());
+	}
+
+	/**
+	 * Gets the path of a cookie, decoded via {@link UrlUtils#decodeURI(java.lang.String)}.
+	 *
+	 * @return  The decoded path
+	 *
+	 * @see Cookie#getPath()
+	 */
+	public static String getPath(Cookie cookie) {
+		return decodePath(cookie.getPath());
+	}
+
+	/**
+	 * Creates a new cookie, but does not add it to any response.
+	 * Encodes name, value, and comment via {@link UrlUtils#encodeURIComponent(java.lang.String)}.
+	 * Encodes path via {@link UrlUtils#encodeURI(java.lang.String)}.
+	 */
+	public static Cookie newCookie(
 		HttpServletRequest request,
-		HttpServletResponse response,
-		String cookieName,
+		String name,
 		String value,
 		String comment,
 		int maxAge,
 		boolean secure,
 		boolean contextOnlyPath
 	) {
-		Cookie newCookie = new Cookie(cookieName, value);
-		if(comment!=null) newCookie.setComment(comment);
+		Cookie newCookie = newCookie(name, value);
+		setComment(newCookie, comment);
 		newCookie.setMaxAge(maxAge);
 		newCookie.setSecure(secure && request.isSecure());
 		String path;
@@ -61,19 +233,39 @@ public final class Cookies {
 		} else {
 			path = "/";
 		}
-		newCookie.setPath(path);
-		response.addCookie(newCookie);
+		setPath(newCookie, path);
+		return newCookie;
+	}
+
+	/**
+	 * Adds a new cookie to the response.
+	 * Encodes name, value, and comment via {@link UrlUtils#encodeURIComponent(java.lang.String)}.
+	 * Encodes path via {@link UrlUtils#encodeURI(java.lang.String)}.
+	 */
+	public static void addCookie(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String name,
+		String value,
+		String comment,
+		int maxAge,
+		boolean secure,
+		boolean contextOnlyPath
+	) {
+		response.addCookie(newCookie(request, name, value, comment, maxAge, secure, contextOnlyPath));
 	}
 
 	/**
 	 * Gets a cookie value given its name or <code>null</code> if not found.
+	 * Encodes name via {@link UrlUtils#encodeURIComponent(java.lang.String)}.
+	 * Decodes value value {@link UrlUtils#decodeURIComponent(java.lang.String)}.
 	 */
-	public static String getCookie(HttpServletRequest request, String cookieName) {
+	public static String getCookie(HttpServletRequest request, String name) {
 		Cookie[] cookies = request.getCookies();
-		if(cookies!=null) {
-			for(int c=cookies.length-1;c>=0;c--) {
-				Cookie cookie = cookies[c];
-				if(cookie.getName().equals(cookieName)) return cookie.getValue();
+		if(cookies != null) {
+			String encodedName = encodeName(name);
+			for(Cookie cookie : cookies) {
+				if(cookie.getName().equals(encodedName)) return getValue(cookie);
 			}
 		}
 		return null;
@@ -81,14 +273,15 @@ public final class Cookies {
 
 	/**
 	 * Removes a cookie by adding it with maxAge of zero.
+	 * Encodes name via {@link UrlUtils#encodeURIComponent(java.lang.String)}.
 	 */
 	public static void removeCookie(
 		HttpServletRequest request,
 		HttpServletResponse response,
-		String cookieName,
+		String name,
 		boolean secure,
 		boolean contextOnlyPath
 	) {
-		addCookie(request, response, cookieName, "Removed", null, 0, secure, contextOnlyPath);
+		addCookie(request, response, name, "Removed", null, 0, secure, contextOnlyPath);
 	}
 }
