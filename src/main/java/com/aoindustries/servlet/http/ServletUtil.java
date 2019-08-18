@@ -24,7 +24,10 @@ package com.aoindustries.servlet.http;
 
 import com.aoindustries.io.Encoder;
 import com.aoindustries.lang.NullArgumentException;
+import com.aoindustries.net.HttpParameters;
+import com.aoindustries.net.HttpParametersUtils;
 import com.aoindustries.net.UrlUtils;
+import com.aoindustries.util.WrappedException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -33,10 +36,14 @@ import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Enumeration;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.SkipPageException;
 
 /**
@@ -48,6 +55,8 @@ public class ServletUtil {
 
 	private ServletUtil() {
 	}
+
+	private static final boolean DEBUG = false;
 
 	/**
 	 * A shared {@link SkipPageException} instance to avoid exception creation overhead
@@ -165,15 +174,15 @@ public class ServletUtil {
 					if(remoteHost.endsWith(".googlebot.com") || remoteHost.endsWith(".googlebot.com.")) {
 						// Forward DNS must resolve back to the original IP
 						for(InetAddress actualIp : InetAddress.getAllByName(remoteHost)) {
-							System.out.println("DEBUG: ServletUtil: Googlebot verified: userAgent=\""+userAgent+"\", remoteAddr=\""+remoteAddr+"\", remoteHost=\""+remoteHost+"\"");
+							if(DEBUG) System.err.println("DEBUG: ServletUtil: Googlebot verified: userAgent=\""+userAgent+"\", remoteAddr=\""+remoteAddr+"\", remoteHost=\""+remoteHost+"\"");
 							if(actualIp.equals(remoteIp)) return true;
 						}
-						System.out.println("DEBUG: ServletUtil: Googlebot agent with valid reverse DNS failed forward lookup: userAgent=\""+userAgent+"\", remoteAddr=\""+remoteAddr+"\", remoteHost=\""+remoteHost+"\"");
+						if(DEBUG) System.err.println("DEBUG: ServletUtil: Googlebot agent with valid reverse DNS failed forward lookup: userAgent=\""+userAgent+"\", remoteAddr=\""+remoteAddr+"\", remoteHost=\""+remoteHost+"\"");
 					}
-					System.out.println("DEBUG: ServletUtil: Googlebot agent failed valid reverse DNS lookup: userAgent=\""+userAgent+"\", remoteAddr=\""+remoteAddr+"\", remoteHost=\""+remoteHost+"\"");
+					if(DEBUG) System.err.println("DEBUG: ServletUtil: Googlebot agent failed valid reverse DNS lookup: userAgent=\""+userAgent+"\", remoteAddr=\""+remoteAddr+"\", remoteHost=\""+remoteHost+"\"");
 				} catch(UnknownHostException exception) {
 					// Ignored
-					System.out.println("DEBUG: ServletUtil: Googlebot agent verification failed due to exception: userAgent=\""+userAgent+"\", remoteAddr=\""+remoteAddr+"\", remoteHost=\""+remoteHost+"\", exception=\""+exception+"\"");
+					if(DEBUG) System.err.println("DEBUG: ServletUtil: Googlebot agent verification failed due to exception: userAgent=\""+userAgent+"\", remoteAddr=\""+remoteAddr+"\", remoteHost=\""+remoteHost+"\", exception=\""+exception+"\"");
 				}
 				break; // Only check the first Googlebot User-Agent header (there should normally only be one anyway)
 			}
@@ -182,12 +191,16 @@ public class ServletUtil {
 	}
 
 	/**
-	 * @see #getAbsoluteURL(javax.servlet.http.HttpServletRequest, java.lang.String, java.lang.Appendable)
+	 * Gets an absolute URL for the given path.  This includes
+	 * protocol, port, context path, and relative path.
+	 * No URL rewriting is performed.
+	 *
+	 * @param contextRelative  When {@code true}, includes {@link HttpServletRequest#getContextPath()} in the URL.
 	 */
-	public static String getAbsoluteURL(HttpServletRequest request, String relPath) {
+	public static String getAbsoluteURL(HttpServletRequest request, String relPath, boolean contextRelative) {
 		try {
 			StringBuilder buffer = new StringBuilder();
-			getAbsoluteURL(request, relPath, buffer);
+			getAbsoluteURL(request, relPath, contextRelative, buffer);
 			return buffer.toString();
 		} catch(IOException e) {
 			// Should never get IOException from StringBuilder.
@@ -200,12 +213,23 @@ public class ServletUtil {
 	 * protocol, port, context path, and relative path.
 	 * No URL rewriting is performed.
 	 */
-	public static void getAbsoluteURL(HttpServletRequest request, String relPath, Appendable out) throws IOException {
+	public static String getAbsoluteURL(HttpServletRequest request, String relPath) {
+		return getAbsoluteURL(request, relPath, true);
+	}
+
+	/**
+	 * Gets an absolute URL for the given path.  This includes
+	 * protocol, port, context path, and relative path.
+	 * No URL rewriting is performed.
+	 *
+	 * @param contextRelative  When {@code true}, includes {@link HttpServletRequest#getContextPath()} in the URL.
+	 */
+	public static void getAbsoluteURL(HttpServletRequest request, String relPath, boolean contextRelative, Appendable out) throws IOException {
 		out.append(request.isSecure() ? "https://" : "http://");
 		out.append(request.getServerName());
 		int port = request.getServerPort();
 		if(port!=(request.isSecure() ? 443 : 80)) out.append(':').append(Integer.toString(port));
-		out.append(request.getContextPath());
+		if(contextRelative) out.append(request.getContextPath());
 		out.append(relPath);
 	}
 
@@ -214,17 +238,37 @@ public class ServletUtil {
 	 * protocol, port, context path, and relative path.
 	 * No URL rewriting is performed.
 	 */
-	public static void getAbsoluteURL(HttpServletRequest request, String relPath, Encoder encoder, Appendable out) throws IOException {
+	public static void getAbsoluteURL(HttpServletRequest request, String relPath, Appendable out) throws IOException {
+		getAbsoluteURL(request, relPath, true, out);
+	}
+
+	/**
+	 * Gets an absolute URL for the given path.  This includes
+	 * protocol, port, context path, and relative path.
+	 * No URL rewriting is performed.
+	 *
+	 * @param contextRelative  When {@code true}, includes {@link HttpServletRequest#getContextPath()} in the URL.
+	 */
+	public static void getAbsoluteURL(HttpServletRequest request, String relPath, boolean contextRelative, Encoder encoder, Appendable out) throws IOException {
 		if(encoder==null) {
-			getAbsoluteURL(request, relPath, out);
+			getAbsoluteURL(request, relPath, contextRelative, out);
 		} else {
 			encoder.append(request.isSecure() ? "https://" : "http://", out);
 			encoder.append(request.getServerName(), out);
 			int port = request.getServerPort();
 			if(port!=(request.isSecure() ? 443 : 80)) encoder.append(':', out).append(Integer.toString(port), out);
-			encoder.append(request.getContextPath(), out);
+			if(contextRelative) encoder.append(request.getContextPath(), out);
 			encoder.append(relPath, out);
 		}
+	}
+
+	/**
+	 * Gets an absolute URL for the given context-relative path.  This includes
+	 * protocol, port, context path, and relative path.
+	 * No URL rewriting is performed.
+	 */
+	public static void getAbsoluteURL(HttpServletRequest request, String relPath, Encoder encoder, Appendable out) throws IOException {
+		getAbsoluteURL(request, relPath, true, encoder, out);
 	}
 
 	/**
@@ -234,8 +278,8 @@ public class ServletUtil {
 	 *               The following actions are performed on the provided href:
 	 *               <ol>
 	 *                 <li>Convert page-relative paths to context-relative path, resolving ./ and ../</li>
-	 *                 <li>Encode URL path elements (like Japanese filenames)</li>
-	 *                 <li>Perform URL rewriting (response.encodeRedirectURL)</li>
+	 *                 <li>Encode URI to ASCII format via {@link #encodeURI(java.lang.String, javax.servlet.ServletResponse)}</li>
+	 *                 <li>Perform URL rewriting {@link HttpServletResponse#encodeRedirectURL(java.lang.String)}</li>
 	 *                 <li>Convert to absolute URL if needed.  This will also add the context path.</li>
 	 *               </ol>
 	 *
@@ -246,12 +290,12 @@ public class ServletUtil {
 		HttpServletResponse response,
 		String servletPath,
 		String href
-	) throws MalformedURLException, UnsupportedEncodingException {
+	) throws MalformedURLException {
 		// Convert page-relative paths to context-relative path, resolving ./ and ../
 		href = getAbsolutePath(servletPath, href);
 
-		// Encode URL path elements (like Japanese filenames)
-		href = UrlUtils.encodeUrlPath(href, response.getCharacterEncoding());
+		// Encode URI to ASCII format
+		href = encodeURI(href, response);
 
 		// Perform URL rewriting
 		href = response.encodeRedirectURL(href);
@@ -304,7 +348,12 @@ public class ServletUtil {
 
 	/**
 	 * Gets the current request URI in context-relative form.  The contextPath stripped.
+	 *
+	 * @deprecated  TODO: getContextPath sometimes comes back percent encoded, usually decoded.  Tomcat 7-only issue?
+	 *                    Deal with this here, and all other places where contextPath used for comparison.
+	 *                    Suggest encoding both then comparing.
 	 */
+	@Deprecated
 	public static String getContextRequestUri(HttpServletRequest request) {
 		String requestUri = request.getRequestURI();
 		String contextPath = request.getContextPath();
@@ -416,5 +465,295 @@ public class ServletUtil {
 			allow.append(METHOD_OPTIONS);
 		}
 		response.setHeader("Allow", allow.toString());
+	}
+
+	/**
+	 * Performs all the proper URL conversions along with optionally adding a lastModified parameter.
+	 * This includes:
+	 * <ol>
+	 *   <li>Converting any page-relative path to a context-relative path starting with a slash (/)</li>
+	 *   <li>Adding any additional parameters</li>
+	 *   <li>Optionally adding lastModified parameter</li>
+	 *   <li>Converting any context-relative path to a site-relative path by prefixing contextPath</li>
+	 *   <li>Encoding any URL path characters not defined in <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</a></li>
+	 *   <li>Rewrite with {@link HttpServletResponse#encodeURL(java.lang.String)}</li>
+	 *   <li>Optionally convert to an absolute URL: <code>http(s)://…</code></li>
+	 * </ol>
+	 */
+	public static String buildUrl(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String url,
+		HttpParameters params,
+		boolean urlAbsolute,
+		LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws MalformedURLException {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			String servletPath = Dispatcher.getCurrentPagePath(request);
+			url = ServletUtil.getAbsolutePath(servletPath, url);
+			url = HttpParametersUtils.addParams(url, params, responseEncoding);
+			url = LastModifiedServlet.addLastModified(servletContext, request, servletPath, url, addLastModified);
+			if(!urlAbsolute && url.startsWith("/")) {
+				String contextPath = request.getContextPath();
+				if(!contextPath.isEmpty()) url = contextPath + url;
+			}
+			url = response.encodeURL(UrlUtils.encodeURI(url, responseEncoding));
+			if(urlAbsolute && url.startsWith("/")) url = ServletUtil.getAbsoluteURL(request, url);
+			return url;
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see #buildUrl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, com.aoindustries.net.HttpParameters, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)
+	 */
+	public static String buildUrl(
+		PageContext pageContext,
+		String url,
+		HttpParameters params,
+		boolean urlAbsolute,
+		LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws MalformedURLException {
+		return buildUrl(
+			pageContext.getServletContext(),
+			(HttpServletRequest)pageContext.getRequest(),
+			(HttpServletResponse)pageContext.getResponse(),
+			url,
+			params,
+			urlAbsolute,
+			addLastModified
+		);
+	}
+
+	/**
+	 * @see #buildUrl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, com.aoindustries.net.HttpParameters, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)
+	 */
+	public static String buildUrl(
+		JspContext jspContext,
+		String url,
+		HttpParameters params,
+		boolean srcAbsolute,
+		LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws MalformedURLException {
+		return buildUrl(
+			(PageContext)jspContext,
+			url,
+			params,
+			srcAbsolute,
+			addLastModified
+		);
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURIComponent(java.lang.String, java.lang.String)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static String encodeURIComponent(String uri, ServletResponse response) {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			return UrlUtils.encodeURIComponent(uri, responseEncoding);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURIComponent(java.lang.String, java.lang.String, java.lang.Appendable)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static void encodeURIComponent(String uri, ServletResponse response, Appendable out) throws IOException {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			UrlUtils.encodeURIComponent(uri, responseEncoding, out);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURIComponent(java.lang.String, java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static void encodeURIComponent(String uri, ServletResponse response, Appendable out, Encoder encoder) throws IOException {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			UrlUtils.encodeURIComponent(uri, responseEncoding, out, encoder);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURIComponent(java.lang.String, java.lang.String, java.lang.StringBuilder)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static void encodeURIComponent(String uri, ServletResponse response, StringBuilder sb) {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			UrlUtils.encodeURIComponent(uri, responseEncoding, sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURIComponent(java.lang.String, java.lang.String, java.lang.StringBuffer)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static void encodeURIComponent(String uri, ServletResponse response, StringBuffer sb) {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			UrlUtils.encodeURIComponent(uri, responseEncoding, sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURIComponent(java.lang.String, java.lang.String)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static String decodeURIComponent(String uri, ServletRequest request) throws UnsupportedEncodingException {
+		return UrlUtils.decodeURIComponent(uri, getRequestEncoding(request));
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURIComponent(java.lang.String, java.lang.String, java.lang.Appendable)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static void decodeURIComponent(String uri, ServletRequest request, Appendable out) throws UnsupportedEncodingException, IOException {
+		UrlUtils.decodeURIComponent(uri, getRequestEncoding(request), out);
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURIComponent(java.lang.String, java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static void decodeURIComponent(String uri, ServletRequest request, Appendable out, Encoder encoder) throws UnsupportedEncodingException, IOException {
+		UrlUtils.decodeURIComponent(uri, getRequestEncoding(request), out, encoder);
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURIComponent(java.lang.String, java.lang.String, java.lang.StringBuilder)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static void decodeURIComponent(String uri, ServletRequest request, StringBuilder sb) throws UnsupportedEncodingException {
+		UrlUtils.decodeURIComponent(uri, getRequestEncoding(request), sb);
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURIComponent(java.lang.String, java.lang.String, java.lang.StringBuffer)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static void decodeURIComponent(String uri, ServletRequest request, StringBuffer sb) throws UnsupportedEncodingException {
+		UrlUtils.decodeURIComponent(uri, getRequestEncoding(request), sb);
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURI(java.lang.String, java.lang.String)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static String encodeURI(String uri, ServletResponse response) {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			return UrlUtils.encodeURI(uri, responseEncoding);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURI(java.lang.String, java.lang.String, java.lang.Appendable)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static void encodeURI(String uri, ServletResponse response, Appendable out) throws IOException {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			UrlUtils.encodeURI(uri, responseEncoding, out);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURI(java.lang.String, java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static void encodeURI(String uri, ServletResponse response, Appendable out, Encoder encoder) throws IOException {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			UrlUtils.encodeURI(uri, responseEncoding, out, encoder);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURI(java.lang.String, java.lang.String, java.lang.StringBuilder)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static void encodeURI(String uri, ServletResponse response, StringBuilder sb) {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			UrlUtils.encodeURI(uri, responseEncoding, sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#encodeURI(java.lang.String, java.lang.String, java.lang.StringBuffer)
+	 * @see  ServletResponse#getCharacterEncoding()
+	 */
+	public static void encodeURI(String uri, ServletResponse response, StringBuffer sb) {
+		String responseEncoding = response.getCharacterEncoding();
+		try {
+			UrlUtils.encodeURI(uri, responseEncoding, sb);
+		} catch(UnsupportedEncodingException e) {
+			throw new WrappedException("ServletResponse encoding (" + responseEncoding + ") is expected to always exist", e);
+		}
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURI(java.lang.String, java.lang.String)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static String decodeURI(String uri, ServletRequest request) throws UnsupportedEncodingException {
+		return UrlUtils.decodeURI(uri, getRequestEncoding(request));
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURI(java.lang.String, java.lang.String, java.lang.Appendable)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static void decodeURI(String uri, ServletRequest request, Appendable out) throws UnsupportedEncodingException, IOException {
+		UrlUtils.decodeURI(uri, getRequestEncoding(request), out);
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURI(java.lang.String, java.lang.String, java.lang.Appendable, com.aoindustries.io.Encoder)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static void decodeURI(String uri, ServletRequest request, Appendable out, Encoder encoder) throws UnsupportedEncodingException, IOException {
+		UrlUtils.decodeURI(uri, getRequestEncoding(request), out, encoder);
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURI(java.lang.String, java.lang.String, java.lang.StringBuilder)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static void decodeURI(String uri, ServletRequest request, StringBuilder sb) throws UnsupportedEncodingException {
+		UrlUtils.decodeURI(uri, getRequestEncoding(request), sb);
+	}
+
+	/**
+	 * @see  UrlUtils#decodeURI(java.lang.String, java.lang.String, java.lang.StringBuffer)
+	 * @see  #getRequestEncoding(javax.servlet.ServletRequest)
+	 */
+	public static void decodeURI(String uri, ServletRequest request, StringBuffer sb) throws UnsupportedEncodingException {
+		UrlUtils.decodeURI(uri, getRequestEncoding(request), sb);
 	}
 }
