@@ -116,7 +116,7 @@ final public class HttpParametersUtils {
 		StringBuilder sb = new StringBuilder();
 		boolean didOne = false;
 		for(Map.Entry<String,List<String>> entry : map.entrySet()) {
-			String encodedName = UriComponent.QUERY.encode(entry.getKey(), documentEncoding);
+			String encodedName = UrlUtils.encodeURIComponent(entry.getKey(), documentEncoding);
 			for(String value : entry.getValue()) {
 				if(didOne) {
 					sb.append('&');
@@ -126,7 +126,7 @@ final public class HttpParametersUtils {
 				sb.append(encodedName);
 				assert value != null : "null values no longer supported to be consistent with servlet environment";
 				sb.append('=');
-				UriComponent.QUERY.encode(value, documentEncoding, sb);
+				UrlUtils.encodeURIComponent(value, documentEncoding, sb);
 			}
 		}
 		assert didOne;
