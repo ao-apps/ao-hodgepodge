@@ -61,6 +61,11 @@ public class UnmodifiableHttpParameters implements HttpParameters {
 	}
 
 	@Override
+	public String toString() {
+		return wrapped.toString();
+	}
+
+	@Override
 	public String getParameter(String name) {
 		return wrapped.getParameter(name);
 	}

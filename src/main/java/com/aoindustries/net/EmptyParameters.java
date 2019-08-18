@@ -44,6 +44,11 @@ final public class EmptyParameters implements HttpParameters {
 	}
 
 	@Override
+	public String toString() {
+		return "";
+	}
+
+	@Override
 	public String getParameter(String name) {
 		return null;
 	}
