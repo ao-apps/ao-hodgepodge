@@ -27,6 +27,7 @@ import com.aoindustries.util.i18n.BundleLookupThreadContext;
 import com.aoindustries.util.i18n.MarkupType;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -67,6 +68,7 @@ public final class EncodingUtils {
 				Transformer transformer = transFactory.newTransformer();
 				StringWriter buffer = new StringWriter();
 				transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+				transformer.setOutputProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
 				transformer.transform(
 					new DOMSource((Node)value),
 					new StreamResult(buffer)
