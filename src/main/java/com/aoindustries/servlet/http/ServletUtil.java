@@ -349,7 +349,7 @@ public class ServletUtil {
 	/**
 	 * Gets the current request URI in context-relative form.  The contextPath stripped.
 	 *
-	 * @deprecated  TODO: getContextPath sometimes comes back percent encoded, usually decoded.  Tomcat 7-only issue?
+	 * @deprecated  TODO: getContextPath sometimes comes back percent encoded, but is usually decoded.  Tomcat 7-only issue?
 	 *                    Deal with this here, and all other places where contextPath used for comparison.
 	 *                    Suggest encoding both then comparing.
 	 */
