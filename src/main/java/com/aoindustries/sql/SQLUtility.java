@@ -459,10 +459,10 @@ public class SQLUtility {
 		int widest = 0;
 		if(value != null) {
 			int width = 0;
-			for(int i = 0, len = value.length(); i < len; i = value.offsetByCodePoints(i, 1)) {
-				int cp = value.codePointAt(i);
-				if(cp != '\r') {
-					if(cp == '\n') {
+			for (int i = 0, len = value.length(), codePoint; i < len; i += Character.charCount(codePoint)) {
+				codePoint = value.codePointAt(i);
+				if(codePoint != '\r') {
+					if(codePoint == '\n') {
 						if(width > widest) widest = width;
 						width = 0;
 					} else {
@@ -531,15 +531,15 @@ public class SQLUtility {
 						cell.setLength(0);
 						int cellWidth = 0;
 						while(pos < toStringLen) {
-							int cp = toString.codePointAt(pos);
-							pos = toString.offsetByCodePoints(pos, 1);
-							if(cp == '\r') {
+							int codePoint = toString.codePointAt(pos);
+							pos += Character.charCount(codePoint);
+							if(codePoint == '\r') {
 								// Skip
-							} else if(cp == '\n') {
+							} else if(codePoint == '\n') {
 								cellNewline = true;
 								break;
 							} else {
-								cell.appendCodePoint(cp);
+								cell.appendCodePoint(codePoint);
 								cellWidth++;
 							}
 						}
