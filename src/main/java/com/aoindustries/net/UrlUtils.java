@@ -93,17 +93,29 @@ public class UrlUtils {
 	 *
 	 * @param scheme  The scheme to look for, not including colon.
 	 *                For example {@code "http"}.
+	 *
+	 * @throws IllegalArgumentException when {@code scheme} is determined to be invalid.
+	 *         Please note that this determination is not guaranteed as shortcuts may
+	 *         skip individual character comparisons.
 	 */
-	public static boolean isScheme(String uri, String scheme) {
+	// TODO: Redundant with SplitUrl.isScheme
+	public static boolean isScheme(String uri, String scheme) throws IllegalArgumentException {
 		if(uri == null) return false;
 		int len = scheme.length();
+		if(len == 0) {
+			throw new IllegalArgumentException("Invalid scheme: " + scheme);
+		}
 		if((len + 1) > uri.length()) return false;
 		for(int i = 0; i < len; i++) {
-			char ch1 = uri.charAt(i);
-			char ch2 = scheme.charAt(i);
+			char ch1 = scheme.charAt(i);
+			boolean isValid = (i == 0) ? RFC3986.isSchemeBeginning(ch1) : RFC3986.isSchemeRemaining(ch1);
+			if(!isValid) {
+				throw new IllegalArgumentException("Invalid scheme: " + scheme);
+			}
+			char ch2 = uri.charAt(i);
 			// Convert to lower-case, ASCII-only
-			if(ch1 >= 'A' && ch1 <= 'Z') ch1 += 'a' - 'A';
-			if(ch2 >= 'A' && ch2 <= 'Z') ch2 += 'a' - 'A';
+			ch1 = RFC3986.normalizeScheme(ch1);
+			ch2 = RFC3986.normalizeScheme(ch2);
 			if(ch1 != ch2) return false;
 		}
 		// Must be followed by a colon
@@ -111,19 +123,20 @@ public class UrlUtils {
 	}
 
 	/**
-	 * Checks if a URI has a scheme, including a possibly empty scheme (starts with ':')
+	 * Checks if a URI has a scheme, not including any empty scheme (starts with ':')
 	 */
 	public static boolean hasScheme(String uri) {
 		if(uri == null) return false;
-		for(int i = 0, len = uri.length(); i < len; i++) {
+		int len = uri.length();
+		if(len == 0) return false;
+		// First character
+		if(!RFC3986.isSchemeBeginning(uri.charAt(0))) return false;
+		// Remaining characters
+		for(int i = 1; i < len; i++) {
 			char ch = uri.charAt(i);
 			if(ch == ':') {
 				return true;
-			} else if(
-				(ch < 'a' || ch > 'z')
-				&& (ch < 'A' || ch > 'Z')
-			) {
-				// ASCII-only
+			} else if(!RFC3986.isSchemeRemaining(ch)) {
 				return false;
 			}
 		}
@@ -133,45 +146,41 @@ public class UrlUtils {
 
 	/**
 	 * Gets the scheme for a URI, or {@code null} when no scheme found.
-	 * The scheme must start the URI, and contain only (A-Z, a-z) before the first colon (:)
-	 * found.  The scheme is normalized to lower-case.  An empty scheme will be returned if the URI starts with (':').
+	 * The scheme must start the URI, and match {@code ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )}
+	 * before the first colon (:) found.  The scheme is normalized to lower-case.
+	 * An empty scheme will never be returned (if the URI starts with ':').
 	 *
 	 * @return  The scheme, not including colon, or {@code null} when not found.
 	 *          For example {@code "http"}.
 	 */
+	// TODO: Redundant with SplitUrl.getScheme except SplitUrl doesn't normalize
 	public static final String getScheme(String uri) {
 		if(uri == null) return null;
 		int len = uri.length();
+		if(len == 0) return null;
+		// First character
+		if(!RFC3986.isSchemeBeginning(uri.charAt(0))) return null;
+
 		// Find the colon, returning null if any non-A-Z,a-z is found on the way
 		int colonPos = -1;
-		for(int i = 0; i < len; i++) {
+		for(int i = 1; i < len; i++) {
 			char ch = uri.charAt(i);
 			if(ch == ':') {
 				colonPos = i;
 				break;
-			} else if(
-				(ch < 'a' || ch > 'z')
-				&& (ch < 'A' || ch > 'Z')
-			) {
-				// ASCII-only
+			} else if(!RFC3986.isSchemeRemaining(ch)) {
 				return null;
 			}
 		}
 		// No colon found
 		if(colonPos == -1) return null;
-		// Empty scheme
-		if(colonPos == 0) return "";
+		// No empty scheme
+		assert colonPos != 0 : "No empty scheme";
 		// Normalize to lower-case
 		char[] scheme = new char[colonPos];
 		for(int i = 0; i < colonPos; i++) {
-			char ch = uri.charAt(i);
 			// Convert to lower-case, ASCII-only
-			if(ch >= 'A' && ch <= 'Z') {
-				ch += 'a' - 'A';
-			} else {
-				assert ch >= 'a' && ch <= 'z';
-			}
-			scheme[i] = ch;
+			scheme[i] = RFC3986.normalizeScheme(uri.charAt(i));
 		}
 		return String.valueOf(scheme);
 	}
