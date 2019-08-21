@@ -73,28 +73,55 @@ public class SplitUrlTest {
 
 		assertFalse(new SplitUrl("/path").isScheme("http"));
 		assertFalse(new SplitUrl("./path").isScheme("https"));
+	}
 
-		assertTrue(new SplitUrl(":blarg").isScheme(""));
-		assertTrue(new SplitUrl(":").isScheme(""));
+	@Test(expected = IllegalArgumentException.class)
+	public void testIsSchemeEmptyScheme1() {
+		new SplitUrl(":blarg").isScheme("");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testIsSchemeEmptyScheme2() {
+		new SplitUrl(":").isScheme("");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testIsSchemeInvalidScheme() {
+		new SplitUrl("http:").isScheme("<<>>");
+	}
+
+	public void testIsSchemeInvalidSchemeTooLongToValidate() {
+		assertFalse(
+			"Scheme will not validate when longer than possible value, due to short-cut",
+			new SplitUrl("http:").isScheme("<<.>>")
+		);
 	}
 
 	@Test
 	public void testGetScheme() {
-		assertEquals("http", new SplitUrl("htTP:").getScheme());
-		assertEquals("https", new SplitUrl("htTPs:").getScheme());
-
+		assertEquals("htTP", new SplitUrl("htTP:").getScheme());
+		assertEquals("htTPs", new SplitUrl("htTPs:").getScheme());
+		assertEquals("htTP", new SplitUrl("htTP:?").getScheme());
+		assertEquals("htTP", new SplitUrl("htTP:?param?&param2=value#anc?h&or").getScheme());
+		assertEquals("htTP", new SplitUrl("htTP:#fragment#").getScheme());
+		assertEquals("htTP", new SplitUrl("htTP:#fragment?notParam").getScheme());
+		
+		
 		assertNull(new SplitUrl("htTP").getScheme());
 		assertNull(new SplitUrl("htTPs").getScheme());
 
 		assertNull(new SplitUrl("/path").getScheme());
 		assertNull(new SplitUrl("./path").getScheme());
 
-		assertEquals("", new SplitUrl(":blarg").getScheme());
-		assertEquals("", new SplitUrl(":").getScheme());
+		assertNull(new SplitUrl(":blarg").getScheme());
+		assertNull(new SplitUrl(":").getScheme());
 	}
+
+	// TODO: Test more scheme methods like write/append
+
 	// </editor-fold>
 
-	// <editor-fold defaultstate="collapsed" desc="Test Base">
+	// <editor-fold defaultstate="collapsed" desc="Test HierPart">
 	@Test
 	public void testGetPathEnd() {
 		assertEquals(5, new SplitUrl("htTP:").getPathEnd());
@@ -117,228 +144,228 @@ public class SplitUrlTest {
 	}
 
 	@Test
-	public void testGetBase() {
-		assertSame("htTP:", new SplitUrl("htTP:").getBase());
-		assertEquals("htTP:", new SplitUrl("htTP:?").getBase());
-		assertEquals("htTP:", new SplitUrl("htTP:?param?&param2=value#anc?h&or").getBase());
-		assertEquals("htTP:", new SplitUrl("htTP:#fragment#").getBase());
-		assertEquals("htTP:", new SplitUrl("htTP:#fragment?notParam").getBase());
+	public void testGetHierPart() {
+		assertEquals("", new SplitUrl("htTP:").getHierPart());
+		assertEquals("", new SplitUrl("htTP:?").getHierPart());
+		assertEquals("", new SplitUrl("htTP:?param?&param2=value#anc?h&or").getHierPart());
+		assertEquals("", new SplitUrl("htTP:#fragment#").getHierPart());
+		assertEquals("", new SplitUrl("htTP:#fragment?notParam").getHierPart());
 
-		assertSame("./", new SplitUrl("./").getBase());
-		assertEquals("./", new SplitUrl("./?").getBase());
-		assertEquals("./", new SplitUrl("./?param?&param2=value#anc?h&or").getBase());
-		assertEquals("./", new SplitUrl("./#fragment#").getBase());
-		assertEquals("./", new SplitUrl("./#fragment?notParam").getBase());
+		assertSame("./", new SplitUrl("./").getHierPart());
+		assertEquals("./", new SplitUrl("./?").getHierPart());
+		assertEquals("./", new SplitUrl("./?param?&param2=value#anc?h&or").getHierPart());
+		assertEquals("./", new SplitUrl("./#fragment#").getHierPart());
+		assertEquals("./", new SplitUrl("./#fragment?notParam").getHierPart());
 
-		assertSame("", new SplitUrl("").getBase());
-		assertEquals("", new SplitUrl("?").getBase());
-		assertEquals("", new SplitUrl("?param?&param2=value#anc?h&or").getBase());
-		assertEquals("", new SplitUrl("#fragment#").getBase());
-		assertEquals("", new SplitUrl("#fragment?notParam").getBase());
+		assertSame("", new SplitUrl("").getHierPart());
+		assertEquals("", new SplitUrl("?").getHierPart());
+		assertEquals("", new SplitUrl("?param?&param2=value#anc?h&or").getHierPart());
+		assertEquals("", new SplitUrl("#fragment#").getHierPart());
+		assertEquals("", new SplitUrl("#fragment?notParam").getHierPart());
 	}
 
-	private static String captureWriteBase(String url) throws IOException {
+	private static String captureWriteHierPart(String url) throws IOException {
 		StringWriter out = new StringWriter(url.length());
-		new SplitUrl(url).writeBase(out);
+		new SplitUrl(url).writeHierPart(out);
 		return out.toString();
 	}
 
 	@Test
-	public void testWriteBase() throws IOException {
-		assertEquals("htTP:", captureWriteBase("htTP:"));
-		assertEquals("htTP:", captureWriteBase("htTP:?"));
-		assertEquals("htTP:", captureWriteBase("htTP:?param?&param2=value#anc?h&or"));
-		assertEquals("htTP:", captureWriteBase("htTP:#fragment#"));
-		assertEquals("htTP:", captureWriteBase("htTP:#fragment?notParam"));
+	public void testWriteHierPart() throws IOException {
+		assertEquals("", captureWriteHierPart("htTP:"));
+		assertEquals("", captureWriteHierPart("htTP:?"));
+		assertEquals("", captureWriteHierPart("htTP:?param?&param2=value#anc?h&or"));
+		assertEquals("", captureWriteHierPart("htTP:#fragment#"));
+		assertEquals("", captureWriteHierPart("htTP:#fragment?notParam"));
 
-		assertEquals("./", captureWriteBase("./"));
-		assertEquals("./", captureWriteBase("./?"));
-		assertEquals("./", captureWriteBase("./?param?&param2=value#anc?h&or"));
-		assertEquals("./", captureWriteBase("./#fragment#"));
-		assertEquals("./", captureWriteBase("./#fragment?notParam"));
+		assertEquals("./", captureWriteHierPart("./"));
+		assertEquals("./", captureWriteHierPart("./?"));
+		assertEquals("./", captureWriteHierPart("./?param?&param2=value#anc?h&or"));
+		assertEquals("./", captureWriteHierPart("./#fragment#"));
+		assertEquals("./", captureWriteHierPart("./#fragment?notParam"));
 
-		assertEquals("", captureWriteBase(""));
-		assertEquals("", captureWriteBase("?"));
-		assertEquals("", captureWriteBase("?param?&param2=value#anc?h&or"));
-		assertEquals("", captureWriteBase("#fragment#"));
-		assertEquals("", captureWriteBase("#fragment?notParam"));
+		assertEquals("", captureWriteHierPart(""));
+		assertEquals("", captureWriteHierPart("?"));
+		assertEquals("", captureWriteHierPart("?param?&param2=value#anc?h&or"));
+		assertEquals("", captureWriteHierPart("#fragment#"));
+		assertEquals("", captureWriteHierPart("#fragment?notParam"));
 	}
 
-	private static String captureWriteBase(String url, Encoder encoder) throws IOException {
+	private static String captureWriteHierPart(String url, Encoder encoder) throws IOException {
 		StringWriter out = new StringWriter(url.length());
-		new SplitUrl(url).writeBase(out, encoder);
+		new SplitUrl(url).writeHierPart(out, encoder);
 		return out.toString();
 	}
 
 	@Test
-	public void testWriteBaseNullEncoder() throws IOException {
-		assertEquals("htTP:&", captureWriteBase("htTP:&", null));
-		assertEquals("htTP:&", captureWriteBase("htTP:&?", null));
-		assertEquals("htTP:&", captureWriteBase("htTP:&?param?&param2=value#anc?h&or", null));
-		assertEquals("htTP:&", captureWriteBase("htTP:&#fragment#", null));
-		assertEquals("htTP:&", captureWriteBase("htTP:&#fragment?notParam", null));
+	public void testWriteHierPartNullEncoder() throws IOException {
+		assertEquals("&", captureWriteHierPart("htTP:&", null));
+		assertEquals("&", captureWriteHierPart("htTP:&?", null));
+		assertEquals("&", captureWriteHierPart("htTP:&?param?&param2=value#anc?h&or", null));
+		assertEquals("&", captureWriteHierPart("htTP:&#fragment#", null));
+		assertEquals("&", captureWriteHierPart("htTP:&#fragment?notParam", null));
 
-		assertEquals("./<>", captureWriteBase("./<>", null));
-		assertEquals("./<>", captureWriteBase("./<>?", null));
-		assertEquals("./<>", captureWriteBase("./<>?param?&param2=value#anc?h&or", null));
-		assertEquals("./<>", captureWriteBase("./<>#fragment#", null));
-		assertEquals("./<>", captureWriteBase("./<>#fragment?notParam", null));
+		assertEquals("./<>", captureWriteHierPart("./<>", null));
+		assertEquals("./<>", captureWriteHierPart("./<>?", null));
+		assertEquals("./<>", captureWriteHierPart("./<>?param?&param2=value#anc?h&or", null));
+		assertEquals("./<>", captureWriteHierPart("./<>#fragment#", null));
+		assertEquals("./<>", captureWriteHierPart("./<>#fragment?notParam", null));
 
-		assertEquals("", captureWriteBase("", null));
-		assertEquals("", captureWriteBase("?", null));
-		assertEquals("", captureWriteBase("?param?&param2=value#anc?h&or", null));
-		assertEquals("", captureWriteBase("#fragment#", null));
-		assertEquals("", captureWriteBase("#fragment?notParam", null));
+		assertEquals("", captureWriteHierPart("", null));
+		assertEquals("", captureWriteHierPart("?", null));
+		assertEquals("", captureWriteHierPart("?param?&param2=value#anc?h&or", null));
+		assertEquals("", captureWriteHierPart("#fragment#", null));
+		assertEquals("", captureWriteHierPart("#fragment?notParam", null));
 	}
 
 	@Test
-	public void testWriteBaseXhtmlEncoder() throws IOException {
-		assertEquals("htTP:&amp;", captureWriteBase("htTP:&", testXmlEncoder));
-		assertEquals("htTP:&amp;", captureWriteBase("htTP:&?", testXmlEncoder));
-		assertEquals("htTP:&amp;", captureWriteBase("htTP:&?param?&param2=value#anc?h&or", testXmlEncoder));
-		assertEquals("htTP:&amp;", captureWriteBase("htTP:&#fragment#", testXmlEncoder));
-		assertEquals("htTP:&amp;", captureWriteBase("htTP:&#fragment?notParam", testXmlEncoder));
+	public void testWriteHierPartXhtmlEncoder() throws IOException {
+		assertEquals("&amp;", captureWriteHierPart("htTP:&", testXmlEncoder));
+		assertEquals("&amp;", captureWriteHierPart("htTP:&?", testXmlEncoder));
+		assertEquals("&amp;", captureWriteHierPart("htTP:&?param?&param2=value#anc?h&or", testXmlEncoder));
+		assertEquals("&amp;", captureWriteHierPart("htTP:&#fragment#", testXmlEncoder));
+		assertEquals("&amp;", captureWriteHierPart("htTP:&#fragment?notParam", testXmlEncoder));
 
-		assertEquals("./&lt;&gt;", captureWriteBase("./<>", testXmlEncoder));
-		assertEquals("./&lt;&gt;", captureWriteBase("./<>?", testXmlEncoder));
-		assertEquals("./&lt;&gt;", captureWriteBase("./<>?param?&param2=value#anc?h&or", testXmlEncoder));
-		assertEquals("./&lt;&gt;", captureWriteBase("./<>#fragment#", testXmlEncoder));
-		assertEquals("./&lt;&gt;", captureWriteBase("./<>#fragment?notParam", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureWriteHierPart("./<>", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureWriteHierPart("./<>?", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureWriteHierPart("./<>?param?&param2=value#anc?h&or", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureWriteHierPart("./<>#fragment#", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureWriteHierPart("./<>#fragment?notParam", testXmlEncoder));
 
-		assertEquals("", captureWriteBase("", testXmlEncoder));
-		assertEquals("", captureWriteBase("?", testXmlEncoder));
-		assertEquals("", captureWriteBase("?param?&param2=value#anc?h&or", testXmlEncoder));
-		assertEquals("", captureWriteBase("#fragment#", testXmlEncoder));
-		assertEquals("", captureWriteBase("#fragment?notParam", testXmlEncoder));
+		assertEquals("", captureWriteHierPart("", testXmlEncoder));
+		assertEquals("", captureWriteHierPart("?", testXmlEncoder));
+		assertEquals("", captureWriteHierPart("?param?&param2=value#anc?h&or", testXmlEncoder));
+		assertEquals("", captureWriteHierPart("#fragment#", testXmlEncoder));
+		assertEquals("", captureWriteHierPart("#fragment?notParam", testXmlEncoder));
 	}
 
-	private static String captureAppendBaseOut(String url) throws IOException {
+	private static String captureAppendHierPartOut(String url) throws IOException {
 		StringWriter out = new StringWriter(url.length());
-		new SplitUrl(url).appendBase(out);
+		new SplitUrl(url).appendHierPart(out);
 		return out.toString();
 	}
 
 	@Test
-	public void testAppendBaseOut() throws IOException {
-		assertEquals("htTP:", captureAppendBaseOut("htTP:"));
-		assertEquals("htTP:", captureAppendBaseOut("htTP:?"));
-		assertEquals("htTP:", captureAppendBaseOut("htTP:?param?&param2=value#anc?h&or"));
-		assertEquals("htTP:", captureAppendBaseOut("htTP:#fragment#"));
-		assertEquals("htTP:", captureAppendBaseOut("htTP:#fragment?notParam"));
+	public void testAppendHierPartOut() throws IOException {
+		assertEquals("", captureAppendHierPartOut("htTP:"));
+		assertEquals("", captureAppendHierPartOut("htTP:?"));
+		assertEquals("", captureAppendHierPartOut("htTP:?param?&param2=value#anc?h&or"));
+		assertEquals("", captureAppendHierPartOut("htTP:#fragment#"));
+		assertEquals("", captureAppendHierPartOut("htTP:#fragment?notParam"));
 
-		assertEquals("./", captureAppendBaseOut("./"));
-		assertEquals("./", captureAppendBaseOut("./?"));
-		assertEquals("./", captureAppendBaseOut("./?param?&param2=value#anc?h&or"));
-		assertEquals("./", captureAppendBaseOut("./#fragment#"));
-		assertEquals("./", captureAppendBaseOut("./#fragment?notParam"));
+		assertEquals("./", captureAppendHierPartOut("./"));
+		assertEquals("./", captureAppendHierPartOut("./?"));
+		assertEquals("./", captureAppendHierPartOut("./?param?&param2=value#anc?h&or"));
+		assertEquals("./", captureAppendHierPartOut("./#fragment#"));
+		assertEquals("./", captureAppendHierPartOut("./#fragment?notParam"));
 
-		assertEquals("", captureAppendBaseOut(""));
-		assertEquals("", captureAppendBaseOut("?"));
-		assertEquals("", captureAppendBaseOut("?param?&param2=value#anc?h&or"));
-		assertEquals("", captureAppendBaseOut("#fragment#"));
-		assertEquals("", captureAppendBaseOut("#fragment?notParam"));
+		assertEquals("", captureAppendHierPartOut(""));
+		assertEquals("", captureAppendHierPartOut("?"));
+		assertEquals("", captureAppendHierPartOut("?param?&param2=value#anc?h&or"));
+		assertEquals("", captureAppendHierPartOut("#fragment#"));
+		assertEquals("", captureAppendHierPartOut("#fragment?notParam"));
 	}
 
-	private static String captureAppendBaseOut(String url, Encoder encoder) throws IOException {
+	private static String captureAppendHierPartOut(String url, Encoder encoder) throws IOException {
 		StringWriter out = new StringWriter(url.length());
-		new SplitUrl(url).appendBase(out, encoder);
+		new SplitUrl(url).appendHierPart(out, encoder);
 		return out.toString();
 	}
 
 	@Test
-	public void testAppendBaseOutNullEncoder() throws IOException {
-		assertEquals("htTP:&", captureAppendBaseOut("htTP:&", null));
-		assertEquals("htTP:&", captureAppendBaseOut("htTP:&?", null));
-		assertEquals("htTP:&", captureAppendBaseOut("htTP:&?param?&param2=value#anc?h&or", null));
-		assertEquals("htTP:&", captureAppendBaseOut("htTP:&#fragment#", null));
-		assertEquals("htTP:&", captureAppendBaseOut("htTP:&#fragment?notParam", null));
+	public void testAppendHierPartOutNullEncoder() throws IOException {
+		assertEquals("&", captureAppendHierPartOut("htTP:&", null));
+		assertEquals("&", captureAppendHierPartOut("htTP:&?", null));
+		assertEquals("&", captureAppendHierPartOut("htTP:&?param?&param2=value#anc?h&or", null));
+		assertEquals("&", captureAppendHierPartOut("htTP:&#fragment#", null));
+		assertEquals("&", captureAppendHierPartOut("htTP:&#fragment?notParam", null));
 
-		assertEquals("./<>", captureAppendBaseOut("./<>", null));
-		assertEquals("./<>", captureAppendBaseOut("./<>?", null));
-		assertEquals("./<>", captureAppendBaseOut("./<>?param?&param2=value#anc?h&or", null));
-		assertEquals("./<>", captureAppendBaseOut("./<>#fragment#", null));
-		assertEquals("./<>", captureAppendBaseOut("./<>#fragment?notParam", null));
+		assertEquals("./<>", captureAppendHierPartOut("./<>", null));
+		assertEquals("./<>", captureAppendHierPartOut("./<>?", null));
+		assertEquals("./<>", captureAppendHierPartOut("./<>?param?&param2=value#anc?h&or", null));
+		assertEquals("./<>", captureAppendHierPartOut("./<>#fragment#", null));
+		assertEquals("./<>", captureAppendHierPartOut("./<>#fragment?notParam", null));
 
-		assertEquals("", captureAppendBaseOut("", null));
-		assertEquals("", captureAppendBaseOut("?", null));
-		assertEquals("", captureAppendBaseOut("?param?&param2=value#anc?h&or", null));
-		assertEquals("", captureAppendBaseOut("#fragment#", null));
-		assertEquals("", captureAppendBaseOut("#fragment?notParam", null));
+		assertEquals("", captureAppendHierPartOut("", null));
+		assertEquals("", captureAppendHierPartOut("?", null));
+		assertEquals("", captureAppendHierPartOut("?param?&param2=value#anc?h&or", null));
+		assertEquals("", captureAppendHierPartOut("#fragment#", null));
+		assertEquals("", captureAppendHierPartOut("#fragment?notParam", null));
 	}
 
 	@Test
-	public void testAppendBaseOutXhtmlEncoder() throws IOException {
-		assertEquals("htTP:&amp;", captureAppendBaseOut("htTP:&", testXmlEncoder));
-		assertEquals("htTP:&amp;", captureAppendBaseOut("htTP:&?", testXmlEncoder));
-		assertEquals("htTP:&amp;", captureAppendBaseOut("htTP:&?param?&param2=value#anc?h&or", testXmlEncoder));
-		assertEquals("htTP:&amp;", captureAppendBaseOut("htTP:&#fragment#", testXmlEncoder));
-		assertEquals("htTP:&amp;", captureAppendBaseOut("htTP:&#fragment?notParam", testXmlEncoder));
+	public void testAppendHierPartOutXhtmlEncoder() throws IOException {
+		assertEquals("&amp;", captureAppendHierPartOut("htTP:&", testXmlEncoder));
+		assertEquals("&amp;", captureAppendHierPartOut("htTP:&?", testXmlEncoder));
+		assertEquals("&amp;", captureAppendHierPartOut("htTP:&?param?&param2=value#anc?h&or", testXmlEncoder));
+		assertEquals("&amp;", captureAppendHierPartOut("htTP:&#fragment#", testXmlEncoder));
+		assertEquals("&amp;", captureAppendHierPartOut("htTP:&#fragment?notParam", testXmlEncoder));
 
-		assertEquals("./&lt;&gt;", captureAppendBaseOut("./<>", testXmlEncoder));
-		assertEquals("./&lt;&gt;", captureAppendBaseOut("./<>?", testXmlEncoder));
-		assertEquals("./&lt;&gt;", captureAppendBaseOut("./<>?param?&param2=value#anc?h&or", testXmlEncoder));
-		assertEquals("./&lt;&gt;", captureAppendBaseOut("./<>#fragment#", testXmlEncoder));
-		assertEquals("./&lt;&gt;", captureAppendBaseOut("./<>#fragment?notParam", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureAppendHierPartOut("./<>", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureAppendHierPartOut("./<>?", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureAppendHierPartOut("./<>?param?&param2=value#anc?h&or", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureAppendHierPartOut("./<>#fragment#", testXmlEncoder));
+		assertEquals("./&lt;&gt;", captureAppendHierPartOut("./<>#fragment?notParam", testXmlEncoder));
 
-		assertEquals("", captureAppendBaseOut("", testXmlEncoder));
-		assertEquals("", captureAppendBaseOut("?", testXmlEncoder));
-		assertEquals("", captureAppendBaseOut("?param?&param2=value#anc?h&or", testXmlEncoder));
-		assertEquals("", captureAppendBaseOut("#fragment#", testXmlEncoder));
-		assertEquals("", captureAppendBaseOut("#fragment?notParam", testXmlEncoder));
+		assertEquals("", captureAppendHierPartOut("", testXmlEncoder));
+		assertEquals("", captureAppendHierPartOut("?", testXmlEncoder));
+		assertEquals("", captureAppendHierPartOut("?param?&param2=value#anc?h&or", testXmlEncoder));
+		assertEquals("", captureAppendHierPartOut("#fragment#", testXmlEncoder));
+		assertEquals("", captureAppendHierPartOut("#fragment?notParam", testXmlEncoder));
 	}
 
-	private static String captureAppendBaseStringBuilder(String url) throws IOException {
+	private static String captureAppendHierPartStringBuilder(String url) throws IOException {
 		StringBuilder sb = new StringBuilder(url.length());
-		new SplitUrl(url).appendBase(sb);
+		new SplitUrl(url).appendHierPart(sb);
 		return sb.toString();
 	}
 
 	@Test
-	public void testAppendBaseStringBuilder() throws IOException {
-		assertEquals("htTP:", captureAppendBaseStringBuilder("htTP:"));
-		assertEquals("htTP:", captureAppendBaseStringBuilder("htTP:?"));
-		assertEquals("htTP:", captureAppendBaseStringBuilder("htTP:?param?&param2=value#anc?h&or"));
-		assertEquals("htTP:", captureAppendBaseStringBuilder("htTP:#fragment#"));
-		assertEquals("htTP:", captureAppendBaseStringBuilder("htTP:#fragment?notParam"));
+	public void testAppendHierPartStringBuilder() throws IOException {
+		assertEquals("", captureAppendHierPartStringBuilder("htTP:"));
+		assertEquals("", captureAppendHierPartStringBuilder("htTP:?"));
+		assertEquals("", captureAppendHierPartStringBuilder("htTP:?param?&param2=value#anc?h&or"));
+		assertEquals("", captureAppendHierPartStringBuilder("htTP:#fragment#"));
+		assertEquals("", captureAppendHierPartStringBuilder("htTP:#fragment?notParam"));
 
-		assertEquals("./", captureAppendBaseStringBuilder("./"));
-		assertEquals("./", captureAppendBaseStringBuilder("./?"));
-		assertEquals("./", captureAppendBaseStringBuilder("./?param?&param2=value#anc?h&or"));
-		assertEquals("./", captureAppendBaseStringBuilder("./#fragment#"));
-		assertEquals("./", captureAppendBaseStringBuilder("./#fragment?notParam"));
+		assertEquals("./", captureAppendHierPartStringBuilder("./"));
+		assertEquals("./", captureAppendHierPartStringBuilder("./?"));
+		assertEquals("./", captureAppendHierPartStringBuilder("./?param?&param2=value#anc?h&or"));
+		assertEquals("./", captureAppendHierPartStringBuilder("./#fragment#"));
+		assertEquals("./", captureAppendHierPartStringBuilder("./#fragment?notParam"));
 
-		assertEquals("", captureAppendBaseStringBuilder(""));
-		assertEquals("", captureAppendBaseStringBuilder("?"));
-		assertEquals("", captureAppendBaseStringBuilder("?param?&param2=value#anc?h&or"));
-		assertEquals("", captureAppendBaseStringBuilder("#fragment#"));
-		assertEquals("", captureAppendBaseStringBuilder("#fragment?notParam"));
+		assertEquals("", captureAppendHierPartStringBuilder(""));
+		assertEquals("", captureAppendHierPartStringBuilder("?"));
+		assertEquals("", captureAppendHierPartStringBuilder("?param?&param2=value#anc?h&or"));
+		assertEquals("", captureAppendHierPartStringBuilder("#fragment#"));
+		assertEquals("", captureAppendHierPartStringBuilder("#fragment?notParam"));
 	}
 
-	private static String captureAppendBaseStringBuffer(String url) throws IOException {
+	private static String captureAppendHierPartStringBuffer(String url) throws IOException {
 		StringBuffer sb = new StringBuffer(url.length());
-		new SplitUrl(url).appendBase(sb);
+		new SplitUrl(url).appendHierPart(sb);
 		return sb.toString();
 	}
 
 	@Test
-	public void testAppendBaseStringBuffer() throws IOException {
-		assertEquals("htTP:", captureAppendBaseStringBuffer("htTP:"));
-		assertEquals("htTP:", captureAppendBaseStringBuffer("htTP:?"));
-		assertEquals("htTP:", captureAppendBaseStringBuffer("htTP:?param?&param2=value#anc?h&or"));
-		assertEquals("htTP:", captureAppendBaseStringBuffer("htTP:#fragment#"));
-		assertEquals("htTP:", captureAppendBaseStringBuffer("htTP:#fragment?notParam"));
+	public void testAppendHierPartStringBuffer() throws IOException {
+		assertEquals("", captureAppendHierPartStringBuffer("htTP:"));
+		assertEquals("", captureAppendHierPartStringBuffer("htTP:?"));
+		assertEquals("", captureAppendHierPartStringBuffer("htTP:?param?&param2=value#anc?h&or"));
+		assertEquals("", captureAppendHierPartStringBuffer("htTP:#fragment#"));
+		assertEquals("", captureAppendHierPartStringBuffer("htTP:#fragment?notParam"));
 
-		assertEquals("./", captureAppendBaseStringBuffer("./"));
-		assertEquals("./", captureAppendBaseStringBuffer("./?"));
-		assertEquals("./", captureAppendBaseStringBuffer("./?param?&param2=value#anc?h&or"));
-		assertEquals("./", captureAppendBaseStringBuffer("./#fragment#"));
-		assertEquals("./", captureAppendBaseStringBuffer("./#fragment?notParam"));
+		assertEquals("./", captureAppendHierPartStringBuffer("./"));
+		assertEquals("./", captureAppendHierPartStringBuffer("./?"));
+		assertEquals("./", captureAppendHierPartStringBuffer("./?param?&param2=value#anc?h&or"));
+		assertEquals("./", captureAppendHierPartStringBuffer("./#fragment#"));
+		assertEquals("./", captureAppendHierPartStringBuffer("./#fragment?notParam"));
 
-		assertEquals("", captureAppendBaseStringBuffer(""));
-		assertEquals("", captureAppendBaseStringBuffer("?"));
-		assertEquals("", captureAppendBaseStringBuffer("?param?&param2=value#anc?h&or"));
-		assertEquals("", captureAppendBaseStringBuffer("#fragment#"));
-		assertEquals("", captureAppendBaseStringBuffer("#fragment?notParam"));
+		assertEquals("", captureAppendHierPartStringBuffer(""));
+		assertEquals("", captureAppendHierPartStringBuffer("?"));
+		assertEquals("", captureAppendHierPartStringBuffer("?param?&param2=value#anc?h&or"));
+		assertEquals("", captureAppendHierPartStringBuffer("#fragment#"));
+		assertEquals("", captureAppendHierPartStringBuffer("#fragment?notParam"));
 	}
 	// </editor-fold>
 
@@ -919,17 +946,17 @@ public class SplitUrlTest {
 			"かおり BBB#fragment?notParam%%%"
 		);
 		testEncodeURI(
-			"Plus (+) in base must be left intact to avoid ambiguity between encode/decode",
+			"Plus (+) in hier-part must be left intact to avoid ambiguity between encode/decode",
 			"%E3%81%8B%E3%81%8A%E3%82%8A+BBB#fragment?notParam%%%",
 			"かおり+BBB#fragment?notParam%%%"
 		);
 		testEncodeURI(
-			"Encoded plus (%2B) in base must be left intact to avoid ambiguity between encode/decode",
+			"Encoded plus (%2B) in hier-part must be left intact to avoid ambiguity between encode/decode",
 			"%E3%81%8B%E3%81%8A%E3%82%8A%2BBBB#fragment?notParam%%%",
 			"かおり%2BBBB#fragment?notParam%%%"
 		);
 		testEncodeURI(
-			"Encoded slash (%2F) in base must be left intact to avoid ambiguity between encode/decode",
+			"Encoded slash (%2F) in hier-part must be left intact to avoid ambiguity between encode/decode",
 			"%E3%81%8B%E3%81%8A%E3%82%8A%2FBBB#fragment?notParam%%%",
 			"かおり%2FBBB#fragment?notParam%%%"
 		);
@@ -997,17 +1024,17 @@ public class SplitUrlTest {
 			"%E3%81%8B%E3%81%8A%E3%82%8A%20BBB#fragment?notParam%25%25%25"
 		);
 		testDecodeURI(
-			"Plus (+) in base must be left intact to avoid ambiguity between encode/decode",
+			"Plus (+) in hier-part must be left intact to avoid ambiguity between encode/decode",
 			"かおり+BBB#fragment?notParam%25%25%25",
 			"%E3%81%8B%E3%81%8A%E3%82%8A+BBB#fragment?notParam%25%25%25"
 		);
 		testDecodeURI(
-			"Encoded plus (%2B) in base must be left intact to avoid ambiguity between encode/decode",
+			"Encoded plus (%2B) in hier-part must be left intact to avoid ambiguity between encode/decode",
 			"かおり%2BBBB#fragment?notParam%25%25%25",
 			"%E3%81%8B%E3%81%8A%E3%82%8A%2BBBB#fragment?notParam%25%25%25"
 		);
 		testDecodeURI(
-			"Encoded slash (%2F) in base must be left intact to avoid ambiguity between encode/decode",
+			"Encoded slash (%2F) in hier-part must be left intact to avoid ambiguity between encode/decode",
 			"かおり%2FBBB#fragment?notParam%25%25%25",
 			"%E3%81%8B%E3%81%8A%E3%82%8A%2FBBB#fragment?notParam%25%25%25"
 		);
