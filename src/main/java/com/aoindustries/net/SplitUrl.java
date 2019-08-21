@@ -23,25 +23,37 @@
 package com.aoindustries.net;
 
 import com.aoindustries.io.Encoder;
+import com.aoindustries.util.StringUtility;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Objects;
 
 /**
- * Extremely minimal representation of a URL, optimized for altering the path,
- * query, or fragment for URL rewriting.
+ * Extremely minimal representation of an <a href="https://tools.ietf.org/html/rfc3986">RFC 3986 URI</a>
+ * or <a href="https://tools.ietf.org/html/rfc3987">RFC 3987 IRI</a>,
+ * optimized for altering the path, query, or fragment for URI rewriting.
  * <p>
- * This only deals with three parts of the URL:
+ * This only deals with four parts of the URI:
  * </p>
  * <ol>
- *   <li>base - everything before the first '?' or '#' (exclusive).  This may
- *       include scheme, hier-part (host, port, path, and such), which this
- *       class is not concerned with.
+ *   <li>scheme - everything before the first ':' (exclusive).</li>
+ *   <li>hier-part - everything after the scheme and before the first '?' or '#' (exclusive).
+ *       This may include host, port, path, and such, which this class is not concerned with.
  *   </li>
  *   <li>query - everything after the first '?' (exclusive) and the fragment '#' (exclusive)</li>
  *   <li>fragment - everything after the first '#' (exclusive)</li>
  * </p>
+ * <p>
+ * This class specifically:
+ * </p>
+ * <ol>
+ * <li>Does not do significant amounts of normalization</li>
+ * <li>Does not support any relative path resolution</li>
+ * <li>Does not do any scheme-specific validation</li>
+ * <li>Does not thoroughly detect malformed URIs</li>
+ * </ol>
  * <p>
  * Instances of this class are immutable and thus thread-safe.  Mutating
  * operations return a new instance.
@@ -54,7 +66,35 @@ import java.nio.charset.Charset;
  */
 public class SplitUrl {
 
-	private final String url;
+	// TODO: Make a public URIParser?
+	private static int getSchemeLength(CharSequence uri) {
+		int len = uri.length();
+		if(len == 0) {
+			return -1;
+		}
+		// First character
+		if(!RFC3986.isSchemeBeginning(uri.charAt(0))) {
+			return -1;
+		}
+		// Remaining characters
+		for(int i = 1; i < len; i++) {
+			char ch = uri.charAt(i);
+			if(ch == ':') {
+				return i;
+			} else if(!RFC3986.isSchemeRemaining(ch)) {
+				return -1;
+			}
+		}
+		// No colon found
+		return -1;
+	}
+
+	private final String uri;
+
+	/**
+	 * The length of the scheme or {@code -1} when there is no scheme.
+	 */
+	private final int schemeLength;
 
 	/**
 	 * The index of the {@code '?'} marking the query or {@code -1} when there is no query.
@@ -66,26 +106,31 @@ public class SplitUrl {
 	 */
 	private final int fragmentIndex;
 
-	public SplitUrl(String url) {
-		this.url = url;
-		int urlLen = url.length();
+	public SplitUrl(String uri) {
+		this.uri = uri;
+		schemeLength = getSchemeLength(uri);
 		// Find first of '?' or '#'
-		int pathEnd = UrlUtils.getPathEnd(url);
-		if(pathEnd >= urlLen) {
+		int pathEnd = StringUtility.indexOf(
+			uri,
+			new char[] {'?', '#'},
+			schemeLength + 1 // Works for -1 (no colon) or index of colon itself
+		);
+		if(pathEnd == -1) {
 			queryIndex = -1;
 			fragmentIndex = -1;
-		} else if(url.charAt(pathEnd) == '?') {
+		} else if(uri.charAt(pathEnd) == '?') {
 			queryIndex = pathEnd;
-			fragmentIndex = url.indexOf('#', pathEnd + 1);
+			fragmentIndex = uri.indexOf('#', pathEnd + 1);
 		} else {
-			assert url.charAt(pathEnd) == '#';
+			assert uri.charAt(pathEnd) == '#';
 			queryIndex = -1;
 			fragmentIndex = pathEnd;
 		}
 	}
 
-	private SplitUrl(String url, int queryIndex, int fragmentIndex) {
-		this.url = url;
+	private SplitUrl(String url, int schemeLength, int queryIndex, int fragmentIndex) {
+		this.uri = url;
+		this.schemeLength = schemeLength;
 		this.queryIndex = queryIndex;
 		this.fragmentIndex = fragmentIndex;
 		assert equals(new SplitUrl(url)) : "Split after mutations must be equal to splitting in public constructor";
@@ -96,11 +141,11 @@ public class SplitUrl {
 	 */
 	@Override
 	public String toString() {
-		return url;
+		return uri;
 	}
 
 	/**
-	 * Compares the {@link #url URL} directly.  No encoding or decoding
+	 * Compares the {@link #uri URL} directly.  No encoding or decoding
 	 * is performed.  This does not compare URLs semantically.
 	 */
 	@Override
@@ -109,9 +154,10 @@ public class SplitUrl {
 		SplitUrl other = (SplitUrl)obj;
 		if(this == other) {
 			return true;
-		} else if(url.equals(other.url)) {
-			assert queryIndex == other.queryIndex : "url equal with queryIndex mismatch: url = " + url + ", this.queryIndex = " + this.queryIndex + ", other.queryIndex = " + other.queryIndex;
-			assert fragmentIndex == other.fragmentIndex : "url equal with fragmentIndex mismatch: url = " + url + ", this.fragmentIndex = " + this.fragmentIndex + ", other.fragmentIndex = " + other.fragmentIndex;
+		} else if(uri.equals(other.uri)) {
+			assert schemeLength == other.schemeLength : "url equal with schemeLength mismatch: url = " + uri + ", this.schemeLength = " + this.schemeLength + ", other.schemeLength = " + other.schemeLength;
+			assert queryIndex == other.queryIndex : "url equal with queryIndex mismatch: url = " + uri + ", this.queryIndex = " + this.queryIndex + ", other.queryIndex = " + other.queryIndex;
+			assert fragmentIndex == other.fragmentIndex : "url equal with fragmentIndex mismatch: url = " + uri + ", this.fragmentIndex = " + this.fragmentIndex + ", other.fragmentIndex = " + other.fragmentIndex;
 			return true;
 		} else {
 			return false;
@@ -126,29 +172,155 @@ public class SplitUrl {
 	 */
 	@Override
 	final public int hashCode() {
-		return url.hashCode();
+		return uri.hashCode();
 	}
 
 	/**
-	 * @see  UrlUtils#isScheme(java.lang.String, java.lang.String)
+	 * Gets the length of the scheme or {@code -1} when there is no scheme.
+	 * This is also the index of the colon (':') that ends the scheme.
+	 *
+	 * @return  the index of the ':' marking the end of the scheme or {@code -1} when there is no scheme.
 	 */
-	public boolean isScheme(String scheme) {
-		return UrlUtils.isScheme(url, scheme);
+	public int getSchemeLength() {
+		return schemeLength;
 	}
 
 	/**
-	 * @see  UrlUtils#hasScheme(java.lang.String)
+	 * Checks if this has a scheme.
 	 */
 	public boolean hasScheme() {
-		return UrlUtils.hasScheme(url);
+		return schemeLength != -1;
 	}
 
 	/**
-	 * @see  UrlUtils#getScheme(java.lang.String)
+	 * Checks if a URI starts with the given scheme.
+	 *
+	 * @param scheme  The scheme to look for, not including colon.
+	 *                For example {@code "http"}.  When {@code null},
+	 *                with match a URI without a scheme.
+	 *
+	 * @throws IllegalArgumentException when {@code scheme} is determined to be invalid.
+	 *         Please note that this determination is not guaranteed as shortcuts may
+	 *         skip individual character comparisons.
+	 */
+	public boolean isScheme(String scheme) throws IllegalArgumentException {
+		if(scheme == null) {
+			return schemeLength == -1;
+		}
+		int len = scheme.length();
+		if(len == 0) {
+			throw new IllegalArgumentException("Invalid scheme: " + scheme);
+		}
+		if(len != schemeLength) {
+			return false;
+		}
+		for(int i = 0; i < schemeLength; i++) {
+			char ch1 = scheme.charAt(i);
+			boolean isValid = (i == 0) ? RFC3986.isSchemeBeginning(ch1) : RFC3986.isSchemeRemaining(ch1);
+			if(!isValid) {
+				throw new IllegalArgumentException("Invalid scheme: " + scheme);
+			}
+			char ch2 = uri.charAt(i);
+			// Convert to lower-case, ASCII-only
+			ch1 = RFC3986.normalizeScheme(ch1);
+			ch2 = RFC3986.normalizeScheme(ch2);
+			if(ch1 != ch2) return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Gets the scheme for a URI, or {@code null} when has no scheme.
+	 * An empty scheme will never be returned (if the URI starts with ':').
+	 * <p>
+	 * This method may involve string manipulation, favor the <code>writeScheme(…)</code>
+	 * and <code>appendScheme(…)</code> methods when appropriate.
+	 * </p>
+	 *
+	 * @return  The scheme, not including colon, or {@code null} when there is no scheme.
+	 *          For example {@code "http"}.
 	 */
 	public String getScheme() {
-		return UrlUtils.getScheme(url);
+		if(schemeLength == -1) return null;
+		return uri.substring(0, schemeLength);
 	}
+
+	/**
+	 * Writes the scheme (not including the ':').
+	 */
+	public void writeScheme(Writer out) throws IOException {
+		if(schemeLength != -1) {
+			out.write(uri, 0, schemeLength);
+		}
+	}
+
+	/**
+	 * Writes the scheme (not including the ':').
+	 */
+	public void writeScheme(Writer out, Encoder encoder) throws IOException {
+		if(schemeLength != -1) {
+			if(encoder == null) {
+				writeScheme(out);
+			} else {
+				encoder.write(uri, 0, schemeLength, out);
+			}
+		}
+	}
+
+	/**
+	 * Appends the scheme (not including the ':').
+	 *
+	 * @return  The {@link Appendable} {@code out}
+	 */
+	// TODO: Return "this" in all appendables?
+	public <A extends Appendable> A appendScheme(A out) throws IOException {
+		if(schemeLength != -1) {
+			out.append(uri, 0, schemeLength);
+		}
+		return out;
+	}
+
+	/**
+	 * Appends the scheme (not including the ':').
+	 *
+	 * @return  The {@link Appendable} {@code out}
+	 */
+	public <A extends Appendable> A appendScheme(A out, Encoder encoder) throws IOException {
+		if(schemeLength != -1) {
+			if(encoder == null) {
+				appendScheme(out);
+			} else {
+				encoder.append(uri, 0, schemeLength, out);
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * Appends the scheme (not including the ':').
+	 *
+	 * @return  The {@link StringBuilder} {@code sb}
+	 */
+	public StringBuilder appendScheme(StringBuilder sb) {
+		if(schemeLength != -1) {
+			sb.append(uri, 0, schemeLength);
+		}
+		return sb;
+	}
+
+	/**
+	 * Appends the scheme (not including the ':').
+	 *
+	 * @return  The {@link StringBuffer} {@code sb}
+	 */
+	public StringBuffer appendScheme(StringBuffer sb) {
+		if(schemeLength != -1) {
+			sb.append(uri, 0, schemeLength);
+		}
+		return sb;
+	}
+
+	// TODO: More details between scheme and path end
 
 	/**
 	 * Gets the path end within this URL.
@@ -158,7 +330,7 @@ public class SplitUrl {
 	public int getPathEnd() {
 		if(queryIndex != -1) return queryIndex;
 		else if(fragmentIndex != -1) return fragmentIndex;
-		else return url.length();
+		else return uri.length();
 	}
 
 	/**
@@ -169,7 +341,9 @@ public class SplitUrl {
 	public boolean pathEndsWith(String suffix) {
 		int suffixLen = suffix.length();
 		int pathStart = getPathEnd() - suffixLen;
-		return pathStart >= 0 && url.regionMatches(pathStart, suffix, 0, suffixLen);
+		return
+			pathStart > schemeLength // Handles both -1 and colon position
+			&& uri.regionMatches(pathStart, suffix, 0, suffixLen);
 	}
 
 	/**
@@ -180,96 +354,120 @@ public class SplitUrl {
 	public boolean pathEndsWithIgnoreCase(String suffix) {
 		int suffixLen = suffix.length();
 		int pathStart = getPathEnd() - suffixLen;
-		return pathStart >= 0 && url.regionMatches(true, pathStart, suffix, 0, suffixLen);
+		return
+			pathStart > schemeLength // Handles both -1 and colon position
+			&& uri.regionMatches(true, pathStart, suffix, 0, suffixLen);
 	}
 
 	/**
-	 * Gets the base - everything before the first '?' or '#' (exclusive).  This may
-	 * include scheme, hier-part (host, port, path, and such), which this
-	 * class is not concerned with.
+	 * Gets the hier-part - everything after the scheme and before the first '?' or '#' (exclusive).  This may
+	 * include host, port, path, and such, which this class is not concerned with.
 	 * <p>
-	 * This method may involve string manipulation, favor the <code>writeBase(…)</code>
-	 * and <code>appendBase(…)</code> methods when appropriate.
+	 * This method may involve string manipulation, favor the <code>writeHierPart(…)</code>
+	 * and <code>appendHierPart(…)</code> methods when appropriate.
 	 * </p>
 	 *
-	 * @return  the part of the URL up to the first '?' or '#' (exclusive), or the full URL when neither found.
+	 * @return  the part of the URL after the scheme and up to the first '?' or '#' (exclusive), or the full URL when neither found.
 	 */
-	public String getBase() {
-		if(queryIndex != -1) return url.substring(0, queryIndex);
-		else if(fragmentIndex != -1) return url.substring(0, fragmentIndex);
-		else return url;
+	public String getHierPart() {
+		if(queryIndex != -1) return uri.substring(schemeLength + 1, queryIndex);
+		else if(fragmentIndex != -1) return uri.substring(schemeLength + 1, fragmentIndex);
+		else if(schemeLength == -1) return uri;
+		else return uri.substring(schemeLength + 1);
 	}
 
 	/**
-	 * Writes the part of the URL up to the first '?' or '#' (exclusive), or the full URL when neither found.
+	 * Writes the part of the URL after the scheme and up to the first '?' or '#' (exclusive), or the full URL when neither found.
 	 */
-	public void writeBase(Writer out) throws IOException {
-		if(queryIndex != -1) out.write(url, 0, queryIndex);
-		else if(fragmentIndex != -1) out.write(url, 0, fragmentIndex);
-		else out.write(url);
-	}
-
-	/**
-	 * Writes the part of the URL up to the first '?' or '#' (exclusive), or the full URL when neither found.
-	 */
-	public void writeBase(Writer out, Encoder encoder) throws IOException {
-		if(encoder == null) {
-			writeBase(out);
+	public void writeHierPart(Writer out) throws IOException {
+		if(queryIndex != -1) {
+			int off = schemeLength + 1;
+			out.write(uri, off, queryIndex - off);
+		} else if(fragmentIndex != -1) {
+			int off = schemeLength + 1;
+			out.write(uri, off, fragmentIndex - off);
+		} else if(schemeLength == -1) {
+			out.write(uri);
 		} else {
-			if(queryIndex != -1) encoder.write(url, 0, queryIndex, out);
-			else if(fragmentIndex != -1) encoder.write(url, 0, fragmentIndex, out);
-			else encoder.write(url, out);
+			int off = schemeLength + 1;
+			out.write(uri, off, uri.length() - off);
 		}
 	}
 
 	/**
-	 * Appends the part of the URL up to the first '?' or '#' (exclusive), or the full URL when neither found.
+	 * Writes the part of the URL after the scheme and up to the first '?' or '#' (exclusive), or the full URL when neither found.
+	 */
+	public void writeHierPart(Writer out, Encoder encoder) throws IOException {
+		if(encoder == null) {
+			writeHierPart(out);
+		} else {
+			if(queryIndex != -1) {
+				int off = schemeLength + 1;
+				encoder.write(uri, off, queryIndex - off, out);
+			} else if(fragmentIndex != -1) {
+				int off = schemeLength + 1;
+				encoder.write(uri, off, fragmentIndex - off, out);
+			} else if(schemeLength == -1) {
+				encoder.write(uri, out);
+			} else {
+				int off = schemeLength + 1;
+				encoder.write(uri, off, uri.length() - off, out);
+			}
+		}
+	}
+
+	/**
+	 * Appends the part of the URL after the scheme and up to the first '?' or '#' (exclusive), or the full URL when neither found.
 	 *
 	 * @return  The {@link Appendable} {@code out}
 	 */
-	public <A extends Appendable> A appendBase(A out) throws IOException {
-		if(queryIndex != -1) out.append(url, 0, queryIndex);
-		else if(fragmentIndex != -1) out.append(url, 0, fragmentIndex);
-		else out.append(url);
+	public <A extends Appendable> A appendHierPart(A out) throws IOException {
+		if(queryIndex != -1) out.append(uri, schemeLength + 1, queryIndex);
+		else if(fragmentIndex != -1) out.append(uri, schemeLength + 1, fragmentIndex);
+		else if(schemeLength == -1) out.append(uri);
+		else out.append(uri, schemeLength + 1, uri.length());
 		return out;
 	}
 
 	/**
-	 * Appends the part of the URL up to the first '?' or '#' (exclusive), or the full URL when neither found.
+	 * Appends the part of the URL after the scheme and up to the first '?' or '#' (exclusive), or the full URL when neither found.
 	 *
 	 * @return  The {@link Appendable} {@code out}
 	 */
-	public <A extends Appendable> A appendBase(A out, Encoder encoder) throws IOException {
+	public <A extends Appendable> A appendHierPart(A out, Encoder encoder) throws IOException {
 		if(encoder == null) {
-			appendBase(out);
+			appendHierPart(out);
 		} else {
-			if(queryIndex != -1) encoder.append(url, 0, queryIndex, out);
-			else if(fragmentIndex != -1) encoder.append(url, 0, fragmentIndex, out);
-			else encoder.append(url, out);
+			if(queryIndex != -1) encoder.append(uri, schemeLength + 1, queryIndex, out);
+			else if(fragmentIndex != -1) encoder.append(uri, schemeLength + 1, fragmentIndex, out);
+			else if(schemeLength == -1) encoder.append(uri, out);
+			else encoder.append(uri, schemeLength + 1, uri.length(), out);
 		}
 		return out;
 	}
 
 	/**
-	 * Appends the part of the URL up to the first '?' or '#' (exclusive), or the full URL when neither found.
+	 * Appends the part of the URL after the scheme and up to the first '?' or '#' (exclusive), or the full URL when neither found.
 	 *
 	 * @return  The {@link StringBuilder} {@code sb}
 	 */
-	public StringBuilder appendBase(StringBuilder sb) {
-		if(queryIndex != -1) return sb.append(url, 0, queryIndex);
-		else if(fragmentIndex != -1) return sb.append(url, 0, fragmentIndex);
-		else return sb.append(url);
+	public StringBuilder appendHierPart(StringBuilder sb) {
+		if(queryIndex != -1) return sb.append(uri, schemeLength + 1, queryIndex);
+		else if(fragmentIndex != -1) return sb.append(uri, schemeLength + 1, fragmentIndex);
+		else if(schemeLength == -1) return sb.append(uri);
+		else return sb.append(uri, schemeLength + 1, uri.length());
 	}
 
 	/**
-	 * Appends the part of the URL up to the first '?' or '#' (exclusive), or the full URL when neither found.
+	 * Appends the part of the URL after the scheme and up to the first '?' or '#' (exclusive), or the full URL when neither found.
 	 *
 	 * @return  The {@link StringBuffer} {@code sb}
 	 */
-	public StringBuffer appendBase(StringBuffer sb) {
-		if(queryIndex != -1) return sb.append(url, 0, queryIndex);
-		else if(fragmentIndex != -1) return sb.append(url, 0, fragmentIndex);
-		else return sb.append(url);
+	public StringBuffer appendHierPart(StringBuffer sb) {
+		if(queryIndex != -1) return sb.append(uri, schemeLength + 1, queryIndex);
+		else if(fragmentIndex != -1) return sb.append(uri, schemeLength + 1, fragmentIndex);
+		else if(schemeLength == -1) return sb.append(uri);
+		else return sb.append(uri, schemeLength + 1, uri.length());
 	}
 
 	/**
@@ -301,9 +499,9 @@ public class SplitUrl {
 		if(queryIndex == -1) return null;
 		int queryStart = queryIndex + 1;
 		if(fragmentIndex == -1) {
-			return url.substring(queryStart);
+			return uri.substring(queryStart);
 		} else {
-			return url.substring(queryStart, fragmentIndex);
+			return uri.substring(queryStart, fragmentIndex);
 		}
 	}
 
@@ -313,9 +511,10 @@ public class SplitUrl {
 	public void writeQueryString(Writer out) throws IOException {
 		if(queryIndex != -1) {
 			int queryStart = queryIndex + 1;
-			out.write(url,
+			out.write(
+				uri,
 				queryStart,
-				(fragmentIndex == -1 ? url.length() : fragmentIndex) - queryStart
+				(fragmentIndex == -1 ? uri.length() : fragmentIndex) - queryStart
 			);
 		}
 	}
@@ -329,9 +528,10 @@ public class SplitUrl {
 				writeQueryString(out);
 			} else {
 				int queryStart = queryIndex + 1;
-				encoder.write(url,
+				encoder.write(
+					uri,
 					queryStart,
-					(fragmentIndex == -1 ? url.length() : fragmentIndex) - queryStart,
+					(fragmentIndex == -1 ? uri.length() : fragmentIndex) - queryStart,
 					out
 				);
 			}
@@ -345,9 +545,10 @@ public class SplitUrl {
 	 */
 	public <A extends Appendable> A appendQueryString(A out) throws IOException {
 		if(queryIndex != -1) {
-			out.append(url,
-				queryIndex+ 1,
-				fragmentIndex == -1 ? url.length() : fragmentIndex
+			out.append(
+				uri,
+				queryIndex + 1,
+				fragmentIndex == -1 ? uri.length() : fragmentIndex
 			);
 		}
 		return out;
@@ -363,9 +564,10 @@ public class SplitUrl {
 			if(encoder == null) {
 				appendQueryString(out);
 			} else {
-				encoder.append(url,
+				encoder.append(
+					uri,
 					queryIndex + 1,
-					fragmentIndex == -1 ? url.length() : fragmentIndex,
+					fragmentIndex == -1 ? uri.length() : fragmentIndex,
 					out
 				);
 			}
@@ -380,9 +582,10 @@ public class SplitUrl {
 	 */
 	public StringBuilder appendQueryString(StringBuilder sb) {
 		if(queryIndex != -1) {
-			sb.append(url,
+			sb.append(
+				uri,
 				queryIndex + 1,
-				fragmentIndex == -1 ? url.length() : fragmentIndex
+				fragmentIndex == -1 ? uri.length() : fragmentIndex
 			);
 		}
 		return sb;
@@ -395,9 +598,10 @@ public class SplitUrl {
 	 */
 	public StringBuffer appendQueryString(StringBuffer sb) {
 		if(queryIndex != -1) {
-			sb.append(url,
+			sb.append(
+				uri,
 				queryIndex + 1,
-				fragmentIndex == -1 ? url.length() : fragmentIndex
+				fragmentIndex == -1 ? uri.length() : fragmentIndex
 			);
 		}
 		return sb;
@@ -429,7 +633,7 @@ public class SplitUrl {
 	 * @return  the fragment (not including the '#') or {@code null} when there is no fragment.
 	 */
 	public String getFragment() {
-		return (fragmentIndex == -1) ? null : url.substring(fragmentIndex + 1);
+		return (fragmentIndex == -1) ? null : uri.substring(fragmentIndex + 1);
 	}
 
 	/**
@@ -438,7 +642,7 @@ public class SplitUrl {
 	public void writeFragment(Writer out) throws IOException {
 		if(fragmentIndex != -1) {
 			int fragmentStart = fragmentIndex + 1;
-			out.write(url, fragmentStart, url.length() - fragmentStart);
+			out.write(uri, fragmentStart, uri.length() - fragmentStart);
 		}
 	}
 
@@ -451,7 +655,7 @@ public class SplitUrl {
 				SplitUrl.this.writeFragment(out);
 			} else {
 				int fragmentStart = fragmentIndex + 1;
-				encoder.write(url, fragmentStart, url.length() - fragmentStart, out);
+				encoder.write(uri, fragmentStart, uri.length() - fragmentStart, out);
 			}
 		}
 	}
@@ -463,7 +667,7 @@ public class SplitUrl {
 	 */
 	public <A extends Appendable> A appendFragment(A out) throws IOException {
 		if(fragmentIndex != -1) {
-			out.append(url, fragmentIndex + 1, url.length());
+			out.append(uri, fragmentIndex + 1, uri.length());
 		}
 		return out;
 	}
@@ -478,7 +682,7 @@ public class SplitUrl {
 			if(encoder == null) {
 				SplitUrl.this.appendFragment(out);
 			} else {
-				encoder.append(url, fragmentIndex + 1, url.length(), out);
+				encoder.append(uri, fragmentIndex + 1, uri.length(), out);
 			}
 		}
 		return out;
@@ -491,7 +695,7 @@ public class SplitUrl {
 	 */
 	public StringBuilder appendFragment(StringBuilder sb) {
 		if(fragmentIndex != -1) {
-			sb.append(url, fragmentIndex + 1, url.length());
+			sb.append(uri, fragmentIndex + 1, uri.length());
 		}
 		return sb;
 	}
@@ -503,7 +707,7 @@ public class SplitUrl {
 	 */
 	public StringBuffer appendFragment(StringBuffer sb) {
 		if(fragmentIndex != -1) {
-			sb.append(url, fragmentIndex + 1, url.length());
+			sb.append(uri, fragmentIndex + 1, uri.length());
 		}
 		return sb;
 	}
@@ -514,8 +718,8 @@ public class SplitUrl {
 	 * @see  UrlUtils#encodeURI(java.lang.String, java.lang.String)
 	 */
 	public SplitUrl encodeURI(String documentEncoding) throws UnsupportedEncodingException {
-		String newUrl = UrlUtils.encodeURI(url, documentEncoding);
-		return (newUrl == url) ? this : new SplitUrl(newUrl);
+		String newUrl = UrlUtils.encodeURI(uri, documentEncoding);
+		return (newUrl == uri) ? this : new SplitUrl(newUrl);
 	}
 
 	/**
@@ -524,68 +728,95 @@ public class SplitUrl {
 	 * @see  UrlUtils#decodeURI(java.lang.String, java.lang.String)
 	 */
 	public SplitUrl decodeURI(String documentEncoding) throws UnsupportedEncodingException {
-		String newUrl = UrlUtils.decodeURI(url, documentEncoding);
-		return (newUrl == url) ? this : new SplitUrl(newUrl);
+		String newUrl = UrlUtils.decodeURI(uri, documentEncoding);
+		return (newUrl == uri) ? this : new SplitUrl(newUrl);
 	}
 
+	// TODO: setScheme
+
 	/**
-	 * Replaces the base.
+	 * Replaces the hier-part.
 	 *
-	 * @param base  The base may not contain the query marker '?' or fragment marker '#'
+	 * @param hierPart  The hier-part may not contain the query marker '?' or fragment marker '#'
 	 *
 	 * @return  The new split URL or {@code this} when unmodified.
 	 */
-	public SplitUrl setBase(String base) {
-		int baseLen = base.length();
+	public SplitUrl setHierPart(String hierPart) {
+		final SplitUrl newSplitUrl;
+		int hierPartLen = hierPart.length();
 		int pathEnd = getPathEnd();
 		// Look for not changed
 		if(
-			baseLen == pathEnd
-			&& url.startsWith(base)
+			hierPartLen == (pathEnd - (schemeLength + 1))
+			&& uri.regionMatches(schemeLength + 1, hierPart, 0, hierPartLen)
 		) {
 			// Not changed
-			return this;
+			newSplitUrl = this;
 		} else {
 			if(queryIndex == -1) {
 				if(fragmentIndex == -1) {
-					// Base only
-					return new SplitUrl(base);
+					if(schemeLength == -1) {
+						// Hier-part only
+						newSplitUrl = new SplitUrl(
+							hierPart,
+							-1,
+							-1,
+							-1
+						);
+					} else {
+						// Schema and hier-part
+						int newUrlLen = schemeLength + 1 + hierPartLen;
+						StringBuilder newUrl = new StringBuilder(newUrlLen);
+						newUrl.append(uri, 0, schemeLength + 1).append(hierPart);
+						assert newUrl.length() == newUrlLen;
+						newSplitUrl = new SplitUrl(
+							newUrl.toString(),
+							schemeLength,
+							-1,
+							-1
+						);
+					}
 				} else {
 					// Fragment only
-					int urlLen = url.length();
-					int newUrlLen = baseLen + (urlLen - fragmentIndex);
+					int urlLen = uri.length();
+					int newUrlLen = schemeLength + 1 + hierPartLen + (urlLen - fragmentIndex);
 					StringBuilder newUrl = new StringBuilder(newUrlLen);
-					newUrl.append(base).append(url, fragmentIndex, urlLen);
+					newUrl.append(uri, 0, schemeLength + 1).append(hierPart).append(uri, fragmentIndex, urlLen);
 					assert newUrl.length() == newUrlLen;
-					return new SplitUrl(
+					newSplitUrl = new SplitUrl(
 						newUrl.toString(),
+						schemeLength,
 						-1,
-						baseLen
+						schemeLength + 1 + hierPartLen
 					);
 				}
 			} else {
-				int urlLen = url.length();
-				int newUrlLen = baseLen + (urlLen - queryIndex);
+				int urlLen = uri.length();
+				int newUrlLen = schemeLength + 1 + hierPartLen + (urlLen - queryIndex);
 				StringBuilder newUrl = new StringBuilder(newUrlLen);
-				newUrl.append(base).append(url, queryIndex, urlLen);
+				newUrl.append(uri, 0, schemeLength + 1).append(hierPart).append(uri, queryIndex, urlLen);
 				assert newUrl.length() == newUrlLen;
 				if(fragmentIndex == -1) {
 					// Query only
-					return new SplitUrl(
+					newSplitUrl = new SplitUrl(
 						newUrl.toString(),
-						baseLen,
+						schemeLength,
+						schemeLength + 1 + hierPartLen,
 						-1
 					);
 				} else {
 					// Query and fragment
-					return new SplitUrl(
+					newSplitUrl = new SplitUrl(
 						newUrl.toString(),
-						baseLen,
-						fragmentIndex + (baseLen - pathEnd)
+						schemeLength,
+						schemeLength + 1 + hierPartLen,
+						fragmentIndex + (schemeLength + 1 + hierPartLen - queryIndex)
 					);
 				}
 			}
 		}
+		assert newSplitUrl.getHierPart().equals(hierPart);
+		return newSplitUrl;
 	}
 
 	/**
@@ -598,27 +829,30 @@ public class SplitUrl {
 	 * @return  The new split URL or {@code this} when unmodified.
 	 */
 	public SplitUrl setQueryString(String query) {
+		final SplitUrl newSplitUrl;
 		if(query == null) {
 			// Removing query
 			if(queryIndex == -1) {
 				// Already has no query
-				return this;
+				newSplitUrl = this;
 			} else {
 				// Remove the existing query
 				if(fragmentIndex == -1) {
-					return new SplitUrl(
-						url.substring(0, queryIndex),
+					newSplitUrl = new SplitUrl(
+						uri.substring(0, queryIndex),
+						schemeLength,
 						-1,
 						-1
 					);
 				} else {
-					int urlLen = url.length();
+					int urlLen = uri.length();
 					int newUrlLen = queryIndex + (urlLen - fragmentIndex);
 					StringBuilder newUrl = new StringBuilder(newUrlLen);
-					newUrl.append(url, 0, queryIndex).append(url, fragmentIndex, urlLen);
+					newUrl.append(uri, 0, queryIndex).append(uri, fragmentIndex, urlLen);
 					assert newUrl.length() == newUrlLen;
-					return new SplitUrl(
+					newSplitUrl = new SplitUrl(
 						newUrl.toString(),
+						schemeLength,
 						-1,
 						queryIndex
 					);
@@ -629,61 +863,68 @@ public class SplitUrl {
 			// Setting query
 			if(queryIndex == -1) {
 				// Add query
-				int urlLen = url.length();
+				int urlLen = uri.length();
 				int queryLen = query.length();
 				int newUrlLen = urlLen + 1 + queryLen;
 				StringBuilder newUrl = new StringBuilder(newUrlLen);
 				if(fragmentIndex == -1) {
-					newUrl.append(url).append('?').append(query);
+					newUrl.append(uri).append('?').append(query);
 					assert newUrl.length() == newUrlLen;
-					return new SplitUrl(
+					newSplitUrl = new SplitUrl(
 						newUrl.toString(),
+						schemeLength,
 						urlLen,
 						-1
 					);
 				} else {
-					newUrl.append(url, 0, fragmentIndex).append('?').append(query).append(url, fragmentIndex, urlLen);
+					newUrl.append(uri, 0, fragmentIndex).append('?').append(query).append(uri, fragmentIndex, urlLen);
 					assert newUrl.length() == newUrlLen;
-					return new SplitUrl(
+					newSplitUrl = new SplitUrl(
 						newUrl.toString(),
+						schemeLength,
 						fragmentIndex,
 						fragmentIndex + 1 + queryLen
 					);
 				}
 			} else {
 				// Replace query
-				int urlLen = url.length();
+				int urlLen = uri.length();
 				int queryLen = query.length();
 				int queryStart = queryIndex + 1;
 				int currentQueryLen = (fragmentIndex == -1 ? urlLen : fragmentIndex) - queryStart;
 				if(
 					currentQueryLen == queryLen
-					&& url.regionMatches(queryStart, query, 0, queryLen)
+					&& uri.regionMatches(queryStart, query, 0, queryLen)
 				) {
 					// Already has this query
-					return this;
-				}
-				int newUrlLen = urlLen - currentQueryLen + queryLen;
-				StringBuilder newUrl = new StringBuilder(newUrlLen);
-				newUrl.append(url, 0, queryStart).append(query);
-				if(fragmentIndex == -1) {
-					assert newUrl.length() == newUrlLen;
-					return new SplitUrl(
-						newUrl.toString(),
-						queryIndex,
-						-1
-					);
+					newSplitUrl = this;
 				} else {
-					newUrl.append(url, fragmentIndex, urlLen);
-					assert newUrl.length() == newUrlLen;
-					return new SplitUrl(
-						newUrl.toString(),
-						queryIndex,
-						fragmentIndex - currentQueryLen + queryLen
-					);
+					int newUrlLen = urlLen - currentQueryLen + queryLen;
+					StringBuilder newUrl = new StringBuilder(newUrlLen);
+					newUrl.append(uri, 0, queryStart).append(query);
+					if(fragmentIndex == -1) {
+						assert newUrl.length() == newUrlLen;
+						newSplitUrl = new SplitUrl(
+							newUrl.toString(),
+							schemeLength,
+							queryIndex,
+							-1
+						);
+					} else {
+						newUrl.append(uri, fragmentIndex, urlLen);
+						assert newUrl.length() == newUrlLen;
+						newSplitUrl = new SplitUrl(
+							newUrl.toString(),
+							schemeLength,
+							queryIndex,
+							fragmentIndex - currentQueryLen + queryLen
+						);
+					}
 				}
 			}
 		}
+		assert Objects.equals(query, newSplitUrl.getQueryString());
+		return newSplitUrl;
 	}
 
 	/**
@@ -696,11 +937,12 @@ public class SplitUrl {
 	 * @return  The new split URL or {@code this} when unmodified.
 	 */
 	public SplitUrl addQueryString(String query) {
+		final SplitUrl newSplitUrl;
 		if(query == null) {
-			return this;
+			newSplitUrl = this;
 		} else {
 			if(query.indexOf('#') != -1) throw new IllegalArgumentException("query string may not contain fragment marker (#): " + query);
-			int urlLen = url.length();
+			int urlLen = uri.length();
 			int queryLen = query.length();
 			int newUrlLen = urlLen + 1 + queryLen;
 			StringBuilder newUrl = new StringBuilder(newUrlLen);
@@ -709,12 +951,12 @@ public class SplitUrl {
 			if(queryIndex == -1) {
 				if(fragmentIndex == -1) {
 					// First parameter to end
-					newUrl.append(url).append('?').append(query);
-					newQueryIndex = url.length();
+					newUrl.append(uri).append('?').append(query);
+					newQueryIndex = uri.length();
 					newFragmentIndex = -1;
 				} else {
 					// First parameter before fragment
-					newUrl.append(url, 0, fragmentIndex).append('?').append(query).append(url, fragmentIndex, urlLen);
+					newUrl.append(uri, 0, fragmentIndex).append('?').append(query).append(uri, fragmentIndex, urlLen);
 					newQueryIndex = fragmentIndex;
 					newFragmentIndex = fragmentIndex + 1 + queryLen;
 				}
@@ -722,21 +964,27 @@ public class SplitUrl {
 				newQueryIndex = queryIndex;
 				if(fragmentIndex == -1) {
 					// Additional parameter to end
-					newUrl.append(url).append('&').append(query);
+					newUrl.append(uri).append('&').append(query);
 					newFragmentIndex = -1;
 				} else {
 					// Additional parameter before fragment
-					newUrl.append(url, 0, fragmentIndex).append('&').append(query).append(url, fragmentIndex, urlLen);
+					newUrl.append(uri, 0, fragmentIndex).append('&').append(query).append(uri, fragmentIndex, urlLen);
 					newFragmentIndex = fragmentIndex + 1 + queryLen;
 				}
 			}
 			assert newUrl.length() == newUrlLen;
-			return new SplitUrl(
+			newSplitUrl = new SplitUrl(
 				newUrl.toString(),
+				schemeLength,
 				newQueryIndex,
 				newFragmentIndex
 			);
 		}
+		assert
+			(query == null) ? Objects.equals(this.getQueryString(), newSplitUrl.getQueryString())
+			: hasQuery() ? newSplitUrl.getQueryString().endsWith('&' + query)
+			: newSplitUrl.getQueryString().equals(query);
+		return newSplitUrl;
 	}
 
 	/**
@@ -753,16 +1001,17 @@ public class SplitUrl {
 	 * @return  The new split URL or {@code this} when unmodified.
 	 */
 	public SplitUrl addEncodedParameter(String encodedName, String encodedValue) {
+		final SplitUrl newSplitUrl;
 		if(encodedName == null) {
 			if(encodedValue != null) throw new IllegalArgumentException("non-null value provided with null name: " + encodedValue);
-			return this;
+			newSplitUrl = this;
 		} else {
 			if(encodedValue == null) {
-				return addQueryString(encodedName);
+				newSplitUrl = addQueryString(encodedName);
 			} else {
 				if(encodedName.indexOf('#') != -1) throw new IllegalArgumentException("name may not contain fragment marker (#): " + encodedName);
 				if(encodedValue.indexOf('#') != -1) throw new IllegalArgumentException("value may not contain fragment marker (#): " + encodedValue);
-				int urlLen = url.length();
+				int urlLen = uri.length();
 				int nameLen = encodedName.length();
 				int valueLen = encodedValue.length();
 				int newUrlLen = urlLen + 1 + nameLen + 1 + valueLen;
@@ -772,12 +1021,12 @@ public class SplitUrl {
 				if(queryIndex == -1) {
 					if(fragmentIndex == -1) {
 						// First parameter to end
-						newUrl.append(url).append('?').append(encodedName).append('=').append(encodedValue);
-						newQueryIndex = url.length();
+						newUrl.append(uri).append('?').append(encodedName).append('=').append(encodedValue);
+						newQueryIndex = uri.length();
 						newFragmentIndex = -1;
 					} else {
 						// First parameter before fragment
-						newUrl.append(url, 0, fragmentIndex).append('?').append(encodedName).append('=').append(encodedValue).append(url, fragmentIndex, urlLen);
+						newUrl.append(uri, 0, fragmentIndex).append('?').append(encodedName).append('=').append(encodedValue).append(uri, fragmentIndex, urlLen);
 						newQueryIndex = fragmentIndex;
 						newFragmentIndex = fragmentIndex + 1 + nameLen + 1 + valueLen;
 					}
@@ -785,22 +1034,25 @@ public class SplitUrl {
 					newQueryIndex = queryIndex;
 					if(fragmentIndex == -1) {
 						// Additional parameter to end
-						newUrl.append(url).append('&').append(encodedName).append('=').append(encodedValue);
+						newUrl.append(uri).append('&').append(encodedName).append('=').append(encodedValue);
 						newFragmentIndex = -1;
 					} else {
 						// Additional parameter before fragment
-						newUrl.append(url, 0, fragmentIndex).append('&').append(encodedName).append('=').append(encodedValue).append(url, fragmentIndex, urlLen);
+						newUrl.append(uri, 0, fragmentIndex).append('&').append(encodedName).append('=').append(encodedValue).append(uri, fragmentIndex, urlLen);
 						newFragmentIndex = fragmentIndex + 1 + nameLen + 1 + valueLen;
 					}
 				}
 				assert newUrl.length() == newUrlLen;
-				return new SplitUrl(
+				newSplitUrl = new SplitUrl(
 					newUrl.toString(),
+					schemeLength,
 					newQueryIndex,
 					newFragmentIndex
 				);
 			}
 		}
+		// TODO: What do we assert here?
+		return newSplitUrl;
 	}
 
 	/**
@@ -836,12 +1088,22 @@ public class SplitUrl {
 	 * @see  HttpParametersUtils#addParams(java.lang.String, com.aoindustries.net.HttpParameters, java.lang.String)
 	 */
 	public SplitUrl addParameters(HttpParameters params, String documentEncoding) throws UnsupportedEncodingException {
+		final SplitUrl newSplitUrl;
 		if(params == null) {
-			return this;
+			newSplitUrl = this;
 		} else {
-			String newUrl = HttpParametersUtils.addParams(url, params, documentEncoding);
-			return (newUrl == url) ? this : new SplitUrl(newUrl);
+			String newUrl = HttpParametersUtils.addParams(uri, params, documentEncoding);
+			newSplitUrl = (newUrl == uri) ? this : new SplitUrl(
+				newUrl,
+				schemeLength,
+				queryIndex != -1 ? queryIndex
+					: fragmentIndex != -1 ? fragmentIndex
+					: uri.length(),
+				fragmentIndex == -1 ? -1 : (newUrl.length() - (uri.length() - fragmentIndex))
+			);
 		}
+		// TODO: What do we assert here?
+		return newSplitUrl;
 	}
 
 	/**
@@ -853,15 +1115,17 @@ public class SplitUrl {
 	 * @return  The new split URL or {@code this} when unmodified.
 	 */
 	public SplitUrl setEncodedFragment(String encodedFragment) {
+		final SplitUrl newSplitUrl;
 		if(encodedFragment == null) {
 			// Removing fragment
 			if(fragmentIndex == -1) {
 				// Already has no fragment
-				return this;
+				newSplitUrl = this;
 			} else {
 				// Remove the existing fragment
-				return new SplitUrl(
-					url.substring(0, fragmentIndex),
+				newSplitUrl = new SplitUrl(
+					uri.substring(0, fragmentIndex),
+					schemeLength,
 					queryIndex,
 					-1
 				);
@@ -870,40 +1134,45 @@ public class SplitUrl {
 			// Setting fragment
 			if(fragmentIndex == -1) {
 				// Add fragment
-				int urlLen = url.length();
+				int urlLen = uri.length();
 				int newUrlLen = urlLen + 1 + encodedFragment.length();
 				StringBuilder newUrl = new StringBuilder(newUrlLen);
-				newUrl.append(url).append('#').append(encodedFragment);
+				newUrl.append(uri).append('#').append(encodedFragment);
 				assert newUrl.length() == newUrlLen;
-				return new SplitUrl(
+				newSplitUrl = new SplitUrl(
 					newUrl.toString(),
+					schemeLength,
 					queryIndex,
 					urlLen
 				);
 			} else {
 				// Replace fragment
-				int urlLen = url.length();
+				int urlLen = uri.length();
 				int fragmentLen = encodedFragment.length();
 				int fragmentStart = fragmentIndex + 1;
 				int currentFragmentLen = urlLen - fragmentStart;
 				if(
 					currentFragmentLen == fragmentLen
-					&& url.regionMatches(fragmentStart, encodedFragment, 0, fragmentLen)
+					&& uri.regionMatches(fragmentStart, encodedFragment, 0, fragmentLen)
 				) {
 					// Already has this fragment
-					return this;
+					newSplitUrl = this;
+				} else {
+					int newUrlLen = urlLen - currentFragmentLen + fragmentLen;
+					StringBuilder newUrl = new StringBuilder(newUrlLen);
+					newUrl.append(uri, 0, fragmentStart).append(encodedFragment);
+					assert newUrl.length() == newUrlLen;
+					newSplitUrl = new SplitUrl(
+						newUrl.toString(),
+						schemeLength,
+						queryIndex,
+						fragmentIndex - currentFragmentLen + fragmentLen
+					);
 				}
-				int newUrlLen = urlLen - currentFragmentLen + fragmentLen;
-				StringBuilder newUrl = new StringBuilder(newUrlLen);
-				newUrl.append(url, 0, fragmentStart).append(encodedFragment);
-				assert newUrl.length() == newUrlLen;
-				return new SplitUrl(
-					newUrl.toString(),
-					queryIndex,
-					fragmentIndex - currentFragmentLen + fragmentLen
-				);
 			}
 		}
+		assert Objects.equals(encodedFragment, newSplitUrl.getFragment());
+		return newSplitUrl;
 	}
 
 	/**
@@ -921,6 +1190,8 @@ public class SplitUrl {
 	 */
 	@Deprecated
 	public SplitUrl setFragment(String fragment) {
-		return setEncodedFragment(UrlUtils.encodeURIComponent(fragment));
+		final SplitUrl newSplitUrl = setEncodedFragment(UrlUtils.encodeURIComponent(fragment));
+		// TODO: What do we assert here?
+		return newSplitUrl;
 	}
 }
