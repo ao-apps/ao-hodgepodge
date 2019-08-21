@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-08-18T02:43:22-0500"
+		dateModified="2019-08-21T05:09:52-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -55,50 +55,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			>
 				<ul>
 					<li>Added missing <code>char</code> to <code>String</code> replacement methods in <code>StringUtility</code>.</li>
-					<li>
-						New class <ao:a href="apidocs/com/aoindustries/net/SplitUrl.html">SplitUrl</ao:a>
-						optimized for high performance manipulation of URL path, query string, and fragment.
-					</li>
-					<li>
-						<code>UrlUtils.encodeUrlPath(String, String)</code> renamed to <code>UrlUtils.encodeURI(String, String)</code>
-						and now encodes the entire URL.  Also no longer does any URL transformations for <code>tel:</code> scheme.
-						Added streaming variants of <code>UrlUtils.encodeURI(…)</code>, too.
-					</li>
-					<li>
-						<code>UrlUtils.decodeUrlPath(String, String)</code> renamed to <code>UrlUtils.decodeURI(String, String)</code>
-						and now decodes the entire URL.
-						Added streaming variants of <code>UrlUtils.decodeURI(…)</code>, too.
-					</li>
-					<li>New methods <code>UrlUtils.encodeURIComponent(…)</code> for encoding URI path components or fragments.</li>
-					<li>New methods <code>UrlUtils.decodeURIComponent(…)</code> for decoding URI path components or fragments.</li>
-					<li><code>HttpParametersUtils.addParams(…)</code> now returns the original string when no parameters added.</li>
-					<li>
-						Deprecated methods performing URI encoding that accept an encoding, in favor of variants using
-						a default encoding of <code>UTF-8</code>.
-					</li>
-					<li>
-						Implementation changed from encoding URI in response encoding to <code>UTF-8</code> per
-						<ao:a href="https://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars">B.2.1 Non-ASCII characters in URI attribute values</ao:a>.
-					</li>
-					<li>Added variants of <code>ServletUtil.getAbsoluteURL(…)</code> that allow not adding context path.</li>
-					<li>Cookie names, values, comments, and paths are now URI-encoded.</li>
-					<li>All implementations of <code>HttpParameters.toString()</code> now encode a query string in UTF-8.</li>
-					<li>New method <code>MutableHttpParameters.addParameters(String, Iterable)</code> to add multiple values at once.</li>
 					<li>During coercion, XML Node will be output as UTF-8.</li>
-					<li>New enum <code>UriComponent</code> used to encode different types of URI components.</li>
-					<li>New methods for URI encoding/decoding in a servlet environment:
-						<ol>
-							<li><code>ServletUtil.encodeURIComponent(…)</code> for encoding URI path components or fragments.</li>
-							<li><code>ServletUtil.decodeURIComponent(…)</code> for decoding URI path components or fragments.</li>
-							<li><code>ServletUtil.encodeURI(…)</code> for encoding an entire URI to <ao:a href="https://tools.ietf.org/html/rfc3986">RFC 3986 ASCII format</ao:a>.</li>
-							<li><code>ServletUtil.decodeURI(…)</code> for decoding an entire URI to <ao:a href="https://tools.ietf.org/html/rfc3987">RFC 3987 Unicode format</ao:a>.</li>
-						</ol>
-					</li>
-					<li>
-						Deprecated <code>ServletUtil.getContextRequestUri()</code>: <code>HttpServletRequest.getContextPath()</code> sometimes comes
-						back percent encoded, but is usually decoded.  We've deprecated this method rather than creating a more advanced implementation
-						to deal with encoding discrepancies.
-					</li>
+					<li>Moved networking utilities to <core:link book="/ao-net-types" page="/index.jspx" />.</li>
+					<li>Moved Servlet and JSP related utilities to a new <core:link book="/ao-servlet-util" page="/index.jspx" /> project.</li>
+					<li>This project no longer depends on servlet and JSP APIs.</li>
 				</ul>
 			</changelog:release>
 		</c:if>

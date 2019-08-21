@@ -77,8 +77,6 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						<configuration>
 							<links>
 								<link>${javac.link.javaApi}</link>
-								<!-- Java EE -->
-								<link>${javac.link.javaeeApi.6}</link>
 								<!-- Direct -->
 								<link>https://aoindustries.com/ao-lang/apidocs/</link>
 								<link>https://aoindustries.com/ao-tempfiles/apidocs/</link>
@@ -96,12 +94,6 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			<dependency>
 				<groupId>junit</groupId><artifactId>junit</artifactId><version>4.12</version>
 			</dependency>
-			<!-- Java EE -->
-			<dependency>
-				<groupId>com.aoindustries</groupId><artifactId>javaee-web-api-bom</artifactId><version>6.0.0-POST-SNAPSHOT</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 			<!-- Direct -->
 			<dependency>
 				<groupId>com.aoindustries</groupId><artifactId>ao-lang</artifactId><version>3.0.0-POST-SNAPSHOT</version>
@@ -117,17 +109,6 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		<dependency>
 			<groupId>junit</groupId><artifactId>junit</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<!-- Java EE -->
-		<dependency>
-			<groupId>javax.servlet</groupId><artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId><artifactId>javax.servlet.jsp-api</artifactId>
-			<scope>provided</scope>
-			<optional>true</optional>
 		</dependency>
 		<!-- Direct -->
 		<dependency>
