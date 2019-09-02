@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-08-21T05:09:52-0500"
+		dateModified="2019-09-02T01:54:46-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -54,11 +54,15 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				scmUrl="@{documented.scm.url}"
 			>
 				<ul>
-					<li>Added missing <code>char</code> to <code>String</code> replacement methods in <code>StringUtility</code>.</li>
 					<li>During coercion, XML Node will be output as UTF-8.</li>
 					<li>Moved networking utilities to <core:link book="/ao-net-types" page="/index.jspx" />.</li>
 					<li>Moved Servlet and JSP related utilities to a new <core:link book="/ao-servlet-util" page="/index.jspx" /> project.</li>
 					<li>This project no longer depends on servlet and JSP APIs.</li>
+					<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
+						<ol>
+							<li><code>com.aoindustries.util.StringUtility</code></li>
+						</ol>
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
@@ -338,8 +342,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New methods to join into arbitrary <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Appendable.html">Appendable</ao:a>:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
+						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
+						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
 					</ul>
 				</li>
 				<li>
