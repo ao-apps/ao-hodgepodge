@@ -136,6 +136,12 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 	 * Captures comments from any lines that begin with #.  This class is here because it is probably
 	 * too simple to be generally useful, as it assumes ISO-8859-1 encoding like used
 	 * by Properties.store.
+	 * <p>
+	 * TODO: Read-write properties files via Reader/Writer in UTF-8 format for Java 9 compatibility
+	 * </p>
+	 * <p>
+	 * TODO: Support comments preceeded by ' ', '\f', '\t'
+	 * </p>
 	 */
 	static class CommentCaptureInputStream extends InputStream {
 		private final InputStream in;
@@ -329,6 +335,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		assert Thread.holdsLock(properties);
 		try {
 			// Create a properties instance that sorts the output by keys (case-insensitive)
+			// TODO: Use SortedProperties here?
 			Properties writer = new Properties() {
 				private static final long serialVersionUID = 6953022173340009928L;
 				@Override
@@ -341,6 +348,12 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 			};
 			writer.putAll(properties);
 			File tmpFile = File.createTempFile("ApplicationResources", null, sourceFile.getParentFile());
+			// TODO: Always write in UNIX newlines
+			// TODO: Convert Unicode \\uHHHH escapes to lower-case, to match how NetBeans writes keys?
+			// TODO: convert \n to \n\(EOL) on properties write
+			// TODO:     also consider prefix next line with \ when it starts with whitespace to maintain
+			// TODO:     This will allow git diff to help within multiline values
+			// TODO: Consider all these changes in a specialized outputstream filter designed to work with Properties
 			OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile));
 			try {
 				// Write any comments from when file was read
