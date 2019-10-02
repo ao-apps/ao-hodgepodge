@@ -38,6 +38,8 @@ import java.util.Properties;
  * <p>
  * Java 1.9: Writer properties files via {@link Writer} in UTF-8 format
  * </p>
+ *
+ * @author  AO Industries, Inc.
  */
 public class SkipCommentsFilterOutputStream extends FilterOutputStream {
 
