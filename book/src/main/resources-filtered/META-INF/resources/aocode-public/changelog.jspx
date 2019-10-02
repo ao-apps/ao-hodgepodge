@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-10-01T19:52:29-0500"
+		dateModified="2019-10-01T20:14:45-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -76,6 +76,11 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<li>
 						Made <ao:a href="apidocs/com/aoindustries/util/SkipCommentsFilterOutputStream.html">SkipCommentsFilterOutputStream</ao:a>
 						public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Properties.html">Properties</ao:a> files.
+					</li>
+					<li>
+						<ao:a href="apidocs/com/aoindustries/util/i18n/ModifiablePropertiesResourceBundle.html">ModifiablePropertiesResourceBundle</ao:a>
+						now stores the properties files in the <ao:a href="apidocs/com/aoindustries/util/DiffableProperties.html">maximally diffable format</ao:a>.
+						It also no longer overwrites the file when the content has not changed.
 					</li>
 				</ul>
 			</changelog:release>
