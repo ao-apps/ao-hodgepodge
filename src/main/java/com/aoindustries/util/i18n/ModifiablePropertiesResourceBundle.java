@@ -30,13 +30,12 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.Collator;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -75,7 +74,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
 	private static final Logger logger = Logger.getLogger(ModifiablePropertiesResourceBundle.class.getName());
 
-	private static final Charset propertiesCharset = Charset.forName("ISO-8859-1");
+	private static final Charset propertiesCharset = StandardCharsets.ISO_8859_1;
 	private static final String EOL = System.getProperty("line.separator");
 
 	private static final String VALIDATED_SUFFIX = ".ModifiableResourceBundle.validated";
