@@ -23,6 +23,7 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.io.FileUtils;
+import com.aoindustries.util.CommentCaptureInputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -131,70 +132,6 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 	 * The properties file is only used for updates.
 	 */
 	private final Properties properties = new Properties();
-
-	/**
-	 * Captures comments from any lines that begin with #.  This class is here because it is probably
-	 * too simple to be generally useful, as it assumes ISO-8859-1 encoding like used
-	 * by Properties.store.
-	 * <p>
-	 * TODO: Read-write properties files via Reader/Writer in UTF-8 format for Java 9 compatibility
-	 * </p>
-	 * <p>
-	 * TODO: Support comments preceeded by ' ', '\f', '\t'
-	 * </p>
-	 */
-	static class CommentCaptureInputStream extends InputStream {
-		private final InputStream in;
-		CommentCaptureInputStream(InputStream in) {
-			this.in = in;
-		}
-
-		private boolean lastCharNewline = true;
-		private boolean isCommentLine = false;
-		private final StringBuilder currentComment = new StringBuilder();
-
-		private final List<String> comments = new ArrayList<>();
-
-		/**
-		 * Adds buffered comment to comments if non-empty.
-		 */
-		private void addComment() {
-			if(currentComment.length()>0) {
-				comments.add(currentComment.toString());
-				currentComment.setLength(0);
-			}
-		}
-
-		@Override
-		public int read() throws IOException {
-			int ch = in.read();
-			if(ch==-1) {
-				// Handle EOL as newline terminator
-				lastCharNewline = true;
-				isCommentLine = false;
-				addComment();
-			} else {
-				if(lastCharNewline) isCommentLine = ch=='#';
-				lastCharNewline = ch=='\n';
-				if(lastCharNewline) addComment();
-				if(isCommentLine && ch!='\n' && ch!='\r') {
-					// This int->char conversion by cast only words because ISO-8859-1 encoding
-					currentComment.append((char)ch);
-				}
-			}
-			return ch;
-		}
-
-		@Override
-		public void close() throws IOException {
-			addComment();
-			super.close();
-		}
-
-		List<String> getComments() {
-			return comments;
-		}
-	}
 
 	/**
 	 * @param sourceFiles The source file(s).  If multiple source files are provided,

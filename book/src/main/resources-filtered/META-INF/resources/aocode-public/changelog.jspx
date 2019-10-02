@@ -69,6 +69,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						files in a way optimized for diff tools, such as <code>git diff</code>.  Best used in conjunction with
 						<ao:a href="apidocs/com/aoindustries/util/SortedProperties.html">SortedProperties</ao:a>.
 					</li>
+					<li>
+						Made <ao:a href="apidocs/com/aoindustries/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>
+						public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Properties.html">Properties</ao:a> files.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
