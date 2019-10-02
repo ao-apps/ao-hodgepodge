@@ -98,6 +98,11 @@ abstract public class WildcardPatternMatcher {
 	 * <p>
 	 * Any null or empty pattern matches none.
 	 * </p>
+	 * <p>
+	 * TODO: New optional flag to limit the matchers to disable the infix matching.
+	 * The prefix and suffix matches will always be fast O(n), but the infix matching
+	 * can be O(n^2).  This may be useful with public facing search forms, for example.
+	 * </p>
 	 */
 	public static WildcardPatternMatcher compile(String patterns) {
 		if(patterns == null || patterns.isEmpty()) {
