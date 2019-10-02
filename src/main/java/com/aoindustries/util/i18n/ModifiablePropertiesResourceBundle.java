@@ -24,6 +24,7 @@ package com.aoindustries.util.i18n;
 
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.util.CommentCaptureInputStream;
+import com.aoindustries.util.SkipCommentsFilterOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -241,27 +242,6 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 	private static void checkKey(String key) throws IllegalArgumentException {
 		if(key.endsWith(VALIDATED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+VALIDATED_SUFFIX+": "+key);
 		if(key.endsWith(MODIFIED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
-	}
-
-	/**
-	 * Skips any lines that begin with #.  This class is here because it is probably
-	 * too simple to be generally useful, as it assumes ISO-8859-1 encoding like used
-	 * by Properties.store.
-	 */
-	static class SkipCommentsFilterOutputStream extends FilterOutputStream {
-		SkipCommentsFilterOutputStream(OutputStream out) {
-			super(out);
-		}
-
-		private boolean lastCharNewline = true;
-		private boolean isCommentLine = false;
-
-		@Override
-		public void write(int ch) throws IOException {
-			if(lastCharNewline) isCommentLine = ch=='#';
-			lastCharNewline = ch=='\n';
-			if(!isCommentLine) out.write(ch);
-		}
 	}
 
 	/**

@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-10-01T19:30:43-0500"
+		dateModified="2019-10-01T19:52:29-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -71,6 +71,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					</li>
 					<li>
 						Made <ao:a href="apidocs/com/aoindustries/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>
+						public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Properties.html">Properties</ao:a> files.
+					</li>
+					<li>
+						Made <ao:a href="apidocs/com/aoindustries/util/SkipCommentsFilterOutputStream.html">SkipCommentsFilterOutputStream</ao:a>
 						public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Properties.html">Properties</ao:a> files.
 					</li>
 				</ul>

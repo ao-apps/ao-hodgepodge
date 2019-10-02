@@ -24,6 +24,7 @@ package com.aoindustries.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -34,7 +35,7 @@ import java.util.Properties;
  * This class is optimized for reading {@link Properties} files and assumes
  * ISO-8859-1 encoding.
  * <p>
- * Java 1.9: Read properties files via Reader in UTF-8 format
+ * Java 1.9: Read properties files via {@link Reader} in UTF-8 format
  * </p>
  */
 public class CommentCaptureInputStream extends InputStream {
