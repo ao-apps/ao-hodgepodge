@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-09-02T01:54:46-0500"
+		dateModified="2019-10-01T19:30:43-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -62,6 +62,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						<ol>
 							<li><code>com.aoindustries.util.StringUtility</code></li>
 						</ol>
+					</li>
+					<li>
+						New class <ao:a href="apidocs/com/aoindustries/util/DiffableProperties.html">DiffableProperties</ao:a>
+						to format <ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Properties.html">Properties</ao:a>
+						files in a way optimized for diff tools, such as <code>git diff</code>.  Best used in conjunction with
+						<ao:a href="apidocs/com/aoindustries/util/SortedProperties.html">SortedProperties</ao:a>.
 					</li>
 				</ul>
 			</changelog:release>
