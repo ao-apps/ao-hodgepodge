@@ -67,7 +67,7 @@ abstract public class WildcardPatternMatcher {
 		}
 
 		@Override
-		public boolean isMatch(String paramName) {
+		public boolean isMatch(String input) {
 			return false;
 		}
 	};
@@ -81,7 +81,7 @@ abstract public class WildcardPatternMatcher {
 
 	private static final WildcardPatternMatcher matchAll = new WildcardPatternMatcher() {
 		@Override
-		public boolean isMatch(String paramName) {
+		public boolean isMatch(String input) {
 			return true;
 		}
 	};
@@ -170,8 +170,8 @@ abstract public class WildcardPatternMatcher {
 								matchers.add(
 									new WildcardPatternMatcher() {
 										@Override
-										public boolean isMatch(String paramName) {
-											return paramName.contains(sequence);
+										public boolean isMatch(String input) {
+											return input.contains(sequence);
 										}
 									}
 								);
@@ -180,8 +180,8 @@ abstract public class WildcardPatternMatcher {
 								matchers.add(
 									new WildcardPatternMatcher() {
 										@Override
-										public boolean isMatch(String paramName) {
-											return paramName.endsWith(sequence);
+										public boolean isMatch(String input) {
+											return input.endsWith(sequence);
 										}
 									}
 								);
@@ -192,8 +192,8 @@ abstract public class WildcardPatternMatcher {
 								matchers.add(
 									new WildcardPatternMatcher() {
 										@Override
-										public boolean isMatch(String paramName) {
-											return paramName.startsWith(sequence);
+										public boolean isMatch(String input) {
+											return input.startsWith(sequence);
 										}
 									}
 								);
@@ -202,8 +202,8 @@ abstract public class WildcardPatternMatcher {
 								matchers.add(
 									new WildcardPatternMatcher() {
 										@Override
-										public boolean isMatch(String paramName) {
-											return paramName.equals(sequence);
+										public boolean isMatch(String input) {
+											return input.equals(sequence);
 										}
 									}
 								);
@@ -213,15 +213,15 @@ abstract public class WildcardPatternMatcher {
 						matchers.add(
 							new WildcardPatternMatcher() {
 								@Override
-								public boolean isMatch(String paramName) {
+								public boolean isMatch(String input) {
 									int index = 0;
 									int indexEnd = sequences.size();
 									int pos = 0;
-									int end = paramName.length();
+									int end = input.length();
 									// Handle non-wildcard start
 									if(!startsWildcard) {
 										String prefix = sequences.get(0);
-										if(!paramName.startsWith(prefix)) {
+										if(!input.startsWith(prefix)) {
 											return false;
 										}
 										index++;
@@ -231,7 +231,7 @@ abstract public class WildcardPatternMatcher {
 									if(!endsWildcard) {
 										indexEnd--;
 										String suffix = sequences.get(indexEnd);
-										if(!paramName.endsWith(suffix)) {
+										if(!input.endsWith(suffix)) {
 											return false;
 										}
 										end -= suffix.length();
@@ -243,7 +243,7 @@ abstract public class WildcardPatternMatcher {
 										String sequence = sequences.get(index++);
 										int sequenceLen = sequence.length();
 										assert sequenceLen > 0;
-										int foundAt = paramName.indexOf(sequence, pos);
+										int foundAt = input.indexOf(sequence, pos);
 										if(foundAt == -1 || foundAt > (end - sequenceLen)) {
 											return false;
 										}
@@ -262,9 +262,9 @@ abstract public class WildcardPatternMatcher {
 			if(matchers.size() == 1) return matchers.get(0);
 			return new WildcardPatternMatcher() {
 				@Override
-				public boolean isMatch(String paramName) {
+				public boolean isMatch(String input) {
 					for(WildcardPatternMatcher matcher : matchers) {
-						if(matcher.isMatch(paramName)) return true;
+						if(matcher.isMatch(input)) return true;
 					}
 					return false;
 				}
@@ -284,5 +284,5 @@ abstract public class WildcardPatternMatcher {
 	}
 
 	// TODO: Rename "matches", deprecate old with "default" method in Java 1.8?
-	abstract public boolean isMatch(String paramName);
+	abstract public boolean isMatch(String input);
 }
