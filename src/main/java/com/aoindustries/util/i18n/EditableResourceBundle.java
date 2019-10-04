@@ -224,7 +224,16 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		final ThreadSettings threadSettings = currentThreadSettings.get();
 		synchronized(threadSettings.requestLookups) {
 			final Map<LookupKey,LookupValue> lookups = threadSettings.requestLookups;
-			final String setValueUrl = threadSettings.setValueUrl;
+			final String setValueUrl;
+			{
+				String url = threadSettings.setValueUrl;
+				if(url != null) {
+					// Strip any anchor
+					int anchorPos = url.lastIndexOf('#');
+					if(anchorPos != -1) url = url.substring(0, anchorPos);
+				}
+				setValueUrl = url;
+			}
 			resetRequest(false, null, false);
 			if(!lookups.isEmpty()) {
 				// Sort by lookupValue.id to present the information in the same order as first seen in the request
@@ -446,7 +455,10 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 							+ "          var value=textArea.value;\n"
 							// Update server
 							+ "          var request=new XMLHttpRequest();\n"
-							+ "          var url=\"").append(setValueUrl).append("?baseName=\"+encodeURIComponent(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])+\"&locale=\"+encodeURIComponent(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURIComponent(EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURIComponent(value)+\"&modified=\"+modified;\n"
+							+ "          var url=\"")
+						.append(setValueUrl)
+						.append(setValueUrl.indexOf('?') == -1 ? '?' : '&')
+						.append("baseName=\"+encodeURIComponent(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])+\"&locale=\"+encodeURIComponent(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURIComponent(EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURIComponent(value)+\"&modified=\"+modified;\n"
 							//+ "          window.alert(url);\n"
 							+ "          request.open('GET', url, false);\n"
 							+ "          request.send(null);\n"
