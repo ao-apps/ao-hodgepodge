@@ -29,7 +29,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		<relativePath>../ao-oss-parent/pom.xml</relativePath>
 	</parent>
 
-	<groupId>com.aoindustries</groupId><artifactId>aocode-public</artifactId><version>3.1.0-POST-SNAPSHOT</version>
+	<groupId>com.aoindustries</groupId><artifactId>aocode-public</artifactId><version>3.1.1-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<name>AOCode Public</name>
