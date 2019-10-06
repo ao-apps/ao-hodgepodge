@@ -29,8 +29,12 @@ import java.util.Map;
 /**
  * Obtains MIME types for file names.
  *
+ * @deprecated  This simple hard-coded list of MIME types is not maintained well.
+ *              It is strongly recommended to use a different, well-supported API.
+ *
  * @author  AO Industries, Inc.
  */
+@Deprecated
 public class MimeType {
 
 	public static final String DEFAULT_MIME_TYPE="unknown/unknown";
