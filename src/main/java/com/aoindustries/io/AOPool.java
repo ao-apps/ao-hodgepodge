@@ -586,7 +586,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		out.append("</td></tr>\n"
 				+ "  <tr><td>Is Closed:</td><td>").append(Boolean.toString(myIsClosed)).append("</td></tr>\n"
 				+ "</table>\n"
-				+ "<br /><br />\n"
+				+ "<br /><br />\n" // TODO: HTML/XHTML serialization
 				+ "<table style='border:1px;' cellspacing='0' cellpadding='2'>\n"
 				+ "  <tr><th colspan='11'><span style='font-size:large;'>Connections</span></th></tr>\n"
 				+ "  <tr>\n"
