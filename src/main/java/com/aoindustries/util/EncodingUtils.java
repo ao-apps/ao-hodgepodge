@@ -85,7 +85,7 @@ public final class EncodingUtils {
 	}
 
 	private static final String EOL = System.getProperty("line.separator");
-	private static final String BR_EOL = "<br />"+EOL;
+	private static final String BR_EOL = "<br />"+EOL; // TODO: HTML/XHTML serialization
 
 	// <editor-fold defaultstate="collapsed" desc="(X)HTML">
 	/**
@@ -243,7 +243,7 @@ public final class EncodingUtils {
 								out.append(S, c-toPrint, c);
 								toPrint=0;
 							}
-							out.append("<br />\n");
+							out.append("<br />\n"); // TODO: HTML/XHTML serialization
 						} else {
 							toPrint++;
 						}
