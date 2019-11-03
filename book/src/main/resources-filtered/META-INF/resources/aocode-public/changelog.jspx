@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-10-06T16:59:05-0500"
+		dateModified="2019-11-03T02:12:52-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -54,6 +54,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				scmUrl="@{documented.scm.url}"
 			>
 				<ul>
+					<li>Minimum Java version changed from 1.7 to 1.8.</li>
 					<li>
 						Deprecated <code>MimeType</code>:
 						This simple hard-coded list of MIME types is not maintained well.
