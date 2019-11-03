@@ -52,6 +52,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	/**
 	 * A callable used to refresh the cache.
 	 */
+	@FunctionalInterface
 	public static interface Refresher<K,V,E extends Exception> {
 		V call(K key) throws E;
 	}
