@@ -70,6 +70,8 @@ public final class EncodingUtils {
 			//       This should keep it consistent with other coercions.
 			return value.toString();
 		}
+		// Otherwise, support CharSequence
+		if(value instanceof CharSequence) return value.toString();
 		// Otherwise, if is a DOM node, serialize the output
 		if(value instanceof Node) {
 			try {
