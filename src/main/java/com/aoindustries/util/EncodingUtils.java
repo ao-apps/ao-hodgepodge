@@ -72,6 +72,8 @@ public final class EncodingUtils {
 		}
 		// Otherwise, support CharSequence
 		if(value instanceof CharSequence) return value.toString();
+		// Otherwise, support char[]
+		if(value instanceof char[]) return new String((char[])value);
 		// Otherwise, if is a DOM node, serialize the output
 		if(value instanceof Node) {
 			try {
