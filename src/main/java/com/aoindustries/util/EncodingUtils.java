@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util;
 
+import com.aoindustries.io.Writable;
 import com.aoindustries.util.i18n.BundleLookupMarkup;
 import com.aoindustries.util.i18n.BundleLookupThreadContext;
 import com.aoindustries.util.i18n.MarkupType;
@@ -52,7 +53,7 @@ public final class EncodingUtils {
 	/**
 	 * Converts an object to a string.
 	 * 
-	 * @deprecated  Use Coercion.toString(Object) instead.
+	 * @deprecated  Use <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/Coercion.html#toString-java.lang.Object-">Coercion.toString(Object)</a> instead.
 	 */
 	@Deprecated
 	public static String toString(Object value) {
@@ -60,6 +61,15 @@ public final class EncodingUtils {
 		if(value instanceof String) return (String)value;
 		// Otherwise, if A is null, then the result is "".
 		if(value == null) return "";
+		// Otherwise, if is a Writable, support optimizations
+		if(value instanceof Writable) {
+			// Note: This is only optimal for Writable that are "isFastToString()",
+			//       but we don't have much better option since a String is required.
+			//       Keeping this here, instead of falling-through to toString() below,
+			//       so behavior is consistent in the odd change a class is a Node and implements Writable.
+			//       This should keep it consistent with other coercions.
+			return value.toString();
+		}
 		// Otherwise, if is a DOM node, serialize the output
 		if(value instanceof Node) {
 			try {

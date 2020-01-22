@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 aocode-public - Reusable Java library of general tools with minimal external dependencies.
-Copyright (C) 2016, 2017, 2018, 2019  AO Industries, Inc.
+Copyright (C) 2016, 2017, 2018, 2019, 2020  AO Industries, Inc.
     support@aoindustries.com
     7262 Bull Pen Cir
     Mobile, AL 36695
@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2019-11-03T02:12:52-0600"
+		dateModified="2020-01-22T05:13:51-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -59,6 +59,13 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						Deprecated <code>MimeType</code>:
 						This simple hard-coded list of MIME types is not maintained well.
 						It is strongly recommended to use a different, well-supported API.
+					</li>
+					<li>
+						Made <code>EncodingUtils.toString(Object)</code> (deprecated) consistent with
+						<ao:a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/Coercion.html">Coercion</ao:a>:
+						<ol>
+							<li>Supporting instances of <ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/io/Writable.html">Writable</ao:a>.</li>
+						</ol>
 					</li>
 				</ul>
 			</changelog:release>
