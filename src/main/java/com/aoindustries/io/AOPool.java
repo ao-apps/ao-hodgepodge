@@ -519,9 +519,11 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	protected abstract boolean isClosed(C conn) throws E;
 
 	/**
-	 * Prints additional connection pool details.
+	 * Prints additional connection pool details.  Must have opened the <code>&lt;tbody&gt;</code>.
 	 */
-	protected abstract void printConnectionStats(Appendable out, boolean isXhtml) throws IOException;
+	protected void printConnectionStats(Appendable out, boolean isXhtml) throws IOException {
+		out.append("  <tbody>\n");
+	}
 
 	/**
 	 * Prints complete statistics about connection pool use.
@@ -572,37 +574,41 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		long timeLen = time-startTime;
 
 		// Print the stats
-		out.append("<table style='border:1px;' cellspacing='0' cellpadding='2'>\n");
+		out.append("<table style=\"border:1px\" cellspacing=\"0\" cellpadding=\"2\">\n");
 		printConnectionStats(out, isXhtml);
-		out.append("  <tr><td>Max Connection Pool Size:</td><td>").append(Integer.toString(poolSize)).append("</td></tr>\n"
-				+ "  <tr><td>Connection Clean Interval:</td><td>");
+		out.append("    <tr><td>Max Connection Pool Size:</td><td>").append(Integer.toString(poolSize)).append("</td></tr>\n"
+				+ "    <tr><td>Connection Clean Interval:</td><td>");
 		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(delayTime), out, isXhtml);
 		out.append("</td></tr>\n"
-				+ "  <tr><td>Max Idle Time:</td><td>");
+				+ "    <tr><td>Max Idle Time:</td><td>");
 		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(maxIdleTime), out, isXhtml);
 		out.append("</td></tr>\n"
-				+ "  <tr><td>Max Connection Age:</td><td>");
+				+ "    <tr><td>Max Connection Age:</td><td>");
 		com.aoindustries.util.EncodingUtils.encodeHtml(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge), out, isXhtml);
 		out.append("</td></tr>\n"
-				+ "  <tr><td>Is Closed:</td><td>").append(Boolean.toString(myIsClosed)).append("</td></tr>\n"
+				+ "    <tr><td>Is Closed:</td><td>").append(Boolean.toString(myIsClosed)).append("</td></tr>\n"
+				+ "  </tbody>\n"
 				+ "</table>\n");
 		if(isXhtml) out.append("<br /><br />\n");
 		else out.append("<br><br>\n");
-		out.append("<table style='border:1px;' cellspacing='0' cellpadding='2'>\n"
-				+ "  <tr><th colspan='11'><span style='font-size:large;'>Connections</span></th></tr>\n"
-				+ "  <tr>\n"
-				+ "    <th>Connection #</th>\n"
-				+ "    <th>Is Connected</th>\n"
-				+ "    <th>Conn Age</th>\n"
-				+ "    <th>Conn Count</th>\n"
-				+ "    <th>Use Count</th>\n"
-				+ "    <th>Total Time</th>\n"
-				+ "    <th>% of Time</th>\n"
-				+ "    <th>State</th>\n"
-				+ "    <th>State Time</th>\n"
-				+ "    <th>Ave Trans Time</th>\n"
-				+ "    <th>Stack Trace</th>\n"
-				+ "  </tr>\n");
+		out.append("<table style=\"border:1px\" cellspacing=\"0\" cellpadding=\"2\">\n"
+				+ "  <thead>\n"
+				+ "    <tr><th colspan=\"11\"><span style=\"font-size:large\">Connections</span></th></tr>\n"
+				+ "    <tr>\n"
+				+ "      <th>Connection #</th>\n"
+				+ "      <th>Is Connected</th>\n"
+				+ "      <th>Conn Age</th>\n"
+				+ "      <th>Conn Count</th>\n"
+				+ "      <th>Use Count</th>\n"
+				+ "      <th>Total Time</th>\n"
+				+ "      <th>% of Time</th>\n"
+				+ "      <th>State</th>\n"
+				+ "      <th>State Time</th>\n"
+				+ "      <th>Ave Trans Time</th>\n"
+				+ "      <th>Stack Trace</th>\n"
+				+ "    </tr>\n"
+				+ "  </thead>\n"
+				+ "  <tbody>\n");
 
 		int totalConnected = 0;
 		long totalConnects = 0;
@@ -618,36 +624,36 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			boolean isBusy = isBusies[c];
 			if(isBusy) totalTime += time - startTimes[c];
 			long stateTime = isBusy ? (time-startTimes[c]):(time-releaseTimes[c]);
-			out.append("  <tr>\n"
-					+ "    <td>").append(Integer.toString(c+1)).append("</td>\n"
-					+ "    <td>").append(isConnected?"Yes":"No").append("</td>\n"
-					+ "    <td>");
+			out.append("    <tr>\n"
+					+ "      <td>").append(Integer.toString(c+1)).append("</td>\n"
+					+ "      <td>").append(isConnected?"Yes":"No").append("</td>\n"
+					+ "      <td>");
 			if(isConnected) com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(time-createTimes[c]), out, isXhtml);
 			else out.append("&#160;");
-			out.append("    <td>").append(Long.toString(connCount)).append("</td>\n"
-					+ "    <td>").append(Long.toString(useCount)).append("</td>\n"
-					+ "    <td>");
+			out.append("      <td>").append(Long.toString(connCount)).append("</td>\n"
+					+ "      <td>").append(Long.toString(useCount)).append("</td>\n"
+					+ "      <td>");
 			com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTime), out, isXhtml);
 			out.append("</td>\n"
-					+ "    <td>").append(Float.toString(totalTime*100/(float)timeLen)).append("%</td>\n"
-					+ "    <td>").append(isBusy?"In Use":isConnected?"Idle":"Closed").append("</td>\n"
-					+ "    <td>");
+					+ "      <td>").append(Float.toString(totalTime*100/(float)timeLen)).append("%</td>\n"
+					+ "      <td>").append(isBusy?"In Use":isConnected?"Idle":"Closed").append("</td>\n"
+					+ "      <td>");
 			com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(stateTime), out, isXhtml);
 			out.append("</td>\n"
-					+ "    <td>").append(Long.toString(totalTime*1000/useCount)).append("&#181;s</td>\n"
-					+ "    <td>");
+					+ "      <td>").append(Long.toString(totalTime*1000/useCount)).append("&#181;s</td>\n"
+					+ "      <td>");
 			Throwable T = allocateStackTraces[c];
 			if(T == null) out.append("&#160;");
 			else {
-				out.append("      <a href='#' onclick='var elem = document.getElementById(\"stack_").append(Integer.toString(c)).append("\").style; elem.visibility=(elem.visibility==\"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
-						+ "      <span id='stack_").append(Integer.toString(c)).append("' style='text-align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:").append(Integer.toString(c+1)).append("'>\n"
-						+ "        <pre style='text-align:left; background-color:white; border: 2px solid; border-color: black;'>\n");
+				out.append("        <a href=\"#\" onclick='var elem = document.getElementById(\"stack_").append(Integer.toString(c)).append("\").style; elem.visibility=(elem.visibility==\"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
+						+ "        <span id=\"stack_").append(Integer.toString(c)).append("\" style=\"text-align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:").append(Integer.toString(c+1)).append("\">\n"
+						+ "          <pre style=\"text-align:left; background-color:white; border: 2px solid; border-color: black\">\n");
 				ErrorPrinter.printStackTraces(T, out);
-				out.append("        </pre>\n"
-						+ "      </span>\n");
+				out.append("          </pre>\n"
+						+ "        </span>\n");
 			}
 			out.append("</td>\n"
-					+ "  </tr>\n");
+					+ "    </tr>\n");
 
 			// Update totals
 			if(isConnected) totalConnected++;
@@ -656,23 +662,26 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			totalTotalTime+=totalTime;
 			if(isBusy) totalBusy++;
 		}
-		out.append("  <tr>\n"
-				+ "    <td><b>Total</b></td>\n"
-				+ "    <td>").append(Integer.toString(totalConnected)).append("</td>\n"
-				+ "    <td>&#160;</td>\n"
-				+ "    <td>").append(Long.toString(totalConnects)).append("</td>\n"
-				+ "    <td>").append(Long.toString(totalUses)).append("</td>\n"
-				+ "    <td>");
+		out.append("  </tbody>\n"
+				+ "  <tfoot>\n"
+				+ "    <tr>\n"
+				+ "      <td><b>Total</b></td>\n"
+				+ "      <td>").append(Integer.toString(totalConnected)).append("</td>\n"
+				+ "      <td>&#160;</td>\n"
+				+ "      <td>").append(Long.toString(totalConnects)).append("</td>\n"
+				+ "      <td>").append(Long.toString(totalUses)).append("</td>\n"
+				+ "      <td>");
 		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTotalTime), out, isXhtml);
 		out.append("</td>\n"
-				+ "    <td>").append(Float.toString(timeLen==0 ? 0 : (totalTotalTime*100/(float)timeLen))).append("%</td>\n"
-				+ "    <td>").append(Integer.toString(totalBusy)).append("</td>\n"
-				+ "    <td>");
+				+ "      <td>").append(Float.toString(timeLen==0 ? 0 : (totalTotalTime*100/(float)timeLen))).append("%</td>\n"
+				+ "      <td>").append(Integer.toString(totalBusy)).append("</td>\n"
+				+ "      <td>");
 		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(timeLen), out, isXhtml);
 		out.append("</td>\n"
-				+ "    <td>").append(Long.toString(totalUses==0 ? 0 : (totalTotalTime*1000/totalUses))).append("&#181;s</td>\n"
-				+ "    <td>&#160;</td>\n"
-				+ "  </tr>\n"
+				+ "      <td>").append(Long.toString(totalUses==0 ? 0 : (totalTotalTime*1000/totalUses))).append("&#181;s</td>\n"
+				+ "      <td>&#160;</td>\n"
+				+ "    </tr>\n"
+				+ "  </tfoot>\n"
 				+ "</table>\n");
 	}
 
