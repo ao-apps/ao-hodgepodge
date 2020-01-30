@@ -173,9 +173,9 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	protected void printConnectionStats(Appendable out, boolean isXhtml) throws IOException {
 		out.append("  <thead>\n"
 				+ "    <tr><th colspan=\"2\"><span style=\"font-size:large\">JDBC Driver</span></th></tr>\n"
-				+ "  </thead>\n"
-				+ "  <tbody>\n"
-				+ "    <tr><td>Driver:</td><td>");
+				+ "  </thead>\n");
+		super.printConnectionStats(out, isXhtml);
+		out.append("    <tr><td>Driver:</td><td>");
 		com.aoindustries.util.EncodingUtils.encodeHtml(driver, false, false, out, isXhtml);
 		out.append("</td></tr>\n"
 				+ "    <tr><td>URL:</td><td>");
