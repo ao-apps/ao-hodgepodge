@@ -171,17 +171,20 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void printConnectionStats(Appendable out, boolean isXhtml) throws IOException {
-		out.append("  <tr><th colspan='2'><span style='font-size:large;'>JDBC Driver</span></th></tr>\n"
-				+ "  <tr><td>Driver:</td><td>");
+		out.append("  <thead>\n"
+				+ "    <tr><th colspan=\"2\"><span style=\"font-size:large\">JDBC Driver</span></th></tr>\n"
+				+ "  </thead>\n"
+				+ "  <tbody>\n"
+				+ "    <tr><td>Driver:</td><td>");
 		com.aoindustries.util.EncodingUtils.encodeHtml(driver, false, false, out, isXhtml);
 		out.append("</td></tr>\n"
-				+ "  <tr><td>URL:</td><td>");
+				+ "    <tr><td>URL:</td><td>");
 		com.aoindustries.util.EncodingUtils.encodeHtml(url, false, false, out, isXhtml);
 		out.append("</td></tr>\n"
-				+ "  <tr><td>User:</td><td>");
+				+ "    <tr><td>User:</td><td>");
 		com.aoindustries.util.EncodingUtils.encodeHtml(user, false, false, out, isXhtml);
 		out.append("</td></tr>\n"
-				+ "  <tr><td>Password:</td><td>");
+				+ "    <tr><td>Password:</td><td>");
 		int len=password.length();
 		for(int c=0;c<len;c++) {
 			out.append('*');
