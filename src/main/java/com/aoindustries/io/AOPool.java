@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -521,13 +521,13 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	/**
 	 * Prints additional connection pool details.
 	 */
-	protected abstract void printConnectionStats(Appendable out) throws IOException;
+	protected abstract void printConnectionStats(Appendable out, boolean isXhtml) throws IOException;
 
 	/**
 	 * Prints complete statistics about connection pool use.
 	 */
 	@SuppressWarnings("deprecation")
-	public final void printStatisticsHTML(Appendable out) throws IOException, E {
+	public final void printStatisticsHTML(Appendable out, boolean isXhtml) throws IOException, E {
 		// Get the data
 		boolean myIsClosed;
 		synchronized(poolLock) {
@@ -573,21 +573,22 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 
 		// Print the stats
 		out.append("<table style='border:1px;' cellspacing='0' cellpadding='2'>\n");
-		printConnectionStats(out);
+		printConnectionStats(out, isXhtml);
 		out.append("  <tr><td>Max Connection Pool Size:</td><td>").append(Integer.toString(poolSize)).append("</td></tr>\n"
 				+ "  <tr><td>Connection Clean Interval:</td><td>");
-		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(delayTime), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(delayTime), out, isXhtml);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>Max Idle Time:</td><td>");
-		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(maxIdleTime), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(maxIdleTime), out, isXhtml);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>Max Connection Age:</td><td>");
-		com.aoindustries.util.EncodingUtils.encodeHtml(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(maxConnectionAge==UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":StringUtility.getDecimalTimeLengthString(maxConnectionAge), out, isXhtml);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>Is Closed:</td><td>").append(Boolean.toString(myIsClosed)).append("</td></tr>\n"
-				+ "</table>\n"
-				+ "<br /><br />\n" // TODO: HTML/XHTML serialization
-				+ "<table style='border:1px;' cellspacing='0' cellpadding='2'>\n"
+				+ "</table>\n");
+		if(isXhtml) out.append("<br /><br />\n");
+		else out.append("<br><br>\n");
+		out.append("<table style='border:1px;' cellspacing='0' cellpadding='2'>\n"
 				+ "  <tr><th colspan='11'><span style='font-size:large;'>Connections</span></th></tr>\n"
 				+ "  <tr>\n"
 				+ "    <th>Connection #</th>\n"
@@ -621,17 +622,17 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 					+ "    <td>").append(Integer.toString(c+1)).append("</td>\n"
 					+ "    <td>").append(isConnected?"Yes":"No").append("</td>\n"
 					+ "    <td>");
-			if(isConnected) com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(time-createTimes[c]), out);
+			if(isConnected) com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(time-createTimes[c]), out, isXhtml);
 			else out.append("&#160;");
 			out.append("    <td>").append(Long.toString(connCount)).append("</td>\n"
 					+ "    <td>").append(Long.toString(useCount)).append("</td>\n"
 					+ "    <td>");
-			com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTime), out);
+			com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTime), out, isXhtml);
 			out.append("</td>\n"
 					+ "    <td>").append(Float.toString(totalTime*100/(float)timeLen)).append("%</td>\n"
 					+ "    <td>").append(isBusy?"In Use":isConnected?"Idle":"Closed").append("</td>\n"
 					+ "    <td>");
-			com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(stateTime), out);
+			com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(stateTime), out, isXhtml);
 			out.append("</td>\n"
 					+ "    <td>").append(Long.toString(totalTime*1000/useCount)).append("&#181;s</td>\n"
 					+ "    <td>");
@@ -662,17 +663,27 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 				+ "    <td>").append(Long.toString(totalConnects)).append("</td>\n"
 				+ "    <td>").append(Long.toString(totalUses)).append("</td>\n"
 				+ "    <td>");
-		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTotalTime), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTotalTime), out, isXhtml);
 		out.append("</td>\n"
 				+ "    <td>").append(Float.toString(timeLen==0 ? 0 : (totalTotalTime*100/(float)timeLen))).append("%</td>\n"
 				+ "    <td>").append(Integer.toString(totalBusy)).append("</td>\n"
 				+ "    <td>");
-		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(timeLen), out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(timeLen), out, isXhtml);
 		out.append("</td>\n"
 				+ "    <td>").append(Long.toString(totalUses==0 ? 0 : (totalTotalTime*1000/totalUses))).append("&#181;s</td>\n"
 				+ "    <td>&#160;</td>\n"
 				+ "  </tr>\n"
 				+ "</table>\n");
+	}
+
+	/**
+	 * Prints complete statistics about connection pool use in XHTML.
+	 *
+	 * @deprecated  Please specify if is HTML or XHTML
+	 */
+	@Deprecated
+	public final void printStatisticsHTML(Appendable out) throws IOException, E {
+		
 	}
 
 	/**

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -170,16 +170,16 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 
 	@SuppressWarnings("deprecation")
 	@Override
-	protected void printConnectionStats(Appendable out) throws IOException {
+	protected void printConnectionStats(Appendable out, boolean isXhtml) throws IOException {
 		out.append("  <tr><th colspan='2'><span style='font-size:large;'>JDBC Driver</span></th></tr>\n"
 				+ "  <tr><td>Driver:</td><td>");
-		com.aoindustries.util.EncodingUtils.encodeHtml(driver, false, false, out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(driver, false, false, out, isXhtml);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>URL:</td><td>");
-		com.aoindustries.util.EncodingUtils.encodeHtml(url, false, false, out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(url, false, false, out, isXhtml);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>User:</td><td>");
-		com.aoindustries.util.EncodingUtils.encodeHtml(user, false, false, out);
+		com.aoindustries.util.EncodingUtils.encodeHtml(user, false, false, out, isXhtml);
 		out.append("</td></tr>\n"
 				+ "  <tr><td>Password:</td><td>");
 		int len=password.length();
