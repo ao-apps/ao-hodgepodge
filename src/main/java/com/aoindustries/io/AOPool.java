@@ -574,7 +574,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		long timeLen = time-startTime;
 
 		// Print the stats
-		out.append("<table style=\"border:1px\" cellspacing=\"0\" cellpadding=\"2\">\n");
+		out.append("<table class=\"thinTable\">\n");
 		printConnectionStats(out, isXhtml);
 		out.append("    <tr><td>Max Connection Pool Size:</td><td>").append(Integer.toString(poolSize)).append("</td></tr>\n"
 				+ "    <tr><td>Connection Clean Interval:</td><td>");
@@ -591,7 +591,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 				+ "</table>\n");
 		if(isXhtml) out.append("<br /><br />\n");
 		else out.append("<br><br>\n");
-		out.append("<table style=\"border:1px\" cellspacing=\"0\" cellpadding=\"2\">\n"
+		out.append("<table class=\"thinTable\">\n"
 				+ "  <thead>\n"
 				+ "    <tr><th colspan=\"11\"><span style=\"font-size:large\">Connections</span></th></tr>\n"
 				+ "    <tr>\n"
@@ -630,7 +630,8 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 					+ "      <td>");
 			if(isConnected) com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(time-createTimes[c]), out, isXhtml);
 			else out.append("&#160;");
-			out.append("      <td>").append(Long.toString(connCount)).append("</td>\n"
+			out.append("</td>\n"
+					+ "      <td>").append(Long.toString(connCount)).append("</td>\n"
 					+ "      <td>").append(Long.toString(useCount)).append("</td>\n"
 					+ "      <td>");
 			com.aoindustries.util.EncodingUtils.encodeHtml(StringUtility.getDecimalTimeLengthString(totalTime), out, isXhtml);
