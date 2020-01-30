@@ -98,9 +98,6 @@ public final class EncodingUtils {
 		return str;
 	}
 
-	private static final String EOL = System.getProperty("line.separator");
-	private static final String BR_EOL = "<br />"+EOL; // TODO: HTML/XHTML serialization
-
 	// <editor-fold defaultstate="collapsed" desc="(X)HTML">
 	/**
 	 * Escapes for use in a (X)HTML document and writes to the provided <code>Appendable</code>.
@@ -114,8 +111,8 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(Object value, Appendable out) throws IOException {
-		encodeHtml(value, true, true, out);
+	public static void encodeHtml(Object value, Appendable out, boolean isXhtml) throws IOException {
+		encodeHtml(value, true, true, out, isXhtml);
 	}
 
 	/**
@@ -130,8 +127,8 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(CharSequence S, int start, int end, Appendable out) throws IOException {
-		encodeHtml(S, start, end, true, true, out);
+	public static void encodeHtml(CharSequence S, int start, int end, Appendable out, boolean isXhtml) throws IOException {
+		encodeHtml(S, start, end, true, true, out, isXhtml);
 	}
 
 	/**
@@ -141,10 +138,10 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static String encodeHtml(Object value) throws IOException {
+	public static String encodeHtml(Object value, boolean isXhtml) throws IOException {
 		if(value==null) return null;
 		StringBuilder result = new StringBuilder();
-		encodeHtml(value, result);
+		encodeHtml(value, result, isXhtml);
 		return result.toString();
 	}
 
@@ -155,8 +152,8 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(char ch, Appendable out) throws IOException {
-		encodeHtml(ch, true, true, out);
+	public static void encodeHtml(char ch, Appendable out, boolean isXhtml) throws IOException {
+		encodeHtml(ch, true, true, out, isXhtml);
 	}
 
 	/**
@@ -166,7 +163,7 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(Object value, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
+	public static void encodeHtml(Object value, boolean make_br, boolean make_nbsp, Appendable out, boolean isXhtml) throws IOException {
 		if(value!=null) {
 			String str = toString(value);
 			BundleLookupMarkup lookupMarkup;
@@ -177,7 +174,7 @@ public final class EncodingUtils {
 				lookupMarkup = null;
 			}
 			if(lookupMarkup!=null) lookupMarkup.appendPrefixTo(MarkupType.XHTML, out);
-			encodeHtml(str, 0, str.length(), make_br, make_nbsp, out);
+			encodeHtml(str, 0, str.length(), make_br, make_nbsp, out, isXhtml);
 			if(lookupMarkup!=null) lookupMarkup.appendSuffixTo(MarkupType.XHTML, out);
 		}
 	}
@@ -197,7 +194,7 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(CharSequence S, int start, int end, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
+	public static void encodeHtml(CharSequence S, int start, int end, boolean make_br, boolean make_nbsp, Appendable out, boolean isXhtml) throws IOException {
 		if (S != null) {
 			int toPrint = 0;
 			for (int c = start; c < end; c++) {
@@ -257,7 +254,7 @@ public final class EncodingUtils {
 								out.append(S, c-toPrint, c);
 								toPrint=0;
 							}
-							out.append("<br />\n"); // TODO: HTML/XHTML serialization
+							out.append(isXhtml ? "<br />" : "<br>").append('\n');
 						} else {
 							toPrint++;
 						}
@@ -289,10 +286,10 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static String encodeHtml(Object value, boolean make_br, boolean make_nbsp) throws IOException {
+	public static String encodeHtml(Object value, boolean make_br, boolean make_nbsp, boolean isXhtml) throws IOException {
 		if(value==null) return null;
 		StringBuilder result = new StringBuilder();
-		encodeHtml(value, make_br, make_nbsp, result);
+		encodeHtml(value, make_br, make_nbsp, result, isXhtml);
 		return result.toString();
 	}
 
@@ -303,7 +300,7 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(char ch, boolean make_br, boolean make_nbsp, Appendable out) throws IOException {
+	public static void encodeHtml(char ch, boolean make_br, boolean make_nbsp, Appendable out, boolean isXhtml) throws IOException {
 		switch(ch) {
 			// Standard XML escapes
 			case '<':
@@ -331,7 +328,7 @@ public final class EncodingUtils {
 				break;
 			case '\n':
 				if(make_br) {
-					out.append(BR_EOL);
+					out.append(isXhtml ? "<br />" : "<br>").append('\n');
 				} else {
 					out.append('\n');
 				}
