@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -213,6 +213,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	 * @see  BundleLookupThreadContext
 	 * </p>
 	 * TODO: Add language resources to properties files (but do not make it an editable properties file to avoid possible infinite recursion?)
+	 * TODO: Decouple from aocode-public and use ao-fluent-html
 	 */
 	public static void printEditableResourceBundleLookups(
 		Encoder textInJavaScriptEncoder,
