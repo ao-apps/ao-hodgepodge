@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.email;
 
+import com.aoindustries.io.ContentType;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -43,35 +44,35 @@ public class MimeType {
 		"aif", "audio/x-aiff",
 		"aifc", "audio/x-aiff",
 		"aiff", "audio/x-aiff",
-		"asc", "text/plain",
+		"asc", ContentType.TEXT,
 		"au", "audio/basic",
 		"avi", "video/x-msvideo",
 		"bin", "application/octet-stream",
 		"bmp", "image/bmp",
-		"c", "text/plain",
+		"c", ContentType.TEXT,
 		"class", "application/octet-stream",
 		"cpio", "application/x-cpio",
 		"csh", "application/x-csh",
-		"css", "text/css",
+		"css", ContentType.CSS,
 		"doc", "application/msword",
 		"dvi", "application/x-dvi",
 		"eps", "application/postscript",
 		"exe", "application/octet-stream",
-		"gif", "image/gif",
+		"gif", ContentType.GIF,
 		"gtar", "application/x-gtar",
 		"gz", "application/x-gzip",
-		"h", "text/plain",
-		"html", "text/html",
-		"htm", "text/html",
+		"h", ContentType.TEXT,
+		"html", ContentType.HTML,
+		"htm", ContentType.HTML,
 		"jad", "text/vnd.sun.j2me.app-descriptor",
 		"jar", "application/java-archive",
-		"java", "text/plain",
-		"jpeg", "image/jpeg",
-		"jpe", "image/jpeg",
-		"jpg", "image/jpeg",
+		"java", ContentType.TEXT,
+		"jpeg", ContentType.JPEG,
+		"jpe", ContentType.JPEG,
+		"jpg", ContentType.JPEG,
 		"js", "application/x-javascript",
 		"latex", "application/x-latex",
-		"log", "text/plain",
+		"log", ContentType.TEXT,
 		"m3u", "audio/x-mpegurl",
 		"man", "application/x-troff-man",
 		"mid", "audio/midi",
@@ -86,13 +87,13 @@ public class MimeType {
 		"mpg", "video/mpeg",
 		"pbm", "image/x-portable-bitmap",
 		"pdf", "application/pdf",
-		"pid", "text/plain",
+		"pid", ContentType.TEXT,
 		"pgm", "image/x-portable-graymap",
-		"png", "image/png",
+		"png", ContentType.PNG,
 		"pnm", "image/x-portable-anymap",
 		"ppm", "image/x-portable-pixmap",
 		"ppt", "application/vnd.ms-powerpoint",
-		"properties", "text/plain",
+		"properties", ContentType.TEXT,
 		"ps", "application/postscript",
 		"qt", "video/quicktime",
 		"ra", "audio/x-realaudio",
@@ -108,7 +109,7 @@ public class MimeType {
 		"sh", "application/x-sh",
 		"sit", "application/x-stuffit",
 		"snd", "audio/basic",
-		"sql", "text/plain",
+		"sql", ContentType.TEXT,
 		"swf", "application/x-shockwave-flash",
 		"tar", "application/x-tar",
 		"tcl", "application/x-tcl",
@@ -118,7 +119,7 @@ public class MimeType {
 		"tiff", "image/tiff",
 		"tif", "image/tiff",
 		"ts", "text/tab-separated-values",
-		"txt", "text/plain",
+		"txt", ContentType.TEXT,
 		"vrml", "model/vrml",
 		"wav", "audio/x-wav",
 		"wmlc", "application/vnd.wap.wmlc",
@@ -128,7 +129,7 @@ public class MimeType {
 		"wrl", "model/vrml",
 		"xbm", "image/x-xbitmap",
 		"xls", "application/vnd.ms-excel",
-		"xml", "text/xml",
+		"xml", ContentType.XML_OLD,
 		"xpm", "image/x-xpixmap",
 		"xwd", "image/x-xwindowdump",
 		"z", "application/x-compress",
