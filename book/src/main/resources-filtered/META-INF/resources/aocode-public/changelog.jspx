@@ -37,7 +37,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-01-29T18:38:50-0600"
+		dateModified="2020-02-13T08:27:26-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -71,6 +71,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					</li>
 					<li><code>EncodingUtils.encodeHtml(*)</code> (deprecated) now require additional <code>isXhtml</code> flag.</li>
 					<li>Connection pool statistics HTML generation now supports both SGML and XML serializations.</li>
+					<li>
+						New bundle lookup markup types:
+						<ul>
+							<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
+						</ul>
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>

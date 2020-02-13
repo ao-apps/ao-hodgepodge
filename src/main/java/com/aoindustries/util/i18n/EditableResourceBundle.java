@@ -962,6 +962,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 				case JAVASCRIPT :
 				case MYSQL :
 				case PSQL :
+				case CSS :
 					out
 						.append("/*")
 						.append(Long.toString(lookupId))
@@ -1025,6 +1026,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					case JAVASCRIPT :
 					case MYSQL :
 					case PSQL :
+					case CSS :
 						encoder
 							.append("/*", out)
 							.append(Long.toString(lookupId), out)
@@ -1073,6 +1075,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 				case JAVASCRIPT :
 				case MYSQL :
 				case PSQL :
+				case CSS :
 				case SH :
 					// No suffix
 					break;
@@ -1113,6 +1116,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					case JAVASCRIPT :
 					case MYSQL :
 					case PSQL :
+					case CSS :
 					case SH :
 						// No suffix
 						break;
