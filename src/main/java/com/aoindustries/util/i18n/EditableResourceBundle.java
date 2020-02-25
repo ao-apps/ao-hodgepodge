@@ -314,7 +314,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					out.append("  </div>\n"
 							+ "  <div id=\"EditableResourceBundleEditorHeader\" style=\"border-bottom:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; top:0px; height:2em; overflow:hidden\">\n"
 							+ "    <div style=\"float:right; border:2px outset black; margin:.3em\"><a href=\"#\" onclick=\"if(EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility('hidden'); return false;\" style=\"text-decoration:none; color:black; background-color:white; padding-left:2px; padding-right:2px;\">✕</a></div>\n"
-							+ "    <script type='text/javascript'>\n"
+							+ "    <script type=\"application/javascript\">\n"
 							+ "      // <![CDATA[\n"
 							+ "      function EditableResourceBundleEditorSetCookie(c_name,value,expiredays) {\n"
 							+ "        var exdate=new Date();\n"
@@ -689,7 +689,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 							+ "</div>\n");
 				}
 				// Highlight and editor functions
-				out.append("<script type='text/javascript'>\n"
+				out.append("<script type=\"application/javascript\">\n"
 						+ "  // <![CDATA[\n"
 						+ "\n"
 						+ "  // Restore the editor to its previous position\n"
