@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,129 +24,144 @@ package com.aoindustries.util.logging;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.ErrorManager;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
+import java.util.logging.StreamHandler;
 
 /**
  * <p>
- * An implementation of <code>Handler</code> that queues log records and handles
- * them in the background.  Two actions are taken for each record, each in a
- * separate background process.  The first writes the <code>System.err</code>
- * with a high priority.  The second is an implementation-defined logging method.
- * The log records are processed in the order received, regardless of level.
+ * An implementation of {@link Handler} that queues log records and handles
+ * them in the background.  The log records are processed in the order received,
+ * regardless of level.
  * </p>
  * <p>
- * Defaults to using ErrorPrinterFormatter.
+ * Configures itself similar to {@link ConsoleHandler} via
+ * {@link HandlerUtil#configure(java.util.logging.Handler)}.
  * </p>
- * 
- * @see ErrorPrinterFormatter
  * 
  * @author  AO Industries, Inc.
  */
 abstract public class QueuedHandler extends Handler {
 
-	private final ExecutorService consoleExecutor;
-	private final ExecutorService customExecutor;
-
-	protected QueuedHandler(final String consoleExecutorThreadName, final String customExecutorThreadName) {
-		setFormatter(ErrorPrinterFormatter.getInstance());
-		consoleExecutor = Executors.newSingleThreadExecutor(
-			new ThreadFactory() {
-				@Override
-				public Thread newThread(Runnable r) {
-					Thread thread = new Thread(r);
-					thread.setName(consoleExecutorThreadName);
-					thread.setDaemon(true);
-					thread.setPriority(Thread.NORM_PRIORITY+1);
-					return thread;
-				}
-			}
-		);
-		customExecutor = Executors.newSingleThreadExecutor(
-			new ThreadFactory() {
-				@Override
-				public Thread newThread(Runnable r) {
-					Thread thread = new Thread(r);
-					thread.setName(customExecutorThreadName);
-					thread.setDaemon(true);
-					thread.setPriority(Thread.NORM_PRIORITY-1);
-					return thread;
-				}
+	/**
+	 * Creates a new executor.  Must be {@linkplain #shutdownExecutor(java.util.concurrent.ExecutorService) shutdown} when no longer needed.
+	 */
+	protected static ExecutorService newExecutor(String executorThreadName) {
+		return Executors.newSingleThreadExecutor(
+			(Runnable r) -> {
+				Thread thread = new Thread(r);
+				thread.setName(executorThreadName);
+				thread.setDaemon(true);
+				thread.setPriority(Thread.NORM_PRIORITY - 1);
+				return thread;
 			}
 		);
 	}
 
-	@Override
-	final public void publish(final LogRecord record) {
-		// Call getSourceClassName and getSourceMethodName to set their values before the background processing.
-		//record.getSourceClassName();
-		//record.getSourceMethodName();
-
-		// Format first to have correct threading information
-		final Formatter formatter = getFormatter();
-		final String fullReport = formatter.format(record);
-
-		// Queue for System.err output
-		consoleExecutor.submit(
-			new Runnable() {
-				@Override
-				public void run() {
-					synchronized(System.err) {
-						System.err.print(fullReport);
-					}
-				}
-			}
-		);
-		// Queue for custom action, don't queue if not needed
-		if(useCustomLogging(record)) {
-			customExecutor.submit(
-				new Runnable() {
-					@Override
-					public void run() {
-						doCustomLogging(formatter, record, fullReport);
-					}
-				}
-			);
+	/**
+	 * Shuts down the executor, waiting up to one minute for tasks to complete.
+	 */
+	protected static void shutdownExecutor(ExecutorService executor) throws SecurityException {
+		executor.shutdown();
+		try {
+			// Wait up to one minute to complete its tasks
+			// NoSuchFieldError in Java 1.5: consoleExecutor.awaitTermination(1, TimeUnit.MINUTES);
+			executor.awaitTermination(60, TimeUnit.SECONDS);
+		} catch(InterruptedException err) {
+			// Ignored
 		}
 	}
 
+	private final ExecutorService executor;
+	private final boolean isOwnExecutor;
+
+	/**
+	 * Manages the queue internally.
+	 */
+	protected QueuedHandler(String executorThreadName) {
+		executor = newExecutor(executorThreadName);
+		isOwnExecutor = true;
+		HandlerUtil.configure(this);
+	}
+
+	/**
+	 * Uses the provided executor.  The executor is
+	 * not {@linkplain ExecutorService#shutdown() shutdown} on {@link #close()};
+	 * it is up to the caller to manage the executor lifecycle.
+	 *
+	 * @see #newExecutor(java.lang.String)
+	 * @see #shutdownExecutor(java.util.concurrent.ExecutorService)
+	 */
+	protected QueuedHandler(ExecutorService executor) {
+		this.executor = executor;
+		this.isOwnExecutor = false;
+		HandlerUtil.configure(this);
+	}
+
+	/**
+	 * @see StreamHandler#publish(java.util.logging.LogRecord)
+	 */
+	@Override
+	public void publish(LogRecord record) {
+		// Don't queue if not needed
+		if(isLoggable(record)) {
+			// Format first to have correct threading information
+			Formatter formatter;
+			String msg;
+			try {
+				formatter = getFormatter();
+				msg = formatter.format(record);
+			} catch(Exception ex) {
+				// We don't want to throw an exception here, but we
+				// report the exception to any registered ErrorManager.
+				reportError(null, ex, ErrorManager.FORMAT_FAILURE);
+				return;
+			}
+			// Queue for custom action
+	        try {
+				executor.submit(
+					() -> {
+						try {
+							backgroundPublish(
+								formatter,
+								record,
+								msg
+							);
+						} catch (Exception ex) {
+							// We don't want to throw an exception here, but we
+							// report the exception to any registered ErrorManager.
+							reportError(null, ex, ErrorManager.WRITE_FAILURE);
+						}
+					}
+				);
+			} catch (Exception ex) {
+				// We don't want to throw an exception here, but we
+				// report the exception to any registered ErrorManager.
+				reportError(null, ex, ErrorManager.GENERIC_FAILURE);
+			}
+		}
+	}
+
+	/**
+	 * TODO: Could wait until all queued log records up to this moment have been handled.
+	 * If new log records are added while we wait, don't wait for them.
+	 */
 	@Override
 	public void flush() {
-		System.err.flush();
-		// Alternately, could wait until all queued log records up to this moment have been handled.  If
-		// no log records are added while we wait, don't wait for them.
+		// Do nothing
 	}
 
 	@Override
 	public void close() throws SecurityException {
-		consoleExecutor.shutdown();
-		customExecutor.shutdown();
-		try {
-			// Wait up to one minute for System.err to complete its tasks
-			// NoSuchFieldError in Java 1.5: consoleExecutor.awaitTermination(1, TimeUnit.MINUTES);
-			consoleExecutor.awaitTermination(60, TimeUnit.SECONDS);
-		} catch(InterruptedException err) {
-			// Ignored
-		}
-		try {
-			// Wait up to one minute for tickets to complete its tasks
-			// NoSuchFieldError in Java 1.5: consoleExecutor.awaitTermination(1, TimeUnit.MINUTES);
-			consoleExecutor.awaitTermination(60, TimeUnit.SECONDS);
-		} catch(InterruptedException err) {
-			// Ignored
-		}
+		if(isOwnExecutor) shutdownExecutor(executor);
 	}
 
 	/**
-	 * The log record will only be queued when this returns <code>true</code>.
-	 */
-	protected abstract boolean useCustomLogging(LogRecord record);
-
-	/**
-	 * This is called in a background Thread.
+	 * This is called in a background thread.
 	 *
 	 * @param formatter  the formatter at the time the record was queued
 	 * @param record     the queued record
@@ -154,5 +169,5 @@ abstract public class QueuedHandler extends Handler {
 	 *                    the record was queued.  The message is generated before
 	 *                    so it can have accurate thread and time information.
 	 */
-	protected abstract void doCustomLogging(Formatter formatter, LogRecord record, String fullReport);
+	protected abstract void backgroundPublish(Formatter formatter, LogRecord record, String fullReport) throws Exception;
 }
