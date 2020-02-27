@@ -92,7 +92,7 @@ public class LogManagerUtil {
 	private static Method getStringPropertyMethod;
 	static {
 		try {
-			Method method = LogManager.class.getMethod("getStringProperty", String.class, String.class);
+			Method method = LogManager.class.getDeclaredMethod("getStringProperty", String.class, String.class);
 			method.setAccessible(true);
 		} catch(RuntimeException | ReflectiveOperationException e) {
 			warn(e);
@@ -125,7 +125,7 @@ public class LogManagerUtil {
 	private static Method getLevelPropertyMethod;
 	static {
 		try {
-			Method method = LogManager.class.getMethod("getLevelProperty", String.class, Level.class);
+			Method method = LogManager.class.getDeclaredMethod("getLevelProperty", String.class, Level.class);
 			method.setAccessible(true);
 		} catch(RuntimeException | ReflectiveOperationException e) {
 			warn(e);
@@ -158,7 +158,7 @@ public class LogManagerUtil {
 	private static Method getFilterPropertyMethod;
 	static {
 		try {
-			Method method = LogManager.class.getMethod("getFilterProperty", String.class, Filter.class);
+			Method method = LogManager.class.getDeclaredMethod("getFilterProperty", String.class, Filter.class);
 			method.setAccessible(true);
 		} catch(RuntimeException | ReflectiveOperationException e) {
 			warn(e);
@@ -201,7 +201,7 @@ public class LogManagerUtil {
 	private static Method getFormatterPropertyMethod;
 	static {
 		try {
-			Method method = LogManager.class.getMethod("getFormatterProperty", String.class, Formatter.class);
+			Method method = LogManager.class.getDeclaredMethod("getFormatterProperty", String.class, Formatter.class);
 			method.setAccessible(true);
 		} catch(RuntimeException | ReflectiveOperationException e) {
 			warn(e);
