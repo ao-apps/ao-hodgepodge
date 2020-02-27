@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-02-13T08:27:26-0600"
+		dateModified="2020-02-27T14:30:10-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -77,6 +77,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						<ul>
 							<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
 						</ul>
+					</li>
+					<li>
+						<code>com.aoindustries.util.logging.*</code> significantly reworked
+						to be compatible with <code>logging.properties</code>.
 					</li>
 				</ul>
 			</changelog:release>
