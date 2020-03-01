@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -241,12 +240,8 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 				List<LookupKey> lookupKeys = new ArrayList<>(lookups.keySet());
 				Collections.sort(
 					lookupKeys,
-					new Comparator<LookupKey>() {
-						@Override
-						public int compare(LookupKey key1, LookupKey key2) {
-							return Long.valueOf(lookups.get(key1).id).compareTo(lookups.get(key2).id);
-						}
-					}
+					// TODO: Replace other uses of Long.compareTo with Long.compare() - and other primitive wrappers.  Less "valueOf"
+					(key1, key2) -> Long.compare(lookups.get(key1).id, lookups.get(key2).id)
 				);
 				if(setValueUrl != null) {
 					// Get the set of all locales
@@ -871,12 +866,12 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 			if(value!=null) {
 				// Record the lookup in any thread context
 				BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
-				if(threadContext!=null) {
+				if(threadContext != null) {
 					// Reserve an element ID, even though it may not be used depending on final context
 					final long elementId = threadSettings.elementIdGenerator.getNextSequenceValue();
 					lookupValue.elementIds.add(elementId);
 					// If this string is already in the thread context, make a new instance to be unique by identity
-					if(threadContext.getLookupMarkup(value)!=null) {
+					if(threadContext.getLookupMarkup(value) != null) {
 						value = new String(value); // Need new string with different identity for unique threadContext lookups
 					}
 					// Find invalidated flag
@@ -982,71 +977,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		}
 
 		@Override
-		public void appendPrefixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException {
-			if(encoder==null) {
-				appendPrefixTo(markupType, out);
-			} else {
-				switch(markupType) {
-					case NONE :
-						// No markup
-						break;
-					case XHTML :
-						//if(invalidated) SB.append(" style=\"color:red\"");
-						String elementIdString = Long.toString(elementId);
-						encoder
-							.append("<!--", out)
-							.append(Long.toString(lookupId), out)
-							.append("--><span id=\"EditableResourceBundleElement", out)
-							.append(elementIdString, out)
-							.append("\" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(", out)
-							.append(elementIdString, out)
-							.append(", true);\"", out)
-							.append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(", out)
-							.append(elementIdString, out)
-							.append(");\">", out)
-						;
-						break;
-					case TEXT :
-						if(invalidated) {
-							encoder
-								.append("<<<", out)
-								.append(Long.toString(lookupId), out)
-								.append('<', out)
-							;
-						} else if(modifyAllText) {
-							encoder
-								.append('<', out)
-								.append(Long.toString(lookupId), out)
-								.append('<', out)
-							;
-						} else {
-							// No prefix
-						}
-						break;
-					case JAVASCRIPT :
-					case MYSQL :
-					case PSQL :
-					case CSS :
-						encoder
-							.append("/*", out)
-							.append(Long.toString(lookupId), out)
-							.append("*/", out)
-						;
-						break;
-					case SH :
-						encoder
-							.append("`#", out)
-							.append(Long.toString(lookupId), out)
-							.append('`', out)
-						;
-						break;
-					default :
-						throw new AssertionError();
-				}
-			}
-		}
-
-		@Override
 		public void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException {
 			switch(markupType) {
 				case NONE :
@@ -1081,48 +1011,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					break;
 				default :
 					throw new AssertionError();
-			}
-		}
-
-		@Override
-		public void appendSuffixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException {
-			if(encoder==null) {
-				appendSuffixTo(markupType, out);
-			} else {
-				switch(markupType) {
-					case NONE :
-						// No markup
-						break;
-					case XHTML :
-						encoder.append("</span>", out);
-						break;
-					case TEXT :
-						if(invalidated) {
-							encoder
-								.append('>', out)
-								.append(Long.toString(lookupId), out)
-								.append(">>>", out)
-							;
-						} else if(modifyAllText) {
-							encoder
-								.append('>', out)
-								.append(Long.toString(lookupId), out)
-								.append('>', out)
-							;
-						} else {
-							// No suffix
-						}
-						break;
-					case JAVASCRIPT :
-					case MYSQL :
-					case PSQL :
-					case CSS :
-					case SH :
-						// No suffix
-						break;
-					default :
-						throw new AssertionError();
-				}
 			}
 		}
 	}

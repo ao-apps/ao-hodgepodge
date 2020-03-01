@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.i18n;
 
-import com.aoindustries.io.Encoder;
 import java.io.IOException;
 
 /**
@@ -39,17 +38,7 @@ public interface BundleLookupMarkup {
 	void appendPrefixTo(MarkupType markupType, Appendable out) throws IOException;
 
 	/**
-	 * Appends the prefix to the given out using the given encoder and markup type.
-	 */
-	void appendPrefixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException;
-
-	/**
 	 * Appends the suffix to the given out using the given markup type.
 	 */
 	void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException;
-
-	/**
-	 * Appends the suffix to the given out using the given encoder and markup type.
-	 */
-	void appendSuffixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException;
 }
