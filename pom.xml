@@ -86,7 +86,6 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 								<link>${javac.link.javaApi}</link>
 								<!-- Direct -->
 								<link>https://aoindustries.com/ao-lang/apidocs/</link>
-								<!-- No apidocs: <groupId>com.aoindustries</groupId><artifactId>ao-style</artifactId> -->
 								<link>https://aoindustries.com/ao-tempfiles/apidocs/</link>
 							</links>
 						</configuration>
@@ -107,9 +106,6 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<groupId>com.aoindustries</groupId><artifactId>ao-lang</artifactId><version>3.4.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
 			</dependency>
 			<dependency>
-				<groupId>com.aoindustries</groupId><artifactId>ao-style</artifactId><version>1.0.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
-			</dependency>
-			<dependency>
 				<groupId>com.aoindustries</groupId><artifactId>ao-tempfiles</artifactId><version>1.0.1${POST-SNAPSHOT}</version>
 			</dependency>
 		</dependencies>
@@ -125,11 +121,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		<dependency>
 			<groupId>com.aoindustries</groupId><artifactId>ao-lang</artifactId>
 		</dependency>
+		<!-- This is only used by AOPool, avoid cyclic project dependcies:
 		<dependency>
 			<groupId>com.aoindustries</groupId><artifactId>ao-style</artifactId>
-			<!-- This is only used by AOPool -->
 			<optional>true</optional>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>com.aoindustries</groupId><artifactId>ao-tempfiles</artifactId>
 		</dependency>
