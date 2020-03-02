@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016, 2017, 2019  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2017, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -51,13 +51,13 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
 	}
 
 	@Override
-	public List<V> sortGraph() throws CycleException, EX {
+	public Set<V> sortGraph() throws CycleException, EX {
 		Set<V> vertices = graph.getVertices();
 		final int size = vertices.size();
 		Set<V> visited = new HashSet<>(size*4/3+1);
-		LinkedHashSet<V> sequence = new LinkedHashSet<>();
+		Set<V> sequence = new LinkedHashSet<>();
 		//L ← Empty list that will contain the sorted nodes
-		List<V> L = new ArrayList<>(size);
+		Set<V> L = new LinkedHashSet<>(size);
 		//S ← Set of all nodes with no incoming edges
 		//for each node n in S do
 		for(V n : vertices) {
@@ -70,11 +70,11 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
 				topologicalSortVisit(n, L, visited, sequence);
 			}
 		}
-		return AoCollections.optimalUnmodifiableList(L);
+		return L;
 	}
 
 	//function visit(node n)
-	private void topologicalSortVisit(V n, List<V> L, Set<V> visited, LinkedHashSet<V> sequence) throws CycleException, EX {
+	private void topologicalSortVisit(V n, Set<V> L, Set<V> visited, Set<V> sequence) throws CycleException, EX {
 		//    if n has not been visited yet then
 		//        mark n as visited
 		if(visited.add(n)) {
@@ -96,7 +96,7 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
 				sequence.remove(m);
 			}
 			//        add n to L
-			L.add(n);
+			if(!L.add(n)) throw new AssertionError();
 		}
 	}
 }

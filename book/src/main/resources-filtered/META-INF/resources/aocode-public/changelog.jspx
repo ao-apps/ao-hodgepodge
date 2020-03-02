@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-02-27T14:30:10-0600"
+		dateModified="2020-03-01T21:49:53-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -81,6 +81,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<li>
 						<code>com.aoindustries.util.logging.*</code> significantly reworked
 						to be compatible with <code>logging.properties</code>.
+					</li>
+					<li>
+						<code>TopologicalSorter</code> now returns a modifiable <code>Set</code>.
+						Previously it returned an unmodifiable <code>List</code>.
 					</li>
 				</ul>
 			</changelog:release>
