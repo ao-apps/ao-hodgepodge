@@ -57,7 +57,7 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
 		Set<V> visited = new HashSet<>(size*4/3+1);
 		Set<V> sequence = new LinkedHashSet<>();
 		//L ← Empty list that will contain the sorted nodes
-		Set<V> L = new LinkedHashSet<>(size);
+		Set<V> L = new LinkedHashSet<>(size*4/3+1);
 		//S ← Set of all nodes with no incoming edges
 		//for each node n in S do
 		for(V n : vertices) {
@@ -69,6 +69,13 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
 			) {
 				topologicalSortVisit(n, L, visited, sequence);
 			}
+		}
+		if(L.size() != size) {
+			throw new IllegalArgumentException(
+				"Not all vertices added.  Does the symmetric graph have consistent edges to and from?\n"
+				+ "    vertices(" + size + "): " + vertices
+				+ "    results(" + L.size() + "): " + L
+			);
 		}
 		return L;
 	}
