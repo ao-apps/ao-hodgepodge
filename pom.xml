@@ -40,15 +40,15 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 	</properties>
 
 	<name>AOCode Public</name>
-	<url>https://aoindustries.com/${project.artifactId}/</url>
+	<url>https://aoindustries.com/aocode-public/</url>
 	<description>Reusable Java library of general tools with minimal external dependencies.</description>
 	<inceptionYear>2000</inceptionYear>
 
 	<scm>
 		<!-- Can't inherit due to multi-module -->
-		<connection>scm:git:git://github.com/aoindustries/${project.artifactId}.git</connection>
-		<developerConnection>scm:git:git@github.com:aoindustries/${project.artifactId}.git</developerConnection>
-		<url>https://github.com/aoindustries/${project.artifactId}</url>
+		<connection>scm:git:git://github.com/aoindustries/aocode-public.git</connection>
+		<developerConnection>scm:git:git@github.com:aoindustries/aocode-public.git</developerConnection>
+		<url>https://github.com/aoindustries/aocode-public</url>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -106,7 +106,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<groupId>com.aoindustries</groupId><artifactId>ao-lang</artifactId><version>3.4.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
 			</dependency>
 			<dependency>
-				<groupId>com.aoindustries</groupId><artifactId>ao-tempfiles</artifactId><version>1.0.1${POST-SNAPSHOT}</version>
+				<groupId>com.aoindustries</groupId><artifactId>ao-tempfiles</artifactId><version>1.0.2-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
