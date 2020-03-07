@@ -70,7 +70,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						<ao:a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/Coercion.html">Coercion</ao:a>:
 						<ol>
 							<li>Supporting instances of <ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/io/Writable.html">Writable</ao:a>.</li>
-							<li>Supporting instances of <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/CharSequence.html">CharSequence</ao:a>.</li>
+							<li>Supporting instances of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/CharSequence.html">CharSequence</ao:a>.</li>
 							<li>Supporting instances of <code>char[]</code>.</li>
 						</ol>
 					</li>
@@ -127,17 +127,17 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				</li>
 				<li>
 					New class <ao:a href="apidocs/com/aoindustries/util/DiffableProperties.html">DiffableProperties</ao:a>
-					to format <ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Properties.html">Properties</ao:a>
+					to format <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a>
 					files in a way optimized for diff tools, such as <code>git diff</code>.  Best used in conjunction with
 					<ao:a href="apidocs/com/aoindustries/util/SortedProperties.html">SortedProperties</ao:a>.
 				</li>
 				<li>
 					Made <ao:a href="apidocs/com/aoindustries/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>
-					public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Properties.html">Properties</ao:a> files.
+					public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
 				</li>
 				<li>
 					Made <ao:a href="apidocs/com/aoindustries/util/SkipCommentsFilterOutputStream.html">SkipCommentsFilterOutputStream</ao:a>
-					public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Properties.html">Properties</ao:a> files.
+					public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
 				</li>
 				<li>
 					<ao:a href="apidocs/com/aoindustries/util/i18n/ModifiablePropertiesResourceBundle.html">ModifiablePropertiesResourceBundle</ao:a>
@@ -159,7 +159,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New abstract class <ao:a href="apidocs/com/aoindustries/sql/ConnectionWrapper.html">ConnectionWrapper</ao:a>
 					split from <ao:a href="apidocs/com/aoindustries/sql/PostgresqlConnectionWrapper.html">PostgresqlConnectionWrapper</ao:a>
-					to be used by other implementations of <ao:a rel="nofollow" href="@{javac.link.javaApi}java/sql/Connection.html">Connection</ao:a>
+					to be used by other implementations of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Connection.html">Connection</ao:a>
 					wrapping.
 				</li>
 				<li>Removed some long-deprecated or otherwise long-unused classes and methods:
@@ -252,7 +252,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				</li>
 				<li>
 					<p>
-						New methods to read and write possibly nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/sql/Timestamp.html">Timestamp</ao:a>
+						New methods to read and write possibly nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Timestamp.html">Timestamp</ao:a>
 						in <ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html">StreamableOutput</ao:a>
 						and <ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html">StreamableInput</ao:a>.
 					</p>
@@ -308,9 +308,9 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				</li>
 				<li>
 					<code>PersistentLinkedList</code> now implements
-					<ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Deque.html">Deque</ao:a>
+					<ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Deque.html">Deque</ao:a>
 					instead of
-					<ao:a rel="nofollow" href="@{javac.link.javaApi}java/util/Queue.html">Queue</ao:a>.
+					<ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Queue.html">Queue</ao:a>.
 				</li>
 			</ul>
 		</changelog:release>
@@ -347,14 +347,14 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		>
 			<ul>
 				<li>
-					New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Byte.html">Byte</ao:a>:
+					New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Byte.html">Byte</ao:a>:
 					<ul>
 						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html#writeNullByte-java.lang.Byte-">CompressedDataOutputStream.writeNullByte(Byte)</ao:a></li>
 						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html#readNullByte--">CompressedDataInputStream.readNullByte()</ao:a></li>
 					</ul>
 				</li>
 				<li>
-					New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Short.html">Short</ao:a>:
+					New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Short.html">Short</ao:a>:
 					<ul>
 						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
 						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
@@ -375,7 +375,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						<li><ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html#getLastModified-javax.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
 					</ul>
 				</li>
-				<li>Improved implementation of <ao:a rel="nofollow" href="@{javac.link.javaApi}java/sql/Wrapper.html">java.sql.Wrapper</ao:a>.</li>
+				<li>Improved implementation of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Wrapper.html">java.sql.Wrapper</ao:a>.</li>
 			</ul>
 		</changelog:release>
 
@@ -408,19 +408,19 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				</li>
 				<li>
 					New constant <ao:a href="apidocs/com/aoindustries/servlet/http/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
-					to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
+					to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
 					repeatedly during routine operation.
 				</li>
 				<li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
 				<li>
-					New methods to read and write nullable <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Boolean.html">Boolean</ao:a>:
+					New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Boolean.html">Boolean</ao:a>:
 					<ul>
 						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html#writeNullBoolean-java.lang.Boolean-">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
 						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html#readNullBoolean--">CompressedDataInputStream.readNullBoolean()</ao:a></li>
 					</ul>
 				</li>
 				<li>
-					New methods to join into arbitrary <ao:a rel="nofollow" href="@{javac.link.javaApi}java/lang/Appendable.html">Appendable</ao:a>:
+					New methods to join into arbitrary <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Appendable.html">Appendable</ao:a>:
 					<ul>
 						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
 						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
@@ -436,7 +436,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				</li>
 				<li>
 					<ao:a href="apidocs/com/aoindustries/servlet/http/Dispatcher">Dispatcher</ao:a> may now forward
-					and include to caller-provided <ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
+					and include to caller-provided <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
 				</li>
 			</ul>
 		</changelog:release>
