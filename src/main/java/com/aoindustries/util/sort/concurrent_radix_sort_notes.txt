@@ -1,6 +1,6 @@
 Benchmark:
 
-cd /home/o/orion/projects/aoprod/aocode-public
+cd "$HOME/projects/aoprod/aocode-public"
 java -Xmx4096m -server -classpath /opt/netbeans-6.9.1/java/modules/ext/junit-3.8.2.jar:build/classes:build/test/classes junit.textui.TestRunner com.aoindustries.util.sort.IntegerRadixSortTest
 
 
