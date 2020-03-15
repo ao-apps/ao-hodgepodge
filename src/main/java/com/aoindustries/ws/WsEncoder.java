@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.aoindustries.ws;
 
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.lang.Strings;
 
 /**
  * SOAP web services cannot send invalid whitespace characters.  In order to not
@@ -146,10 +146,10 @@ public class WsEncoder {
 													) {
 														value.append(
 															(char)(
-																(StringUtility.getHex(ch1)<<12)
-																| (StringUtility.getHex(ch2)<<8)
-																| (StringUtility.getHex(ch3)<<4)
-																| StringUtility.getHex(ch4)
+																(Strings.getHex(ch1)<<12)
+																| (Strings.getHex(ch2)<<8)
+																| (Strings.getHex(ch3)<<4)
+																| Strings.getHex(ch4)
 															)
 														);
 													} else value.append('\\').append(ch).append(ch1).append(ch2).append(ch3).append(ch4);

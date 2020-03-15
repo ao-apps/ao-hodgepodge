@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.aoindustries.util.schedule;
 
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.lang.Strings;
 import com.aoindustries.util.UnmodifiableCalendar;
 import java.util.Calendar;
 import java.util.Collection;
@@ -83,7 +83,7 @@ public abstract class Recurring {
 		}
 		if(recurring.length()>=3 && recurring.substring(0, 3).equalsIgnoreCase("on ")) {
 			EnumSet<DayOfWeek> daysOfWeek = EnumSet.noneOf(DayOfWeek.class);
-			for(String dayStr : StringUtility.splitStringCommaSpace(recurring.substring(3))) {
+			for(String dayStr : Strings.splitStringCommaSpace(recurring.substring(3))) {
 				boolean found = false;
 				for(DayOfWeek dow : allDaysOfWeek) {
 					if(
@@ -102,7 +102,7 @@ public abstract class Recurring {
 		}
 		if(recurring.length()>=3 && recurring.substring(0, 3).equalsIgnoreCase("in ")) {
 			EnumSet<Month> months = EnumSet.noneOf(Month.class);
-			for(String monthStr : StringUtility.splitStringCommaSpace(recurring.substring(3))) {
+			for(String monthStr : Strings.splitStringCommaSpace(recurring.substring(3))) {
 				boolean found = false;
 				for(Month month : allMonths) {
 					if(

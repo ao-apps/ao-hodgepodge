@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2013, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,7 +24,7 @@ package com.aoindustries.io;
 
 import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.GetOpt;
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.lang.Strings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -74,17 +74,17 @@ final public class RateLimitCat {
 		System.err.print(": ");
 		System.err.print(byteCount);
 		System.err.print(" bytes (");
-		System.err.print(StringUtility.getApproximateSize(byteCount));
+		System.err.print(Strings.getApproximateSize(byteCount));
 		System.err.print(") transferred in ");
 		System.err.print(BigDecimal.valueOf(timespan, 3));
 		System.err.print(" seconds (");
-		System.err.print(StringUtility.getTimeLengthString(timespan));
+		System.err.print(Strings.getTimeLengthString(timespan));
 		System.err.print(')');
 		if(bytesRemaining!=null && bytesRemaining[0]>0) {
 			System.err.print(", ");
 			System.err.print(bytesRemaining[0]);
 			System.err.print(" bytes (");
-			System.err.print(StringUtility.getApproximateSize(bytesRemaining[0]));
+			System.err.print(Strings.getApproximateSize(bytesRemaining[0]));
 			System.err.print(") remaining");
 		}
 		System.err.println();

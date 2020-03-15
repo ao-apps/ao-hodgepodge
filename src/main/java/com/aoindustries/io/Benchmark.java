@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,7 +25,7 @@ package com.aoindustries.io;
 import com.aoindustries.math.Statistics;
 import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.ErrorPrinter;
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.lang.Strings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -61,7 +61,7 @@ public class Benchmark {
 			final String filename=args[c];
 			final File file = new File(filename);
 			System.out.print("Sequential Read by Block Size (");
-			System.out.print(StringUtility.getApproximateSize(MAX_READ_BYTES));
+			System.out.print(Strings.getApproximateSize(MAX_READ_BYTES));
 			System.out.println(" Total)");
 			for(int ci=0; ci<blockSizes.length; ci++) {
 				List<Double> blockSizeThroughputs = fileThroughputs.get(ci);
@@ -87,7 +87,7 @@ public class Benchmark {
 					double throughput = (double)bytesRead*1000D/((double)timeSpan*1048576D);
 					blockSizeThroughputs.add(throughput);
 					System.out.print("    ");
-					System.out.print(StringUtility.getApproximateSize(blockSize));
+					System.out.print(Strings.getApproximateSize(blockSize));
 					System.out.print(": ");
 					System.out.print(numberFormat.format(throughput));
 					System.out.print(" MB/sec");

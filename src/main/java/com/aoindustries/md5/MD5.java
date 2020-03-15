@@ -1,6 +1,3 @@
-package com.aoindustries.md5;
-
-import com.aoindustries.util.StringUtility;
 /*
  * $Header: /var/cvs/aocode-public/src/com/aoindustries/md5/MD5.java,v 1.2 2008/01/06 16:47:45 orion Exp $
  *
@@ -52,6 +49,9 @@ import com.aoindustries.util.StringUtility;
  * Initial revision
  *
  */
+package com.aoindustries.md5;
+
+import com.aoindustries.lang.Strings;
 
 /**
  * Implementation of RSA's MD5 hash generator
@@ -531,7 +531,7 @@ public class MD5 {
 	}
 
 	private static long getHexValue(char ch) throws IllegalArgumentException {
-		return StringUtility.getHex(ch);
+		return Strings.getHex(ch);
 	}
 
 	public static long getMD5Hi(String md5) throws IllegalArgumentException {
