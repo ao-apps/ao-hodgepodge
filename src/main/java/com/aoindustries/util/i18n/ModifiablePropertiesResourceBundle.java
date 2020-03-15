@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,7 +26,6 @@ import com.aoindustries.io.FileUtils;
 import com.aoindustries.util.CommentCaptureInputStream;
 import com.aoindustries.util.DiffableProperties;
 import com.aoindustries.util.SkipCommentsFilterOutputStream;
-import com.aoindustries.util.SortedProperties;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -38,15 +37,16 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sun.util.ResourceBundleEnumeration;
 
 /**
  * <p>
@@ -212,10 +212,45 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		return valueMap.get(key);
 	}
 
+	// See sun.util.ResourceBundleEnumeration
 	@Override
 	public Enumeration<String> getKeys() {
 		ResourceBundle myParent= this.parent;
-		return new ResourceBundleEnumeration(valueMap.keySet(), (myParent != null) ? myParent.getKeys() : null);
+		Set<String> set = valueMap.keySet();
+		Enumeration<String> enumeration = (myParent != null) ? myParent.getKeys() : null;
+		return new Enumeration<String>() {
+
+			private Iterator<String> iterator = set.iterator();
+			private String next = null;
+
+			@Override
+			public boolean hasMoreElements() {
+				if (next == null) {
+					if (iterator.hasNext()) {
+						next = iterator.next();
+					} else if (enumeration != null) {
+						while (next == null && enumeration.hasMoreElements()) {
+							next = enumeration.nextElement();
+							if (set.contains(next)) {
+								next = null;
+							}
+						}
+					}
+				}
+				return next != null;
+			}
+
+			@Override
+			public String nextElement() {
+				if (hasMoreElements()) {
+					String result = next;
+					next = null;
+					return result;
+				} else {
+					throw new NoSuchElementException();
+				}
+			}
+		};
 	}
 
 	@Override
@@ -248,7 +283,8 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		assert Thread.holdsLock(properties);
 		try {
 			// Create a properties instance that sorts the output by keys (case-insensitive)
-			SortedProperties writer = new SortedProperties(); // TODO: Do same sorting like DiffablePropertiesTask.java (keeping keys together)
+			@SuppressWarnings("deprecation")
+			com.aoindustries.util.SortedProperties writer = new com.aoindustries.util.SortedProperties(); // TODO: Do same sorting like DiffablePropertiesTask.java (keeping keys together)
 			writer.putAll(properties);
 			// Generate new file
 			byte[] newContent;
