@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-03-15T12:27:14-05:00"
+		dateModified="2020-03-15T17:50:55-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -91,6 +91,35 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						Previously it returned an unmodifiable <code>List</code>.
 					</li>
 					<li>Updated dependencies.</li>
+					<li>Removed the <code>com.aoindustries.security</code> package:
+						<ol>
+							<li>
+								<code>com.aoindustries.security.NotAuthenticatedException</code> moved to
+								the <core:link book="/ao-lang" page="/index.jspx" /> project.
+								Resolves this split-package with <core:link book="/ao-lang" page="/index.jspx" />.
+							</li>
+							<li>
+								Removed <code>com.aoindustries.security.AccountDisabledException</code>; please use
+								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountLockedException.html">AccountLockedException</ao:a> instead.
+							</li>
+							<li>
+								Removed <code>com.aoindustries.security.AccountNotFoundException</code>; please use
+								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountNotFoundException.html">AccountNotFoundException</ao:a> instead.
+							</li>
+							<li>
+								Removed <code>com.aoindustries.security.BadPasswordException</code>; please use
+								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/FailedLoginException.html">FailedLoginException</ao:a> instead.
+							</li>
+							<li>
+								Removed <code>com.aoindustries.security.IncompleteLoginException</code>; please use
+								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/CredentialNotFoundException.html">CredentialNotFoundException</ao:a> instead.
+							</li>
+							<li>
+								Removed <code>com.aoindustries.security.LoginException</code>; please use
+								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/LoginException.html">LoginException</ao:a> instead.
+							</li>
+						</ol>
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
