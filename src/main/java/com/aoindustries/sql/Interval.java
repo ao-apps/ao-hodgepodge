@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2014, 2016  AO Industries, Inc.
+ * Copyright (C) 2014, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.aoindustries.sql;
 
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.lang.Strings;
 import java.io.Serializable;
 
 /**
@@ -68,7 +68,7 @@ final public class Interval implements Serializable, Comparable<Interval> {
 	}
 
 	public static String toString(long interval) {
-		return StringUtility.getDecimalTimeLengthString(interval*1000, false);
+		return Strings.getDecimalTimeLengthString(interval*1000, false);
 	}
 
 	@Override

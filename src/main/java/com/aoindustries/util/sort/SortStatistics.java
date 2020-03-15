@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2013, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2013, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,7 +23,7 @@
 package com.aoindustries.util.sort;
 
 import com.aoindustries.sql.SQLUtility;
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.lang.Strings;
 import java.io.PrintWriter;
 
 /**
@@ -148,7 +148,7 @@ final public class SortStatistics {
 
 	public void printStats(PrintWriter out) {
 		out.print("Total Time...........: ");
-		if(totalTime>Integer.MAX_VALUE) out.println(StringUtility.getTimeLengthString(totalTime));
+		if(totalTime>Integer.MAX_VALUE) out.println(Strings.getTimeLengthString(totalTime));
 		else {
 			out.print(SQLUtility.formatDecimal3((int)totalTime));
 			out.println(" seconds");

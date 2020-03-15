@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-03-15T00:27:10-05:00"
+		dateModified="2020-03-15T12:27:14-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -423,8 +423,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New methods to join into arbitrary <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Appendable.html">Appendable</ao:a>:
 					<ul>
-						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
-						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/util/StringUtility.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
+						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/lang/Strings.html#join-java.lang.Iterable-java.lang.String-A-">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
+						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/lang/Strings.html#join-java.lang.Object:A-java.lang.String-A-">StringUtility.join(Object[], String, Appendable)</ao:a></li>
 					</ul>
 				</li>
 				<li>

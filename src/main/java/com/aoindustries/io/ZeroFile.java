@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,7 +23,7 @@
 package com.aoindustries.io;
 
 import com.aoindustries.sql.SQLUtility;
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.lang.Strings;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -160,7 +160,7 @@ public class ZeroFile {
 			if(PROGRESS) {
 				lastVerboseString = TerminalWriter.progressOutput(
 					lastVerboseString,
-					StringUtility.getApproximateSize(pos+blockSize)
+					Strings.getApproximateSize(pos+blockSize)
 					+ ": "
 					+ SQLUtility.formatDecimal2((long)block * 10000L / (long)blocks)
 					+ "% read, "
@@ -197,7 +197,7 @@ public class ZeroFile {
 				if(PROGRESS) {
 					lastVerboseString = TerminalWriter.progressOutput(
 						lastVerboseString,
-						StringUtility.getApproximateSize(bytesWritten)
+						Strings.getApproximateSize(bytesWritten)
 						+ ": "
 						+ SQLUtility.formatDecimal2((long)written * 10000L / (long)numDirtyBlocks)
 						+ "% written",

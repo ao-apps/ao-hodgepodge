@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2017, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2013, 2017, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util;
 
+import com.aoindustries.lang.Strings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -108,7 +109,7 @@ abstract public class WildcardPatternMatcher {
 		if(patterns == null || patterns.isEmpty()) {
 			return matchNone;
 		} else {
-			List<String> list = StringUtility.splitStringCommaSpace(patterns);
+			List<String> list = Strings.splitStringCommaSpace(patterns);
 			// Match none shortcut
 			if(list.isEmpty()) return matchNone;
 
