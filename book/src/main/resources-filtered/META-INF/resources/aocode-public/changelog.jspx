@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-03-15T17:50:55-05:00"
+		dateModified="2020-03-15T21:00:26-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -120,6 +120,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							</li>
 						</ol>
 					</li>
+					<li>Moved the <code>com.aoindustries.util.persistent</code> package to the new <core:link book="/ao-persistence" page="/index.jspx" /> project.</l>
 				</ul>
 			</changelog:release>
 		</c:if>
