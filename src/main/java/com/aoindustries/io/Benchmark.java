@@ -22,10 +22,10 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.lang.Strings;
 import com.aoindustries.math.Statistics;
 import com.aoindustries.util.BufferManager;
 import com.aoindustries.util.ErrorPrinter;
-import com.aoindustries.lang.Strings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

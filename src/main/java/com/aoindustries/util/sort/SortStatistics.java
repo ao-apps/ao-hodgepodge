@@ -22,8 +22,8 @@
  */
 package com.aoindustries.util.sort;
 
-import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.lang.Strings;
+import com.aoindustries.sql.SQLUtility;
 import java.io.PrintWriter;
 
 /**

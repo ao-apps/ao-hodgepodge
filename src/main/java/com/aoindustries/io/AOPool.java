@@ -22,8 +22,8 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.util.ErrorPrinter;
 import com.aoindustries.lang.Strings;
+import com.aoindustries.util.ErrorPrinter;
 import com.aoindustries.util.WrappedExceptions;
 import java.io.IOException;
 import java.util.ArrayList;
