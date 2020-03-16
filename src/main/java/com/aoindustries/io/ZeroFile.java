@@ -22,8 +22,8 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.sql.SQLUtility;
 import com.aoindustries.lang.Strings;
+import com.aoindustries.sql.SQLUtility;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
