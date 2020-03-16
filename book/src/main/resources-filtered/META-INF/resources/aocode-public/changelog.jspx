@@ -120,7 +120,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							</li>
 						</ol>
 					</li>
-					<li>Moved the <code>com.aoindustries.util.persistent</code> package to the new <core:link book="/ao-persistence" page="/index.jspx" /> project.</l>
+					<li>Moved the <code>com.aoindustries.util.persistent</code> package to the new <core:link book="/ao-persistence" page="/index.jspx" /> project.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
