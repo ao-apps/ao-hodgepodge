@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -923,14 +923,14 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				) {
 					radixSort(
 						size,
-						new SingleTaskNumberRadixTable<N>(size),
+						new SingleTaskNumberRadixTable<>(size),
 						new NumberListSource<>(size, list),
 						null
 					);
 				} else {
 					radixSort(
 						size,
-						new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
+						new MultiTaskNumberRadixTable<>(size, numProcessors * TASKS_PER_PROCESSOR),
 						new NumberListSource<>(size, list),
 						executor
 					);
@@ -1017,14 +1017,14 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 			) {
 				radixSort(
 					size,
-					new SingleTaskNumberRadixTable<N>(size),
+					new SingleTaskNumberRadixTable<>(size),
 					new NumberArraySource<>(size, array),
 					null
 				);
 			} else {
 				radixSort(
 					size,
-					new MultiTaskNumberRadixTable<N>(size, numProcessors * TASKS_PER_PROCESSOR),
+					new MultiTaskNumberRadixTable<>(size, numProcessors * TASKS_PER_PROCESSOR),
 					new NumberArraySource<>(size, array),
 					executor
 				);

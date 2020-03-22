@@ -189,10 +189,10 @@ public class Benchmark {
 			List<List<List<Double>>> seekRates = new ArrayList<>(numFiles);
 			for(int c=0; c<numFiles; c++) {
 				List<List<Double>> fileThroughputs = new ArrayList<>(blockSizes.length);
-				for(int d=0; d<blockSizes.length; d++) fileThroughputs.add(new ArrayList<Double>(numPasses));
+				for(int d=0; d<blockSizes.length; d++) fileThroughputs.add(new ArrayList<>(numPasses));
 				throughputs.add(fileThroughputs);
 				List<List<Double>> fileSeekRates = new ArrayList<>(concurrencies.length);
-				for(int d=0; d<concurrencies.length; d++) fileSeekRates.add(new ArrayList<Double>(numPasses));
+				for(int d=0; d<concurrencies.length; d++) fileSeekRates.add(new ArrayList<>(numPasses));
 				seekRates.add(fileSeekRates);
 			}
 			for(int pass=1; pass<=numPasses; pass++) {
