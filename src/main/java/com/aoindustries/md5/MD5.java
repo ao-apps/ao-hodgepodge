@@ -57,7 +57,7 @@ import com.aoindustries.lang.Strings;
  * Implementation of RSA's MD5 hash generator
  *
  * @version	$Revision: 1.2 $
- * @author	Santeri Paavolainen <sjpaavol@cc.helsinki.fi>
+ * @author	Santeri Paavolainen &lt;sjpaavol@cc.helsinki.fi&gt;
  */
 public class MD5 {
 	/**
@@ -390,11 +390,11 @@ public class MD5 {
 	}
 
 	/**
-	 * Update buffer with a single integer (only & 0xff part is used,
+	 * Update buffer with a single integer (only &amp; 0xff part is used,
 	 * as a byte)
 	 *
 	 * @param i		Integer value, which is then converted to 
-	 *			byte as i & 0xff
+	 *			byte as i &amp; 0xff
 	 */
 	public void Update (int i) {
 		Update((byte) (i & 0xff));

@@ -103,9 +103,8 @@ public class LogManagerUtil {
 	 * Package private method to get a String property.
      * If the property is not defined we return the given
      * default value.
-	 *
-	 * @see LogManager#getStringProperty(java.lang.String, java.lang.String)
 	 */
+	// @see LogManager#getStringProperty(java.lang.String, java.lang.String)
     public static String getStringProperty(LogManager manager, String name, String defaultValue) {
 		if(getStringPropertyMethod != null) {
 			try {
@@ -136,9 +135,8 @@ public class LogManagerUtil {
 	 * Package private method to get a Level property.
 	 * If the property is not defined or cannot be parsed
 	 * we return the given default value.
-	 *
-	 * @see LogManager#getLevelProperty(java.lang.String, java.util.logging.Level)
 	 */
+	// @see LogManager#getLevelProperty(java.lang.String, java.util.logging.Level)
 	public static Level getLevelProperty(LogManager manager, String name, Level defaultValue) {
 		if(getLevelPropertyMethod != null) {
 			try {
@@ -170,9 +168,8 @@ public class LogManagerUtil {
 	 * We return an instance of the class named by the "name"
 	 * property. If the property is not defined or has problems
 	 * we return the defaultValue.
-	 *
-	 * @see LogManager#getFilterProperty(java.lang.String, java.util.logging.Filter)
 	 */
+	// @see LogManager#getFilterProperty(java.lang.String, java.util.logging.Filter)
 	public static Filter getFilterProperty(LogManager manager, String name, Filter defaultValue) {
 		if(getFilterPropertyMethod != null) {
 			try {
@@ -213,9 +210,8 @@ public class LogManagerUtil {
 	 * We return an instance of the class named by the "name"
 	 * property. If the property is not defined or has problems
 	 * we return the defaultValue.
-	 *
-	 * @see LogManager#getFormatterProperty(java.lang.String, java.util.logging.Formatter)
 	 */
+	// @see LogManager#getFormatterProperty(java.lang.String, java.util.logging.Formatter)
 	public static Formatter getFormatterProperty(LogManager manager, String name, Formatter defaultValue) {
 		if(getFormatterPropertyMethod != null) {
 			try {

@@ -42,9 +42,8 @@ public class HandlerUtil {
 	 * Private method to configure a ConsoleHandler from LogManager
 	 * properties and/or default values as specified in the class
 	 * javadoc.
-	 *
-	 * @see ConsoleHandler#configure()
 	 */
+	// @see ConsoleHandler#configure()
 	public static void configure(Handler handler) {
 		LogManager manager = LogManager.getLogManager();
 		String cname = handler.getClass().getName();

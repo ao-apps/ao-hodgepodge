@@ -76,7 +76,7 @@ import java.io.InputStream;
  * hashing of the read input.
  *
  * @version	$Revision: 1.2 $
- * @author	Santeri Paavolainen <santtu@cs.hut.fi>
+ * @author	Santeri Paavolainen &lt;santtu@cs.hut.fi&gt;
  */
 public class MD5InputStream extends FilterInputStream {
 

@@ -29,7 +29,7 @@ import java.util.List;
  * @version 	1.0, 23 Jun 1995
  * @version 	1.1, 12 Apr 2000 
  *              -- fixed java.lang.ArrayIndexOutOfBoundsException
- *                 Joel Berry <jmbshifty@yahoo.com> found this bug
+ *                 Joel Berry &lt;jmbshifty@yahoo.com&gt; found this bug
  * <p>
  * http://www.auto.tuwien.ac.at/~blieb/woop/shell.html 
  *

@@ -68,7 +68,7 @@ import java.io.OutputStream;
  * hashing of the read output.
  *
  * @version	$Revision: 1.2 $
- * @author	Santeri Paavolainen <santtu@cs.hut.fi>
+ * @author	Santeri Paavolainen &lt;santtu@cs.hut.fi&gt;
  */
 
 public class MD5OutputStream extends FilterOutputStream {
