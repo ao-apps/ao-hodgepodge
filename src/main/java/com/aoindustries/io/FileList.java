@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -276,6 +276,10 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 		return objectFactory;
 	}
 
+	/**
+     * @deprecated The finalization mechanism is inherently problematic.
+	 */
+    @Deprecated // Java 9: (since="9")
 	@Override
 	protected void finalize() throws Throwable {
 		try {
