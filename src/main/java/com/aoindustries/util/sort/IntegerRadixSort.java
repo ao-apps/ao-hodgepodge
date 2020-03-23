@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.RandomAccess;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -645,12 +644,7 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					final int finalToTaskNum = toTaskNum;
 					importStepFutures.add(
 						executor.submit(
-							new Callable<Source.ImportDataResult>() {
-								@Override
-								public Source.ImportDataResult call() {
-									return source.importData(table, finalTaskStart, finalTaskEnd, finalToTaskNum);
-								}
-							}
+							() -> source.importData(table, finalTaskStart, finalTaskEnd, finalToTaskNum)
 						)
 					);
 				}
@@ -705,16 +699,13 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 								assert runnableFutures != null;
 								runnableFutures.add(
 									executor.submit(
-										new Runnable() {
-											@Override
-											public void run() {
-												for(int fromQueueNum=finalTaskFromQueueStart; fromQueueNum<taskFromQueueEnd; fromQueueNum++) {
-													table.gatherScatter(
-														finalShift,
-														fromQueueNum,
-														finalToTaskNum
-													);
-												}
+										() -> {
+											for(int _fromQueueNum=finalTaskFromQueueStart; _fromQueueNum<taskFromQueueEnd; _fromQueueNum++) {
+												table.gatherScatter(
+													finalShift,
+													_fromQueueNum,
+													finalToTaskNum
+												);
 											}
 										}
 									)
@@ -770,17 +761,12 @@ final public class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 						assert runnableFutures != null;
 						runnableFutures.add(
 							executor.submit(
-								new Runnable() {
-									@Override
-									public void run() {
-										source.exportData(
-											table,
-											finalTaskFromQueueStart,
-											finalTaskFromQueueEnd,
-											finalTaskOutIndex
-										);
-									}
-								}
+								() -> source.exportData(
+									table,
+									finalTaskFromQueueStart,
+									finalTaskFromQueueEnd,
+									finalTaskOutIndex
+								)
 							)
 						);
 

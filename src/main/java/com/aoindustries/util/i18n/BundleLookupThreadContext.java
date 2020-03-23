@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2017, 2019  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2017, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -69,18 +69,15 @@ final public class BundleLookupThreadContext {
 	 */
 	static {
 		ApplicationResourcesAccessor.addListener(
-			new ApplicationResourcesAccessor.Listener() {
-				@Override
-				public void onGetMessage(ApplicationResourcesAccessor accessor, Locale locale, String key, Object[] args, String resource, String result) {
-					// Copy any lookup markup to the newly generated string
-					BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
-					if(threadContext != null) {
-						BundleLookupMarkup lookupMarkup = threadContext.getLookupMarkup(resource);
-						threadContext.addLookupMarkup(
-							result, // This string is already a new instance and therefore is already unique by identity
-							lookupMarkup
-						);
-					}
+			(ApplicationResourcesAccessor accessor, Locale locale, String key, Object[] args, String resource, String result) -> {
+				// Copy any lookup markup to the newly generated string
+				BundleLookupThreadContext _threadContext = BundleLookupThreadContext.getThreadContext(false);
+				if(_threadContext != null) {
+					BundleLookupMarkup lookupMarkup = _threadContext.getLookupMarkup(resource);
+					_threadContext.addLookupMarkup(
+						result, // This string is already a new instance and therefore is already unique by identity
+						lookupMarkup
+					);
 				}
 			}
 		);

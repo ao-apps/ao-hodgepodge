@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013, 2016, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013, 2016, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -185,14 +185,11 @@ public class SQLUtility {
 		return CalendarUtils.parseDateTime(
 			dateTime,
 			timeZone,
-			new CalendarUtils.DateTimeProducer<Timestamp>() {
-				@Override
-				public Timestamp createDateTime(GregorianCalendar gcal, int nanos) {
-					long millis = gcal.getTimeInMillis();
-					long seconds = millis / 1000;
-					if((millis % 1000) < 0) seconds--;
-					return newTimestamp(seconds, nanos);
-				}
+			(GregorianCalendar gcal, int nanos) -> {
+				long millis = gcal.getTimeInMillis();
+				long seconds = millis / 1000;
+				if((millis % 1000) < 0) seconds--;
+				return newTimestamp(seconds, nanos);
 			}
 		);
 	}
@@ -726,29 +723,24 @@ public class SQLUtility {
 		final int numCols = alignRights.length;
 		printTable(
 			titles,
-			new Iterable<Object[]>() {
+			() -> new Iterator<Object[]>() {
+				Iterator<Object> valuesIter = values.iterator();
+
 				@Override
-				public Iterator<Object[]> iterator() {
-					return new Iterator<Object[]>() {
-						Iterator<Object> valuesIter = values.iterator();
+				public boolean hasNext() {
+					return valuesIter.hasNext();
+				}
 
-						@Override
-						public boolean hasNext() {
-							return valuesIter.hasNext();
-						}
+				@Override
+				public Object[] next() {
+					Object[] row = new Object[numCols];
+					for(int i = 0; i < numCols; i++) row[i] = valuesIter.next();
+					return row;
+				}
 
-						@Override
-						public Object[] next() {
-							Object[] row = new Object[numCols];
-							for(int i = 0; i < numCols; i++) row[i] = valuesIter.next();
-							return row;
-						}
-
-						@Override
-						public void remove() {
-							throw new UnsupportedOperationException();
-						}
-					};
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException();
 				}
 			},
 			out,
@@ -768,30 +760,25 @@ public class SQLUtility {
 		final int numCols = alignRights.length;
 		printTable(
 			titles,
-			new Iterable<Object[]>() {
+			() -> new Iterator<Object[]>() {
+				int index = 0;
+
 				@Override
-				public Iterator<Object[]> iterator() {
-					return new Iterator<Object[]>() {
-						int index = 0;
+				public boolean hasNext() {
+					return index < values.length;
+				}
 
-						@Override
-						public boolean hasNext() {
-							return index < values.length;
-						}
+				@Override
+				public Object[] next() {
+					Object[] row = new Object[numCols];
+					System.arraycopy(values, index, row, 0, numCols);
+					index += numCols;
+					return row;
+				}
 
-						@Override
-						public Object[] next() {
-							Object[] row = new Object[numCols];
-							System.arraycopy(values, index, row, 0, numCols);
-							index += numCols;
-							return row;
-						}
-
-						@Override
-						public void remove() {
-							throw new UnsupportedOperationException();
-						}
-					};
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException();
 				}
 			},
 			out,

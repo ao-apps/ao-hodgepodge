@@ -28,7 +28,6 @@ import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -145,19 +144,14 @@ public class ParallelDelete {
 		// The set of next files is kept in key order so that it can scale with O(n*log(n)) for larger numbers of directories
 		// as opposed to O(n^2) for a list.  This is similar to the fix for AWStats logresolvemerge provided by Dan Armstrong
 		// a couple of years ago.
-		final Map<String,List<FilesystemIterator>> nextFiles = new TreeMap<>(
-			new Comparator<String>() {
-				@Override
-				public int compare(String S1, String S2) {
-					// Make sure directories are sorted after their directory contents
-					int diff = S1.compareTo(S2);
-					if(diff==0) return 0;
-					if(S2.startsWith(S1)) return 1;
-					if(S1.startsWith(S2)) return -1;
-					return diff;
-				}
-			}
-		);
+		final Map<String,List<FilesystemIterator>> nextFiles = new TreeMap<>((S1, S2) -> {
+			// Make sure directories are sorted after their directory contents
+			int diff = S1.compareTo(S2);
+			if(diff==0) return 0;
+			if(S2.startsWith(S1)) return 1;
+			if(S1.startsWith(S2)) return -1;
+			return diff;
+		});
 		{
 			final Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
 			for(File directory : directories) {
