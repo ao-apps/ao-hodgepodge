@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -76,7 +76,7 @@ public class LongArrayList extends AbstractList<Long>
 	/**
 	 * Constructs a list containing the elements of the specified
 	 * collection, in the order they are returned by the collection's
-	 * iterator.  The <tt>ArrayList</tt> instance has an initial capacity of
+	 * iterator.  The {@link LongArrayList} instance has an initial capacity of
 	 * 110% the size of the specified collection.
 	 *
 	 * @param c the collection whose elements are to be placed into this list.
@@ -101,9 +101,9 @@ public class LongArrayList extends AbstractList<Long>
 	}
 
 	/**
-	 * Trims the capacity of this <tt>ArrayList</tt> instance to be the
+	 * Trims the capacity of this {@link LongArrayList} instance to be the
 	 * list's current size.  An application can use this operation to minimize
-	 * the storage of an <tt>ArrayList</tt> instance.
+	 * the storage of an {@link LongArrayList} instance.
 	 */
 	public void trimToSize() {
 		modCount++;
@@ -116,7 +116,7 @@ public class LongArrayList extends AbstractList<Long>
 	}
 
 	/**
-	 * Increases the capacity of this <tt>ArrayList</tt> instance, if
+	 * Increases the capacity of this {@link LongArrayList} instance, if
 	 * necessary, to ensure  that it can hold at least the number of elements
 	 * specified by the minimum capacity argument.
 	 *
@@ -148,8 +148,8 @@ public class LongArrayList extends AbstractList<Long>
 	/**
 	 * Tests if this list has no elements.
 	 *
-	 * @return  <tt>true</tt> if this list has no elements;
-	 *          <tt>false</tt> otherwise.
+	 * @return  {@code true} if this list has no elements;
+	 *          {@code false} otherwise.
 	 */
 	@Override
 	public boolean isEmpty() {
@@ -157,7 +157,7 @@ public class LongArrayList extends AbstractList<Long>
 	}
 
 	/**
-	 * Returns <tt>true</tt> if this list contains the specified element.
+	 * Returns {@code true} if this list contains the specified element.
 	 *
 	 * @param elem element whose presence in this List is to be tested.
 	 * @return  <code>true</code> if the specified element is present;
@@ -171,7 +171,7 @@ public class LongArrayList extends AbstractList<Long>
 	}
 
 	/**
-	 * Returns <tt>true</tt> if this list contains the specified element.
+	 * Returns {@code true} if this list contains the specified element.
 	 *
 	 * @param elem element whose presence in this List is to be tested.
 	 * @return  <code>true</code> if the specified element is present;
@@ -184,11 +184,11 @@ public class LongArrayList extends AbstractList<Long>
 
 	/**
 	 * Searches for the first occurrence of the given argument, testing
-	 * for equality using the <tt>equals</tt> method.
+	 * for equality using the {@link #equals(java.lang.Object) equals} method.
 	 *
 	 * @param   elem   an object.
 	 * @return  the index of the first occurrence of the argument in this
-	 *          list; returns <tt>-1</tt> if the object is not found.
+	 *          list; returns {@code -1} if the object is not found.
 	 * @see     Object#equals(Object)
 	 */
 	@Override
@@ -200,11 +200,11 @@ public class LongArrayList extends AbstractList<Long>
 
 	/**
 	 * Searches for the first occurrence of the given argument, testing
-	 * for equality using the <tt>equals</tt> method.
+	 * for equality using the {@link #equals(java.lang.Object) equals} method.
 	 *
 	 * @param   elem   an object.
 	 * @return  the index of the first occurrence of the argument in this
-	 *          list; returns <tt>-1</tt> if the object is not found.
+	 *          list; returns {@code -1} if the object is not found.
 	 * @see     Object#equals(Object)
 	 */
 	@Override
@@ -247,10 +247,10 @@ public class LongArrayList extends AbstractList<Long>
 	}
 
 	/**
-	 * Returns a shallow copy of this <tt>ArrayList</tt> instance.  (The
+	 * Returns a shallow copy of this {@link LongArrayList} instance.  (The
 	 * elements themselves are not copied.)
 	 *
-	 * @return  a clone of this <tt>ArrayList</tt> instance.
+	 * @return  a clone of this {@link LongArrayList} instance.
 	 */
 	@Override
 	public Object clone() {
@@ -304,9 +304,9 @@ public class LongArrayList extends AbstractList<Long>
 	 * If the list fits in the specified array with room to spare (i.e., the
 	 * array has more elements than the list), the element in the array
 	 * immediately following the end of the collection is set to
-	 * <tt>null</tt>.  This is useful in determining the length of the list
+	 * {@code null}.  This is useful in determining the length of the list
 	 * <i>only</i> if the caller knows that the list does not contain any
-	 * <tt>null</tt> elements.
+	 * {@code null} elements.
 	 *
 	 * @param a the array into which the elements of the list are to
 	 *                be stored, if it is big enough; otherwise, a new array of the
@@ -334,8 +334,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *
 	 * @param  index index of element to return.
 	 * @return the element at the specified position in this list.
-	 * @throws    IndexOutOfBoundsException if index is out of range <tt>(index
-	 *                   &lt; 0 || index &gt;= size())</tt>.
+	 * @throws    IndexOutOfBoundsException if index is out of range {@code (index < 0 || index >= size())}.
 	 */
 	@Override
 	public Long get(int index) {
@@ -349,8 +348,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *
 	 * @param  index index of element to return.
 	 * @return the element at the specified position in this list.
-	 * @throws    IndexOutOfBoundsException if index is out of range <tt>(index
-	 *                   &lt; 0 || index &gt;= size())</tt>.
+	 * @throws    IndexOutOfBoundsException if index is out of range {@code (index < 0 || index >= size())}.
 	 */
 	@Override
 	public long getLong(int index) {
@@ -367,7 +365,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param element element to be stored at the specified position.
 	 * @return the element previously at the specified position.
 	 * @throws    IndexOutOfBoundsException if index out of range
-	 *                  <tt>(index &lt; 0 || index &gt;= size())</tt>.
+	 *                  {@code (index < 0 || index >= size())}.
 	 */
 	@Override
 	public Long set(int index, Long element) {
@@ -382,7 +380,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param element element to be stored at the specified position.
 	 * @return the element previously at the specified position.
 	 * @throws    IndexOutOfBoundsException if index out of range
-	 *                  <tt>(index &lt; 0 || index &gt;= size())</tt>.
+	 *                  {@code (index < 0 || index >= size())}.
 	 */
 	@Override
 	public long set(int index, long element) {
@@ -397,7 +395,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * Appends the specified element to the end of this list.
 	 *
 	 * @param o element to be appended to this list.
-	 * @return <tt>true</tt> (as per the general contract of Collection.add).
+	 * @return {@code true} (as per the general contract of Collection.add).
 	 */
 	@Override
 	public boolean add(Long o) {
@@ -408,7 +406,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * Appends the specified element to the end of this list.
 	 *
 	 * @param o element to be appended to this list.
-	 * @return <tt>true</tt> (as per the general contract of Collection.add).
+	 * @return {@code true} (as per the general contract of Collection.add).
 	 */
 	@Override
 	public boolean add(long o) {
@@ -425,7 +423,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param index index at which the specified element is to be inserted.
 	 * @param element element to be inserted.
 	 * @throws    IndexOutOfBoundsException if index is out of range
-	 *                  <tt>(index &lt; 0 || index &gt; size())</tt>.
+	 *                  {@code (index < 0 || index > size())}.
 	 */
 	@Override
 	public void add(int index, Long element) {
@@ -440,7 +438,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param index index at which the specified element is to be inserted.
 	 * @param element element to be inserted.
 	 * @throws    IndexOutOfBoundsException if index is out of range
-	 *                  <tt>(index &lt; 0 || index &gt; size())</tt>.
+	 *                  {@code (index < 0 || index > size())}.
 	 */
 	@Override
 	public void add(int index, long element) {
@@ -462,8 +460,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *
 	 * @param index the index of the element to removed.
 	 * @return the element that was removed from the list.
-	 * @throws    IndexOutOfBoundsException if index out of range <tt>(index
-	 *                   &lt; 0 || index &gt;= size())</tt>.
+	 * @throws    IndexOutOfBoundsException if index out of range {@code(index < 0 || index >= size())}.
 	 */
 	@Override
 	public Long remove(int index) {
@@ -477,8 +474,7 @@ public class LongArrayList extends AbstractList<Long>
 	 *
 	 * @param index the index of the element to removed.
 	 * @return the element that was removed from the list.
-	 * @throws    IndexOutOfBoundsException if index out of range <tt>(index
-	 *                   &lt; 0 || index &gt;= size())</tt>.
+	 * @throws    IndexOutOfBoundsException if index out of range {@code (index < 0 || index >= size())}.
 	 */
 	@Override
 	public long removeAtIndex(int index) {
@@ -499,14 +495,14 @@ public class LongArrayList extends AbstractList<Long>
 	/**
 	 * Removes a single instance of the specified element from this
 	 * list, if it is present (optional operation).  More formally,
-	 * removes an element <tt>e</tt> such that <tt>(o==null ? e==null :
-	 * o.equals(e))</tt>, if the list contains one or more such
-	 * elements.  Returns <tt>true</tt> if the list contained the
+	 * removes an element {@code e} such that {@code (o==null ? e==null : o.equals(e))},
+	 * if the list contains one or more such
+	 * elements.  Returns {@code true} if the list contained the
 	 * specified element (or equivalently, if the list changed as a
 	 * result of the call).<p>
 	 *
 	 * @param o element to be removed from this list, if present.
-	 * @return <tt>true</tt> if the list contained the specified element.
+	 * @return {@code true} if the list contained the specified element.
 	 */
 	@Override
 	public boolean remove(Object o) {
@@ -517,14 +513,14 @@ public class LongArrayList extends AbstractList<Long>
 	/**
 	 * Removes a single instance of the specified element from this
 	 * list, if it is present (optional operation).  More formally,
-	 * removes an element <tt>e</tt> such that <tt>(o==null ? e==null :
-	 * o.equals(e))</tt>, if the list contains one or more such
-	 * elements.  Returns <tt>true</tt> if the list contained the
+	 * removes an element {@code e} such that {@code (o==null ? e==null : o.equals(e))},
+	 * if the list contains one or more such
+	 * elements.  Returns {@code true} if the list contained the
 	 * specified element (or equivalently, if the list changed as a
 	 * result of the call).<p>
 	 *
 	 * @param value element to be removed from this list, if present.
-	 * @return <tt>true</tt> if the list contained the specified element.
+	 * @return {@code true} if the list contained the specified element.
 	 */
 	@Override
 	public boolean removeByValue(long value) {
@@ -574,7 +570,7 @@ public class LongArrayList extends AbstractList<Long>
 	 * list is nonempty.)
 	 *
 	 * @param c the elements to be inserted into this list.
-	 * @return <tt>true</tt> if this list changed as a result of the call.
+	 * @return {@code true} if this list changed as a result of the call.
 	 * @throws    NullPointerException if the specified collection is null.
 	 */
 	@Override
@@ -597,9 +593,8 @@ public class LongArrayList extends AbstractList<Long>
 	 * @param index index at which to insert first element
 	 *                    from the specified collection.
 	 * @param c elements to be inserted into this list.
-	 * @return <tt>true</tt> if this list changed as a result of the call.
-	 * @throws    IndexOutOfBoundsException if index out of range <tt>(index
-	 *                  &lt; 0 || index &gt; size())</tt>.
+	 * @return {@code true} if this list changed as a result of the call.
+	 * @throws    IndexOutOfBoundsException if index out of range {@code (index < 0 || index > size())}.
 	 * @throws    NullPointerException if the specified Collection is null.
 	 */
 	@Override
@@ -627,8 +622,8 @@ public class LongArrayList extends AbstractList<Long>
 	 * Removes from this List all of the elements whose index is between
 	 * fromIndex, inclusive and toIndex, exclusive.  Shifts any succeeding
 	 * elements to the left (reduces their index).
-	 * This call shortens the list by <tt>(toIndex - fromIndex)</tt> elements.
-	 * (If <tt>toIndex==fromIndex</tt>, this operation has no effect.)
+	 * This call shortens the list by {@code (toIndex - fromIndex)} elements.
+	 * (If {@code toIndex==fromIndex}, this operation has no effect.)
 	 *
 	 * @param fromIndex index of first element to be removed.
 	 * @param toIndex index after last element to be removed.
@@ -659,12 +654,12 @@ public class LongArrayList extends AbstractList<Long>
 	}
 
 	/**
-	 * Save the state of the <tt>ArrayList</tt> instance to a stream (that
+	 * Save the state of the {@link LongArrayList} instance to a stream (that
 	 * is, serialize it).
 	 *
-	 * @serialData The length of the array backing the <tt>ArrayList</tt>
+	 * @serialData The length of the array backing the {@link LongArrayList}
 	 *             instance is emitted (int), followed by all of its elements
-	 *             (each an <tt>Object</tt>) in the proper order.
+	 *             (each an {@link Object}) in the proper order.
 	 */
 	private void writeObject(java.io.ObjectOutputStream s)
 		throws java.io.IOException{
@@ -685,7 +680,7 @@ public class LongArrayList extends AbstractList<Long>
 	}
 
 	/**
-	 * Reconstitute the <tt>IntArrayList</tt> instance from a stream (that is,
+	 * Reconstitute the {@link LongArrayList} instance from a stream (that is,
 	 * deserialize it).
 	 */
 	private void readObject(java.io.ObjectInputStream s)

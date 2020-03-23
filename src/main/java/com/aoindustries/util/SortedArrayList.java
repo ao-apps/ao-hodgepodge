@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011  AO Industries, Inc.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -74,11 +74,11 @@ public class SortedArrayList<E> extends ArrayList<E> {
 
 	/**
 	 * Searches for the first occurrence of the given argument, testing
-	 * for equality using the <tt>equals</tt> method.
+	 * for equality using the {@link #equals(java.lang.Object) equals} method.
 	 *
 	 * @param   elem   an object.
 	 * @return  the index of the first occurrence of the argument in this
-	 *          list; returns <tt>-1</tt> if the object is not found.
+	 *          list; returns {@code -1} if the object is not found.
 	 * @see     Object#equals(Object)
 	 */
 	@Override
@@ -189,7 +189,7 @@ public class SortedArrayList<E> extends ArrayList<E> {
 	 * of the list of matching hashCodes.
 	 *
 	 * @param o element to be appended to this list.
-	 * @return <tt>true</tt> (as per the general contract of Collection.add).
+	 * @return {@code true} (as per the general contract of Collection.add).
 	 */
 	@Override
 	public boolean add(E o) {
@@ -231,12 +231,12 @@ public class SortedArrayList<E> extends ArrayList<E> {
 	 * Removes a single instance of the specified element from this
 	 * list, if it is present (optional operation).
 	 * If the list contains one or more such
-	 * elements.  Returns <tt>true</tt> if the list contained the
+	 * elements.  Returns {@code true} if the list contained the
 	 * specified element (or equivalently, if the list changed as a
 	 * result of the call).<p>
 	 *
 	 * @param o element to be removed from this list, if present.
-	 * @return <tt>true</tt> if the list contained the specified element.
+	 * @return {@code true} if the list contained the specified element.
 	 */
 	@Override
 	public boolean remove(Object o) {

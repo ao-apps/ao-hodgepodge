@@ -43,16 +43,17 @@ import java.util.concurrent.BlockingQueue;
  * </p>
  * <p>
  * Also performs the task with three threads:
+ * </p>
  * <pre>
  *     Iterate filesystem -&gt; Delete entries -&gt; Verbose Output
  *     (Calling Thread)      (New Thread)      (New Thread)
  * </pre>
- * </p>
  * <p>
  * Verifying this is, in fact, true.  This is measured with a copy of the
  * backups from one of our managed servers.  The system RAM was limited to 128
  * MB to better simulate backup server hardware.  ext3 benchmarks on Maxtor 250
  * GB 7200 RPM SATA.  reiserfs benchmarks on WD 80 GB 7200 IDE.
+ * </p>
  * <pre>
  *                       +---------------------+---------------------+
  *                       |         ext3        |      reiserfs       |
@@ -71,13 +72,16 @@ import java.util.concurrent.BlockingQueue;
  * |           | % CPU   |      23% |       8% |      48% |       5% |
  * +-----------+---------+----------+----------+----------+----------+
  * </pre>
- * </p>
+ * <p>
  * TODO: Once benchmarks finished for other # Deleted, adjust threshold between
  *       rm and parallel in FailoverFileReplicationManager
- * 
+ * </p>
+ * <p>
  * TODO: Should it use a provided ExecutorService instead of making own Threads?
- * 
+ * </p>
+ * <p>
  * TODO: Concurrent deletes would be possible.  Is there any advantage?
+ * </p>
  *
  * @author  AO Industries, Inc.
  */

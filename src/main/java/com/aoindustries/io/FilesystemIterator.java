@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2015, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2015, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -255,7 +255,6 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 	/**
 	 * Gets the next files, up to batchSize.
 	 * @return the number of files in the array, zero (0) indicates iteration has completed
-	 * @throws java.io.IOException
 	 */
 	public int getNextFiles(final File[] files, final int batchSize) throws IOException {
 		int c=0;

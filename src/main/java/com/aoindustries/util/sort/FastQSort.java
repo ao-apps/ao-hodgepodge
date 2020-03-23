@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @author James Gosling
  * @author Kevin A. Smith
- * @version 	@(#)QSortAlgorithm.java	1.3, 29 Feb 1996
+ * @version 	\@(#)QSortAlgorithm.java	1.3, 29 Feb 1996
  * extended with TriMedian and InsertionSort by Denis Ahrens
  * with all the tips from Robert Sedgewick (Algorithms in C++).
  * It uses TriMedian and InsertionSort for lists shorts than 4.
