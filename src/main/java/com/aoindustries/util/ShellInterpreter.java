@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013, 2014, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2013, 2014, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,6 +23,7 @@
 package com.aoindustries.util;
 
 import com.aoindustries.io.TerminalWriter;
+import com.aoindustries.lang.EmptyArrays;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
@@ -63,7 +64,7 @@ abstract public class ShellInterpreter implements Runnable {
 	protected String status="Running";
 
 	public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err) {
-		this(in, out, err, AoArrays.EMPTY_STRING_ARRAY);
+		this(in, out, err, EmptyArrays.EMPTY_STRING_ARRAY);
 	}
 
 	public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String ... args) {
@@ -87,7 +88,7 @@ abstract public class ShellInterpreter implements Runnable {
 			this.args=args;
 		} else {
 			if(skipped==args.length) {
-				this.args = AoArrays.EMPTY_STRING_ARRAY;
+				this.args = EmptyArrays.EMPTY_STRING_ARRAY;
 			} else {
 				this.args = new String[args.length-skipped];
 				System.arraycopy(args, skipped, this.args, 0, args.length-skipped);
@@ -149,7 +150,7 @@ abstract public class ShellInterpreter implements Runnable {
 			if(args.length>0 && "&".equals(args[args.length-1])) {
 				String[] newArgs;
 				if(args.length==1) {
-					newArgs = AoArrays.EMPTY_STRING_ARRAY;
+					newArgs = EmptyArrays.EMPTY_STRING_ARRAY;
 				} else {
 					newArgs = new String[args.length-1];
 					System.arraycopy(args, 0, newArgs, 0, args.length-1);

@@ -22,7 +22,7 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.util.AoArrays;
+import com.aoindustries.lang.EmptyArrays;
 import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -215,16 +215,16 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 									if(file.getCanonicalPath().equals(filename)) {
 										list = file.list();
 										if(list==null) {
-											list = AoArrays.EMPTY_STRING_ARRAY;
+											list = EmptyArrays.EMPTY_STRING_ARRAY;
 										} else if(isSorted && list.length>0) {
 											Arrays.sort(list);
 										}
 									} else {
 										//System.err.println("Skipping non-canonical directory listing: "+filename);
-										list = AoArrays.EMPTY_STRING_ARRAY;
+										list = EmptyArrays.EMPTY_STRING_ARRAY;
 									}
 								} else {
-									list = AoArrays.EMPTY_STRING_ARRAY;
+									list = EmptyArrays.EMPTY_STRING_ARRAY;
 								}
 								// No need to push onto the stack if the children are empty?
 								if(list.length>0) {

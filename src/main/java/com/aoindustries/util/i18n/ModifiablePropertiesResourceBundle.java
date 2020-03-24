@@ -284,7 +284,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		try {
 			// Create a properties instance that sorts the output by keys (case-insensitive)
 			@SuppressWarnings("deprecation")
-			com.aoindustries.util.SortedProperties writer = new com.aoindustries.util.SortedProperties(); // TODO: Do same sorting like DiffablePropertiesTask.java (keeping keys together)
+			com.aoindustries.collections.SortedProperties writer = new com.aoindustries.collections.SortedProperties(); // TODO: Do same sorting like DiffablePropertiesTask.java (keeping keys together)
 			writer.putAll(properties);
 			// Generate new file
 			byte[] newContent;

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2019  AO Industries, Inc.
+ * Copyright (C) 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -49,11 +49,11 @@ import java.util.Properties;
  *     will be prefixed with a "\" if it starts with whitespace.</li>
  * </ol>
  * <p>
- * For maximum diffability, this should be used along with {@link SortedProperties}.
+ * For maximum diffability, this should be used along with {@link com.aoindustries.collections.SortedProperties}.
  * </p>
  *
  * @see  Properties
- * @see  SortedProperties
+ * @see  com.aoindustries.collections.SortedProperties
  */
 public class DiffableProperties {
 

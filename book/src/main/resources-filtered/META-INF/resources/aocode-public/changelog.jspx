@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-03-15T21:00:26-05:00"
+		dateModified="2020-03-24T03:13:19-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -160,7 +160,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					New class <ao:a href="apidocs/com/aoindustries/util/DiffableProperties.html">DiffableProperties</ao:a>
 					to format <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a>
 					files in a way optimized for diff tools, such as <code>git diff</code>.  Best used in conjunction with
-					<ao:a href="apidocs/com/aoindustries/util/SortedProperties.html">SortedProperties</ao:a>.
+					<ao:a href="https://aoindustries.com/ao-collections/apidocs/com/aoindustries/collections/SortedProperties.html">SortedProperties</ao:a>.
 				</li>
 				<li>
 					Made <ao:a href="apidocs/com/aoindustries/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>

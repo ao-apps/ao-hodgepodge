@@ -22,7 +22,7 @@
  */
 package com.aoindustries.util.graph;
 
-import com.aoindustries.util.AoCollections;
+import com.aoindustries.collections.AoCollections;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
