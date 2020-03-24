@@ -33,7 +33,7 @@ evaporate into nothing.
 * [Project Home](https://aoindustries.com/aocode-public/)
 * [Changelog](https://aoindustries.com/aocode-public/changelog)
 * [API Docs](https://aoindustries.com/aocode-public/apidocs/)
-* [Maven Central Repository](https://search.maven.org/#search%7Cgav%7C1%7Cg:%22com.aoindustries%22%20AND%20a:%22aocode-public%22)
+* [Maven Central Repository](https://search.maven.org/artifact/com.aoindustries/aocode-public)
 * [GitHub](https://github.com/aoindustries/aocode-public)
 
 ## Contact Us
