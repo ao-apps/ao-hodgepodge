@@ -22,9 +22,9 @@
  */
 package com.aoindustries.util.sort;
 
+import com.aoindustries.collections.IntList;
 import com.aoindustries.lang.RuntimeUtils;
 import com.aoindustries.util.AtomicSequence;
-import com.aoindustries.util.IntList;
 import com.aoindustries.util.Sequence;
 import java.util.Arrays;
 import java.util.List;

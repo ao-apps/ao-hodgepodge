@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,8 @@
  */
 package com.aoindustries.util.sort;
 
+import com.aoindustries.collections.IntList;
 import com.aoindustries.io.FileList;
-import com.aoindustries.util.IntList;
 
 /**
  * A sort implementation that sorts int[] primitives as was as integer representation of numeric objects.
