@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-03-25T03:02:42-05:00"
+		dateModified="2020-03-25T03:47:24-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -89,7 +89,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New bundle lookup markup types:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
+						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType.html#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
 					</ul>
 				</li>
 				<li>
@@ -470,13 +470,13 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New bundle lookup markup types:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#MYSQL">MarkupType.MYSQL</ao:a> for the <ao:a href="https://dev.mysql.com/doc/en/mysql.html">MySQL <code>mysql</code> command line</ao:a>.</li>
-						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#PSQL">MarkupType.PSQL</ao:a> for the <ao:a href="https://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL <code>psql</code> command line</ao:a>.</li>
-						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#SH">MarkupType.SH</ao:a> for shell script encoding.</li>
+						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType.html#MYSQL">MarkupType.MYSQL</ao:a> for the <ao:a href="https://dev.mysql.com/doc/en/mysql.html">MySQL <code>mysql</code> command line</ao:a>.</li>
+						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType.html#PSQL">MarkupType.PSQL</ao:a> for the <ao:a href="https://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL <code>psql</code> command line</ao:a>.</li>
+						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType.html#SH">MarkupType.SH</ao:a> for shell script encoding.</li>
 					</ul>
 				</li>
 				<li>
-					<ao:a href="apidocs/com/aoindustries/servlet/http/Dispatcher">Dispatcher</ao:a> may now forward
+					<ao:a href="apidocs/com/aoindustries/servlet/http/Dispatcher.html">Dispatcher</ao:a> may now forward
 					and include to caller-provided <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
 				</li>
 			</ul>
