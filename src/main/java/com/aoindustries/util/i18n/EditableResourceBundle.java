@@ -240,7 +240,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 				List<LookupKey> lookupKeys = new ArrayList<>(lookups.keySet());
 				Collections.sort(
 					lookupKeys,
-					// TODO: Replace other uses of Long.compareTo with Long.compare() - and other primitive wrappers.  Less "valueOf"
 					(key1, key2) -> Long.compare(lookups.get(key1).id, lookups.get(key2).id)
 				);
 				if(setValueUrl != null) {

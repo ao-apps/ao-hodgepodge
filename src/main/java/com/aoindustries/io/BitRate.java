@@ -102,7 +102,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
 
 	private final long quantity;
 	private final Unit unit;
-	private transient Long bitRate;
+	private transient long bitRate;
 
 	public BitRate(long bitRate) {
 		this(bitRate, null);
@@ -151,7 +151,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
 
 	@Override
 	public int hashCode() {
-		return bitRate.hashCode();
+		return Long.hashCode(bitRate);
 	}
 
 	@Override
@@ -162,7 +162,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
 
 	@Override
 	public int compareTo(BitRate o) {
-		return bitRate.compareTo(o.bitRate);
+		return Long.compare(bitRate, o.bitRate);
 	}
 
 	public long getQuantity() {
@@ -173,7 +173,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
 		return unit;
 	}
 
-	public Long getBitRate() {
+	public long getBitRate() {
 		return bitRate;
 	}
 }
