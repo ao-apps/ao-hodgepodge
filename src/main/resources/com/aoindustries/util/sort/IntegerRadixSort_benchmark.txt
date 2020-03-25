@@ -1,4 +1,3 @@
-TODO: Move these non-source files into resources, or just delete or move to book
 Initial
 
 1/1: Speedup: 0.065
