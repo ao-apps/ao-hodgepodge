@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2012, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2010, 2011, 2012, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.math.SafeMath;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -92,7 +91,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
 	 */
 	private static long getBitRate(long quantity, Unit unit) {
 		if(quantity<1) throw new IllegalArgumentException("quantity<1");
-		return SafeMath.multiply(quantity, unit==null ? 1 : unit.getCoefficient());
+		return Math.multiplyExact(quantity, unit==null ? 1 : unit.getCoefficient());
 	}
 
 	public static BitRate valueOf(String value) {
