@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util;
 
+import com.aoindustries.exception.WrappedException;
 import com.aoindustries.io.Writable;
 import com.aoindustries.util.i18n.BundleLookupMarkup;
 import com.aoindustries.util.i18n.BundleLookupThreadContext;

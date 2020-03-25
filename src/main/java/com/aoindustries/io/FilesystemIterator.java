@@ -22,8 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.exception.WrappedException;
 import com.aoindustries.lang.EmptyArrays;
-import com.aoindustries.util.WrappedException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

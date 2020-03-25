@@ -22,8 +22,8 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.exception.WrappedException;
 import com.aoindustries.tempfiles.TempFileContext;
-import com.aoindustries.util.WrappedException;
 import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
