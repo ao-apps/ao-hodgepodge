@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-03-24T04:39:55-05:00"
+		dateModified="2020-03-25T03:02:42-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -53,78 +53,87 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{project.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{project.scm.url}"
-			>
-				<ul>
-					<li>Minimum Java version changed from 1.7 to 1.8.</li>
-					<li>
-						Reduced use of property substitutions in <code>pom.xml</code>.
-						This is to help 3rd-party parsers that fail to perform full Maven-compatible substitutions.
-					</li>
-					<li>
-						Deprecated <code>MimeType</code>:
-						This simple hard-coded list of MIME types is not maintained well.
-						It is strongly recommended to use a different, well-supported API.
-					</li>
-					<li>
-						Made <code>EncodingUtils.toString(Object)</code> (deprecated) consistent with
-						<ao:a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/Coercion.html">Coercion</ao:a>:
-						<ol>
-							<li>Supporting instances of <ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/io/Writable.html">Writable</ao:a>.</li>
-							<li>Supporting instances of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/CharSequence.html">CharSequence</ao:a>.</li>
-							<li>Supporting instances of <code>char[]</code>.</li>
-						</ol>
-					</li>
-					<li><code>EncodingUtils.encodeHtml(*)</code> (deprecated) now require additional <code>isXhtml</code> flag.</li>
-					<li>Connection pool statistics HTML generation now supports both SGML and XML serializations.</li>
-					<li>
-						New bundle lookup markup types:
-						<ul>
-							<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
-						</ul>
-					</li>
-					<li>
-						<code>com.aoindustries.util.logging.*</code> significantly reworked
-						to be compatible with <code>logging.properties</code>.
-					</li>
-					<li>
-						<code>TopologicalSorter</code> now returns a modifiable <code>Set</code>.
-						Previously it returned an unmodifiable <code>List</code>.
-					</li>
-					<li>Updated dependencies.</li>
-					<li>Removed the <code>com.aoindustries.security</code> package:
-						<ol>
-							<li>
-								<code>com.aoindustries.security.NotAuthenticatedException</code> moved to
-								the <core:link book="/ao-lang" page="/index.jspx" /> project.
-								Resolves this split-package with <core:link book="/ao-lang" page="/index.jspx" />.
-							</li>
-							<li>
-								Removed <code>com.aoindustries.security.AccountDisabledException</code>; please use
-								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountLockedException.html">AccountLockedException</ao:a> instead.
-							</li>
-							<li>
-								Removed <code>com.aoindustries.security.AccountNotFoundException</code>; please use
-								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountNotFoundException.html">AccountNotFoundException</ao:a> instead.
-							</li>
-							<li>
-								Removed <code>com.aoindustries.security.BadPasswordException</code>; please use
-								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/FailedLoginException.html">FailedLoginException</ao:a> instead.
-							</li>
-							<li>
-								Removed <code>com.aoindustries.security.IncompleteLoginException</code>; please use
-								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/CredentialNotFoundException.html">CredentialNotFoundException</ao:a> instead.
-							</li>
-							<li>
-								Removed <code>com.aoindustries.security.LoginException</code>; please use
-								<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/LoginException.html">LoginException</ao:a> instead.
-							</li>
-						</ol>
-					</li>
-					<li>Moved the <code>com.aoindustries.util.persistent</code> package to the new <core:link book="/ao-persistence" page="/index.jspx" /> project.</li>
-					<li>Split collection-related utilities into new <core:link book="/ao-collections" page="/index.jspx" /> project.</li>
-				</ul>
-			</changelog:release>
+			/>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="4.0.0"
+			datePublished="2020-03-25T03:02:42-05:00"
+			groupId="@{project.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{project.scm.url}"
+		>
+			<ul>
+				<li>Minimum Java version changed from 1.7 to 1.8.</li>
+				<li>
+					Reduced use of property substitutions in <code>pom.xml</code>.
+					This is to help 3rd-party parsers that fail to perform full Maven-compatible substitutions.
+				</li>
+				<li>
+					Deprecated <code>MimeType</code>:
+					This simple hard-coded list of MIME types is not maintained well.
+					It is strongly recommended to use a different, well-supported API.
+				</li>
+				<li>
+					Made <code>EncodingUtils.toString(Object)</code> (deprecated) consistent with
+					<ao:a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/Coercion.html">Coercion</ao:a>:
+					<ol>
+						<li>Supporting instances of <ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/io/Writable.html">Writable</ao:a>.</li>
+						<li>Supporting instances of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/CharSequence.html">CharSequence</ao:a>.</li>
+						<li>Supporting instances of <code>char[]</code>.</li>
+					</ol>
+				</li>
+				<li><code>EncodingUtils.encodeHtml(*)</code> (deprecated) now require additional <code>isXhtml</code> flag.</li>
+				<li>Connection pool statistics HTML generation now supports both SGML and XML serializations.</li>
+				<li>
+					New bundle lookup markup types:
+					<ul>
+						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
+					</ul>
+				</li>
+				<li>
+					<code>com.aoindustries.util.logging.*</code> significantly reworked
+					to be compatible with <code>logging.properties</code>.
+				</li>
+				<li>
+					<code>TopologicalSorter</code> now returns a modifiable <code>Set</code>.
+					Previously it returned an unmodifiable <code>List</code>.
+				</li>
+				<li>Updated dependencies.</li>
+				<li>Removed the <code>com.aoindustries.security</code> package:
+					<ol>
+						<li>
+							<code>com.aoindustries.security.NotAuthenticatedException</code> moved to
+							the <core:link book="/ao-lang" page="/index.jspx" /> project.
+							Resolves this split-package with <core:link book="/ao-lang" page="/index.jspx" />.
+						</li>
+						<li>
+							Removed <code>com.aoindustries.security.AccountDisabledException</code>; please use
+							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountLockedException.html">AccountLockedException</ao:a> instead.
+						</li>
+						<li>
+							Removed <code>com.aoindustries.security.AccountNotFoundException</code>; please use
+							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountNotFoundException.html">AccountNotFoundException</ao:a> instead.
+						</li>
+						<li>
+							Removed <code>com.aoindustries.security.BadPasswordException</code>; please use
+							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/FailedLoginException.html">FailedLoginException</ao:a> instead.
+						</li>
+						<li>
+							Removed <code>com.aoindustries.security.IncompleteLoginException</code>; please use
+							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/CredentialNotFoundException.html">CredentialNotFoundException</ao:a> instead.
+						</li>
+						<li>
+							Removed <code>com.aoindustries.security.LoginException</code>; please use
+							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/LoginException.html">LoginException</ao:a> instead.
+						</li>
+					</ol>
+				</li>
+				<li>Moved the <code>com.aoindustries.util.persistent</code> package to the new <core:link book="/ao-persistence" page="/index.jspx" /> project.</li>
+				<li>Split collection-related utilities into new <core:link book="/ao-collections" page="/index.jspx" /> project.</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
