@@ -109,7 +109,7 @@ abstract public class WildcardPatternMatcher {
 		if(patterns == null || patterns.isEmpty()) {
 			return matchNone;
 		} else {
-			List<String> list = Strings.splitStringCommaSpace(patterns);
+			List<String> list = Strings.splitCommaSpace(patterns);
 			// Match none shortcut
 			if(list.isEmpty()) return matchNone;
 

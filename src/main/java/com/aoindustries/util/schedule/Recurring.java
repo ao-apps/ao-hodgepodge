@@ -83,7 +83,7 @@ public abstract class Recurring {
 		}
 		if(recurring.length()>=3 && recurring.substring(0, 3).equalsIgnoreCase("on ")) {
 			EnumSet<DayOfWeek> daysOfWeek = EnumSet.noneOf(DayOfWeek.class);
-			for(String dayStr : Strings.splitStringCommaSpace(recurring.substring(3))) {
+			for(String dayStr : Strings.splitCommaSpace(recurring.substring(3))) {
 				boolean found = false;
 				for(DayOfWeek dow : allDaysOfWeek) {
 					if(
@@ -102,7 +102,7 @@ public abstract class Recurring {
 		}
 		if(recurring.length()>=3 && recurring.substring(0, 3).equalsIgnoreCase("in ")) {
 			EnumSet<Month> months = EnumSet.noneOf(Month.class);
-			for(String monthStr : Strings.splitStringCommaSpace(recurring.substring(3))) {
+			for(String monthStr : Strings.splitCommaSpace(recurring.substring(3))) {
 				boolean found = false;
 				for(Month month : allMonths) {
 					if(
