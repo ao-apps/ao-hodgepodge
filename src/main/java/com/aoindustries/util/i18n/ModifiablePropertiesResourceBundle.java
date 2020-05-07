@@ -36,9 +36,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.Collator;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -275,6 +278,44 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		if(key.endsWith(MODIFIED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
 	}
 
+	public static final Comparator<Object> PROPERTIES_KEY_COMPARATOR = new Comparator<Object>() {
+
+		private final Collator collator = Collator.getInstance(Locale.ROOT);
+
+		@Override
+		public int compare(Object o1, Object o2) {
+			String s1 = (String)o1;
+			String base1;
+			int sub1;
+			if(s1.endsWith(MODIFIED_SUFFIX)) {
+				base1 = s1.substring(0, s1.length() - MODIFIED_SUFFIX.length());
+				sub1 = 1;
+			} else if(s1.endsWith(VALIDATED_SUFFIX)) {
+				base1 = s1.substring(0, s1.length() - VALIDATED_SUFFIX.length());
+				sub1 = 2;
+			} else {
+				base1 = s1;
+				sub1 = 0;
+			}
+			String s2 = (String)o2;
+			String base2;
+			int sub2;
+			if(s2.endsWith(MODIFIED_SUFFIX)) {
+				base2 = s2.substring(0, s2.length() - MODIFIED_SUFFIX.length());
+				sub2 = 1;
+			} else if(s2.endsWith(VALIDATED_SUFFIX)) {
+				base2 = s2.substring(0, s2.length() - VALIDATED_SUFFIX.length());
+				sub2 = 2;
+			} else {
+				base2 = s2;
+				sub2 = 0;
+			}
+			int diff = collator.compare(base1, base2);
+			if(diff != 0) return diff;
+			return Integer.compare(sub1, sub2);
+		}
+	};
+
 	/**
 	 * Saves the properties file in ascending key order.  All accesses must
 	 * already hold a lock on the properties object.
@@ -284,7 +325,12 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		try {
 			// Create a properties instance that sorts the output by keys (case-insensitive)
 			@SuppressWarnings("deprecation")
-			com.aoindustries.collections.SortedProperties writer = new com.aoindustries.collections.SortedProperties(); // TODO: Do same sorting like DiffablePropertiesTask.java (keeping keys together)
+			com.aoindustries.collections.SortedProperties writer = new com.aoindustries.collections.SortedProperties() {
+				@Override
+				public Comparator<Object> getKeyComparator() {
+					return PROPERTIES_KEY_COMPARATOR;
+				}
+			};
 			writer.putAll(properties);
 			// Generate new file
 			byte[] newContent;
