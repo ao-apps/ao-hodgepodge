@@ -54,7 +54,7 @@ public final class EncodingUtils {
 	/**
 	 * Converts an object to a string.
 	 * 
-	 * @deprecated  Use <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/Coercion.html#toString-java.lang.Object-">Coercion.toString(Object)</a> instead.
+	 * @deprecated  Use <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/Coercion.html#toString(java.lang.Object)">Coercion.toString(Object)</a> instead.
 	 */
 	@Deprecated
 	public static String toString(Object value) {
