@@ -113,10 +113,6 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						<groupId>org.apache.maven.plugins</groupId><artifactId>maven-javadoc-plugin</artifactId>
 						<configuration>
 							<offlineLinks>
-								<offlineLink>
-									<url>${javadoc.link.javase}</url>
-									<location>${project.build.directory}/offlineLinks/com/aoindustries/javadoc/offline/javase/${javase.release}</location>
-								</offlineLink>
 								<!-- Direct -->
 								<offlineLink>
 									<url>https://aoindustries.com/ao-collections/apidocs/</url>
@@ -134,6 +130,11 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 								<offlineLink>
 									<url>https://junit.org/junit4/javadoc/latest/</url>
 									<location>${project.build.directory}/offlineLinks/junit/junit</location>
+								</offlineLink>
+								<!-- Java SE -->
+								<offlineLink>
+									<url>${javadoc.link.javase}</url>
+									<location>${project.build.directory}/offlineLinks/com/aoindustries/javadoc/offline/javase/${javase.release}</location>
 								</offlineLink>
 							</offlineLinks>
 						</configuration>
@@ -178,7 +179,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		<dependency>
 			<groupId>com.aoindustries</groupId><artifactId>ao-lang</artifactId>
 		</dependency>
-		<!-- This is only used by AOPool, avoid cyclic project dependcies:
+		<!-- This is only used by AOPool, avoid cyclic project dependencies:
 		<dependency>
 			<groupId>com.aoindustries</groupId><artifactId>ao-style</artifactId>
 			<optional>true</optional>
