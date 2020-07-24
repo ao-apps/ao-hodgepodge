@@ -171,7 +171,7 @@ public class ZeroFile {
 				//System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": "+(allZero ? "Already zero" : "Dirty"));
 			}
 		}
-		if(PROGRESS) {
+		if(PROGRESS && !lastVerboseString.isEmpty()) {
 			System.err.println();
 			lastVerboseString = "";
 		}
@@ -207,7 +207,7 @@ public class ZeroFile {
 				}
 			}
 		}
-		if(PROGRESS) {
+		if(PROGRESS && !lastVerboseString.isEmpty()) {
 			System.err.println();
 			lastVerboseString = "";
 		}
