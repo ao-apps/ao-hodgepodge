@@ -67,7 +67,7 @@ public final class EncodingUtils {
 			// Note: This is only optimal for Writable that are "isFastToString()",
 			//       but we don't have much better option since a String is required.
 			//       Keeping this here, instead of falling-through to toString() below,
-			//       so behavior is consistent in the odd change a class is a Node and implements Writable.
+			//       so behavior is consistent in the odd chance a class is a Node and implements Writable.
 			//       This should keep it consistent with other coercions.
 			return value.toString();
 		}
