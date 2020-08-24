@@ -40,6 +40,13 @@ public class MimeType {
 
 	public static final String DEFAULT_MIME_TYPE="unknown/unknown";
 
+	// Related to LocaleFilter.java
+	// Related to NoSessionFilter.java
+	// Related to SessionResponseWrapper.java
+	// Related to LastModifiedServlet.java
+	// Related to ao-mime-mappings/…/web-fragment.xml
+	// Related to ContentType.java
+	// Is MimeType.java
 	private static final String[] types={
 		"aif", "audio/x-aiff",
 		"aifc", "audio/x-aiff",
@@ -133,7 +140,13 @@ public class MimeType {
 		"xpm", "image/x-xpixmap",
 		"xwd", "image/x-xwindowdump",
 		"z", "application/x-compress",
-		"zip", "application/zip"
+		"zip", "application/zip",
+		// Web development
+		"less",    ContentType.TEXT, // See https://stackoverflow.com/a/45102599
+		"sass",    ContentType.SASS, // See https://stackoverflow.com/a/40893366
+		"scss",    ContentType.SCSS, // See https://stackoverflow.com/a/40893366
+		"css.map", ContentType.JSON, // See https://stackoverflow.com/a/44184109
+		"js.map",  ContentType.JSON, // See https://stackoverflow.com/a/44184109
 	};
 	private static final Map<String,String> hash = new HashMap<>();
 	static {
@@ -146,10 +159,16 @@ public class MimeType {
 	private MimeType() {}
 
 	public static String getMimeType(String filename) {
-		int pos=filename.lastIndexOf('.');
-		if(pos!=-1) {
-			String type=hash.get(filename.substring(pos+1).toLowerCase(Locale.ROOT));
-			if(type!=null) return type;
+		int dotPos = filename.lastIndexOf('.');
+		if(dotPos != -1) {
+			String type = hash.get(filename.substring(dotPos + 1).toLowerCase(Locale.ROOT));
+			if(type != null) return type;
+			// Check for double-dot extension
+			dotPos = filename.lastIndexOf('.', dotPos - 1);
+			if(dotPos != -1) {
+				type = hash.get(filename.substring(dotPos + 1).toLowerCase(Locale.ROOT));
+				if(type != null) return type;
+			}
 		}
 		return DEFAULT_MIME_TYPE;
 	}
