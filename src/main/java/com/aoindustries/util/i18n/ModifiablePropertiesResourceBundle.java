@@ -76,7 +76,6 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
 	private static final Charset propertiesCharset = StandardCharsets.ISO_8859_1;
 
-	// TODO: Make public and use from DiffablePropertiesTask (or share a Comparator)
 	private static final String VALIDATED_SUFFIX = ".ModifiableResourceBundle.validated";
 	private static final String MODIFIED_SUFFIX = ".ModifiableResourceBundle.modified";
 
