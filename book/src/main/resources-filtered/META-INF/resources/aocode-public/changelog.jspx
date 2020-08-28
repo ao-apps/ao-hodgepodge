@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-08-24T01:45:42-05:00"
+		dateModified="2020-08-27T21:56:11-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -53,15 +53,24 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{project.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{project.scm.url}"
-			>
-				<ul>
-					<li>
-						Added support for Web development file types <code>*.less</code>, <code>*.sass</code>,
-						<code>*.scss</code>, <code>*.css.map</code>, and <code>*.js.map</code>.
-					</li>
-				</ul>
-			</changelog:release>
+			/>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="4.2.0"
+			datePublished="2020-08-27T21:56:11-05:00"
+			groupId="@{project.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{project.scm.url}"
+		>
+			<ul>
+				<li>
+					Added support for Web development file types <code>*.less</code>, <code>*.sass</code>,
+					<code>*.scss</code>, <code>*.css.map</code>, and <code>*.js.map</code>.
+				</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
@@ -75,7 +84,6 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li><code>ZeroFile</code> no longer writes blank lines when there are no blocks to read or write.</li>
 			</ul>
 		</changelog:release>
-
 
 		<changelog:release
 			projectName="@{documented.name}"
