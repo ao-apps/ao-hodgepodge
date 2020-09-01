@@ -123,9 +123,9 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	/**
 	 * Loads a driver at most once.
 	 */
-	private static void loadDriver(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+	private static void loadDriver(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException { // TODO: ReflectiveOperationException only
 		if(!driversLoaded.containsKey(classname)) {
-			Object O = Class.forName(classname).newInstance();
+			Object O = Class.forName(classname).newInstance(); // TODO
 			driversLoaded.putIfAbsent(classname, O);
 		}
 	}
@@ -152,7 +152,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		} catch(SQLException err) {
 			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", err);
 			throw err;
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException err) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException err) { // TODO: ReflectiveOperationException only
 			SQLException sqlErr=new SQLException();
 			sqlErr.initCause(err);
 			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
