@@ -447,7 +447,7 @@ public class SQLUtility {
 		return (isNegative?-1L:1L)*(whole * 1000L + millis);
 	}
 
-	private static final String EOL = System.getProperty("line.separator");
+	private static final String EOL = System.lineSeparator();
 
 	/**
 	 * Gets the width for a string, handling newlines.
