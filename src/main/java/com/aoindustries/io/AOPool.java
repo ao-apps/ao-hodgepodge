@@ -819,6 +819,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	 * {@link #close(java.lang.Object)}.  This is only called on connections that are not
 	 * {@link #isClosed(java.lang.Object) closed}.
 	 */
+	@SuppressWarnings("NoopMethodInAbstractClass")
 	protected void logConnection(C conn) throws E {
 		// Nothing by default
 	}
