@@ -196,6 +196,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	/**
 	 * All warnings are sent here if available, otherwise will be written to <code>System.err</code>.
 	 */
+	@SuppressWarnings("NonConstantLogger")
 	protected final Logger logger;
 
 	protected AOPool(String name, int poolSize, long maxConnectionAge, Logger logger) {
@@ -226,6 +227,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	/**
 	 * Shuts down the pool, exceptions during close will be logged as a warning and not thrown.
 	 */
+	@SuppressWarnings("UseSpecificCatch")
 	final public void close() {
 		List<C> connsToClose;
 		synchronized(poolLock) {
@@ -248,8 +250,10 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		for(C conn : connsToClose) {
 			try {
 				close(conn);
-			} catch(Exception err) {
-				logger.log(Level.WARNING, null, err);
+			} catch(ThreadDeath td) {
+				throw td;
+			} catch(Throwable t) {
+				logger.log(Level.WARNING, null, t);
 			}
 		}
 	}
@@ -303,6 +307,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	 * @throws I when interrupted
 	 * @throws E when error
 	 */
+	@SuppressWarnings("UseSpecificCatch")
 	public C getConnection(int maxConnections) throws I, E {
 		// Return immediately if already interrupted
 		if(Thread.interrupted()) throw newInterruptedException(null, null);
@@ -331,10 +336,10 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			);
 		}
 		// Find an available pooledConnection inside poolLock, actually connect outside poolLock below
-		PooledConnection<C> pooledConnection = null;
+		PooledConnection<C> pooledConnection;
 		synchronized(poolLock) {
 			try {
-				while(pooledConnection==null) {
+				do {
 					if(Thread.interrupted()) throw newInterruptedException(null, null);
 
 					if(allConnections.size() != (availableConnections.size() + busyConnections.size())) throw new AssertionError("allConnections.size!=(availableConnections.size+busyConnections.size)");
@@ -351,6 +356,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 							busyConnections.add(pooledConnection);
 						} else {
 							// Wait for a connection to become available
+							pooledConnection = null;
 							try {
 								poolLock.wait();
 							} catch(InterruptedException err) {
@@ -358,7 +364,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 							}
 						}
 					}
-				}
+				} while(pooledConnection == null);
 				// Keep track of the maximum concurrency hit
 				int concurrency = busyConnections.size();
 				if(concurrency>maxConcurrency) maxConcurrency=concurrency;
@@ -369,7 +375,6 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		}
 		threadConnections.add(pooledConnection);
 		// If anything goes wrong during the remainder of this method, need to release the connection
-		boolean successful = false;
 		try {
 			// Now that the pooledConnection is allocated, create/reuse the connection outside poolLock
 			long currentTime = System.currentTimeMillis();
@@ -409,28 +414,36 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 				pooledConnection.allocateStackTrace = allocateStackTrace;
 			}
 			if(doReset) resetConnection(conn);
-			successful = true;
 			return conn;
-		} finally {
-			if(!successful) {
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			try {
+				C conn;
+				synchronized(pooledConnection) {
+					conn = pooledConnection.connection;
+					pooledConnection.connection = null;
+				}
+				if(conn != null) {
+					try {
+						close(conn);
+					} catch(ThreadDeath td) {
+						throw td;
+					} catch(Throwable t2) {
+						t.addSuppressed(t2);
+					}
+				}
+			} finally {
 				try {
-					C conn;
-					synchronized(pooledConnection) {
-						conn = pooledConnection.connection;
-						pooledConnection.connection = null;
-					}
-					if(conn!=null) {
-						try {
-							close(conn);
-						} catch(Exception err) {
-							logger.log(Level.WARNING, null, err);
-						}
-					}
-				} finally {
 					threadConnections.remove(pooledConnection);
 					release(pooledConnection);
+				} catch(ThreadDeath td) {
+					throw td;
+				} catch(Throwable t2) {
+					t.addSuppressed(t2);
 				}
 			}
+			throw newException(null, t);
 		}
 	}
 
@@ -693,6 +706,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	 * @deprecated  Please specify if is HTML or XHTML
 	 */
 	@Deprecated
+	@SuppressWarnings("NoopMethodInAbstractClass")
 	public final void printStatisticsHTML(Appendable out) throws IOException, E {
 		
 	}
@@ -702,6 +716,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	 * It is safe to call this method more than once, but only the first call will
 	 * have any affect and the second release will log a warning.
 	 */
+	@SuppressWarnings("UseSpecificCatch")
 	final public void releaseConnection(C connection) throws E {
 		// Find the associated PooledConnection
 		PooledConnection<C> pooledConnection = null;
@@ -716,16 +731,20 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 				}
 			}
 		}
-		if(pooledConnection==null) {
+		if(pooledConnection == null) {
 			logger.log(Level.WARNING, "PooledConnection not found during releaseConnection");
 		} else {
 			try {
+				Throwable t1 = null;
 				boolean closeConnection = false;
 				boolean connIsClosed;
 				try {
 					connIsClosed = isClosed(connection);
-				} catch(Exception err) {
-					logger.log(Level.SEVERE, null, err);
+				} catch(ThreadDeath td) {
+					throw td;
+				} catch(Throwable t) {
+					assert t1 == null;
+					t1 = t;
 					connIsClosed = false;
 					closeConnection = true; // Force closure due to error on isClosed
 				}
@@ -735,38 +754,46 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 						pooledConnection.connection = null;
 					}
 				} else {
-					if(maxConnectionAge!=UNLIMITED_MAX_CONNECTION_AGE) {
-						long age = System.currentTimeMillis()-pooledConnection.createTime;
-						if(age<0 || age>=maxConnectionAge) closeConnection = true;
+					if(!closeConnection && maxConnectionAge != UNLIMITED_MAX_CONNECTION_AGE) {
+						long age = System.currentTimeMillis() - pooledConnection.createTime;
+						closeConnection = age < 0 || age >= maxConnectionAge;
+					}
+					// TODO: Log warnings on here both close and reset
+					if(!closeConnection) {
+						// Reset connections as they are released
+						try {
+							resetConnection(connection);
+						} catch(ThreadDeath td) {
+							throw td;
+						} catch(Throwable t) {
+							if(t1 == null) {
+								t1 = t;
+							} else {
+								t1.addSuppressed(t);
+							}
+							// Close the connection when error during reset
+							closeConnection = true;
+						}
 					}
 					if(closeConnection) {
-						// Error on isClosed or max age reached, close the connection
+						// Error or max age reached, close the connection
 						try {
 							close(connection);
-						} catch(Exception err) {
-							logger.log(Level.SEVERE, null, err);
+						} catch(ThreadDeath td) {
+							throw td;
+						} catch(Throwable t) {
+							if(t1 == null) {
+								t1 = t;
+							} else {
+								t1.addSuppressed(t);
+							}
 						}
 						synchronized(pooledConnection) {
 							pooledConnection.connection = null;
 						}
-					} else {
-						// Reset connections as they are released
-						try {
-							resetConnection(connection);
-						} catch(Exception err) {
-							// Close the connection when error during reset
-							logger.log(Level.SEVERE, null, err);
-							try {
-								close(connection);
-							} catch(Exception err2) {
-								logger.log(Level.SEVERE, null, err2);
-							}
-							synchronized(pooledConnection) {
-								pooledConnection.connection = null;
-							}
-						}
 					}
 				}
+				if(t1 != null) throw newException(null, t1);
 			} finally {
 				// Unallocate the connection from the pool
 				release(pooledConnection);
@@ -782,6 +809,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	 * the connection.  It will stop when the pool is flagged as closed.
 	 */
 	@Override
+	@SuppressWarnings({"SleepWhileInLoop", "UseSpecificCatch", "TooBroadCatch"})
 	final public void run() {
 		while(true) {
 			try {
@@ -822,14 +850,16 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 				for(C conn : connsToClose) {
 					try {
 						close(conn);
-					} catch(Exception err) {
-						logger.log(Level.WARNING, null, err);
+					} catch(ThreadDeath td) {
+						throw td;
+					} catch(Throwable t) {
+						logger.log(Level.WARNING, null, t);
 					}
 				}
-			} catch (ThreadDeath TD) {
-				throw TD;
-			} catch (Throwable T) {
-				logger.logp(Level.SEVERE, AOPool.class.getName(), "run", null, T);
+			} catch (ThreadDeath td) {
+				throw td;
+			} catch (Throwable t) {
+				logger.log(Level.SEVERE, null, t);
 			}
 		}
 	}

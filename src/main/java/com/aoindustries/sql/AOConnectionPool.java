@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import com.aoindustries.io.AOPool;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -86,35 +87,32 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		return getConnection(isolationLevel, readOnly, 1);
 	}
 
+	@SuppressWarnings("UseSpecificCatch")
 	public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
-		Connection conn=null;
+		Connection conn = null;
 		try {
-			while(conn==null) {
-				conn=super.getConnection(maxConnections);
+			while(conn == null) {
+				conn = super.getConnection(maxConnections);
 				boolean isReadOnly = conn.isReadOnly();
-				if(isReadOnly!=readOnly) conn.setReadOnly(readOnly);
+				if(isReadOnly != readOnly) conn.setReadOnly(readOnly);
 			}
 			int currentIsolationLevel = conn.getTransactionIsolation();
-			if(currentIsolationLevel!=isolationLevel) conn.setTransactionIsolation(isolationLevel);
+			if(currentIsolationLevel != isolationLevel) conn.setTransactionIsolation(isolationLevel);
 			return conn;
-		} catch(SQLException err) {
-			if(conn!=null) {
-				try {
-					releaseConnection(conn);
-				} catch(Exception err2) {
-					// Will throw original error instead
-				}
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			try {
+				releaseConnection(conn);
+			} catch(ThreadDeath td) {
+				throw td;
+			} catch(Throwable t2) {
+				t.addSuppressed(t2);
 			}
-			throw err;
-		} catch(Exception err) {
-			if(conn!=null) {
-				try {
-					releaseConnection(conn);
-				} catch(Exception err2) {
-					// Will throw original error instead
-				}
-			}
-			throw new SQLException(err);
+			if(t instanceof Error) throw (Error)t;
+			if(t instanceof RuntimeException) throw (RuntimeException)t;
+			if(t instanceof SQLException) throw (SQLException)t;
+			throw new SQLException(t);
 		}
 	}
 
@@ -123,14 +121,15 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	/**
 	 * Loads a driver at most once.
 	 */
-	private static void loadDriver(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException { // TODO: ReflectiveOperationException only
+	private static void loadDriver(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		if(!driversLoaded.containsKey(classname)) {
-			Object O = Class.forName(classname).newInstance(); // TODO
+			Object O = Class.forName(classname).getConstructor().newInstance();
 			driversLoaded.putIfAbsent(classname, O);
 		}
 	}
 
 	@Override
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	protected Connection getConnectionObject() throws SQLException {
 		try {
 			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
@@ -149,14 +148,14 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 			} finally {
 				if(!successful) conn.close();
 			}
-		} catch(SQLException err) {
-			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", err);
-			throw err;
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException err) { // TODO: ReflectiveOperationException only
-			SQLException sqlErr=new SQLException();
-			sqlErr.initCause(err);
-			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", sqlErr);
-			throw sqlErr;
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", t);
+			if(t instanceof Error) throw (Error)t;
+			if(t instanceof RuntimeException) throw (RuntimeException)t;
+			if(t instanceof SQLException) throw (SQLException)t;
+			throw new SQLException(t);
 		}
 	}
 
@@ -220,8 +219,9 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 
 	@Override
 	protected SQLException newException(String message, Throwable cause) {
-		SQLException err=new SQLException(message);
-		if(cause!=null) err.initCause(cause);
+		if(cause instanceof SQLException) return (SQLException)cause;
+		SQLException err = new SQLException(message);
+		if(cause != null) err.initCause(cause);
 		return err;
 	}
 

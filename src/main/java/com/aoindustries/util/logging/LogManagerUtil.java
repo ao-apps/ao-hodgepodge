@@ -43,6 +43,7 @@ import java.util.logging.LogManager;
  * 
  * @author  AO Industries, Inc.
  */
+@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 public class LogManagerUtil {
 
 	/**
@@ -66,6 +67,7 @@ public class LogManagerUtil {
 	 * Does not log {@link SecurityException}, which is expected in more
 	 * restricted runtimes.
 	 */
+	@SuppressWarnings("UseOfSystemOutOrSystemErr")
 	static void warn(Throwable t, Object ... extraInfo) {
 		if(!(t instanceof SecurityException)) {
 			synchronized(warnLock) {
@@ -94,8 +96,10 @@ public class LogManagerUtil {
 		try {
 			Method method = LogManager.class.getDeclaredMethod("getStringProperty", String.class, String.class);
 			method.setAccessible(true);
-		} catch(RuntimeException | ReflectiveOperationException e) {
-			warn(e);
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			warn(t);
 		}
 	}
 
@@ -109,8 +113,10 @@ public class LogManagerUtil {
 		if(getStringPropertyMethod != null) {
 			try {
 				return (String)getStringPropertyMethod.invoke(manager, name, defaultValue);
-			} catch(RuntimeException | ReflectiveOperationException e) {
-				warn(e);
+			} catch(ThreadDeath td) {
+				throw td;
+			} catch(Throwable t) {
+				warn(t);
 				// Fall-through to copied implementation
 			}
 		}
@@ -126,8 +132,10 @@ public class LogManagerUtil {
 		try {
 			Method method = LogManager.class.getDeclaredMethod("getLevelProperty", String.class, Level.class);
 			method.setAccessible(true);
-		} catch(RuntimeException | ReflectiveOperationException e) {
-			warn(e);
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			warn(t);
 		}
 	}
 
@@ -141,8 +149,10 @@ public class LogManagerUtil {
 		if(getLevelPropertyMethod != null) {
 			try {
 				return (Level)getLevelPropertyMethod.invoke(manager, name, defaultValue);
-			} catch(RuntimeException | ReflectiveOperationException e) {
-				warn(e);
+			} catch(ThreadDeath td) {
+				throw td;
+			} catch(Throwable t) {
+				warn(t);
 				// Fall-through to copied implementation
 			}
 		}
@@ -158,8 +168,10 @@ public class LogManagerUtil {
 		try {
 			Method method = LogManager.class.getDeclaredMethod("getFilterProperty", String.class, Filter.class);
 			method.setAccessible(true);
-		} catch(RuntimeException | ReflectiveOperationException e) {
-			warn(e);
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			warn(t);
 		}
 	}
 
@@ -174,8 +186,10 @@ public class LogManagerUtil {
 		if(getFilterPropertyMethod != null) {
 			try {
 				return (Filter)getFilterPropertyMethod.invoke(manager, name, defaultValue);
-			} catch(RuntimeException | ReflectiveOperationException e) {
-				warn(e);
+			} catch(ThreadDeath td) {
+				throw td;
+			} catch(Throwable t) {
+				warn(t);
 				// Fall-through to copied implementation
 			}
 		}
@@ -183,10 +197,12 @@ public class LogManagerUtil {
 		try {
 			if (val != null) {
 				Class<?> clz = ClassLoader.getSystemClassLoader().loadClass(val);
-				return (Filter) clz.newInstance();
+				return (Filter) clz.getConstructor().newInstance();
 			}
-		} catch (RuntimeException | ReflectiveOperationException ex) {
-			warn(ex);
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			warn(t);
 			// We got one of a variety of exceptions in creating the
 			// class or creating an instance.
 			// Drop through.
@@ -200,8 +216,10 @@ public class LogManagerUtil {
 		try {
 			Method method = LogManager.class.getDeclaredMethod("getFormatterProperty", String.class, Formatter.class);
 			method.setAccessible(true);
-		} catch(RuntimeException | ReflectiveOperationException e) {
-			warn(e);
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			warn(t);
 		}
 	}
 
@@ -216,8 +234,10 @@ public class LogManagerUtil {
 		if(getFormatterPropertyMethod != null) {
 			try {
 				return (Formatter)getFormatterPropertyMethod.invoke(manager, name, defaultValue);
-			} catch(RuntimeException | ReflectiveOperationException e) {
-				warn(e);
+			} catch(ThreadDeath td) {
+				throw td;
+			} catch(Throwable t) {
+				warn(t);
 				// Fall-through to copied implementation
 			}
 		}
@@ -225,10 +245,12 @@ public class LogManagerUtil {
 		try {
 			if (val != null) {
 				Class<?> clz = ClassLoader.getSystemClassLoader().loadClass(val);
-				return (Formatter) clz.newInstance();
+				return (Formatter) clz.getConstructor().newInstance();
 			}
-		} catch (RuntimeException | ReflectiveOperationException ex) {
-			warn(ex);
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			warn(t);
 			// We got one of a variety of exceptions in creating the
 			// class or creating an instance.
 			// Drop through.

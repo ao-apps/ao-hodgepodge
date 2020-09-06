@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import com.aoindustries.util.CalendarUtils;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -800,22 +801,32 @@ public class SQLUtility {
 	/**
 	 * Converts a number of seconds and nanoseconds into a given {@link Timestamp}.
 	 */
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public static <E extends Throwable> void toTimestamp(long seconds, int nanos, Timestamp ts, Class<E> exceptionType) throws E {
-		// Avoid underflow or overflow on conversion to millis
-		String message;
-		if(seconds > MAX_TIMESTAMP_SECONDS) {
-			message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
-		} else if(seconds < MIN_TIMESTAMP_SECONDS) {
-			message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
-		} else {
-			ts.setTime(seconds * 1000);
-			ts.setNanos(nanos);
-			return;
-		}
+		String message = null;
 		try {
+			// Avoid underflow or overflow on conversion to millis
+			if(seconds > MAX_TIMESTAMP_SECONDS) {
+				message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
+			} else if(seconds < MIN_TIMESTAMP_SECONDS) {
+				message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
+			} else {
+				ts.setTime(seconds * 1000);
+				ts.setNanos(nanos);
+				return;
+			}
 			throw exceptionType.getConstructor(String.class).newInstance(message);
-		} catch(ReflectiveOperationException e) {
-			throw new IllegalArgumentException(message, e);
+		} catch(InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if(cause instanceof Error) throw (Error)cause;
+			if(cause instanceof RuntimeException) throw (RuntimeException)cause;
+			if(exceptionType.isInstance(cause)) throw exceptionType.cast(cause);
+			throw new IllegalArgumentException(message, cause == null ? e : cause);
+		} catch(Error | RuntimeException e) {
+			throw e;
+		} catch(Throwable t) {
+			if(exceptionType.isInstance(t)) throw exceptionType.cast(t);
+			throw new IllegalArgumentException(message, t);
 		}
 	}
 
@@ -845,20 +856,30 @@ public class SQLUtility {
 	/**
 	 * Converts a number of seconds and nanoseconds into a new {@link UnmodifiableTimestamp}.
 	 */
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public static <E extends Throwable> UnmodifiableTimestamp newUnmodifiableTimestamp(long seconds, int nanos, Class<E> exceptionType) throws E {
-		// Avoid underflow or overflow on conversion to millis
-		String message;
-		if(seconds > MAX_TIMESTAMP_SECONDS) {
-			message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
-		} else if(seconds < MIN_TIMESTAMP_SECONDS) {
-			message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
-		} else {
-			return new UnmodifiableTimestamp(seconds * 1000, nanos);
-		}
+		String message = null;
 		try {
+			// Avoid underflow or overflow on conversion to millis
+			if(seconds > MAX_TIMESTAMP_SECONDS) {
+				message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
+			} else if(seconds < MIN_TIMESTAMP_SECONDS) {
+				message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
+			} else {
+				return new UnmodifiableTimestamp(seconds * 1000, nanos);
+			}
 			throw exceptionType.getConstructor(String.class).newInstance(message);
-		} catch(ReflectiveOperationException e) {
-			throw new IllegalArgumentException(message, e);
+		} catch(InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if(cause instanceof Error) throw (Error)cause;
+			if(cause instanceof RuntimeException) throw (RuntimeException)cause;
+			if(exceptionType.isInstance(cause)) throw exceptionType.cast(cause);
+			throw new IllegalArgumentException(message, cause == null ? e : cause);
+		} catch(Error | RuntimeException e) {
+			throw e;
+		} catch(Throwable t) {
+			if(exceptionType.isInstance(t)) throw exceptionType.cast(t);
+			throw new IllegalArgumentException(message, t);
 		}
 	}
 
