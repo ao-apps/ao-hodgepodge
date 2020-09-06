@@ -758,7 +758,20 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 						long age = System.currentTimeMillis() - pooledConnection.createTime;
 						closeConnection = age < 0 || age >= maxConnectionAge;
 					}
-					// TODO: Log warnings on here both close and reset
+					// Log warnings before release and/or close
+					try {
+						logConnection(connection);
+					} catch(ThreadDeath td) {
+						throw td;
+					} catch(Throwable t) {
+						if(t1 == null) {
+							t1 = t;
+						} else {
+							t1.addSuppressed(t);
+						}
+						// Close the connection when error during logging
+						closeConnection = true;
+					}
 					if(!closeConnection) {
 						// Reset connections as they are released
 						try {
@@ -799,6 +812,15 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 				release(pooledConnection);
 			}
 		}
+	}
+
+	/**
+	 * Perform any connection logging before {@link #resetConnection(java.lang.Object)} and/or
+	 * {@link #close(java.lang.Object)}.  This is only called on connections that are not
+	 * {@link #isClosed(java.lang.Object) closed}.
+	 */
+	protected void logConnection(C conn) throws E {
+		// Nothing by default
 	}
 
 	protected abstract void resetConnection(C conn) throws I, E;

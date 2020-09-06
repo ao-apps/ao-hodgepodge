@@ -189,13 +189,16 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	}
 
 	@Override
+	protected void logConnection(Connection conn) throws SQLException {
+		if(logger.isLoggable(Level.WARNING)) {
+			SQLWarning warning = conn.getWarnings();
+			if(warning != null) logger.log(Level.WARNING, null, warning);
+		}
+	}
+
+	@Override
 	protected void resetConnection(Connection conn) throws SQLException {
 		if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-		// Dump all warnings to System.err and clear warnings
-		SQLWarning warning=conn.getWarnings();
-		if(warning!=null) {
-			logger.logp(Level.WARNING, AOConnectionPool.class.getName(), "resetConnection", null, warning);
-		}
 		conn.clearWarnings();
 
 		// Autocommit will always be turned on, regardless what a previous transaction might have done
