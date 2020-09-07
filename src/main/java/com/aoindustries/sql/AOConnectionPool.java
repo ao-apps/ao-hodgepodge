@@ -23,6 +23,8 @@
 package com.aoindustries.sql;
 
 import com.aoindustries.io.AOPool;
+import com.aoindustries.lang.AutoCloseables;
+import com.aoindustries.lang.Throwables;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
@@ -79,17 +81,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		} catch(Throwable t) {
 			t1 = t;
 		} finally {
-			try {
-				conn.close();
-			} catch(ThreadDeath td) {
-				throw td;
-			} catch(Throwable t) {
-				if(t1 == null) {
-					t1 = t;
-				} else {
-					t1.addSuppressed(t);
-				}
-			}
+			t1 = AutoCloseables.close(t1, conn);
 		}
 		if(t1 != null) {
 			if(t1 instanceof Error) throw (Error)t1;
@@ -146,7 +138,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
 	 */
-	@SuppressWarnings("UseSpecificCatch")
+	@SuppressWarnings({"UseSpecificCatch", "AssignmentToCatchBlockParameter"})
 	public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
 		Connection conn = null;
 		try {
@@ -163,7 +155,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 			} catch(ThreadDeath td) {
 				throw td;
 			} catch(Throwable t2) {
-				t.addSuppressed(t2);
+				t = Throwables.addSuppressed(t, t2);
 			}
 			if(t instanceof Error) throw (Error)t;
 			if(t instanceof RuntimeException) throw (RuntimeException)t;

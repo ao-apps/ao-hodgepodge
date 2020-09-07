@@ -24,6 +24,7 @@ package com.aoindustries.io;
 
 import com.aoindustries.exception.WrappedExceptions;
 import com.aoindustries.lang.Strings;
+import com.aoindustries.lang.Throwables;
 import com.aoindustries.util.ErrorPrinter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -311,7 +312,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	 * @throws I when interrupted
 	 * @throws E when error
 	 */
-	@SuppressWarnings("UseSpecificCatch")
+	@SuppressWarnings({"UseSpecificCatch", "AssignmentToCatchBlockParameter"})
 	public C getConnection(int maxConnections) throws I, E {
 		// Return immediately if already interrupted
 		if(Thread.interrupted()) throw newInterruptedException(null, null);
@@ -421,7 +422,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			return conn;
 		} catch(ThreadDeath td) {
 			throw td;
-		} catch(Throwable t) {
+		} catch(Throwable t1) {
 			try {
 				C conn;
 				synchronized(pooledConnection) {
@@ -433,8 +434,8 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 						close(conn);
 					} catch(ThreadDeath td) {
 						throw td;
-					} catch(Throwable t2) {
-						t.addSuppressed(t2);
+					} catch(Throwable t) {
+						t1 = Throwables.addSuppressed(t1, t);
 					}
 				}
 			} finally {
@@ -443,11 +444,11 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 					release(pooledConnection);
 				} catch(ThreadDeath td) {
 					throw td;
-				} catch(Throwable t2) {
-					t.addSuppressed(t2);
+				} catch(Throwable t) {
+					t1 = Throwables.addSuppressed(t1, t);
 				}
 			}
-			throw newException(null, t);
+			throw newException(null, t1);
 		}
 	}
 
@@ -768,11 +769,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 					} catch(ThreadDeath td) {
 						throw td;
 					} catch(Throwable t) {
-						if(t1 == null) {
-							t1 = t;
-						} else {
-							t1.addSuppressed(t);
-						}
+						t1 = Throwables.addSuppressed(t1, t);
 						// Close the connection when error during logging
 						closeConnection = true;
 					}
@@ -783,11 +780,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 						} catch(ThreadDeath td) {
 							throw td;
 						} catch(Throwable t) {
-							if(t1 == null) {
-								t1 = t;
-							} else {
-								t1.addSuppressed(t);
-							}
+							t1 = Throwables.addSuppressed(t1, t);
 							// Close the connection when error during reset
 							closeConnection = true;
 						}
@@ -799,11 +792,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 						} catch(ThreadDeath td) {
 							throw td;
 						} catch(Throwable t) {
-							if(t1 == null) {
-								t1 = t;
-							} else {
-								t1.addSuppressed(t);
-							}
+							t1 = Throwables.addSuppressed(t1, t);
 						}
 						synchronized(pooledConnection) {
 							pooledConnection.connection = null;
