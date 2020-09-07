@@ -39,6 +39,9 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
+// TODO: Use Connection.isValid while allocating from pool and/or putting back into pool?
+// TODO: Can isValid be used instead of forceful rollbackAndClose on SQLException?
+// TODO: Or use isValid in background connection management?
 final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
 
 	private final String driver;
@@ -54,13 +57,54 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		this.password = password;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * If the connection not already {@linkplain Connection#isClosed() closed}, and is not
+	 * {@linkplain Connection#getAutoCommit() auto-commit}, the connection will be
+	 * {@linkplain Connection#rollback() rolled back} and set back to auto-commit before closing.
+	 * </p>
+	 */
 	@Override
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	protected void close(Connection conn) throws SQLException {
-		conn.close();
+		Throwable t1 = null;
+		try {
+			if(!conn.isClosed() && !conn.getAutoCommit()) {
+				conn.rollback();
+				conn.setAutoCommit(true);
+			}
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			t1 = t;
+		} finally {
+			try {
+				conn.close();
+			} catch(ThreadDeath td) {
+				throw td;
+			} catch(Throwable t) {
+				if(t1 == null) {
+					t1 = t;
+				} else {
+					t1.addSuppressed(t);
+				}
+			}
+		}
+		if(t1 != null) {
+			if(t1 instanceof Error) throw (Error)t1;
+			if(t1 instanceof RuntimeException) throw (RuntimeException)t1;
+			if(t1 instanceof SQLException) throw (SQLException)t1;
+			throw new SQLException(t1);
+		}
 	}
 
 	/**
 	 * Gets a read/write connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
+	 * <p>
+	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
+	 * </p>
+	 *
 	 * @return The read/write connection to the database
 	 */
 	@Override
@@ -70,6 +114,10 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 
 	/**
 	 * Gets a connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
+	 * <p>
+	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
+	 * </p>
+	 *
 	 * @param readOnly The {@link Connection#setReadOnly(boolean) read-only flag}
 	 * @return The connection to the database
 	 */
@@ -79,25 +127,33 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 
 	/**
 	 * Gets a connection to the database with a maximum connections of 1.
+	 * <p>
+	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
+	 * </p>
+	 *
 	 * @param isolationLevel The {@link Connection#setTransactionIsolation(int) transaction isolation level}
 	 * @param readOnly The {@link Connection#setReadOnly(boolean) read-only flag}
+	 *
 	 * @return The connection to the database
 	 */
 	public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {
 		return getConnection(isolationLevel, readOnly, 1);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
+	 * </p>
+	 */
 	@SuppressWarnings("UseSpecificCatch")
 	public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
 		Connection conn = null;
 		try {
-			while(conn == null) {
-				conn = super.getConnection(maxConnections);
-				boolean isReadOnly = conn.isReadOnly();
-				if(isReadOnly != readOnly) conn.setReadOnly(readOnly);
-			}
-			int currentIsolationLevel = conn.getTransactionIsolation();
-			if(currentIsolationLevel != isolationLevel) conn.setTransactionIsolation(isolationLevel);
+			conn = super.getConnection(maxConnections);
+			assert conn.getAutoCommit();
+			if(conn.isReadOnly() != readOnly) conn.setReadOnly(readOnly);
+			if(conn.getTransactionIsolation() != isolationLevel) conn.setTransactionIsolation(isolationLevel);
 			return conn;
 		} catch(ThreadDeath td) {
 			throw td;
@@ -204,6 +260,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		// Autocommit will always be turned on, regardless what a previous transaction might have done
 		if(!conn.getAutoCommit()) {
 			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+			conn.rollback();
 			conn.setAutoCommit(true);
 		}
 

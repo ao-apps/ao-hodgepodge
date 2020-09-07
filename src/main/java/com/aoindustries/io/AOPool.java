@@ -222,6 +222,10 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		start();
 	}
 
+	/**
+	 * Closes the given connection.  The connection may or may not already be
+	 * {@linkplain #isClosed(java.lang.Object) closed}.
+	 */
 	protected abstract void close(C conn) throws E;
 
 	/**

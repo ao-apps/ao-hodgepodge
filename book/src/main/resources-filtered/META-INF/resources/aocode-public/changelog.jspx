@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-09-06T07:47:57-05:00"
+		dateModified="2020-09-06T22:21:39-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -58,6 +58,11 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<li>
 						<code>AOConnectionPool</code> now logs <code>SQLWarning</code> before both reset and/or close.
 						Previously, warnings were only logged on reset.
+					</li>
+					<li>
+						<code>AOConnectionPool</code> now rolls-back transaction when connection is not auto-commit
+						during both reset and close.  This is done to not rely on underlying JDBC driver implementation
+						specifics, and to always rollback a transaction unless explicitly committed.
 					</li>
 				</ul>
 			</changelog:release>
