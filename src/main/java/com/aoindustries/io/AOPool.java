@@ -224,8 +224,9 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	}
 
 	/**
-	 * Closes the given connection.  The connection may or may not already be
-	 * {@linkplain #isClosed(java.lang.Object) closed}.
+	 * Closes the given connection.
+	 * The connection may or may not already have been {@linkplain #resetConnection(java.lang.Object) reset}.
+	 * The connection may or may not already be {@linkplain #isClosed(java.lang.Object) closed}.
 	 */
 	protected abstract void close(C conn) throws E;
 
@@ -718,8 +719,20 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 
 	/**
 	 * Releases the database <code>Connection</code> to the <code>Connection</code> pool.
+	 * <p>
 	 * It is safe to call this method more than once, but only the first call will
 	 * have any affect and the second release will log a warning.
+	 * </p>
+	 * <p>
+	 * The connection will be {@linkplain #resetConnection(java.lang.Object) reset} and/or
+	 * {@linkplain #close(java.lang.Object) closed}.
+	 * </p>
+	 *
+	 * @see  #isClosed(java.lang.Object)
+	 * @see  #logConnection(java.lang.Object)
+	 * @see  #resetConnection(java.lang.Object)
+	 * @see  #close(java.lang.Object)
+	 * @see  #release(com.aoindustries.io.AOPool.PooledConnection)
 	 */
 	@SuppressWarnings("UseSpecificCatch")
 	final public void releaseConnection(C connection) throws E {
@@ -817,6 +830,9 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		// Nothing by default
 	}
 
+	/**
+	 * Resets the given connection for release back to the pool.
+	 */
 	protected abstract void resetConnection(C conn) throws I, E;
 
 	/**
