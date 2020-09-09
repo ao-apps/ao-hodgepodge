@@ -59,6 +59,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
+// TODO: Don't extend Thread
 abstract public class AOPool<C,E extends Exception,I extends Exception> extends Thread {
 
 	public static final int DEFAULT_DELAY_TIME = 1 * 60 * 1000;
