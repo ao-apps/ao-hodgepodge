@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-09-06T22:21:39-05:00"
+		dateModified="2020-09-09T06:33:43-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -55,15 +55,31 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				scmUrl="@{project.scm.url}"
 			>
 				<ul>
-					<li>
-						<code>AOConnectionPool</code> now logs <code>SQLWarning</code> before both reset and/or close.
-						Previously, warnings were only logged on reset.
+					<li><code>AOConnectionPool</code> improvements:
+						<ol>
+							<li>
+								Now logs <code>SQLWarning</code> before both reset and/or close.
+								Previously, warnings were only logged on reset.
+							</li>
+							<li>
+								Now rolls-back transaction when connection is not auto-commit
+								during both reset and close.  This is done to not rely on underlying JDBC driver implementation
+								specifics, and to always rollback a transaction unless explicitly committed.
+							</li>
+							<li>
+								New static methods <code>defaultLogConnection(Connection, Logger)</code> and
+								<code>defaultResetConnection(Connection)</code>, which can be used to log and reset
+								connections in a compatible way.
+							</li>
+							<li>
+								New constant <code>IDLE_READ_ONLY</code> that defines the read-only state of connections
+								when reset, set to <code>true</code>.  Connections are reset when first created and before
+								being released back to the pool.Previously, various parts of the code would assume reset to
+								read-only - this centralizes that assumption.
+							</li>
+						</ol>
 					</li>
-					<li>
-						<code>AOConnectionPool</code> now rolls-back transaction when connection is not auto-commit
-						during both reset and close.  This is done to not rely on underlying JDBC driver implementation
-						specifics, and to always rollback a transaction unless explicitly committed.
-					</li>
+					<li>New utility class <code>Connections</code> for working with <code>java.sql.Connection</code>.</li>
 				</ul>
 			</changelog:release>
 		</c:if>

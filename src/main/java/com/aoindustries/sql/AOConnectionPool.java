@@ -46,6 +46,11 @@ import java.util.logging.Logger;
 // TODO: Or use isValid in background connection management?
 final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
 
+	/**
+	 * The read-only state of connections while idle in the pool.
+	 */
+	public static final boolean IDLE_READ_ONLY = true;
+
 	private final String driver;
 	private final String url;
 	private final String user;
@@ -92,29 +97,34 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	}
 
 	/**
-	 * Gets a read/write connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
+	 * Gets a read/write connection to the database with a transaction level of {@link Connections#DEFAULT_TRANSACTION_ISOLATION}
+	 * and a maximum connections of 1.
 	 * <p>
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
 	 *
 	 * @return The read/write connection to the database
 	 */
+	// Note: Matches DatabaseConnection.getConnection()
 	@Override
 	public Connection getConnection() throws SQLException {
-		return getConnection(Connection.TRANSACTION_READ_COMMITTED, false, 1);
+		return getConnection(Connections.DEFAULT_TRANSACTION_ISOLATION, false, 1);
 	}
 
 	/**
-	 * Gets a connection to the database with a transaction level of Connection.TRANSACTION_READ_COMMITTED and a maximum connections of 1.
+	 * Gets a connection to the database with a transaction level of {@link Connections#DEFAULT_TRANSACTION_ISOLATION}
+	 * and a maximum connections of 1.
 	 * <p>
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
 	 *
 	 * @param readOnly The {@link Connection#setReadOnly(boolean) read-only flag}
+	 *
 	 * @return The connection to the database
 	 */
+	// Note: Matches DatabaseConnection.getConnection(boolean)
 	public Connection getConnection(boolean readOnly) throws SQLException {
-		return getConnection(Connection.TRANSACTION_READ_COMMITTED, readOnly, 1);
+		return getConnection(Connections.DEFAULT_TRANSACTION_ISOLATION, readOnly, 1);
 	}
 
 	/**
@@ -128,6 +138,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 *
 	 * @return The connection to the database
 	 */
+	// Note: Matches DatabaseConnection.getConnection(int, boolean)
 	public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {
 		return getConnection(isolationLevel, readOnly, 1);
 	}
@@ -138,14 +149,17 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
 	 */
+	// Note: Matches DatabaseConnection.getConnection(int, boolean, int)
 	@SuppressWarnings({"UseSpecificCatch", "AssignmentToCatchBlockParameter"})
 	public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
 		Connection conn = null;
 		try {
 			conn = super.getConnection(maxConnections);
 			assert conn.getAutoCommit();
-			if(conn.isReadOnly() != readOnly) conn.setReadOnly(readOnly);
-			if(conn.getTransactionIsolation() != isolationLevel) conn.setTransactionIsolation(isolationLevel);
+			assert conn.isReadOnly() == IDLE_READ_ONLY : "Connection not reset";
+			assert conn.getTransactionIsolation() == Connections.DEFAULT_TRANSACTION_ISOLATION : "Connection not reset";
+			if(readOnly != IDLE_READ_ONLY) conn.setReadOnly(readOnly);
+			if(isolationLevel != Connections.DEFAULT_TRANSACTION_ISOLATION) conn.setTransactionIsolation(isolationLevel);
 			return conn;
 		} catch(ThreadDeath td) {
 			throw td;
@@ -185,7 +199,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 			Connection conn = DriverManager.getConnection(url, user, password);
 			boolean successful = false;
 			try {
-				if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+				if(Thread.interrupted()) throw new SQLException("Thread interrupted"); // TODO: Make an InterruptedSQLException, with a static checkInterrupted() method?
 				if(conn.getClass().getName().startsWith("org.postgresql.")) {
 					// getTransactionIsolation causes a round-trip to the database, this wrapper caches the value and avoids unnecessary sets
 					// to eliminate unnecessary round-trips and improve performance over high-latency links.
@@ -236,16 +250,41 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		out.append("</td></tr>\n");
 	}
 
-	@Override
-	protected void logConnection(Connection conn) throws SQLException {
+	/**
+	 * Default implementation of {@link #logConnection(java.lang.Object)}
+	 *
+	 * @see  #logConnection(java.sql.Connection)
+	 */
+	public static void defaultLogConnection(Connection conn, Logger logger) throws SQLException {
 		if(logger.isLoggable(Level.WARNING)) {
 			SQLWarning warning = conn.getWarnings();
 			if(warning != null) logger.log(Level.WARNING, null, warning);
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #defaultLogConnection(java.sql.Connection, java.util.logging.Logger)
+	 */
 	@Override
-	protected void resetConnection(Connection conn) throws SQLException {
+	protected void logConnection(Connection conn) throws SQLException {
+		defaultLogConnection(conn, logger);
+	}
+
+	/**
+	 * Default implementation of {@link #resetConnection(java.sql.Connection)}
+	 * <ol>
+	 * <li>{@linkplain Connection#clearWarnings() Warnings are cleared}</li>
+	 * <li>Any {@linkplain Connection#getAutoCommit() transaction in-progress} is {@linkplain Connection#rollback() rolled-back}</li>
+	 * <li>Auto-commit is enabled</li>
+	 * <li>Read-only state is set to {@link #IDLE_READ_ONLY}</li>
+	 * <li>Transaction isolation level set to {@link Connections#DEFAULT_TRANSACTION_ISOLATION}</li>
+	 * </ol>
+	 *
+	 * @see  #resetConnection(java.sql.Connection)
+	 */
+	public static void defaultResetConnection(Connection conn) throws SQLException {
 		if(Thread.interrupted()) throw new SQLException("Thread interrupted");
 		conn.clearWarnings();
 
@@ -255,18 +294,26 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 			conn.rollback();
 			conn.setAutoCommit(true);
 		}
-
+		// Restore the connection to the idle read-only state
+		if(conn.isReadOnly() != IDLE_READ_ONLY) {
+			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
+			conn.setReadOnly(IDLE_READ_ONLY);
+		}
 		// Restore to default transaction level
-		if(conn.getTransactionIsolation()!=Connection.TRANSACTION_READ_COMMITTED) {
-			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		if(conn.getTransactionIsolation() != Connections.DEFAULT_TRANSACTION_ISOLATION) {
+			if(Thread.interrupted()) throw new SQLException("Thread interrupted"); // TODO: Should we do these types of interrupted checks more?
+			conn.setTransactionIsolation(Connections.DEFAULT_TRANSACTION_ISOLATION);
 		}
+	}
 
-		// Restore the connection to a read-only state
-		if(!conn.isReadOnly()) {
-			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
-			conn.setReadOnly(true);
-		}
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #defaultResetConnection(java.sql.Connection)
+	 */
+	@Override
+	protected void resetConnection(Connection conn) throws SQLException {
+		defaultResetConnection(conn);
 	}
 
 	@Override
