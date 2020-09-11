@@ -66,11 +66,17 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		this.password = password;
 	}
 
-	private static Connection unwrap(Connection conn) throws SQLException {
-		if(conn instanceof UncloseableConnectionWrapper) {
-			return ((UncloseableConnectionWrapper)conn).getWrappedConnection();
+	private Connection unwrap(Connection conn) throws SQLException {
+		AOPoolConnectionWrapper wrapper;
+		if(conn instanceof AOPoolConnectionWrapper) {
+			wrapper = (AOPoolConnectionWrapper)conn;
 		} else {
-			return conn.unwrap(UncloseableConnectionWrapper.class).getWrappedConnection();
+			wrapper = conn.unwrap(AOPoolConnectionWrapper.class);
+		}
+		if(wrapper.pool == this) {
+			return wrapper.wrapped;
+		} else {
+			throw new SQLException("Connection from a different pool, cannot unwrap");
 		}
 	}
 
@@ -92,7 +98,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		} catch(Throwable t) {
 			t1 = Throwables.addSuppressed(t1, t);
 		}
-		// Close wrapped
+		// Close wrapped (or parameter "conn" when can't unwrap)
 		try {
 			if(!conn.isClosed() && !conn.getAutoCommit()) {
 				conn.rollback();
@@ -220,9 +226,51 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		}
 	}
 
+	private static class AOPoolConnectionWrapper extends UncloseableConnectionWrapper {
+
+		private final AOConnectionPool pool;
+		private final Connection wrapped;
+
+		private AOPoolConnectionWrapper(AOConnectionPool pool, Connection wrapped) {
+			this.pool = pool;
+			this.wrapped = wrapped;
+		}
+
+		@Override
+		protected void onAbort(Executor executor) throws SQLException {
+			Throwable t1 = null;
+			try {
+				wrapped.abort(executor);
+			} catch(Throwable t) {
+				t1 = Throwables.addSuppressed(t1, t);
+			}
+			try {
+				pool.release(this);
+			} catch(Throwable t) {
+				t1 = Throwables.addSuppressed(t1, t);
+			}
+			if(t1 != null) {
+				if(t1 instanceof Error) throw (Error)t1;
+				if(t1 instanceof RuntimeException) throw (RuntimeException)t1;
+				if(t1 instanceof SQLException) throw (SQLException)t1;
+				throw new SQLException(t1);
+			}
+		}
+
+		@Override
+		protected void onClose() throws SQLException {
+			pool.release(this);
+		}
+
+		@Override
+		protected Connection getWrappedConnection() {
+			return wrapped;
+		}
+	}
+
 	@Override
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-	protected Connection getConnectionObject() throws SQLException {
+	protected AOPoolConnectionWrapper getConnectionObject() throws SQLException {
 		try {
 			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
 			loadDriver(driver);
@@ -235,39 +283,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 					// to eliminate unnecessary round-trips and improve performance over high-latency links.
 					conn = new PostgresqlConnectionWrapper(conn);
 				}
-				final Connection finalConn = conn;
-				Connection wrapped = new UncloseableConnectionWrapper() {
-					@Override
-					protected void onAbort(Executor executor) throws SQLException {
-						Throwable t1 = null;
-						try {
-							finalConn.abort(executor);
-						} catch(Throwable t) {
-							t1 = Throwables.addSuppressed(t1, t);
-						}
-						try {
-							release(this);
-						} catch(Throwable t) {
-							t1 = Throwables.addSuppressed(t1, t);
-						}
-						if(t1 != null) {
-							if(t1 instanceof Error) throw (Error)t1;
-							if(t1 instanceof RuntimeException) throw (RuntimeException)t1;
-							if(t1 instanceof SQLException) throw (SQLException)t1;
-							throw new SQLException(t1);
-						}
-					}
-
-					@Override
-					protected void onClose() throws SQLException {
-						release(this);
-					}
-
-					@Override
-					protected Connection getWrappedConnection() {
-						return finalConn;
-					}
-				};
+				AOPoolConnectionWrapper wrapped = new AOPoolConnectionWrapper(this, conn);
 				successful = true;
 				return wrapped;
 			} finally {
