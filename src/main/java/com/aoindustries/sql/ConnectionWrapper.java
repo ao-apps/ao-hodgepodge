@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -38,6 +39,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
@@ -67,18 +69,18 @@ public abstract class ConnectionWrapper implements Connection {
 	}
 
 	@Override
-	public Statement createStatement() throws SQLException {
-		return getWrappedConnection().createStatement();
+	public StatementWrapper createStatement() throws SQLException {
+		return wrapStatement(getWrappedConnection().createStatement()).orElseThrow(AssertionError::new);
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql) throws SQLException {
-		return getWrappedConnection().prepareStatement(sql);
+	public PreparedStatementWrapper prepareStatement(String sql) throws SQLException {
+		return wrapPreparedStatement(getWrappedConnection().prepareStatement(sql)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
-	public CallableStatement prepareCall(String sql) throws SQLException {
-		return getWrappedConnection().prepareCall(sql);
+	public CallableStatementWrapper prepareCall(String sql) throws SQLException {
+		return wrapCallableStatement(getWrappedConnection().prepareCall(sql)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
@@ -117,8 +119,8 @@ public abstract class ConnectionWrapper implements Connection {
 	}
 
 	@Override
-	public DatabaseMetaData getMetaData() throws SQLException {
-		return getWrappedConnection().getMetaData();
+	public DatabaseMetaDataWrapper getMetaData() throws SQLException {
+		return wrapDatabaseMetaData(getWrappedConnection().getMetaData());
 	}
 
 	@Override
@@ -162,18 +164,18 @@ public abstract class ConnectionWrapper implements Connection {
 	}
 
 	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-		return getWrappedConnection().createStatement(resultSetType, resultSetConcurrency);
+	public StatementWrapper createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+		return wrapStatement(getWrappedConnection().createStatement(resultSetType, resultSetConcurrency)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-		return getWrappedConnection().prepareStatement(sql, resultSetType, resultSetConcurrency);
+	public PreparedStatementWrapper prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+		return wrapPreparedStatement(getWrappedConnection().prepareStatement(sql, resultSetType, resultSetConcurrency)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
-	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-		return getWrappedConnection().prepareCall(sql, resultSetType, resultSetConcurrency);
+	public CallableStatementWrapper prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+		return wrapCallableStatement(getWrappedConnection().prepareCall(sql, resultSetType, resultSetConcurrency)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
@@ -217,33 +219,33 @@ public abstract class ConnectionWrapper implements Connection {
 	}
 
 	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-		return getWrappedConnection().createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
+	public StatementWrapper createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		return wrapStatement(getWrappedConnection().createStatement(resultSetType, resultSetConcurrency, resultSetHoldability)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-		return getWrappedConnection().prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+	public PreparedStatementWrapper prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		return wrapPreparedStatement(getWrappedConnection().prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
-	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-		return getWrappedConnection().prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+	public CallableStatementWrapper prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		return wrapCallableStatement(getWrappedConnection().prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
-		return getWrappedConnection().prepareStatement(sql, autoGeneratedKeys);
+	public PreparedStatementWrapper prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+		return wrapPreparedStatement(getWrappedConnection().prepareStatement(sql, autoGeneratedKeys)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int columnIndexes[]) throws SQLException {
-		return getWrappedConnection().prepareStatement(sql, columnIndexes);
+	public PreparedStatementWrapper prepareStatement(String sql, int columnIndexes[]) throws SQLException {
+		return wrapPreparedStatement(getWrappedConnection().prepareStatement(sql, columnIndexes)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, String columnNames[]) throws SQLException {
-		return getWrappedConnection().prepareStatement(sql, columnNames);
+	public PreparedStatementWrapper prepareStatement(String sql, String columnNames[]) throws SQLException {
+		return wrapPreparedStatement(getWrappedConnection().prepareStatement(sql, columnNames)).orElseThrow(AssertionError::new);
 	}
 
 	@Override
@@ -292,8 +294,8 @@ public abstract class ConnectionWrapper implements Connection {
 	}
 
 	@Override
-	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-		return getWrappedConnection().createArrayOf(typeName, elements);
+	public ArrayWrapper createArrayOf(String typeName, Object[] elements) throws SQLException {
+		return wrapArray(getWrappedConnection().createArrayOf(typeName, elements));
 	}
 
 	@Override
@@ -324,6 +326,171 @@ public abstract class ConnectionWrapper implements Connection {
 	@Override
 	public void abort(Executor executor) throws SQLException {
 		getWrappedConnection().abort(executor);
+	}
+
+	protected Optional<? extends StatementWrapper> wrapStatement(Statement stmt) {
+		if(stmt == null) {
+			return Optional.empty();
+		}
+		if(stmt instanceof PreparedStatement) {
+			return wrapPreparedStatement((PreparedStatement)stmt);
+		}
+		if(stmt instanceof StatementWrapper) {
+			StatementWrapper stmtWrapper = (StatementWrapper)stmt;
+			if(stmtWrapper.getConnectionWrapper() == this) {
+				return Optional.of(stmtWrapper);
+			}
+		}
+		return Optional.of(
+			new StatementWrapper() {
+				@Override
+				protected ConnectionWrapper getConnectionWrapper() {
+					return ConnectionWrapper.this;
+				}
+
+				@Override
+				protected Statement getWrappedStatement() {
+					return stmt;
+				}
+			}
+		);
+	}
+
+	protected Optional<? extends PreparedStatementWrapper> wrapPreparedStatement(PreparedStatement pstmt) {
+		if(pstmt == null) {
+			return Optional.empty();
+		}
+		if(pstmt instanceof CallableStatement) {
+			return wrapCallableStatement((CallableStatement)pstmt);
+		}
+		if(pstmt instanceof PreparedStatementWrapper) {
+			PreparedStatementWrapper stmtWrapper = (PreparedStatementWrapper)pstmt;
+			if(stmtWrapper.getConnectionWrapper() == this) {
+				return Optional.of(stmtWrapper);
+			}
+		}
+		return Optional.of(
+			new PreparedStatementWrapper() {
+				@Override
+				protected ConnectionWrapper getConnectionWrapper() {
+					return ConnectionWrapper.this;
+				}
+
+				@Override
+				protected PreparedStatement getWrappedStatement() {
+					return pstmt;
+				}
+			}
+		);
+	}
+
+	protected Optional<? extends CallableStatementWrapper> wrapCallableStatement(CallableStatement cstmt) {
+		if(cstmt == null) {
+			return Optional.empty();
+		}
+		if(cstmt instanceof CallableStatementWrapper) {
+			CallableStatementWrapper stmtWrapper = (CallableStatementWrapper)cstmt;
+			if(stmtWrapper.getConnectionWrapper() == this) {
+				return Optional.of(stmtWrapper);
+			}
+		}
+		return Optional.of(
+			new CallableStatementWrapper() {
+				@Override
+				protected ConnectionWrapper getConnectionWrapper() {
+					return ConnectionWrapper.this;
+				}
+
+				@Override
+				protected CallableStatement getWrappedStatement() {
+					return cstmt;
+				}
+			}
+		);
+	}
+
+	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
+		if(results == null) {
+			return null;
+		}
+		if(results instanceof ResultSetWrapper) {
+			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
+			if(
+				resultsWrapper.getConnectionWrapper() == this
+				&& !resultsWrapper.getStatementWrapper().isPresent()
+			) {
+				return resultsWrapper;
+			}
+		}
+		return wrapStatement(results.getStatement())
+			.map(stmtWrapper -> stmtWrapper.wrapResultSet(results))
+			.orElseGet(() -> new ResultSetWrapper() {
+				@Override
+				protected ConnectionWrapper getConnectionWrapper() {
+					return ConnectionWrapper.this;
+				}
+
+				@Override
+				protected Optional<? extends StatementWrapper> getStatementWrapper() {
+					return Optional.empty();
+				}
+
+				@Override
+				protected ResultSet getWrappedResultSet() {
+					return results;
+				}
+			});
+	}
+
+	protected ArrayWrapper wrapArray(Array array) {
+		if(array == null) {
+			return null;
+		}
+		if(array instanceof ArrayWrapper) {
+			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
+			if(
+				arrayWrapper.getConnectionWrapper() == this
+				&& !arrayWrapper.getStatementWrapper().isPresent()
+			) {
+				return arrayWrapper;
+			}
+		}
+		return new ArrayWrapper() {
+			@Override
+			protected ConnectionWrapper getConnectionWrapper() {
+				return ConnectionWrapper.this;
+			}
+
+			@Override
+			protected Optional<? extends StatementWrapper> getStatementWrapper() {
+				return Optional.empty();
+			}
+
+			@Override
+			protected Array getWrappedArray() {
+				return array;
+			}
+		};
+	}
+
+	protected DatabaseMetaDataWrapper wrapDatabaseMetaData(DatabaseMetaData metaData) {
+		if(metaData instanceof DatabaseMetaDataWrapper) {
+			DatabaseMetaDataWrapper metaDataWrapper = (DatabaseMetaDataWrapper)metaData;
+			if(metaDataWrapper.getConnectionWrapper() == this) {
+				return metaDataWrapper;
+			}
+		}
+		return new DatabaseMetaDataWrapper() {
+			@Override
+			protected ConnectionWrapper getConnectionWrapper() {
+				return ConnectionWrapper.this;
+			}
+
+			@Override
+			protected DatabaseMetaData getWrappedDatabaseMetaData() {
+				return metaData;
+			}
+		};
 	}
 
 	/**
