@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +45,7 @@ import java.util.logging.Logger;
 // TODO: Use Connection.isValid while allocating from pool and/or putting back into pool?
 // TODO: Can isValid be used instead of forceful rollbackAndClose on SQLException?
 // TODO: Or use isValid in background connection management?
+// TODO: Warn in AOConnectionPool when max connections are higher than database supports
 final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
 
 	/**
@@ -64,6 +66,14 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		this.password = password;
 	}
 
+	private static Connection unwrap(Connection conn) throws SQLException {
+		if(conn instanceof UncloseableConnectionWrapper) {
+			return ((UncloseableConnectionWrapper)conn).getWrappedConnection();
+		} else {
+			return conn.unwrap(UncloseableConnectionWrapper.class).getWrappedConnection();
+		}
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -76,15 +86,20 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	protected void close(Connection conn) throws SQLException {
 		Throwable t1 = null;
+		// Unwrap
+		try {
+			conn = unwrap(conn);
+		} catch(Throwable t) {
+			t1 = Throwables.addSuppressed(t1, t);
+		}
+		// Close wrapped
 		try {
 			if(!conn.isClosed() && !conn.getAutoCommit()) {
 				conn.rollback();
 				conn.setAutoCommit(true);
 			}
-		} catch(ThreadDeath td) {
-			throw td;
 		} catch(Throwable t) {
-			t1 = t;
+			t1 = Throwables.addSuppressed(t1, t);
 		} finally {
 			t1 = AutoCloseables.close(t1, conn);
 		}
@@ -106,6 +121,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * @return The read/write connection to the database
 	 *
 	 * @see  #getConnection(int, boolean, int)
+	 * @see  Connection#close()
 	 */
 	// Note: Matches Database.getConnection()
 	// Note: Matches DatabaseConnection.getConnection()
@@ -126,6 +142,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * @return The connection to the database
 	 *
 	 * @see  #getConnection(int, boolean, int)
+	 * @see  Connection#close()
 	 */
 	// Note: Matches Database.getConnection(boolean)
 	// Note: Matches DatabaseConnection.getConnection(boolean)
@@ -145,6 +162,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * @return The connection to the database
 	 *
 	 * @see  #getConnection(int, boolean, int)
+	 * @see  Connection#close()
 	 */
 	// Note: Matches Database.getConnection(int, boolean)
 	// Note: Matches DatabaseConnection.getConnection(int, boolean)
@@ -157,6 +175,8 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * <p>
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
+	 *
+	 * @see  Connection#close()
 	 */
 	// Note: Matches Database.getConnection(int, boolean, int)
 	// Note: Matches DatabaseConnection.getConnection(int, boolean, int)
@@ -175,7 +195,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 			throw td;
 		} catch(Throwable t) {
 			try {
-				releaseConnection(conn);
+				release(conn);
 			} catch(ThreadDeath td) {
 				throw td;
 			} catch(Throwable t2) {
@@ -215,8 +235,41 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 					// to eliminate unnecessary round-trips and improve performance over high-latency links.
 					conn = new PostgresqlConnectionWrapper(conn);
 				}
+				final Connection finalConn = conn;
+				Connection wrapped = new UncloseableConnectionWrapper() {
+					@Override
+					protected void onAbort(Executor executor) throws SQLException {
+						Throwable t1 = null;
+						try {
+							finalConn.abort(executor);
+						} catch(Throwable t) {
+							t1 = Throwables.addSuppressed(t1, t);
+						}
+						try {
+							release(this);
+						} catch(Throwable t) {
+							t1 = Throwables.addSuppressed(t1, t);
+						}
+						if(t1 != null) {
+							if(t1 instanceof Error) throw (Error)t1;
+							if(t1 instanceof RuntimeException) throw (RuntimeException)t1;
+							if(t1 instanceof SQLException) throw (SQLException)t1;
+							throw new SQLException(t1);
+						}
+					}
+
+					@Override
+					protected void onClose() throws SQLException {
+						release(this);
+					}
+
+					@Override
+					protected Connection getWrappedConnection() {
+						return finalConn;
+					}
+				};
 				successful = true;
-				return conn;
+				return wrapped;
 			} finally {
 				if(!successful) conn.close();
 			}
@@ -233,7 +286,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 
 	@Override
 	protected boolean isClosed(Connection conn) throws SQLException {
-		return conn.isClosed();
+		return unwrap(conn).isClosed();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -261,7 +314,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	}
 
 	/**
-	 * Default implementation of {@link #logConnection(java.lang.Object)}
+	 * Default implementation of {@link #logConnection(java.sql.Connection)}
 	 *
 	 * @see  #logConnection(java.sql.Connection)
 	 */

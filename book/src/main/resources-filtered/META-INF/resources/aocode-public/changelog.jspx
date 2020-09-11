@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-09-11T07:03:49-05:00"
+		dateModified="2020-09-11T08:32:32-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -90,6 +90,18 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<li><code>PreparedStatement</code> wrapped in <code>PreparedStatementWrapper</code></li>
 							<li><code>ResultSetStatement</code> wrapped in <code>ResultSetStatementWrapper</code></li>
 							<li><code>Statement</code> wrapped in <code>StatementWrapper</code></li>
+						</ol>
+					</li>
+					<li>
+						Deprecated <code>AOPool.releaseConnection(C)</code> in favor of <code>AutoCloseable.close()</code>
+						for use in try-with-resources:
+						<ol>
+							<li>New protected method <code>AOPool.release(C)</code> that performs the release.</li>
+							<li>
+								Every pooled object must now implement <code>AutoCloseable</code> in a way that results
+								in a call to <code>AOPool.release(C)</code> without the underlying connection
+								closed.
+							</li>
 						</ol>
 					</li>
 				</ul>

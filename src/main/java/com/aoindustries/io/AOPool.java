@@ -60,7 +60,7 @@ import java.util.logging.Logger;
  * @author  AO Industries, Inc.
  */
 // TODO: Don't extend Thread
-abstract public class AOPool<C,E extends Exception,I extends Exception> extends Thread {
+abstract public class AOPool<C extends AutoCloseable,E extends Exception,I extends Exception> extends Thread {
 
 	public static final int DEFAULT_DELAY_TIME = 1 * 60 * 1000;
 	public static final int DEFAULT_MAX_IDLE_TIME = 10 * 60 * 1000;
@@ -225,9 +225,12 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	}
 
 	/**
-	 * Closes the given connection.
-	 * The connection may or may not already have been {@linkplain #resetConnection(java.lang.Object) reset}.
-	 * The connection may or may not already be {@linkplain #isClosed(java.lang.Object) closed}.
+	 * Closes the underlying connection.
+	 * The connection may or may not already have been {@linkplain #resetConnection(java.lang.AutoCloseable) reset}.
+	 * The connection may or may not already be {@linkplain #isClosed(java.lang.AutoCloseable) closed}.
+	 * <p>
+	 * Please note, this is distinct from the implementation of {@link AutoCloseable} for use in try-with-resources.
+	 * </p>
 	 */
 	protected abstract void close(C conn) throws E;
 
@@ -290,10 +293,11 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	/**
 	 * Gets a connection, warning of a connection is already used by this thread.
 	 *
-	 * @see  #getConnection(int)
-	 *
 	 * @throws I when interrupted
 	 * @throws E when error
+	 *
+	 * @see  #getConnection(int)
+	 * @see  AutoCloseable#close()
 	 */
 	public C getConnection() throws I, E {
 		return getConnection(1);
@@ -313,6 +317,8 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	 *
 	 * @throws I when interrupted
 	 * @throws E when error
+	 *
+	 * @see  AutoCloseable#close()
 	 */
 	@SuppressWarnings({"UseSpecificCatch", "AssignmentToCatchBlockParameter"})
 	public C getConnection(int maxConnections) throws I, E {
@@ -456,6 +462,12 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 
 	/**
 	 * Creates a new connection.
+	 * <p>
+	 * The returned connection must call {@link #release(java.lang.AutoCloseable)} on
+	 * {@link AutoCloseable#close()}.  This is to support use via try-with-resources, and is
+	 * distinct from {@link #isClosed(java.lang.AutoCloseable)} and {@link #close(java.lang.AutoCloseable)}, which must
+	 * both work with the underlying connection.
+	 * </p>
 	 *
 	 * @throws I when interrupted
 	 * @throws E when error
@@ -537,6 +549,12 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 		return total;
 	}
 
+	/**
+	 * Determine if the underlying connection is closed.
+	 * <p>
+	 * Please note, this is distinct from the implementation of {@link AutoCloseable} for use in try-with-resources.
+	 * </p>
+	 */
 	protected abstract boolean isClosed(C conn) throws E;
 
 	/**
@@ -719,24 +737,33 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	}
 
 	/**
+	 * @deprecated  Please release to the pool by {@linkplain AutoCloseable#close() closing the connection},
+	 *              preferably via try-with-resources.
+	 */
+	@Deprecated
+	final public void releaseConnection(C connection) throws E {
+		release(connection);
+	}
+
+	/**
 	 * Releases the database <code>Connection</code> to the <code>Connection</code> pool.
 	 * <p>
 	 * It is safe to call this method more than once, but only the first call will
 	 * have any affect and the second release will log a warning.
 	 * </p>
 	 * <p>
-	 * The connection will be {@linkplain #resetConnection(java.lang.Object) reset} and/or
-	 * {@linkplain #close(java.lang.Object) closed}.
+	 * The connection will be {@linkplain #resetConnection(java.lang.AutoCloseable) reset} and/or
+	 * {@linkplain #close(java.lang.AutoCloseable) closed}.
 	 * </p>
 	 *
-	 * @see  #isClosed(java.lang.Object)
-	 * @see  #logConnection(java.lang.Object)
-	 * @see  #resetConnection(java.lang.Object)
-	 * @see  #close(java.lang.Object)
+	 * @see  #isClosed(java.lang.AutoCloseable)
+	 * @see  #logConnection(java.lang.AutoCloseable)
+	 * @see  #resetConnection(java.lang.AutoCloseable)
+	 * @see  #close(java.lang.AutoCloseable)
 	 * @see  #release(com.aoindustries.io.AOPool.PooledConnection)
 	 */
 	@SuppressWarnings("UseSpecificCatch")
-	final public void releaseConnection(C connection) throws E {
+	protected void release(C connection) throws E {
 		// Find the associated PooledConnection
 		PooledConnection<C> pooledConnection = null;
 		List<PooledConnection<C>> threadConnections = currentThreadConnections.get();
@@ -751,7 +778,7 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 			}
 		}
 		if(pooledConnection == null) {
-			logger.log(Level.WARNING, "PooledConnection not found during releaseConnection");
+			logger.log(Level.WARNING, "PooledConnection not found during release");
 		} else {
 			try {
 				Throwable t1 = null;
@@ -822,9 +849,9 @@ abstract public class AOPool<C,E extends Exception,I extends Exception> extends 
 	}
 
 	/**
-	 * Perform any connection logging before {@link #resetConnection(java.lang.Object)} and/or
-	 * {@link #close(java.lang.Object)}.  This is only called on connections that are not
-	 * {@link #isClosed(java.lang.Object) closed}.
+	 * Perform any connection logging before {@link #resetConnection(java.lang.AutoCloseable)} and/or
+	 * {@link #close(java.lang.AutoCloseable)}.  This is only called on connections that are not
+	 * {@linkplain #isClosed(java.lang.AutoCloseable) closed}.
 	 */
 	@SuppressWarnings("NoopMethodInAbstractClass")
 	protected void logConnection(C conn) throws E {
