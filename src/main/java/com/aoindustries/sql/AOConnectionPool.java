@@ -97,14 +97,17 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	}
 
 	/**
-	 * Gets a read/write connection to the database with a transaction level of {@link Connections#DEFAULT_TRANSACTION_ISOLATION}
-	 * and a maximum connections of 1.
+	 * Gets a read/write connection to the database with a transaction level of
+	 * {@link Connections#DEFAULT_TRANSACTION_ISOLATION} and a maximum connections of 1.
 	 * <p>
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
 	 *
 	 * @return The read/write connection to the database
+	 *
+	 * @see  #getConnection(int, boolean, int)
 	 */
+	// Note: Matches Database.getConnection()
 	// Note: Matches DatabaseConnection.getConnection()
 	@Override
 	public Connection getConnection() throws SQLException {
@@ -112,8 +115,8 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	}
 
 	/**
-	 * Gets a connection to the database with a transaction level of {@link Connections#DEFAULT_TRANSACTION_ISOLATION}
-	 * and a maximum connections of 1.
+	 * Gets a connection to the database with a transaction level of
+	 * {@link Connections#DEFAULT_TRANSACTION_ISOLATION} and a maximum connections of 1.
 	 * <p>
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
@@ -121,7 +124,10 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * @param readOnly The {@link Connection#setReadOnly(boolean) read-only flag}
 	 *
 	 * @return The connection to the database
+	 *
+	 * @see  #getConnection(int, boolean, int)
 	 */
+	// Note: Matches Database.getConnection(boolean)
 	// Note: Matches DatabaseConnection.getConnection(boolean)
 	public Connection getConnection(boolean readOnly) throws SQLException {
 		return getConnection(Connections.DEFAULT_TRANSACTION_ISOLATION, readOnly, 1);
@@ -137,7 +143,10 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * @param readOnly The {@link Connection#setReadOnly(boolean) read-only flag}
 	 *
 	 * @return The connection to the database
+	 *
+	 * @see  #getConnection(int, boolean, int)
 	 */
+	// Note: Matches Database.getConnection(int, boolean)
 	// Note: Matches DatabaseConnection.getConnection(int, boolean)
 	public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {
 		return getConnection(isolationLevel, readOnly, 1);
@@ -149,6 +158,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
 	 */
+	// Note: Matches Database.getConnection(int, boolean, int)
 	// Note: Matches DatabaseConnection.getConnection(int, boolean, int)
 	@SuppressWarnings({"UseSpecificCatch", "AssignmentToCatchBlockParameter"})
 	public Connection getConnection(int isolationLevel, boolean readOnly, int maxConnections) throws SQLException {
