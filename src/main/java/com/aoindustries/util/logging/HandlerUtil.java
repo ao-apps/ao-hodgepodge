@@ -22,7 +22,6 @@
  */
 package com.aoindustries.util.logging;
 
-import java.io.UnsupportedEncodingException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -44,6 +43,7 @@ public class HandlerUtil {
 	 * javadoc.
 	 */
 	// @see ConsoleHandler#configure()
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public static void configure(Handler handler) {
 		LogManager manager = LogManager.getLogManager();
 		String cname = handler.getClass().getName();
@@ -53,12 +53,16 @@ public class HandlerUtil {
 		handler.setFormatter(LogManagerUtil.getFormatterProperty(manager, cname +".formatter", new SimpleFormatter()));
 		try {
 			handler.setEncoding(LogManagerUtil.getStringProperty(manager, cname +".encoding", null));
-		} catch (RuntimeException | UnsupportedEncodingException ex) {
-			LogManagerUtil.warn(ex);
+		} catch (ThreadDeath td) {
+			throw td;
+		} catch (Throwable t) {
+			LogManagerUtil.warn(t);
 			try {
 				handler.setEncoding(null);
-			} catch (RuntimeException | UnsupportedEncodingException ex2) {
-				LogManagerUtil.warn(ex2);
+			} catch (ThreadDeath td) {
+				throw td;
+			} catch (Throwable t2) {
+				LogManagerUtil.warn(t2);
 				// doing a setEncoding with null should always work.
 				// assert false;
 			}

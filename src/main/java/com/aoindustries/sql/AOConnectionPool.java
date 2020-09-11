@@ -197,13 +197,9 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 			if(readOnly != IDLE_READ_ONLY) conn.setReadOnly(readOnly);
 			if(isolationLevel != Connections.DEFAULT_TRANSACTION_ISOLATION) conn.setTransactionIsolation(isolationLevel);
 			return conn;
-		} catch(ThreadDeath td) {
-			throw td;
 		} catch(Throwable t) {
 			try {
 				release(conn);
-			} catch(ThreadDeath td) {
-				throw td;
 			} catch(Throwable t2) {
 				t = Throwables.addSuppressed(t, t2);
 			}

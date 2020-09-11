@@ -428,8 +428,6 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 			}
 			if(doReset) resetConnection(conn);
 			return conn;
-		} catch(ThreadDeath td) {
-			throw td;
 		} catch(Throwable t1) {
 			try {
 				C conn;
@@ -440,8 +438,6 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 				if(conn != null) {
 					try {
 						close(conn);
-					} catch(ThreadDeath td) {
-						throw td;
 					} catch(Throwable t) {
 						t1 = Throwables.addSuppressed(t1, t);
 					}
@@ -450,12 +446,11 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 				try {
 					threadConnections.remove(pooledConnection);
 					release(pooledConnection);
-				} catch(ThreadDeath td) {
-					throw td;
 				} catch(Throwable t) {
 					t1 = Throwables.addSuppressed(t1, t);
 				}
 			}
+			if(t1 instanceof ThreadDeath) throw (ThreadDeath)t1;
 			throw newException(null, t1);
 		}
 	}
@@ -786,11 +781,8 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 				boolean connIsClosed;
 				try {
 					connIsClosed = isClosed(connection);
-				} catch(ThreadDeath td) {
-					throw td;
 				} catch(Throwable t) {
-					assert t1 == null;
-					t1 = t;
+					t1 = Throwables.addSuppressed(t1, t);
 					connIsClosed = false;
 					closeConnection = true; // Force closure due to error on isClosed
 				}
@@ -807,8 +799,6 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 					// Log warnings before release and/or close
 					try {
 						logConnection(connection);
-					} catch(ThreadDeath td) {
-						throw td;
 					} catch(Throwable t) {
 						t1 = Throwables.addSuppressed(t1, t);
 						// Close the connection when error during logging
@@ -818,8 +808,6 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 						// Reset connections as they are released
 						try {
 							resetConnection(connection);
-						} catch(ThreadDeath td) {
-							throw td;
 						} catch(Throwable t) {
 							t1 = Throwables.addSuppressed(t1, t);
 							// Close the connection when error during reset
@@ -830,8 +818,6 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 						// Error or max age reached, close the connection
 						try {
 							close(connection);
-						} catch(ThreadDeath td) {
-							throw td;
 						} catch(Throwable t) {
 							t1 = Throwables.addSuppressed(t1, t);
 						}
@@ -840,7 +826,10 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 						}
 					}
 				}
-				if(t1 != null) throw newException(null, t1);
+				if(t1 != null) {
+					if(t1 instanceof ThreadDeath) throw (ThreadDeath)t1;
+					throw newException(null, t1);
+				}
 			} finally {
 				// Unallocate the connection from the pool
 				release(pooledConnection);

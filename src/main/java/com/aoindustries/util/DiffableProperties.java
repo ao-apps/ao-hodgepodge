@@ -215,6 +215,7 @@ public class DiffableProperties {
 	 * Rewrites the given files, if modified.  Reads and writes the files in ISO8859-1 encoding.
 	 */
 	// Java 9: Support UTF-8 properties
+	@SuppressWarnings({"UseOfSystemOutOrSystemErr", "TooBroadCatch"})
 	public static void main(String[] args) {
 		if(args.length == 0) {
 			System.err.println("Usage: " + DiffableProperties.class.getName() + " file.properties [file.properties [...]]");
@@ -228,14 +229,16 @@ public class DiffableProperties {
 						// Modified, write output
 						System.out.println(filename + ": " + result.getBefore().length() + " -> " + after.length());
 					}
-				} catch(RuntimeException e) {
-					System.err.println(filename + ": " + e.getMessage());
-					e.printStackTrace(System.err);
-					System.exit(SysExits.EX_SOFTWARE);
+				} catch(ThreadDeath td) {
+					throw td;
 				} catch(IOException e) {
 					System.err.println(filename + ": " + e.getMessage());
 					//e.printStackTrace(System.err);
-					System.exit(SysExits.EX_IOERR);
+					System.exit(SysExits.getSysExit(e));
+				} catch(Throwable t) {
+					System.err.println(filename + ": " + t.getMessage());
+					t.printStackTrace(System.err);
+					System.exit(SysExits.getSysExit(t));
 				}
 			}
 		}
