@@ -56,7 +56,7 @@ import java.util.logging.Logger;
 //
 // TODO: Deprecate and just use commons-dbcp.  This pooling code predates dbcp-1.0 by around three years, but there
 //       is probably no benefit to maintaining this separate pooling implementation.
-final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
+public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
 
 	/**
 	 * The read-only state of connections while idle in the pool.
