@@ -550,12 +550,18 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 		return maxConnectionAge;
 	}
 
+	/**
+	 * Gets the maximum number of connections that have been busy at once.
+	 */
 	final public int getMaxConcurrency() {
 		synchronized(poolLock) {
 			return maxConcurrency;
 		}
 	}
 
+	/**
+	 * Gets the maximum number of connections the pool will create at once.
+	 */
 	final public int getPoolSize() {
 		return poolSize;
 	}
