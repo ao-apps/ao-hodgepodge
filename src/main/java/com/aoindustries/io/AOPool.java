@@ -208,7 +208,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 		 * Incremental allocation of thread IDs, since they are not used outside the scope of this class.
 		 * No benefit to randomizing the values.
 		 */
-		private long nextId = 0;
+		private long lastId = 0;
 
 		@Override
 		protected SmallIdentifier initialValue() {
@@ -216,7 +216,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 			synchronized(threadConnectionsByThreadId) {
 				// Wraparound of 64-bit identifier is unlikely, but still make sure is available for correctness
 				do {
-					id = new SmallIdentifier(nextId++);
+					id = new SmallIdentifier(++lastId);
 				} while(!threadConnectionsByThreadId.containsKey(id));
 				threadConnectionsByThreadId.put(id, new ArrayList<>());
 			}
@@ -681,6 +681,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 		long[] useCounts;
 		long[] totalTimes;
 		boolean[] isBusies;
+		SmallIdentifier[] allocationThreadIds;
 		long[] startTimes;
 		long[] releaseTimes;
 		Throwable[] allocateStackTraces;
@@ -692,6 +693,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 			useCounts = new long[numConnections];
 			totalTimes = new long[numConnections];
 			isBusies = new boolean[numConnections];
+			allocationThreadIds = new SmallIdentifier[numConnections];
 			startTimes = new long[numConnections];
 			releaseTimes = new long[numConnections];
 			allocateStackTraces = new Throwable[numConnections];
@@ -703,6 +705,19 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 				useCounts[c] = pooledConnection.useCount.get();
 				totalTimes[c] = pooledConnection.totalTime.get();
 				isBusies[c] = busyConnections.contains(pooledConnection);
+				C connection;
+				synchronized(pooledConnection) {
+					connection = pooledConnection.connection;
+				}
+				SmallIdentifier allocationThreadId;
+				if(connection == null) {
+					allocationThreadId = null;
+				} else {
+					synchronized(allocationThreadIdByConnection) {
+						allocationThreadId = allocationThreadIdByConnection.get(connection);
+					}
+				}
+				allocationThreadIds[c] = allocationThreadId;
 				startTimes[c] = pooledConnection.startTime;
 				releaseTimes[c] = pooledConnection.releaseTime;
 				allocateStackTraces[c] = pooledConnection.allocateStackTrace;
@@ -762,6 +777,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 			boolean isBusy = isBusies[c];
 			if(isBusy) totalTime += time - startTimes[c];
 			long stateTime = isBusy ? (time-startTimes[c]):(time-releaseTimes[c]);
+			SmallIdentifier allocationThreadId = allocationThreadIds[c];
 			out.append("    <tr>\n"
 					+ "      <td>").append(Integer.toString(c+1)).append("</td>\n"
 					+ "      <td>").append(isConnected?"Yes":"No").append("</td>\n"
@@ -775,7 +791,9 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 			com.aoindustries.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(totalTime), out, isXhtml);
 			out.append("</td>\n"
 					+ "      <td>").append(Float.toString(totalTime*100/(float)timeLen)).append("%</td>\n"
-					+ "      <td>").append(isBusy?"In Use":isConnected?"Idle":"Closed").append("</td>\n"
+					+ "      <td>").append(isBusy?"In Use":isConnected?"Idle":"Closed");
+			if(allocationThreadId != null) out.append(" by Thread #").append(Long.toString(allocationThreadId.getValue()));
+			out.append("</td>\n"
 					+ "      <td>");
 			com.aoindustries.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(stateTime), out, isXhtml);
 			out.append("</td>\n"
