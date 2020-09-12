@@ -352,9 +352,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		}
 	}
 
-	private static interface IPooledConnectionWrapper {
-		Connection getWrappedConnection();
-
+	private static interface IPooledConnectionWrapper extends IUncloseableConnectionWrapper {
 		AOConnectionPool getPool();
 	}
 
@@ -369,21 +367,16 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		}
 
 		@Override
-		public Connection getWrappedConnection() {
-			return super.getWrappedConnection();
-		}
-
-		@Override
 		public AOConnectionPool getPool() {
 			return pool;
 		}
 
 		@Override
 		@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-		protected void onAbort(Executor executor) throws SQLException {
+		public void onAbort(Executor executor) throws SQLException {
 			Throwable t1 = null;
 			try {
-				getWrappedConnection().abort(executor);
+				super.onAbort(executor);
 			} catch(Throwable t) {
 				t1 = Throwables.addSuppressed(t1, t);
 			}
@@ -401,7 +394,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		}
 
 		@Override
-		protected void onClose() throws SQLException {
+		public void onClose() throws SQLException {
 			pool.release(this);
 		}
 

@@ -46,7 +46,7 @@ import java.util.Optional;
  *
  * @author  AO Industries, Inc.
  */
-public class ResultSetWrapper implements ResultSet {
+public class ResultSetWrapper implements IResultSetWrapper {
 
 	private final ConnectionWrapper connectionWrapper;
 	private final StatementWrapper stmtWrapper;
@@ -72,10 +72,8 @@ public class ResultSetWrapper implements ResultSet {
 		return Optional.ofNullable(stmtWrapper);
 	}
 
-	/**
-	 * Gets the results that are wrapped.
-	 */
-	protected ResultSet getWrappedResultSet() {
+	@Override
+	public ResultSet getWrappedResultSet() {
 		return wrapped;
 	}
 

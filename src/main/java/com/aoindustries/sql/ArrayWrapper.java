@@ -33,7 +33,7 @@ import java.util.Optional;
  *
  * @author  AO Industries, Inc.
  */
-public class ArrayWrapper implements Array {
+public class ArrayWrapper implements IArrayWrapper {
 
 	private final ConnectionWrapper connectionWrapper;
 	private final StatementWrapper stmtWrapper;
@@ -59,10 +59,8 @@ public class ArrayWrapper implements Array {
 		return Optional.ofNullable(stmtWrapper);
 	}
 
-	/**
-	 * Gets the array that is wrapped.
-	 */
-	protected Array getWrappedArray() {
+	@Override
+	public Array getWrappedArray() {
 		return wrapped;
 	}
 

@@ -32,7 +32,7 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public class DatabaseMetaDataWrapper implements DatabaseMetaData {
+public class DatabaseMetaDataWrapper implements IDatabaseMetaDataWrapper {
 
 	private final ConnectionWrapper connectionWrapper;
 	private final DatabaseMetaData wrapped;
@@ -49,10 +49,8 @@ public class DatabaseMetaDataWrapper implements DatabaseMetaData {
 		return connectionWrapper;
 	}
 
-	/**
-	 * Gets the database meta data that is wrapped.
-	 */
-	protected DatabaseMetaData getWrappedDatabaseMetaData() {
+	@Override
+	public DatabaseMetaData getWrappedDatabaseMetaData() {
 		return wrapped;
 	}
 

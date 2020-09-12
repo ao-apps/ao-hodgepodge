@@ -32,7 +32,7 @@ import java.sql.Statement;
  *
  * @author  AO Industries, Inc.
  */
-public class StatementWrapper implements Statement {
+public class StatementWrapper implements IStatementWrapper {
 
 	private final ConnectionWrapper connectionWrapper;
 	private final Statement wrapped;
@@ -49,10 +49,8 @@ public class StatementWrapper implements Statement {
 		return connectionWrapper;
 	}
 
-	/**
-	 * Gets the statement that is wrapped.
-	 */
-	protected Statement getWrappedStatement() {
+	@Override
+	public Statement getWrappedStatement() {
 		return wrapped;
 	}
 

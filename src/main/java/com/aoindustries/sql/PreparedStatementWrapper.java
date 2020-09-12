@@ -44,17 +44,14 @@ import java.util.Calendar;
  *
  * @author  AO Industries, Inc.
  */
-public class PreparedStatementWrapper extends StatementWrapper implements PreparedStatement {
+public class PreparedStatementWrapper extends StatementWrapper implements IPreparedStatementWrapper {
 
 	public PreparedStatementWrapper(ConnectionWrapper connectionWrapper, PreparedStatement wrapped) {
 		super(connectionWrapper, wrapped);
 	}
 
-	/**
-	 * Gets the prepared statement that is wrapped.
-	 */
 	@Override
-	protected PreparedStatement getWrappedStatement() {
+	public PreparedStatement getWrappedStatement() {
 		return (PreparedStatement)super.getWrappedStatement();
 	}
 

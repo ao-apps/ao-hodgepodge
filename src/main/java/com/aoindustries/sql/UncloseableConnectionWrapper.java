@@ -44,12 +44,41 @@ import java.util.function.Function;
  *
  * @author  AO Industries, Inc.
  */
-public abstract class UncloseableConnectionWrapper extends ConnectionWrapper {
+public class UncloseableConnectionWrapper extends ConnectionWrapper implements IUncloseableConnectionWrapper {
 
 	private final AtomicBoolean closed = new AtomicBoolean();
 
 	public UncloseableConnectionWrapper(Connection wrapped) {
 		super(wrapped);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This default implementation calls {@link Connection#abort(java.util.concurrent.Executor)}
+	 * on the wrapped connection.
+	 * </p>
+	 *
+	 * @see  #getWrappedConnection()
+	 * @see  Connection#abort(java.util.concurrent.Executor)
+	 */
+	@Override
+	public void onAbort(Executor executor) throws SQLException {
+		getWrappedConnection().abort(executor);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This default implementation does nothing.
+	 * </p>
+	 *
+	 * @see  #getWrappedConnection()
+	 * @see  Connection#close()
+	 */
+	@Override
+	public void onClose() throws SQLException {
+		// Do nothing
 	}
 
 	private <X extends Throwable> void checkNotClosed(Function<String,X> throwableSupplier) throws X {
@@ -398,21 +427,4 @@ public abstract class UncloseableConnectionWrapper extends ConnectionWrapper {
 			onAbort(executor);
 		}
 	}
-
-	/**
-	 * Called when {@link #abort(java.util.concurrent.Executor)} is called and not already closed.
-	 * {@link #onClose()} will never be called once aborted.  This is only called at most once.
-	 *
-	 * @see #abort(java.util.concurrent.Executor)
-	 */
-	protected abstract void onAbort(Executor executor) throws SQLException;
-
-	/**
-	 * Called when {@link #close()} is called, or when the wrapped connection is discovered as closed during
-	 * {@link #isClosed()}.  In either case, this is only called at most once.
-	 *
-	 * @see #close()
-	 * @see #isClosed()
-	 */
-	protected abstract void onClose() throws SQLException;
 }

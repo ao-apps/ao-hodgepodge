@@ -42,17 +42,14 @@ import java.util.Calendar;
  *
  * @author  AO Industries, Inc.
  */
-public class CallableStatementWrapper extends PreparedStatementWrapper implements CallableStatement {
+public class CallableStatementWrapper extends PreparedStatementWrapper implements ICallableStatementWrapper {
 
 	public CallableStatementWrapper(ConnectionWrapper connectionWrapper, CallableStatement wrapped) {
 		super(connectionWrapper, wrapped);
 	}
 
-	/**
-	 * Gets the callable statement that is wrapped.
-	 */
 	@Override
-	protected CallableStatement getWrappedStatement() {
+	public CallableStatement getWrappedStatement() {
 		return (CallableStatement)super.getWrappedStatement();
 	}
 

@@ -47,7 +47,7 @@ import java.util.concurrent.Executor;
  *
  * @author  AO Industries, Inc.
  */
-public class ConnectionWrapper implements Connection {
+public class ConnectionWrapper implements IConnectionWrapper {
 
 	private final Connection wrapped;
 
@@ -55,10 +55,8 @@ public class ConnectionWrapper implements Connection {
 		this.wrapped = wrapped;
 	}
 
-	/**
-	 * Gets the connection that is wrapped.
-	 */
-	protected Connection getWrappedConnection() {
+	@Override
+	public Connection getWrappedConnection() {
 		return wrapped;
 	}
 
