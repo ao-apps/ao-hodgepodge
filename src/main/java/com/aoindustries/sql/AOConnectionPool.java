@@ -66,6 +66,7 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		this.password = password;
 	}
 
+	@SuppressWarnings("null")
 	private Connection unwrap(Connection conn) throws SQLException {
 		AOPoolConnectionWrapper wrapper;
 		if(conn instanceof AOPoolConnectionWrapper) {
@@ -119,16 +120,28 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 
 	/**
 	 * Gets a read/write connection to the database with a transaction level of
-	 * {@link Connections#DEFAULT_TRANSACTION_ISOLATION} and a maximum connections of 1.
+	 * {@link Connections#DEFAULT_TRANSACTION_ISOLATION},
+	 * warning when a connection is already used by this thread.
 	 * <p>
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
+	 * <p>
+	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
+	 * available.
+	 * </p>
+	 * <p>
+	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
+	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
+	 * </p>
 	 *
-	 * @return The read/write connection to the database
+	 * @return  The read/write connection to the database
+	 *
+	 * @throws  SQLException  when an error occurs, or when a thread attempts to allocate more than half the pool
 	 *
 	 * @see  #getConnection(int, boolean, int)
 	 * @see  Connection#close()
 	 */
+	// Note: Matches AOPool.getConnection()
 	// Note: Matches Database.getConnection()
 	// Note: Matches DatabaseConnection.getConnection()
 	@Override
@@ -137,15 +150,59 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	}
 
 	/**
-	 * Gets a connection to the database with a transaction level of
-	 * {@link Connections#DEFAULT_TRANSACTION_ISOLATION} and a maximum connections of 1.
+	 * Gets a read/write connection to the database with a transaction level of
+	 * {@link Connections#DEFAULT_TRANSACTION_ISOLATION}.
 	 * <p>
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
+	 * <p>
+	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
+	 * available.
+	 * </p>
+	 * <p>
+	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
+	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
+	 * </p>
 	 *
-	 * @param readOnly The {@link Connection#setReadOnly(boolean) read-only flag}
+	 * @param  maxConnections  The maximum number of connections expected to be used by the current thread.
+	 *                         This should normally be one to avoid potential deadlock.
 	 *
-	 * @return The connection to the database
+	 * @return  The read/write connection to the database
+	 *
+	 * @throws  SQLException  when an error occurs, or when a thread attempts to allocate more than half the pool
+	 *
+	 * @see  #getConnection(int, boolean, int)
+	 * @see  Connection#close()
+	 */
+	// Note: Matches AOPool.getConnection(int)
+	// Note: Matches Database.getConnection(int)
+	// Note: Matches DatabaseConnection.getConnection(int)
+	@Override
+	public Connection getConnection(int maxConnections) throws SQLException {
+		return getConnection(Connections.DEFAULT_TRANSACTION_ISOLATION, false, maxConnections);
+	}
+
+	/**
+	 * Gets a connection to the database with a transaction level of
+	 * {@link Connections#DEFAULT_TRANSACTION_ISOLATION},
+	 * warning when a connection is already used by this thread.
+	 * <p>
+	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
+	 * </p>
+	 * <p>
+	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
+	 * available.
+	 * </p>
+	 * <p>
+	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
+	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
+	 * </p>
+	 *
+	 * @param  readOnly  The {@link Connection#setReadOnly(boolean) read-only flag}
+	 *
+	 * @return  The connection to the database
+	 *
+	 * @throws  SQLException  when an error occurs, or when a thread attempts to allocate more than half the pool
 	 *
 	 * @see  #getConnection(int, boolean, int)
 	 * @see  Connection#close()
@@ -157,15 +214,27 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	}
 
 	/**
-	 * Gets a connection to the database with a maximum connections of 1.
+	 * Gets a connection to the database,
+	 * warning when a connection is already used by this thread.
 	 * <p>
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
+	 * <p>
+	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
+	 * available.
+	 * </p>
+	 * <p>
+	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
+	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
+	 * </p>
 	 *
-	 * @param isolationLevel The {@link Connection#setTransactionIsolation(int) transaction isolation level}
-	 * @param readOnly The {@link Connection#setReadOnly(boolean) read-only flag}
+	 * @param  isolationLevel  The {@link Connection#setTransactionIsolation(int) transaction isolation level}
 	 *
-	 * @return The connection to the database
+	 * @param  readOnly        The {@link Connection#setReadOnly(boolean) read-only flag}
+	 *
+	 * @return  The connection to the database
+	 *
+	 * @throws  SQLException  when an error occurs, or when a thread attempts to allocate more than half the pool
 	 *
 	 * @see  #getConnection(int, boolean, int)
 	 * @see  Connection#close()
@@ -177,10 +246,29 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Gets a connection to the database.
 	 * <p>
 	 * The connection will be in auto-commit mode, as configured by {@link #resetConnection(java.sql.Connection)}
 	 * </p>
+	 * <p>
+	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
+	 * available.
+	 * </p>
+	 * <p>
+	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
+	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
+	 * </p>
+	 *
+	 * @param  isolationLevel  The {@link Connection#setTransactionIsolation(int) transaction isolation level}
+	 *
+	 * @param  readOnly        The {@link Connection#setReadOnly(boolean) read-only flag}
+	 *
+	 * @param  maxConnections  The maximum number of connections expected to be used by the current thread.
+	 *                         This should normally be one to avoid potential deadlock.
+	 *
+	 * @return  The connection to the database
+	 *
+	 * @throws  SQLException  when an error occurs, or when a thread attempts to allocate more than half the pool
 	 *
 	 * @see  Connection#close()
 	 */

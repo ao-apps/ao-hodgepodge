@@ -291,37 +291,66 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	}
 
 	/**
-	 * Gets a connection, warning of a connection is already used by this thread.
+	 * Gets either an available connection or creates a new connection,
+	 * warning when a connection is already used by this thread.
+	 * <p>
+	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
+	 * available.
+	 * </p>
+	 * <p>
+	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
+	 * thread, it should not be passed off to another thread before {@linkplain AutoCloseable#close() release}.
+	 * </p>
 	 *
-	 * @throws I when interrupted
-	 * @throws E when error
+	 * @return  Either a reused or new connection
+	 *
+	 * @throws  I  when interrupted
+	 * @throws  E  when an error occurs, or when a thread attempts to allocate more than half the pool
 	 *
 	 * @see  #getConnection(int)
 	 * @see  AutoCloseable#close()
 	 */
+	// Note: Matches AOConnectionPool.getConnection()
+	// Note: Matches Database.getConnection()
+	// Note: Matches DatabaseConnection.getConnection()
 	public C getConnection() throws I, E {
 		return getConnection(1);
 	}
 
 	/**
-	 * Gets either an available connection or creates a new connection.  If all the
-	 * connections in the pool are busy and the pool is at capacity, waits until a
-	 * connection becomes available.  Due to internal <code>ThreadLocal</code>
-	 * optimizations, the connection returned must be released by the current thread,
-	 * it should not be passed off to another thread before release.
+	 * Gets either an available connection or creates a new connection.
+	 * <p>
+	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
+	 * available.
+	 * </p>
+	 * <p>
+	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
+	 * thread, it should not be passed off to another thread before {@linkplain AutoCloseable#close() release}.
+	 * </p>
 	 *
 	 * @param  maxConnections  The maximum number of connections expected to be used by the current thread.
 	 *                         This should normally be one to avoid potential deadlock.
 	 *
-	 * @return either a reused or new connection
+	 * @return  Either a reused or new connection
 	 *
-	 * @throws I when interrupted
-	 * @throws E when error
+	 * @throws  I  when interrupted
+	 * @throws  E  when an error occurs, or when a thread attempts to allocate more than half the pool
 	 *
+	 * @see  #getConnection()
 	 * @see  AutoCloseable#close()
 	 */
+	// Note: Matches AOConnectionPool.getConnection(int)
+	// Note: Matches Database.getConnection(int)
+	// Note: Matches DatabaseConnection.getConnection(int)
+
+	// TODO: No longer do threadlocal stuff.  Instead, no more "maxConnections", and keep reference back to PoolConnection
+	//       from the ConnectionWrapper.  Or use ThreadLocal just as a hint.  To be able to remove connections from the list
+	//       for another Thread, the ThreadLocal should just store a generated ID, which would also be tracked in the
+	//       ConnectionWrapper.  The central map for tracking must be weak key to be subject to garbage collection when
+	//       threads die.
 	@SuppressWarnings({"UseSpecificCatch", "AssignmentToCatchBlockParameter"})
 	public C getConnection(int maxConnections) throws I, E {
+		if(maxConnections < 1) maxConnections = 1;
 		// Return immediately if already interrupted
 		if(Thread.interrupted()) throw newInterruptedException(null, null);
 
@@ -329,21 +358,28 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 		// Error or warn if this thread already has too many connections
 		List<PooledConnection<C>> threadConnections = currentThreadConnections.get();
 		int useCount = threadConnections.size();
-		if(useCount>=maxConnections) {
+		if(useCount >= maxConnections) {
 			Throwable[] allocateStackTraces = new Throwable[useCount];
 			for(int c=0; c<useCount; c++) {
 				PooledConnection<C> threadConnection = threadConnections.get(c);
 				allocateStackTraces[c] = threadConnection.allocateStackTrace;
 			}
 			// Throw an exception if over half the pool is used by this thread
-			if(useCount>=(poolSize/2)) throw newException("Thread attempting to allocate more than half of the connection pool: "+thisThread.toString(), new WrappedExceptions(allocateStackTraces));
+			int halfPool = poolSize / 2;
+			if(halfPool < 1) halfPool = 1; // Unlikely case of one-connection pool
+			if(useCount >= halfPool) {
+				throw newException(
+					"Thread attempting to allocate more than half of the connection pool: " + thisThread.toString(),
+					new WrappedExceptions(allocateStackTraces)
+				);
+			}
 			logger.logp(
 				Level.WARNING,
 				AOPool.class.getName(),
 				"getConnection",
 				null,
 				new WrappedExceptions(
-					"Warning: Thread allocated more than "+maxConnections+" "+(maxConnections==1 ? "connection" : "connections")+".  The stack trace at allocation time is included.",
+					"Warning: Thread allocated more than "+maxConnections+" "+(maxConnections==1 ? "connection" : "connections")+".  The stack trace at allocation time is included for each connection.",
 					allocateStackTraces
 				)
 			);
