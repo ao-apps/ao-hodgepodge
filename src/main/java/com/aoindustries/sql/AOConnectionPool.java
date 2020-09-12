@@ -28,6 +28,7 @@ import com.aoindustries.lang.Throwables;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -45,7 +46,15 @@ import java.util.logging.Logger;
 // TODO: Use Connection.isValid while allocating from pool and/or putting back into pool?
 // TODO: Can isValid be used instead of forceful rollbackAndClose on SQLException?
 // TODO: Or use isValid in background connection management?
-// TODO: Warn in AOConnectionPool when max connections are higher than database supports
+//
+// TODO: Warn in AOConnectionPool when max connections are higher than database supports (check once on connect, check
+//       occasionally?  PostgreSQL JDBC driver seems to have hard-coded value of 8192 currently, so this might not be
+//       very meaningful.
+//
+// TODO: Implement DataSource
+//
+// TODO: Deprecate and just use commons-dbcp.  This pooling code predates dbcp-1.0 by around three years, but there
+//       is probably no benefit to maintaining this separate pooling implementation.
 final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLException> {
 
 	/**
@@ -68,14 +77,14 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 
 	@SuppressWarnings("null")
 	private Connection unwrap(Connection conn) throws SQLException {
-		AOPoolConnectionWrapper wrapper;
-		if(conn instanceof AOPoolConnectionWrapper) {
-			wrapper = (AOPoolConnectionWrapper)conn;
+		PooledConnectionWrapper wrapper;
+		if(conn instanceof PooledConnectionWrapper) {
+			wrapper = (PooledConnectionWrapper)conn;
 		} else {
-			wrapper = conn.unwrap(AOPoolConnectionWrapper.class);
+			wrapper = conn.unwrap(PooledConnectionWrapper.class);
 		}
 		if(wrapper.pool == this) {
-			return wrapper.wrapped;
+			return wrapper.getWrappedConnection();
 		} else {
 			throw new SQLException("Connection from a different pool, cannot unwrap");
 		}
@@ -310,21 +319,58 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		}
 	}
 
-	private static class AOPoolConnectionWrapper extends UncloseableConnectionWrapper {
+	private static class PooledDatabaseMetaDataWrapper extends DatabaseMetaDataWrapper {
 
-		private final AOConnectionPool pool;
-		private final Connection wrapped;
-
-		private AOPoolConnectionWrapper(AOConnectionPool pool, Connection wrapped) {
-			this.pool = pool;
-			this.wrapped = wrapped;
+		private PooledDatabaseMetaDataWrapper(PooledConnectionWrapper connectionWrapper, DatabaseMetaData wrapped) {
+			super(connectionWrapper, wrapped);
 		}
 
 		@Override
+		protected PooledConnectionWrapper getConnectionWrapper() {
+			return (PooledConnectionWrapper)super.getConnectionWrapper();
+		}
+
+		@Override
+		public int getMaxConnections() throws SQLException {
+			AOConnectionPool pool = getConnectionWrapper().pool;
+			int maxConnections = super.getMaxConnections();
+			int poolSize = pool.getPoolSize();
+			if(maxConnections == 0) {
+				// Unknown, just return pool size
+				return poolSize;
+			} else {
+				if(poolSize > maxConnections) {
+					// Warn and constrain by maxConnections
+					if(pool.logger.isLoggable(Level.WARNING)) {
+						pool.logger.warning(
+							"AOConnectionPool.poolSize > DatabaseMetaData.maxConnections: "
+							+ poolSize + " > " + maxConnections
+						);
+					}
+					return maxConnections;
+				} else {
+					// Constrain by pool size
+					return poolSize;
+				}
+			}
+		}
+	}
+
+	private static class PooledConnectionWrapper extends UncloseableConnectionWrapper {
+
+		private final AOConnectionPool pool;
+
+		private PooledConnectionWrapper(AOConnectionPool pool, Connection wrapped) {
+			super(wrapped);
+			this.pool = pool;
+		}
+
+		@Override
+		@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 		protected void onAbort(Executor executor) throws SQLException {
 			Throwable t1 = null;
 			try {
-				wrapped.abort(executor);
+				getWrappedConnection().abort(executor);
 			} catch(Throwable t) {
 				t1 = Throwables.addSuppressed(t1, t);
 			}
@@ -347,14 +393,14 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 		}
 
 		@Override
-		protected Connection getWrappedConnection() {
-			return wrapped;
+		protected PooledDatabaseMetaDataWrapper newDatabaseMetaDataWrapper(DatabaseMetaData metaData) {
+			return new PooledDatabaseMetaDataWrapper(this, metaData);
 		}
 	}
 
 	@Override
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-	protected AOPoolConnectionWrapper getConnectionObject() throws SQLException {
+	protected PooledConnectionWrapper getConnectionObject() throws SQLException {
 		try {
 			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
 			loadDriver(driver);
@@ -367,9 +413,9 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 					// to eliminate unnecessary round-trips and improve performance over high-latency links.
 					conn = new PostgresqlConnectionWrapper(conn);
 				}
-				AOPoolConnectionWrapper wrapped = new AOPoolConnectionWrapper(this, conn);
+				PooledConnectionWrapper connectionWrapper = new PooledConnectionWrapper(this, conn);
 				successful = true;
-				return wrapped;
+				return connectionWrapper;
 			} finally {
 				if(!successful) conn.close();
 			}
