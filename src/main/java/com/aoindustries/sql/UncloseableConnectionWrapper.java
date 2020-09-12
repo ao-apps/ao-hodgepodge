@@ -48,7 +48,8 @@ public abstract class UncloseableConnectionWrapper extends ConnectionWrapper {
 
 	private final AtomicBoolean closed = new AtomicBoolean();
 
-	public UncloseableConnectionWrapper() {
+	public UncloseableConnectionWrapper(Connection wrapped) {
+		super(wrapped);
 	}
 
 	private <X extends Throwable> void checkNotClosed(Function<String,X> throwableSupplier) throws X {

@@ -46,9 +46,102 @@ import java.util.Optional;
  *
  * @author  AO Industries, Inc.
  */
-public abstract class ResultSetWrapper implements ResultSet {
+public class ResultSetWrapper implements ResultSet {
 
-	public ResultSetWrapper() {
+	private final ConnectionWrapper connectionWrapper;
+	private final StatementWrapper stmtWrapper;
+	private final ResultSet wrapped;
+
+	public ResultSetWrapper(ConnectionWrapper connectionWrapper, StatementWrapper stmtWrapper, ResultSet wrapped) {
+		this.connectionWrapper = connectionWrapper;
+		this.stmtWrapper = stmtWrapper;
+		this.wrapped = wrapped;
+	}
+
+	/**
+	 * Gets the connection wrapper.
+	 */
+	protected ConnectionWrapper getConnectionWrapper() {
+		return connectionWrapper;
+	}
+
+	/**
+	 * Gets the statement wrapper.
+	 */
+	protected Optional<? extends StatementWrapper> getStatementWrapper() {
+		return Optional.ofNullable(stmtWrapper);
+	}
+
+	/**
+	 * Gets the results that are wrapped.
+	 */
+	protected ResultSet getWrappedResultSet() {
+		return wrapped;
+	}
+
+	/**
+	 * Wraps an {@link Array}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#newArrayWrapper(com.aoindustries.sql.StatementWrapper, java.sql.Array)
+	 * @see  #unwrapArray(java.sql.Array)
+	 */
+	protected ArrayWrapper wrapArray(Array array) {
+		if(array == null) {
+			return null;
+		}
+		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
+		StatementWrapper resultsStmtWrapper = getStatementWrapper().orElse(null);
+		if(array instanceof ArrayWrapper) {
+			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
+			if(
+				arrayWrapper.getConnectionWrapper() == _connectionWrapper
+				&& arrayWrapper.getStatementWrapper().orElse(null) == resultsStmtWrapper
+			) {
+				return arrayWrapper;
+			}
+		}
+		return _connectionWrapper.newArrayWrapper(resultsStmtWrapper, array);
+	}
+
+	/**
+	 * Unwraps an {@link Array}, if wrapped by this wrapper.
+	 *
+	 * @see  #wrapArray(java.sql.Array)
+	 */
+	protected Array unwrapArray(Array array) {
+		if(array == null) {
+			return null;
+		}
+		if(array instanceof ArrayWrapper) {
+			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
+			if(arrayWrapper.getConnectionWrapper() == getConnectionWrapper()) {
+				return arrayWrapper.getWrappedArray();
+			}
+		}
+		return array;
+	}
+
+	/**
+	 * Wraps a {@link Statement}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapStatement(java.sql.Statement)
+	 */
+	protected StatementWrapper wrapStatement(Statement stmt) {
+		if(stmt == null) {
+			return null;
+		}
+		StatementWrapper _stmtWrapper = getStatementWrapper().orElse(null);
+		if(
+			_stmtWrapper != null
+			&& (
+		 		_stmtWrapper == stmt
+		 		|| _stmtWrapper.getWrappedStatement() == stmt
+			)
+		) {
+			return _stmtWrapper;
+		} else {
+			return getConnectionWrapper().wrapStatement(stmt);
+		}
 	}
 
 	@Override
@@ -1034,91 +1127,4 @@ public abstract class ResultSetWrapper implements ResultSet {
     public void updateObject(String columnLabel, Object x, SQLType targetSqlType) throws SQLException {
 		getWrappedResultSet().updateObject(columnLabel, x, targetSqlType);
 	}
-
-	protected StatementWrapper wrapStatement(Statement stmt) {
-		if(stmt == null) {
-			return null;
-		}
-		Optional<? extends StatementWrapper> stmtWrapper = getStatementWrapper();
-		if(
-			stmtWrapper.isPresent()
-			&& (
-		 		stmtWrapper.get() == stmt
-		 		|| stmtWrapper.get().getWrappedStatement() == stmt
-			)
-		) {
-			return stmtWrapper.get();
-		} else {
-			return getConnectionWrapper().wrapStatement(stmt).orElseThrow(AssertionError::new);
-		}
-		// TODO: Why "bad return type in lambda expression"?
-		// return getStatementWrapper()
-		// 	.filter(stmtWrapper ->
-		// 		stmtWrapper == stmt
-		// 		|| stmtWrapper.getWrappedStatement() == stmt
-		// 	).orElseGet(() ->
-		// 		getConnectionWrapper().wrapStatement(stmt).orElseThrow(AssertionError::new)
-		// 	);
-	}
-
-	protected ArrayWrapper wrapArray(Array array) {
-		if(array == null) {
-			return null;
-		}
-		ConnectionWrapper connectionWrapper = getConnectionWrapper();
-		Optional<? extends StatementWrapper> resultsStmtWrapper = getStatementWrapper();
-		if(array instanceof ArrayWrapper) {
-			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
-			if(
-				arrayWrapper.getConnectionWrapper() == connectionWrapper
-				&& arrayWrapper.getStatementWrapper().orElse(null) == resultsStmtWrapper.orElse(null)
-			) {
-				return arrayWrapper;
-			}
-		}
-		return new ArrayWrapper() {
-			@Override
-			protected ConnectionWrapper getConnectionWrapper() {
-				return connectionWrapper;
-			}
-
-			@Override
-			protected Optional<? extends StatementWrapper> getStatementWrapper() {
-				return resultsStmtWrapper;
-			}
-
-			@Override
-			protected Array getWrappedArray() {
-				return array;
-			}
-		};
-	}
-
-	protected Array unwrapArray(Array array) {
-		if(array == null) {
-			return null;
-		}
-		if(array instanceof ArrayWrapper) {
-			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
-			if(arrayWrapper.getConnectionWrapper() == getConnectionWrapper()) {
-				return arrayWrapper.getWrappedArray();
-			}
-		}
-		return array;
-	}
-
-	/**
-	 * Gets the connection wrapper.
-	 */
-	protected abstract ConnectionWrapper getConnectionWrapper();
-
-	/**
-	 * Gets the statement wrapper.
-	 */
-	protected abstract Optional<? extends StatementWrapper> getStatementWrapper();
-
-	/**
-	 * Gets the results that are wrapped.
-	 */
-	protected abstract ResultSet getWrappedResultSet();
 }

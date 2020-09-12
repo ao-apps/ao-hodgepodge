@@ -26,16 +26,54 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.Optional;
 
 /**
  * Wraps a {@link Statement}.
  *
  * @author  AO Industries, Inc.
  */
-public abstract class StatementWrapper implements Statement {
+public class StatementWrapper implements Statement {
 
-	public StatementWrapper() {
+	private final ConnectionWrapper connectionWrapper;
+	private final Statement wrapped;
+
+	public StatementWrapper(ConnectionWrapper connectionWrapper, Statement wrapped) {
+		this.connectionWrapper = connectionWrapper;
+		this.wrapped = wrapped;
+	}
+
+	/**
+	 * Gets the connection wrapper.
+	 */
+	protected ConnectionWrapper getConnectionWrapper() {
+		return connectionWrapper;
+	}
+
+	/**
+	 * Gets the statement that is wrapped.
+	 */
+	protected Statement getWrappedStatement() {
+		return wrapped;
+	}
+
+	/**
+	 * Wraps a {@link ResultSet}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#newResultSetWrapper(com.aoindustries.sql.StatementWrapper, java.sql.ResultSet)
+	 * @see  ArrayWrapper#wrapResultSet(java.sql.ResultSet)
+	 * @see  DatabaseMetaDataWrapper#wrapResultSet(java.sql.ResultSet)
+	 */
+	protected ResultSetWrapper wrapResultSet(ResultSet results) {
+		if(results == null) {
+			return null;
+		}
+		if(results instanceof ResultSetWrapper) {
+			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
+			if(resultsWrapper.getStatementWrapper().orElse(null) == this) {
+				return resultsWrapper;
+			}
+		}
+		return getConnectionWrapper().newResultSetWrapper(this, results);
 	}
 
 	@Override
@@ -190,9 +228,9 @@ public abstract class StatementWrapper implements Statement {
 
     @Override
 	public ConnectionWrapper getConnection()  throws SQLException {
-		ConnectionWrapper connectionWrapper = getConnectionWrapper();
-		assert getWrappedStatement().getConnection() == connectionWrapper.getWrappedConnection();
-		return connectionWrapper;
+		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
+		assert getWrappedStatement().getConnection() == _connectionWrapper.getWrappedConnection();
+		return _connectionWrapper;
 	}
 
     @Override
@@ -309,42 +347,4 @@ public abstract class StatementWrapper implements Statement {
 	// Java 9: String enquoteIdentifier(String identifier, boolean alwaysQuote) throws SQLException
 	// Java 9: boolean isSimpleIdentifier(String identifier) throws SQLException
 	// Java 9: String enquoteNCharLiteral(String val)  throws SQLException
-	
-	protected ResultSetWrapper wrapResultSet(ResultSet results) {
-		if(results == null) {
-			return null;
-		}
-		if(results instanceof ResultSetWrapper) {
-			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
-			if(resultsWrapper.getStatementWrapper().orElse(null) == this) {
-				return resultsWrapper;
-			}
-		}
-		return new ResultSetWrapper() {
-			@Override
-			protected ConnectionWrapper getConnectionWrapper() {
-				return StatementWrapper.this.getConnectionWrapper();
-			}
-
-			@Override
-			protected Optional<? extends StatementWrapper> getStatementWrapper() {
-				return Optional.of(StatementWrapper.this);
-			}
-
-			@Override
-			protected ResultSet getWrappedResultSet() {
-				return results;
-			}
-		};
-	}
-
-	/**
-	 * Gets the connection wrapper.
-	 */
-	protected abstract ConnectionWrapper getConnectionWrapper();
-
-	/**
-	 * Gets the statement that is wrapped.
-	 */
-	protected abstract Statement getWrappedStatement();
 }

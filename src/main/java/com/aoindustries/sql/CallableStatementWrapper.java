@@ -36,16 +36,42 @@ import java.sql.SQLException;
 import java.sql.SQLType;
 import java.sql.SQLXML;
 import java.util.Calendar;
-import java.util.Optional;
 
 /**
  * Wraps a {@link CallableStatement}.
  *
  * @author  AO Industries, Inc.
  */
-public abstract class CallableStatementWrapper extends PreparedStatementWrapper implements CallableStatement {
+public class CallableStatementWrapper extends PreparedStatementWrapper implements CallableStatement {
 
-	public CallableStatementWrapper() {
+	public CallableStatementWrapper(ConnectionWrapper connectionWrapper, CallableStatement wrapped) {
+		super(connectionWrapper, wrapped);
+	}
+
+	/**
+	 * Gets the callable statement that is wrapped.
+	 */
+	@Override
+	protected CallableStatement getWrappedStatement() {
+		return (CallableStatement)super.getWrappedStatement();
+	}
+
+	/**
+	 * Wraps an {@link Array}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#newArrayWrapper(com.aoindustries.sql.StatementWrapper, java.sql.Array)
+	 */
+	protected ArrayWrapper wrapArray(Array array) {
+		if(array == null) {
+			return null;
+		}
+		if(array instanceof ArrayWrapper) {
+			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
+			if(arrayWrapper.getStatementWrapper().orElse(null) == this) {
+				return arrayWrapper;
+			}
+		}
+		return getConnectionWrapper().newArrayWrapper(this, array);
 	}
 
 	@Override
@@ -653,38 +679,4 @@ public abstract class CallableStatementWrapper extends PreparedStatementWrapper 
     public void registerOutParameter(String parameterName, SQLType sqlType, String typeName) throws SQLException {
 		getWrappedStatement().registerOutParameter(parameterName, sqlType, typeName);
 	}
-
-	protected ArrayWrapper wrapArray(Array array) {
-		if(array == null) {
-			return null;
-		}
-		if(array instanceof ArrayWrapper) {
-			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
-			if(arrayWrapper.getStatementWrapper().orElse(null) == this) {
-				return arrayWrapper;
-			}
-		}
-		return new ArrayWrapper() {
-			@Override
-			protected ConnectionWrapper getConnectionWrapper() {
-				return CallableStatementWrapper.this.getConnectionWrapper();
-			}
-
-			@Override
-			protected Optional<? extends StatementWrapper> getStatementWrapper() {
-				return Optional.of(CallableStatementWrapper.this);
-			}
-
-			@Override
-			protected Array getWrappedArray() {
-				return array;
-			}
-		};
-	}
-
-	/**
-	 * Gets the callable statement that is wrapped.
-	 */
-	@Override
-	protected abstract CallableStatement getWrappedStatement();
 }

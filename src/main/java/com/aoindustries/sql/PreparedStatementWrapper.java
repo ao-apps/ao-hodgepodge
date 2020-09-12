@@ -44,9 +44,18 @@ import java.util.Calendar;
  *
  * @author  AO Industries, Inc.
  */
-public abstract class PreparedStatementWrapper extends StatementWrapper implements PreparedStatement {
+public class PreparedStatementWrapper extends StatementWrapper implements PreparedStatement {
 
-	public PreparedStatementWrapper() {
+	public PreparedStatementWrapper(ConnectionWrapper connectionWrapper, PreparedStatement wrapped) {
+		super(connectionWrapper, wrapped);
+	}
+
+	/**
+	 * Gets the prepared statement that is wrapped.
+	 */
+	@Override
+	protected PreparedStatement getWrappedStatement() {
+		return (PreparedStatement)super.getWrappedStatement();
 	}
 
 	@Override
@@ -192,7 +201,7 @@ public abstract class PreparedStatementWrapper extends StatementWrapper implemen
 
 	@Override
     public void setArray(int parameterIndex, Array x) throws SQLException {
-		getWrappedStatement().setArray(parameterIndex, unwrapArray(x));
+		getWrappedStatement().setArray(parameterIndex, getConnectionWrapper().unwrapArray(x));
 	}
 
 	@Override
@@ -339,23 +348,4 @@ public abstract class PreparedStatementWrapper extends StatementWrapper implemen
     public long executeLargeUpdate() throws SQLException {
 		return getWrappedStatement().executeLargeUpdate();
 	}
-
-	protected Array unwrapArray(Array array) {
-		if(array == null) {
-			return null;
-		}
-		if(array instanceof ArrayWrapper) {
-			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
-			if(arrayWrapper.getConnectionWrapper() == getConnectionWrapper()) {
-				return arrayWrapper.getWrappedArray();
-			}
-		}
-		return array;
-	}
-
-	/**
-	 * Gets the prepared statement that is wrapped.
-	 */
-	@Override
-	protected abstract PreparedStatement getWrappedStatement();
 }

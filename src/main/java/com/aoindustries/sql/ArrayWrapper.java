@@ -33,9 +33,79 @@ import java.util.Optional;
  *
  * @author  AO Industries, Inc.
  */
-public abstract class ArrayWrapper implements Array {
+public class ArrayWrapper implements Array {
 
-	public ArrayWrapper() {
+	private final ConnectionWrapper connectionWrapper;
+	private final StatementWrapper stmtWrapper;
+	private final Array wrapped;
+
+	public ArrayWrapper(ConnectionWrapper connectionWrapper, StatementWrapper stmtWrapper, Array wrapped) {
+		this.connectionWrapper = connectionWrapper;
+		this.stmtWrapper = stmtWrapper;
+		this.wrapped = wrapped;
+	}
+
+	/**
+	 * Gets the connection wrapper.
+	 */
+	protected ConnectionWrapper getConnectionWrapper() {
+		return connectionWrapper;
+	}
+
+	/**
+	 * Gets the statement wrapper.
+	 */
+	protected Optional<? extends StatementWrapper> getStatementWrapper() {
+		return Optional.ofNullable(stmtWrapper);
+	}
+
+	/**
+	 * Gets the array that is wrapped.
+	 */
+	protected Array getWrappedArray() {
+		return wrapped;
+	}
+
+	/**
+	 * Wraps a {@link ResultSet}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapResultSet(java.sql.ResultSet)
+	 * @see  StatementWrapper#wrapResultSet(java.sql.ResultSet)
+	 */
+	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
+		if(results == null) {
+			return null;
+		}
+		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
+		StatementWrapper _stmtWrapper = getStatementWrapper().orElse(null);
+		if(results instanceof ResultSetWrapper) {
+			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
+			Optional<? extends StatementWrapper> rsStmtWrapper = resultsWrapper.getStatementWrapper();
+			if(
+				rsStmtWrapper.isPresent()
+				&& rsStmtWrapper.get().getConnectionWrapper() == _connectionWrapper
+				&& (
+					rsStmtWrapper.get() == _stmtWrapper
+					|| rsStmtWrapper.get().getWrappedStatement() == _stmtWrapper
+				)
+			) {
+				return resultsWrapper;
+			}
+		}
+		Statement stmt = results.getStatement();
+		if(
+			_stmtWrapper != null
+			&& _stmtWrapper.getWrappedStatement() == stmt
+		) {
+			return _stmtWrapper.wrapResultSet(results);
+		} else {
+			StatementWrapper newStmtWrapper = _connectionWrapper.wrapStatement(stmt);
+			if(newStmtWrapper != null) {
+				return newStmtWrapper.wrapResultSet(results);
+			} else {
+				return _connectionWrapper.wrapResultSet(results);
+			}
+		}
 	}
 
 	@Override
@@ -92,61 +162,4 @@ public abstract class ArrayWrapper implements Array {
 	public void free() throws SQLException {
 		getWrappedArray().free();
 	}
-
-	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
-		if(results == null) {
-			return null;
-		}
-		ConnectionWrapper connectionWrapper = getConnectionWrapper();
-		Optional<? extends StatementWrapper> arrayStmtWrapper = getStatementWrapper();
-		if(results instanceof ResultSetWrapper) {
-			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
-			Optional<? extends StatementWrapper> rsStmtWrapper = resultsWrapper.getStatementWrapper();
-			if(
-				rsStmtWrapper.isPresent()
-				&& rsStmtWrapper.get().getConnectionWrapper() == connectionWrapper
-				&& (
-					rsStmtWrapper.get() == arrayStmtWrapper.orElse(null)
-					|| rsStmtWrapper.get().getWrappedStatement() == arrayStmtWrapper.orElse(null)
-				)
-			) {
-				return resultsWrapper;
-			}
-		}
-		Statement stmt = results.getStatement();
-		if(
-			arrayStmtWrapper.isPresent()
-			&& arrayStmtWrapper.get().getWrappedStatement() == stmt
-		) {
-			return arrayStmtWrapper.get().wrapResultSet(results);
-		} else {
-			// Java 9: Use Optional.or
-
-			Optional<? extends StatementWrapper> newStmtWrapper = connectionWrapper.wrapStatement(stmt);
-			if(newStmtWrapper.isPresent()) {
-				return newStmtWrapper.get().wrapResultSet(results);
-			} else {
-				return connectionWrapper.wrapResultSet(results);
-			}
-
-			//return connectionWrapper.wrapStatement(stmt)
-			//	.map(newStmtWrapper -> newStmtWrapper.wrapResultSet(results))
-			//	.orElseGet(() -> connectionWrapper.wrapResultSet(results));
-		}
-	}
-
-	/**
-	 * Gets the connection wrapper.
-	 */
-	protected abstract ConnectionWrapper getConnectionWrapper();
-
-	/**
-	 * Gets the statement wrapper.
-	 */
-	protected abstract Optional<? extends StatementWrapper> getStatementWrapper();
-
-	/**
-	 * Gets the array that is wrapped.
-	 */
-	protected abstract Array getWrappedArray();
 }

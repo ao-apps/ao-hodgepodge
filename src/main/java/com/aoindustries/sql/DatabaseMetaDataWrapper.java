@@ -26,16 +26,59 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
-import java.util.Optional;
 
 /**
  * Wraps a {@link DatabaseMetaData}.
  *
  * @author  AO Industries, Inc.
  */
-public abstract class DatabaseMetaDataWrapper implements DatabaseMetaData {
+public class DatabaseMetaDataWrapper implements DatabaseMetaData {
 
-	public DatabaseMetaDataWrapper() {
+	private final ConnectionWrapper connectionWrapper;
+	private final DatabaseMetaData wrapped;
+
+	public DatabaseMetaDataWrapper(ConnectionWrapper connectionWrapper, DatabaseMetaData wrapped) {
+		this.connectionWrapper = connectionWrapper;
+		this.wrapped = wrapped;
+	}
+
+	/**
+	 * Gets the connection wrapper.
+	 */
+	protected ConnectionWrapper getConnectionWrapper() {
+		return connectionWrapper;
+	}
+
+	/**
+	 * Gets the database meta data that is wrapped.
+	 */
+	protected DatabaseMetaData getWrappedDatabaseMetaData() {
+		return wrapped;
+	}
+
+	/**
+	 * Wraps a {@link ResultSet}, if not already wrapped by this wrapper.
+	 *
+	 * @see  StatementWrapper#wrapResultSet(java.sql.ResultSet)
+	 * @see  ConnectionWrapper#wrapResultSet(java.sql.ResultSet)
+	 */
+	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
+		if(results == null) {
+			return null;
+		}
+		if(results instanceof ResultSetWrapper) {
+			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
+			if(!resultsWrapper.getStatementWrapper().isPresent()) {
+				return resultsWrapper;
+			}
+		}
+		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
+		StatementWrapper stmtWrapper = _connectionWrapper.wrapStatement(results.getStatement());
+		if(stmtWrapper != null) {
+			return stmtWrapper.wrapResultSet(results);
+		} else {
+			return _connectionWrapper.wrapResultSet(results);
+		}
 	}
 
 	@Override
@@ -795,9 +838,9 @@ public abstract class DatabaseMetaDataWrapper implements DatabaseMetaData {
 
 	@Override
 	public ConnectionWrapper getConnection() throws SQLException {
-		ConnectionWrapper connectionWrapper = getConnectionWrapper();
-		assert getWrappedDatabaseMetaData().getConnection() == connectionWrapper.getWrappedConnection();
-		return connectionWrapper;
+		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
+		assert getWrappedDatabaseMetaData().getConnection() == _connectionWrapper.getWrappedConnection();
+		return _connectionWrapper;
 	}
 
 	@Override
@@ -936,36 +979,4 @@ public abstract class DatabaseMetaDataWrapper implements DatabaseMetaData {
 	}
 
 	// Java 9: boolean supportsSharding() throws SQLException;
-
-	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
-		if(results == null) {
-			return null;
-		}
-		if(results instanceof ResultSetWrapper) {
-			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
-			if(!resultsWrapper.getStatementWrapper().isPresent()) {
-				return resultsWrapper;
-			}
-		}
-		ConnectionWrapper connectionWrapper = getConnectionWrapper();
-		Optional<? extends StatementWrapper> stmtWrapper = connectionWrapper.wrapStatement(results.getStatement());
-		if(stmtWrapper.isPresent()) {
-			return stmtWrapper.get().wrapResultSet(results);
-		} else {
-			return connectionWrapper.wrapResultSet(results);
-		}
-		//return connectionWrapper.wrapStatement(results.getStatement())
-		//	.map(stmtWrapper -> stmtWrapper.wrapResultSet(results))
-		//	.orElseGet(() -> connectionWrapper.wrapResultSet(results));
-	}
-
-	/**
-	 * Gets the connection wrapper.
-	 */
-	protected abstract ConnectionWrapper getConnectionWrapper();
-
-	/**
-	 * Gets the database meta data that is wrapped.
-	 */
-	protected abstract DatabaseMetaData getWrappedDatabaseMetaData();
 }
