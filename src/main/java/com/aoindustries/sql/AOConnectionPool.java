@@ -78,13 +78,13 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 
 	@SuppressWarnings("null")
 	private Connection unwrap(Connection conn) throws SQLException {
-		PooledConnectionWrapper wrapper;
-		if(conn instanceof PooledConnectionWrapper) {
-			wrapper = (PooledConnectionWrapper)conn;
+		IPooledConnectionWrapper wrapper;
+		if(conn instanceof IPooledConnectionWrapper) {
+			wrapper = (IPooledConnectionWrapper)conn;
 		} else {
-			wrapper = conn.unwrap(PooledConnectionWrapper.class);
+			wrapper = conn.unwrap(IPooledConnectionWrapper.class);
 		}
-		if(wrapper.pool == this) {
+		if(wrapper.getPool() == this) {
 			return wrapper.getWrappedConnection();
 		} else {
 			throw new SQLException("Connection from a different pool, cannot unwrap");
@@ -352,13 +352,30 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		}
 	}
 
-	private static class PooledConnectionWrapper extends UncloseableConnectionWrapper {
+	private static interface IPooledConnectionWrapper {
+		Connection getWrappedConnection();
+
+		AOConnectionPool getPool();
+	}
+
+	private static class PooledConnectionWrapper extends UncloseableConnectionWrapper
+		implements IPooledConnectionWrapper {
 
 		private final AOConnectionPool pool;
 
 		private PooledConnectionWrapper(AOConnectionPool pool, Connection wrapped) {
 			super(wrapped);
 			this.pool = pool;
+		}
+
+		@Override
+		public Connection getWrappedConnection() {
+			return super.getWrappedConnection();
+		}
+
+		@Override
+		public AOConnectionPool getPool() {
+			return pool;
 		}
 
 		@Override
