@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -72,6 +72,7 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 	}
 
 	@Override
+	@SuppressWarnings("UseOfSystemOutOrSystemErr")
 	public void run() {
 		try {
 			long totalBytes = 0;
@@ -118,7 +119,7 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 				System.out.println(getDirection()+" Connection closing: "+totalBytes+" bytes sent in "+BigDecimal.valueOf(endTime-startTime, 3)+" seconds, "+(totalBytes * 8000 / (endTime - startTime))+" bits/second average");
 			}
 		} catch(IOException err) {
-			ErrorPrinter.printStackTraces(err);
+			ErrorPrinter.printStackTraces(err, System.err);
 		}
 	}
 

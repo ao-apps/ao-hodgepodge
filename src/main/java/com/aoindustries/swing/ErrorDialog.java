@@ -51,10 +51,12 @@ public class ErrorDialog extends DefaultJDialog implements ActionListener {
 		this(parent, title, T, (Object[])null);
 	}
 
+	@SuppressWarnings({"LeakingThisInConstructor", "OverridableMethodCallInConstructor"})
 	public ErrorDialog(Component parent, String title, Throwable T, Object... extraInfo) {
 		super((parent instanceof JFrame) ? (JFrame)parent : new JFrame(), title, true, 400, 300);
 
-		Container contentPane=getContentPane();
+		@SuppressWarnings("OverridableMethodCallInConstructor")
+		Container contentPane = getContentPane();
 		contentPane.setLayout(new MultiBorderLayout());
 		contentPane.add(new JLabel(" "), BorderLayout.NORTH);
 		contentPane.add(new JLabel("An application error has occurred.  Please provide a", JLabel.CENTER), BorderLayout.NORTH);

@@ -41,6 +41,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class Benchmark {
 
 	private static final long MAX_READ_BYTES = 4L * 1024L * 1024L * 1024L;
@@ -80,7 +81,7 @@ public class Benchmark {
 						}
 					}
 				} catch(IOException err) {
-					ErrorPrinter.printStackTraces(err);
+					ErrorPrinter.printStackTraces(err, System.err);
 				} finally {
 					long timeSpan = System.currentTimeMillis() - startTime;
 					if(bytesRead!=MAX_READ_BYTES) System.err.println("Incorrect number of bytes read.  Expected "+MAX_READ_BYTES+", got "+bytesRead);
@@ -134,7 +135,7 @@ public class Benchmark {
 										raf.close();
 									}
 								} catch(IOException err) {
-									ErrorPrinter.printStackTraces(err);
+									ErrorPrinter.printStackTraces(err, System.err);
 								}
 								synchronized(counter) {
 									counter[0]+=count;
@@ -147,7 +148,7 @@ public class Benchmark {
 						try {
 							threads[d].join();
 						} catch(InterruptedException err) {
-							ErrorPrinter.printStackTraces(err);
+							ErrorPrinter.printStackTraces(err, System.err);
 						}
 					}
 					double seekRate = (double)counter[0]/30L;
@@ -189,10 +190,14 @@ public class Benchmark {
 			List<List<List<Double>>> seekRates = new ArrayList<>(numFiles);
 			for(int c=0; c<numFiles; c++) {
 				List<List<Double>> fileThroughputs = new ArrayList<>(blockSizes.length);
-				for(int d=0; d<blockSizes.length; d++) fileThroughputs.add(new ArrayList<>(numPasses));
+				for(int d = 0; d < blockSizes.length; d++) {
+					fileThroughputs.add(new ArrayList<>(numPasses));
+				}
 				throughputs.add(fileThroughputs);
 				List<List<Double>> fileSeekRates = new ArrayList<>(concurrencies.length);
-				for(int d=0; d<concurrencies.length; d++) fileSeekRates.add(new ArrayList<>(numPasses));
+				for(int d = 0; d < concurrencies.length; d++) {
+					fileSeekRates.add(new ArrayList<>(numPasses));
+				}
 				seekRates.add(fileSeekRates);
 			}
 			for(int pass=1; pass<=numPasses; pass++) {

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2018  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,6 +35,7 @@ import java.net.Socket;
  *
  * @author  AO Industries, Inc.
  */
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class BandwidthLimitingTunnel implements Runnable {
 
 	private final boolean verbose;
@@ -46,6 +47,7 @@ public class BandwidthLimitingTunnel implements Runnable {
 	private final Long downstream_bandwidth;
 	private final Thread thread;
 
+	@SuppressWarnings("CallToThreadStartDuringObjectConstruction")
 	public BandwidthLimitingTunnel(
 		boolean verbose,
 		String listen_address,
@@ -65,6 +67,7 @@ public class BandwidthLimitingTunnel implements Runnable {
 		(this.thread = new Thread(this)).start();
 	}
 
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void main(String[] args) {
 		// Listen address
 		// Listen port
@@ -113,6 +116,7 @@ public class BandwidthLimitingTunnel implements Runnable {
 	}
 
 	@Override
+	@SuppressWarnings({"ResultOfObjectAllocationIgnored", "UseSpecificCatch", "TooBroadCatch", "SleepWhileInLoop"})
 	public void run() {
 		while(thread==Thread.currentThread()) {
 			try {
@@ -128,11 +132,11 @@ public class BandwidthLimitingTunnel implements Runnable {
 			} catch(ThreadDeath TD) {
 				throw TD;
 			} catch(Throwable T) {
-				ErrorPrinter.printStackTraces(T);
+				ErrorPrinter.printStackTraces(T, System.err);
 				try {
 					Thread.sleep(10000);
 				} catch(InterruptedException err) {
-					ErrorPrinter.printStackTraces(err);
+					ErrorPrinter.printStackTraces(err, System.err);
 				}
 			}
 		}

@@ -144,6 +144,7 @@ abstract public class ShellInterpreter implements Runnable {
 	/**
 	 * Processes one command and returns.
 	 */
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	private boolean handleCommandImpl(String[] args) throws IOException, SQLException, Throwable {
 		try {
 			// Fork to background task
@@ -233,7 +234,9 @@ abstract public class ShellInterpreter implements Runnable {
 			}
 			if(changed) {
 				// Trim off any extra entries
-				while(jobs.size()>0 && jobs.get(jobs.size()-1)==null) jobs.remove(jobs.size()-1);
+				while(jobs.size() > 0 && jobs.get(jobs.size() - 1) == null) {
+					jobs.remove(jobs.size() - 1);
+				}
 			}
 		}
 	}
@@ -246,7 +249,9 @@ abstract public class ShellInterpreter implements Runnable {
 		String mystatus=shell.status;
 		out.print(mystatus);
 		int blanks=Math.max(1, 25-num.length()-mystatus.length());
-		for(int c=0;c<blanks;c++) out.print(' ');
+		for(int c = 0; c < blanks; c++) {
+			out.print(' ');
+		}
 		for(int c=0;c<shell.args.length;c++) {
 			if(c>0) out.print(' ');
 			out.print(shell.args[c]);
