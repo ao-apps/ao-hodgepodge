@@ -357,6 +357,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	 * @see  #getConnection(int)
 	 * @see  AutoCloseable#close()
 	 */
+	// Note:      Is AOPool.getConnection()
 	// Note: Matches AOConnectionPool.getConnection()
 	// Note: Matches Database.getConnection()
 	// Note: Matches DatabaseConnection.getConnection()
@@ -387,6 +388,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	 * @see  #getConnection()
 	 * @see  AutoCloseable#close()
 	 */
+	// Note:      Is AOPool.getConnection(int)
 	// Note: Matches AOConnectionPool.getConnection(int)
 	// Note: Matches Database.getConnection(int)
 	// Note: Matches DatabaseConnection.getConnection(int)

@@ -148,6 +148,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 	 * @see  Connection#close()
 	 */
 	// Note: Matches AOPool.getConnection()
+	// Note:      Is AOConnectionPool.getConnection()
 	// Note: Matches Database.getConnection()
 	// Note: Matches DatabaseConnection.getConnection()
 	@Override
@@ -182,6 +183,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 	 * @see  Connection#close()
 	 */
 	// Note: Matches AOPool.getConnection(int)
+	// Note:      Is AOConnectionPool.getConnection(int)
 	// Note: Matches Database.getConnection(int)
 	// Note: Matches DatabaseConnection.getConnection(int)
 	@Override
@@ -210,6 +212,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 	 * @see  #getConnection(int, boolean, int)
 	 * @see  Connection#close()
 	 */
+	// Note:      Is AOConnectionPool.getConnection(boolean)
 	// Note: Matches Database.getConnection(boolean)
 	// Note: Matches DatabaseConnection.getConnection(boolean)
 	public Connection getConnection(boolean readOnly) throws SQLException {
@@ -238,6 +241,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 	 * @see  #getConnection(int, boolean, int)
 	 * @see  Connection#close()
 	 */
+	// Note:      Is AOConnectionPool.getConnection(int, boolean)
 	// Note: Matches Database.getConnection(int, boolean)
 	// Note: Matches DatabaseConnection.getConnection(int, boolean)
 	public Connection getConnection(int isolationLevel, boolean readOnly) throws SQLException {
@@ -272,6 +276,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 	 *
 	 * @see  Connection#close()
 	 */
+	// Note:      Is AOConnectionPool.getConnection(int, boolean, int)
 	// Note: Matches Database.getConnection(int, boolean, int)
 	// Note: Matches DatabaseConnection.getConnection(int, boolean, int)
 	@SuppressWarnings({"UseSpecificCatch", "AssignmentToCatchBlockParameter"})
