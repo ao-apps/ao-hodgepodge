@@ -391,7 +391,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 
 	@Override
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-	protected PooledConnectionWrapper getConnectionObject() throws SQLException {
+	protected Connection getConnectionObject() throws SQLException {
 		try {
 			if(Thread.interrupted()) throw new SQLException("Thread interrupted");
 			loadDriver(driver);

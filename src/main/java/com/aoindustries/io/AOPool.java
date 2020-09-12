@@ -236,7 +236,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	 *
 	 * @see  #currentThreadId
 	 */
-	private final Map<SmallIdentifier,List<PooledConnection<C>>> threadConnectionsByThreadId = new WeakHashMap<SmallIdentifier,List<PooledConnection<C>>>();
+	private final Map<SmallIdentifier,List<PooledConnection<C>>> threadConnectionsByThreadId = new WeakHashMap<>();
 
 	/**
 	 * Tracks the thread ID that allocated each connection.
@@ -881,7 +881,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	 * @see  #close(java.lang.AutoCloseable)
 	 * @see  #release(com.aoindustries.io.AOPool.PooledConnection)
 	 */
-	@SuppressWarnings("UseSpecificCatch")
+	@SuppressWarnings({"UseSpecificCatch", "NestedSynchronizedStatement"})
 	protected void release(C connection) throws E {
 		// Find the threadId that had allocated the connection
 		// Will not be found when already released (or not from this pool)
