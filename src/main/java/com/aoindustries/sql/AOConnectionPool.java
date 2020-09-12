@@ -138,10 +138,6 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
 	 * available.
 	 * </p>
-	 * <p>
-	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
-	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
-	 * </p>
 	 *
 	 * @return  The read/write connection to the database
 	 *
@@ -168,13 +164,14 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
 	 * available.
 	 * </p>
-	 * <p>
-	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
-	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
-	 * </p>
 	 *
 	 * @param  maxConnections  The maximum number of connections expected to be used by the current thread.
 	 *                         This should normally be one to avoid potential deadlock.
+	 *                         <p>
+	 *                         The connection will continue to be considered used by the allocating thread until
+	 *                         released (via {@link Connection#close()}, even if the connection is shared by another
+	 *                         thread.
+	 *                         </p>
 	 *
 	 * @return  The read/write connection to the database
 	 *
@@ -202,10 +199,6 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
 	 * available.
 	 * </p>
-	 * <p>
-	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
-	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
-	 * </p>
 	 *
 	 * @param  readOnly  The {@link Connection#setReadOnly(boolean) read-only flag}
 	 *
@@ -231,10 +224,6 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * <p>
 	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
 	 * available.
-	 * </p>
-	 * <p>
-	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
-	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
 	 * </p>
 	 *
 	 * @param  isolationLevel  The {@link Connection#setTransactionIsolation(int) transaction isolation level}
@@ -263,10 +252,6 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
 	 * available.
 	 * </p>
-	 * <p>
-	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
-	 * thread, it should not be passed off to another thread before {@linkplain Connection#close() release}.
-	 * </p>
 	 *
 	 * @param  isolationLevel  The {@link Connection#setTransactionIsolation(int) transaction isolation level}
 	 *
@@ -274,6 +259,11 @@ final public class AOConnectionPool extends AOPool<Connection,SQLException,SQLEx
 	 *
 	 * @param  maxConnections  The maximum number of connections expected to be used by the current thread.
 	 *                         This should normally be one to avoid potential deadlock.
+	 *                         <p>
+	 *                         The connection will continue to be considered used by the allocating thread until
+	 *                         released (via {@link Connection#close()}, even if the connection is shared by another
+	 *                         thread.
+	 *                         </p>
 	 *
 	 * @return  The connection to the database
 	 *

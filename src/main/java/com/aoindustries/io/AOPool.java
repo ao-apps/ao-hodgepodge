@@ -25,37 +25,45 @@ package com.aoindustries.io;
 import com.aoindustries.exception.WrappedExceptions;
 import com.aoindustries.lang.Strings;
 import com.aoindustries.lang.Throwables;
+import com.aoindustries.security.SmallIdentifier;
 import com.aoindustries.util.ErrorPrinter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Random;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Reusable generic connection pooling with dynamic flaming tiger feature.
- *
+ * <p>
  * Two lists of connections are maintained.  The first is the list of connections
  * that are ready unused, and the second is the list of connections that are
  * currently checked-out.  By using this strategy, an available connection
  * can be found without searching the entire list.
- *
- * In addition to the global lists, a <code>ThreadLocal</code> list of connections
+ * </p>
+ * <p>
+ * In addition to the global lists, a {@link ThreadLocal} list of connections
  * checked-out by the current thread is maintained.  When getting a new connection,
- * this is used to check again <code>maxConnections</code> instead of checking
+ * this is used to check against <code>maxConnections</code> instead of checking
  * the global lists.
- *
+ * </p>
+ * <p>
  * Idea: Add some sort of thread-connection affinity, where the same connection
  *       slot will be used by the same thread when it is available.  This should
  *       help cache locality.
- *
- * Idea: When connections are closed due to maxConnectionAge, automatically reconnect
- *       in the background.  This would avoid the latency of the reconnect for the
- *       connection-using thread.
+ * </p>
+ * <p>
+ * Idea: Automatically connect ahead of time in the background.  This could
+ *       hide connection latency on first-use.
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
@@ -186,14 +194,58 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	private int maxConcurrency = 0;
 
 	/**
-	 * Connections that are checked-out by the current thread.
+	 * The allocation id of the current thread.  This is used as a key in the weak map
+	 * {@link #threadConnectionsByThreadId} and is tracked per-connection by {@link #allocationThreadIdByConnection}.
+	 * <p>
+	 * This approach allows sharing of information between threads, while still allowing garbage collection once a
+	 * thread dies.
+	 * </p>
+	 *
+	 * @see  #threadConnectionsByThreadId
 	 */
-	private final ThreadLocal<List<PooledConnection<C>>> currentThreadConnections = new ThreadLocal<List<PooledConnection<C>>>() {
+	private final ThreadLocal<SmallIdentifier> currentThreadId = new ThreadLocal<SmallIdentifier>() {
+
+		/**
+		 * Incremental allocation of thread IDs, since they are not used outside the scope of this class.
+		 * No benefit to randomizing the values.
+		 */
+		private long nextId = 0;
+
 		@Override
-		public List<PooledConnection<C>> initialValue() {
-			return new ArrayList<>();
+		protected SmallIdentifier initialValue() {
+			SmallIdentifier id;
+			synchronized(threadConnectionsByThreadId) {
+				// Wraparound of 64-bit identifier is unlikely, but still make sure is available for correctness
+				do {
+					id = new SmallIdentifier(nextId++);
+				} while(!threadConnectionsByThreadId.containsKey(id));
+				threadConnectionsByThreadId.put(id, new ArrayList<>());
+			}
+			return id;
 		}
 	};
+
+	/**
+	 * Connections that are checked-out by the current thread.
+	 * <p>
+	 * All access to this map must be synchronized on the map.
+	 * </p>
+	 * <p>
+	 * Furthermore, access to each of the individual lists must be synchronized on the list.  When a connection is
+	 * shared between threads, this list will be accessed by multiple threads.
+	 * </p>
+	 *
+	 * @see  #currentThreadId
+	 */
+	private final Map<SmallIdentifier,List<PooledConnection<C>>> threadConnectionsByThreadId = new WeakHashMap<SmallIdentifier,List<PooledConnection<C>>>();
+
+	/**
+	 * Tracks the thread ID that allocated each connection.
+	 * <p>
+	 * All access to this map must be synchronized on the map.
+	 * </p>
+	 */
+	private final Map<C,SmallIdentifier> allocationThreadIdByConnection = new IdentityHashMap<>();
 
 	/**
 	 * All warnings are sent here if available, otherwise will be written to <code>System.err</code>.
@@ -297,10 +349,6 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
 	 * available.
 	 * </p>
-	 * <p>
-	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
-	 * thread, it should not be passed off to another thread before {@linkplain AutoCloseable#close() release}.
-	 * </p>
 	 *
 	 * @return  Either a reused or new connection
 	 *
@@ -323,13 +371,14 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	 * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
 	 * available.
 	 * </p>
-	 * <p>
-	 * Due to internal {@link ThreadLocal} optimizations, the connection returned must be released by the current
-	 * thread, it should not be passed off to another thread before {@linkplain AutoCloseable#close() release}.
-	 * </p>
 	 *
 	 * @param  maxConnections  The maximum number of connections expected to be used by the current thread.
 	 *                         This should normally be one to avoid potential deadlock.
+	 *                         <p>
+	 *                         The connection will continue to be considered used by the allocating thread until
+	 *                         released (via {@link AutoCloseable#close()}, even if the connection is shared by another
+	 *                         thread.
+	 *                         </p>
 	 *
 	 * @return  Either a reused or new connection
 	 *
@@ -342,12 +391,6 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	// Note: Matches AOConnectionPool.getConnection(int)
 	// Note: Matches Database.getConnection(int)
 	// Note: Matches DatabaseConnection.getConnection(int)
-
-	// TODO: No longer do threadlocal stuff.  Instead, no more "maxConnections", and keep reference back to PoolConnection
-	//       from the ConnectionWrapper.  Or use ThreadLocal just as a hint.  To be able to remove connections from the list
-	//       for another Thread, the ThreadLocal should just store a generated ID, which would also be tracked in the
-	//       ConnectionWrapper.  The central map for tracking must be weak key to be subject to garbage collection when
-	//       threads die.
 	@SuppressWarnings({"UseSpecificCatch", "AssignmentToCatchBlockParameter"})
 	public C getConnection(int maxConnections) throws I, E {
 		if(maxConnections < 1) maxConnections = 1;
@@ -355,34 +398,44 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 		if(Thread.interrupted()) throw newInterruptedException(null, null);
 
 		Thread thisThread = Thread.currentThread();
-		// Error or warn if this thread already has too many connections
-		List<PooledConnection<C>> threadConnections = currentThreadConnections.get();
-		int useCount = threadConnections.size();
-		if(useCount >= maxConnections) {
-			Throwable[] allocateStackTraces = new Throwable[useCount];
-			for(int c=0; c<useCount; c++) {
-				PooledConnection<C> threadConnection = threadConnections.get(c);
-				allocateStackTraces[c] = threadConnection.allocateStackTrace;
-			}
-			// Throw an exception if over half the pool is used by this thread
-			int halfPool = poolSize / 2;
-			if(halfPool < 1) halfPool = 1; // Unlikely case of one-connection pool
-			if(useCount >= halfPool) {
-				throw newException(
-					"Thread attempting to allocate more than half of the connection pool: " + thisThread.toString(),
-					new WrappedExceptions(allocateStackTraces)
+		SmallIdentifier threadId;
+		List<PooledConnection<C>> threadConnections;
+		synchronized(threadConnectionsByThreadId) {
+			threadId = currentThreadId.get();
+			threadConnections = threadConnectionsByThreadId.get(threadId);
+		}
+		assert threadConnections != null : "The list of connections per-thread is added to map during ThreadLocal.initialValue()";
+
+		synchronized(threadConnections) {
+			// Error or warn if this thread already has too many connections
+			int useCount = threadConnections.size();
+			if(useCount >= maxConnections) {
+				Throwable[] allocateStackTraces = new Throwable[useCount];
+				for(int c = 0; c < useCount; c++) {
+					allocateStackTraces[c] = threadConnections.get(c).allocateStackTrace;
+				}
+				// Throw an exception if over half the pool is used by this thread
+				int halfPool = poolSize / 2;
+				if(halfPool < 1) halfPool = 1; // Unlikely case of one-connection pool
+				if(useCount >= halfPool) {
+					throw newException(
+						"Thread attempting to allocate more than half of the connection pool: " + thisThread.toString(),
+						new WrappedExceptions(allocateStackTraces)
+					);
+				}
+				logger.logp(
+					Level.WARNING,
+					AOPool.class.getName(),
+					"getConnection",
+					null,
+					new WrappedExceptions(
+						"Warning: Thread allocated more than " + maxConnections + " "
+							+ (maxConnections == 1 ? "connection" : "connections")
+							+ ".  The stack trace at allocation time is included for each connection.",
+						allocateStackTraces
+					)
 				);
 			}
-			logger.logp(
-				Level.WARNING,
-				AOPool.class.getName(),
-				"getConnection",
-				null,
-				new WrappedExceptions(
-					"Warning: Thread allocated more than "+maxConnections+" "+(maxConnections==1 ? "connection" : "connections")+".  The stack trace at allocation time is included for each connection.",
-					allocateStackTraces
-				)
-			);
 		}
 		// Find an available pooledConnection inside poolLock, actually connect outside poolLock below
 		PooledConnection<C> pooledConnection;
@@ -422,7 +475,9 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 				poolLock.notify();
 			}
 		}
-		threadConnections.add(pooledConnection);
+		synchronized(threadConnections) {
+			threadConnections.add(pooledConnection);
+		}
 		// If anything goes wrong during the remainder of this method, need to release the connection
 		try {
 			// Now that the pooledConnection is allocated, create/reuse the connection outside poolLock
@@ -463,6 +518,9 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 				pooledConnection.allocateStackTrace = allocateStackTrace;
 			}
 			if(doReset) resetConnection(conn);
+			synchronized(allocationThreadIdByConnection) {
+				allocationThreadIdByConnection.put(conn, threadId);
+			}
 			return conn;
 		} catch(Throwable t1) {
 			try {
@@ -472,6 +530,9 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 					pooledConnection.connection = null;
 				}
 				if(conn != null) {
+					synchronized(allocationThreadIdByConnection) {
+						allocationThreadIdByConnection.remove(conn);
+					}
 					try {
 						close(conn);
 					} catch(Throwable t) {
@@ -480,7 +541,9 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 				}
 			} finally {
 				try {
-					threadConnections.remove(pooledConnection);
+					synchronized(threadConnections) {
+						threadConnections.remove(pooledConnection);
+					}
 					release(pooledConnection);
 				} catch(Throwable t) {
 					t1 = Throwables.addSuppressed(t1, t);
@@ -785,8 +848,10 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	/**
 	 * Releases the database <code>Connection</code> to the <code>Connection</code> pool.
 	 * <p>
-	 * It is safe to call this method more than once, but only the first call will
-	 * have any affect and the second release will log a warning.
+	 * It is safe to call this method more than once, but only the first call will have any affect.
+	 * </p>
+	 * <p>
+	 * If the connection is not from this pool, no action is taken.
 	 * </p>
 	 * <p>
 	 * The connection will be {@linkplain #resetConnection(java.lang.AutoCloseable) reset} and/or
@@ -801,22 +866,35 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 	 */
 	@SuppressWarnings("UseSpecificCatch")
 	protected void release(C connection) throws E {
-		// Find the associated PooledConnection
-		PooledConnection<C> pooledConnection = null;
-		List<PooledConnection<C>> threadConnections = currentThreadConnections.get();
-		for(int c=threadConnections.size()-1; c>=0; c--) {
-			PooledConnection<C> threadConnection = threadConnections.get(c);
-			synchronized(threadConnection) {
-				if(threadConnection.connection==connection) {
-					pooledConnection = threadConnection;
-					threadConnections.remove(c);
-					break;
+		// Find the threadId that had allocated the connection
+		// Will not be found when already released (or not from this pool)
+		SmallIdentifier allocationThreadId;
+		synchronized(allocationThreadIdByConnection) {
+			allocationThreadId = allocationThreadIdByConnection.remove(connection);
+		}
+		if(allocationThreadId != null) {
+			// Find the set of all connections currently allocated by the allocating thread
+			List<PooledConnection<C>> threadConnections;
+			synchronized(threadConnectionsByThreadId) {
+				threadConnections = threadConnectionsByThreadId.get(allocationThreadId);
+			}
+			if(threadConnections == null) throw new AssertionError("The list of connections per-thread should not have been garbage collected, since holding a reference to identifier in allocationThreadIdByConnection");
+			// Find the PooledConnection for this Connection
+			PooledConnection<C> pooledConnection = null;
+			synchronized(threadConnections) {
+				// Search backwards, since when multiple connections are allocated, they are usually released in opposite order in try-with-resources
+				for(int c = threadConnections.size() - 1; c >= 0; c--) {
+					PooledConnection<C> threadConnection = threadConnections.get(c);
+					synchronized(threadConnection) {
+						if(threadConnection.connection == connection) {
+							pooledConnection = threadConnection;
+							threadConnections.remove(c);
+							break;
+						}
+					}
 				}
 			}
-		}
-		if(pooledConnection == null) {
-			logger.log(Level.WARNING, "PooledConnection not found during release");
-		} else {
+			if(pooledConnection == null) throw new AssertionError("PooledConnection not found by allocationThreadId");
 			try {
 				Throwable t1 = null;
 				boolean closeConnection = false;
@@ -836,7 +914,8 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 				} else {
 					if(!closeConnection && maxConnectionAge != UNLIMITED_MAX_CONNECTION_AGE) {
 						long age = System.currentTimeMillis() - pooledConnection.createTime;
-						closeConnection = age < 0 || age >= maxConnectionAge;
+						// Allow time range, in case of system time resets
+						closeConnection = (age <= -maxConnectionAge) || (age >= maxConnectionAge);
 					}
 					// Log warnings before release and/or close
 					try {
