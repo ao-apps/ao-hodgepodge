@@ -550,12 +550,16 @@ public class SQLUtility {
 							if(alignRights == null) {
 								// Print centered
 								int before = (width - cellWidth) / 2;
-								for(int d = 0; d < before; d++) out.append(' ');
+								for(int d = 0; d < before; d++) {
+									out.append(' ');
+								}
 								out.append(cell);
 								printed = before + cellWidth;
 							} else if(alignRights[col]) {
 								// Right align
-								for(int e = cellWidth; e < width; e++) out.append(' ');
+								for(int e = cellWidth; e < width; e++) {
+									out.append(' ');
+								}
 								out.append(cell);
 								printed = width;
 							} else {
@@ -568,7 +572,9 @@ public class SQLUtility {
 				}
 				boolean hasMoreColumns = col < (numCols - 1);
 				if(UNICODE_TABLES || hasMoreColumns) {
-					for(int e = printed; e < width; e++) out.append(' ');
+					for(int e = printed; e < width; e++) {
+						out.append(' ');
+					}
 					out.append(UNICODE_TABLES && cellNewline ? '↵' : ' ');
 					out.append(UNICODE_TABLES ? '│' : (line < lineCounts[col + 1]) ? '|' : ' ');
 					if(hasMoreColumns) out.append(' ');
@@ -620,7 +626,9 @@ public class SQLUtility {
 				for(int c = 0; c < numCols; c++) {
 					if(c > 0) out.append("─┬─");
 					int width = widest[c];
-					for(int d = 0; d < width; d++) out.append('─');
+					for(int d = 0; d < width; d++) {
+						out.append('─');
+					}
 				}
 				out.append("─┐");
 				out.append(EOL);
@@ -641,7 +649,9 @@ public class SQLUtility {
 					for(int c = 0; c < numCols; c++) {
 						if(c > 0) out.append(UNICODE_TABLES ? "─┼─" : "-+-");
 						int width = widest[c];
-						for(int d = 0; d < width; d++) out.append(UNICODE_TABLES ? '─' : '-');
+						for(int d = 0; d < width; d++) {
+							out.append(UNICODE_TABLES ? '─' : '-');
+						}
 					}
 					if(UNICODE_TABLES) {
 						out.append("─┤");
@@ -665,7 +675,9 @@ public class SQLUtility {
 				for(int c = 0; c < numCols; c++) {
 					if(c > 0) out.append("─┴─");
 					int width = widest[c];
-					for(int d = 0; d < width; d++) out.append('─');
+					for(int d = 0; d < width; d++) {
+						out.append('─');
+					}
 				}
 				out.append("─┘");
 				out.append(EOL);
@@ -727,7 +739,7 @@ public class SQLUtility {
 		printTable(
 			titles,
 			() -> new Iterator<Object[]>() {
-				Iterator<Object> valuesIter = values.iterator();
+				private final Iterator<Object> valuesIter = values.iterator();
 
 				@Override
 				public boolean hasNext() {
@@ -737,7 +749,9 @@ public class SQLUtility {
 				@Override
 				public Object[] next() {
 					Object[] row = new Object[numCols];
-					for(int i = 0; i < numCols; i++) row[i] = valuesIter.next();
+					for(int i = 0; i < numCols; i++) {
+						row[i] = valuesIter.next();
+					}
 					return row;
 				}
 
@@ -764,7 +778,7 @@ public class SQLUtility {
 		printTable(
 			titles,
 			() -> new Iterator<Object[]>() {
-				int index = 0;
+				private int index = 0;
 
 				@Override
 				public boolean hasNext() {
