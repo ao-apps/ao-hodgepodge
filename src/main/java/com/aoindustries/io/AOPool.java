@@ -67,7 +67,7 @@ import java.util.logging.Logger;
  * @author  AO Industries, Inc.
  */
 // TODO: Don't extend Thread
-abstract public class AOPool<C extends AutoCloseable,E extends Exception,I extends Exception> extends Thread {
+abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I extends Throwable> extends Thread {
 
 	public static final int DEFAULT_DELAY_TIME = 1 * 60 * 1000;
 	public static final int DEFAULT_MAX_IDLE_TIME = 10 * 60 * 1000;
@@ -523,7 +523,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 				allocationThreadIdByConnection.put(conn, threadId);
 			}
 			return conn;
-		} catch(Throwable t1) {
+		} catch(Throwable t0) {
 			try {
 				C conn;
 				synchronized(pooledConnection) {
@@ -537,7 +537,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 					try {
 						close(conn);
 					} catch(Throwable t) {
-						t1 = Throwables.addSuppressed(t1, t);
+						t0 = Throwables.addSuppressed(t0, t);
 					}
 				}
 			} finally {
@@ -547,11 +547,12 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 					}
 					release(pooledConnection);
 				} catch(Throwable t) {
-					t1 = Throwables.addSuppressed(t1, t);
+					t0 = Throwables.addSuppressed(t0, t);
 				}
 			}
-			if(t1 instanceof ThreadDeath) throw (ThreadDeath)t1;
-			throw newException(null, t1);
+			if(t0 instanceof Error) throw (Error)t0;
+			if(t0 instanceof RuntimeException) throw (RuntimeException)t0;
+			throw newException(null, t0);
 		}
 	}
 
@@ -915,13 +916,13 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 			}
 			if(pooledConnection == null) throw new AssertionError("PooledConnection not found by allocationThreadId");
 			try {
-				Throwable t1 = null;
+				Throwable t0 = null;
 				boolean closeConnection = false;
 				boolean connIsClosed;
 				try {
 					connIsClosed = isClosed(connection);
 				} catch(Throwable t) {
-					t1 = Throwables.addSuppressed(t1, t);
+					t0 = Throwables.addSuppressed(t0, t);
 					connIsClosed = false;
 					closeConnection = true; // Force closure due to error on isClosed
 				}
@@ -940,7 +941,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 					try {
 						logConnection(connection);
 					} catch(Throwable t) {
-						t1 = Throwables.addSuppressed(t1, t);
+						t0 = Throwables.addSuppressed(t0, t);
 						// Close the connection when error during logging
 						closeConnection = true;
 					}
@@ -949,7 +950,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 						try {
 							resetConnection(connection);
 						} catch(Throwable t) {
-							t1 = Throwables.addSuppressed(t1, t);
+							t0 = Throwables.addSuppressed(t0, t);
 							// Close the connection when error during reset
 							closeConnection = true;
 						}
@@ -959,16 +960,17 @@ abstract public class AOPool<C extends AutoCloseable,E extends Exception,I exten
 						try {
 							close(connection);
 						} catch(Throwable t) {
-							t1 = Throwables.addSuppressed(t1, t);
+							t0 = Throwables.addSuppressed(t0, t);
 						}
 						synchronized(pooledConnection) {
 							pooledConnection.connection = null;
 						}
 					}
 				}
-				if(t1 != null) {
-					if(t1 instanceof ThreadDeath) throw (ThreadDeath)t1;
-					throw newException(null, t1);
+				if(t0 != null) {
+					if(t0 instanceof Error) throw (Error)t0;
+					if(t0 instanceof RuntimeException) throw (RuntimeException)t0;
+					throw newException(null, t0);
 				}
 			} finally {
 				// Unallocate the connection from the pool
