@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -253,7 +253,7 @@ public class StreamableInput extends DataInputStream {
 	public static Timestamp readTimestamp(DataInputStream in) throws IOException {
 		long seconds = in.readLong();
 		int nanos = readCompressedInt(in);
-		return SQLUtility.newTimestamp(seconds, nanos, IOException.class);
+		return SQLUtility.newTimestamp(seconds, nanos, IOException::new);
 	}
 
 	/**
@@ -284,7 +284,7 @@ public class StreamableInput extends DataInputStream {
 	public static UnmodifiableTimestamp readUnmodifiableTimestamp(DataInputStream in) throws IOException {
 		long seconds = in.readLong();
 		int nanos = readCompressedInt(in);
-		return SQLUtility.newUnmodifiableTimestamp(seconds, nanos, IOException.class);
+		return SQLUtility.newUnmodifiableTimestamp(seconds, nanos, IOException::new);
 	}
 
 	/**
