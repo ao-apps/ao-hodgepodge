@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-09-12T12:48:57-05:00"
+		dateModified="2020-09-14T19:26:21-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -109,6 +109,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						When a connection is shared between threads, the <code>maxConnections</code> calculation, along
 						with associated warnings and constraints, is relative to the allocating thread.
 					</li>
+					<li><code>BackgroundCache</code> now allows all <code>Throwable</code>.</li>
 				</ul>
 			</changelog:release>
 		</c:if>

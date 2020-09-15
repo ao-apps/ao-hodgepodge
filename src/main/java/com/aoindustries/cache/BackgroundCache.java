@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
-public class BackgroundCache<K,V,E extends Exception> {
+public class BackgroundCache<K,V,E extends Throwable> {
 
 	/**
 	 * The thread priority used for the timer.
@@ -53,14 +53,14 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 * A callable used to refresh the cache.
 	 */
 	@FunctionalInterface
-	public static interface Refresher<K,V,E extends Exception> {
+	public static interface Refresher<K,V,E extends Throwable> {
 		V call(K key) throws E;
 	}
 
 	/**
 	 * The result of a refresh.
 	 */
-	public static class Result<V,E extends Exception> {
+	public static class Result<V,E extends Throwable> {
 
 		private final V value;
 		private final E exception;
@@ -200,7 +200,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	}
 
 	private final String name;
-	private final Class<E> exceptionClass;
+	private final Class<? extends E> exceptionClass;
 	final long refreshInterval;
 	private final long expirationAge;
 	final Logger logger;
@@ -229,7 +229,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	public BackgroundCache(
 		String name,
-		Class<E> exceptionClass,
+		Class<? extends E> exceptionClass,
 		long refreshInterval,
 		long expirationAge,
 		Logger logger
@@ -249,7 +249,7 @@ public class BackgroundCache<K,V,E extends Exception> {
 	 */
 	public BackgroundCache(
 		String name,
-		Class<E> exceptionClass,
+		Class<? extends E> exceptionClass,
 		long refreshInterval,
 		long expirationAge
 	) {
@@ -314,13 +314,13 @@ public class BackgroundCache<K,V,E extends Exception> {
 	) throws IllegalStateException {
 		try {
 			return new Result<>(refresher.call(key));
-		} catch(Exception e) {
-			if(exceptionClass.isInstance(e)) {
-				return new Result<>(exceptionClass.cast(e));
-			} else if(e instanceof RuntimeException) {
-				throw (RuntimeException)e;
+		} catch(Error | RuntimeException e) {
+			throw e;
+		} catch(Throwable t) {
+			if(exceptionClass.isInstance(t)) {
+				return new Result<>(exceptionClass.cast(t));
 			} else {
-				throw new AssertionError("Unexpected exception type", e);
+				throw new AssertionError("Unexpected exception type", t);
 			}
 		}
 	}
