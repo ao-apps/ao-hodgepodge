@@ -23,6 +23,7 @@
 package com.aoindustries.util.sort;
 
 import com.aoindustries.collections.IntList;
+import com.aoindustries.exception.WrappedException;
 import com.aoindustries.lang.RuntimeUtils;
 import com.aoindustries.util.AtomicSequence;
 import com.aoindustries.util.Sequence;
@@ -112,7 +113,7 @@ final public class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 						futures.remove().get();
 					}
 				} catch(InterruptedException | ExecutionException e) {
-					throw new RuntimeException(e);
+					throw new WrappedException(e);
 				}
 			} else {
 				sort(array, 0, array.length, 32-R_BITS_PER_PASS, null);

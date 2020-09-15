@@ -102,12 +102,12 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 	@Override
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	protected void close(Connection conn) throws SQLException {
-		Throwable t1 = null;
+		Throwable t0 = null;
 		// Unwrap
 		try {
 			conn = unwrap(conn);
 		} catch(Throwable t) {
-			t1 = Throwables.addSuppressed(t1, t);
+			t0 = Throwables.addSuppressed(t0, t);
 		}
 		// Close wrapped (or parameter "conn" when can't unwrap)
 		try {
@@ -116,16 +116,9 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 				conn.setAutoCommit(true);
 			}
 		} catch(Throwable t) {
-			t1 = Throwables.addSuppressed(t1, t);
-		} finally {
-			t1 = AutoCloseables.close(t1, conn);
+			t0 = Throwables.addSuppressed(t0, t);
 		}
-		if(t1 != null) {
-			if(t1 instanceof Error) throw (Error)t1;
-			if(t1 instanceof RuntimeException) throw (RuntimeException)t1;
-			if(t1 instanceof SQLException) throw (SQLException)t1;
-			throw new SQLException(t1);
-		}
+		AutoCloseables.closeAndThrow(t0, SQLException.class, SQLException::new, conn);
 	}
 
 	/**
@@ -290,16 +283,13 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 			if(readOnly != IDLE_READ_ONLY) conn.setReadOnly(readOnly);
 			if(isolationLevel != Connections.DEFAULT_TRANSACTION_ISOLATION) conn.setTransactionIsolation(isolationLevel);
 			return conn;
-		} catch(Throwable t) {
+		} catch(Throwable t0) {
 			try {
 				release(conn);
-			} catch(Throwable t2) {
-				t = Throwables.addSuppressed(t, t2);
+			} catch(Throwable t) {
+				t0 = Throwables.addSuppressed(t0, t);
 			}
-			if(t instanceof Error) throw (Error)t;
-			if(t instanceof RuntimeException) throw (RuntimeException)t;
-			if(t instanceof SQLException) throw (SQLException)t;
-			throw new SQLException(t);
+			throw Throwables.wrap(t0, SQLException.class, SQLException::new);
 		}
 	}
 
@@ -374,22 +364,19 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		@Override
 		@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 		public void onAbort(Executor executor) throws SQLException {
-			Throwable t1 = null;
+			Throwable t0 = null;
 			try {
 				super.onAbort(executor);
 			} catch(Throwable t) {
-				t1 = Throwables.addSuppressed(t1, t);
+				t0 = Throwables.addSuppressed(t0, t);
 			}
 			try {
 				pool.release(this);
 			} catch(Throwable t) {
-				t1 = Throwables.addSuppressed(t1, t);
+				t0 = Throwables.addSuppressed(t0, t);
 			}
-			if(t1 != null) {
-				if(t1 instanceof Error) throw (Error)t1;
-				if(t1 instanceof RuntimeException) throw (RuntimeException)t1;
-				if(t1 instanceof SQLException) throw (SQLException)t1;
-				throw new SQLException(t1);
+			if(t0 != null) {
+				throw Throwables.wrap(t0, SQLException.class, SQLException::new);
 			}
 		}
 
@@ -429,10 +416,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 			throw td;
 		} catch(Throwable t) {
 			logger.logp(Level.SEVERE, AOConnectionPool.class.getName(), "getConnectionObject", "url="+url+"&user="+user+"&password=XXXXXXXX", t);
-			if(t instanceof Error) throw (Error)t;
-			if(t instanceof RuntimeException) throw (RuntimeException)t;
-			if(t instanceof SQLException) throw (SQLException)t;
-			throw new SQLException(t);
+			throw Throwables.wrap(t, SQLException.class, SQLException::new);
 		}
 	}
 
