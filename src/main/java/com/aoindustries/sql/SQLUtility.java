@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.lang.Throwables;
 import com.aoindustries.util.CalendarUtils;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -32,6 +33,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.function.Function;
 
 /**
  * SQL utilities.
@@ -799,94 +801,124 @@ public class SQLUtility {
 	public static final long MIN_TIMESTAMP_SECONDS = Long.MIN_VALUE / 1000;
 
 	/**
+	 * Shared implementation of creating exception through reflection.
+	 *
+	 * @deprecated  This is only used by old, deprecated implementations.
+	 */
+	@Deprecated
+	private static <X extends Throwable> X newException(Class<? extends X> xClass, String message) {
+		try {
+			try {
+				return xClass.getConstructor(String.class).newInstance(message);
+			} catch(InvocationTargetException e) {
+				// Unwrap cause for more direct stack traces
+				Throwable cause = e.getCause();
+				throw (cause == null) ? e : cause;
+			}
+		} catch(Throwable t) {
+			if(xClass.isInstance(t)) return xClass.cast(t);
+			throw Throwables.wrap(
+				t,
+				IllegalArgumentException.class,
+				cause -> new IllegalArgumentException(message, cause)
+			);
+		}
+	}
+
+	/**
 	 * Converts a number of seconds and nanoseconds into a given {@link Timestamp}.
 	 */
-	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-	public static <E extends Throwable> void toTimestamp(long seconds, int nanos, Timestamp ts, Class<E> exceptionType) throws E {
-		String message = null;
-		try {
-			// Avoid underflow or overflow on conversion to millis
-			if(seconds > MAX_TIMESTAMP_SECONDS) {
-				message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
-			} else if(seconds < MIN_TIMESTAMP_SECONDS) {
-				message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
-			} else {
-				ts.setTime(seconds * 1000);
-				ts.setNanos(nanos);
-				return;
-			}
-			throw exceptionType.getConstructor(String.class).newInstance(message);
-		} catch(InvocationTargetException e) {
-			Throwable cause = e.getCause();
-			if(cause instanceof Error) throw (Error)cause;
-			if(cause instanceof RuntimeException) throw (RuntimeException)cause;
-			if(exceptionType.isInstance(cause)) throw exceptionType.cast(cause);
-			throw new IllegalArgumentException(message, cause == null ? e : cause);
-		} catch(Error | RuntimeException e) {
-			throw e;
-		} catch(Throwable t) {
-			if(exceptionType.isInstance(t)) throw exceptionType.cast(t);
-			throw new IllegalArgumentException(message, t);
+	public static <X extends Throwable> void toTimestamp(long seconds, int nanos, Timestamp ts, Function<? super String,? extends X> xSupplier) throws X {
+		String message;
+		// Avoid underflow or overflow on conversion to millis
+		if(seconds > MAX_TIMESTAMP_SECONDS) {
+			message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
+		} else if(seconds < MIN_TIMESTAMP_SECONDS) {
+			message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
+		} else {
+			ts.setTime(seconds * 1000);
+			ts.setNanos(nanos);
+			return;
 		}
+		throw xSupplier.apply(message);
+	}
+
+	/**
+	 * Converts a number of seconds and nanoseconds into a given {@link Timestamp}.
+	 *
+	 * @deprecated  Please use {@link #toTimestamp(long, int, java.sql.Timestamp, java.util.function.Function)},
+	 *              typically with lambda constructor reference
+	 */
+	@Deprecated
+	public static <X extends Throwable> void toTimestamp(long seconds, int nanos, Timestamp ts, Class<? extends X> xClass) throws X {
+		toTimestamp(seconds, nanos, ts, message -> newException(xClass, message));
 	}
 
 	/**
 	 * Converts a number of seconds and nanoseconds into a given {@link Timestamp}.
 	 */
 	public static void toTimestamp(long seconds, int nanos, Timestamp ts) {
-		toTimestamp(seconds, nanos, ts, IllegalArgumentException.class);
+		toTimestamp(seconds, nanos, ts, IllegalArgumentException::new);
 	}
 
 	/**
 	 * Converts a number of seconds and nanoseconds into a new {@link Timestamp}.
 	 */
-	public static <E extends Throwable> Timestamp newTimestamp(long seconds, int nanos, Class<E> exceptionType) throws E {
+	public static <X extends Throwable> Timestamp newTimestamp(long seconds, int nanos, Function<? super String,? extends X> xSupplier) throws X {
 		Timestamp ts = new Timestamp(0);
-		toTimestamp(seconds, nanos, ts, exceptionType);
+		toTimestamp(seconds, nanos, ts, xSupplier);
 		return ts;
+	}
+
+	/**
+	 * Converts a number of seconds and nanoseconds into a new {@link Timestamp}.
+	 *
+	 * @deprecated  Please use {@link #newTimestamp(long, int, java.util.function.Function)},
+	 *              typically with lambda constructor reference
+	 */
+	@Deprecated
+	public static <X extends Throwable> Timestamp newTimestamp(long seconds, int nanos, Class<? extends X> xClass) throws X {
+		return newTimestamp(seconds, nanos, message -> newException(xClass, message));
 	}
 
 	/**
 	 * Converts a number of seconds and nanoseconds into a new {@link Timestamp}.
 	 */
 	public static Timestamp newTimestamp(long seconds, int nanos) throws IllegalArgumentException {
-		return newTimestamp(seconds, nanos, IllegalArgumentException.class);
+		return newTimestamp(seconds, nanos, IllegalArgumentException::new);
 	}
 
 	/**
 	 * Converts a number of seconds and nanoseconds into a new {@link UnmodifiableTimestamp}.
 	 */
-	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-	public static <E extends Throwable> UnmodifiableTimestamp newUnmodifiableTimestamp(long seconds, int nanos, Class<E> exceptionType) throws E {
-		String message = null;
-		try {
-			// Avoid underflow or overflow on conversion to millis
-			if(seconds > MAX_TIMESTAMP_SECONDS) {
-				message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
-			} else if(seconds < MIN_TIMESTAMP_SECONDS) {
-				message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
-			} else {
-				return new UnmodifiableTimestamp(seconds * 1000, nanos);
-			}
-			throw exceptionType.getConstructor(String.class).newInstance(message);
-		} catch(InvocationTargetException e) {
-			Throwable cause = e.getCause();
-			if(cause instanceof Error) throw (Error)cause;
-			if(cause instanceof RuntimeException) throw (RuntimeException)cause;
-			if(exceptionType.isInstance(cause)) throw exceptionType.cast(cause);
-			throw new IllegalArgumentException(message, cause == null ? e : cause);
-		} catch(Error | RuntimeException e) {
-			throw e;
-		} catch(Throwable t) {
-			if(exceptionType.isInstance(t)) throw exceptionType.cast(t);
-			throw new IllegalArgumentException(message, t);
+	public static <X extends Throwable> UnmodifiableTimestamp newUnmodifiableTimestamp(long seconds, int nanos, Function<? super String,? extends X> xSupplier) throws X {
+		String message;
+		// Avoid underflow or overflow on conversion to millis
+		if(seconds > MAX_TIMESTAMP_SECONDS) {
+			message = "seconds overflow: " + seconds + " > " + MAX_TIMESTAMP_SECONDS;
+		} else if(seconds < MIN_TIMESTAMP_SECONDS) {
+			message = "seconds underflow: " + seconds + " < " + MAX_TIMESTAMP_SECONDS;
+		} else {
+			return new UnmodifiableTimestamp(seconds * 1000, nanos);
 		}
+		throw xSupplier.apply(message);
+	}
+
+	/**
+	 * Converts a number of seconds and nanoseconds into a new {@link UnmodifiableTimestamp}.
+	 *
+	 * @deprecated  Please use {@link #newUnmodifiableTimestamp(long, int, java.util.function.Function)},
+	 *              typically with lambda constructor reference
+	 */
+	@Deprecated
+	public static <X extends Throwable> UnmodifiableTimestamp newUnmodifiableTimestamp(long seconds, int nanos, Class<? extends X> xClass) throws X {
+		return newUnmodifiableTimestamp(seconds, nanos, message -> newException(xClass, message));
 	}
 
 	/**
 	 * Converts a number of seconds and nanoseconds into a new {@link UnmodifiableTimestamp}.
 	 */
 	public static UnmodifiableTimestamp newUnmodifiableTimestamp(long seconds, int nanos) throws IllegalArgumentException {
-		return newUnmodifiableTimestamp(seconds, nanos, IllegalArgumentException.class);
+		return newUnmodifiableTimestamp(seconds, nanos, IllegalArgumentException::new);
 	}
 }

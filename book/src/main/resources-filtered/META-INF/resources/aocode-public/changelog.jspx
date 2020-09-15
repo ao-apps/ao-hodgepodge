@@ -110,6 +110,11 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						with associated warnings and constraints, is relative to the allocating thread.
 					</li>
 					<li><code>BackgroundCache</code> now allows all <code>Throwable</code>.</li>
+					<li>
+						<code>SQLUtility</code> now accepts <code>Function</code> to generate exception instead of
+						<code>Class</code>.  Using lambdas is faster than reflection, and the compiler can verify the
+						presence of the constructor.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
