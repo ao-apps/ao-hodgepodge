@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.collections.AoCollections;
 import com.aoindustries.exception.WrappedExceptions;
 import com.aoindustries.lang.Strings;
 import com.aoindustries.lang.Throwables;
@@ -29,7 +30,6 @@ import com.aoindustries.security.SmallIdentifier;
 import com.aoindustries.util.ErrorPrinter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -270,7 +270,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 		this.logger = logger;
 		allConnections = new ArrayList<>(poolSize);
 		availableConnections = new PriorityQueue<>(poolSize);
-		busyConnections = new HashSet<>(poolSize*4/3+1);
+		busyConnections = AoCollections.newHashSet(poolSize);
 		// TODO: Call start() after construction completed
 		start();
 	}

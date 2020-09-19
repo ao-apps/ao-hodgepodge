@@ -24,7 +24,6 @@ package com.aoindustries.util.graph;
 
 import com.aoindustries.collections.AoCollections;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,10 +53,10 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
 	public Set<V> sortGraph() throws CycleException, EX {
 		Set<V> vertices = graph.getVertices();
 		final int size = vertices.size();
-		Set<V> visited = new HashSet<>(size*4/3+1);
+		Set<V> visited = AoCollections.newHashSet(size);
 		Set<V> sequence = new LinkedHashSet<>();
 		//L ← Empty list that will contain the sorted nodes
-		Set<V> L = new LinkedHashSet<>(size*4/3+1);
+		Set<V> L = AoCollections.newLinkedHashSet(size);
 		//S ← Set of all nodes with no incoming edges
 		//for each node n in S do
 		for(V n : vertices) {

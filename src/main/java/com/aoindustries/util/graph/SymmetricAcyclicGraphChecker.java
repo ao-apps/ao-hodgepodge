@@ -62,7 +62,7 @@ public class SymmetricAcyclicGraphChecker<V, EX extends Exception> implements Gr
 	@Override
 	public void checkGraph() throws AsymmetricException, CycleException, EX {
 		Set<V> vertices = graph.getVertices();
-		Map<V,Color> colors = new HashMap<>(vertices.size()*4/3+1);
+		Map<V,Color> colors = AoCollections.newHashMap(vertices.size());
 		Map<V,V> predecessors = new HashMap<>(); // Could this be a simple sequence like TopologicalSorter?  Any benefit?
 		for(V v : vertices) {
 			if(!colors.containsKey(v)) doCheck(colors, predecessors, v);
