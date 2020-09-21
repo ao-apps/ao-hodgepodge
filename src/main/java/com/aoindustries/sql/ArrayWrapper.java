@@ -107,36 +107,6 @@ public class ArrayWrapper implements IArrayWrapper {
 	}
 
 	@Override
-	public String getBaseTypeName() throws SQLException {
-		return getWrappedArray().getBaseTypeName();
-	}
-
-	@Override
-	public int getBaseType() throws SQLException {
-		return getWrappedArray().getBaseType();
-	}
-
-	@Override
-	public Object getArray() throws SQLException {
-		return getWrappedArray().getArray();
-	}
-
-	@Override
-	public Object getArray(java.util.Map<String,Class<?>> map) throws SQLException {
-		return getWrappedArray().getArray(map);
-	}
-
-	@Override
-	public Object getArray(long index, int count) throws SQLException {
-		return getWrappedArray().getArray(index, count);
-	}
-
-	@Override
-	public Object getArray(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException {
-		return getWrappedArray().getArray(index, count, map);
-	}
-
-	@Override
 	public ResultSetWrapper getResultSet() throws SQLException {
 		return wrapResultSet(getWrappedArray().getResultSet());
 	}
@@ -154,10 +124,5 @@ public class ArrayWrapper implements IArrayWrapper {
 	@Override
 	public ResultSetWrapper getResultSet(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException {
 		return wrapResultSet(getWrappedArray().getResultSet(index, count, map));
-	}
-
-	@Override
-	public void free() throws SQLException {
-		getWrappedArray().free();
 	}
 }
