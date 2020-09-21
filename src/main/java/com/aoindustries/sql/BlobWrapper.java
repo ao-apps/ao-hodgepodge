@@ -22,21 +22,20 @@
  */
 package com.aoindustries.sql;
 
-import java.sql.ResultSet;
+import java.sql.Blob;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
- * Wraps a {@link Statement}.
+ * Wraps a {@link Blob}.
  *
  * @author  AO Industries, Inc.
  */
-public class StatementWrapper implements IStatementWrapper {
+public class BlobWrapper implements IBlobWrapper {
 
 	private final ConnectionWrapper connectionWrapper;
-	private final Statement wrapped;
+	private final Blob wrapped;
 
-	public StatementWrapper(ConnectionWrapper connectionWrapper, Statement wrapped) {
+	public BlobWrapper(ConnectionWrapper connectionWrapper, Blob wrapped) {
 		this.connectionWrapper = connectionWrapper;
 		this.wrapped = wrapped;
 	}
@@ -49,38 +48,21 @@ public class StatementWrapper implements IStatementWrapper {
 	}
 
 	@Override
-	public Statement getWrapped() {
+	public Blob getWrapped() {
 		return wrapped;
 	}
 
 	/**
-	 * Wraps a {@link ResultSet}, if not already wrapped by this wrapper.
+	 * Unwraps a {@link Blob}, if wrapped by this wrapper.
 	 *
-	 * @see  ConnectionWrapper#wrapResultSet(com.aoindustries.sql.StatementWrapper, java.sql.ResultSet)
+	 * @see  ConnectionWrapper#unwrapBlob(java.sql.Blob)
 	 */
-	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
-		return getConnectionWrapper().wrapResultSet(this, results);
+	protected Blob unwrapBlob(Blob blob) {
+		return getConnectionWrapper().unwrapBlob(blob);
 	}
 
 	@Override
-	public ResultSetWrapper executeQuery(String sql) throws SQLException {
-		return wrapResultSet(getWrapped().executeQuery(sql));
-	}
-
-    @Override
-	public ResultSetWrapper getResultSet() throws SQLException {
-		return wrapResultSet(getWrapped().getResultSet());
-	}
-
-    @Override
-	public ConnectionWrapper getConnection() throws SQLException {
-		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
-		assert getWrapped().getConnection() == _connectionWrapper.getWrapped();
-		return _connectionWrapper;
-	}
-
-    @Override
-	public ResultSetWrapper getGeneratedKeys() throws SQLException {
-		return wrapResultSet(getWrapped().getGeneratedKeys());
+	public long position(Blob pattern, long start) throws SQLException {
+		return getWrapped().position(unwrapBlob(pattern), start);
 	}
 }

@@ -23,6 +23,7 @@
 package com.aoindustries.sql;
 
 import java.sql.Array;
+import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 
@@ -45,19 +46,24 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	/**
 	 * Wraps an {@link Array}, if not already wrapped by this wrapper.
 	 *
-	 * @see  ConnectionWrapper#newArrayWrapper(com.aoindustries.sql.StatementWrapper, java.sql.Array)
+	 * @see  ConnectionWrapper#wrapArray(com.aoindustries.sql.StatementWrapper, java.sql.Array)
 	 */
 	protected ArrayWrapper wrapArray(Array array) {
-		if(array == null) {
-			return null;
-		}
-		if(array instanceof ArrayWrapper) {
-			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
-			if(arrayWrapper.getStatementWrapper().orElse(null) == this) {
-				return arrayWrapper;
-			}
-		}
-		return getConnectionWrapper().newArrayWrapper(this, array);
+		return getConnectionWrapper().wrapArray(this, array);
+	}
+
+	/**
+	 * Wraps a {@link Blob}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapBlob(java.sql.Blob)
+	 */
+	protected BlobWrapper wrapBlob(Blob blob) {
+		return getConnectionWrapper().wrapBlob(blob);
+	}
+
+	@Override
+    public BlobWrapper getBlob(int parameterIndex) throws SQLException {
+		return wrapBlob(getWrapped().getBlob(parameterIndex));
 	}
 
 	@Override
@@ -66,7 +72,17 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	}
 
 	@Override
+    public BlobWrapper getBlob(String parameterName) throws SQLException {
+		return wrapBlob(getWrapped().getBlob(parameterName));
+	}
+
+	@Override
     public ArrayWrapper getArray(String parameterName) throws SQLException {
 		return wrapArray(getWrapped().getArray(parameterName));
+	}
+
+	@Override
+    public void setBlob(String parameterName, Blob x) throws SQLException {
+		getWrapped().setBlob(parameterName, unwrapBlob(x));
 	}
 }

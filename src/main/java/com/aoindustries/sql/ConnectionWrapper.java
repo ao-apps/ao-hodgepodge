@@ -23,6 +23,7 @@
 package com.aoindustries.sql;
 
 import java.sql.Array;
+import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -53,12 +54,19 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	/**
 	 * Creates a new {@link ArrayWrapper}.
 	 *
-	 * @see  CallableStatementWrapper#wrapArray(java.sql.Array)
-	 * @see  #wrapArray(java.sql.Array)
-	 * @see  ResultSetWrapper#wrapArray(java.sql.Array)
+	 * @see  #wrapArray(com.aoindustries.sql.StatementWrapper, java.sql.Array)
 	 */
 	protected ArrayWrapper newArrayWrapper(StatementWrapper stmtWrapper, Array array) {
 		return new ArrayWrapper(this, stmtWrapper, array);
+	}
+
+	/**
+	 * Creates a new {@link BlobWrapper}.
+	 *
+	 * @see  #wrapBlob(java.sql.Blob)
+	 */
+	protected BlobWrapper newBlobWrapper(Blob blob) {
+		return new BlobWrapper(this, blob);
 	}
 
 	/**
@@ -91,8 +99,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	/**
 	 * Creates a new {@link ResultSetWrapper}.
 	 *
-	 * @see  #wrapResultSet(java.sql.ResultSet)
-	 * @see  StatementWrapper#wrapResultSet(java.sql.ResultSet)
+	 * @see  #wrapResultSet(com.aoindustries.sql.StatementWrapper, java.sql.ResultSet)
 	 */
 	protected ResultSetWrapper newResultSetWrapper(StatementWrapper stmtWrapper, ResultSet results) {
 		return new ResultSetWrapper(this, stmtWrapper, results);
@@ -101,8 +108,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	/**
 	 * Creates a new {@link ResultSetMetaDataWrapper}.
 	 *
-	 * @see  PreparedStatementWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
-	 * @see  ResultSetWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
+	 * @see  #wrapResultSetMetaData(java.sql.ResultSetMetaData)
 	 */
 	protected ResultSetMetaDataWrapper newResultSetMetaDataWrapper(ResultSetMetaData metaData) {
 		return new ResultSetMetaDataWrapper(this, metaData);
@@ -121,9 +127,10 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * Wraps an {@link Array}, if not already wrapped by this wrapper.
 	 *
 	 * @see  #newArrayWrapper(com.aoindustries.sql.StatementWrapper, java.sql.Array)
-	 * @see  #unwrapArray(java.sql.Array)
+	 * @see  CallableStatementWrapper#wrapArray(java.sql.Array)
+	 * @see  ResultSetWrapper#wrapArray(java.sql.Array)
 	 */
-	protected ArrayWrapper wrapArray(Array array) {
+	protected ArrayWrapper wrapArray(StatementWrapper stmtWrapper, Array array) {
 		if(array == null) {
 			return null;
 		}
@@ -131,18 +138,19 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
 			if(
 				arrayWrapper.getConnectionWrapper() == this
-				&& !arrayWrapper.getStatementWrapper().isPresent()
+				&& arrayWrapper.getStatementWrapper().orElse(null) == stmtWrapper
 			) {
 				return arrayWrapper;
 			}
 		}
-		return newArrayWrapper(null, array);
+		return newArrayWrapper(stmtWrapper, array);
 	}
 
 	/**
 	 * Unwraps an {@link Array}, if wrapped by this wrapper.
 	 *
-	 * @see  #wrapArray(java.sql.Array)
+	 * @see  PreparedStatementWrapper#unwrapArray(java.sql.Array)
+	 * @see  ResultSetWrapper#unwrapArray(java.sql.Array)
 	 */
 	protected Array unwrapArray(Array array) {
 		if(array == null) {
@@ -155,6 +163,46 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return array;
+	}
+
+	/**
+	 * Wraps a {@link Blob}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newBlobWrapper(java.sql.Blob)
+	 * @see  CallableStatementWrapper#wrapBlob(java.sql.Blob)
+	 * @see  ResultSetWrapper#wrapBlob(java.sql.Blob)
+	 */
+	protected BlobWrapper wrapBlob(Blob blob) {
+		if(blob == null) {
+			return null;
+		}
+		if(blob instanceof BlobWrapper) {
+			BlobWrapper blobWrapper = (BlobWrapper)blob;
+			if(blobWrapper.getConnectionWrapper() == this) {
+				return blobWrapper;
+			}
+		}
+		return newBlobWrapper(blob);
+	}
+
+	/**
+	 * Unwraps a {@link Blob}, if wrapped by this wrapper.
+	 *
+	 * @see  BlobWrapper#unwrapBlob(java.sql.Blob)
+	 * @see  PreparedStatementWrapper#unwrapBlob(java.sql.Blob)
+	 * @see  ResultSetWrapper#unwrapBlob(java.sql.Blob)
+	 */
+	protected Blob unwrapBlob(Blob blob) {
+		if(blob == null) {
+			return null;
+		}
+		if(blob instanceof BlobWrapper) {
+			BlobWrapper blobWrapper = (BlobWrapper)blob;
+			if(blobWrapper.getConnectionWrapper() == this) {
+				return blobWrapper.getWrapped();
+			}
+		}
+		return blob;
 	}
 
 	/**
@@ -194,6 +242,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * Wraps a {@link PreparedStatement}, if not already wrapped by this wrapper.
 	 *
 	 * @see  #newPreparedStatementWrapper(java.sql.PreparedStatement)
+	 * @see  #wrapCallableStatement(java.sql.CallableStatement)
 	 */
 	protected PreparedStatementWrapper wrapPreparedStatement(PreparedStatement pstmt) {
 		if(pstmt == null) {
@@ -214,12 +263,13 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	/**
 	 * Wraps a {@link ResultSet}, if not already wrapped by this wrapper.
 	 *
-	 * @see  #newResultSetWrapper(com.aoindustries.sql.StatementWrapper, java.sql.ResultSet)
 	 * @see  #wrapStatement(java.sql.Statement)
+	 * @see  #newResultSetWrapper(com.aoindustries.sql.StatementWrapper, java.sql.ResultSet)
 	 * @see  ArrayWrapper#wrapResultSet(java.sql.ResultSet)
 	 * @see  DatabaseMetaDataWrapper#wrapResultSet(java.sql.ResultSet)
+	 * @see  StatementWrapper#wrapResultSet(java.sql.ResultSet)
 	 */
-	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
+	protected ResultSetWrapper wrapResultSet(StatementWrapper stmtWrapper, ResultSet results) throws SQLException {
 		if(results == null) {
 			return null;
 		}
@@ -227,23 +277,46 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
 			if(
 				resultsWrapper.getConnectionWrapper() == this
-				&& !resultsWrapper.getStatementWrapper().isPresent()
+				&& resultsWrapper.getStatementWrapper().orElse(null) == stmtWrapper
 			) {
 				return resultsWrapper;
 			}
 		}
-		StatementWrapper stmtWrapper = wrapStatement(results.getStatement());
-		if(stmtWrapper != null) {
-			return stmtWrapper.wrapResultSet(results);
-		} else {
-			return newResultSetWrapper(null, results);
+		Statement stmt = results.getStatement();
+		if(
+			stmtWrapper == null
+			|| stmtWrapper.getWrapped() != stmt
+		) {
+			stmtWrapper = wrapStatement(stmt);
 		}
+		return newResultSetWrapper(stmtWrapper, results);
+	}
+
+	/**
+	 * Wraps a {@link ResultSetMetaData}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newResultSetMetaDataWrapper(java.sql.ResultSetMetaData)
+	 * @see  PreparedStatementWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
+	 * @see  ResultSetWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
+	 */
+	protected ResultSetMetaDataWrapper wrapResultSetMetaData(ResultSetMetaData metaData) {
+		if(metaData == null) {
+			return null;
+		}
+		if(metaData instanceof ResultSetMetaDataWrapper) {
+			ResultSetMetaDataWrapper metaDataWrapper = (ResultSetMetaDataWrapper)metaData;
+			if(metaDataWrapper.getConnectionWrapper() == this) {
+				return metaDataWrapper;
+			}
+		}
+		return newResultSetMetaDataWrapper(metaData);
 	}
 
 	/**
 	 * Wraps a {@link Statement}, if not already wrapped by this wrapper.
 	 *
 	 * @see  #newStatementWrapper(java.sql.Statement)
+	 * @see  #wrapPreparedStatement(java.sql.PreparedStatement)
 	 * @see  ResultSetWrapper#wrapStatement(java.sql.Statement)
 	 */
 	protected StatementWrapper wrapStatement(Statement stmt) {
@@ -267,16 +340,31 @@ public class ConnectionWrapper implements IConnectionWrapper {
 		return wrapStatement(getWrapped().createStatement());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapPreparedStatement(java.sql.PreparedStatement)
+	 */
 	@Override
 	public PreparedStatementWrapper prepareStatement(String sql) throws SQLException {
 		return wrapPreparedStatement(getWrapped().prepareStatement(sql));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapCallableStatement(java.sql.CallableStatement)
+	 */
 	@Override
 	public CallableStatementWrapper prepareCall(String sql) throws SQLException {
 		return wrapCallableStatement(getWrapped().prepareCall(sql));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapDatabaseMetaData(java.sql.DatabaseMetaData)
+	 */
 	@Override
 	public DatabaseMetaDataWrapper getMetaData() throws SQLException {
 		return wrapDatabaseMetaData(getWrapped().getMetaData());
@@ -287,11 +375,21 @@ public class ConnectionWrapper implements IConnectionWrapper {
 		return wrapStatement(getWrapped().createStatement(resultSetType, resultSetConcurrency));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapPreparedStatement(java.sql.PreparedStatement)
+	 */
 	@Override
 	public PreparedStatementWrapper prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
 		return wrapPreparedStatement(getWrapped().prepareStatement(sql, resultSetType, resultSetConcurrency));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapCallableStatement(java.sql.CallableStatement)
+	 */
 	@Override
 	public CallableStatementWrapper prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
 		return wrapCallableStatement(getWrapped().prepareCall(sql, resultSetType, resultSetConcurrency));
@@ -302,33 +400,73 @@ public class ConnectionWrapper implements IConnectionWrapper {
 		return wrapStatement(getWrapped().createStatement(resultSetType, resultSetConcurrency, resultSetHoldability));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapPreparedStatement(java.sql.PreparedStatement)
+	 */
 	@Override
 	public PreparedStatementWrapper prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		return wrapPreparedStatement(getWrapped().prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapCallableStatement(java.sql.CallableStatement)
+	 */
 	@Override
 	public CallableStatementWrapper prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		return wrapCallableStatement(getWrapped().prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapPreparedStatement(java.sql.PreparedStatement)
+	 */
 	@Override
 	public PreparedStatementWrapper prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
 		return wrapPreparedStatement(getWrapped().prepareStatement(sql, autoGeneratedKeys));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapPreparedStatement(java.sql.PreparedStatement)
+	 */
 	@Override
 	public PreparedStatementWrapper prepareStatement(String sql, int columnIndexes[]) throws SQLException {
 		return wrapPreparedStatement(getWrapped().prepareStatement(sql, columnIndexes));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapPreparedStatement(java.sql.PreparedStatement)
+	 */
 	@Override
 	public PreparedStatementWrapper prepareStatement(String sql, String columnNames[]) throws SQLException {
 		return wrapPreparedStatement(getWrapped().prepareStatement(sql, columnNames));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapBlob(java.sql.Blob)
+	 */
+	@Override
+	public BlobWrapper createBlob() throws SQLException {
+		return wrapBlob(getWrapped().createBlob());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapArray(com.aoindustries.sql.StatementWrapper, java.sql.Array)
+	 */
 	@Override
 	public ArrayWrapper createArrayOf(String typeName, Object[] elements) throws SQLException {
-		return wrapArray(getWrapped().createArrayOf(typeName, elements));
+		return wrapArray(null, getWrapped().createArrayOf(typeName, elements));
 	}
 }

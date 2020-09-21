@@ -25,7 +25,6 @@ package com.aoindustries.sql;
 import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Optional;
 
 /**
@@ -67,43 +66,10 @@ public class ArrayWrapper implements IArrayWrapper {
 	/**
 	 * Wraps a {@link ResultSet}, if not already wrapped by this wrapper.
 	 *
-	 * @see  ConnectionWrapper#wrapResultSet(java.sql.ResultSet)
-	 * @see  StatementWrapper#wrapResultSet(java.sql.ResultSet)
+	 * @see  ConnectionWrapper#wrapResultSet(com.aoindustries.sql.StatementWrapper, java.sql.ResultSet)
 	 */
 	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
-		if(results == null) {
-			return null;
-		}
-		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
-		StatementWrapper _stmtWrapper = getStatementWrapper().orElse(null);
-		if(results instanceof ResultSetWrapper) {
-			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
-			Optional<? extends StatementWrapper> rsStmtWrapper = resultsWrapper.getStatementWrapper();
-			if(
-				rsStmtWrapper.isPresent()
-				&& rsStmtWrapper.get().getConnectionWrapper() == _connectionWrapper
-				&& (
-					rsStmtWrapper.get() == _stmtWrapper
-					|| rsStmtWrapper.get().getWrapped() == _stmtWrapper
-				)
-			) {
-				return resultsWrapper;
-			}
-		}
-		Statement stmt = results.getStatement();
-		if(
-			_stmtWrapper != null
-			&& _stmtWrapper.getWrapped() == stmt
-		) {
-			return _stmtWrapper.wrapResultSet(results);
-		} else {
-			StatementWrapper newStmtWrapper = _connectionWrapper.wrapStatement(stmt);
-			if(newStmtWrapper != null) {
-				return newStmtWrapper.wrapResultSet(results);
-			} else {
-				return _connectionWrapper.wrapResultSet(results);
-			}
-		}
+		return getConnectionWrapper().wrapResultSet(getStatementWrapper().orElse(null), results);
 	}
 
 	@Override

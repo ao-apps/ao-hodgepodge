@@ -23,6 +23,7 @@
 package com.aoindustries.sql;
 
 import java.sql.Array;
+import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -44,22 +45,30 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	}
 
 	/**
+	 * Unwraps an {@link Array}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapArray(java.sql.Array)
+	 */
+	protected Array unwrapArray(Array array) {
+		return getConnectionWrapper().unwrapArray(array);
+	}
+
+	/**
+	 * Unwraps a {@link Blob}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapBlob(java.sql.Blob)
+	 */
+	protected Blob unwrapBlob(Blob blob) {
+		return getConnectionWrapper().unwrapBlob(blob);
+	}
+
+	/**
 	 * Wraps a {@link ResultSetMetaData}, if not already wrapped by this wrapper.
 	 *
-	 * @see  ConnectionWrapper#newResultSetMetaDataWrapper(java.sql.ResultSetMetaData)
+	 * @see  ConnectionWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
 	 */
 	protected ResultSetMetaDataWrapper wrapResultSetMetaData(ResultSetMetaData metaData) {
-		if(metaData == null) {
-			return null;
-		}
-		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
-		if(metaData instanceof ResultSetMetaDataWrapper) {
-			ResultSetMetaDataWrapper metaDataWrapper = (ResultSetMetaDataWrapper)metaData;
-			if(metaDataWrapper.getConnectionWrapper() == _connectionWrapper) {
-				return metaDataWrapper;
-			}
-		}
-		return _connectionWrapper.newResultSetMetaDataWrapper(metaData);
+		return getConnectionWrapper().wrapResultSetMetaData(metaData);
 	}
 
 	@Override
@@ -68,8 +77,13 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	}
 
 	@Override
+    public void setBlob(int parameterIndex, Blob x) throws SQLException {
+		getWrapped().setBlob(parameterIndex, unwrapBlob(x));
+	}
+
+	@Override
     public void setArray(int parameterIndex, Array x) throws SQLException {
-		IPreparedStatementWrapper.super.setArray(parameterIndex, getConnectionWrapper().unwrapArray(x));
+		getWrapped().setArray(parameterIndex, unwrapArray(x));
 	}
 
 	@Override

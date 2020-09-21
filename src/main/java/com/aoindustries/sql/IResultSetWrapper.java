@@ -25,7 +25,6 @@ package com.aoindustries.sql;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.Ref;
@@ -626,9 +625,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default Blob getBlob(int columnIndex) throws SQLException {
-		return getWrapped().getBlob(columnIndex);
-	}
+    IBlobWrapper getBlob(int columnIndex) throws SQLException;
 
 	@Override
     default Clob getClob(int columnIndex) throws SQLException {
@@ -649,9 +646,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default Blob getBlob(String columnLabel) throws SQLException {
-		return getWrapped().getBlob(columnLabel);
-	}
+    IBlobWrapper getBlob(String columnLabel) throws SQLException;
 
 	@Override
     default Clob getClob(String columnLabel) throws SQLException {
@@ -712,14 +707,10 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateBlob(int columnIndex, java.sql.Blob x) throws SQLException {
-		getWrapped().updateBlob(columnIndex, x);
-	}
+    void updateBlob(int columnIndex, java.sql.Blob x) throws SQLException;
 
 	@Override
-    default void updateBlob(String columnLabel, java.sql.Blob x) throws SQLException {
-		getWrapped().updateBlob(columnLabel, x);
-	}
+    void updateBlob(String columnLabel, java.sql.Blob x) throws SQLException;
 
 	@Override
     default void updateClob(int columnIndex, java.sql.Clob x) throws SQLException {
@@ -732,14 +723,10 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateArray(int columnIndex, java.sql.Array x) throws SQLException {
-		getWrapped().updateArray(columnIndex, x);
-	}
+    void updateArray(int columnIndex, java.sql.Array x) throws SQLException;
 
 	@Override
-    default void updateArray(String columnLabel, java.sql.Array x) throws SQLException {
-		getWrapped().updateArray(columnLabel, x);
-	}
+    void updateArray(String columnLabel, java.sql.Array x) throws SQLException;
 
 	@Override
     default RowId getRowId(int columnIndex) throws SQLException {

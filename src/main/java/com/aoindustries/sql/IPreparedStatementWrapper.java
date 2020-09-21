@@ -181,9 +181,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default void setBlob(int parameterIndex, Blob x) throws SQLException {
-		getWrapped().setBlob(parameterIndex, x);
-	}
+    void setBlob(int parameterIndex, Blob x) throws SQLException;
 
 	@Override
     default void setClob(int parameterIndex, Clob x) throws SQLException {
@@ -191,9 +189,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default void setArray(int parameterIndex, Array x) throws SQLException {
-		getWrapped().setArray(parameterIndex, x);
-	}
+    void setArray(int parameterIndex, Array x) throws SQLException;
 
 	@Override
     IResultSetMetaDataWrapper getMetaData() throws SQLException;

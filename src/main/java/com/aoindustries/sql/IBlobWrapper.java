@@ -22,21 +22,22 @@
  */
 package com.aoindustries.sql;
 
-import java.sql.Array;
+import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.SQLException;
 
 /**
- * Wraps an {@link Array}.
+ * Wraps a {@link Blob}.
  *
  * @author  AO Industries, Inc.
  */
-public interface IArrayWrapper extends IWrapper, Array, AutoCloseable {
+public interface IBlobWrapper extends IWrapper, Blob, AutoCloseable {
 
 	/**
-	 * Gets the array that is wrapped.
+	 * Gets the blob that is wrapped.
 	 */
 	@Override
-	Array getWrapped();
+	Blob getWrapped();
 
 	/**
 	 * Calls {@link #free()}
@@ -49,49 +50,55 @@ public interface IArrayWrapper extends IWrapper, Array, AutoCloseable {
 	}
 
 	@Override
-	default String getBaseTypeName() throws SQLException {
-		return getWrapped().getBaseTypeName();
+	default long length() throws SQLException {
+		return getWrapped().length();
 	}
 
 	@Override
-	default int getBaseType() throws SQLException {
-		return getWrapped().getBaseType();
+	default byte[] getBytes(long pos, int length) throws SQLException {
+		return getWrapped().getBytes(pos, length);
 	}
 
 	@Override
-	default Object getArray() throws SQLException {
-		return getWrapped().getArray();
+	default java.io.InputStream getBinaryStream() throws SQLException {
+		return getWrapped().getBinaryStream();
 	}
 
 	@Override
-	default Object getArray(java.util.Map<String,Class<?>> map) throws SQLException {
-		return getWrapped().getArray(map);
+	default long position(byte pattern[], long start) throws SQLException {
+		return getWrapped().position(pattern, start);
 	}
 
 	@Override
-	default Object getArray(long index, int count) throws SQLException {
-		return getWrapped().getArray(index, count);
+	long position(Blob pattern, long start) throws SQLException;
+
+	@Override
+	default int setBytes(long pos, byte[] bytes) throws SQLException {
+		return getWrapped().setBytes(pos, bytes);
 	}
 
 	@Override
-	default Object getArray(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException {
-		return getWrapped().getArray(index, count, map);
+	default int setBytes(long pos, byte[] bytes, int offset, int len) throws SQLException {
+		return getWrapped().setBytes(pos, bytes, offset, len);
 	}
 
 	@Override
-	IResultSetWrapper getResultSet() throws SQLException;
+	default java.io.OutputStream setBinaryStream(long pos) throws SQLException {
+		return getWrapped().setBinaryStream(pos);
+	}
 
 	@Override
-	IResultSetWrapper getResultSet(java.util.Map<String,Class<?>> map) throws SQLException;
-
-	@Override
-	IResultSetWrapper getResultSet(long index, int count) throws SQLException;
-
-	@Override
-	IResultSetWrapper getResultSet(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException;
+	default void truncate(long len) throws SQLException {
+		getWrapped().truncate(len);
+	}
 
 	@Override
 	default void free() throws SQLException {
 		getWrapped().free();
+	}
+
+	@Override
+	default InputStream getBinaryStream(long pos, long length) throws SQLException {
+		return getWrapped().getBinaryStream(pos, length);
 	}
 }

@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.NClob;
@@ -217,9 +216,7 @@ public interface IConnectionWrapper extends IWrapper, Connection {
 	}
 
 	@Override
-	default Blob createBlob() throws SQLException {
-		return getWrapped().createBlob();
-	}
+	IBlobWrapper createBlob() throws SQLException;
 
 	@Override
 	default NClob createNClob() throws SQLException {

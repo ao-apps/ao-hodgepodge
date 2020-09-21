@@ -56,26 +56,10 @@ public class DatabaseMetaDataWrapper implements IDatabaseMetaDataWrapper {
 	/**
 	 * Wraps a {@link ResultSet}, if not already wrapped by this wrapper.
 	 *
-	 * @see  StatementWrapper#wrapResultSet(java.sql.ResultSet)
-	 * @see  ConnectionWrapper#wrapResultSet(java.sql.ResultSet)
+	 * @see  ConnectionWrapper#wrapResultSet(com.aoindustries.sql.StatementWrapper, java.sql.ResultSet)
 	 */
 	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
-		if(results == null) {
-			return null;
-		}
-		if(results instanceof ResultSetWrapper) {
-			ResultSetWrapper resultsWrapper = (ResultSetWrapper)results;
-			if(!resultsWrapper.getStatementWrapper().isPresent()) {
-				return resultsWrapper;
-			}
-		}
-		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
-		StatementWrapper stmtWrapper = _connectionWrapper.wrapStatement(results.getStatement());
-		if(stmtWrapper != null) {
-			return stmtWrapper.wrapResultSet(results);
-		} else {
-			return _connectionWrapper.wrapResultSet(results);
-		}
+		return getConnectionWrapper().wrapResultSet(null, results);
 	}
 
 	@Override
