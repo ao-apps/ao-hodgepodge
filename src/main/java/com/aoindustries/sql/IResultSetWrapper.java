@@ -760,24 +760,16 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateNClob(int columnIndex, NClob nClob) throws SQLException {
-		getWrapped().updateNClob(columnIndex, nClob);
-	}
+    void updateNClob(int columnIndex, NClob nClob) throws SQLException;
 
 	@Override
-    default void updateNClob(String columnLabel, NClob nClob) throws SQLException {
-		getWrapped().updateNClob(columnLabel, nClob);
-	}
+    void updateNClob(String columnLabel, NClob nClob) throws SQLException;
 
 	@Override
-    default NClob getNClob(int columnIndex) throws SQLException {
-		return getWrapped().getNClob(columnIndex);
-	}
+    INClobWrapper getNClob(int columnIndex) throws SQLException;
 
 	@Override
-    default NClob getNClob(String columnLabel) throws SQLException {
-		return getWrapped().getNClob(columnLabel);
-	}
+    INClobWrapper getNClob(String columnLabel) throws SQLException;
 
 	@Override
     default SQLXML getSQLXML(int columnIndex) throws SQLException {

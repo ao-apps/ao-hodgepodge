@@ -459,9 +459,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-	default void setNClob(String parameterName, NClob value) throws SQLException {
-		getWrapped().setNClob(parameterName, value);
-	}
+	void setNClob(String parameterName, NClob value) throws SQLException;
 
 	@Override
 	default void setClob(String parameterName, Reader reader, long length) throws SQLException {
@@ -479,14 +477,10 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default NClob getNClob(int parameterIndex) throws SQLException {
-		return getWrapped().getNClob(parameterIndex);
-	}
+    INClobWrapper getNClob(int parameterIndex) throws SQLException;
 
 	@Override
-    default NClob getNClob(String parameterName) throws SQLException {
-		return getWrapped().getNClob(parameterName);
-	}
+    INClobWrapper getNClob(String parameterName) throws SQLException;
 
 	@Override
     default void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException {

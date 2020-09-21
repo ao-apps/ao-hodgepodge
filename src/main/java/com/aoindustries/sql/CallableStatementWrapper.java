@@ -26,6 +26,7 @@ import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
+import java.sql.NClob;
 import java.sql.SQLException;
 
 /**
@@ -69,6 +70,15 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	 */
 	protected ClobWrapper wrapClob(Clob clob) {
 		return getConnectionWrapper().wrapClob(clob);
+	}
+
+	/**
+	 * Wraps a {@link NClob}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapNClob(java.sql.NClob)
+	 */
+	protected NClobWrapper wrapNClob(NClob nclob) {
+		return getConnectionWrapper().wrapNClob(nclob);
 	}
 
 	/**
@@ -129,6 +139,36 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	@Override
     public ArrayWrapper getArray(String parameterName) throws SQLException {
 		return wrapArray(getWrapped().getArray(parameterName));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapNClob(java.sql.NClob) 
+	 */
+	@Override
+	public void setNClob(String parameterName, NClob value) throws SQLException {
+		getWrapped().setNClob(parameterName, unwrapNClob(value));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapNClob(java.sql.NClob)
+	 */
+	@Override
+    public NClobWrapper getNClob(int parameterIndex) throws SQLException {
+		return wrapNClob(getWrapped().getNClob(parameterIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapNClob(java.sql.NClob)
+	 */
+	@Override
+    public NClobWrapper getNClob(String parameterName) throws SQLException {
+		return wrapNClob(getWrapped().getNClob(parameterName));
 	}
 
 	/**

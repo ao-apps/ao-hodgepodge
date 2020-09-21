@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -119,6 +120,24 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 */
 	protected Clob unwrapClob(Clob clob) {
 		return getConnectionWrapper().unwrapClob(clob);
+	}
+
+	/**
+	 * Wraps a {@link NClob}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapNClob(java.sql.NClob)
+	 */
+	protected NClobWrapper wrapNClob(NClob nclob) {
+		return getConnectionWrapper().wrapNClob(nclob);
+	}
+
+	/**
+	 * Unwraps a {@link NClob}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapNClob(java.sql.NClob)
+	 */
+	protected NClob unwrapNClob(NClob nclob) {
+		return getConnectionWrapper().unwrapNClob(nclob);
 	}
 
 	/**
@@ -277,5 +296,45 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	@Override
     public void updateArray(String columnLabel, java.sql.Array x) throws SQLException {
 		getWrapped().updateArray(columnLabel, unwrapArray(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapNClob(java.sql.NClob) 
+	 */
+	@Override
+    public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
+		getWrapped().updateNClob(columnIndex, unwrapNClob(nClob));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapNClob(java.sql.NClob) 
+	 */
+	@Override
+    public void updateNClob(String columnLabel, NClob nClob) throws SQLException {
+		getWrapped().updateNClob(columnLabel, unwrapNClob(nClob));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapNClob(java.sql.NClob) 
+	 */
+	@Override
+    public NClobWrapper getNClob(int columnIndex) throws SQLException {
+		return wrapNClob(getWrapped().getNClob(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapNClob(java.sql.NClob) 
+	 */
+	@Override
+    public NClobWrapper getNClob(String columnLabel) throws SQLException {
+		return wrapNClob(getWrapped().getNClob(columnLabel));
 	}
 }

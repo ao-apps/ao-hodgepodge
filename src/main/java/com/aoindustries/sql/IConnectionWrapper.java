@@ -23,7 +23,6 @@
 package com.aoindustries.sql;
 
 import java.sql.Connection;
-import java.sql.NClob;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -216,9 +215,7 @@ public interface IConnectionWrapper extends IWrapper, Connection {
 	IBlobWrapper createBlob() throws SQLException;
 
 	@Override
-	default NClob createNClob() throws SQLException {
-		return getWrapped().createNClob();
-	}
+	INClobWrapper createNClob() throws SQLException;
 
 	@Override
 	default SQLXML createSQLXML() throws SQLException {

@@ -238,9 +238,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-	default void setNClob(int parameterIndex, NClob value) throws SQLException {
-		getWrapped().setNClob(parameterIndex, value);
-	}
+	void setNClob(int parameterIndex, NClob value) throws SQLException;
 
 	@Override
 	default void setClob(int parameterIndex, Reader reader, long length) throws SQLException {

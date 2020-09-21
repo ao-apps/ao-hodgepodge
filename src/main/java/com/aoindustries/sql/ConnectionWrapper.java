@@ -28,6 +28,7 @@ import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -95,6 +96,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected DatabaseMetaDataWrapper newDatabaseMetaDataWrapper(DatabaseMetaData metaData) {
 		return new DatabaseMetaDataWrapper(this, metaData);
+	}
+
+	/**
+	 * Creates a new {@link NClobWrapper}.
+	 *
+	 * @see  #wrapNClob(java.sql.NClob)
+	 */
+	protected NClobWrapper newNClobWrapper(NClob nclob) {
+		return new NClobWrapper(this, nclob);
 	}
 
 	/**
@@ -237,12 +247,16 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * Wraps a {@link Clob}, if not already wrapped by this wrapper.
 	 *
 	 * @see  #newClobWrapper(java.sql.Clob)
+	 * @see  #wrapNClob(java.sql.NClob)
 	 * @see  CallableStatementWrapper#wrapClob(java.sql.Clob)
 	 * @see  ResultSetWrapper#wrapClob(java.sql.Clob)
 	 */
 	protected ClobWrapper wrapClob(Clob clob) {
 		if(clob == null) {
 			return null;
+		}
+		if(clob instanceof NClob) {
+			return wrapNClob((NClob)clob);
 		}
 		if(clob instanceof ClobWrapper) {
 			ClobWrapper clobWrapper = (ClobWrapper)clob;
@@ -286,6 +300,45 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return newDatabaseMetaDataWrapper(metaData);
+	}
+
+	/**
+	 * Wraps a {@link NClob}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newNClobWrapper(java.sql.NClob)
+	 * @see  CallableStatementWrapper#wrapNClob(java.sql.NClob)
+	 * @see  ResultSetWrapper#wrapNClob(java.sql.NClob)
+	 */
+	protected NClobWrapper wrapNClob(NClob nclob) {
+		if(nclob == null) {
+			return null;
+		}
+		if(nclob instanceof NClobWrapper) {
+			NClobWrapper nclobWrapper = (NClobWrapper)nclob;
+			if(nclobWrapper.getConnectionWrapper() == this) {
+				return nclobWrapper;
+			}
+		}
+		return newNClobWrapper(nclob);
+	}
+
+	/**
+	 * Unwraps a {@link NClob}, if wrapped by this wrapper.
+	 *
+	 * @see  PreparedStatementWrapper#unwrapNClob(java.sql.NClob)
+	 * @see  ResultSetWrapper#unwrapNClob(java.sql.NClob)
+	 */
+	protected NClob unwrapNClob(NClob nclob) {
+		if(nclob == null) {
+			return null;
+		}
+		if(nclob instanceof NClobWrapper) {
+			NClobWrapper nclobWrapper = (NClobWrapper)nclob;
+			if(nclobWrapper.getConnectionWrapper() == this) {
+				return nclobWrapper.getWrapped();
+			}
+		}
+		return nclob;
 	}
 
 	/**
@@ -533,6 +586,16 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	@Override
 	public BlobWrapper createBlob() throws SQLException {
 		return wrapBlob(getWrapped().createBlob());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapNClob(java.sql.NClob)
+	 */
+	@Override
+	public NClobWrapper createNClob() throws SQLException {
+		return wrapNClob(getWrapped().createNClob());
 	}
 
 	/**

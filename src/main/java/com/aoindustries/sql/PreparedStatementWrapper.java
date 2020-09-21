@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -70,6 +71,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	 */
 	protected Clob unwrapClob(Clob clob) {
 		return getConnectionWrapper().unwrapClob(clob);
+	}
+
+	/**
+	 * Unwraps a {@link NClob}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapNClob(java.sql.NClob)
+	 */
+	protected NClob unwrapNClob(NClob nclob) {
+		return getConnectionWrapper().unwrapNClob(nclob);
 	}
 
 	/**
@@ -129,5 +139,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	@Override
     public ResultSetMetaDataWrapper getMetaData() throws SQLException {
 		return wrapResultSetMetaData(getWrapped().getMetaData());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapNClob(java.sql.NClob)
+	 */
+	@Override
+	public void setNClob(int parameterIndex, NClob value) throws SQLException {
+		getWrapped().setNClob(parameterIndex, unwrapNClob(value));
 	}
 }
