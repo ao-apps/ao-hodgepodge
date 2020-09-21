@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -95,6 +96,16 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected ResultSetWrapper newResultSetWrapper(StatementWrapper stmtWrapper, ResultSet results) {
 		return new ResultSetWrapper(this, stmtWrapper, results);
+	}
+
+	/**
+	 * Creates a new {@link ResultSetMetaDataWrapper}.
+	 *
+	 * @see  PreparedStatementWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
+	 * @see  ResultSetWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
+	 */
+	protected ResultSetMetaDataWrapper newResultSetMetaDataWrapper(ResultSetMetaData metaData) {
+		return new ResultSetMetaDataWrapper(this, metaData);
 	}
 
 	/**

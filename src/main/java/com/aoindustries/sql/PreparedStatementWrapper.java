@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 /**
@@ -42,6 +43,25 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 		return (PreparedStatement)super.getWrapped();
 	}
 
+	/**
+	 * Wraps a {@link ResultSetMetaData}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#newResultSetMetaDataWrapper(java.sql.ResultSetMetaData)
+	 */
+	protected ResultSetMetaDataWrapper wrapResultSetMetaData(ResultSetMetaData metaData) {
+		if(metaData == null) {
+			return null;
+		}
+		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
+		if(metaData instanceof ResultSetMetaDataWrapper) {
+			ResultSetMetaDataWrapper metaDataWrapper = (ResultSetMetaDataWrapper)metaData;
+			if(metaDataWrapper.getConnectionWrapper() == _connectionWrapper) {
+				return metaDataWrapper;
+			}
+		}
+		return _connectionWrapper.newResultSetMetaDataWrapper(metaData);
+	}
+
 	@Override
 	public ResultSetWrapper executeQuery() throws SQLException {
 		return wrapResultSet(getWrapped().executeQuery());
@@ -50,5 +70,10 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	@Override
     public void setArray(int parameterIndex, Array x) throws SQLException {
 		IPreparedStatementWrapper.super.setArray(parameterIndex, getConnectionWrapper().unwrapArray(x));
+	}
+
+	@Override
+    public ResultSetMetaDataWrapper getMetaData() throws SQLException {
+		return wrapResultSetMetaData(getWrapped().getMetaData());
 	}
 }

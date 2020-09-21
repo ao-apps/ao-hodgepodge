@@ -30,7 +30,6 @@ import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.Ref;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLType;
@@ -246,9 +245,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default ResultSetMetaData getMetaData() throws SQLException {
-		return getWrapped().getMetaData();
-	}
+    IResultSetMetaDataWrapper getMetaData() throws SQLException;
 
 	@Override
     default Object getObject(int columnIndex) throws SQLException {

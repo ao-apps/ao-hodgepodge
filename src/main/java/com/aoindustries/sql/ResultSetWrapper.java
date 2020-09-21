@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import java.sql.Array;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
@@ -107,6 +108,25 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	}
 
 	/**
+	 * Wraps a {@link ResultSetMetaData}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#newResultSetMetaDataWrapper(java.sql.ResultSetMetaData)
+	 */
+	protected ResultSetMetaDataWrapper wrapResultSetMetaData(ResultSetMetaData metaData) {
+		if(metaData == null) {
+			return null;
+		}
+		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
+		if(metaData instanceof ResultSetMetaDataWrapper) {
+			ResultSetMetaDataWrapper metaDataWrapper = (ResultSetMetaDataWrapper)metaData;
+			if(metaDataWrapper.getConnectionWrapper() == _connectionWrapper) {
+				return metaDataWrapper;
+			}
+		}
+		return _connectionWrapper.newResultSetMetaDataWrapper(metaData);
+	}
+
+	/**
 	 * Wraps a {@link Statement}, if not already wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#wrapStatement(java.sql.Statement)
@@ -127,6 +147,11 @@ public class ResultSetWrapper implements IResultSetWrapper {
 		} else {
 			return getConnectionWrapper().wrapStatement(stmt);
 		}
+	}
+
+	@Override
+    public ResultSetMetaDataWrapper getMetaData() throws SQLException {
+		return wrapResultSetMetaData(getWrapped().getMetaData());
 	}
 
 	@Override

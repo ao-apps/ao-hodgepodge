@@ -32,7 +32,6 @@ import java.sql.NClob;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
-import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLType;
@@ -196,11 +195,8 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 		getWrapped().setArray(parameterIndex, x);
 	}
 
-	// TODO: Wrap this, too?
 	@Override
-    default ResultSetMetaData getMetaData() throws SQLException {
-		return getWrapped().getMetaData();
-	}
+    IResultSetMetaDataWrapper getMetaData() throws SQLException;
 
 	@Override
     default void setDate(int parameterIndex, java.sql.Date x, Calendar cal) throws SQLException {
