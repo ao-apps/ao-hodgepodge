@@ -49,7 +49,7 @@ public class DatabaseMetaDataWrapper implements IDatabaseMetaDataWrapper {
 	}
 
 	@Override
-	public DatabaseMetaData getWrappedDatabaseMetaData() {
+	public DatabaseMetaData getWrapped() {
 		return wrapped;
 	}
 
@@ -80,138 +80,138 @@ public class DatabaseMetaDataWrapper implements IDatabaseMetaDataWrapper {
 
 	@Override
 	public ResultSetWrapper getProcedures(String catalog, String schemaPattern, String procedureNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getProcedures(catalog, schemaPattern, procedureNamePattern));
+		return wrapResultSet(getWrapped().getProcedures(catalog, schemaPattern, procedureNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getProcedureColumns(catalog, schemaPattern, procedureNamePattern, columnNamePattern));
+		return wrapResultSet(getWrapped().getProcedureColumns(catalog, schemaPattern, procedureNamePattern, columnNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getTables(String catalog, String schemaPattern, String tableNamePattern, String types[]) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getTables(catalog, schemaPattern, tableNamePattern, types));
+		return wrapResultSet(getWrapped().getTables(catalog, schemaPattern, tableNamePattern, types));
 	}
 
 	@Override
 	public ResultSetWrapper getSchemas() throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getSchemas());
+		return wrapResultSet(getWrapped().getSchemas());
 	}
 
 	@Override
 	public ResultSetWrapper getCatalogs() throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getCatalogs());
+		return wrapResultSet(getWrapped().getCatalogs());
 	}
 
 	@Override
 	public ResultSetWrapper getTableTypes() throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getTableTypes());
+		return wrapResultSet(getWrapped().getTableTypes());
 	}
 
 	@Override
 	public ResultSetWrapper getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern));
+		return wrapResultSet(getWrapped().getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getColumnPrivileges(catalog, schema, table, columnNamePattern));
+		return wrapResultSet(getWrapped().getColumnPrivileges(catalog, schema, table, columnNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getTablePrivileges(catalog, schemaPattern, tableNamePattern));
+		return wrapResultSet(getWrapped().getTablePrivileges(catalog, schemaPattern, tableNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getBestRowIdentifier(catalog, schema, table, scope, nullable));
+		return wrapResultSet(getWrapped().getBestRowIdentifier(catalog, schema, table, scope, nullable));
 	}
 
 	@Override
 	public ResultSetWrapper getVersionColumns(String catalog, String schema, String table) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getVersionColumns(catalog, schema, table));
+		return wrapResultSet(getWrapped().getVersionColumns(catalog, schema, table));
 	}
 
 	@Override
 	public ResultSetWrapper getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getPrimaryKeys(catalog, schema, table));
+		return wrapResultSet(getWrapped().getPrimaryKeys(catalog, schema, table));
 	}
 
 	@Override
 	public ResultSetWrapper getImportedKeys(String catalog, String schema, String table) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getImportedKeys(catalog, schema, table));
+		return wrapResultSet(getWrapped().getImportedKeys(catalog, schema, table));
 	}
 
 	@Override
 	public ResultSetWrapper getExportedKeys(String catalog, String schema, String table) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getExportedKeys(catalog, schema, table));
+		return wrapResultSet(getWrapped().getExportedKeys(catalog, schema, table));
 	}
 
 	@Override
 	public ResultSetWrapper getCrossReference(String parentCatalog, String parentSchema, String parentTable, String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog, foreignSchema, foreignTable));
+		return wrapResultSet(getWrapped().getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog, foreignSchema, foreignTable));
 	}
 
 	@Override
 	public ResultSetWrapper getTypeInfo() throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getTypeInfo());
+		return wrapResultSet(getWrapped().getTypeInfo());
 	}
 
 	@Override
 	public ResultSetWrapper getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getIndexInfo(catalog, schema, table, unique, approximate));
+		return wrapResultSet(getWrapped().getIndexInfo(catalog, schema, table, unique, approximate));
 	}
 
 	@Override
 	public ResultSetWrapper getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getUDTs(catalog, schemaPattern, typeNamePattern, types));
+		return wrapResultSet(getWrapped().getUDTs(catalog, schemaPattern, typeNamePattern, types));
 	}
 
 	@Override
 	public ConnectionWrapper getConnection() throws SQLException {
 		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
-		assert getWrappedDatabaseMetaData().getConnection() == _connectionWrapper.getWrappedConnection();
+		assert getWrapped().getConnection() == _connectionWrapper.getWrapped();
 		return _connectionWrapper;
 	}
 
 	@Override
 	public ResultSetWrapper getSuperTypes(String catalog, String schemaPattern, String typeNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getSuperTypes(catalog, schemaPattern, typeNamePattern));
+		return wrapResultSet(getWrapped().getSuperTypes(catalog, schemaPattern, typeNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getSuperTables(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getSuperTables(catalog, schemaPattern, tableNamePattern));
+		return wrapResultSet(getWrapped().getSuperTables(catalog, schemaPattern, tableNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getAttributes(String catalog, String schemaPattern, String typeNamePattern, String attributeNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getAttributes(catalog, schemaPattern, typeNamePattern, attributeNamePattern));
+		return wrapResultSet(getWrapped().getAttributes(catalog, schemaPattern, typeNamePattern, attributeNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getSchemas(String catalog, String schemaPattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getSchemas(catalog, schemaPattern));
+		return wrapResultSet(getWrapped().getSchemas(catalog, schemaPattern));
 	}
 
 	@Override
 	public ResultSetWrapper getClientInfoProperties() throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getClientInfoProperties());
+		return wrapResultSet(getWrapped().getClientInfoProperties());
 	}
 
 	@Override
 	public ResultSetWrapper getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getFunctions(catalog, schemaPattern, functionNamePattern));
+		return wrapResultSet(getWrapped().getFunctions(catalog, schemaPattern, functionNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getFunctionColumns(catalog, schemaPattern, functionNamePattern, columnNamePattern));
+		return wrapResultSet(getWrapped().getFunctionColumns(catalog, schemaPattern, functionNamePattern, columnNamePattern));
 	}
 
 	@Override
 	public ResultSetWrapper getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
-		return wrapResultSet(getWrappedDatabaseMetaData().getPseudoColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern));
+		return wrapResultSet(getWrapped().getPseudoColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern));
 	}
 }

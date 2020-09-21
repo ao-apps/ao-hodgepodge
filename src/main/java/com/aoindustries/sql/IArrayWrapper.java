@@ -30,41 +30,42 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public interface IArrayWrapper extends Array {
+public interface IArrayWrapper extends IWrapper, Array {
 
 	/**
 	 * Gets the array that is wrapped.
 	 */
-	Array getWrappedArray();
+	@Override
+	Array getWrapped();
 
 	@Override
 	default String getBaseTypeName() throws SQLException {
-		return getWrappedArray().getBaseTypeName();
+		return getWrapped().getBaseTypeName();
 	}
 
 	@Override
 	default int getBaseType() throws SQLException {
-		return getWrappedArray().getBaseType();
+		return getWrapped().getBaseType();
 	}
 
 	@Override
 	default Object getArray() throws SQLException {
-		return getWrappedArray().getArray();
+		return getWrapped().getArray();
 	}
 
 	@Override
 	default Object getArray(java.util.Map<String,Class<?>> map) throws SQLException {
-		return getWrappedArray().getArray(map);
+		return getWrapped().getArray(map);
 	}
 
 	@Override
 	default Object getArray(long index, int count) throws SQLException {
-		return getWrappedArray().getArray(index, count);
+		return getWrapped().getArray(index, count);
 	}
 
 	@Override
 	default Object getArray(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException {
-		return getWrappedArray().getArray(index, count, map);
+		return getWrapped().getArray(index, count, map);
 	}
 
 	@Override
@@ -81,6 +82,6 @@ public interface IArrayWrapper extends Array {
 
 	@Override
 	default void free() throws SQLException {
-		getWrappedArray().free();
+		getWrapped().free();
 	}
 }

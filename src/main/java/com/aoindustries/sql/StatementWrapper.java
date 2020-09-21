@@ -49,7 +49,7 @@ public class StatementWrapper implements IStatementWrapper {
 	}
 
 	@Override
-	public Statement getWrappedStatement() {
+	public Statement getWrapped() {
 		return wrapped;
 	}
 
@@ -75,23 +75,23 @@ public class StatementWrapper implements IStatementWrapper {
 
 	@Override
 	public ResultSetWrapper executeQuery(String sql) throws SQLException {
-		return wrapResultSet(getWrappedStatement().executeQuery(sql));
+		return wrapResultSet(getWrapped().executeQuery(sql));
 	}
 
     @Override
 	public ResultSetWrapper getResultSet() throws SQLException {
-		return wrapResultSet(getWrappedStatement().getResultSet());
+		return wrapResultSet(getWrapped().getResultSet());
 	}
 
     @Override
 	public ConnectionWrapper getConnection() throws SQLException {
 		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
-		assert getWrappedStatement().getConnection() == _connectionWrapper.getWrappedConnection();
+		assert getWrapped().getConnection() == _connectionWrapper.getWrapped();
 		return _connectionWrapper;
 	}
 
     @Override
 	public ResultSetWrapper getGeneratedKeys() throws SQLException {
-		return wrapResultSet(getWrappedStatement().getGeneratedKeys());
+		return wrapResultSet(getWrapped().getGeneratedKeys());
 	}
 }

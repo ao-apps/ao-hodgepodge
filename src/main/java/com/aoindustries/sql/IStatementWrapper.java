@@ -31,99 +31,85 @@ import java.sql.Statement;
  *
  * @author  AO Industries, Inc.
  */
-public interface IStatementWrapper extends Statement {
+public interface IStatementWrapper extends IWrapper, Statement {
 
 	/**
 	 * Gets the statement that is wrapped.
 	 */
-	Statement getWrappedStatement();
-
 	@Override
-	default <T> T unwrap(Class<T> iface) throws SQLException {
-		if(iface.isInstance(this)) return iface.cast(this);
-		Statement stmt = getWrappedStatement();
-		if(iface.isInstance(stmt)) return iface.cast(stmt);
-		return stmt.unwrap(iface);
-	}
-
-	@Override
-	default boolean isWrapperFor(Class<?> iface) throws SQLException {
-		if(iface.isInstance(this)) return true;
-		Statement stmt = getWrappedStatement();
-		return iface.isInstance(stmt) || stmt.isWrapperFor(iface);
-	}
+	Statement getWrapped();
 
 	@Override
 	IResultSetWrapper executeQuery(String sql) throws SQLException;
 
     @Override
 	default int executeUpdate(String sql) throws SQLException {
-		return getWrappedStatement().executeUpdate(sql);
+		return getWrapped().executeUpdate(sql);
 	}
 
 	@Override
 	default void close() throws SQLException {
-		getWrappedStatement().close();
+		getWrapped().close();
 	}
 
     @Override
 	default int getMaxFieldSize() throws SQLException {
-		return getWrappedStatement().getMaxFieldSize();
+		return getWrapped().getMaxFieldSize();
 	}
 
     @Override
 	default void setMaxFieldSize(int max) throws SQLException {
-		getWrappedStatement().setMaxFieldSize(max);
+		getWrapped().setMaxFieldSize(max);
 	}
 
     @Override
 	default int getMaxRows() throws SQLException {
-		return getWrappedStatement().getMaxRows();
+		return getWrapped().getMaxRows();
 	}
 
     @Override
 	default void setMaxRows(int max) throws SQLException {
-		getWrappedStatement().setMaxRows(max);
+		getWrapped().setMaxRows(max);
 	}
 
     @Override
 	default void setEscapeProcessing(boolean enable) throws SQLException {
-		getWrappedStatement().setEscapeProcessing(enable);
+		getWrapped().setEscapeProcessing(enable);
 	}
 
     @Override
 	default int getQueryTimeout() throws SQLException {
-		return getWrappedStatement().getQueryTimeout();
+		return getWrapped().getQueryTimeout();
 	}
 
     @Override
 	default void setQueryTimeout(int seconds) throws SQLException {
-		getWrappedStatement().setQueryTimeout(seconds);
+		getWrapped().setQueryTimeout(seconds);
 	}
 
     @Override
 	default void cancel() throws SQLException {
-		getWrappedStatement().cancel();
+		getWrapped().cancel();
 	}
 
     @Override
 	default SQLWarning getWarnings() throws SQLException {
-		return getWrappedStatement().getWarnings();
+		return getWrapped().getWarnings();
 	}
 
     @Override
 	default void clearWarnings() throws SQLException {
-		getWrappedStatement().clearWarnings();
+		getWrapped().clearWarnings();
 	}
 
     @Override
 	default void setCursorName(String name) throws SQLException {
-		getWrappedStatement().setCursorName(name);
+		getWrapped().setCursorName(name);
 	}
 
     @Override
 	default boolean execute(String sql) throws SQLException {
-		return getWrappedStatement().execute(sql);
+		return getWrapped().execute(sql);
 	}
 
 	@Override
@@ -131,57 +117,57 @@ public interface IStatementWrapper extends Statement {
 
     @Override
 	default int getUpdateCount() throws SQLException {
-		return getWrappedStatement().getUpdateCount();
+		return getWrapped().getUpdateCount();
 	}
 
     @Override
 	default boolean getMoreResults() throws SQLException {
-		return getWrappedStatement().getMoreResults();
+		return getWrapped().getMoreResults();
 	}
 
     @Override
 	default void setFetchDirection(int direction) throws SQLException {
-		getWrappedStatement().setFetchDirection(direction);
+		getWrapped().setFetchDirection(direction);
 	}
 
     @Override
 	default int getFetchDirection() throws SQLException {
-		return getWrappedStatement().getFetchDirection();
+		return getWrapped().getFetchDirection();
 	}
 
     @Override
 	default void setFetchSize(int rows) throws SQLException {
-		getWrappedStatement().setFetchSize(rows);
+		getWrapped().setFetchSize(rows);
 	}
 
     @Override
 	default int getFetchSize() throws SQLException {
-		return getWrappedStatement().getFetchSize();
+		return getWrapped().getFetchSize();
 	}
 
     @Override
 	default int getResultSetConcurrency() throws SQLException {
-		return getWrappedStatement().getResultSetConcurrency();
+		return getWrapped().getResultSetConcurrency();
 	}
 
     @Override
 	default int getResultSetType() throws SQLException {
-		return getWrappedStatement().getResultSetType();
+		return getWrapped().getResultSetType();
 	}
 
     @Override
 	default void addBatch(String sql) throws SQLException {
-		getWrappedStatement().addBatch(sql);
+		getWrapped().addBatch(sql);
 	}
 
     @Override
 	default void clearBatch() throws SQLException {
-		getWrappedStatement().clearBatch();
+		getWrapped().clearBatch();
 	}
 
     @Override
 	default int[] executeBatch() throws SQLException {
-		return getWrappedStatement().executeBatch();
+		return getWrapped().executeBatch();
 	}
 
 	@Override
@@ -189,7 +175,7 @@ public interface IStatementWrapper extends Statement {
 
     @Override
 	default boolean getMoreResults(int current) throws SQLException {
-		return getWrappedStatement().getMoreResults(current);
+		return getWrapped().getMoreResults(current);
 	}
 
 	@Override
@@ -197,102 +183,102 @@ public interface IStatementWrapper extends Statement {
 
     @Override
 	default int executeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
-		return getWrappedStatement().executeUpdate(sql, autoGeneratedKeys);
+		return getWrapped().executeUpdate(sql, autoGeneratedKeys);
 	}
 
     @Override
 	default int executeUpdate(String sql, int columnIndexes[]) throws SQLException {
-		return getWrappedStatement().executeUpdate(sql, columnIndexes);
+		return getWrapped().executeUpdate(sql, columnIndexes);
 	}
 
     @Override
 	default int executeUpdate(String sql, String columnNames[]) throws SQLException {
-		return getWrappedStatement().executeUpdate(sql, columnNames);
+		return getWrapped().executeUpdate(sql, columnNames);
 	}
 
     @Override
 	default boolean execute(String sql, int autoGeneratedKeys) throws SQLException {
-		return getWrappedStatement().execute(sql, autoGeneratedKeys);
+		return getWrapped().execute(sql, autoGeneratedKeys);
 	}
 
     @Override
 	default boolean execute(String sql, int columnIndexes[]) throws SQLException {
-		return getWrappedStatement().execute(sql, columnIndexes);
+		return getWrapped().execute(sql, columnIndexes);
 	}
 
     @Override
 	default boolean execute(String sql, String columnNames[]) throws SQLException {
-		return getWrappedStatement().execute(sql, columnNames);
+		return getWrapped().execute(sql, columnNames);
 	}
 
     @Override
 	default int getResultSetHoldability() throws SQLException {
-		return getWrappedStatement().getResultSetHoldability();
+		return getWrapped().getResultSetHoldability();
 	}
 
     @Override
 	default boolean isClosed() throws SQLException {
-		return getWrappedStatement().isClosed();
+		return getWrapped().isClosed();
 	}
 
 	@Override
 	default void setPoolable(boolean poolable) throws SQLException {
-		getWrappedStatement().setPoolable(poolable);
+		getWrapped().setPoolable(poolable);
 	}
 
 	@Override
 	default boolean isPoolable() throws SQLException {
-		return getWrappedStatement().isPoolable();
+		return getWrapped().isPoolable();
 	}
 
     @Override
 	default void closeOnCompletion() throws SQLException {
-		getWrappedStatement().closeOnCompletion();
+		getWrapped().closeOnCompletion();
 	}
 
     @Override
 	default boolean isCloseOnCompletion() throws SQLException {
-		return getWrappedStatement().isCloseOnCompletion();
+		return getWrapped().isCloseOnCompletion();
 	}
 
     @Override
 	default long getLargeUpdateCount() throws SQLException {
-		return getWrappedStatement().getLargeUpdateCount();
+		return getWrapped().getLargeUpdateCount();
 	}
 
     @Override
 	default void setLargeMaxRows(long max) throws SQLException {
-		getWrappedStatement().setLargeMaxRows(max);
+		getWrapped().setLargeMaxRows(max);
 	}
 
 	@Override
 	default long getLargeMaxRows() throws SQLException {
-		return getWrappedStatement().getLargeMaxRows();
+		return getWrapped().getLargeMaxRows();
 	}
 
     @Override
 	default long[] executeLargeBatch() throws SQLException {
-		return getWrappedStatement().executeLargeBatch();
+		return getWrapped().executeLargeBatch();
 	}
 
     @Override
 	default long executeLargeUpdate(String sql) throws SQLException {
-		return getWrappedStatement().executeLargeUpdate(sql);
+		return getWrapped().executeLargeUpdate(sql);
 	}
 
     @Override
 	default long executeLargeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
-		return getWrappedStatement().executeLargeUpdate(sql, autoGeneratedKeys);
+		return getWrapped().executeLargeUpdate(sql, autoGeneratedKeys);
 	}
 
     @Override
 	default long executeLargeUpdate(String sql, int columnIndexes[]) throws SQLException {
-		return getWrappedStatement().executeLargeUpdate(sql, columnIndexes);
+		return getWrapped().executeLargeUpdate(sql, columnIndexes);
 	}
 
     @Override
 	default long executeLargeUpdate(String sql, String columnNames[]) throws SQLException {
-		return getWrappedStatement().executeLargeUpdate(sql, columnNames);
+		return getWrapped().executeLargeUpdate(sql, columnNames);
 	}
 
 	// Java 9: String enquoteLiteral(String val)  throws SQLException;

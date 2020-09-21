@@ -85,7 +85,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 			wrapper = conn.unwrap(IPooledConnectionWrapper.class);
 		}
 		if(wrapper.getPool() == this) {
-			return wrapper.getWrappedConnection();
+			return wrapper.getWrapped();
 		} else {
 			throw new SQLException("Connection from a different pool, cannot unwrap");
 		}

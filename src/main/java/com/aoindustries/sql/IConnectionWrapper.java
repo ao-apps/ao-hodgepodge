@@ -41,26 +41,20 @@ import java.util.concurrent.Executor;
  *
  * @author  AO Industries, Inc.
  */
-public interface IConnectionWrapper extends Connection {
+public interface IConnectionWrapper extends IWrapper, Connection {
 
 	/**
 	 * Gets the connection that is wrapped.
 	 */
-	Connection getWrappedConnection();
-
 	@Override
-	default <T> T unwrap(Class<T> iface) throws SQLException {
-		if(iface.isInstance(this)) return iface.cast(this);
-		Connection conn = getWrappedConnection();
-		if(iface.isInstance(conn)) return iface.cast(conn);
-		return conn.unwrap(iface);
-	}
+	Connection getWrapped();
 
-	@Override
-	default boolean isWrapperFor(Class<?> iface) throws SQLException {
-		if(iface.isInstance(this)) return true;
-		Connection conn = getWrappedConnection();
-		return iface.isInstance(conn) || conn.isWrapperFor(iface);
+	/**
+	 * @deprecated  Please use {@link #getWrapped()}
+	 */
+	@Deprecated
+	default Connection getWrappedConnection() {
+		return getWrapped();
 	}
 
 	@Override
@@ -74,37 +68,37 @@ public interface IConnectionWrapper extends Connection {
 
 	@Override
 	default String nativeSQL(String sql) throws SQLException {
-		return getWrappedConnection().nativeSQL(sql);
+		return getWrapped().nativeSQL(sql);
 	}
 
 	@Override
 	default void setAutoCommit(boolean autoCommit) throws SQLException {
-		getWrappedConnection().setAutoCommit(autoCommit);
+		getWrapped().setAutoCommit(autoCommit);
 	}
 
 	@Override
 	default boolean getAutoCommit() throws SQLException {
-		return getWrappedConnection().getAutoCommit();
+		return getWrapped().getAutoCommit();
 	}
 
 	@Override
 	default void commit() throws SQLException {
-		getWrappedConnection().commit();
+		getWrapped().commit();
 	}
 
 	@Override
 	default void rollback() throws SQLException {
-		getWrappedConnection().rollback();
+		getWrapped().rollback();
 	}
 
 	@Override
 	default void close() throws SQLException {
-		getWrappedConnection().close();
+		getWrapped().close();
 	}
 
 	@Override
 	default boolean isClosed() throws SQLException {
-		return getWrappedConnection().isClosed();
+		return getWrapped().isClosed();
 	}
 
 	@Override
@@ -112,42 +106,42 @@ public interface IConnectionWrapper extends Connection {
 
 	@Override
 	default void setReadOnly(boolean readOnly) throws SQLException {
-		getWrappedConnection().setReadOnly(readOnly);
+		getWrapped().setReadOnly(readOnly);
 	}
 
 	@Override
 	default boolean isReadOnly() throws SQLException {
-		return getWrappedConnection().isReadOnly();
+		return getWrapped().isReadOnly();
 	}
 
 	@Override
 	default void setCatalog(String catalog) throws SQLException {
-		getWrappedConnection().setCatalog(catalog);
+		getWrapped().setCatalog(catalog);
 	}
 
 	@Override
 	default String getCatalog() throws SQLException {
-		return getWrappedConnection().getCatalog();
+		return getWrapped().getCatalog();
 	}
 
 	@Override
 	default void setTransactionIsolation(int level) throws SQLException {
-		getWrappedConnection().setTransactionIsolation(level);
+		getWrapped().setTransactionIsolation(level);
 	}
 
 	@Override
 	default int getTransactionIsolation() throws SQLException {
-		return getWrappedConnection().getTransactionIsolation();
+		return getWrapped().getTransactionIsolation();
 	}
 
 	@Override
 	default SQLWarning getWarnings() throws SQLException {
-		return getWrappedConnection().getWarnings();
+		return getWrapped().getWarnings();
 	}
 
 	@Override
 	default void clearWarnings() throws SQLException {
-		getWrappedConnection().clearWarnings();
+		getWrapped().clearWarnings();
 	}
 
 	@Override
@@ -161,42 +155,42 @@ public interface IConnectionWrapper extends Connection {
 
 	@Override
 	default Map<String,Class<?>> getTypeMap() throws SQLException {
-		return getWrappedConnection().getTypeMap();
+		return getWrapped().getTypeMap();
 	}
 
 	@Override
 	default void setTypeMap(Map<String,Class<?>> map) throws SQLException {
-		getWrappedConnection().setTypeMap(map);
+		getWrapped().setTypeMap(map);
 	}
 
 	@Override
 	default void setHoldability(int holdability) throws SQLException {
-		getWrappedConnection().setHoldability(holdability);
+		getWrapped().setHoldability(holdability);
 	}
 
 	@Override
 	default int getHoldability() throws SQLException {
-		return getWrappedConnection().getHoldability();
+		return getWrapped().getHoldability();
 	}
 
 	@Override
 	default Savepoint setSavepoint() throws SQLException {
-		return getWrappedConnection().setSavepoint();
+		return getWrapped().setSavepoint();
 	}
 
 	@Override
 	default Savepoint setSavepoint(String name) throws SQLException {
-		return getWrappedConnection().setSavepoint(name);
+		return getWrapped().setSavepoint(name);
 	}
 
 	@Override
 	default void rollback(Savepoint savepoint) throws SQLException {
-		getWrappedConnection().rollback(savepoint);
+		getWrapped().rollback(savepoint);
 	}
 
 	@Override
 	default void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		getWrappedConnection().releaseSavepoint(savepoint);
+		getWrapped().releaseSavepoint(savepoint);
 	}
 
 	@Override
@@ -219,47 +213,47 @@ public interface IConnectionWrapper extends Connection {
 
 	@Override
 	default Clob createClob() throws SQLException {
-		return getWrappedConnection().createClob();
+		return getWrapped().createClob();
 	}
 
 	@Override
 	default Blob createBlob() throws SQLException {
-		return getWrappedConnection().createBlob();
+		return getWrapped().createBlob();
 	}
 
 	@Override
 	default NClob createNClob() throws SQLException {
-		return getWrappedConnection().createNClob();
+		return getWrapped().createNClob();
 	}
 
 	@Override
 	default SQLXML createSQLXML() throws SQLException {
-		return getWrappedConnection().createSQLXML();
+		return getWrapped().createSQLXML();
 	}
 
 	@Override
 	default boolean isValid(int timeout) throws SQLException {
-		return getWrappedConnection().isValid(timeout);
+		return getWrapped().isValid(timeout);
 	}
 
 	@Override
 	default void setClientInfo(String name, String value) throws SQLClientInfoException {
-		getWrappedConnection().setClientInfo(name, value);
+		getWrapped().setClientInfo(name, value);
 	}
 
 	@Override
 	default void setClientInfo(Properties properties) throws SQLClientInfoException {
-		getWrappedConnection().setClientInfo(properties);
+		getWrapped().setClientInfo(properties);
 	}
 
 	@Override
 	default String getClientInfo(String name) throws SQLException {
-		return getWrappedConnection().getClientInfo(name);
+		return getWrapped().getClientInfo(name);
 	}
 
 	@Override
 	default Properties getClientInfo() throws SQLException {
-		return getWrappedConnection().getClientInfo();
+		return getWrapped().getClientInfo();
 	}
 
 	@Override
@@ -267,31 +261,31 @@ public interface IConnectionWrapper extends Connection {
 
 	@Override
 	default Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-		return getWrappedConnection().createStruct(typeName, attributes);
+		return getWrapped().createStruct(typeName, attributes);
 	}
 
 	@Override
 	default int getNetworkTimeout() throws SQLException {
-		return getWrappedConnection().getNetworkTimeout();
+		return getWrapped().getNetworkTimeout();
 	}
 
 	@Override
 	default void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-		getWrappedConnection().setNetworkTimeout(executor, milliseconds);
+		getWrapped().setNetworkTimeout(executor, milliseconds);
 	}
 
 	@Override
 	default void setSchema(String schema) throws SQLException {
-		getWrappedConnection().setSchema(schema);
+		getWrapped().setSchema(schema);
 	}
 
 	@Override
 	default String getSchema() throws SQLException {
-		return getWrappedConnection().getSchema();
+		return getWrapped().getSchema();
 	}
 
 	@Override
 	default void abort(Executor executor) throws SQLException {
-		getWrappedConnection().abort(executor);
+		getWrapped().abort(executor);
 	}
 }

@@ -47,117 +47,117 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	 * Gets the callable statement that is wrapped.
 	 */
 	@Override
-	CallableStatement getWrappedStatement();
+	CallableStatement getWrapped();
 
 	@Override
 	default void registerOutParameter(int parameterIndex, int sqlType) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterIndex, sqlType);
+		getWrapped().registerOutParameter(parameterIndex, sqlType);
 	}
 
 	@Override
 	default void registerOutParameter(int parameterIndex, int sqlType, int scale) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterIndex, sqlType, scale);
+		getWrapped().registerOutParameter(parameterIndex, sqlType, scale);
 	}
 
 	@Override
     default boolean wasNull() throws SQLException {
-		return getWrappedStatement().wasNull();
+		return getWrapped().wasNull();
 	}
 
 	@Override
     default String getString(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getString(parameterIndex);
+		return getWrapped().getString(parameterIndex);
 	}
 
 	@Override
     default boolean getBoolean(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getBoolean(parameterIndex);
+		return getWrapped().getBoolean(parameterIndex);
 	}
 
 	@Override
     default byte getByte(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getByte(parameterIndex);
+		return getWrapped().getByte(parameterIndex);
 	}
 
 	@Override
     default short getShort(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getShort(parameterIndex);
+		return getWrapped().getShort(parameterIndex);
 	}
 
 	@Override
     default int getInt(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getInt(parameterIndex);
+		return getWrapped().getInt(parameterIndex);
 	}
 
 	@Override
     default long getLong(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getLong(parameterIndex);
+		return getWrapped().getLong(parameterIndex);
 	}
 
 	@Override
     default float getFloat(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getFloat(parameterIndex);
+		return getWrapped().getFloat(parameterIndex);
 	}
 
 	@Override
     default double getDouble(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getDouble(parameterIndex);
+		return getWrapped().getDouble(parameterIndex);
 	}
 
 	@Override
     @Deprecated // Java 9: (since="1.2")
     default BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException {
-		return getWrappedStatement().getBigDecimal(parameterIndex, scale);
+		return getWrapped().getBigDecimal(parameterIndex, scale);
 	}
 
 	@Override
     default byte[] getBytes(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getBytes(parameterIndex);
+		return getWrapped().getBytes(parameterIndex);
 	}
 
 	@Override
     default java.sql.Date getDate(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getDate(parameterIndex);
+		return getWrapped().getDate(parameterIndex);
 	}
 
 	@Override
     default java.sql.Time getTime(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getTime(parameterIndex);
+		return getWrapped().getTime(parameterIndex);
 	}
 
 	@Override
     default java.sql.Timestamp getTimestamp(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getTimestamp(parameterIndex);
+		return getWrapped().getTimestamp(parameterIndex);
 	}
 
 	@Override
     default Object getObject(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getObject(parameterIndex);
+		return getWrapped().getObject(parameterIndex);
 	}
 
 	@Override
     default BigDecimal getBigDecimal(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getBigDecimal(parameterIndex);
+		return getWrapped().getBigDecimal(parameterIndex);
 	}
 
 	@Override
     default Object getObject(int parameterIndex, java.util.Map<String,Class<?>> map) throws SQLException {
-		return getWrappedStatement().getObject(parameterIndex, map);
+		return getWrapped().getObject(parameterIndex, map);
 	}
 
 	@Override
     default Ref getRef(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getRef(parameterIndex);
+		return getWrapped().getRef(parameterIndex);
 	}
 
 	@Override
     default Blob getBlob(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getBlob(parameterIndex);
+		return getWrapped().getBlob(parameterIndex);
 	}
 
 	@Override
     default Clob getClob(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getClob(parameterIndex);
+		return getWrapped().getClob(parameterIndex);
 	}
 
 	@Override
@@ -165,257 +165,257 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 
 	@Override
     default java.sql.Date getDate(int parameterIndex, Calendar cal) throws SQLException {
-		return getWrappedStatement().getDate(parameterIndex, cal);
+		return getWrapped().getDate(parameterIndex, cal);
 	}
 
 	@Override
     default java.sql.Time getTime(int parameterIndex, Calendar cal) throws SQLException {
-		return getWrappedStatement().getTime(parameterIndex, cal);
+		return getWrapped().getTime(parameterIndex, cal);
 	}
 
 	@Override
     default java.sql.Timestamp getTimestamp(int parameterIndex, Calendar cal) throws SQLException {
-		return getWrappedStatement().getTimestamp(parameterIndex, cal);
+		return getWrapped().getTimestamp(parameterIndex, cal);
 	}
 
 	@Override
     default void registerOutParameter(int parameterIndex, int sqlType, String typeName) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterIndex, sqlType, typeName);
+		getWrapped().registerOutParameter(parameterIndex, sqlType, typeName);
 	}
 
 	@Override
     default void registerOutParameter(String parameterName, int sqlType) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterName, sqlType);
+		getWrapped().registerOutParameter(parameterName, sqlType);
 	}
 
 	@Override
     default void registerOutParameter(String parameterName, int sqlType, int scale) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterName, sqlType, scale);
+		getWrapped().registerOutParameter(parameterName, sqlType, scale);
 	}
 
 	@Override
     default void registerOutParameter(String parameterName, int sqlType, String typeName) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterName, sqlType, typeName);
+		getWrapped().registerOutParameter(parameterName, sqlType, typeName);
 	}
 
 	@Override
     default java.net.URL getURL(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getURL(parameterIndex);
+		return getWrapped().getURL(parameterIndex);
 	}
 
 	@Override
     default void setURL(String parameterName, java.net.URL val) throws SQLException {
-		getWrappedStatement().setURL(parameterName, val);
+		getWrapped().setURL(parameterName, val);
 	}
 
 	@Override
     default void setNull(String parameterName, int sqlType) throws SQLException {
-		getWrappedStatement().setNull(parameterName, sqlType);
+		getWrapped().setNull(parameterName, sqlType);
 	}
 
 	@Override
     default void setBoolean(String parameterName, boolean x) throws SQLException {
-		getWrappedStatement().setBoolean(parameterName, x);
+		getWrapped().setBoolean(parameterName, x);
 	}
 
 	@Override
     default void setByte(String parameterName, byte x) throws SQLException {
-		getWrappedStatement().setByte(parameterName, x);
+		getWrapped().setByte(parameterName, x);
 	}
 
 	@Override
     default void setShort(String parameterName, short x) throws SQLException {
-		getWrappedStatement().setShort(parameterName, x);
+		getWrapped().setShort(parameterName, x);
 	}
 
 	@Override
     default void setInt(String parameterName, int x) throws SQLException {
-		getWrappedStatement().setInt(parameterName, x);
+		getWrapped().setInt(parameterName, x);
 	}
 
 	@Override
     default void setLong(String parameterName, long x) throws SQLException {
-		getWrappedStatement().setLong(parameterName, x);
+		getWrapped().setLong(parameterName, x);
 	}
 
 	@Override
     default void setFloat(String parameterName, float x) throws SQLException {
-		getWrappedStatement().setFloat(parameterName, x);
+		getWrapped().setFloat(parameterName, x);
 	}
 
 	@Override
     default void setDouble(String parameterName, double x) throws SQLException {
-		getWrappedStatement().setDouble(parameterName, x);
+		getWrapped().setDouble(parameterName, x);
 	}
 
 	@Override
     default void setBigDecimal(String parameterName, BigDecimal x) throws SQLException {
-		getWrappedStatement().setBigDecimal(parameterName, x);
+		getWrapped().setBigDecimal(parameterName, x);
 	}
 
 	@Override
     default void setString(String parameterName, String x) throws SQLException {
-		getWrappedStatement().setString(parameterName, x);
+		getWrapped().setString(parameterName, x);
 	}
 
 	@Override
     default void setBytes(String parameterName, byte x[]) throws SQLException {
-		getWrappedStatement().setBytes(parameterName, x);
+		getWrapped().setBytes(parameterName, x);
 	}
 
 	@Override
     default void setDate(String parameterName, java.sql.Date x) throws SQLException {
-		getWrappedStatement().setDate(parameterName, x);
+		getWrapped().setDate(parameterName, x);
 	}
 
 	@Override
     default void setTime(String parameterName, java.sql.Time x)throws SQLException {
-		getWrappedStatement().setTime(parameterName, x);
+		getWrapped().setTime(parameterName, x);
 	}
 
 	@Override
     default void setTimestamp(String parameterName, java.sql.Timestamp x) throws SQLException {
-		getWrappedStatement().setTimestamp(parameterName, x);
+		getWrapped().setTimestamp(parameterName, x);
 	}
 
 	@Override
     default void setAsciiStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
-		getWrappedStatement().setAsciiStream(parameterName, x, length);
+		getWrapped().setAsciiStream(parameterName, x, length);
 	}
 
 	@Override
     default void setBinaryStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
-		getWrappedStatement().setBinaryStream(parameterName, x, length);
+		getWrapped().setBinaryStream(parameterName, x, length);
 	}
 
 	@Override
     default void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SQLException {
-		getWrappedStatement().setObject(parameterName, x, targetSqlType, scale);
+		getWrapped().setObject(parameterName, x, targetSqlType, scale);
 	}
 
 	@Override
     default void setObject(String parameterName, Object x, int targetSqlType) throws SQLException {
-		getWrappedStatement().setObject(parameterName, x, targetSqlType);
+		getWrapped().setObject(parameterName, x, targetSqlType);
 	}
 
 	@Override
     default void setObject(String parameterName, Object x) throws SQLException {
-		getWrappedStatement().setObject(parameterName, x);
+		getWrapped().setObject(parameterName, x);
 	}
 
 	@Override
     default void setCharacterStream(String parameterName, java.io.Reader reader, int length) throws SQLException {
-		getWrappedStatement().setCharacterStream(parameterName, reader, length);
+		getWrapped().setCharacterStream(parameterName, reader, length);
 	}
 
 	@Override
     default void setDate(String parameterName, java.sql.Date x, Calendar cal) throws SQLException {
-		getWrappedStatement().setDate(parameterName, x, cal);
+		getWrapped().setDate(parameterName, x, cal);
 	}
 
 	@Override
     default void setTime(String parameterName, java.sql.Time x, Calendar cal) throws SQLException {
-		getWrappedStatement().setTime(parameterName, x, cal);
+		getWrapped().setTime(parameterName, x, cal);
 	}
 
 	@Override
     default void setTimestamp(String parameterName, java.sql.Timestamp x, Calendar cal) throws SQLException {
-		getWrappedStatement().setTimestamp(parameterName, x, cal);
+		getWrapped().setTimestamp(parameterName, x, cal);
 	}
 
 	@Override
     default void setNull(String parameterName, int sqlType, String typeName) throws SQLException {
-		getWrappedStatement().setNull(parameterName, sqlType, typeName);
+		getWrapped().setNull(parameterName, sqlType, typeName);
 	}
 
 	@Override
     default String getString(String parameterName) throws SQLException {
-		return getWrappedStatement().getString(parameterName);
+		return getWrapped().getString(parameterName);
 	}
 
 	@Override
     default boolean getBoolean(String parameterName) throws SQLException {
-		return getWrappedStatement().getBoolean(parameterName);
+		return getWrapped().getBoolean(parameterName);
 	}
 
 	@Override
     default byte getByte(String parameterName) throws SQLException {
-		return getWrappedStatement().getByte(parameterName);
+		return getWrapped().getByte(parameterName);
 	}
 
 	@Override
     default short getShort(String parameterName) throws SQLException {
-		return getWrappedStatement().getShort(parameterName);
+		return getWrapped().getShort(parameterName);
 	}
 
 	@Override
     default int getInt(String parameterName) throws SQLException {
-		return getWrappedStatement().getInt(parameterName);
+		return getWrapped().getInt(parameterName);
 	}
 
 	@Override
     default long getLong(String parameterName) throws SQLException {
-		return getWrappedStatement().getLong(parameterName);
+		return getWrapped().getLong(parameterName);
 	}
 
 	@Override
     default float getFloat(String parameterName) throws SQLException {
-		return getWrappedStatement().getFloat(parameterName);
+		return getWrapped().getFloat(parameterName);
 	}
 
 	@Override
     default double getDouble(String parameterName) throws SQLException {
-		return getWrappedStatement().getDouble(parameterName);
+		return getWrapped().getDouble(parameterName);
 	}
 
 	@Override
     default byte[] getBytes(String parameterName) throws SQLException {
-		return getWrappedStatement().getBytes(parameterName);
+		return getWrapped().getBytes(parameterName);
 	}
 
 	@Override
     default java.sql.Date getDate(String parameterName) throws SQLException {
-		return getWrappedStatement().getDate(parameterName);
+		return getWrapped().getDate(parameterName);
 	}
 
 	@Override
     default java.sql.Time getTime(String parameterName) throws SQLException {
-		return getWrappedStatement().getTime(parameterName);
+		return getWrapped().getTime(parameterName);
 	}
 
 	@Override
     default java.sql.Timestamp getTimestamp(String parameterName) throws SQLException {
-		return getWrappedStatement().getTimestamp(parameterName);
+		return getWrapped().getTimestamp(parameterName);
 	}
 
 	@Override
     default Object getObject(String parameterName) throws SQLException {
-		return getWrappedStatement().getObject(parameterName);
+		return getWrapped().getObject(parameterName);
 	}
 
 	@Override
     default BigDecimal getBigDecimal(String parameterName) throws SQLException {
-		return getWrappedStatement().getBigDecimal(parameterName);
+		return getWrapped().getBigDecimal(parameterName);
 	}
 
 	@Override
     default Object getObject(String parameterName, java.util.Map<String,Class<?>> map) throws SQLException {
-		return getWrappedStatement().getObject(parameterName, map);
+		return getWrapped().getObject(parameterName, map);
 	}
 
 	@Override
     default Ref getRef(String parameterName) throws SQLException {
-		return getWrappedStatement().getRef(parameterName);
+		return getWrapped().getRef(parameterName);
 	}
 
 	@Override
     default Blob getBlob(String parameterName) throws SQLException {
-		return getWrappedStatement().getBlob(parameterName);
+		return getWrapped().getBlob(parameterName);
 	}
 
 	@Override
     default Clob getClob(String parameterName) throws SQLException {
-		return getWrappedStatement().getClob(parameterName);
+		return getWrapped().getClob(parameterName);
 	}
 
 	@Override
@@ -423,231 +423,231 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 
 	@Override
     default java.sql.Date getDate(String parameterName, Calendar cal) throws SQLException {
-		return getWrappedStatement().getDate(parameterName, cal);
+		return getWrapped().getDate(parameterName, cal);
 	}
 
 	@Override
     default java.sql.Time getTime(String parameterName, Calendar cal) throws SQLException {
-		return getWrappedStatement().getTime(parameterName, cal);
+		return getWrapped().getTime(parameterName, cal);
 	}
 
 	@Override
     default java.sql.Timestamp getTimestamp(String parameterName, Calendar cal) throws SQLException {
-		return getWrappedStatement().getTimestamp(parameterName, cal);
+		return getWrapped().getTimestamp(parameterName, cal);
 	}
 
 	@Override
     default java.net.URL getURL(String parameterName) throws SQLException {
-		return getWrappedStatement().getURL(parameterName);
+		return getWrapped().getURL(parameterName);
 	}
 
 	@Override
     default RowId getRowId(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getRowId(parameterIndex);
+		return getWrapped().getRowId(parameterIndex);
 	}
 
 	@Override
     default RowId getRowId(String parameterName) throws SQLException {
-		return getWrappedStatement().getRowId(parameterName);
+		return getWrapped().getRowId(parameterName);
 	}
 
 	@Override
     default void setRowId(String parameterName, RowId x) throws SQLException {
-		getWrappedStatement().setRowId(parameterName, x);
+		getWrapped().setRowId(parameterName, x);
 	}
 
 	@Override
     default void setNString(String parameterName, String value) throws SQLException {
-		getWrappedStatement().setNString(parameterName, value);
+		getWrapped().setNString(parameterName, value);
 	}
 
 	@Override
     default void setNCharacterStream(String parameterName, Reader value, long length) throws SQLException {
-		getWrappedStatement().setNCharacterStream(parameterName, value, length);
+		getWrapped().setNCharacterStream(parameterName, value, length);
 	}
 
 	@Override
 	default void setNClob(String parameterName, NClob value) throws SQLException {
-		getWrappedStatement().setNClob(parameterName, value);
+		getWrapped().setNClob(parameterName, value);
 	}
 
 	@Override
 	default void setClob(String parameterName, Reader reader, long length) throws SQLException {
-		getWrappedStatement().setClob(parameterName, reader, length);
+		getWrapped().setClob(parameterName, reader, length);
 	}
 
 	@Override
 	default void setBlob(String parameterName, InputStream inputStream, long length) throws SQLException {
-		getWrappedStatement().setBlob(parameterName, inputStream, length);
+		getWrapped().setBlob(parameterName, inputStream, length);
 	}
 
 	@Override
 	default void setNClob(String parameterName, Reader reader, long length) throws SQLException {
-		getWrappedStatement().setNClob(parameterName, reader, length);
+		getWrapped().setNClob(parameterName, reader, length);
 	}
 
 	@Override
     default NClob getNClob(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getNClob(parameterIndex);
+		return getWrapped().getNClob(parameterIndex);
 	}
 
 	@Override
     default NClob getNClob(String parameterName) throws SQLException {
-		return getWrappedStatement().getNClob(parameterName);
+		return getWrapped().getNClob(parameterName);
 	}
 
 	@Override
     default void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException {
-		getWrappedStatement().setSQLXML(parameterName, xmlObject);
+		getWrapped().setSQLXML(parameterName, xmlObject);
 	}
 
 	@Override
     default SQLXML getSQLXML(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getSQLXML(parameterIndex);
+		return getWrapped().getSQLXML(parameterIndex);
 	}
 
 	@Override
     default SQLXML getSQLXML(String parameterName) throws SQLException {
-		return getWrappedStatement().getSQLXML(parameterName);
+		return getWrapped().getSQLXML(parameterName);
 	}
 
 	@Override
     default String getNString(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getNString(parameterIndex);
+		return getWrapped().getNString(parameterIndex);
 	}
 
 	@Override
     default String getNString(String parameterName) throws SQLException {
-		return getWrappedStatement().getNString(parameterName);
+		return getWrapped().getNString(parameterName);
 	}
 
 	@Override
     default java.io.Reader getNCharacterStream(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getNCharacterStream(parameterIndex);
+		return getWrapped().getNCharacterStream(parameterIndex);
 	}
 
 	@Override
     default java.io.Reader getNCharacterStream(String parameterName) throws SQLException {
-		return getWrappedStatement().getNCharacterStream(parameterName);
+		return getWrapped().getNCharacterStream(parameterName);
 	}
 
 	@Override
     default java.io.Reader getCharacterStream(int parameterIndex) throws SQLException {
-		return getWrappedStatement().getCharacterStream(parameterIndex);
+		return getWrapped().getCharacterStream(parameterIndex);
 	}
 
 	@Override
     default java.io.Reader getCharacterStream(String parameterName) throws SQLException {
-		return getWrappedStatement().getCharacterStream(parameterName);
+		return getWrapped().getCharacterStream(parameterName);
 	}
 
 	@Override
     default void setBlob(String parameterName, Blob x) throws SQLException {
-		getWrappedStatement().setBlob(parameterName, x);
+		getWrapped().setBlob(parameterName, x);
 	}
 
 	@Override
     default void setClob(String parameterName, Clob x) throws SQLException {
-		getWrappedStatement().setClob(parameterName, x);
+		getWrapped().setClob(parameterName, x);
 	}
 
 	@Override
     default void setAsciiStream(String parameterName, java.io.InputStream x, long length) throws SQLException {
-		getWrappedStatement().setAsciiStream(parameterName, x, length);
+		getWrapped().setAsciiStream(parameterName, x, length);
 	}
 
 	@Override
     default void setBinaryStream(String parameterName, java.io.InputStream x, long length) throws SQLException {
-		getWrappedStatement().setBinaryStream(parameterName, x, length);
+		getWrapped().setBinaryStream(parameterName, x, length);
 	}
 
 	@Override
     default void setCharacterStream(String parameterName, java.io.Reader reader, long length) throws SQLException {
-		getWrappedStatement().setCharacterStream(parameterName, reader, length);
+		getWrapped().setCharacterStream(parameterName, reader, length);
 	}
 
 	@Override
     default void setAsciiStream(String parameterName, java.io.InputStream x) throws SQLException {
-		getWrappedStatement().setAsciiStream(parameterName, x);
+		getWrapped().setAsciiStream(parameterName, x);
 	}
 
 	@Override
     default void setBinaryStream(String parameterName, java.io.InputStream x) throws SQLException {
-		getWrappedStatement().setBinaryStream(parameterName, x);
+		getWrapped().setBinaryStream(parameterName, x);
 	}
 
 	@Override
     default void setCharacterStream(String parameterName, java.io.Reader reader) throws SQLException {
-		getWrappedStatement().setCharacterStream(parameterName, reader);
+		getWrapped().setCharacterStream(parameterName, reader);
 	}
 
 	@Override
 	default void setNCharacterStream(String parameterName, Reader value) throws SQLException {
-		getWrappedStatement().setNCharacterStream(parameterName, value);
+		getWrapped().setNCharacterStream(parameterName, value);
 	}
 
 	@Override
 	default void setClob(String parameterName, Reader reader) throws SQLException {
-		getWrappedStatement().setClob(parameterName, reader);
+		getWrapped().setClob(parameterName, reader);
 	}
 
 	@Override
 	default void setBlob(String parameterName, InputStream inputStream) throws SQLException {
-		getWrappedStatement().setBlob(parameterName, inputStream);
+		getWrapped().setBlob(parameterName, inputStream);
 	}
 
 	@Override
 	default void setNClob(String parameterName, Reader reader) throws SQLException {
-		getWrappedStatement().setNClob(parameterName, reader);
+		getWrapped().setNClob(parameterName, reader);
 	}
 
 	@Override
 	default <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
-		return getWrappedStatement().getObject(parameterIndex, type);
+		return getWrapped().getObject(parameterIndex, type);
 	}
 
 	@Override
 	default <T> T getObject(String parameterName, Class<T> type) throws SQLException {
-		return getWrappedStatement().getObject(parameterName, type);
+		return getWrapped().getObject(parameterName, type);
 	}
 
 	@Override
 	default void setObject(String parameterName, Object x, SQLType targetSqlType, int scaleOrLength) throws SQLException {
-		getWrappedStatement().setObject(parameterName, x, targetSqlType, scaleOrLength);
+		getWrapped().setObject(parameterName, x, targetSqlType, scaleOrLength);
 	}
 
 	@Override
 	default void setObject(String parameterName, Object x, SQLType targetSqlType)throws SQLException {
-		getWrappedStatement().setObject(parameterName, x, targetSqlType);
+		getWrapped().setObject(parameterName, x, targetSqlType);
 	}
 
 	@Override
     default void registerOutParameter(int parameterIndex, SQLType sqlType) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterIndex, sqlType);
+		getWrapped().registerOutParameter(parameterIndex, sqlType);
 	}
 
 	@Override
     default void registerOutParameter(int parameterIndex, SQLType sqlType, int scale) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterIndex, sqlType, scale);
+		getWrapped().registerOutParameter(parameterIndex, sqlType, scale);
 	}
 
 	@Override
     default void registerOutParameter(int parameterIndex, SQLType sqlType, String typeName) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterIndex, sqlType, typeName);
+		getWrapped().registerOutParameter(parameterIndex, sqlType, typeName);
 	}
 
 	@Override
     default void registerOutParameter(String parameterName, SQLType sqlType) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterName, sqlType);
+		getWrapped().registerOutParameter(parameterName, sqlType);
 	}
 
 	@Override
     default void registerOutParameter(String parameterName, SQLType sqlType, int scale) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterName, sqlType, scale);
+		getWrapped().registerOutParameter(parameterName, sqlType, scale);
 	}
 
 	@Override
     default void registerOutParameter(String parameterName, SQLType sqlType, String typeName) throws SQLException {
-		getWrappedStatement().registerOutParameter(parameterName, sqlType, typeName);
+		getWrapped().registerOutParameter(parameterName, sqlType, typeName);
 	}
 }

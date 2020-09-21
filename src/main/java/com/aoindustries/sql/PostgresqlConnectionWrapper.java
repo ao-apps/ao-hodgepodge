@@ -45,7 +45,7 @@ public class PostgresqlConnectionWrapper extends ConnectionWrapper {
 
 	@Override
 	public void setTransactionIsolation(int level) throws SQLException {
-		Connection wrapped = getWrappedConnection();
+		Connection wrapped = getWrapped();
 		synchronized(transactionIsolationLevelLock) {
 			if(
 				level != this.transactionIsolationLevel
@@ -60,7 +60,7 @@ public class PostgresqlConnectionWrapper extends ConnectionWrapper {
 
 	@Override
 	public int getTransactionIsolation() throws SQLException {
-		Connection wrapped = getWrappedConnection();
+		Connection wrapped = getWrapped();
 		synchronized(transactionIsolationLevelLock) {
 			// Also call wrapped connection when isClosed to get the error from the wrapped driver.
 			if(wrapped.isClosed()) {

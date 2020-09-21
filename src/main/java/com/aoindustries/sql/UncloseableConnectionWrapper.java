@@ -64,7 +64,7 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	 */
 	@Override
 	public void onAbort(Executor executor) throws SQLException {
-		getWrappedConnection().abort(executor);
+		getWrapped().abort(executor);
 	}
 
 	/**

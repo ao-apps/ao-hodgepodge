@@ -31,616 +31,602 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public interface IDatabaseMetaDataWrapper extends DatabaseMetaData {
+public interface IDatabaseMetaDataWrapper extends IWrapper, DatabaseMetaData {
 
 	/**
 	 * Gets the database meta data that is wrapped.
 	 */
-	DatabaseMetaData getWrappedDatabaseMetaData();
-
 	@Override
-	default <T> T unwrap(Class<T> iface) throws SQLException {
-		if(iface.isInstance(this)) return iface.cast(this);
-		DatabaseMetaData metaData = getWrappedDatabaseMetaData();
-		if(iface.isInstance(metaData)) return iface.cast(metaData);
-		return metaData.unwrap(iface);
-	}
-
-	@Override
-	default boolean isWrapperFor(Class<?> iface) throws SQLException {
-		if(iface.isInstance(this)) return true;
-		DatabaseMetaData metaData = getWrappedDatabaseMetaData();
-		return iface.isInstance(metaData) || metaData.isWrapperFor(iface);
-	}
+	DatabaseMetaData getWrapped();
 
 	@Override
 	default boolean allProceduresAreCallable() throws SQLException {
-		return getWrappedDatabaseMetaData().allProceduresAreCallable();
+		return getWrapped().allProceduresAreCallable();
 	}
 
 	@Override
 	default boolean allTablesAreSelectable() throws SQLException {
-		return getWrappedDatabaseMetaData().allTablesAreSelectable();
+		return getWrapped().allTablesAreSelectable();
 	}
 
 	@Override
 	default String getURL() throws SQLException {
-		return getWrappedDatabaseMetaData().getURL();
+		return getWrapped().getURL();
 	}
 
 	@Override
 	default String getUserName() throws SQLException {
-		return getWrappedDatabaseMetaData().getUserName();
+		return getWrapped().getUserName();
 	}
 
 	@Override
 	default boolean isReadOnly() throws SQLException {
-		return getWrappedDatabaseMetaData().isReadOnly();
+		return getWrapped().isReadOnly();
 	}
 
 	@Override
 	default boolean nullsAreSortedHigh() throws SQLException {
-		return getWrappedDatabaseMetaData().nullsAreSortedHigh();
+		return getWrapped().nullsAreSortedHigh();
 	}
 
 	@Override
 	default boolean nullsAreSortedLow() throws SQLException {
-		return getWrappedDatabaseMetaData().nullsAreSortedLow();
+		return getWrapped().nullsAreSortedLow();
 	}
 
 	@Override
 	default boolean nullsAreSortedAtStart() throws SQLException {
-		return getWrappedDatabaseMetaData().nullsAreSortedAtStart();
+		return getWrapped().nullsAreSortedAtStart();
 	}
 
 	@Override
 	default boolean nullsAreSortedAtEnd() throws SQLException {
-		return getWrappedDatabaseMetaData().nullsAreSortedAtEnd();
+		return getWrapped().nullsAreSortedAtEnd();
 	}
 
 	@Override
 	default String getDatabaseProductName() throws SQLException {
-		return getWrappedDatabaseMetaData().getDatabaseProductName();
+		return getWrapped().getDatabaseProductName();
 	}
 
 	@Override
 	default String getDatabaseProductVersion() throws SQLException {
-		return getWrappedDatabaseMetaData().getDatabaseProductVersion();
+		return getWrapped().getDatabaseProductVersion();
 	}
 
 	@Override
 	default String getDriverName() throws SQLException {
-		return getWrappedDatabaseMetaData().getDriverName();
+		return getWrapped().getDriverName();
 	}
 
 	@Override
 	default String getDriverVersion() throws SQLException {
-		return getWrappedDatabaseMetaData().getDriverVersion();
+		return getWrapped().getDriverVersion();
 	}
 
 	@Override
 	default int getDriverMajorVersion() {
-		return getWrappedDatabaseMetaData().getDriverMajorVersion();
+		return getWrapped().getDriverMajorVersion();
 	}
 
 	@Override
 	default int getDriverMinorVersion() {
-		return getWrappedDatabaseMetaData().getDriverMinorVersion();
+		return getWrapped().getDriverMinorVersion();
 	}
 
 	@Override
 	default boolean usesLocalFiles() throws SQLException {
-		return getWrappedDatabaseMetaData().usesLocalFiles();
+		return getWrapped().usesLocalFiles();
 	}
 
 	@Override
 	default boolean usesLocalFilePerTable() throws SQLException {
-		return getWrappedDatabaseMetaData().usesLocalFilePerTable();
+		return getWrapped().usesLocalFilePerTable();
 	}
 
 	@Override
 	default boolean supportsMixedCaseIdentifiers() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsMixedCaseIdentifiers();
+		return getWrapped().supportsMixedCaseIdentifiers();
 	}
 
 	@Override
 	default boolean storesUpperCaseIdentifiers() throws SQLException {
-		return getWrappedDatabaseMetaData().storesUpperCaseIdentifiers();
+		return getWrapped().storesUpperCaseIdentifiers();
 	}
 
 	@Override
 	default boolean storesLowerCaseIdentifiers() throws SQLException {
-		return getWrappedDatabaseMetaData().storesLowerCaseIdentifiers();
+		return getWrapped().storesLowerCaseIdentifiers();
 	}
 
 	@Override
 	default boolean storesMixedCaseIdentifiers() throws SQLException {
-		return getWrappedDatabaseMetaData().storesMixedCaseIdentifiers();
+		return getWrapped().storesMixedCaseIdentifiers();
 	}
 
 	@Override
 	default boolean supportsMixedCaseQuotedIdentifiers() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsMixedCaseQuotedIdentifiers();
+		return getWrapped().supportsMixedCaseQuotedIdentifiers();
 	}
 
 	@Override
 	default boolean storesUpperCaseQuotedIdentifiers() throws SQLException {
-		return getWrappedDatabaseMetaData().storesUpperCaseQuotedIdentifiers();
+		return getWrapped().storesUpperCaseQuotedIdentifiers();
 	}
 
 	@Override
 	default boolean storesLowerCaseQuotedIdentifiers() throws SQLException {
-		return getWrappedDatabaseMetaData().storesLowerCaseQuotedIdentifiers();
+		return getWrapped().storesLowerCaseQuotedIdentifiers();
 	}
 
 	@Override
 	default boolean storesMixedCaseQuotedIdentifiers() throws SQLException {
-		return getWrappedDatabaseMetaData().storesMixedCaseQuotedIdentifiers();
+		return getWrapped().storesMixedCaseQuotedIdentifiers();
 	}
 
 	@Override
 	default String getIdentifierQuoteString() throws SQLException {
-		return getWrappedDatabaseMetaData().getIdentifierQuoteString();
+		return getWrapped().getIdentifierQuoteString();
 	}
 
 	@Override
 	default String getSQLKeywords() throws SQLException {
-		return getWrappedDatabaseMetaData().getSQLKeywords();
+		return getWrapped().getSQLKeywords();
 	}
 
 	@Override
 	default String getNumericFunctions() throws SQLException {
-		return getWrappedDatabaseMetaData().getNumericFunctions();
+		return getWrapped().getNumericFunctions();
 	}
 
 	@Override
 	default String getStringFunctions() throws SQLException {
-		return getWrappedDatabaseMetaData().getStringFunctions();
+		return getWrapped().getStringFunctions();
 	}
 
 	@Override
 	default String getSystemFunctions() throws SQLException {
-		return getWrappedDatabaseMetaData().getSystemFunctions();
+		return getWrapped().getSystemFunctions();
 	}
 
 	@Override
 	default String getTimeDateFunctions() throws SQLException {
-		return getWrappedDatabaseMetaData().getTimeDateFunctions();
+		return getWrapped().getTimeDateFunctions();
 	}
 
 	@Override
 	default String getSearchStringEscape() throws SQLException {
-		return getWrappedDatabaseMetaData().getSearchStringEscape();
+		return getWrapped().getSearchStringEscape();
 	}
 
 	@Override
 	default String getExtraNameCharacters() throws SQLException {
-		return getWrappedDatabaseMetaData().getExtraNameCharacters();
+		return getWrapped().getExtraNameCharacters();
 	}
 
 	@Override
 	default boolean supportsAlterTableWithAddColumn() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsAlterTableWithAddColumn();
+		return getWrapped().supportsAlterTableWithAddColumn();
 	}
 
 	@Override
 	default boolean supportsAlterTableWithDropColumn() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsAlterTableWithDropColumn();
+		return getWrapped().supportsAlterTableWithDropColumn();
 	}
 
 	@Override
 	default boolean supportsColumnAliasing() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsColumnAliasing();
+		return getWrapped().supportsColumnAliasing();
 	}
 
 	@Override
 	default boolean nullPlusNonNullIsNull() throws SQLException {
-		return getWrappedDatabaseMetaData().nullPlusNonNullIsNull();
+		return getWrapped().nullPlusNonNullIsNull();
 	}
 
 	@Override
 	default boolean supportsConvert() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsConvert();
+		return getWrapped().supportsConvert();
 	}
 
 	@Override
 	default boolean supportsConvert(int fromType, int toType) throws SQLException {
-		return getWrappedDatabaseMetaData().supportsConvert(fromType, toType);
+		return getWrapped().supportsConvert(fromType, toType);
 	}
 
 	@Override
 	default boolean supportsTableCorrelationNames() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsTableCorrelationNames();
+		return getWrapped().supportsTableCorrelationNames();
 	}
 
 	@Override
 	default boolean supportsDifferentTableCorrelationNames() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsDifferentTableCorrelationNames();
+		return getWrapped().supportsDifferentTableCorrelationNames();
 	}
 
 	@Override
 	default boolean supportsExpressionsInOrderBy() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsExpressionsInOrderBy();
+		return getWrapped().supportsExpressionsInOrderBy();
 	}
 
 	@Override
 	default boolean supportsOrderByUnrelated() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsOrderByUnrelated();
+		return getWrapped().supportsOrderByUnrelated();
 	}
 
 	@Override
 	default boolean supportsGroupBy() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsGroupBy();
+		return getWrapped().supportsGroupBy();
 	}
 
 	@Override
 	default boolean supportsGroupByUnrelated() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsGroupByUnrelated();
+		return getWrapped().supportsGroupByUnrelated();
 	}
 
 	@Override
 	default boolean supportsGroupByBeyondSelect() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsGroupByBeyondSelect();
+		return getWrapped().supportsGroupByBeyondSelect();
 	}
 
 	@Override
 	default boolean supportsLikeEscapeClause() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsLikeEscapeClause();
+		return getWrapped().supportsLikeEscapeClause();
 	}
 
 	@Override
 	default boolean supportsMultipleResultSets() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsMultipleResultSets();
+		return getWrapped().supportsMultipleResultSets();
 	}
 
 	@Override
 	default boolean supportsMultipleTransactions() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsMultipleTransactions();
+		return getWrapped().supportsMultipleTransactions();
 	}
 
 	@Override
 	default boolean supportsNonNullableColumns() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsNonNullableColumns();
+		return getWrapped().supportsNonNullableColumns();
 	}
 
 	@Override
 	default boolean supportsMinimumSQLGrammar() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsMinimumSQLGrammar();
+		return getWrapped().supportsMinimumSQLGrammar();
 	}
 
 	@Override
 	default boolean supportsCoreSQLGrammar() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsCoreSQLGrammar();
+		return getWrapped().supportsCoreSQLGrammar();
 	}
 
 	@Override
 	default boolean supportsExtendedSQLGrammar() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsExtendedSQLGrammar();
+		return getWrapped().supportsExtendedSQLGrammar();
 	}
 
 	@Override
 	default boolean supportsANSI92EntryLevelSQL() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsANSI92EntryLevelSQL();
+		return getWrapped().supportsANSI92EntryLevelSQL();
 	}
 
 	@Override
 	default boolean supportsANSI92IntermediateSQL() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsANSI92IntermediateSQL();
+		return getWrapped().supportsANSI92IntermediateSQL();
 	}
 
 	@Override
 	default boolean supportsANSI92FullSQL() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsANSI92FullSQL();
+		return getWrapped().supportsANSI92FullSQL();
 	}
 
 	@Override
 	default boolean supportsIntegrityEnhancementFacility() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsIntegrityEnhancementFacility();
+		return getWrapped().supportsIntegrityEnhancementFacility();
 	}
 
 	@Override
 	default boolean supportsOuterJoins() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsOuterJoins();
+		return getWrapped().supportsOuterJoins();
 	}
 
 	@Override
 	default boolean supportsFullOuterJoins() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsFullOuterJoins();
+		return getWrapped().supportsFullOuterJoins();
 	}
 
 	@Override
 	default boolean supportsLimitedOuterJoins() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsLimitedOuterJoins();
+		return getWrapped().supportsLimitedOuterJoins();
 	}
 
 	@Override
 	default String getSchemaTerm() throws SQLException {
-		return getWrappedDatabaseMetaData().getSchemaTerm();
+		return getWrapped().getSchemaTerm();
 	}
 
 	@Override
 	default String getProcedureTerm() throws SQLException {
-		return getWrappedDatabaseMetaData().getProcedureTerm();
+		return getWrapped().getProcedureTerm();
 	}
 
 	@Override
 	default String getCatalogTerm() throws SQLException {
-		return getWrappedDatabaseMetaData().getCatalogTerm();
+		return getWrapped().getCatalogTerm();
 	}
 
 	@Override
 	default boolean isCatalogAtStart() throws SQLException {
-		return getWrappedDatabaseMetaData().isCatalogAtStart();
+		return getWrapped().isCatalogAtStart();
 	}
 
 	@Override
 	default String getCatalogSeparator() throws SQLException {
-		return getWrappedDatabaseMetaData().getCatalogSeparator();
+		return getWrapped().getCatalogSeparator();
 	}
 
 	@Override
 	default boolean supportsSchemasInDataManipulation() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSchemasInDataManipulation();
+		return getWrapped().supportsSchemasInDataManipulation();
 	}
 
 	@Override
 	default boolean supportsSchemasInProcedureCalls() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSchemasInProcedureCalls();
+		return getWrapped().supportsSchemasInProcedureCalls();
 	}
 
 	@Override
 	default boolean supportsSchemasInTableDefinitions() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSchemasInTableDefinitions();
+		return getWrapped().supportsSchemasInTableDefinitions();
 	}
 
 	@Override
 	default boolean supportsSchemasInIndexDefinitions() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSchemasInIndexDefinitions();
+		return getWrapped().supportsSchemasInIndexDefinitions();
 	}
 
 	@Override
 	default boolean supportsSchemasInPrivilegeDefinitions() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSchemasInPrivilegeDefinitions();
+		return getWrapped().supportsSchemasInPrivilegeDefinitions();
 	}
 
 	@Override
 	default boolean supportsCatalogsInDataManipulation() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsCatalogsInDataManipulation();
+		return getWrapped().supportsCatalogsInDataManipulation();
 	}
 
 	@Override
 	default boolean supportsCatalogsInProcedureCalls() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsCatalogsInProcedureCalls();
+		return getWrapped().supportsCatalogsInProcedureCalls();
 	}
 
 	@Override
 	default boolean supportsCatalogsInTableDefinitions() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsCatalogsInTableDefinitions();
+		return getWrapped().supportsCatalogsInTableDefinitions();
 	}
 
 	@Override
 	default boolean supportsCatalogsInIndexDefinitions() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsCatalogsInIndexDefinitions();
+		return getWrapped().supportsCatalogsInIndexDefinitions();
 	}
 
 	@Override
 	default boolean supportsCatalogsInPrivilegeDefinitions() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsCatalogsInPrivilegeDefinitions();
+		return getWrapped().supportsCatalogsInPrivilegeDefinitions();
 	}
 
 	@Override
 	default boolean supportsPositionedDelete() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsPositionedDelete();
+		return getWrapped().supportsPositionedDelete();
 	}
 
 	@Override
 	default boolean supportsPositionedUpdate() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsPositionedUpdate();
+		return getWrapped().supportsPositionedUpdate();
 	}
 
 	@Override
 	default boolean supportsSelectForUpdate() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSelectForUpdate();
+		return getWrapped().supportsSelectForUpdate();
 	}
 
 	@Override
 	default boolean supportsStoredProcedures() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsStoredProcedures();
+		return getWrapped().supportsStoredProcedures();
 	}
 
 	@Override
 	default boolean supportsSubqueriesInComparisons() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSubqueriesInComparisons();
+		return getWrapped().supportsSubqueriesInComparisons();
 	}
 
 	@Override
 	default boolean supportsSubqueriesInExists() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSubqueriesInExists();
+		return getWrapped().supportsSubqueriesInExists();
 	}
 
 	@Override
 	default boolean supportsSubqueriesInIns() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSubqueriesInIns();
+		return getWrapped().supportsSubqueriesInIns();
 	}
 
 	@Override
 	default boolean supportsSubqueriesInQuantifieds() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSubqueriesInQuantifieds();
+		return getWrapped().supportsSubqueriesInQuantifieds();
 	}
 
 	@Override
 	default boolean supportsCorrelatedSubqueries() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsCorrelatedSubqueries();
+		return getWrapped().supportsCorrelatedSubqueries();
 	}
 
 	@Override
 	default boolean supportsUnion() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsUnion();
+		return getWrapped().supportsUnion();
 	}
 
 	@Override
 	default boolean supportsUnionAll() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsUnionAll();
+		return getWrapped().supportsUnionAll();
 	}
 
 	@Override
 	default boolean supportsOpenCursorsAcrossCommit() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsOpenCursorsAcrossCommit();
+		return getWrapped().supportsOpenCursorsAcrossCommit();
 	}
 
 	@Override
 	default boolean supportsOpenCursorsAcrossRollback() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsOpenCursorsAcrossRollback();
+		return getWrapped().supportsOpenCursorsAcrossRollback();
 	}
 
 	@Override
 	default boolean supportsOpenStatementsAcrossCommit() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsOpenStatementsAcrossCommit();
+		return getWrapped().supportsOpenStatementsAcrossCommit();
 	}
 
 	@Override
 	default boolean supportsOpenStatementsAcrossRollback() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsOpenStatementsAcrossRollback();
+		return getWrapped().supportsOpenStatementsAcrossRollback();
 	}
 
 	@Override
 	default int getMaxBinaryLiteralLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxBinaryLiteralLength();
+		return getWrapped().getMaxBinaryLiteralLength();
 	}
 
 	@Override
 	default int getMaxCharLiteralLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxCharLiteralLength();
+		return getWrapped().getMaxCharLiteralLength();
 	}
 
 	@Override
 	default int getMaxColumnNameLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxColumnNameLength();
+		return getWrapped().getMaxColumnNameLength();
 	}
 
 	@Override
 	default int getMaxColumnsInGroupBy() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxColumnsInGroupBy();
+		return getWrapped().getMaxColumnsInGroupBy();
 	}
 
 	@Override
 	default int getMaxColumnsInIndex() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxColumnsInIndex();
+		return getWrapped().getMaxColumnsInIndex();
 	}
 
 	@Override
 	default int getMaxColumnsInOrderBy() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxColumnsInOrderBy();
+		return getWrapped().getMaxColumnsInOrderBy();
 	}
 
 	@Override
 	default int getMaxColumnsInSelect() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxColumnsInSelect();
+		return getWrapped().getMaxColumnsInSelect();
 	}
 
 	@Override
 	default int getMaxColumnsInTable() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxColumnsInTable();
+		return getWrapped().getMaxColumnsInTable();
 	}
 
 	@Override
 	default int getMaxConnections() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxConnections();
+		return getWrapped().getMaxConnections();
 	}
 
 	@Override
 	default int getMaxCursorNameLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxCursorNameLength();
+		return getWrapped().getMaxCursorNameLength();
 	}
 
 	@Override
 	default int getMaxIndexLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxIndexLength();
+		return getWrapped().getMaxIndexLength();
 	}
 
 	@Override
 	default int getMaxSchemaNameLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxSchemaNameLength();
+		return getWrapped().getMaxSchemaNameLength();
 	}
 
 	@Override
 	default int getMaxProcedureNameLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxProcedureNameLength();
+		return getWrapped().getMaxProcedureNameLength();
 	}
 
 	@Override
 	default int getMaxCatalogNameLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxCatalogNameLength();
+		return getWrapped().getMaxCatalogNameLength();
 	}
 
 	@Override
 	default int getMaxRowSize() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxRowSize();
+		return getWrapped().getMaxRowSize();
 	}
 
 	@Override
 	default boolean doesMaxRowSizeIncludeBlobs() throws SQLException {
-		return getWrappedDatabaseMetaData().doesMaxRowSizeIncludeBlobs();
+		return getWrapped().doesMaxRowSizeIncludeBlobs();
 	}
 
 	@Override
 	default int getMaxStatementLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxStatementLength();
+		return getWrapped().getMaxStatementLength();
 	}
 
 	@Override
 	default int getMaxStatements() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxStatements();
+		return getWrapped().getMaxStatements();
 	}
 
 	@Override
 	default int getMaxTableNameLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxTableNameLength();
+		return getWrapped().getMaxTableNameLength();
 	}
 
 	@Override
 	default int getMaxTablesInSelect() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxTablesInSelect();
+		return getWrapped().getMaxTablesInSelect();
 	}
 
 	@Override
 	default int getMaxUserNameLength() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxUserNameLength();
+		return getWrapped().getMaxUserNameLength();
 	}
 
 	@Override
 	default int getDefaultTransactionIsolation() throws SQLException {
-		return getWrappedDatabaseMetaData().getDefaultTransactionIsolation();
+		return getWrapped().getDefaultTransactionIsolation();
 	}
 
 	@Override
 	default boolean supportsTransactions() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsTransactions();
+		return getWrapped().supportsTransactions();
 	}
 
 	@Override
 	default boolean supportsTransactionIsolationLevel(int level) throws SQLException {
-		return getWrappedDatabaseMetaData().supportsTransactionIsolationLevel(level);
+		return getWrapped().supportsTransactionIsolationLevel(level);
 	}
 
 	@Override
 	default boolean supportsDataDefinitionAndDataManipulationTransactions() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsDataDefinitionAndDataManipulationTransactions();
+		return getWrapped().supportsDataDefinitionAndDataManipulationTransactions();
 	}
 
 	@Override
 	default boolean supportsDataManipulationTransactionsOnly() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsDataManipulationTransactionsOnly();
+		return getWrapped().supportsDataManipulationTransactionsOnly();
 	}
 
 	@Override
 	default boolean dataDefinitionCausesTransactionCommit() throws SQLException {
-		return getWrappedDatabaseMetaData().dataDefinitionCausesTransactionCommit();
+		return getWrapped().dataDefinitionCausesTransactionCommit();
 	}
 
 	@Override
 	default boolean dataDefinitionIgnoredInTransactions() throws SQLException {
-		return getWrappedDatabaseMetaData().dataDefinitionIgnoredInTransactions();
+		return getWrapped().dataDefinitionIgnoredInTransactions();
 	}
 
 	@Override
@@ -696,62 +682,62 @@ public interface IDatabaseMetaDataWrapper extends DatabaseMetaData {
 
 	@Override
 	default boolean supportsResultSetType(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().supportsResultSetType(type);
+		return getWrapped().supportsResultSetType(type);
 	}
 
 	@Override
 	default boolean supportsResultSetConcurrency(int type, int concurrency) throws SQLException {
-		return getWrappedDatabaseMetaData().supportsResultSetConcurrency(type, concurrency);
+		return getWrapped().supportsResultSetConcurrency(type, concurrency);
 	}
 
 	@Override
 	default boolean ownUpdatesAreVisible(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().ownUpdatesAreVisible(type);
+		return getWrapped().ownUpdatesAreVisible(type);
 	}
 
 	@Override
 	default boolean ownDeletesAreVisible(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().ownDeletesAreVisible(type);
+		return getWrapped().ownDeletesAreVisible(type);
 	}
 
 	@Override
 	default boolean ownInsertsAreVisible(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().ownInsertsAreVisible(type);
+		return getWrapped().ownInsertsAreVisible(type);
 	}
 
 	@Override
 	default boolean othersUpdatesAreVisible(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().othersUpdatesAreVisible(type);
+		return getWrapped().othersUpdatesAreVisible(type);
 	}
 
 	@Override
 	default boolean othersDeletesAreVisible(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().othersDeletesAreVisible(type);
+		return getWrapped().othersDeletesAreVisible(type);
 	}
 
 	@Override
 	default boolean othersInsertsAreVisible(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().othersInsertsAreVisible(type);
+		return getWrapped().othersInsertsAreVisible(type);
 	}
 
 	@Override
 	default boolean updatesAreDetected(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().updatesAreDetected(type);
+		return getWrapped().updatesAreDetected(type);
 	}
 
 	@Override
 	default boolean deletesAreDetected(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().deletesAreDetected(type);
+		return getWrapped().deletesAreDetected(type);
 	}
 
 	@Override
 	default boolean insertsAreDetected(int type) throws SQLException {
-		return getWrappedDatabaseMetaData().insertsAreDetected(type);
+		return getWrapped().insertsAreDetected(type);
 	}
 
 	@Override
 	default boolean supportsBatchUpdates() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsBatchUpdates();
+		return getWrapped().supportsBatchUpdates();
 	}
 
 	@Override
@@ -762,22 +748,22 @@ public interface IDatabaseMetaDataWrapper extends DatabaseMetaData {
 
 	@Override
 	default boolean supportsSavepoints() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsSavepoints();
+		return getWrapped().supportsSavepoints();
 	}
 
 	@Override
 	default boolean supportsNamedParameters() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsNamedParameters();
+		return getWrapped().supportsNamedParameters();
 	}
 
 	@Override
 	default boolean supportsMultipleOpenResults() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsMultipleOpenResults();
+		return getWrapped().supportsMultipleOpenResults();
 	}
 
 	@Override
 	default boolean supportsGetGeneratedKeys() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsGetGeneratedKeys();
+		return getWrapped().supportsGetGeneratedKeys();
 	}
 
 	@Override
@@ -791,52 +777,52 @@ public interface IDatabaseMetaDataWrapper extends DatabaseMetaData {
 
 	@Override
 	default boolean supportsResultSetHoldability(int holdability) throws SQLException {
-		return getWrappedDatabaseMetaData().supportsResultSetHoldability(holdability);
+		return getWrapped().supportsResultSetHoldability(holdability);
 	}
 
 	@Override
 	default int getResultSetHoldability() throws SQLException {
-		return getWrappedDatabaseMetaData().getResultSetHoldability();
+		return getWrapped().getResultSetHoldability();
 	}
 
 	@Override
 	default int getDatabaseMajorVersion() throws SQLException {
-		return getWrappedDatabaseMetaData().getDatabaseMajorVersion();
+		return getWrapped().getDatabaseMajorVersion();
 	}
 
 	@Override
 	default int getDatabaseMinorVersion() throws SQLException {
-		return getWrappedDatabaseMetaData().getDatabaseMinorVersion();
+		return getWrapped().getDatabaseMinorVersion();
 	}
 
 	@Override
 	default int getJDBCMajorVersion() throws SQLException {
-		return getWrappedDatabaseMetaData().getJDBCMajorVersion();
+		return getWrapped().getJDBCMajorVersion();
 	}
 
 	@Override
 	default int getJDBCMinorVersion() throws SQLException {
-		return getWrappedDatabaseMetaData().getJDBCMinorVersion();
+		return getWrapped().getJDBCMinorVersion();
 	}
 
 	@Override
 	default int getSQLStateType() throws SQLException {
-		return getWrappedDatabaseMetaData().getSQLStateType();
+		return getWrapped().getSQLStateType();
 	}
 
 	@Override
 	default boolean locatorsUpdateCopy() throws SQLException {
-		return getWrappedDatabaseMetaData().locatorsUpdateCopy();
+		return getWrapped().locatorsUpdateCopy();
 	}
 
 	@Override
 	default boolean supportsStatementPooling() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsStatementPooling();
+		return getWrapped().supportsStatementPooling();
 	}
 
 	@Override
 	default RowIdLifetime getRowIdLifetime() throws SQLException {
-		return getWrappedDatabaseMetaData().getRowIdLifetime();
+		return getWrapped().getRowIdLifetime();
 	}
 
 	@Override
@@ -844,12 +830,12 @@ public interface IDatabaseMetaDataWrapper extends DatabaseMetaData {
 
 	@Override
 	default boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsStoredFunctionsUsingCallSyntax();
+		return getWrapped().supportsStoredFunctionsUsingCallSyntax();
 	}
 
 	@Override
 	default boolean autoCommitFailureClosesAllResultSets() throws SQLException {
-		return getWrappedDatabaseMetaData().autoCommitFailureClosesAllResultSets();
+		return getWrapped().autoCommitFailureClosesAllResultSets();
 	}
 
 	@Override
@@ -866,17 +852,17 @@ public interface IDatabaseMetaDataWrapper extends DatabaseMetaData {
 
 	@Override
 	default boolean generatedKeyAlwaysReturned() throws SQLException {
-		return getWrappedDatabaseMetaData().generatedKeyAlwaysReturned();
+		return getWrapped().generatedKeyAlwaysReturned();
 	}
 
 	@Override
 	default long getMaxLogicalLobSize() throws SQLException {
-		return getWrappedDatabaseMetaData().getMaxLogicalLobSize();
+		return getWrapped().getMaxLogicalLobSize();
 	}
 
 	@Override
 	default boolean supportsRefCursors() throws SQLException {
-		return getWrappedDatabaseMetaData().supportsRefCursors();
+		return getWrapped().supportsRefCursors();
 	}
 
 	// Java 9: boolean supportsSharding() throws SQLException;

@@ -60,7 +60,7 @@ public class ArrayWrapper implements IArrayWrapper {
 	}
 
 	@Override
-	public Array getWrappedArray() {
+	public Array getWrapped() {
 		return wrapped;
 	}
 
@@ -84,7 +84,7 @@ public class ArrayWrapper implements IArrayWrapper {
 				&& rsStmtWrapper.get().getConnectionWrapper() == _connectionWrapper
 				&& (
 					rsStmtWrapper.get() == _stmtWrapper
-					|| rsStmtWrapper.get().getWrappedStatement() == _stmtWrapper
+					|| rsStmtWrapper.get().getWrapped() == _stmtWrapper
 				)
 			) {
 				return resultsWrapper;
@@ -93,7 +93,7 @@ public class ArrayWrapper implements IArrayWrapper {
 		Statement stmt = results.getStatement();
 		if(
 			_stmtWrapper != null
-			&& _stmtWrapper.getWrappedStatement() == stmt
+			&& _stmtWrapper.getWrapped() == stmt
 		) {
 			return _stmtWrapper.wrapResultSet(results);
 		} else {
@@ -108,21 +108,21 @@ public class ArrayWrapper implements IArrayWrapper {
 
 	@Override
 	public ResultSetWrapper getResultSet() throws SQLException {
-		return wrapResultSet(getWrappedArray().getResultSet());
+		return wrapResultSet(getWrapped().getResultSet());
 	}
 
 	@Override
 	public ResultSetWrapper getResultSet(java.util.Map<String,Class<?>> map) throws SQLException {
-		return wrapResultSet(getWrappedArray().getResultSet(map));
+		return wrapResultSet(getWrapped().getResultSet(map));
 	}
 
 	@Override
 	public ResultSetWrapper getResultSet(long index, int count) throws SQLException {
-		return wrapResultSet(getWrappedArray().getResultSet(index, count));
+		return wrapResultSet(getWrapped().getResultSet(index, count));
 	}
 
 	@Override
 	public ResultSetWrapper getResultSet(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException {
-		return wrapResultSet(getWrappedArray().getResultSet(index, count, map));
+		return wrapResultSet(getWrapped().getResultSet(index, count, map));
 	}
 }

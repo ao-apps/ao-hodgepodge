@@ -60,7 +60,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	}
 
 	@Override
-	public ResultSet getWrappedResultSet() {
+	public ResultSet getWrapped() {
 		return wrapped;
 	}
 
@@ -100,7 +100,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 		if(array instanceof ArrayWrapper) {
 			ArrayWrapper arrayWrapper = (ArrayWrapper)array;
 			if(arrayWrapper.getConnectionWrapper() == getConnectionWrapper()) {
-				return arrayWrapper.getWrappedArray();
+				return arrayWrapper.getWrapped();
 			}
 		}
 		return array;
@@ -120,7 +120,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 			_stmtWrapper != null
 			&& (
 		 		_stmtWrapper == stmt
-		 		|| _stmtWrapper.getWrappedStatement() == stmt
+		 		|| _stmtWrapper.getWrapped() == stmt
 			)
 		) {
 			return _stmtWrapper;
@@ -131,17 +131,17 @@ public class ResultSetWrapper implements IResultSetWrapper {
 
 	@Override
     public StatementWrapper getStatement() throws SQLException {
-		return wrapStatement(getWrappedResultSet().getStatement());
+		return wrapStatement(getWrapped().getStatement());
 	}
 
 	@Override
     public ArrayWrapper getArray(int columnIndex) throws SQLException {
-		return wrapArray(getWrappedResultSet().getArray(columnIndex));
+		return wrapArray(getWrapped().getArray(columnIndex));
 	}
 
 	@Override
     public ArrayWrapper getArray(String columnLabel) throws SQLException {
-		return wrapArray(getWrappedResultSet().getArray(columnLabel));
+		return wrapArray(getWrapped().getArray(columnLabel));
 	}
 
 	@Override

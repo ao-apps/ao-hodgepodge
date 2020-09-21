@@ -38,8 +38,8 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	}
 
 	@Override
-	public CallableStatement getWrappedStatement() {
-		return (CallableStatement)super.getWrappedStatement();
+	public CallableStatement getWrapped() {
+		return (CallableStatement)super.getWrapped();
 	}
 
 	/**
@@ -62,11 +62,11 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 
 	@Override
     public ArrayWrapper getArray(int parameterIndex) throws SQLException {
-		return wrapArray(getWrappedStatement().getArray(parameterIndex));
+		return wrapArray(getWrapped().getArray(parameterIndex));
 	}
 
 	@Override
     public ArrayWrapper getArray(String parameterName) throws SQLException {
-		return wrapArray(getWrappedStatement().getArray(parameterName));
+		return wrapArray(getWrapped().getArray(parameterName));
 	}
 }
