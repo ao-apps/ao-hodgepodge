@@ -154,9 +154,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     IBlobWrapper getBlob(int parameterIndex) throws SQLException;
 
 	@Override
-    default Clob getClob(int parameterIndex) throws SQLException {
-		return getWrapped().getClob(parameterIndex);
-	}
+    IClobWrapper getClob(int parameterIndex) throws SQLException;
 
 	@Override
     IArrayWrapper getArray(int parameterIndex) throws SQLException;
@@ -410,9 +408,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     IBlobWrapper getBlob(String parameterName) throws SQLException;
 
 	@Override
-    default Clob getClob(String parameterName) throws SQLException {
-		return getWrapped().getClob(parameterName);
-	}
+    IClobWrapper getClob(String parameterName) throws SQLException;
 
 	@Override
     IArrayWrapper getArray(String parameterName) throws SQLException;
@@ -541,9 +537,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     void setBlob(String parameterName, Blob x) throws SQLException;
 
 	@Override
-    default void setClob(String parameterName, Clob x) throws SQLException {
-		getWrapped().setClob(parameterName, x);
-	}
+    void setClob(String parameterName, Clob x) throws SQLException;
 
 	@Override
     default void setAsciiStream(String parameterName, java.io.InputStream x, long length) throws SQLException {

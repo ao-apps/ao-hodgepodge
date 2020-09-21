@@ -62,91 +62,181 @@ public class DatabaseMetaDataWrapper implements IDatabaseMetaDataWrapper {
 		return getConnectionWrapper().wrapResultSet(null, results);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getProcedures(String catalog, String schemaPattern, String procedureNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getProcedures(catalog, schemaPattern, procedureNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getProcedureColumns(catalog, schemaPattern, procedureNamePattern, columnNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getTables(String catalog, String schemaPattern, String tableNamePattern, String types[]) throws SQLException {
 		return wrapResultSet(getWrapped().getTables(catalog, schemaPattern, tableNamePattern, types));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getSchemas() throws SQLException {
 		return wrapResultSet(getWrapped().getSchemas());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getCatalogs() throws SQLException {
 		return wrapResultSet(getWrapped().getCatalogs());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getTableTypes() throws SQLException {
 		return wrapResultSet(getWrapped().getTableTypes());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getColumnPrivileges(catalog, schema, table, columnNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getTablePrivileges(catalog, schemaPattern, tableNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable) throws SQLException {
 		return wrapResultSet(getWrapped().getBestRowIdentifier(catalog, schema, table, scope, nullable));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getVersionColumns(String catalog, String schema, String table) throws SQLException {
 		return wrapResultSet(getWrapped().getVersionColumns(catalog, schema, table));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
 		return wrapResultSet(getWrapped().getPrimaryKeys(catalog, schema, table));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getImportedKeys(String catalog, String schema, String table) throws SQLException {
 		return wrapResultSet(getWrapped().getImportedKeys(catalog, schema, table));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getExportedKeys(String catalog, String schema, String table) throws SQLException {
 		return wrapResultSet(getWrapped().getExportedKeys(catalog, schema, table));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getCrossReference(String parentCatalog, String parentSchema, String parentTable, String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
 		return wrapResultSet(getWrapped().getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog, foreignSchema, foreignTable));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getTypeInfo() throws SQLException {
 		return wrapResultSet(getWrapped().getTypeInfo());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate) throws SQLException {
 		return wrapResultSet(getWrapped().getIndexInfo(catalog, schema, table, unique, approximate));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types) throws SQLException {
 		return wrapResultSet(getWrapped().getUDTs(catalog, schemaPattern, typeNamePattern, types));
@@ -159,41 +249,81 @@ public class DatabaseMetaDataWrapper implements IDatabaseMetaDataWrapper {
 		return _connectionWrapper;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getSuperTypes(String catalog, String schemaPattern, String typeNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getSuperTypes(catalog, schemaPattern, typeNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getSuperTables(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getSuperTables(catalog, schemaPattern, tableNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getAttributes(String catalog, String schemaPattern, String typeNamePattern, String attributeNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getAttributes(catalog, schemaPattern, typeNamePattern, attributeNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getSchemas(String catalog, String schemaPattern) throws SQLException {
 		return wrapResultSet(getWrapped().getSchemas(catalog, schemaPattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getClientInfoProperties() throws SQLException {
 		return wrapResultSet(getWrapped().getClientInfoProperties());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getFunctions(catalog, schemaPattern, functionNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getFunctionColumns(catalog, schemaPattern, functionNamePattern, columnNamePattern));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
 		return wrapResultSet(getWrapped().getPseudoColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern));

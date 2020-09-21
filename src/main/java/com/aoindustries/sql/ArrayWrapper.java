@@ -72,21 +72,41 @@ public class ArrayWrapper implements IArrayWrapper {
 		return getConnectionWrapper().wrapResultSet(getStatementWrapper().orElse(null), results);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getResultSet() throws SQLException {
 		return wrapResultSet(getWrapped().getResultSet());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getResultSet(java.util.Map<String,Class<?>> map) throws SQLException {
 		return wrapResultSet(getWrapped().getResultSet(map));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getResultSet(long index, int count) throws SQLException {
 		return wrapResultSet(getWrapped().getResultSet(index, count));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper getResultSet(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException {
 		return wrapResultSet(getWrapped().getResultSet(index, count, map));

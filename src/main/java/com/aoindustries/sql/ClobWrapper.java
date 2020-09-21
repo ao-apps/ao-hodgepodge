@@ -22,20 +22,20 @@
  */
 package com.aoindustries.sql;
 
-import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.SQLException;
 
 /**
- * Wraps a {@link Blob}.
+ * Wraps a {@link Clob}.
  *
  * @author  AO Industries, Inc.
  */
-public class BlobWrapper implements IBlobWrapper {
+public class ClobWrapper implements IClobWrapper {
 
 	private final ConnectionWrapper connectionWrapper;
-	private final Blob wrapped;
+	private final Clob wrapped;
 
-	public BlobWrapper(ConnectionWrapper connectionWrapper, Blob wrapped) {
+	public ClobWrapper(ConnectionWrapper connectionWrapper, Clob wrapped) {
 		this.connectionWrapper = connectionWrapper;
 		this.wrapped = wrapped;
 	}
@@ -48,26 +48,26 @@ public class BlobWrapper implements IBlobWrapper {
 	}
 
 	@Override
-	public Blob getWrapped() {
+	public Clob getWrapped() {
 		return wrapped;
 	}
 
 	/**
-	 * Unwraps a {@link Blob}, if wrapped by this wrapper.
+	 * Unwraps a {@link Clob}, if wrapped by this wrapper.
 	 *
-	 * @see  ConnectionWrapper#unwrapBlob(java.sql.Blob)
+	 * @see  ConnectionWrapper#unwrapClob(java.sql.Clob)
 	 */
-	protected Blob unwrapBlob(Blob blob) {
-		return getConnectionWrapper().unwrapBlob(blob);
+	protected Clob unwrapClob(Clob clob) {
+		return getConnectionWrapper().unwrapClob(clob);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @see  #unwrapBlob(java.sql.Blob)
+	 * @see  #unwrapClob(java.sql.Clob)
 	 */
 	@Override
-	public long position(Blob pattern, long start) throws SQLException {
-		return getWrapped().position(unwrapBlob(pattern), start);
+	public long position(Clob pattern, long start) throws SQLException {
+		return getWrapped().position(unwrapClob(pattern), start);
 	}
 }

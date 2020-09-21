@@ -25,7 +25,6 @@ package com.aoindustries.sql;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.Ref;
 import java.sql.ResultSet;
@@ -628,9 +627,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     IBlobWrapper getBlob(int columnIndex) throws SQLException;
 
 	@Override
-    default Clob getClob(int columnIndex) throws SQLException {
-		return getWrapped().getClob(columnIndex);
-	}
+    IClobWrapper getClob(int columnIndex) throws SQLException;
 
 	@Override
     IArrayWrapper getArray(int columnIndex) throws SQLException;
@@ -649,9 +646,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     IBlobWrapper getBlob(String columnLabel) throws SQLException;
 
 	@Override
-    default Clob getClob(String columnLabel) throws SQLException {
-		return getWrapped().getClob(columnLabel);
-	}
+    IClobWrapper getClob(String columnLabel) throws SQLException;
 
 	@Override
     IArrayWrapper getArray(String columnLabel) throws SQLException;
@@ -713,14 +708,10 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateBlob(String columnLabel, java.sql.Blob x) throws SQLException;
 
 	@Override
-    default void updateClob(int columnIndex, java.sql.Clob x) throws SQLException {
-		getWrapped().updateClob(columnIndex, x);
-	}
+    void updateClob(int columnIndex, java.sql.Clob x) throws SQLException;
 
 	@Override
-    default void updateClob(String columnLabel, java.sql.Clob x) throws SQLException {
-		getWrapped().updateClob(columnLabel, x);
-	}
+    void updateClob(String columnLabel, java.sql.Clob x) throws SQLException;
 
 	@Override
     void updateArray(int columnIndex, java.sql.Array x) throws SQLException;

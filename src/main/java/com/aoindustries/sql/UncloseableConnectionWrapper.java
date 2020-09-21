@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.NClob;
 import java.sql.SQLClientInfoException;
@@ -323,7 +322,7 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public Clob createClob() throws SQLException {
+	public ClobWrapper createClob() throws SQLException {
 		checkNotClosed();
 		return super.createClob();
 	}

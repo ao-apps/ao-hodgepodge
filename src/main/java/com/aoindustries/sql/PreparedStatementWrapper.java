@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import java.sql.Array;
 import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -63,6 +64,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	}
 
 	/**
+	 * Unwraps a {@link Clob}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapClob(java.sql.Clob)
+	 */
+	protected Clob unwrapClob(Clob clob) {
+		return getConnectionWrapper().unwrapClob(clob);
+	}
+
+	/**
 	 * Wraps a {@link ResultSetMetaData}, if not already wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
@@ -71,21 +81,51 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 		return getConnectionWrapper().wrapResultSetMetaData(metaData);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSet(java.sql.ResultSet)
+	 */
 	@Override
 	public ResultSetWrapper executeQuery() throws SQLException {
 		return wrapResultSet(getWrapped().executeQuery());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapBlob(java.sql.Blob)
+	 */
 	@Override
     public void setBlob(int parameterIndex, Blob x) throws SQLException {
 		getWrapped().setBlob(parameterIndex, unwrapBlob(x));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapClob(java.sql.Clob)
+	 */
+	@Override
+    public void setClob(int parameterIndex, Clob x) throws SQLException {
+		getWrapped().setClob(parameterIndex, unwrapClob(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapArray(java.sql.Array)
+	 */
 	@Override
     public void setArray(int parameterIndex, Array x) throws SQLException {
 		getWrapped().setArray(parameterIndex, unwrapArray(x));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSetMetaData(java.sql.ResultSetMetaData)
+	 */
 	@Override
     public ResultSetMetaDataWrapper getMetaData() throws SQLException {
 		return wrapResultSetMetaData(getWrapped().getMetaData());

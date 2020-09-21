@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import java.sql.Array;
 import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -103,6 +104,24 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	}
 
 	/**
+	 * Wraps a {@link Clob}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapClob(java.sql.Clob)
+	 */
+	protected ClobWrapper wrapClob(Clob clob) {
+		return getConnectionWrapper().wrapClob(clob);
+	}
+
+	/**
+	 * Unwraps a {@link Clob}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapClob(java.sql.Clob)
+	 */
+	protected Clob unwrapClob(Clob clob) {
+		return getConnectionWrapper().unwrapClob(clob);
+	}
+
+	/**
 	 * Wraps a {@link ResultSetMetaData}, if not already wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
@@ -120,51 +139,141 @@ public class ResultSetWrapper implements IResultSetWrapper {
 		return getConnectionWrapper().wrapStatement(stmt);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapResultSetMetaData(java.sql.ResultSetMetaData)
+	 */
 	@Override
     public ResultSetMetaDataWrapper getMetaData() throws SQLException {
 		return wrapResultSetMetaData(getWrapped().getMetaData());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapStatement(java.sql.Statement)
+	 */
 	@Override
     public StatementWrapper getStatement() throws SQLException {
 		return wrapStatement(getWrapped().getStatement());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapBlob(java.sql.Blob)
+	 */
 	@Override
     public BlobWrapper getBlob(int columnIndex) throws SQLException {
 		return wrapBlob(getWrapped().getBlob(columnIndex));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapClob(java.sql.Clob)
+	 */
+	@Override
+    public ClobWrapper getClob(int columnIndex) throws SQLException {
+		return wrapClob(getWrapped().getClob(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapArray(java.sql.Array)
+	 */
 	@Override
     public ArrayWrapper getArray(int columnIndex) throws SQLException {
 		return wrapArray(getWrapped().getArray(columnIndex));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapBlob(java.sql.Blob)
+	 */
 	@Override
     public BlobWrapper getBlob(String columnLabel) throws SQLException {
 		return wrapBlob(getWrapped().getBlob(columnLabel));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapClob(java.sql.Clob)
+	 */
+	@Override
+    public ClobWrapper getClob(String columnLabel) throws SQLException {
+		return wrapClob(getWrapped().getClob(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapArray(java.sql.Array)
+	 */
 	@Override
     public ArrayWrapper getArray(String columnLabel) throws SQLException {
 		return wrapArray(getWrapped().getArray(columnLabel));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapBlob(java.sql.Blob)
+	 */
 	@Override
     public void updateBlob(int columnIndex, java.sql.Blob x) throws SQLException {
 		getWrapped().updateBlob(columnIndex, unwrapBlob(x));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapBlob(java.sql.Blob)
+	 */
 	@Override
     public void updateBlob(String columnLabel, java.sql.Blob x) throws SQLException {
 		getWrapped().updateBlob(columnLabel, unwrapBlob(x));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapClob(java.sql.Clob)
+	 */
+	@Override
+    public void updateClob(int columnIndex, java.sql.Clob x) throws SQLException {
+		getWrapped().updateClob(columnIndex, unwrapClob(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapClob(java.sql.Clob)
+	 */
+	@Override
+    public void updateClob(String columnLabel, java.sql.Clob x) throws SQLException {
+		getWrapped().updateClob(columnLabel, unwrapClob(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapArray(java.sql.Array)
+	 */
 	@Override
     public void updateArray(int columnIndex, java.sql.Array x) throws SQLException {
 		getWrapped().updateArray(columnIndex, unwrapArray(x));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapArray(java.sql.Array)
+	 */
 	@Override
     public void updateArray(String columnLabel, java.sql.Array x) throws SQLException {
 		getWrapped().updateArray(columnLabel, unwrapArray(x));

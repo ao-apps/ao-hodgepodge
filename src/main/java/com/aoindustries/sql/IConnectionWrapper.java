@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.NClob;
 import java.sql.SQLClientInfoException;
@@ -211,9 +210,7 @@ public interface IConnectionWrapper extends IWrapper, Connection {
 	IPreparedStatementWrapper prepareStatement(String sql, String columnNames[]) throws SQLException;
 
 	@Override
-	default Clob createClob() throws SQLException {
-		return getWrapped().createClob();
-	}
+	IClobWrapper createClob() throws SQLException;
 
 	@Override
 	IBlobWrapper createBlob() throws SQLException;

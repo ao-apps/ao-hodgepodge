@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -76,6 +77,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected CallableStatementWrapper newCallableStatementWrapper(CallableStatement cstmt) {
 		return new CallableStatementWrapper(this, cstmt);
+	}
+
+	/**
+	 * Creates a new {@link ClobWrapper}.
+	 *
+	 * @see  #wrapClob(java.sql.Clob)
+	 */
+	protected ClobWrapper newClobWrapper(Clob clob) {
+		return new ClobWrapper(this, clob);
 	}
 
 	/**
@@ -224,6 +234,46 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	}
 
 	/**
+	 * Wraps a {@link Clob}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newClobWrapper(java.sql.Clob)
+	 * @see  CallableStatementWrapper#wrapClob(java.sql.Clob)
+	 * @see  ResultSetWrapper#wrapClob(java.sql.Clob)
+	 */
+	protected ClobWrapper wrapClob(Clob clob) {
+		if(clob == null) {
+			return null;
+		}
+		if(clob instanceof ClobWrapper) {
+			ClobWrapper clobWrapper = (ClobWrapper)clob;
+			if(clobWrapper.getConnectionWrapper() == this) {
+				return clobWrapper;
+			}
+		}
+		return newClobWrapper(clob);
+	}
+
+	/**
+	 * Unwraps a {@link Clob}, if wrapped by this wrapper.
+	 *
+	 * @see  ClobWrapper#unwrapClob(java.sql.Clob)
+	 * @see  PreparedStatementWrapper#unwrapClob(java.sql.Clob)
+	 * @see  ResultSetWrapper#unwrapClob(java.sql.Clob)
+	 */
+	protected Clob unwrapClob(Clob clob) {
+		if(clob == null) {
+			return null;
+		}
+		if(clob instanceof ClobWrapper) {
+			ClobWrapper clobWrapper = (ClobWrapper)clob;
+			if(clobWrapper.getConnectionWrapper() == this) {
+				return clobWrapper.getWrapped();
+			}
+		}
+		return clob;
+	}
+
+	/**
 	 * Wraps a {@link DatabaseMetaData}, if not already wrapped by this wrapper.
 	 *
 	 * @see  #newDatabaseMetaDataWrapper(java.sql.DatabaseMetaData)
@@ -335,6 +385,11 @@ public class ConnectionWrapper implements IConnectionWrapper {
 		return newStatementWrapper(stmt);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapStatement(java.sql.Statement)
+	 */
 	@Override
 	public StatementWrapper createStatement() throws SQLException {
 		return wrapStatement(getWrapped().createStatement());
@@ -370,6 +425,11 @@ public class ConnectionWrapper implements IConnectionWrapper {
 		return wrapDatabaseMetaData(getWrapped().getMetaData());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapStatement(java.sql.Statement)
+	 */
 	@Override
 	public StatementWrapper createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
 		return wrapStatement(getWrapped().createStatement(resultSetType, resultSetConcurrency));
@@ -395,6 +455,11 @@ public class ConnectionWrapper implements IConnectionWrapper {
 		return wrapCallableStatement(getWrapped().prepareCall(sql, resultSetType, resultSetConcurrency));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapStatement(java.sql.Statement)
+	 */
 	@Override
 	public StatementWrapper createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		return wrapStatement(getWrapped().createStatement(resultSetType, resultSetConcurrency, resultSetHoldability));
@@ -448,6 +513,16 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	@Override
 	public PreparedStatementWrapper prepareStatement(String sql, String columnNames[]) throws SQLException {
 		return wrapPreparedStatement(getWrapped().prepareStatement(sql, columnNames));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapClob(java.sql.Clob)
+	 */
+	@Override
+	public ClobWrapper createClob() throws SQLException {
+		return wrapClob(getWrapped().createClob());
 	}
 
 	/**
