@@ -27,6 +27,7 @@ import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.NClob;
+import java.sql.Ref;
 import java.sql.SQLException;
 
 /**
@@ -82,6 +83,25 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	}
 
 	/**
+	 * Wraps a {@link Ref}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapRef(java.sql.Ref)
+	 */
+	protected RefWrapper wrapRef(Ref ref) {
+		return getConnectionWrapper().wrapRef(ref);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapRef(java.sql.Ref)
+	 */
+	@Override
+    public RefWrapper getRef(int parameterIndex) throws SQLException {
+		return wrapRef(getWrapped().getRef(parameterIndex));
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * @see  #wrapBlob(java.sql.Blob)
@@ -109,6 +129,16 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	@Override
     public ArrayWrapper getArray(int parameterIndex) throws SQLException {
 		return wrapArray(getWrapped().getArray(parameterIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapRef(java.sql.Ref)
+	 */
+	@Override
+    public RefWrapper getRef(String parameterName) throws SQLException {
+		return wrapRef(getWrapped().getRef(parameterName));
 	}
 
 	/**

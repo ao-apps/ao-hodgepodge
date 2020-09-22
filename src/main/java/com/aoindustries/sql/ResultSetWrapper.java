@@ -26,6 +26,7 @@ import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -141,6 +142,24 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	}
 
 	/**
+	 * Wraps a {@link Ref}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapRef(java.sql.Ref)
+	 */
+	protected RefWrapper wrapRef(Ref ref) {
+		return getConnectionWrapper().wrapRef(ref);
+	}
+
+	/**
+	 * Unwraps a {@link Ref}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapRef(java.sql.Ref)
+	 */
+	protected Ref unwrapRef(Ref ref) {
+		return getConnectionWrapper().unwrapRef(ref);
+	}
+
+	/**
 	 * Wraps a {@link ResultSetMetaData}, if not already wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
@@ -181,6 +200,16 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #wrapRef(java.sql.Ref)
+	 */
+	@Override
+    public RefWrapper getRef(int columnIndex) throws SQLException {
+		return wrapRef(getWrapped().getRef(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #wrapBlob(java.sql.Blob)
 	 */
 	@Override
@@ -211,6 +240,16 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #wrapRef(java.sql.Ref)
+	 */
+	@Override
+    public RefWrapper getRef(String columnLabel) throws SQLException {
+		return wrapRef(getWrapped().getRef(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #wrapBlob(java.sql.Blob)
 	 */
 	@Override
@@ -236,6 +275,26 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	@Override
     public ArrayWrapper getArray(String columnLabel) throws SQLException {
 		return wrapArray(getWrapped().getArray(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapRef(java.sql.Ref)
+	 */
+	@Override
+    public void updateRef(int columnIndex, java.sql.Ref x) throws SQLException {
+		getWrapped().updateRef(columnIndex, unwrapRef(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapRef(java.sql.Ref)
+	 */
+	@Override
+    public void updateRef(String columnLabel, java.sql.Ref x) throws SQLException {
+		getWrapped().updateRef(columnLabel, unwrapRef(x));
 	}
 
 	/**

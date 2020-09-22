@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -114,6 +115,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected PreparedStatementWrapper newPreparedStatementWrapper(PreparedStatement pstmt) {
 		return new PreparedStatementWrapper(this, pstmt);
+	}
+
+	/**
+	 * Creates a new {@link RefWrapper}.
+	 *
+	 * @see  #wrapRef(java.sql.Ref)
+	 */
+	protected RefWrapper newRefWrapper(Ref ref) {
+		return new RefWrapper(this, ref);
 	}
 
 	/**
@@ -361,6 +371,45 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return newPreparedStatementWrapper(pstmt);
+	}
+
+	/**
+	 * Wraps a {@link Ref}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newRefWrapper(java.sql.Ref)
+	 * @see  CallableStatementWrapper#wrapRef(java.sql.Ref)
+	 * @see  ResultSetWrapper#wrapRef(java.sql.Ref)
+	 */
+	protected RefWrapper wrapRef(Ref ref) {
+		if(ref == null) {
+			return null;
+		}
+		if(ref instanceof RefWrapper) {
+			RefWrapper refWrapper = (RefWrapper)ref;
+			if(refWrapper.getConnectionWrapper() == this) {
+				return refWrapper;
+			}
+		}
+		return newRefWrapper(ref);
+	}
+
+	/**
+	 * Unwraps a {@link Ref}, if wrapped by this wrapper.
+	 *
+	 * @see  PreparedStatementWrapper#unwrapRef(java.sql.Ref)
+	 * @see  ResultSetWrapper#unwrapRef(java.sql.Ref)
+	 */
+	protected Ref unwrapRef(Ref ref) {
+		if(ref == null) {
+			return null;
+		}
+		if(ref instanceof RefWrapper) {
+			RefWrapper refWrapper = (RefWrapper)ref;
+			if(refWrapper.getConnectionWrapper() == this) {
+				return refWrapper.getWrapped();
+			}
+		}
+		return ref;
 	}
 
 	/**

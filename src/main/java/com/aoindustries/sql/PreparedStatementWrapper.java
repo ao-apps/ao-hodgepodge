@@ -27,6 +27,7 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.Ref;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
@@ -83,6 +84,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	}
 
 	/**
+	 * Unwraps a {@link Ref}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapRef(java.sql.Ref)
+	 */
+	protected Ref unwrapRef(Ref ref) {
+		return getConnectionWrapper().unwrapRef(ref);
+	}
+
+	/**
 	 * Wraps a {@link ResultSetMetaData}, if not already wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#wrapResultSetMetaData(java.sql.ResultSetMetaData)
@@ -99,6 +109,16 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	@Override
 	public ResultSetWrapper executeQuery() throws SQLException {
 		return wrapResultSet(getWrapped().executeQuery());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapRef(java.sql.Ref)
+	 */
+	@Override
+    public void setRef(int parameterIndex, Ref x) throws SQLException {
+		getWrapped().setRef(parameterIndex, unwrapRef(x));
 	}
 
 	/**

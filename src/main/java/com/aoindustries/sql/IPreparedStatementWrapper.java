@@ -176,9 +176,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default void setRef(int parameterIndex, Ref x) throws SQLException {
-		getWrapped().setRef(parameterIndex, x);
-	}
+    void setRef(int parameterIndex, Ref x) throws SQLException;
 
 	@Override
     void setBlob(int parameterIndex, Blob x) throws SQLException;

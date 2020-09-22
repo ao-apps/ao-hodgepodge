@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.NClob;
-import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.RowId;
 import java.sql.SQLException;
@@ -619,9 +618,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default Ref getRef(int columnIndex) throws SQLException {
-		return getWrapped().getRef(columnIndex);
-	}
+    IRefWrapper getRef(int columnIndex) throws SQLException;
 
 	@Override
     IBlobWrapper getBlob(int columnIndex) throws SQLException;
@@ -638,9 +635,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default Ref getRef(String columnLabel) throws SQLException {
-		return getWrapped().getRef(columnLabel);
-	}
+    IRefWrapper getRef(String columnLabel) throws SQLException;
 
 	@Override
     IBlobWrapper getBlob(String columnLabel) throws SQLException;
@@ -692,14 +687,10 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateRef(int columnIndex, java.sql.Ref x) throws SQLException {
-		getWrapped().updateRef(columnIndex, x);
-	}
+    void updateRef(int columnIndex, java.sql.Ref x) throws SQLException;
 
 	@Override
-    default void updateRef(String columnLabel, java.sql.Ref x) throws SQLException {
-		getWrapped().updateRef(columnLabel, x);
-	}
+    void updateRef(String columnLabel, java.sql.Ref x) throws SQLException;
 
 	@Override
     void updateBlob(int columnIndex, java.sql.Blob x) throws SQLException;

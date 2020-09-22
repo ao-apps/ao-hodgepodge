@@ -29,7 +29,6 @@ import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.NClob;
-import java.sql.Ref;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLType;
@@ -146,9 +145,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default Ref getRef(int parameterIndex) throws SQLException {
-		return getWrapped().getRef(parameterIndex);
-	}
+    IRefWrapper getRef(int parameterIndex) throws SQLException;
 
 	@Override
     IBlobWrapper getBlob(int parameterIndex) throws SQLException;
@@ -400,9 +397,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default Ref getRef(String parameterName) throws SQLException {
-		return getWrapped().getRef(parameterName);
-	}
+    IRefWrapper getRef(String parameterName) throws SQLException;
 
 	@Override
     IBlobWrapper getBlob(String parameterName) throws SQLException;
