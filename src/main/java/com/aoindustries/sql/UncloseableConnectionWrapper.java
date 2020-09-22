@@ -27,7 +27,6 @@ import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Savepoint;
-import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -380,7 +379,7 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+	public StructWrapper createStruct(String typeName, Object[] attributes) throws SQLException {
 		checkNotClosed();
 		return super.createStruct(typeName, attributes);
 	}

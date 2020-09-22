@@ -38,6 +38,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Struct;
 
 /**
  * Wraps a {@link Connection}.
@@ -181,6 +182,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected StatementWrapper newStatementWrapper(Statement stmt) {
 		return new StatementWrapper(this, stmt);
+	}
+
+	/**
+	 * Creates a new {@link StructWrapper}.
+	 *
+	 * @see  #wrapStruct(Struct)
+	 */
+	protected StructWrapper newStructWrapper(Struct struct) {
+		return new StructWrapper(this, struct);
 	}
 
 	/**
@@ -630,6 +640,24 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	}
 
 	/**
+	 * Wraps a {@link Struct}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newStructWrapper(java.sql.Struct)
+	 */
+	protected StructWrapper wrapStruct(Struct struct) {
+		if(struct == null) {
+			return null;
+		}
+		if(struct instanceof StructWrapper) {
+			StructWrapper structWrapper = (StructWrapper)struct;
+			if(structWrapper.getConnectionWrapper() == this) {
+				return structWrapper;
+			}
+		}
+		return newStructWrapper(struct);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * @see  #wrapStatement(java.sql.Statement)
@@ -847,5 +875,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	@Override
 	public ArrayWrapper createArrayOf(String typeName, Object[] elements) throws SQLException {
 		return wrapArray(null, getWrapped().createArrayOf(typeName, elements));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapStruct(java.sql.Struct)
+	 */
+	@Override
+	public StructWrapper createStruct(String typeName, Object[] attributes) throws SQLException {
+		return wrapStruct(getWrapped().createStruct(typeName, attributes));
 	}
 }

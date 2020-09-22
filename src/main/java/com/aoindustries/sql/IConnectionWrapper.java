@@ -27,7 +27,6 @@ import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Savepoint;
-import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -240,9 +239,7 @@ public interface IConnectionWrapper extends IWrapper, Connection {
 	IArrayWrapper createArrayOf(String typeName, Object[] elements) throws SQLException;
 
 	@Override
-	default Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-		return getWrapped().createStruct(typeName, attributes);
-	}
+	IStructWrapper createStruct(String typeName, Object[] attributes) throws SQLException;
 
 	@Override
 	default int getNetworkTimeout() throws SQLException {
