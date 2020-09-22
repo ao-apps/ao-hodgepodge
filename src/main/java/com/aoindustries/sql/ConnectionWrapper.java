@@ -40,6 +40,7 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.Optional;
 
 /**
  * Wraps a {@link Connection}.
@@ -48,10 +49,20 @@ import java.sql.Struct;
  */
 public class ConnectionWrapper implements IConnectionWrapper {
 
+	private final DriverWrapper driverWrapper;
 	private final Connection wrapped;
 
-	public ConnectionWrapper(Connection wrapped) {
+	public ConnectionWrapper(DriverWrapper driverWrapper, Connection wrapped) {
+		this.driverWrapper = driverWrapper;
 		this.wrapped = wrapped;
+	}
+
+	public ConnectionWrapper(Connection wrapped) {
+		this(null, wrapped);
+	}
+
+	protected Optional<? extends DriverWrapper> getDriverWrapper() {
+		return Optional.ofNullable(driverWrapper);
 	}
 
 	@Override
