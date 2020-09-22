@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -137,18 +138,18 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default java.io.InputStream getAsciiStream(int columnIndex) throws SQLException {
+    default InputStream getAsciiStream(int columnIndex) throws SQLException {
 		return getWrapped().getAsciiStream(columnIndex);
 	}
 
 	@Override
     @Deprecated // Java 9: (since="1.2")
-    default java.io.InputStream getUnicodeStream(int columnIndex) throws SQLException {
+    default InputStream getUnicodeStream(int columnIndex) throws SQLException {
 		return getWrapped().getUnicodeStream(columnIndex);
 	}
 
 	@Override
-    default java.io.InputStream getBinaryStream(int columnIndex) throws SQLException {
+    default InputStream getBinaryStream(int columnIndex) throws SQLException {
 		return getWrapped().getBinaryStream(columnIndex);
 	}
 
@@ -219,18 +220,18 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default java.io.InputStream getAsciiStream(String columnLabel) throws SQLException {
+    default InputStream getAsciiStream(String columnLabel) throws SQLException {
 		return getWrapped().getAsciiStream(columnLabel);
 	}
 
 	@Override
     @Deprecated // Java 9: (since="1.2")
-    default java.io.InputStream getUnicodeStream(String columnLabel) throws SQLException {
+    default InputStream getUnicodeStream(String columnLabel) throws SQLException {
 		return getWrapped().getUnicodeStream(columnLabel);
 	}
 
 	@Override
-    default java.io.InputStream getBinaryStream(String columnLabel) throws SQLException {
+    default InputStream getBinaryStream(String columnLabel) throws SQLException {
 		return getWrapped().getBinaryStream(columnLabel);
 	}
 
@@ -268,12 +269,12 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default java.io.Reader getCharacterStream(int columnIndex) throws SQLException {
+    default Reader getCharacterStream(int columnIndex) throws SQLException {
 		return getWrapped().getCharacterStream(columnIndex);
 	}
 
 	@Override
-    default java.io.Reader getCharacterStream(String columnLabel) throws SQLException {
+    default Reader getCharacterStream(String columnLabel) throws SQLException {
 		return getWrapped().getCharacterStream(columnLabel);
 	}
 
@@ -685,12 +686,12 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default java.net.URL getURL(int columnIndex) throws SQLException {
+    default URL getURL(int columnIndex) throws SQLException {
 		return getWrapped().getURL(columnIndex);
 	}
 
 	@Override
-    default java.net.URL getURL(String columnLabel) throws SQLException {
+    default URL getURL(String columnLabel) throws SQLException {
 		return getWrapped().getURL(columnLabel);
 	}
 
@@ -785,12 +786,12 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default java.io.Reader getNCharacterStream(int columnIndex) throws SQLException {
+    default Reader getNCharacterStream(int columnIndex) throws SQLException {
 		return getWrapped().getNCharacterStream(columnIndex);
 	}
 
 	@Override
-    default java.io.Reader getNCharacterStream(String columnLabel) throws SQLException {
+    default Reader getNCharacterStream(String columnLabel) throws SQLException {
 		return getWrapped().getNCharacterStream(columnLabel);
 	}
 

@@ -197,7 +197,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default java.net.URL getURL(int parameterIndex) throws SQLException {
+    default URL getURL(int parameterIndex) throws SQLException {
 		return getWrapped().getURL(parameterIndex);
 	}
 
@@ -429,7 +429,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default java.net.URL getURL(String parameterName) throws SQLException {
+    default URL getURL(String parameterName) throws SQLException {
 		return getWrapped().getURL(parameterName);
 	}
 
@@ -496,22 +496,22 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default java.io.Reader getNCharacterStream(int parameterIndex) throws SQLException {
+    default Reader getNCharacterStream(int parameterIndex) throws SQLException {
 		return getWrapped().getNCharacterStream(parameterIndex);
 	}
 
 	@Override
-    default java.io.Reader getNCharacterStream(String parameterName) throws SQLException {
+    default Reader getNCharacterStream(String parameterName) throws SQLException {
 		return getWrapped().getNCharacterStream(parameterName);
 	}
 
 	@Override
-    default java.io.Reader getCharacterStream(int parameterIndex) throws SQLException {
+    default Reader getCharacterStream(int parameterIndex) throws SQLException {
 		return getWrapped().getCharacterStream(parameterIndex);
 	}
 
 	@Override
-    default java.io.Reader getCharacterStream(String parameterName) throws SQLException {
+    default Reader getCharacterStream(String parameterName) throws SQLException {
 		return getWrapped().getCharacterStream(parameterName);
 	}
 

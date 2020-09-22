@@ -22,7 +22,10 @@
  */
 package com.aoindustries.sql;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.sql.Clob;
 import java.sql.SQLException;
 
@@ -60,12 +63,12 @@ public interface IClobWrapper extends IWrapper, Clob, AutoCloseable {
 	}
 
 	@Override
-	default java.io.Reader getCharacterStream() throws SQLException {
+	default Reader getCharacterStream() throws SQLException {
 		return getWrapped().getCharacterStream();
 	}
 
 	@Override
-	default java.io.InputStream getAsciiStream() throws SQLException {
+	default InputStream getAsciiStream() throws SQLException {
 		return getWrapped().getAsciiStream();
 	}
 
@@ -88,12 +91,12 @@ public interface IClobWrapper extends IWrapper, Clob, AutoCloseable {
 	}
 
 	@Override
-	default java.io.OutputStream setAsciiStream(long pos) throws SQLException {
+	default OutputStream setAsciiStream(long pos) throws SQLException {
 		return getWrapped().setAsciiStream(pos);
 	}
 
 	@Override
-	default java.io.Writer setCharacterStream(long pos) throws SQLException {
+	default Writer setCharacterStream(long pos) throws SQLException {
 		return getWrapped().setCharacterStream(pos);
 	}
 
