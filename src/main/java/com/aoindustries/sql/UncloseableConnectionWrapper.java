@@ -260,13 +260,13 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public Savepoint setSavepoint() throws SQLException {
+	public SavepointWrapper setSavepoint() throws SQLException {
 		checkNotClosed();
 		return super.setSavepoint();
 	}
 
 	@Override
-	public Savepoint setSavepoint(String name) throws SQLException {
+	public SavepointWrapper setSavepoint(String name) throws SQLException {
 		checkNotClosed();
 		return super.setSavepoint(name);
 	}

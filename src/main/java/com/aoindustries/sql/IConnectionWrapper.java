@@ -170,24 +170,16 @@ public interface IConnectionWrapper extends IWrapper, Connection {
 	}
 
 	@Override
-	default Savepoint setSavepoint() throws SQLException {
-		return getWrapped().setSavepoint();
-	}
+	ISavepointWrapper setSavepoint() throws SQLException;
 
 	@Override
-	default Savepoint setSavepoint(String name) throws SQLException {
-		return getWrapped().setSavepoint(name);
-	}
+	ISavepointWrapper setSavepoint(String name) throws SQLException;
 
 	@Override
-	default void rollback(Savepoint savepoint) throws SQLException {
-		getWrapped().rollback(savepoint);
-	}
+	void rollback(Savepoint savepoint) throws SQLException;
 
 	@Override
-	default void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		getWrapped().releaseSavepoint(savepoint);
-	}
+	void releaseSavepoint(Savepoint savepoint) throws SQLException;
 
 	@Override
 	IStatementWrapper createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException;

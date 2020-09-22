@@ -36,6 +36,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Savepoint;
 import java.sql.Statement;
 
 /**
@@ -153,6 +154,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected RowIdWrapper newRowIdWrapper(RowId rowId) {
 		return new RowIdWrapper(this, rowId);
+	}
+
+	/**
+	 * Creates a new {@link SavepointWrapper}.
+	 *
+	 * @see  #wrapSavepoint(Savepoint)
+	 */
+	protected SavepointWrapper newSavepointWrapper(Savepoint savepoint) {
+		return new SavepointWrapper(this, savepoint);
 	}
 
 	/**
@@ -524,6 +534,40 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	}
 
 	/**
+	 * Wraps a {@link Savepoint}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newSavepointWrapper(java.sql.Savepoint)
+	 */
+	protected SavepointWrapper wrapSavepoint(Savepoint savepoint) {
+		if(savepoint == null) {
+			return null;
+		}
+		if(savepoint instanceof SavepointWrapper) {
+			SavepointWrapper savepointWrapper = (SavepointWrapper)savepoint;
+			if(savepointWrapper.getConnectionWrapper() == this) {
+				return savepointWrapper;
+			}
+		}
+		return newSavepointWrapper(savepoint);
+	}
+
+	/**
+	 * Unwraps a {@link Savepoint}, if wrapped by this wrapper.
+	 */
+	protected Savepoint unwrapSavepoint(Savepoint savepoint) {
+		if(savepoint == null) {
+			return null;
+		}
+		if(savepoint instanceof SavepointWrapper) {
+			SavepointWrapper savepointWrapper = (SavepointWrapper)savepoint;
+			if(savepointWrapper.getConnectionWrapper() == this) {
+				return savepointWrapper.getWrapped();
+			}
+		}
+		return savepoint;
+	}
+
+	/**
 	 * Wraps a {@link SQLXML}, if not already wrapped by this wrapper.
 	 *
 	 * @see  #newSQLXMLWrapper(java.sql.SQLXML)
@@ -653,6 +697,46 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	@Override
 	public CallableStatementWrapper prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
 		return wrapCallableStatement(getWrapped().prepareCall(sql, resultSetType, resultSetConcurrency));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapSavepoint(java.sql.Savepoint)
+	 */
+	@Override
+	public SavepointWrapper setSavepoint() throws SQLException {
+		return wrapSavepoint(getWrapped().setSavepoint());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapSavepoint(java.sql.Savepoint)
+	 */
+	@Override
+	public SavepointWrapper setSavepoint(String name) throws SQLException {
+		return wrapSavepoint(getWrapped().setSavepoint());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapSavepoint(java.sql.Savepoint)
+	 */
+	@Override
+	public void rollback(Savepoint savepoint) throws SQLException {
+		getWrapped().rollback(unwrapSavepoint(savepoint));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapSavepoint(java.sql.Savepoint)
+	 */
+	@Override
+	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+		getWrapped().rollback(unwrapSavepoint(savepoint));
 	}
 
 	/**
