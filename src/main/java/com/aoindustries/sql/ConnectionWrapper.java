@@ -209,6 +209,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * @see  #newArrayWrapper(com.aoindustries.sql.StatementWrapper, java.sql.Array)
 	 * @see  CallableStatementWrapper#wrapArray(java.sql.Array)
 	 * @see  ResultSetWrapper#wrapArray(java.sql.Array)
+	 * @see  SQLInputWrapper#wrapArray(java.sql.Array)
 	 */
 	protected ArrayWrapper wrapArray(StatementWrapper stmtWrapper, Array array) {
 		if(array == null) {
@@ -231,6 +232,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 *
 	 * @see  PreparedStatementWrapper#unwrapArray(java.sql.Array)
 	 * @see  ResultSetWrapper#unwrapArray(java.sql.Array)
+	 * @see  SQLOutputWrapper#unwrapArray(java.sql.Array)
 	 */
 	protected Array unwrapArray(Array array) {
 		if(array == null) {
@@ -251,6 +253,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * @see  #newBlobWrapper(java.sql.Blob)
 	 * @see  CallableStatementWrapper#wrapBlob(java.sql.Blob)
 	 * @see  ResultSetWrapper#wrapBlob(java.sql.Blob)
+	 * @see  SQLInputWrapper#wrapBlob(java.sql.Blob)
 	 */
 	protected BlobWrapper wrapBlob(Blob blob) {
 		if(blob == null) {
@@ -271,6 +274,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * @see  BlobWrapper#unwrapBlob(java.sql.Blob)
 	 * @see  PreparedStatementWrapper#unwrapBlob(java.sql.Blob)
 	 * @see  ResultSetWrapper#unwrapBlob(java.sql.Blob)
+	 * @see  SQLOutputWrapper#unwrapBlob(java.sql.Blob)
 	 */
 	protected Blob unwrapBlob(Blob blob) {
 		if(blob == null) {
@@ -310,6 +314,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * @see  #wrapNClob(java.sql.NClob)
 	 * @see  CallableStatementWrapper#wrapClob(java.sql.Clob)
 	 * @see  ResultSetWrapper#wrapClob(java.sql.Clob)
+	 * @see  SQLInputWrapper#wrapClob(java.sql.Clob)
 	 */
 	protected ClobWrapper wrapClob(Clob clob) {
 		if(clob == null) {
@@ -333,6 +338,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * @see  ClobWrapper#unwrapClob(java.sql.Clob)
 	 * @see  PreparedStatementWrapper#unwrapClob(java.sql.Clob)
 	 * @see  ResultSetWrapper#unwrapClob(java.sql.Clob)
+	 * @see  SQLOutputWrapper#unwrapClob(java.sql.Clob)
 	 */
 	protected Clob unwrapClob(Clob clob) {
 		if(clob == null) {
@@ -368,6 +374,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * @see  #newNClobWrapper(java.sql.NClob)
 	 * @see  CallableStatementWrapper#wrapNClob(java.sql.NClob)
 	 * @see  ResultSetWrapper#wrapNClob(java.sql.NClob)
+	 * @see  SQLInputWrapper#wrapNClob(java.sql.NClob)
 	 */
 	protected NClobWrapper wrapNClob(NClob nclob) {
 		if(nclob == null) {
@@ -387,6 +394,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 *
 	 * @see  PreparedStatementWrapper#unwrapNClob(java.sql.NClob)
 	 * @see  ResultSetWrapper#unwrapNClob(java.sql.NClob)
+	 * @see  SQLOutputWrapper#unwrapNClob(java.sql.NClob)
 	 */
 	protected NClob unwrapNClob(NClob nclob) {
 		if(nclob == null) {
@@ -448,6 +456,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * @see  #newRefWrapper(java.sql.Ref)
 	 * @see  CallableStatementWrapper#wrapRef(java.sql.Ref)
 	 * @see  ResultSetWrapper#wrapRef(java.sql.Ref)
+	 * @see  SQLInputWrapper#wrapRef(java.sql.Ref)
 	 */
 	protected RefWrapper wrapRef(Ref ref) {
 		if(ref == null) {
@@ -467,6 +476,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 *
 	 * @see  PreparedStatementWrapper#unwrapRef(java.sql.Ref)
 	 * @see  ResultSetWrapper#unwrapRef(java.sql.Ref)
+	 * @see  SQLOutputWrapper#unwrapRef(java.sql.Ref)
 	 */
 	protected Ref unwrapRef(Ref ref) {
 		if(ref == null) {
@@ -539,6 +549,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * @see  #newRowIdWrapper(java.sql.RowId)
 	 * @see  CallableStatementWrapper#wrapRowId(java.sql.RowId)
 	 * @see  ResultSetWrapper#wrapRowId(java.sql.RowId)
+	 * @see  SQLInputWrapper#wrapRowId(java.sql.RowId)
 	 */
 	protected RowIdWrapper wrapRowId(RowId rowId) {
 		if(rowId == null) {
@@ -558,6 +569,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 *
 	 * @see  PreparedStatementWrapper#unwrapRowId(java.sql.RowId)
 	 * @see  ResultSetWrapper#unwrapRowId(java.sql.RowId)
+	 * @see  SQLOutputWrapper#unwrapRowId(java.sql.RowId)
 	 */
 	protected RowId unwrapRowId(RowId rowId) {
 		if(rowId == null) {
@@ -612,6 +624,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 * @see  #newSQLXMLWrapper(java.sql.SQLXML)
 	 * @see  CallableStatementWrapper#wrapSQLXML(java.sql.SQLXML)
 	 * @see  ResultSetWrapper#wrapSQLXML(java.sql.SQLXML)
+	 * @see  SQLInputWrapper#wrapSQLXML(java.sql.SQLXML)
 	 */
 	protected SQLXMLWrapper wrapSQLXML(SQLXML sqlXml) {
 		if(sqlXml == null) {
@@ -631,6 +644,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 *
 	 * @see  PreparedStatementWrapper#unwrapSQLXML(java.sql.SQLXML)
 	 * @see  ResultSetWrapper#unwrapSQLXML(java.sql.SQLXML)
+	 * @see  SQLOutputWrapper#unwrapSQLXML(java.sql.SQLXML)
 	 */
 	protected SQLXML unwrapSQLXML(SQLXML sqlXml) {
 		if(sqlXml == null) {
@@ -684,6 +698,24 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return newStructWrapper(struct);
+	}
+
+	/**
+	 * Unwraps a {@link Struct}, if wrapped by this wrapper.
+	 *
+	 * @see  SQLOutputWrapper#unwrapStruct(java.sql.Struct)
+	 */
+	protected Struct unwrapStruct(Struct struct) {
+		if(struct == null) {
+			return null;
+		}
+		if(struct instanceof StructWrapper) {
+			StructWrapper structWrapper = (StructWrapper)struct;
+			if(structWrapper.getConnectionWrapper() == this) {
+				return structWrapper.getWrapped();
+			}
+		}
+		return struct;
 	}
 
 	/**
