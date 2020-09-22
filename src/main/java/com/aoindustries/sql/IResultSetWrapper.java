@@ -755,24 +755,16 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     INClobWrapper getNClob(String columnLabel) throws SQLException;
 
 	@Override
-    default SQLXML getSQLXML(int columnIndex) throws SQLException {
-		return getWrapped().getSQLXML(columnIndex);
-	}
+    ISQLXMLWrapper getSQLXML(int columnIndex) throws SQLException;
 
 	@Override
-    default SQLXML getSQLXML(String columnLabel) throws SQLException {
-		return getWrapped().getSQLXML(columnLabel);
-	}
+    ISQLXMLWrapper getSQLXML(String columnLabel) throws SQLException;
 
 	@Override
-    default void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
-		getWrapped().updateSQLXML(columnIndex, xmlObject);
-	}
+    void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException;
 
 	@Override
-    default void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException {
-		getWrapped().updateSQLXML(columnLabel, xmlObject);
-	}
+    void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException;
 
 	@Override
     default String getNString(int columnIndex) throws SQLException {

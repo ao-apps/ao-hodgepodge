@@ -30,6 +30,7 @@ import java.sql.NClob;
 import java.sql.Ref;
 import java.sql.RowId;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 
 /**
  * Wraps a {@link CallableStatement}.
@@ -99,6 +100,15 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	 */
 	protected RowIdWrapper wrapRowId(RowId rowId) {
 		return getConnectionWrapper().wrapRowId(rowId);
+	}
+
+	/**
+	 * Wraps a {@link SQLXML}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapSQLXML(java.sql.SQLXML)
+	 */
+	protected SQLXMLWrapper wrapSQLXML(SQLXML sqlXml) {
+		return getConnectionWrapper().wrapSQLXML(sqlXml);
 	}
 
 	/**
@@ -239,6 +249,36 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	@Override
     public NClobWrapper getNClob(String parameterName) throws SQLException {
 		return wrapNClob(getWrapped().getNClob(parameterName));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapSQLXML(java.sql.SQLXML) 
+	 */
+	@Override
+    public void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException {
+		getWrapped().setSQLXML(parameterName, unwrapSQLXML(xmlObject));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapSQLXML(java.sql.SQLXML)
+	 */
+	@Override
+    public SQLXMLWrapper getSQLXML(int parameterIndex) throws SQLException {
+		return wrapSQLXML(getWrapped().getSQLXML(parameterIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapSQLXML(java.sql.SQLXML)
+	 */
+	@Override
+    public SQLXMLWrapper getSQLXML(String parameterName) throws SQLException {
+		return wrapSQLXML(getWrapped().getSQLXML(parameterName));
 	}
 
 	/**

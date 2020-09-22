@@ -26,7 +26,6 @@ import java.sql.Connection;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Struct;
 import java.util.Map;
@@ -339,7 +338,7 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public SQLXML createSQLXML() throws SQLException {
+	public SQLXMLWrapper createSQLXML() throws SQLException {
 		checkNotClosed();
 		return super.createSQLXML();
 	}

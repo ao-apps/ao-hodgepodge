@@ -472,19 +472,13 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     INClobWrapper getNClob(String parameterName) throws SQLException;
 
 	@Override
-    default void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException {
-		getWrapped().setSQLXML(parameterName, xmlObject);
-	}
+    void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException;
 
 	@Override
-    default SQLXML getSQLXML(int parameterIndex) throws SQLException {
-		return getWrapped().getSQLXML(parameterIndex);
-	}
+    ISQLXMLWrapper getSQLXML(int parameterIndex) throws SQLException;
 
 	@Override
-    default SQLXML getSQLXML(String parameterName) throws SQLException {
-		return getWrapped().getSQLXML(parameterName);
-	}
+    ISQLXMLWrapper getSQLXML(String parameterName) throws SQLException;
 
 	@Override
     default String getNString(int parameterIndex) throws SQLException {

@@ -26,7 +26,6 @@ import java.sql.Connection;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Struct;
 import java.util.Map;
@@ -218,9 +217,7 @@ public interface IConnectionWrapper extends IWrapper, Connection {
 	INClobWrapper createNClob() throws SQLException;
 
 	@Override
-	default SQLXML createSQLXML() throws SQLException {
-		return getWrapped().createSQLXML();
-	}
+	ISQLXMLWrapper createSQLXML() throws SQLException;
 
 	@Override
 	default boolean isValid(int timeout) throws SQLException {

@@ -252,9 +252,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-	default void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
-		getWrapped().setSQLXML(parameterIndex, xmlObject);
-	}
+	void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException;
 
 	@Override
     default void setObject(int parameterIndex, Object x, int targetSqlType, int scaleOrLength) throws SQLException {

@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Statement;
 
 /**
@@ -152,6 +153,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected RowIdWrapper newRowIdWrapper(RowId rowId) {
 		return new RowIdWrapper(this, rowId);
+	}
+
+	/**
+	 * Creates a new {@link SQLXMLWrapper}.
+	 *
+	 * @see  #wrapSQLXML(SQLXML)
+	 */
+	protected SQLXMLWrapper newSQLXMLWrapper(SQLXML sqlXml) {
+		return new SQLXMLWrapper(this, sqlXml);
 	}
 
 	/**
@@ -514,6 +524,45 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	}
 
 	/**
+	 * Wraps a {@link SQLXML}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newSQLXMLWrapper(java.sql.SQLXML)
+	 * @see  CallableStatementWrapper#wrapSQLXML(java.sql.SQLXML)
+	 * @see  ResultSetWrapper#wrapSQLXML(java.sql.SQLXML)
+	 */
+	protected SQLXMLWrapper wrapSQLXML(SQLXML sqlXml) {
+		if(sqlXml == null) {
+			return null;
+		}
+		if(sqlXml instanceof SQLXMLWrapper) {
+			SQLXMLWrapper sqlXmlWrapper = (SQLXMLWrapper)sqlXml;
+			if(sqlXmlWrapper.getConnectionWrapper() == this) {
+				return sqlXmlWrapper;
+			}
+		}
+		return newSQLXMLWrapper(sqlXml);
+	}
+
+	/**
+	 * Unwraps a {@link SQLXML}, if wrapped by this wrapper.
+	 *
+	 * @see  PreparedStatementWrapper#unwrapSQLXML(java.sql.SQLXML)
+	 * @see  ResultSetWrapper#unwrapSQLXML(java.sql.SQLXML)
+	 */
+	protected SQLXML unwrapSQLXML(SQLXML sqlXml) {
+		if(sqlXml == null) {
+			return null;
+		}
+		if(sqlXml instanceof SQLXMLWrapper) {
+			SQLXMLWrapper sqlXmlWrapper = (SQLXMLWrapper)sqlXml;
+			if(sqlXmlWrapper.getConnectionWrapper() == this) {
+				return sqlXmlWrapper.getWrapped();
+			}
+		}
+		return sqlXml;
+	}
+
+	/**
 	 * Wraps a {@link Statement}, if not already wrapped by this wrapper.
 	 *
 	 * @see  #newStatementWrapper(java.sql.Statement)
@@ -694,6 +743,16 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	@Override
 	public NClobWrapper createNClob() throws SQLException {
 		return wrapNClob(getWrapped().createNClob());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapSQLXML(java.sql.SQLXML)
+	 */
+	@Override
+	public SQLXMLWrapper createSQLXML() throws SQLException {
+		return wrapSQLXML(getWrapped().createSQLXML());
 	}
 
 	/**

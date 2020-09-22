@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.Optional;
 
@@ -185,6 +186,24 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 */
 	protected RowId unwrapRowId(RowId rowId) {
 		return getConnectionWrapper().unwrapRowId(rowId);
+	}
+
+	/**
+	 * Wraps a {@link SQLXML}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapSQLXML(java.sql.SQLXML)
+	 */
+	protected SQLXMLWrapper wrapSQLXML(SQLXML sqlXml) {
+		return getConnectionWrapper().wrapSQLXML(sqlXml);
+	}
+
+	/**
+	 * Unwraps a {@link SQLXML}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapSQLXML(java.sql.SQLXML)
+	 */
+	protected SQLXML unwrapSQLXML(SQLXML sqlXml) {
+		return getConnectionWrapper().unwrapSQLXML(sqlXml);
 	}
 
 	/**
@@ -454,5 +473,45 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	@Override
     public NClobWrapper getNClob(String columnLabel) throws SQLException {
 		return wrapNClob(getWrapped().getNClob(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapSQLXML(java.sql.SQLXML) 
+	 */
+	@Override
+    public SQLXMLWrapper getSQLXML(int columnIndex) throws SQLException {
+		return wrapSQLXML(getWrapped().getSQLXML(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapSQLXML(java.sql.SQLXML) 
+	 */
+	@Override
+    public SQLXMLWrapper getSQLXML(String columnLabel) throws SQLException {
+		return wrapSQLXML(getWrapped().getSQLXML(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapSQLXML(java.sql.SQLXML) 
+	 */
+	@Override
+    public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
+		getWrapped().updateSQLXML(columnIndex, unwrapSQLXML(xmlObject));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapSQLXML(java.sql.SQLXML) 
+	 */
+	@Override
+    public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException {
+		getWrapped().updateSQLXML(columnLabel, unwrapSQLXML(xmlObject));
 	}
 }

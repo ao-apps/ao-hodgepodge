@@ -31,6 +31,7 @@ import java.sql.Ref;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 
 /**
  * Wraps a {@link PreparedStatement}.
@@ -112,6 +113,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	}
 
 	/**
+	 * Unwraps a {@link SQLXML}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapSQLXML(java.sql.SQLXML)
+	 */
+	protected SQLXML unwrapSQLXML(SQLXML sqlXml) {
+		return getConnectionWrapper().unwrapSQLXML(sqlXml);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * @see  #wrapResultSet(java.sql.ResultSet)
@@ -189,5 +199,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	@Override
 	public void setNClob(int parameterIndex, NClob value) throws SQLException {
 		getWrapped().setNClob(parameterIndex, unwrapNClob(value));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapSQLXML(java.sql.SQLXML)
+	 */
+	@Override
+	public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
+		getWrapped().setSQLXML(parameterIndex, unwrapSQLXML(xmlObject));
 	}
 }
