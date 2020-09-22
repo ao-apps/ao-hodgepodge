@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
@@ -83,6 +84,15 @@ public class SQLXMLWrapper implements ISQLXMLWrapper {
 	}
 
 	/**
+	 * Wraps a {@link Writer}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapWriter(java.io.Writer)
+	 */
+	protected WriterWrapper wrapWriter(Writer out) {
+		return getConnectionWrapper().wrapWriter(out);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * @see  #wrapInputStream(java.io.InputStream)
@@ -111,4 +121,15 @@ public class SQLXMLWrapper implements ISQLXMLWrapper {
 	public ReaderWrapper getCharacterStream() throws SQLException {
 		return wrapReader(getWrapped().getCharacterStream());
 	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapWriter(Writer)
+	 */
+	@Override
+	public WriterWrapper setCharacterStream() throws SQLException {
+		return wrapWriter(getWrapped().setCharacterStream());
+	}
+
 }

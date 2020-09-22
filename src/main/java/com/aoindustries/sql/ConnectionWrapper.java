@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -242,6 +243,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected StructWrapper newStructWrapper(Struct struct) {
 		return new StructWrapper(this, struct);
+	}
+
+	/**
+	 * Creates a new {@link WriterWrapper}.
+	 *
+	 * @see  #wrapWriter(java.io.Writer)
+	 */
+	protected WriterWrapper newWriterWrapper(Writer out) {
+		return new WriterWrapper(this, out);
 	}
 
 	/**
@@ -864,6 +874,26 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return struct;
+	}
+
+	/**
+	 * Wraps a {@link Writer}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newWriterWrapper(java.io.Writer)
+	 * @see  ClobWrapper#wrapWriter(java.io.Writer)
+	 * @see  SQLXMLWrapper#wrapWriter(java.io.Writer)
+	 */
+	protected WriterWrapper wrapWriter(Writer out) {
+		if(out == null) {
+			return null;
+		}
+		if(out instanceof WriterWrapper) {
+			WriterWrapper outWrapper = (WriterWrapper)out;
+			if(outWrapper.getConnectionWrapper() == this) {
+				return outWrapper;
+			}
+		}
+		return newWriterWrapper(out);
 	}
 
 	/**

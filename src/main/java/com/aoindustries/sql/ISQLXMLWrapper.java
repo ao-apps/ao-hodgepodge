@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.io.Writer;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import javax.xml.transform.Result;
@@ -66,9 +65,7 @@ public interface ISQLXMLWrapper extends IWrapper, SQLXML, AutoCloseable {
 	ReaderWrapper getCharacterStream() throws SQLException;
 
 	@Override
-	default Writer setCharacterStream() throws SQLException {
-		return getWrapped().setCharacterStream();
-	}
+	WriterWrapper setCharacterStream() throws SQLException;
 
 	@Override
 	default String getString() throws SQLException {
