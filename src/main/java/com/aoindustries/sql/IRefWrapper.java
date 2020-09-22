@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import java.sql.Ref;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * Wraps a {@link Ref}.
@@ -44,7 +45,7 @@ public interface IRefWrapper extends IWrapper, Ref {
 	}
 
 	@Override
-	default Object getObject(java.util.Map<String,Class<?>> map) throws SQLException {
+	default Object getObject(Map<String,Class<?>> map) throws SQLException {
 		return getWrapped().getObject(map);
 	}
 

@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import java.sql.Array;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * Wraps an {@link Array}.
@@ -64,7 +65,7 @@ public interface IArrayWrapper extends IWrapper, Array, AutoCloseable {
 	}
 
 	@Override
-	default Object getArray(java.util.Map<String,Class<?>> map) throws SQLException {
+	default Object getArray(Map<String,Class<?>> map) throws SQLException {
 		return getWrapped().getArray(map);
 	}
 
@@ -74,7 +75,7 @@ public interface IArrayWrapper extends IWrapper, Array, AutoCloseable {
 	}
 
 	@Override
-	default Object getArray(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException {
+	default Object getArray(long index, int count, Map<String,Class<?>> map) throws SQLException {
 		return getWrapped().getArray(index, count, map);
 	}
 
@@ -82,13 +83,13 @@ public interface IArrayWrapper extends IWrapper, Array, AutoCloseable {
 	IResultSetWrapper getResultSet() throws SQLException;
 
 	@Override
-	IResultSetWrapper getResultSet(java.util.Map<String,Class<?>> map) throws SQLException;
+	IResultSetWrapper getResultSet(Map<String,Class<?>> map) throws SQLException;
 
 	@Override
 	IResultSetWrapper getResultSet(long index, int count) throws SQLException;
 
 	@Override
-	IResultSetWrapper getResultSet(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException;
+	IResultSetWrapper getResultSet(long index, int count, Map<String,Class<?>> map) throws SQLException;
 
 	@Override
 	default void free() throws SQLException {

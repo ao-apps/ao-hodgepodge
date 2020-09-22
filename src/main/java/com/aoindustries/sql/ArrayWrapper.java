@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -88,7 +89,7 @@ public class ArrayWrapper implements IArrayWrapper {
 	 * @see  #wrapResultSet(java.sql.ResultSet)
 	 */
 	@Override
-	public ResultSetWrapper getResultSet(java.util.Map<String,Class<?>> map) throws SQLException {
+	public ResultSetWrapper getResultSet(Map<String,Class<?>> map) throws SQLException {
 		return wrapResultSet(getWrapped().getResultSet(map));
 	}
 
@@ -108,7 +109,7 @@ public class ArrayWrapper implements IArrayWrapper {
 	 * @see  #wrapResultSet(java.sql.ResultSet)
 	 */
 	@Override
-	public ResultSetWrapper getResultSet(long index, int count, java.util.Map<String,Class<?>> map) throws SQLException {
+	public ResultSetWrapper getResultSet(long index, int count, Map<String,Class<?>> map) throws SQLException {
 		return wrapResultSet(getWrapped().getResultSet(index, count, map));
 	}
 }

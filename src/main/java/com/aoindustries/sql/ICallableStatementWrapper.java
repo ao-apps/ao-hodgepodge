@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
@@ -37,6 +38,7 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Map;
 
 /**
  * Wraps a {@link CallableStatement}.
@@ -143,7 +145,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default Object getObject(int parameterIndex, java.util.Map<String,Class<?>> map) throws SQLException {
+    default Object getObject(int parameterIndex, Map<String,Class<?>> map) throws SQLException {
 		return getWrapped().getObject(parameterIndex, map);
 	}
 
@@ -200,7 +202,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default void setURL(String parameterName, java.net.URL val) throws SQLException {
+    default void setURL(String parameterName, URL val) throws SQLException {
 		getWrapped().setURL(parameterName, val);
 	}
 
@@ -275,12 +277,12 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default void setAsciiStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
+    default void setAsciiStream(String parameterName, InputStream x, int length) throws SQLException {
 		getWrapped().setAsciiStream(parameterName, x, length);
 	}
 
 	@Override
-    default void setBinaryStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
+    default void setBinaryStream(String parameterName, InputStream x, int length) throws SQLException {
 		getWrapped().setBinaryStream(parameterName, x, length);
 	}
 
@@ -300,7 +302,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default void setCharacterStream(String parameterName, java.io.Reader reader, int length) throws SQLException {
+    default void setCharacterStream(String parameterName, Reader reader, int length) throws SQLException {
 		getWrapped().setCharacterStream(parameterName, reader, length);
 	}
 
@@ -395,7 +397,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default Object getObject(String parameterName, java.util.Map<String,Class<?>> map) throws SQLException {
+    default Object getObject(String parameterName, Map<String,Class<?>> map) throws SQLException {
 		return getWrapped().getObject(parameterName, map);
 	}
 
@@ -520,32 +522,32 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     void setClob(String parameterName, Clob x) throws SQLException;
 
 	@Override
-    default void setAsciiStream(String parameterName, java.io.InputStream x, long length) throws SQLException {
+    default void setAsciiStream(String parameterName, InputStream x, long length) throws SQLException {
 		getWrapped().setAsciiStream(parameterName, x, length);
 	}
 
 	@Override
-    default void setBinaryStream(String parameterName, java.io.InputStream x, long length) throws SQLException {
+    default void setBinaryStream(String parameterName, InputStream x, long length) throws SQLException {
 		getWrapped().setBinaryStream(parameterName, x, length);
 	}
 
 	@Override
-    default void setCharacterStream(String parameterName, java.io.Reader reader, long length) throws SQLException {
+    default void setCharacterStream(String parameterName, Reader reader, long length) throws SQLException {
 		getWrapped().setCharacterStream(parameterName, reader, length);
 	}
 
 	@Override
-    default void setAsciiStream(String parameterName, java.io.InputStream x) throws SQLException {
+    default void setAsciiStream(String parameterName, InputStream x) throws SQLException {
 		getWrapped().setAsciiStream(parameterName, x);
 	}
 
 	@Override
-    default void setBinaryStream(String parameterName, java.io.InputStream x) throws SQLException {
+    default void setBinaryStream(String parameterName, InputStream x) throws SQLException {
 		getWrapped().setBinaryStream(parameterName, x);
 	}
 
 	@Override
-    default void setCharacterStream(String parameterName, java.io.Reader reader) throws SQLException {
+    default void setCharacterStream(String parameterName, Reader reader) throws SQLException {
 		getWrapped().setCharacterStream(parameterName, reader);
 	}
 

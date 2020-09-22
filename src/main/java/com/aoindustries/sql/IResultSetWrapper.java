@@ -40,6 +40,7 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Map;
 
 /**
  * Wraps a {@link ResultSet}.
@@ -462,17 +463,17 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateAsciiStream(int columnIndex, java.io.InputStream x, int length) throws SQLException {
+    default void updateAsciiStream(int columnIndex, InputStream x, int length) throws SQLException {
 		getWrapped().updateAsciiStream(columnIndex, x, length);
 	}
 
 	@Override
-    default void updateBinaryStream(int columnIndex, java.io.InputStream x, int length) throws SQLException {
+    default void updateBinaryStream(int columnIndex, InputStream x, int length) throws SQLException {
 		getWrapped().updateBinaryStream(columnIndex, x, length);
 	}
 
 	@Override
-    default void updateCharacterStream(int columnIndex, java.io.Reader x, int length) throws SQLException {
+    default void updateCharacterStream(int columnIndex, Reader x, int length) throws SQLException {
 		getWrapped().updateCharacterStream(columnIndex, x, length);
 	}
 
@@ -557,17 +558,17 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateAsciiStream(String columnLabel, java.io.InputStream x, int length) throws SQLException {
+    default void updateAsciiStream(String columnLabel, InputStream x, int length) throws SQLException {
 		getWrapped().updateAsciiStream(columnLabel, x, length);
 	}
 
 	@Override
-    default void updateBinaryStream(String columnLabel, java.io.InputStream x, int length) throws SQLException {
+    default void updateBinaryStream(String columnLabel, InputStream x, int length) throws SQLException {
 		getWrapped().updateBinaryStream(columnLabel, x, length);
 	}
 
 	@Override
-    default void updateCharacterStream(String columnLabel, java.io.Reader reader, int length) throws SQLException {
+    default void updateCharacterStream(String columnLabel, Reader reader, int length) throws SQLException {
 		getWrapped().updateCharacterStream(columnLabel, reader, length);
 	}
 
@@ -620,7 +621,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     IStatementWrapper getStatement() throws SQLException;
 
 	@Override
-    default Object getObject(int columnIndex, java.util.Map<String,Class<?>> map) throws SQLException {
+    default Object getObject(int columnIndex, Map<String,Class<?>> map) throws SQLException {
 		return getWrapped().getObject(columnIndex, map);
 	}
 
@@ -637,7 +638,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     IArrayWrapper getArray(int columnIndex) throws SQLException;
 
 	@Override
-    default Object getObject(String columnLabel, java.util.Map<String,Class<?>> map) throws SQLException {
+    default Object getObject(String columnLabel, Map<String,Class<?>> map) throws SQLException {
 		return getWrapped().getObject(columnLabel, map);
 	}
 
@@ -794,42 +795,42 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateNCharacterStream(int columnIndex, java.io.Reader x, long length) throws SQLException {
+    default void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
 		getWrapped().updateNCharacterStream(columnIndex, x, length);
 	}
 
 	@Override
-    default void updateNCharacterStream(String columnLabel, java.io.Reader reader, long length) throws SQLException {
+    default void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
 		getWrapped().updateNCharacterStream(columnLabel, reader, length);
 	}
 
 	@Override
-    default void updateAsciiStream(int columnIndex, java.io.InputStream x, long length) throws SQLException {
+    default void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException {
 		getWrapped().updateAsciiStream(columnIndex, x, length);
 	}
 
 	@Override
-    default void updateBinaryStream(int columnIndex, java.io.InputStream x, long length) throws SQLException {
+    default void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException {
 		getWrapped().updateBinaryStream(columnIndex, x, length);
 	}
 
 	@Override
-    default void updateCharacterStream(int columnIndex, java.io.Reader x, long length) throws SQLException {
+    default void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
 		getWrapped().updateCharacterStream(columnIndex, x, length);
 	}
 
 	@Override
-    default void updateAsciiStream(String columnLabel, java.io.InputStream x, long length) throws SQLException {
+    default void updateAsciiStream(String columnLabel, InputStream x, long length) throws SQLException {
 		getWrapped().updateAsciiStream(columnLabel, x, length);
 	}
 
 	@Override
-    default void updateBinaryStream(String columnLabel, java.io.InputStream x, long length) throws SQLException {
+    default void updateBinaryStream(String columnLabel, InputStream x, long length) throws SQLException {
 		getWrapped().updateBinaryStream(columnLabel, x, length);
 	}
 
 	@Override
-    default void updateCharacterStream(String columnLabel, java.io.Reader reader, long length) throws SQLException {
+    default void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
 		getWrapped().updateCharacterStream(columnLabel, reader, length);
 	}
 
@@ -864,42 +865,42 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateNCharacterStream(int columnIndex, java.io.Reader x) throws SQLException {
+    default void updateNCharacterStream(int columnIndex, Reader x) throws SQLException {
 		getWrapped().updateNCharacterStream(columnIndex, x);
 	}
 
 	@Override
-    default void updateNCharacterStream(String columnLabel, java.io.Reader reader) throws SQLException {
+    default void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException {
 		getWrapped().updateNCharacterStream(columnLabel, reader);
 	}
 
 	@Override
-    default void updateAsciiStream(int columnIndex, java.io.InputStream x) throws SQLException {
+    default void updateAsciiStream(int columnIndex, InputStream x) throws SQLException {
 		getWrapped().updateAsciiStream(columnIndex, x);
 	}
 
 	@Override
-    default void updateBinaryStream(int columnIndex, java.io.InputStream x) throws SQLException {
+    default void updateBinaryStream(int columnIndex, InputStream x) throws SQLException {
 		getWrapped().updateBinaryStream(columnIndex, x);
 	}
 
 	@Override
-    default void updateCharacterStream(int columnIndex, java.io.Reader x) throws SQLException {
+    default void updateCharacterStream(int columnIndex, Reader x) throws SQLException {
 		getWrapped().updateCharacterStream(columnIndex, x);
 	}
 
 	@Override
-    default void updateAsciiStream(String columnLabel, java.io.InputStream x) throws SQLException {
+    default void updateAsciiStream(String columnLabel, InputStream x) throws SQLException {
 		getWrapped().updateAsciiStream(columnLabel, x);
 	}
 
 	@Override
-    default void updateBinaryStream(String columnLabel, java.io.InputStream x) throws SQLException {
+    default void updateBinaryStream(String columnLabel, InputStream x) throws SQLException {
 		getWrapped().updateBinaryStream(columnLabel, x);
 	}
 
 	@Override
-    default void updateCharacterStream(String columnLabel, java.io.Reader reader) throws SQLException {
+    default void updateCharacterStream(String columnLabel, Reader reader) throws SQLException {
 		getWrapped().updateCharacterStream(columnLabel, reader);
 	}
 

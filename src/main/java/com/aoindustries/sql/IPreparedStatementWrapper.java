@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -133,18 +134,18 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default void setAsciiStream(int parameterIndex, java.io.InputStream x, int length) throws SQLException {
+    default void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
 		getWrapped().setAsciiStream(parameterIndex, x, length);
 	}
 
 	@Override
     @Deprecated // Java 9: (since="1.2")
-    default void setUnicodeStream(int parameterIndex, java.io.InputStream x, int length) throws SQLException {
+    default void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
 		getWrapped().setUnicodeStream(parameterIndex, x, length);
 	}
 
 	@Override
-    default void setBinaryStream(int parameterIndex, java.io.InputStream x, int length) throws SQLException {
+    default void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
 		getWrapped().setBinaryStream(parameterIndex, x, length);
 	}
 
@@ -174,7 +175,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default void setCharacterStream(int parameterIndex, java.io.Reader reader, int length) throws SQLException {
+    default void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException {
 		getWrapped().setCharacterStream(parameterIndex, reader, length);
 	}
 
@@ -214,7 +215,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default void setURL(int parameterIndex, java.net.URL x) throws SQLException {
+    default void setURL(int parameterIndex, URL x) throws SQLException {
 		getWrapped().setURL(parameterIndex, x);
 	}
 
@@ -263,32 +264,32 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-	default void setAsciiStream(int parameterIndex, java.io.InputStream x, long length) throws SQLException {
+	default void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
 		getWrapped().setAsciiStream(parameterIndex, x, length);
 	}
 
 	@Override
-    default void setBinaryStream(int parameterIndex, java.io.InputStream x, long length) throws SQLException {
+    default void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
 		getWrapped().setBinaryStream(parameterIndex, x, length);
 	}
 
 	@Override
-    default void setCharacterStream(int parameterIndex, java.io.Reader reader, long length) throws SQLException {
+    default void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
 		getWrapped().setCharacterStream(parameterIndex, reader, length);
 	}
 
 	@Override
-    default void setAsciiStream(int parameterIndex, java.io.InputStream x) throws SQLException {
+    default void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
 		getWrapped().setAsciiStream(parameterIndex, x);
 	}
 
 	@Override
-    default void setBinaryStream(int parameterIndex, java.io.InputStream x) throws SQLException {
+    default void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
 		getWrapped().setBinaryStream(parameterIndex, x);
 	}
 
 	@Override
-    default void setCharacterStream(int parameterIndex, java.io.Reader reader) throws SQLException {
+    default void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
 		getWrapped().setCharacterStream(parameterIndex, reader);
 	}
 
