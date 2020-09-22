@@ -23,6 +23,7 @@
 package com.aoindustries.sql;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -107,6 +108,15 @@ public class SQLOutputWrapper implements ISQLOutputWrapper {
 	}
 
 	/**
+	 * Unwraps a {@link Reader}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapReader(java.io.Reader)
+	 */
+	protected Reader unwrapReader(Reader in) {
+		return getConnectionWrapper().unwrapReader(in);
+	}
+
+	/**
 	 * Unwraps a {@link Ref}, if wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#unwrapRef(java.sql.Ref)
@@ -140,6 +150,16 @@ public class SQLOutputWrapper implements ISQLOutputWrapper {
 	 */
 	protected Struct unwrapStruct(Struct struct) {
 		return getConnectionWrapper().unwrapStruct(struct);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+	public void writeCharacterStream(Reader x) throws SQLException {
+		getWrapped().writeCharacterStream(unwrapReader(x));
 	}
 
 	/**

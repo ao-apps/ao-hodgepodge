@@ -121,9 +121,7 @@ public interface ISQLOutputWrapper extends IWrapper, SQLOutput {
 	}
 
 	@Override
-	default void writeCharacterStream(Reader x) throws SQLException {
-		getWrapped().writeCharacterStream(x);
-	}
+	void writeCharacterStream(Reader x) throws SQLException;
 
 	@Override
 	void writeAsciiStream(InputStream x) throws SQLException;

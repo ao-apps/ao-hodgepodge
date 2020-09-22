@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Date;
@@ -110,9 +109,7 @@ public interface ISQLInputWrapper extends IWrapper, SQLInput {
 	}
 
 	@Override
-	default Reader readCharacterStream() throws SQLException {
-		return getWrapped().readCharacterStream();
-	}
+	ReaderWrapper readCharacterStream() throws SQLException;
 
 	@Override
 	InputStreamWrapper readAsciiStream() throws SQLException;

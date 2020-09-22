@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.sql.Clob;
 import java.sql.SQLException;
 
@@ -82,6 +83,25 @@ public class ClobWrapper implements IClobWrapper {
 	}
 
 	/**
+	 * Wraps a {@link Reader}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapReader(java.sql.Reader)
+	 */
+	protected ReaderWrapper wrapReader(Reader in) {
+		return getConnectionWrapper().wrapReader(in);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapReader(java.io.Reader)
+	 */
+	@Override
+	public ReaderWrapper getCharacterStream() throws SQLException {
+		return wrapReader(getWrapped().getCharacterStream());
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * @see  #wrapInputStream(java.io.InputStream)
@@ -109,5 +129,15 @@ public class ClobWrapper implements IClobWrapper {
 	@Override
 	public OutputStreamWrapper setAsciiStream(long pos) throws SQLException {
 		return wrapOutputStream(getWrapped().setAsciiStream(pos));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapReader(java.io.Reader)
+	 */
+	@Override
+	public ReaderWrapper getCharacterStream(long pos, long length) throws SQLException {
+		return wrapReader(getWrapped().getCharacterStream(pos, length));
 	}
 }

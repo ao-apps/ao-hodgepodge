@@ -24,6 +24,7 @@ package com.aoindustries.sql;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -160,6 +161,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected PreparedStatementWrapper newPreparedStatementWrapper(PreparedStatement pstmt) {
 		return new PreparedStatementWrapper(this, pstmt);
+	}
+
+	/**
+	 * Creates a new {@link ReaderWrapper}.
+	 *
+	 * @see  #wrapReader(java.io.Reader)
+	 */
+	protected ReaderWrapper newReaderWrapper(Reader in) {
+		return new ReaderWrapper(this, in);
 	}
 
 	/**
@@ -543,6 +553,49 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return newPreparedStatementWrapper(pstmt);
+	}
+
+	/**
+	 * Wraps a {@link Reader}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newReaderWrapper(java.io.Reader)
+	 * @see  CallableStatementWrapper#wrapReader(java.io.Reader)
+	 * @see  ClobWrapper#wrapReader(java.io.Reader)
+	 * @see  ResultSetWrapper#wrapReader(java.io.Reader)
+	 * @see  SQLInputWrapper#wrapReader(java.io.Reader)
+	 * @see  SQLXMLWrapper#wrapReader(java.io.Reader)
+	 */
+	protected ReaderWrapper wrapReader(Reader in) {
+		if(in == null) {
+			return null;
+		}
+		if(in instanceof ReaderWrapper) {
+			ReaderWrapper inWrapper = (ReaderWrapper)in;
+			if(inWrapper.getConnectionWrapper() == this) {
+				return inWrapper;
+			}
+		}
+		return newReaderWrapper(in);
+	}
+
+	/**
+	 * Unwraps a {@link Reader}, if wrapped by this wrapper.
+	 *
+	 * @see  PreparedStatementWrapper#unwrapReader(java.io.Reader)
+	 * @see  ResultSetWrapper#unwrapReader(java.io.Reader)
+	 * @see  SQLOutputWrapper#unwrapReader(java.io.Reader)
+	 */
+	protected Reader unwrapReader(Reader in) {
+		if(in == null) {
+			return null;
+		}
+		if(in instanceof ReaderWrapper) {
+			ReaderWrapper inWrapper = (ReaderWrapper)in;
+			if(inWrapper.getConnectionWrapper() == this) {
+				return inWrapper.getWrapped();
+			}
+		}
+		return in;
 	}
 
 	/**

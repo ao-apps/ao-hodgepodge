@@ -23,6 +23,7 @@
 package com.aoindustries.sql;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -160,6 +161,24 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 */
 	protected NClob unwrapNClob(NClob nclob) {
 		return getConnectionWrapper().unwrapNClob(nclob);
+	}
+
+	/**
+	 * Wraps a {@link Reader}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapReader(java.sql.Reader)
+	 */
+	protected ReaderWrapper wrapReader(Reader in) {
+		return getConnectionWrapper().wrapReader(in);
+	}
+
+	/**
+	 * Unwraps a {@link Reader}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapReader(java.io.Reader)
+	 */
+	protected Reader unwrapReader(Reader in) {
+		return getConnectionWrapper().unwrapReader(in);
 	}
 
 	/**
@@ -309,6 +328,26 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #wrapReader(java.io.Reader)
+	 */
+	@Override
+    public ReaderWrapper getCharacterStream(int columnIndex) throws SQLException {
+		return wrapReader(getWrapped().getCharacterStream(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapReader(java.io.Reader)
+	 */
+	@Override
+    public ReaderWrapper getCharacterStream(String columnLabel) throws SQLException {
+		return wrapReader(getWrapped().getCharacterStream(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapInputStream(java.io.InputStream)
 	 */
 	@Override
@@ -329,6 +368,16 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateCharacterStream(int columnIndex, Reader x, int length) throws SQLException {
+		getWrapped().updateCharacterStream(columnIndex, unwrapReader(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapInputStream(java.io.InputStream)
 	 */
 	@Override
@@ -344,6 +393,16 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	@Override
     public void updateBinaryStream(String columnLabel, InputStream x, int length) throws SQLException {
 		getWrapped().updateBinaryStream(columnLabel, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateCharacterStream(String columnLabel, Reader reader, int length) throws SQLException {
+		getWrapped().updateCharacterStream(columnLabel, unwrapReader(reader), length);
 	}
 
 	/**
@@ -639,6 +698,46 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #wrapReader(java.io.Reader)
+	 */
+	@Override
+    public ReaderWrapper getNCharacterStream(int columnIndex) throws SQLException {
+		return wrapReader(getWrapped().getNCharacterStream(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapReader(java.io.Reader)
+	 */
+	@Override
+    public ReaderWrapper getNCharacterStream(String columnLabel) throws SQLException {
+		return wrapReader(getWrapped().getNCharacterStream(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
+		getWrapped().updateNCharacterStream(columnIndex, unwrapReader(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
+		getWrapped().updateNCharacterStream(columnLabel, unwrapReader(reader), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapInputStream(java.io.InputStream)
 	 */
 	@Override
@@ -654,6 +753,16 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	@Override
     public void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException {
 		getWrapped().updateBinaryStream(columnIndex, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
+		getWrapped().updateCharacterStream(columnIndex, unwrapReader(x), length);
 	}
 
 	/**
@@ -679,6 +788,16 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
+		getWrapped().updateCharacterStream(columnLabel, unwrapReader(reader), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapInputStream(java.io.InputStream)
 	 */
 	@Override
@@ -694,6 +813,66 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	@Override
     public void updateBlob(String columnLabel, InputStream inputStream, long length) throws SQLException {
 		getWrapped().updateBlob(columnLabel, unwrapInputStream(inputStream), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateClob(int columnIndex, Reader reader, long length) throws SQLException {
+		getWrapped().updateClob(columnIndex, unwrapReader(reader), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateClob(String columnLabel, Reader reader, long length) throws SQLException {
+		getWrapped().updateClob(columnLabel, unwrapReader(reader), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateNClob(int columnIndex, Reader reader, long length) throws SQLException {
+		getWrapped().updateNClob(columnIndex, unwrapReader(reader), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateNClob(String columnLabel, Reader reader, long length) throws SQLException {
+		getWrapped().updateNClob(columnLabel, unwrapReader(reader), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateNCharacterStream(int columnIndex, Reader x) throws SQLException {
+		getWrapped().updateNCharacterStream(columnIndex, unwrapReader(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException {
+		getWrapped().updateNCharacterStream(columnLabel, unwrapReader(reader));
 	}
 
 	/**
@@ -719,6 +898,16 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateCharacterStream(int columnIndex, Reader x) throws SQLException {
+		getWrapped().updateCharacterStream(columnIndex, unwrapReader(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapInputStream(java.io.InputStream)
 	 */
 	@Override
@@ -739,6 +928,16 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateCharacterStream(String columnLabel, Reader reader) throws SQLException {
+		getWrapped().updateCharacterStream(columnLabel, unwrapReader(reader));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapInputStream(java.io.InputStream)
 	 */
 	@Override
@@ -754,5 +953,45 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	@Override
     public void updateBlob(String columnLabel, InputStream inputStream) throws SQLException {
 		getWrapped().updateBlob(columnLabel, unwrapInputStream(inputStream));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateClob(int columnIndex, Reader reader) throws SQLException {
+		getWrapped().updateClob(columnIndex, unwrapReader(reader));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateClob(String columnLabel, Reader reader) throws SQLException {
+		getWrapped().updateClob(columnLabel, unwrapReader(reader));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateNClob(int columnIndex, Reader reader) throws SQLException {
+		getWrapped().updateNClob(columnIndex, unwrapReader(reader));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void updateNClob(String columnLabel, Reader reader) throws SQLException {
+		getWrapped().updateNClob(columnLabel, unwrapReader(reader));
 	}
 }

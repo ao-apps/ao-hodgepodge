@@ -168,9 +168,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException {
-		getWrapped().setCharacterStream(parameterIndex, reader, length);
-	}
+    void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException;
 
 	@Override
     void setRef(int parameterIndex, Ref x) throws SQLException;
@@ -224,25 +222,19 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-	default void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
-		getWrapped().setNCharacterStream(parameterIndex, value, length);
-	}
+	void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException;
 
 	@Override
 	void setNClob(int parameterIndex, NClob value) throws SQLException;
 
 	@Override
-	default void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
-		getWrapped().setClob(parameterIndex, reader, length);
-	}
+	void setClob(int parameterIndex, Reader reader, long length) throws SQLException;
 
 	@Override
 	void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException;
 
 	@Override
-	default void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
-		getWrapped().setNClob(parameterIndex, reader, length);
-	}
+	void setNClob(int parameterIndex, Reader reader, long length) throws SQLException;
 
 	@Override
 	void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException;
@@ -259,9 +251,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
     void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException;
 
 	@Override
-    default void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
-		getWrapped().setCharacterStream(parameterIndex, reader, length);
-	}
+    void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException;
 
 	@Override
     void setAsciiStream(int parameterIndex, InputStream x) throws SQLException;
@@ -270,27 +260,19 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
     void setBinaryStream(int parameterIndex, InputStream x) throws SQLException;
 
 	@Override
-    default void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-		getWrapped().setCharacterStream(parameterIndex, reader);
-	}
+    void setCharacterStream(int parameterIndex, Reader reader) throws SQLException;
 
 	@Override
-	default void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
-		getWrapped().setNCharacterStream(parameterIndex, value);
-	}
+	void setNCharacterStream(int parameterIndex, Reader value) throws SQLException;
 
 	@Override
-	default void setClob(int parameterIndex, Reader reader) throws SQLException {
-		getWrapped().setClob(parameterIndex, reader);
-	}
+	void setClob(int parameterIndex, Reader reader) throws SQLException;
 
 	@Override
 	void setBlob(int parameterIndex, InputStream inputStream) throws SQLException;
 
 	@Override
-	default void setNClob(int parameterIndex, Reader reader) throws SQLException {
-		getWrapped().setNClob(parameterIndex, reader);
-	}
+	void setNClob(int parameterIndex, Reader reader) throws SQLException;
 
 	@Override
     default void setObject(int parameterIndex, Object x, SQLType targetSqlType, int scaleOrLength) throws SQLException {

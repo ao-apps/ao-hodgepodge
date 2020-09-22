@@ -257,14 +257,10 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default Reader getCharacterStream(int columnIndex) throws SQLException {
-		return getWrapped().getCharacterStream(columnIndex);
-	}
+    ReaderWrapper getCharacterStream(int columnIndex) throws SQLException;
 
 	@Override
-    default Reader getCharacterStream(String columnLabel) throws SQLException {
-		return getWrapped().getCharacterStream(columnLabel);
-	}
+    ReaderWrapper getCharacterStream(String columnLabel) throws SQLException;
 
 	@Override
     default BigDecimal getBigDecimal(int columnIndex) throws SQLException {
@@ -458,9 +454,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateBinaryStream(int columnIndex, InputStream x, int length) throws SQLException;
 
 	@Override
-    default void updateCharacterStream(int columnIndex, Reader x, int length) throws SQLException {
-		getWrapped().updateCharacterStream(columnIndex, x, length);
-	}
+    void updateCharacterStream(int columnIndex, Reader x, int length) throws SQLException;
 
 	@Override
     default void updateObject(int columnIndex, Object x, int scaleOrLength) throws SQLException {
@@ -549,9 +543,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateBinaryStream(String columnLabel, InputStream x, int length) throws SQLException;
 
 	@Override
-    default void updateCharacterStream(String columnLabel, Reader reader, int length) throws SQLException {
-		getWrapped().updateCharacterStream(columnLabel, reader, length);
-	}
+    void updateCharacterStream(String columnLabel, Reader reader, int length) throws SQLException;
 
 	@Override
     default void updateObject(String columnLabel, Object x, int scaleOrLength) throws SQLException {
@@ -766,24 +758,16 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default Reader getNCharacterStream(int columnIndex) throws SQLException {
-		return getWrapped().getNCharacterStream(columnIndex);
-	}
+    ReaderWrapper getNCharacterStream(int columnIndex) throws SQLException;
 
 	@Override
-    default Reader getNCharacterStream(String columnLabel) throws SQLException {
-		return getWrapped().getNCharacterStream(columnLabel);
-	}
+    ReaderWrapper getNCharacterStream(String columnLabel) throws SQLException;
 
 	@Override
-    default void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
-		getWrapped().updateNCharacterStream(columnIndex, x, length);
-	}
+    void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException;
 
 	@Override
-    default void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
-		getWrapped().updateNCharacterStream(columnLabel, reader, length);
-	}
+    void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException;
 
 	@Override
     void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException;
@@ -792,9 +776,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException;
 
 	@Override
-    default void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
-		getWrapped().updateCharacterStream(columnIndex, x, length);
-	}
+    void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException;
 
 	@Override
     void updateAsciiStream(String columnLabel, InputStream x, long length) throws SQLException;
@@ -803,9 +785,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateBinaryStream(String columnLabel, InputStream x, long length) throws SQLException;
 
 	@Override
-    default void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
-		getWrapped().updateCharacterStream(columnLabel, reader, length);
-	}
+    void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException;
 
 	@Override
     void updateBlob(int columnIndex, InputStream inputStream, long length) throws SQLException;
@@ -814,34 +794,22 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateBlob(String columnLabel, InputStream inputStream, long length) throws SQLException;
 
 	@Override
-    default void updateClob(int columnIndex, Reader reader, long length) throws SQLException {
-		getWrapped().updateClob(columnIndex, reader, length);
-	}
+    void updateClob(int columnIndex, Reader reader, long length) throws SQLException;
 
 	@Override
-    default void updateClob(String columnLabel, Reader reader, long length) throws SQLException {
-		getWrapped().updateClob(columnLabel, reader, length);
-	}
+    void updateClob(String columnLabel, Reader reader, long length) throws SQLException;
 
 	@Override
-    default void updateNClob(int columnIndex, Reader reader, long length) throws SQLException {
-		getWrapped().updateNClob(columnIndex, reader, length);
-	}
+    void updateNClob(int columnIndex, Reader reader, long length) throws SQLException;
 
 	@Override
-    default void updateNClob(String columnLabel, Reader reader, long length) throws SQLException {
-		getWrapped().updateNClob(columnLabel, reader, length);
-	}
+    void updateNClob(String columnLabel, Reader reader, long length) throws SQLException;
 
 	@Override
-    default void updateNCharacterStream(int columnIndex, Reader x) throws SQLException {
-		getWrapped().updateNCharacterStream(columnIndex, x);
-	}
+    void updateNCharacterStream(int columnIndex, Reader x) throws SQLException;
 
 	@Override
-    default void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException {
-		getWrapped().updateNCharacterStream(columnLabel, reader);
-	}
+    void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException;
 
 	@Override
     void updateAsciiStream(int columnIndex, InputStream x) throws SQLException;
@@ -850,9 +818,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateBinaryStream(int columnIndex, InputStream x) throws SQLException;
 
 	@Override
-    default void updateCharacterStream(int columnIndex, Reader x) throws SQLException {
-		getWrapped().updateCharacterStream(columnIndex, x);
-	}
+    void updateCharacterStream(int columnIndex, Reader x) throws SQLException;
 
 	@Override
     void updateAsciiStream(String columnLabel, InputStream x) throws SQLException;
@@ -861,9 +827,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateBinaryStream(String columnLabel, InputStream x) throws SQLException;
 
 	@Override
-    default void updateCharacterStream(String columnLabel, Reader reader) throws SQLException {
-		getWrapped().updateCharacterStream(columnLabel, reader);
-	}
+    void updateCharacterStream(String columnLabel, Reader reader) throws SQLException;
 
 	@Override
     void updateBlob(int columnIndex, InputStream inputStream) throws SQLException;
@@ -872,24 +836,16 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateBlob(String columnLabel, InputStream inputStream) throws SQLException;
 
 	@Override
-    default void updateClob(int columnIndex, Reader reader) throws SQLException {
-		getWrapped().updateClob(columnIndex, reader);
-	}
+    void updateClob(int columnIndex, Reader reader) throws SQLException;
 
 	@Override
-    default void updateClob(String columnLabel, Reader reader) throws SQLException {
-		getWrapped().updateClob(columnLabel, reader);
-	}
+    void updateClob(String columnLabel, Reader reader) throws SQLException;
 
 	@Override
-    default void updateNClob(int columnIndex, Reader reader) throws SQLException {
-		getWrapped().updateNClob(columnIndex, reader);
-	}
+    void updateNClob(int columnIndex, Reader reader) throws SQLException;
 
 	@Override
-    default void updateNClob(String columnLabel, Reader reader) throws SQLException {
-		getWrapped().updateNClob(columnLabel, reader);
-	}
+    void updateNClob(String columnLabel, Reader reader) throws SQLException;
 
 	@Override
 	default <T> T getObject(int columnIndex, Class<T> type) throws SQLException {

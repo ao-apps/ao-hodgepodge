@@ -298,9 +298,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default void setCharacterStream(String parameterName, Reader reader, int length) throws SQLException {
-		getWrapped().setCharacterStream(parameterName, reader, length);
-	}
+    void setCharacterStream(String parameterName, Reader reader, int length) throws SQLException;
 
 	@Override
     default void setDate(String parameterName, Date x, Calendar cal) throws SQLException {
@@ -444,25 +442,19 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default void setNCharacterStream(String parameterName, Reader value, long length) throws SQLException {
-		getWrapped().setNCharacterStream(parameterName, value, length);
-	}
+    void setNCharacterStream(String parameterName, Reader value, long length) throws SQLException;
 
 	@Override
 	void setNClob(String parameterName, NClob value) throws SQLException;
 
 	@Override
-	default void setClob(String parameterName, Reader reader, long length) throws SQLException {
-		getWrapped().setClob(parameterName, reader, length);
-	}
+	void setClob(String parameterName, Reader reader, long length) throws SQLException;
 
 	@Override
 	void setBlob(String parameterName, InputStream inputStream, long length) throws SQLException;
 
 	@Override
-	default void setNClob(String parameterName, Reader reader, long length) throws SQLException {
-		getWrapped().setNClob(parameterName, reader, length);
-	}
+	void setNClob(String parameterName, Reader reader, long length) throws SQLException;
 
 	@Override
     INClobWrapper getNClob(int parameterIndex) throws SQLException;
@@ -490,24 +482,16 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default Reader getNCharacterStream(int parameterIndex) throws SQLException {
-		return getWrapped().getNCharacterStream(parameterIndex);
-	}
+    ReaderWrapper getNCharacterStream(int parameterIndex) throws SQLException;
 
 	@Override
-    default Reader getNCharacterStream(String parameterName) throws SQLException {
-		return getWrapped().getNCharacterStream(parameterName);
-	}
+    ReaderWrapper getNCharacterStream(String parameterName) throws SQLException;
 
 	@Override
-    default Reader getCharacterStream(int parameterIndex) throws SQLException {
-		return getWrapped().getCharacterStream(parameterIndex);
-	}
+    ReaderWrapper getCharacterStream(int parameterIndex) throws SQLException;
 
 	@Override
-    default Reader getCharacterStream(String parameterName) throws SQLException {
-		return getWrapped().getCharacterStream(parameterName);
-	}
+    ReaderWrapper getCharacterStream(String parameterName) throws SQLException;
 
 	@Override
     void setBlob(String parameterName, Blob x) throws SQLException;
@@ -522,9 +506,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     void setBinaryStream(String parameterName, InputStream x, long length) throws SQLException;
 
 	@Override
-    default void setCharacterStream(String parameterName, Reader reader, long length) throws SQLException {
-		getWrapped().setCharacterStream(parameterName, reader, length);
-	}
+    void setCharacterStream(String parameterName, Reader reader, long length) throws SQLException;
 
 	@Override
     void setAsciiStream(String parameterName, InputStream x) throws SQLException;
@@ -533,27 +515,19 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     void setBinaryStream(String parameterName, InputStream x) throws SQLException;
 
 	@Override
-    default void setCharacterStream(String parameterName, Reader reader) throws SQLException {
-		getWrapped().setCharacterStream(parameterName, reader);
-	}
+    void setCharacterStream(String parameterName, Reader reader) throws SQLException;
 
 	@Override
-	default void setNCharacterStream(String parameterName, Reader value) throws SQLException {
-		getWrapped().setNCharacterStream(parameterName, value);
-	}
+	void setNCharacterStream(String parameterName, Reader value) throws SQLException;
 
 	@Override
-	default void setClob(String parameterName, Reader reader) throws SQLException {
-		getWrapped().setClob(parameterName, reader);
-	}
+	void setClob(String parameterName, Reader reader) throws SQLException;
 
 	@Override
 	void setBlob(String parameterName, InputStream inputStream) throws SQLException;
 
 	@Override
-	default void setNClob(String parameterName, Reader reader) throws SQLException {
-		getWrapped().setNClob(parameterName, reader);
-	}
+	void setNClob(String parameterName, Reader reader) throws SQLException;
 
 	@Override
 	default <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {

@@ -23,6 +23,7 @@
 package com.aoindustries.sql;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -106,6 +107,15 @@ public class SQLInputWrapper implements ISQLInputWrapper {
 	}
 
 	/**
+	 * Wraps a {@link Reader}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapReader(java.sql.Reader)
+	 */
+	protected ReaderWrapper wrapReader(Reader in) {
+		return getConnectionWrapper().wrapReader(in);
+	}
+
+	/**
 	 * Wraps a {@link Ref}, if not already wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#wrapRef(java.sql.Ref)
@@ -130,6 +140,16 @@ public class SQLInputWrapper implements ISQLInputWrapper {
 	 */
 	protected SQLXMLWrapper wrapSQLXML(SQLXML sqlXml) {
 		return getConnectionWrapper().wrapSQLXML(sqlXml);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapReader(java.io.Reader)
+	 */
+	@Override
+	public ReaderWrapper readCharacterStream() throws SQLException {
+		return wrapReader(getWrapped().readCharacterStream());
 	}
 
 	/**

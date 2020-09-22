@@ -23,6 +23,7 @@
 package com.aoindustries.sql;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -106,6 +107,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	}
 
 	/**
+	 * Unwraps a {@link Reader}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapReader(java.io.Reader)
+	 */
+	protected Reader unwrapReader(Reader in) {
+		return getConnectionWrapper().unwrapReader(in);
+	}
+
+	/**
 	 * Unwraps a {@link Ref}, if wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#unwrapRef(java.sql.Ref)
@@ -185,6 +195,16 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException {
+		getWrapped().setCharacterStream(parameterIndex, unwrapReader(reader), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapRef(java.sql.Ref)
 	 */
 	@Override
@@ -255,6 +275,16 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+	public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
+		getWrapped().setNCharacterStream(parameterIndex, unwrapReader(value), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapNClob(java.sql.NClob)
 	 */
 	@Override
@@ -265,11 +295,31 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+	public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
+		getWrapped().setClob(parameterIndex, unwrapReader(reader), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapInputStream(java.io.InputStream)
 	 */
 	@Override
 	public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
 		getWrapped().setBlob(parameterIndex, unwrapInputStream(inputStream), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+	public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
+		getWrapped().setNClob(parameterIndex, unwrapReader(reader), length);
 	}
 
 	/**
@@ -305,6 +355,16 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
+		getWrapped().setCharacterStream(parameterIndex, unwrapReader(reader), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapInputStream(java.io.InputStream)
 	 */
 	@Override
@@ -325,10 +385,50 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+    public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
+		getWrapped().setCharacterStream(parameterIndex, unwrapReader(reader));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+	public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
+		getWrapped().setNCharacterStream(parameterIndex, unwrapReader(value));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+	public void setClob(int parameterIndex, Reader reader) throws SQLException {
+		getWrapped().setClob(parameterIndex, unwrapReader(reader));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapInputStream(java.io.InputStream)
 	 */
 	@Override
 	public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
 		getWrapped().setBlob(parameterIndex, unwrapInputStream(inputStream));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapReader(java.io.Reader)
+	 */
+	@Override
+	public void setNClob(int parameterIndex, Reader reader) throws SQLException {
+		getWrapped().setNClob(parameterIndex, unwrapReader(reader));
 	}
 }
