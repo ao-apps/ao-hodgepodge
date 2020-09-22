@@ -29,6 +29,7 @@ import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
@@ -110,6 +111,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected NClobWrapper newNClobWrapper(NClob nclob) {
 		return new NClobWrapper(this, nclob);
+	}
+
+	/**
+	 * Creates a new {@link ParameterMetaDataWrapper}.
+	 *
+	 * @see  #wrapParameterMetaData(java.sql.ParameterMetaData)
+	 */
+	protected ParameterMetaDataWrapper newParameterMetaDataWrapper(ParameterMetaData metaData) {
+		return new ParameterMetaDataWrapper(this, metaData);
 	}
 
 	/**
@@ -389,6 +399,25 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return nclob;
+	}
+
+	/**
+	 * Wraps a {@link ParameterMetaData}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newParameterMetaDataWrapper(java.sql.ParameterMetaData)
+	 * @see  PreparedStatementWrapper#wrapParameterMetaData(java.sql.ParameterMetaData)
+	 */
+	protected ParameterMetaDataWrapper wrapParameterMetaData(ParameterMetaData metaData) {
+		if(metaData == null) {
+			return null;
+		}
+		if(metaData instanceof ParameterMetaDataWrapper) {
+			ParameterMetaDataWrapper metaDataWrapper = (ParameterMetaDataWrapper)metaData;
+			if(metaDataWrapper.getConnectionWrapper() == this) {
+				return metaDataWrapper;
+			}
+		}
+		return newParameterMetaDataWrapper(metaData);
 	}
 
 	/**

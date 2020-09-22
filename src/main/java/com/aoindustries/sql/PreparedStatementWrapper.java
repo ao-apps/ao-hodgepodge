@@ -26,6 +26,7 @@ import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSetMetaData;
@@ -83,6 +84,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	 */
 	protected NClob unwrapNClob(NClob nclob) {
 		return getConnectionWrapper().unwrapNClob(nclob);
+	}
+
+	/**
+	 * Wraps a {@link ParameterMetaData}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapParameterMetaData(java.sql.ParameterMetaData)
+	 */
+	protected ParameterMetaDataWrapper wrapParameterMetaData(ParameterMetaData metaData) {
+		return getConnectionWrapper().wrapParameterMetaData(metaData);
 	}
 
 	/**
@@ -179,6 +189,16 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	@Override
     public ResultSetMetaDataWrapper getMetaData() throws SQLException {
 		return wrapResultSetMetaData(getWrapped().getMetaData());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapParameterMetaData(java.sql.ParameterMetaData)
+	 */
+	@Override
+    public ParameterMetaDataWrapper getParameterMetaData() throws SQLException {
+		return wrapParameterMetaData(getWrapped().getParameterMetaData());
 	}
 
 	/**

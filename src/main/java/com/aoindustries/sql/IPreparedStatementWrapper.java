@@ -31,7 +31,6 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
 import java.sql.NClob;
-import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.RowId;
@@ -220,9 +219,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default ParameterMetaData getParameterMetaData() throws SQLException {
-		return getWrapped().getParameterMetaData();
-	}
+    IParameterMetaDataWrapper getParameterMetaData() throws SQLException;
 
 	@Override
     void setRowId(int parameterIndex, RowId x) throws SQLException;
