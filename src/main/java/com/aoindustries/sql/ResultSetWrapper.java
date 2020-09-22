@@ -321,7 +321,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 * @see  #unwrapRef(java.sql.Ref)
 	 */
 	@Override
-    public void updateRef(int columnIndex, java.sql.Ref x) throws SQLException {
+    public void updateRef(int columnIndex, Ref x) throws SQLException {
 		getWrapped().updateRef(columnIndex, unwrapRef(x));
 	}
 
@@ -331,7 +331,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 * @see  #unwrapRef(java.sql.Ref)
 	 */
 	@Override
-    public void updateRef(String columnLabel, java.sql.Ref x) throws SQLException {
+    public void updateRef(String columnLabel, Ref x) throws SQLException {
 		getWrapped().updateRef(columnLabel, unwrapRef(x));
 	}
 
@@ -341,7 +341,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 * @see  #unwrapBlob(java.sql.Blob)
 	 */
 	@Override
-    public void updateBlob(int columnIndex, java.sql.Blob x) throws SQLException {
+    public void updateBlob(int columnIndex, Blob x) throws SQLException {
 		getWrapped().updateBlob(columnIndex, unwrapBlob(x));
 	}
 
@@ -351,7 +351,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 * @see  #unwrapBlob(java.sql.Blob)
 	 */
 	@Override
-    public void updateBlob(String columnLabel, java.sql.Blob x) throws SQLException {
+    public void updateBlob(String columnLabel, Blob x) throws SQLException {
 		getWrapped().updateBlob(columnLabel, unwrapBlob(x));
 	}
 
@@ -361,7 +361,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 * @see  #unwrapClob(java.sql.Clob)
 	 */
 	@Override
-    public void updateClob(int columnIndex, java.sql.Clob x) throws SQLException {
+    public void updateClob(int columnIndex, Clob x) throws SQLException {
 		getWrapped().updateClob(columnIndex, unwrapClob(x));
 	}
 
@@ -371,7 +371,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 * @see  #unwrapClob(java.sql.Clob)
 	 */
 	@Override
-    public void updateClob(String columnLabel, java.sql.Clob x) throws SQLException {
+    public void updateClob(String columnLabel, Clob x) throws SQLException {
 		getWrapped().updateClob(columnLabel, unwrapClob(x));
 	}
 
@@ -381,7 +381,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 * @see  #unwrapArray(java.sql.Array)
 	 */
 	@Override
-    public void updateArray(int columnIndex, java.sql.Array x) throws SQLException {
+    public void updateArray(int columnIndex, Array x) throws SQLException {
 		getWrapped().updateArray(columnIndex, unwrapArray(x));
 	}
 
@@ -391,7 +391,7 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 * @see  #unwrapArray(java.sql.Array)
 	 */
 	@Override
-    public void updateArray(String columnLabel, java.sql.Array x) throws SQLException {
+    public void updateArray(String columnLabel, Array x) throws SQLException {
 		getWrapped().updateArray(columnLabel, unwrapArray(x));
 	}
 

@@ -28,11 +28,14 @@ import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
+import java.sql.Date;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLType;
 import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Calendar;
 
 /**
@@ -115,17 +118,17 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default java.sql.Date getDate(int parameterIndex) throws SQLException {
+    default Date getDate(int parameterIndex) throws SQLException {
 		return getWrapped().getDate(parameterIndex);
 	}
 
 	@Override
-    default java.sql.Time getTime(int parameterIndex) throws SQLException {
+    default Time getTime(int parameterIndex) throws SQLException {
 		return getWrapped().getTime(parameterIndex);
 	}
 
 	@Override
-    default java.sql.Timestamp getTimestamp(int parameterIndex) throws SQLException {
+    default Timestamp getTimestamp(int parameterIndex) throws SQLException {
 		return getWrapped().getTimestamp(parameterIndex);
 	}
 
@@ -157,17 +160,17 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     IArrayWrapper getArray(int parameterIndex) throws SQLException;
 
 	@Override
-    default java.sql.Date getDate(int parameterIndex, Calendar cal) throws SQLException {
+    default Date getDate(int parameterIndex, Calendar cal) throws SQLException {
 		return getWrapped().getDate(parameterIndex, cal);
 	}
 
 	@Override
-    default java.sql.Time getTime(int parameterIndex, Calendar cal) throws SQLException {
+    default Time getTime(int parameterIndex, Calendar cal) throws SQLException {
 		return getWrapped().getTime(parameterIndex, cal);
 	}
 
 	@Override
-    default java.sql.Timestamp getTimestamp(int parameterIndex, Calendar cal) throws SQLException {
+    default Timestamp getTimestamp(int parameterIndex, Calendar cal) throws SQLException {
 		return getWrapped().getTimestamp(parameterIndex, cal);
 	}
 
@@ -257,17 +260,17 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default void setDate(String parameterName, java.sql.Date x) throws SQLException {
+    default void setDate(String parameterName, Date x) throws SQLException {
 		getWrapped().setDate(parameterName, x);
 	}
 
 	@Override
-    default void setTime(String parameterName, java.sql.Time x)throws SQLException {
+    default void setTime(String parameterName, Time x)throws SQLException {
 		getWrapped().setTime(parameterName, x);
 	}
 
 	@Override
-    default void setTimestamp(String parameterName, java.sql.Timestamp x) throws SQLException {
+    default void setTimestamp(String parameterName, Timestamp x) throws SQLException {
 		getWrapped().setTimestamp(parameterName, x);
 	}
 
@@ -302,17 +305,17 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default void setDate(String parameterName, java.sql.Date x, Calendar cal) throws SQLException {
+    default void setDate(String parameterName, Date x, Calendar cal) throws SQLException {
 		getWrapped().setDate(parameterName, x, cal);
 	}
 
 	@Override
-    default void setTime(String parameterName, java.sql.Time x, Calendar cal) throws SQLException {
+    default void setTime(String parameterName, Time x, Calendar cal) throws SQLException {
 		getWrapped().setTime(parameterName, x, cal);
 	}
 
 	@Override
-    default void setTimestamp(String parameterName, java.sql.Timestamp x, Calendar cal) throws SQLException {
+    default void setTimestamp(String parameterName, Timestamp x, Calendar cal) throws SQLException {
 		getWrapped().setTimestamp(parameterName, x, cal);
 	}
 
@@ -367,17 +370,17 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default java.sql.Date getDate(String parameterName) throws SQLException {
+    default Date getDate(String parameterName) throws SQLException {
 		return getWrapped().getDate(parameterName);
 	}
 
 	@Override
-    default java.sql.Time getTime(String parameterName) throws SQLException {
+    default Time getTime(String parameterName) throws SQLException {
 		return getWrapped().getTime(parameterName);
 	}
 
 	@Override
-    default java.sql.Timestamp getTimestamp(String parameterName) throws SQLException {
+    default Timestamp getTimestamp(String parameterName) throws SQLException {
 		return getWrapped().getTimestamp(parameterName);
 	}
 
@@ -409,17 +412,17 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     IArrayWrapper getArray(String parameterName) throws SQLException;
 
 	@Override
-    default java.sql.Date getDate(String parameterName, Calendar cal) throws SQLException {
+    default Date getDate(String parameterName, Calendar cal) throws SQLException {
 		return getWrapped().getDate(parameterName, cal);
 	}
 
 	@Override
-    default java.sql.Time getTime(String parameterName, Calendar cal) throws SQLException {
+    default Time getTime(String parameterName, Calendar cal) throws SQLException {
 		return getWrapped().getTime(parameterName, cal);
 	}
 
 	@Override
-    default java.sql.Timestamp getTimestamp(String parameterName, Calendar cal) throws SQLException {
+    default Timestamp getTimestamp(String parameterName, Calendar cal) throws SQLException {
 		return getWrapped().getTimestamp(parameterName, cal);
 	}
 

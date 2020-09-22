@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.Date;
 import java.sql.NClob;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
@@ -36,6 +37,8 @@ import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLType;
 import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Calendar;
 
 /**
@@ -115,17 +118,17 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default void setDate(int parameterIndex, java.sql.Date x) throws SQLException {
+    default void setDate(int parameterIndex, Date x) throws SQLException {
 		getWrapped().setDate(parameterIndex, x);
 	}
 
 	@Override
-    default void setTime(int parameterIndex, java.sql.Time x) throws SQLException {
+    default void setTime(int parameterIndex, Time x) throws SQLException {
 		getWrapped().setTime(parameterIndex, x);
 	}
 
 	@Override
-    default void setTimestamp(int parameterIndex, java.sql.Timestamp x) throws SQLException {
+    default void setTimestamp(int parameterIndex, Timestamp x) throws SQLException {
 		getWrapped().setTimestamp(parameterIndex, x);
 	}
 
@@ -191,17 +194,17 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
     IResultSetMetaDataWrapper getMetaData() throws SQLException;
 
 	@Override
-    default void setDate(int parameterIndex, java.sql.Date x, Calendar cal) throws SQLException {
+    default void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
 		getWrapped().setDate(parameterIndex, x, cal);
 	}
 
 	@Override
-    default void setTime(int parameterIndex, java.sql.Time x, Calendar cal) throws SQLException {
+    default void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
 		getWrapped().setTime(parameterIndex, x, cal);
 	}
 
 	@Override
-    default void setTimestamp(int parameterIndex, java.sql.Timestamp x, Calendar cal) throws SQLException {
+    default void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
 		getWrapped().setTimestamp(parameterIndex, x, cal);
 	}
 

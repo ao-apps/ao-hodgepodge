@@ -25,13 +25,20 @@ package com.aoindustries.sql;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
 import java.sql.NClob;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLType;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Calendar;
 
 /**
@@ -114,17 +121,17 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default java.sql.Date getDate(int columnIndex) throws SQLException {
+    default Date getDate(int columnIndex) throws SQLException {
 		return getWrapped().getDate(columnIndex);
 	}
 
 	@Override
-    default java.sql.Time getTime(int columnIndex) throws SQLException {
+    default Time getTime(int columnIndex) throws SQLException {
 		return getWrapped().getTime(columnIndex);
 	}
 
 	@Override
-    default java.sql.Timestamp getTimestamp(int columnIndex) throws SQLException {
+    default Timestamp getTimestamp(int columnIndex) throws SQLException {
 		return getWrapped().getTimestamp(columnIndex);
 	}
 
@@ -196,17 +203,17 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default java.sql.Date getDate(String columnLabel) throws SQLException {
+    default Date getDate(String columnLabel) throws SQLException {
 		return getWrapped().getDate(columnLabel);
 	}
 
 	@Override
-    default java.sql.Time getTime(String columnLabel) throws SQLException {
+    default Time getTime(String columnLabel) throws SQLException {
 		return getWrapped().getTime(columnLabel);
 	}
 
 	@Override
-    default java.sql.Timestamp getTimestamp(String columnLabel) throws SQLException {
+    default Timestamp getTimestamp(String columnLabel) throws SQLException {
 		return getWrapped().getTimestamp(columnLabel);
 	}
 
@@ -440,17 +447,17 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateDate(int columnIndex, java.sql.Date x) throws SQLException {
+    default void updateDate(int columnIndex, Date x) throws SQLException {
 		getWrapped().updateDate(columnIndex, x);
 	}
 
 	@Override
-    default void updateTime(int columnIndex, java.sql.Time x) throws SQLException {
+    default void updateTime(int columnIndex, Time x) throws SQLException {
 		getWrapped().updateTime(columnIndex, x);
 	}
 
 	@Override
-    default void updateTimestamp(int columnIndex, java.sql.Timestamp x) throws SQLException {
+    default void updateTimestamp(int columnIndex, Timestamp x) throws SQLException {
 		getWrapped().updateTimestamp(columnIndex, x);
 	}
 
@@ -535,17 +542,17 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    default void updateDate(String columnLabel, java.sql.Date x) throws SQLException {
+    default void updateDate(String columnLabel, Date x) throws SQLException {
 		getWrapped().updateDate(columnLabel, x);
 	}
 
 	@Override
-    default void updateTime(String columnLabel, java.sql.Time x) throws SQLException {
+    default void updateTime(String columnLabel, Time x) throws SQLException {
 		getWrapped().updateTime(columnLabel, x);
 	}
 
 	@Override
-    default void updateTimestamp(String columnLabel, java.sql.Timestamp x) throws SQLException {
+    default void updateTimestamp(String columnLabel, Timestamp x) throws SQLException {
 		getWrapped().updateTimestamp(columnLabel, x);
 	}
 
@@ -647,32 +654,32 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     IArrayWrapper getArray(String columnLabel) throws SQLException;
 
 	@Override
-    default java.sql.Date getDate(int columnIndex, Calendar cal) throws SQLException {
+    default Date getDate(int columnIndex, Calendar cal) throws SQLException {
 		return getWrapped().getDate(columnIndex, cal);
 	}
 
 	@Override
-    default java.sql.Date getDate(String columnLabel, Calendar cal) throws SQLException {
+    default Date getDate(String columnLabel, Calendar cal) throws SQLException {
 		return getWrapped().getDate(columnLabel, cal);
 	}
 
 	@Override
-    default java.sql.Time getTime(int columnIndex, Calendar cal) throws SQLException {
+    default Time getTime(int columnIndex, Calendar cal) throws SQLException {
 		return getWrapped().getTime(columnIndex, cal);
 	}
 
 	@Override
-    default java.sql.Time getTime(String columnLabel, Calendar cal) throws SQLException {
+    default Time getTime(String columnLabel, Calendar cal) throws SQLException {
 		return getWrapped().getTime(columnLabel, cal);
 	}
 
 	@Override
-    default java.sql.Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
+    default Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
 		return getWrapped().getTimestamp(columnIndex, cal);
 	}
 
 	@Override
-    default java.sql.Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
+    default Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
 		return getWrapped().getTimestamp(columnLabel, cal);
 	}
 
@@ -687,28 +694,28 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 	}
 
 	@Override
-    void updateRef(int columnIndex, java.sql.Ref x) throws SQLException;
+    void updateRef(int columnIndex, Ref x) throws SQLException;
 
 	@Override
-    void updateRef(String columnLabel, java.sql.Ref x) throws SQLException;
+    void updateRef(String columnLabel, Ref x) throws SQLException;
 
 	@Override
-    void updateBlob(int columnIndex, java.sql.Blob x) throws SQLException;
+    void updateBlob(int columnIndex, Blob x) throws SQLException;
 
 	@Override
-    void updateBlob(String columnLabel, java.sql.Blob x) throws SQLException;
+    void updateBlob(String columnLabel, Blob x) throws SQLException;
 
 	@Override
-    void updateClob(int columnIndex, java.sql.Clob x) throws SQLException;
+    void updateClob(int columnIndex, Clob x) throws SQLException;
 
 	@Override
-    void updateClob(String columnLabel, java.sql.Clob x) throws SQLException;
+    void updateClob(String columnLabel, Clob x) throws SQLException;
 
 	@Override
-    void updateArray(int columnIndex, java.sql.Array x) throws SQLException;
+    void updateArray(int columnIndex, Array x) throws SQLException;
 
 	@Override
-    void updateArray(String columnLabel, java.sql.Array x) throws SQLException;
+    void updateArray(String columnLabel, Array x) throws SQLException;
 
 	@Override
     IRowIdWrapper getRowId(int columnIndex) throws SQLException;
