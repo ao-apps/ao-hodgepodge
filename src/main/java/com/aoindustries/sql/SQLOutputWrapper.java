@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import java.io.InputStream;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -88,6 +89,15 @@ public class SQLOutputWrapper implements ISQLOutputWrapper {
 	}
 
 	/**
+	 * Unwraps an {@link InputStream}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapInputStream(java.io.InputStream)
+	 */
+	protected InputStream unwrapInputStream(InputStream in) {
+		return getConnectionWrapper().unwrapInputStream(in);
+	}
+
+	/**
 	 * Unwraps a {@link NClob}, if wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#unwrapNClob(java.sql.NClob)
@@ -130,6 +140,26 @@ public class SQLOutputWrapper implements ISQLOutputWrapper {
 	 */
 	protected Struct unwrapStruct(Struct struct) {
 		return getConnectionWrapper().unwrapStruct(struct);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public void writeAsciiStream(InputStream x) throws SQLException {
+		getWrapped().writeAsciiStream(unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public void writeBinaryStream(InputStream x) throws SQLException {
+		getWrapped().writeBinaryStream(unwrapInputStream(x));
 	}
 
 	/**

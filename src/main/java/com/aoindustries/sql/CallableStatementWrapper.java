@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import java.io.InputStream;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -154,6 +155,26 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setAsciiStream(String parameterName, InputStream x, int length) throws SQLException {
+		getWrapped().setAsciiStream(parameterName, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setBinaryStream(String parameterName, InputStream x, int length) throws SQLException {
+		getWrapped().setBinaryStream(parameterName, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #wrapRef(java.sql.Ref)
 	 */
 	@Override
@@ -234,6 +255,16 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public void setBlob(String parameterName, InputStream inputStream, long length) throws SQLException {
+		getWrapped().setBlob(parameterName, unwrapInputStream(inputStream), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #wrapNClob(java.sql.NClob)
 	 */
 	@Override
@@ -299,5 +330,55 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	@Override
     public void setClob(String parameterName, Clob x) throws SQLException {
 		getWrapped().setClob(parameterName, unwrapClob(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setAsciiStream(String parameterName, InputStream x, long length) throws SQLException {
+		getWrapped().setAsciiStream(parameterName, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setBinaryStream(String parameterName, InputStream x, long length) throws SQLException {
+		getWrapped().setBinaryStream(parameterName, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setAsciiStream(String parameterName, InputStream x) throws SQLException {
+		getWrapped().setAsciiStream(parameterName, unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setBinaryStream(String parameterName, InputStream x) throws SQLException {
+		getWrapped().setBinaryStream(parameterName, unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public void setBlob(String parameterName, InputStream inputStream) throws SQLException {
+		getWrapped().setBlob(parameterName, unwrapInputStream(inputStream));
 	}
 }

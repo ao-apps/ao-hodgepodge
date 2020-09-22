@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -116,14 +115,10 @@ public interface ISQLInputWrapper extends IWrapper, SQLInput {
 	}
 
 	@Override
-	default InputStream readAsciiStream() throws SQLException {
-		return getWrapped().readAsciiStream();
-	}
+	InputStreamWrapper readAsciiStream() throws SQLException;
 
 	@Override
-	default InputStream readBinaryStream() throws SQLException {
-		return getWrapped().readBinaryStream();
-	}
+	InputStreamWrapper readBinaryStream() throws SQLException;
 
 	@Override
 	default Object readObject() throws SQLException {

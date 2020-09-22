@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
@@ -68,9 +67,7 @@ public interface IClobWrapper extends IWrapper, Clob, AutoCloseable {
 	}
 
 	@Override
-	default InputStream getAsciiStream() throws SQLException {
-		return getWrapped().getAsciiStream();
-	}
+	InputStreamWrapper getAsciiStream() throws SQLException;
 
 	@Override
 	default long position(String searchstr, long start) throws SQLException {

@@ -126,14 +126,10 @@ public interface ISQLOutputWrapper extends IWrapper, SQLOutput {
 	}
 
 	@Override
-	default void writeAsciiStream(InputStream x) throws SQLException {
-		getWrapped().writeAsciiStream(x);
-	}
+	void writeAsciiStream(InputStream x) throws SQLException;
 
 	@Override
-	default void writeBinaryStream(InputStream x) throws SQLException {
-		getWrapped().writeBinaryStream(x);
-	}
+	void writeBinaryStream(InputStream x) throws SQLException;
 
 	@Override
 	default void writeObject(SQLData x) throws SQLException {

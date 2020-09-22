@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import java.io.InputStream;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -75,6 +76,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	 */
 	protected Clob unwrapClob(Clob clob) {
 		return getConnectionWrapper().unwrapClob(clob);
+	}
+
+	/**
+	 * Unwraps an {@link InputStream}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapInputStream(java.io.InputStream)
+	 */
+	protected InputStream unwrapInputStream(InputStream in) {
+		return getConnectionWrapper().unwrapInputStream(in);
 	}
 
 	/**
@@ -139,6 +149,37 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	@Override
 	public ResultSetWrapper executeQuery() throws SQLException {
 		return wrapResultSet(getWrapped().executeQuery());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
+		getWrapped().setAsciiStream(parameterIndex, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    @Deprecated // Java 9: (since="1.2")
+    public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
+		getWrapped().setUnicodeStream(parameterIndex, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
+		getWrapped().setBinaryStream(parameterIndex, unwrapInputStream(x), length);
 	}
 
 	/**
@@ -224,10 +265,70 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
+		getWrapped().setBlob(parameterIndex, unwrapInputStream(inputStream), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #unwrapSQLXML(java.sql.SQLXML)
 	 */
 	@Override
 	public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
 		getWrapped().setSQLXML(parameterIndex, unwrapSQLXML(xmlObject));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
+		getWrapped().setAsciiStream(parameterIndex, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
+		getWrapped().setBinaryStream(parameterIndex, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
+		getWrapped().setAsciiStream(parameterIndex, unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
+		getWrapped().setBinaryStream(parameterIndex, unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
+		getWrapped().setBlob(parameterIndex, unwrapInputStream(inputStream));
 	}
 }

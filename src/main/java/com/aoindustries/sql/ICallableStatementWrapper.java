@@ -277,14 +277,10 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default void setAsciiStream(String parameterName, InputStream x, int length) throws SQLException {
-		getWrapped().setAsciiStream(parameterName, x, length);
-	}
+    void setAsciiStream(String parameterName, InputStream x, int length) throws SQLException;
 
 	@Override
-    default void setBinaryStream(String parameterName, InputStream x, int length) throws SQLException {
-		getWrapped().setBinaryStream(parameterName, x, length);
-	}
+    void setBinaryStream(String parameterName, InputStream x, int length) throws SQLException;
 
 	@Override
     default void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SQLException {
@@ -461,9 +457,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-	default void setBlob(String parameterName, InputStream inputStream, long length) throws SQLException {
-		getWrapped().setBlob(parameterName, inputStream, length);
-	}
+	void setBlob(String parameterName, InputStream inputStream, long length) throws SQLException;
 
 	@Override
 	default void setNClob(String parameterName, Reader reader, long length) throws SQLException {
@@ -522,14 +516,10 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
     void setClob(String parameterName, Clob x) throws SQLException;
 
 	@Override
-    default void setAsciiStream(String parameterName, InputStream x, long length) throws SQLException {
-		getWrapped().setAsciiStream(parameterName, x, length);
-	}
+    void setAsciiStream(String parameterName, InputStream x, long length) throws SQLException;
 
 	@Override
-    default void setBinaryStream(String parameterName, InputStream x, long length) throws SQLException {
-		getWrapped().setBinaryStream(parameterName, x, length);
-	}
+    void setBinaryStream(String parameterName, InputStream x, long length) throws SQLException;
 
 	@Override
     default void setCharacterStream(String parameterName, Reader reader, long length) throws SQLException {
@@ -537,14 +527,10 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default void setAsciiStream(String parameterName, InputStream x) throws SQLException {
-		getWrapped().setAsciiStream(parameterName, x);
-	}
+    void setAsciiStream(String parameterName, InputStream x) throws SQLException;
 
 	@Override
-    default void setBinaryStream(String parameterName, InputStream x) throws SQLException {
-		getWrapped().setBinaryStream(parameterName, x);
-	}
+    void setBinaryStream(String parameterName, InputStream x) throws SQLException;
 
 	@Override
     default void setCharacterStream(String parameterName, Reader reader) throws SQLException {
@@ -562,9 +548,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-	default void setBlob(String parameterName, InputStream inputStream) throws SQLException {
-		getWrapped().setBlob(parameterName, inputStream);
-	}
+	void setBlob(String parameterName, InputStream inputStream) throws SQLException;
 
 	@Override
 	default void setNClob(String parameterName, Reader reader) throws SQLException {

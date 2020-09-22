@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import java.io.InputStream;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -126,6 +127,24 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	}
 
 	/**
+	 * Wraps an {@link InputStream}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapInputStream(java.io.InputStream)
+	 */
+	protected InputStreamWrapper wrapInputStream(InputStream in) {
+		return getConnectionWrapper().wrapInputStream(in);
+	}
+
+	/**
+	 * Unwraps an {@link InputStream}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapInputStream(java.io.InputStream)
+	 */
+	protected InputStream unwrapInputStream(InputStream in) {
+		return getConnectionWrapper().unwrapInputStream(in);
+	}
+
+	/**
 	 * Wraps a {@link NClob}, if not already wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#wrapNClob(java.sql.NClob)
@@ -218,11 +237,113 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public InputStreamWrapper getAsciiStream(int columnIndex) throws SQLException {
+		return wrapInputStream(getWrapped().getAsciiStream(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    @Deprecated // Java 9: (since="1.2")
+    public InputStreamWrapper getUnicodeStream(int columnIndex) throws SQLException {
+		return wrapInputStream(getWrapped().getUnicodeStream(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public InputStreamWrapper getBinaryStream(int columnIndex) throws SQLException {
+		return wrapInputStream(getWrapped().getBinaryStream(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public InputStreamWrapper getAsciiStream(String columnLabel) throws SQLException {
+		return wrapInputStream(getWrapped().getAsciiStream(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    @Deprecated // Java 9: (since="1.2")
+    public InputStreamWrapper getUnicodeStream(String columnLabel) throws SQLException {
+		return wrapInputStream(getWrapped().getUnicodeStream(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public InputStreamWrapper getBinaryStream(String columnLabel) throws SQLException {
+		return wrapInputStream(getWrapped().getBinaryStream(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * @see  #wrapResultSetMetaData(java.sql.ResultSetMetaData)
 	 */
 	@Override
     public ResultSetMetaDataWrapper getMetaData() throws SQLException {
 		return wrapResultSetMetaData(getWrapped().getMetaData());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateAsciiStream(int columnIndex, InputStream x, int length) throws SQLException {
+		getWrapped().updateAsciiStream(columnIndex, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBinaryStream(int columnIndex, InputStream x, int length) throws SQLException {
+		getWrapped().updateBinaryStream(columnIndex, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateAsciiStream(String columnLabel, InputStream x, int length) throws SQLException {
+		getWrapped().updateAsciiStream(columnLabel, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBinaryStream(String columnLabel, InputStream x, int length) throws SQLException {
+		getWrapped().updateBinaryStream(columnLabel, unwrapInputStream(x), length);
 	}
 
 	/**
@@ -513,5 +634,125 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	@Override
     public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException {
 		getWrapped().updateSQLXML(columnLabel, unwrapSQLXML(xmlObject));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException {
+		getWrapped().updateAsciiStream(columnIndex, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException {
+		getWrapped().updateBinaryStream(columnIndex, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateAsciiStream(String columnLabel, InputStream x, long length) throws SQLException {
+		getWrapped().updateAsciiStream(columnLabel, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBinaryStream(String columnLabel, InputStream x, long length) throws SQLException {
+		getWrapped().updateBinaryStream(columnLabel, unwrapInputStream(x), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBlob(int columnIndex, InputStream inputStream, long length) throws SQLException {
+		getWrapped().updateBlob(columnIndex, unwrapInputStream(inputStream), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBlob(String columnLabel, InputStream inputStream, long length) throws SQLException {
+		getWrapped().updateBlob(columnLabel, unwrapInputStream(inputStream), length);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateAsciiStream(int columnIndex, InputStream x) throws SQLException {
+		getWrapped().updateAsciiStream(columnIndex, unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBinaryStream(int columnIndex, InputStream x) throws SQLException {
+		getWrapped().updateBinaryStream(columnIndex, unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateAsciiStream(String columnLabel, InputStream x) throws SQLException {
+		getWrapped().updateAsciiStream(columnLabel, unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBinaryStream(String columnLabel, InputStream x) throws SQLException {
+		getWrapped().updateBinaryStream(columnLabel, unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBlob(int columnIndex, InputStream inputStream) throws SQLException {
+		getWrapped().updateBlob(columnIndex, unwrapInputStream(inputStream));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapInputStream(java.io.InputStream)
+	 */
+	@Override
+    public void updateBlob(String columnLabel, InputStream inputStream) throws SQLException {
+		getWrapped().updateBlob(columnLabel, unwrapInputStream(inputStream));
 	}
 }

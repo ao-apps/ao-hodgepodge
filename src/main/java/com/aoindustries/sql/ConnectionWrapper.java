@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import java.io.InputStream;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -113,6 +114,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected DatabaseMetaDataWrapper newDatabaseMetaDataWrapper(DatabaseMetaData metaData) {
 		return new DatabaseMetaDataWrapper(this, metaData);
+	}
+
+	/**
+	 * Creates a new {@link InputStreamWrapper}.
+	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	protected InputStreamWrapper newInputStreamWrapper(InputStream in) {
+		return new InputStreamWrapper(this, in);
 	}
 
 	/**
@@ -377,6 +387,49 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return newDatabaseMetaDataWrapper(metaData);
+	}
+
+	/**
+	 * Wraps an {@link InputStream}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newInputStreamWrapper(java.io.InputStream)
+	 * @see  BlobWrapper#wrapInputStream(java.io.InputStream)
+	 * @see  ClobWrapper#wrapInputStream(java.io.InputStream)
+	 * @see  ResultSetWrapper#wrapInputStream(java.io.InputStream)
+	 * @see  SQLInputWrapper#wrapInputStream(java.io.InputStream)
+	 * @see  SQLXMLWrapper#wrapInputStream(java.io.InputStream)
+	 */
+	protected InputStreamWrapper wrapInputStream(InputStream in) {
+		if(in == null) {
+			return null;
+		}
+		if(in instanceof InputStreamWrapper) {
+			InputStreamWrapper inWrapper = (InputStreamWrapper)in;
+			if(inWrapper.getConnectionWrapper() == this) {
+				return inWrapper;
+			}
+		}
+		return newInputStreamWrapper(in);
+	}
+
+	/**
+	 * Unwraps an {@link InputStream}, if wrapped by this wrapper.
+	 *
+	 * @see  PreparedStatementWrapper#unwrapInputStream(java.io.InputStream)
+	 * @see  ResultSetWrapper#unwrapInputStream(java.io.InputStream)
+	 * @see  SQLOutputWrapper#unwrapInputStream(java.io.InputStream)
+	 */
+	protected InputStream unwrapInputStream(InputStream in) {
+		if(in == null) {
+			return null;
+		}
+		if(in instanceof InputStreamWrapper) {
+			InputStreamWrapper inWrapper = (InputStreamWrapper)in;
+			if(inWrapper.getConnectionWrapper() == this) {
+				return inWrapper.getWrapped();
+			}
+		}
+		return in;
 	}
 
 	/**

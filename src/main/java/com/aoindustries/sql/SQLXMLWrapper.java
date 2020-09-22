@@ -22,6 +22,8 @@
  */
 package com.aoindustries.sql;
 
+import java.io.InputStream;
+import java.sql.SQLException;
 import java.sql.SQLXML;
 
 /**
@@ -49,5 +51,24 @@ public class SQLXMLWrapper implements ISQLXMLWrapper {
 	@Override
 	public SQLXML getWrapped() {
 		return wrapped;
+	}
+
+	/**
+	 * Wraps an {@link InputStream}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapInputStream(java.io.InputStream)
+	 */
+	protected InputStreamWrapper wrapInputStream(InputStream in) {
+		return getConnectionWrapper().wrapInputStream(in);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public InputStreamWrapper getBinaryStream() throws SQLException {
+		return wrapInputStream(getWrapped().getBinaryStream());
 	}
 }

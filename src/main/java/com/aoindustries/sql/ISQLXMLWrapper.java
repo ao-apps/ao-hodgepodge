@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
@@ -60,9 +59,7 @@ public interface ISQLXMLWrapper extends IWrapper, SQLXML, AutoCloseable {
 	}
 
 	@Override
-	default InputStream getBinaryStream() throws SQLException {
-		return getWrapped().getBinaryStream();
-	}
+	InputStreamWrapper getBinaryStream() throws SQLException;
 
 	@Override
 	default OutputStream setBinaryStream() throws SQLException {

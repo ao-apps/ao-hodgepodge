@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import java.io.InputStream;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -87,6 +88,15 @@ public class SQLInputWrapper implements ISQLInputWrapper {
 	}
 
 	/**
+	 * Wraps an {@link InputStream}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapInputStream(java.io.InputStream)
+	 */
+	protected InputStreamWrapper wrapInputStream(InputStream in) {
+		return getConnectionWrapper().wrapInputStream(in);
+	}
+
+	/**
 	 * Wraps a {@link NClob}, if not already wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#wrapNClob(java.sql.NClob)
@@ -120,6 +130,26 @@ public class SQLInputWrapper implements ISQLInputWrapper {
 	 */
 	protected SQLXMLWrapper wrapSQLXML(SQLXML sqlXml) {
 		return getConnectionWrapper().wrapSQLXML(sqlXml);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public InputStreamWrapper readAsciiStream() throws SQLException {
+		return wrapInputStream(getWrapped().readAsciiStream());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapInputStream(java.io.InputStream)
+	 */
+	@Override
+	public InputStreamWrapper readBinaryStream() throws SQLException {
+		return wrapInputStream(getWrapped().readBinaryStream());
 	}
 
 	/**
