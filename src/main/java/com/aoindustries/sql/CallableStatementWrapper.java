@@ -28,6 +28,7 @@ import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.Ref;
+import java.sql.RowId;
 import java.sql.SQLException;
 
 /**
@@ -89,6 +90,15 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	 */
 	protected RefWrapper wrapRef(Ref ref) {
 		return getConnectionWrapper().wrapRef(ref);
+	}
+
+	/**
+	 * Wraps a {@link RowId}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapRowId(RowId)
+	 */
+	protected RowIdWrapper wrapRowId(RowId rowId) {
+		return getConnectionWrapper().wrapRowId(rowId);
 	}
 
 	/**
@@ -169,6 +179,36 @@ public class CallableStatementWrapper extends PreparedStatementWrapper implement
 	@Override
     public ArrayWrapper getArray(String parameterName) throws SQLException {
 		return wrapArray(getWrapped().getArray(parameterName));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapRowId(java.sql.RowId)
+	 */
+	@Override
+    public RowIdWrapper getRowId(int parameterIndex) throws SQLException {
+		return wrapRowId(getWrapped().getRowId(parameterIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapRowId(java.sql.RowId)
+	 */
+	@Override
+    public RowIdWrapper getRowId(String parameterName) throws SQLException {
+		return wrapRowId(getWrapped().getRowId(parameterName));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapRowId(java.sql.RowId) 
+	 */
+	@Override
+    public void setRowId(String parameterName, RowId x) throws SQLException {
+		getWrapped().setRowId(parameterName, unwrapRowId(x));
 	}
 
 	/**

@@ -711,24 +711,16 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
     void updateArray(String columnLabel, java.sql.Array x) throws SQLException;
 
 	@Override
-    default RowId getRowId(int columnIndex) throws SQLException {
-		return getWrapped().getRowId(columnIndex);
-	}
+    IRowIdWrapper getRowId(int columnIndex) throws SQLException;
 
 	@Override
-    default RowId getRowId(String columnLabel) throws SQLException {
-		return getWrapped().getRowId(columnLabel);
-	}
+    IRowIdWrapper getRowId(String columnLabel) throws SQLException;
 
 	@Override
-    default void updateRowId(int columnIndex, RowId x) throws SQLException {
-		getWrapped().updateRowId(columnIndex, x);
-	}
+    void updateRowId(int columnIndex, RowId x) throws SQLException;
 
 	@Override
-    default void updateRowId(String columnLabel, RowId x) throws SQLException {
-		getWrapped().updateRowId(columnLabel, x);
-	}
+    void updateRowId(String columnLabel, RowId x) throws SQLException;
 
 	@Override
     default int getHoldability() throws SQLException {

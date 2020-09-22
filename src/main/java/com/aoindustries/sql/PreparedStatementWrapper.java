@@ -29,6 +29,7 @@ import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSetMetaData;
+import java.sql.RowId;
 import java.sql.SQLException;
 
 /**
@@ -102,6 +103,15 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	}
 
 	/**
+	 * Unwraps a {@link RowId}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapRowId(java.sql.RowId)
+	 */
+	protected RowId unwrapRowId(RowId rowId) {
+		return getConnectionWrapper().unwrapRowId(rowId);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * @see  #wrapResultSet(java.sql.ResultSet)
@@ -159,6 +169,16 @@ public class PreparedStatementWrapper extends StatementWrapper implements IPrepa
 	@Override
     public ResultSetMetaDataWrapper getMetaData() throws SQLException {
 		return wrapResultSetMetaData(getWrapped().getMetaData());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapRowId(java.sql.RowId)
+	 */
+	@Override
+    public void setRowId(int parameterIndex, RowId x) throws SQLException {
+		getWrapped().setRowId(parameterIndex, unwrapRowId(x));
 	}
 
 	/**

@@ -221,9 +221,7 @@ public interface IPreparedStatementWrapper extends IStatementWrapper, PreparedSt
 	}
 
 	@Override
-    default void setRowId(int parameterIndex, RowId x) throws SQLException {
-		getWrapped().setRowId(parameterIndex, x);
-	}
+    void setRowId(int parameterIndex, RowId x) throws SQLException;
 
 	@Override
 	default void setNString(int parameterIndex, String value) throws SQLException {

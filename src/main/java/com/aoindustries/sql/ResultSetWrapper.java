@@ -29,6 +29,7 @@ import java.sql.NClob;
 import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
@@ -166,6 +167,24 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 */
 	protected ResultSetMetaDataWrapper wrapResultSetMetaData(ResultSetMetaData metaData) {
 		return getConnectionWrapper().wrapResultSetMetaData(metaData);
+	}
+
+	/**
+	 * Wraps a {@link RowId}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapRowId(RowId)
+	 */
+	protected RowIdWrapper wrapRowId(RowId rowId) {
+		return getConnectionWrapper().wrapRowId(rowId);
+	}
+
+	/**
+	 * Unwraps a {@link RowId}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapRowId(java.sql.RowId)
+	 */
+	protected RowId unwrapRowId(RowId rowId) {
+		return getConnectionWrapper().unwrapRowId(rowId);
 	}
 
 	/**
@@ -355,6 +374,46 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	@Override
     public void updateArray(String columnLabel, java.sql.Array x) throws SQLException {
 		getWrapped().updateArray(columnLabel, unwrapArray(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapRowId(java.sql.RowId)
+	 */
+	@Override
+    public RowIdWrapper getRowId(int columnIndex) throws SQLException {
+		return wrapRowId(getWrapped().getRowId(columnIndex));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapRowId(java.sql.RowId)
+	 */
+	@Override
+    public RowIdWrapper getRowId(String columnLabel) throws SQLException {
+		return wrapRowId(getWrapped().getRowId(columnLabel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapRowId(java.sql.RowId)
+	 */
+	@Override
+    public void updateRowId(int columnIndex, RowId x) throws SQLException {
+		getWrapped().updateRowId(columnIndex, unwrapRowId(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #unwrapRowId(java.sql.RowId)
+	 */
+	@Override
+    public void updateRowId(String columnLabel, RowId x) throws SQLException {
+		getWrapped().updateRowId(columnLabel, unwrapRowId(x));
 	}
 
 	/**

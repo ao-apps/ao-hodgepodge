@@ -33,6 +33,7 @@ import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -142,6 +143,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected ResultSetMetaDataWrapper newResultSetMetaDataWrapper(ResultSetMetaData metaData) {
 		return new ResultSetMetaDataWrapper(this, metaData);
+	}
+
+	/**
+	 * Creates a new {@link RowIdWrapper}.
+	 *
+	 * @see  #wrapRowId(RowId)
+	 */
+	protected RowIdWrapper newRowIdWrapper(RowId rowId) {
+		return new RowIdWrapper(this, rowId);
 	}
 
 	/**
@@ -462,6 +472,45 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return newResultSetMetaDataWrapper(metaData);
+	}
+
+	/**
+	 * Wraps a {@link RowId}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newRowIdWrapper(java.sql.RowId)
+	 * @see  CallableStatementWrapper#wrapRowId(java.sql.RowId)
+	 * @see  ResultSetWrapper#wrapRowId(java.sql.RowId)
+	 */
+	protected RowIdWrapper wrapRowId(RowId rowId) {
+		if(rowId == null) {
+			return null;
+		}
+		if(rowId instanceof RowIdWrapper) {
+			RowIdWrapper rowIdWrapper = (RowIdWrapper)rowId;
+			if(rowIdWrapper.getConnectionWrapper() == this) {
+				return rowIdWrapper;
+			}
+		}
+		return newRowIdWrapper(rowId);
+	}
+
+	/**
+	 * Unwraps a {@link RowId}, if wrapped by this wrapper.
+	 *
+	 * @see  PreparedStatementWrapper#unwrapRowId(java.sql.RowId)
+	 * @see  ResultSetWrapper#unwrapRowId(java.sql.RowId)
+	 */
+	protected RowId unwrapRowId(RowId rowId) {
+		if(rowId == null) {
+			return null;
+		}
+		if(rowId instanceof RowIdWrapper) {
+			RowIdWrapper rowIdWrapper = (RowIdWrapper)rowId;
+			if(rowIdWrapper.getConnectionWrapper() == this) {
+				return rowIdWrapper.getWrapped();
+			}
+		}
+		return rowId;
 	}
 
 	/**

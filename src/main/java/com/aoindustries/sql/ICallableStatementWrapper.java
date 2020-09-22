@@ -429,19 +429,13 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 	}
 
 	@Override
-    default RowId getRowId(int parameterIndex) throws SQLException {
-		return getWrapped().getRowId(parameterIndex);
-	}
+    IRowIdWrapper getRowId(int parameterIndex) throws SQLException;
 
 	@Override
-    default RowId getRowId(String parameterName) throws SQLException {
-		return getWrapped().getRowId(parameterName);
-	}
+    IRowIdWrapper getRowId(String parameterName) throws SQLException;
 
 	@Override
-    default void setRowId(String parameterName, RowId x) throws SQLException {
-		getWrapped().setRowId(parameterName, x);
-	}
+    void setRowId(String parameterName, RowId x) throws SQLException;
 
 	@Override
     default void setNString(String parameterName, String value) throws SQLException {
