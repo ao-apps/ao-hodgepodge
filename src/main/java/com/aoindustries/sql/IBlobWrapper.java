@@ -22,7 +22,6 @@
  */
 package com.aoindustries.sql;
 
-import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
@@ -81,9 +80,7 @@ public interface IBlobWrapper extends IWrapper, Blob, AutoCloseable {
 	}
 
 	@Override
-	default OutputStream setBinaryStream(long pos) throws SQLException {
-		return getWrapped().setBinaryStream(pos);
-	}
+	OutputStreamWrapper setBinaryStream(long pos) throws SQLException;
 
 	@Override
 	default void truncate(long len) throws SQLException {

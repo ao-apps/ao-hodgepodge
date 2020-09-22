@@ -22,22 +22,20 @@
  */
 package com.aoindustries.sql;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.OutputStream;
-import java.sql.SQLException;
-import java.sql.SQLXML;
 
 /**
- * Wraps a {@link SQLXML}.
+ * Wraps an {@link OutputStream}.
  *
  * @author  AO Industries, Inc.
  */
-public class SQLXMLWrapper implements ISQLXMLWrapper {
+public class OutputStreamWrapper extends OutputStream implements IWrapper {
 
 	private final ConnectionWrapper connectionWrapper;
-	private final SQLXML wrapped;
+	private final OutputStream wrapped;
 
-	public SQLXMLWrapper(ConnectionWrapper connectionWrapper, SQLXML wrapped) {
+	public OutputStreamWrapper(ConnectionWrapper connectionWrapper, OutputStream wrapped) {
 		this.connectionWrapper = connectionWrapper;
 		this.wrapped = wrapped;
 	}
@@ -49,46 +47,36 @@ public class SQLXMLWrapper implements ISQLXMLWrapper {
 		return connectionWrapper;
 	}
 
+	/**
+	 * Gets the output stream that is wrapped.
+	 */
 	@Override
-	public SQLXML getWrapped() {
+	public OutputStream getWrapped() {
 		return wrapped;
 	}
 
-	/**
-	 * Wraps an {@link InputStream}, if not already wrapped by this wrapper.
-	 *
-	 * @see  ConnectionWrapper#wrapInputStream(java.io.InputStream)
-	 */
-	protected InputStreamWrapper wrapInputStream(InputStream in) {
-		return getConnectionWrapper().wrapInputStream(in);
-	}
-
-	/**
-	 * Wraps an {@link OutputStream}, if not already wrapped by this wrapper.
-	 *
-	 * @see  ConnectionWrapper#wrapOutputStream(java.io.OutputStream)
-	 */
-	protected OutputStreamWrapper wrapOutputStream(OutputStream out) {
-		return getConnectionWrapper().wrapOutputStream(out);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @see  #wrapInputStream(java.io.InputStream)
-	 */
 	@Override
-	public InputStreamWrapper getBinaryStream() throws SQLException {
-		return wrapInputStream(getWrapped().getBinaryStream());
+	public void write(int b) throws IOException {
+		getWrapped().write(b);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @see  #wrapOutputStream(java.io.OutputStream)
-	 */
 	@Override
-	public OutputStreamWrapper setBinaryStream() throws SQLException {
-		return wrapOutputStream(getWrapped().setBinaryStream());
+	public void write(byte b[]) throws IOException {
+		getWrapped().write(b);
+	}
+
+	@Override
+	public void write(byte b[], int off, int len) throws IOException {
+		getWrapped().write(b, off, len);
+	}
+
+	@Override
+	public void flush() throws IOException {
+		getWrapped().flush();
+	}
+
+	@Override
+	public void close() throws IOException {
+		getWrapped().close();
 	}
 }

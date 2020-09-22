@@ -23,6 +23,7 @@
 package com.aoindustries.sql;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -132,6 +133,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected NClobWrapper newNClobWrapper(NClob nclob) {
 		return new NClobWrapper(this, nclob);
+	}
+
+	/**
+	 * Creates a new {@link OutputStreamWrapper}.
+	 *
+	 * @see  #wrapOutputStream(java.io.OutputStream)
+	 */
+	protected OutputStreamWrapper newOutputStreamWrapper(OutputStream out) {
+		return new OutputStreamWrapper(this, out);
 	}
 
 	/**
@@ -471,6 +481,27 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return nclob;
+	}
+
+	/**
+	 * Wraps an {@link OutputStream}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newOutputStreamWrapper(java.io.OutputStream)
+	 * @see  BlobWrapper#wrapOutputStream(java.io.OutputStream)
+	 * @see  ClobWrapper#wrapOutputStream(java.io.OutputStream)
+	 * @see  SQLXMLWrapper#wrapOutputStream(java.io.OutputStream)
+	 */
+	protected OutputStreamWrapper wrapOutputStream(OutputStream out) {
+		if(out == null) {
+			return null;
+		}
+		if(out instanceof OutputStreamWrapper) {
+			OutputStreamWrapper outWrapper = (OutputStreamWrapper)out;
+			if(outWrapper.getConnectionWrapper() == this) {
+				return outWrapper;
+			}
+		}
+		return newOutputStreamWrapper(out);
 	}
 
 	/**

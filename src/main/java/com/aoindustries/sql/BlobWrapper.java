@@ -23,6 +23,7 @@
 package com.aoindustries.sql;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
@@ -72,6 +73,15 @@ public class BlobWrapper implements IBlobWrapper {
 	}
 
 	/**
+	 * Wraps an {@link OutputStream}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapOutputStream(java.io.OutputStream)
+	 */
+	protected OutputStreamWrapper wrapOutputStream(OutputStream out) {
+		return getConnectionWrapper().wrapOutputStream(out);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * @see  #wrapInputStream(java.io.InputStream)
@@ -89,6 +99,16 @@ public class BlobWrapper implements IBlobWrapper {
 	@Override
 	public long position(Blob pattern, long start) throws SQLException {
 		return getWrapped().position(unwrapBlob(pattern), start);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapOutputStream(java.io.OutputStream)
+	 */
+	@Override
+	public OutputStreamWrapper setBinaryStream(long pos) throws SQLException {
+		return wrapOutputStream(getWrapped().setBinaryStream(pos));
 	}
 
 	/**
