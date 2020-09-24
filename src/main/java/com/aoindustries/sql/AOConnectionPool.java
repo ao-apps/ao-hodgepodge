@@ -25,6 +25,7 @@ package com.aoindustries.sql;
 import com.aoindustries.io.AOPool;
 import com.aoindustries.lang.AutoCloseables;
 import com.aoindustries.lang.Throwables;
+import com.aoindustries.sql.wrapper.DatabaseMetaDataWrapper;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;

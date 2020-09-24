@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import com.aoindustries.sql.wrapper.ConnectionWrapper;
 import java.sql.Connection;
 import java.sql.SQLException;
 

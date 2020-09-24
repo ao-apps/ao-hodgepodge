@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-09-14T19:26:21-05:00"
+		dateModified="2020-09-24T01:38:56-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -82,15 +82,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<li>New utility class <code>Connections</code> for working with <code>java.sql.Connection</code>.</li>
 					<li>
 						<code>ConnectionWrapper</code> now wraps all objects that can lead back to the wrapped
-						<code>Connection</code>.  This includes:
-						<ol>
-							<li><code>Array</code> wrapped in <code>ArrayWrapper</code></li>
-							<li><code>CallableStatement</code> wrapped in <code>CallableStatementWrapper</code></li>
-							<li><code>DatabaseMetaData</code> wrapped in <code>DatabaseMetaDataWrapper</code></li>
-							<li><code>PreparedStatement</code> wrapped in <code>PreparedStatementWrapper</code></li>
-							<li><code>ResultSetStatement</code> wrapped in <code>ResultSetStatementWrapper</code></li>
-							<li><code>Statement</code> wrapped in <code>StatementWrapper</code></li>
-						</ol>
+						<code>Connection</code>, and moved to new <code>com.aoindustries.sql.wrapper</code> package.
 					</li>
 					<li>
 						Deprecated <code>AOPool.releaseConnection(C)</code> in favor of <code>AutoCloseable.close()</code>

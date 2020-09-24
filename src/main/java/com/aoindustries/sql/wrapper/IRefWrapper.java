@@ -20,35 +20,50 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.sql;
+package com.aoindustries.sql.wrapper;
 
-import com.aoindustries.sql.wrapper.IConnectionWrapper;
-import java.sql.Connection;
+import java.sql.Ref;
 import java.sql.SQLException;
-import java.util.concurrent.Executor;
+import java.util.Map;
 
 /**
- * Wraps a {@link Connection} while tracking closed state; will only delegate methods to wrapped connection when not
- * closed.
+ * Wraps a {@link Ref}.
  *
  * @author  AO Industries, Inc.
  */
-public interface IUncloseableConnectionWrapper extends IConnectionWrapper {
+public interface IRefWrapper extends IWrapper, Ref, AutoCloseable {
 
 	/**
-	 * Called when {@link #abort(java.util.concurrent.Executor)} is called and not already closed.
-	 * {@link #onClose()} will never be called once aborted.  This is only called at most once.
-	 *
-	 * @see #abort(java.util.concurrent.Executor)
+	 * Gets the ref that is wrapped.
 	 */
-	void onAbort(Executor executor) throws SQLException;
+	@Override
+	Ref getWrapped();
 
 	/**
-	 * Called when {@link #close()} is called, or when the wrapped connection is discovered as closed during
-	 * {@link #isClosed()}.  In either case, this is only called at most once.
-	 *
-	 * @see #close()
-	 * @see #isClosed()
+	 * Releases resources associated with this wrapper.
 	 */
-	void onClose() throws SQLException;
+	@Override
+	default void close() throws SQLException {
+		// Do nothing by default
+	}
+
+	@Override
+	default String getBaseTypeName() throws SQLException {
+		return getWrapped().getBaseTypeName();
+	}
+
+	@Override
+	default Object getObject(Map<String,Class<?>> map) throws SQLException {
+		return getWrapped().getObject(map);
+	}
+
+	@Override
+	default Object getObject() throws SQLException {
+		return getWrapped().getObject();
+	}
+
+	@Override
+	default void setObject(Object value) throws SQLException {
+		getWrapped().setObject(value);
+	}
 }

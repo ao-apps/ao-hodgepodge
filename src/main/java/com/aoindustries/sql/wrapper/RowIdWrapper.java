@@ -20,35 +20,50 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.sql;
+package com.aoindustries.sql.wrapper;
 
-import com.aoindustries.sql.wrapper.IConnectionWrapper;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.Executor;
+import java.sql.RowId;
 
 /**
- * Wraps a {@link Connection} while tracking closed state; will only delegate methods to wrapped connection when not
- * closed.
+ * Wraps a {@link RowId}.
  *
  * @author  AO Industries, Inc.
  */
-public interface IUncloseableConnectionWrapper extends IConnectionWrapper {
+public class RowIdWrapper implements IRowIdWrapper {
+
+	private final ConnectionWrapper connectionWrapper;
+	private final RowId wrapped;
+
+	public RowIdWrapper(ConnectionWrapper connectionWrapper, RowId wrapped) {
+		this.connectionWrapper = connectionWrapper;
+		this.wrapped = wrapped;
+	}
 
 	/**
-	 * Called when {@link #abort(java.util.concurrent.Executor)} is called and not already closed.
-	 * {@link #onClose()} will never be called once aborted.  This is only called at most once.
-	 *
-	 * @see #abort(java.util.concurrent.Executor)
+	 * Gets the connection wrapper.
 	 */
-	void onAbort(Executor executor) throws SQLException;
+	protected ConnectionWrapper getConnectionWrapper() {
+		return connectionWrapper;
+	}
 
-	/**
-	 * Called when {@link #close()} is called, or when the wrapped connection is discovered as closed during
-	 * {@link #isClosed()}.  In either case, this is only called at most once.
-	 *
-	 * @see #close()
-	 * @see #isClosed()
-	 */
-	void onClose() throws SQLException;
+	@Override
+	public RowId getWrapped() {
+		return wrapped;
+	}
+
+	@Override
+	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+	public boolean equals(Object obj) {
+		return getWrapped().equals(obj);
+	}
+
+	@Override
+	public String toString() {
+		return getWrapped().toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return getWrapped().hashCode();
+	}
 }
