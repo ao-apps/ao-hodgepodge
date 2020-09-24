@@ -20,36 +20,35 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.sql;
+package com.aoindustries.sql.tracker;
 
-import com.aoindustries.sql.wrapper.IConnectionWrapper;
+import com.aoindustries.sql.wrapper.IDriverWrapper;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.Executor;
+import java.sql.Driver;
+import java.sql.DriverAction;
+import java.util.Map;
 
 /**
- * Wraps a {@link Connection} while tracking closed state; will only delegate methods to wrapped connection when not
- * closed.
+ * Tracks a {@link Driver} for unclosed or unfreed objects.
  *
  * @author  AO Industries, Inc.
  */
-// TODO: Move to own package and extend Tracker
-public interface IUncloseableConnectionWrapper extends IConnectionWrapper {
+public interface IDriverTracker extends IDriverWrapper, DriverAction, IOnClose {
 
 	/**
-	 * Called when {@link #abort(java.util.concurrent.Executor)} is called and not already closed.
-	 * {@link #onClose()} will never be called once aborted.  This is only called at most once.
+	 * Gets all the connections that have not yet been closed.
 	 *
-	 * @see #abort(java.util.concurrent.Executor)
+	 * @return  The mapping from wrapped connection to tracker without any defensive copy.
+	 *
+	 * @see  ConnectionTracker#close()
 	 */
-	void onAbort(Executor executor) throws SQLException;
+	Map<Connection,? extends IConnectionTracker> getTrackedConnections();
 
 	/**
-	 * Called when {@link #close()} is called, or when the wrapped connection is discovered as closed during
-	 * {@link #isClosed()}.  In either case, this is only called at most once.
+	 * Calls onClose handlers, closes all tracked objects, then calls {@code super.deregister()}.
 	 *
-	 * @see #close()
-	 * @see #isClosed()
+	 * @see  #addOnClose(java.lang.Runnable)
 	 */
-	void onClose() throws SQLException;
+	@Override
+	void deregister();
 }

@@ -28,6 +28,7 @@ import com.aoindustries.sql.wrapper.CallableStatementWrapper;
 import com.aoindustries.sql.wrapper.ClobWrapper;
 import com.aoindustries.sql.wrapper.ConnectionWrapper;
 import com.aoindustries.sql.wrapper.DatabaseMetaDataWrapper;
+import com.aoindustries.sql.wrapper.DriverWrapper;
 import com.aoindustries.sql.wrapper.NClobWrapper;
 import com.aoindustries.sql.wrapper.PreparedStatementWrapper;
 import com.aoindustries.sql.wrapper.SQLXMLWrapper;
@@ -51,9 +52,14 @@ import java.util.function.Function;
  *
  * @author  AO Industries, Inc.
  */
+// TODO: Move to own package and extend Tracker
 public class UncloseableConnectionWrapper extends ConnectionWrapper implements IUncloseableConnectionWrapper {
 
 	private final AtomicBoolean closed = new AtomicBoolean();
+
+	public UncloseableConnectionWrapper(DriverWrapper driverWrapper, Connection wrapped) {
+		super(driverWrapper, wrapped);
+	}
 
 	public UncloseableConnectionWrapper(Connection wrapped) {
 		super(wrapped);

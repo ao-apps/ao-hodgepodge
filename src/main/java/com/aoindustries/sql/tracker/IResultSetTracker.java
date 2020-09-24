@@ -20,36 +20,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.sql;
+package com.aoindustries.sql.tracker;
 
-import com.aoindustries.sql.wrapper.IConnectionWrapper;
-import java.sql.Connection;
+import com.aoindustries.sql.wrapper.IResultSetWrapper;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.Executor;
 
 /**
- * Wraps a {@link Connection} while tracking closed state; will only delegate methods to wrapped connection when not
- * closed.
+ * Tracks a {@link ResultSet} for unclosed or unfreed objects.
  *
  * @author  AO Industries, Inc.
  */
-// TODO: Move to own package and extend Tracker
-public interface IUncloseableConnectionWrapper extends IConnectionWrapper {
+public interface IResultSetTracker extends IResultSetWrapper, IOnClose,
+	ITrackedArrays,
+	ITrackedBlobs,
+	ITrackedClobs,
+	ITrackedInputStreams,
+	ITrackedNClobs,
+	ITrackedReaders,
+	ITrackedRefs,
+	ITrackedResultSetMetaDatas,
+	ITrackedRowIds,
+	ITrackedSQLXMLs {
 
 	/**
-	 * Called when {@link #abort(java.util.concurrent.Executor)} is called and not already closed.
-	 * {@link #onClose()} will never be called once aborted.  This is only called at most once.
+	 * Calls onClose handlers, closes all tracked objects, then calls {@code super.close()}.
 	 *
-	 * @see #abort(java.util.concurrent.Executor)
+	 * @see  #addOnClose(java.lang.Runnable)
 	 */
-	void onAbort(Executor executor) throws SQLException;
-
-	/**
-	 * Called when {@link #close()} is called, or when the wrapped connection is discovered as closed during
-	 * {@link #isClosed()}.  In either case, this is only called at most once.
-	 *
-	 * @see #close()
-	 * @see #isClosed()
-	 */
-	void onClose() throws SQLException;
+	@Override
+	void close() throws SQLException;
 }
