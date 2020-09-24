@@ -32,7 +32,7 @@ import java.io.InputStream;
  */
 public class InputStreamWrapper extends InputStream implements IWrapper {
 
-	private final ConnectionWrapper connectionWrapper; // TODO: Review where connectionWrapper is actually needed
+	private final ConnectionWrapper connectionWrapper;
 	private final InputStream wrapped;
 
 	public InputStreamWrapper(ConnectionWrapper connectionWrapper, InputStream wrapped) {
