@@ -38,7 +38,7 @@ import java.sql.Timestamp;
 public interface ISQLInputWrapper extends IWrapper, SQLInput, AutoCloseable {
 
 	/**
-	 * Gets the SQL output that is wrapped.
+	 * Gets the SQL input that is wrapped.
 	 */
 	@Override
 	SQLInput getWrapped();
