@@ -250,7 +250,19 @@ public class ResultSetWrapper implements IResultSetWrapper {
 	 * @see  ConnectionWrapper#wrapStatement(java.sql.Statement)
 	 */
 	protected StatementWrapper wrapStatement(Statement stmt) {
-		return getConnectionWrapper().wrapStatement(stmt);
+		// First check if matches our statement wrapper
+		if(
+			stmtWrapper == stmt
+			|| (
+				stmtWrapper != null
+				&& stmtWrapper.getWrapped() == stmt
+			)
+		) {
+			return stmtWrapper;
+		} else {
+			// Wrap now, if needed
+			return getConnectionWrapper().wrapStatement(stmt);
+		}
 	}
 
 	/**
