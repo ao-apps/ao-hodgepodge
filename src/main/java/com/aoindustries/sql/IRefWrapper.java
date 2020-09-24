@@ -31,13 +31,21 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public interface IRefWrapper extends IWrapper, Ref {
+public interface IRefWrapper extends IWrapper, Ref, AutoCloseable {
 
 	/**
 	 * Gets the ref that is wrapped.
 	 */
 	@Override
 	Ref getWrapped();
+
+	/**
+	 * Releases resources associated with this wrapper.
+	 */
+	@Override
+	default void close() throws SQLException {
+		// Do nothing by default
+	}
 
 	@Override
 	default String getBaseTypeName() throws SQLException {

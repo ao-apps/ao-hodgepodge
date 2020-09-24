@@ -30,13 +30,21 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public interface IParameterMetaDataWrapper extends IWrapper, ParameterMetaData {
+public interface IParameterMetaDataWrapper extends IWrapper, ParameterMetaData, AutoCloseable {
 
 	/**
 	 * Gets the parameter meta data that is wrapped.
 	 */
 	@Override
 	ParameterMetaData getWrapped();
+
+	/**
+	 * Releases resources associated with this wrapper.
+	 */
+	@Override
+	default void close() throws SQLException {
+		// Do nothing by default
+	}
 
 	@Override
 	default int getParameterCount() throws SQLException {

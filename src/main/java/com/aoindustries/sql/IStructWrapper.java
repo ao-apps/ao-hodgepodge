@@ -31,13 +31,21 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public interface IStructWrapper extends IWrapper, Struct {
+public interface IStructWrapper extends IWrapper, Struct, AutoCloseable {
 
 	/**
 	 * Gets the struct that is wrapped.
 	 */
 	@Override
 	Struct getWrapped();
+
+	/**
+	 * Releases resources associated with this wrapper.
+	 */
+	@Override
+	default void close() throws SQLException {
+		// Do nothing by default
+	}
 
 	@Override
 	default String getSQLTypeName() throws SQLException {

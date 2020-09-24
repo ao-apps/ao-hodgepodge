@@ -30,13 +30,21 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public interface IResultSetMetaDataWrapper extends IWrapper, ResultSetMetaData {
+public interface IResultSetMetaDataWrapper extends IWrapper, ResultSetMetaData, AutoCloseable {
 
 	/**
 	 * Gets the result set meta data that is wrapped.
 	 */
 	@Override
 	ResultSetMetaData getWrapped();
+
+	/**
+	 * Releases resources associated with this wrapper.
+	 */
+	@Override
+	default void close() throws SQLException {
+		// Do nothing by default
+	}
 
 	@Override
 	default int getColumnCount() throws SQLException {

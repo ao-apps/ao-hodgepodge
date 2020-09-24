@@ -40,6 +40,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
+import java.sql.SQLInput;
+import java.sql.SQLOutput;
 import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
@@ -210,12 +212,17 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	}
 
 	/**
-	 * Creates a new {@link SavepointWrapper}.
-	 *
-	 * @see  #wrapSavepoint(Savepoint)
+	 * Creates a new {@link SQLInputWrapper}.
 	 */
-	protected SavepointWrapper newSavepointWrapper(Savepoint savepoint) {
-		return new SavepointWrapper(this, savepoint);
+	protected SQLInputWrapper newSQLInputWrapper(SQLInput sqlInput) {
+		return new SQLInputWrapper(this, sqlInput);
+	}
+
+	/**
+	 * Creates a new {@link SQLOutputWrapper}.
+	 */
+	protected SQLOutputWrapper newSQLOutputWrapper(SQLOutput sqlOutput) {
+		return new SQLOutputWrapper(this, sqlOutput);
 	}
 
 	/**
@@ -225,6 +232,15 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	protected SQLXMLWrapper newSQLXMLWrapper(SQLXML sqlXml) {
 		return new SQLXMLWrapper(this, sqlXml);
+	}
+
+	/**
+	 * Creates a new {@link SavepointWrapper}.
+	 *
+	 * @see  #wrapSavepoint(Savepoint)
+	 */
+	protected SavepointWrapper newSavepointWrapper(Savepoint savepoint) {
+		return new SavepointWrapper(this, savepoint);
 	}
 
 	/**
@@ -983,7 +999,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	@Override
 	public SavepointWrapper setSavepoint(String name) throws SQLException {
-		return wrapSavepoint(getWrapped().setSavepoint());
+		return wrapSavepoint(getWrapped().setSavepoint(name));
 	}
 
 	/**
@@ -1003,7 +1019,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 */
 	@Override
 	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		getWrapped().rollback(unwrapSavepoint(savepoint));
+		getWrapped().releaseSavepoint(unwrapSavepoint(savepoint));
 	}
 
 	/**

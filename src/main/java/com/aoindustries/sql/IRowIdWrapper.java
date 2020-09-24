@@ -23,19 +23,28 @@
 package com.aoindustries.sql;
 
 import java.sql.RowId;
+import java.sql.SQLException;
 
 /**
  * Wraps a {@link RowId}.
  *
  * @author  AO Industries, Inc.
  */
-public interface IRowIdWrapper extends IWrapper, RowId {
+public interface IRowIdWrapper extends IWrapper, RowId, AutoCloseable {
 
 	/**
 	 * Gets the row ID that is wrapped.
 	 */
 	@Override
 	RowId getWrapped();
+
+	/**
+	 * Releases resources associated with this wrapper.
+	 */
+	@Override
+	default void close() throws SQLException {
+		// Do nothing by default
+	}
 
 	@Override
 	boolean equals(Object obj);

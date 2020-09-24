@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import java.sql.SQLException;
 import java.sql.Savepoint;
 
 /**
@@ -49,5 +50,10 @@ public class SavepointWrapper implements ISavepointWrapper {
 	@Override
 	public Savepoint getWrapped() {
 		return wrapped;
+	}
+
+	@Override
+	public void close() throws SQLException {
+		getConnectionWrapper().releaseSavepoint(this);
 	}
 }

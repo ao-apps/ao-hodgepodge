@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
@@ -30,13 +31,21 @@ import java.sql.Savepoint;
  *
  * @author  AO Industries, Inc.
  */
-public interface ISavepointWrapper extends IWrapper, Savepoint {
+public interface ISavepointWrapper extends IWrapper, Savepoint, AutoCloseable {
 
 	/**
 	 * Gets the savepoint that is wrapped.
 	 */
 	@Override
 	Savepoint getWrapped();
+
+	/**
+	 * Calls {@link Connection#releaseSavepoint(java.sql.Savepoint)}
+	 *
+	 * @see  Connection#releaseSavepoint(java.sql.Savepoint)
+	 */
+	@Override
+	void close() throws SQLException;
 
 	@Override
 	default int getSavepointId() throws SQLException {

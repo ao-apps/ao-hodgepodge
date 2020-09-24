@@ -47,13 +47,21 @@ import java.sql.Timestamp;
  *
  * @author  AO Industries, Inc.
  */
-public interface ISQLOutputWrapper extends IWrapper, SQLOutput {
+public interface ISQLOutputWrapper extends IWrapper, SQLOutput, AutoCloseable {
 
 	/**
 	 * Gets the SQL output that is wrapped.
 	 */
 	@Override
 	SQLOutput getWrapped();
+
+	/**
+	 * Releases resources associated with this wrapper.
+	 */
+	@Override
+	default void close() throws SQLException {
+		// Do nothing by default
+	}
 
 	@Override
 	default void writeString(String x) throws SQLException {

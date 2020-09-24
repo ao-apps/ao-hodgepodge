@@ -31,13 +31,21 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public interface IDatabaseMetaDataWrapper extends IWrapper, DatabaseMetaData {
+public interface IDatabaseMetaDataWrapper extends IWrapper, DatabaseMetaData, AutoCloseable {
 
 	/**
 	 * Gets the database meta data that is wrapped.
 	 */
 	@Override
 	DatabaseMetaData getWrapped();
+
+	/**
+	 * Releases resources associated with this wrapper.
+	 */
+	@Override
+	default void close() throws SQLException {
+		// Do nothing by default
+	}
 
 	@Override
 	default boolean allProceduresAreCallable() throws SQLException {
