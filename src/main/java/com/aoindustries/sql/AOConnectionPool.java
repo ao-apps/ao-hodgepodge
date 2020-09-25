@@ -27,7 +27,6 @@ import com.aoindustries.lang.AutoCloseables;
 import com.aoindustries.lang.Throwables;
 import com.aoindustries.sql.wrapper.DatabaseMetaDataWrapper;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -299,9 +298,9 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 	/**
 	 * Loads a driver at most once.
 	 */
-	private static void loadDriver(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+	private static void loadDriver(String classname) throws ClassNotFoundException {
 		if(!driversLoaded.containsKey(classname)) {
-			Object O = Class.forName(classname).getConstructor().newInstance();
+			Object O = Class.forName(classname);
 			driversLoaded.putIfAbsent(classname, O);
 		}
 	}
