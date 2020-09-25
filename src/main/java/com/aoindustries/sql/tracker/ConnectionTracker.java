@@ -577,6 +577,12 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	 */
 	@Override
 	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+		// TODO: Also call onRelease on all savepoints after this one in the current transaction.
+		//       This could mean tracking the current savepoint, and having a linked-list style "next" reference between
+		//       tracked savepoints.  Alternatively, could maintain a list of savepoints on the connection.  Finally,
+		//       a savepoint could register and onClose handler on its parent savepoint, which would clean - the
+		//       consideration here would be would only need to release the first savepoint.
+		// TODO: Also, remove all savepoints on rollback/commit?
 		((SavepointTracker)wrapSavepoint(savepoint)).onRelease();
 		super.releaseSavepoint(savepoint);
 	}
