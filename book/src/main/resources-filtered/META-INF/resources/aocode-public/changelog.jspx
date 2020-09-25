@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-09-24T19:12:01-05:00"
+		dateModified="2020-09-25T06:15:58-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -113,9 +113,16 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						to ensure that everything is completely tidy before releasing a connection back to a pool.
 					</li>
 					<li>
+						New package <code>com.aoindustries.sql.failfast</code> that makes a
+						<ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Connection.html">Connection</ao:a>
+						perform in a fail-fast manner.  All access to the connection will fail once a
+						<ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Throwable.html">Throwable</ao:a>
+						has been thrown by the underlying driver, with this state only being cleared by rollback.
+					</li>
+					<li>
 						<p>
-							Registered JDBC drivers for default wrapper and tracker implementations.  These are activated
-							by including a prefix in the JDBC URL.
+							Registered JDBC drivers for default failfast, tracker, and wrapper implementations.  These
+							are activated by including a prefix in the JDBC URL, and may be combined.
 						</p>
 						<p>
 							For example, the following JDBC URL will track the <ao:a href="https://dev.mysql.com/downloads/connector/j/">MySQL JDBC Driver</ao:a>,
@@ -126,6 +133,10 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							Furthermore, the following JDBC URL will wrap the <ao:a href="https://jdbc.postgresql.org/">PostgreSQL JDBC Driver</ao:a>,
 							shielding the driver behind a thorough façade:
 							<code>jdbc:wrapper:postgresql://<var>host</var>/<var>database</var></code>.
+						</p>
+						<p>
+							Finally, the following JDBC URL will perform fail-fast on top of tracking:
+							<code>jdbc:failfast:tracker:postgresql://<var>host</var>/<var>database</var></code>.
 						</p>
 					</li>
 				</ul>
