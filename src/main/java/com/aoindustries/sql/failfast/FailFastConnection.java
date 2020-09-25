@@ -390,12 +390,7 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 				failFastCause = ClosedSQLException.FAST_MARKER_KEEP_PRIVATE;
 			}
 		}
-		try {
-			super.close();
-		} catch(Throwable t) {
-			addFailFastCause(t);
-			throw Throwables.wrap(t, SQLException.class, FailFastSQLException::new);
-		}
+		super.close();
 	}
 
 	@Override
@@ -918,11 +913,6 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 				failFastCause = AbortedSQLException.FAST_MARKER_KEEP_PRIVATE;
 			}
 		}
-		try {
-			super.abort(executor);
-		} catch(Throwable t) {
-			addFailFastCause(t);
-			throw Throwables.wrap(t, SQLException.class, FailFastSQLException::new);
-		}
+		super.abort(executor);
 	}
 }
