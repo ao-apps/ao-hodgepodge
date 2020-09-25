@@ -101,7 +101,7 @@ public interface IFailFastConnection extends IConnectionWrapper {
 	 * @see  ClosedSQLException
 	 */
 	@Override
-	public void close() throws SQLException;
+	void close() throws SQLException;
 
 	/**
 	 * When not in a {@linkplain TerminalSQLException terminal fail-fast state}, will
@@ -122,5 +122,5 @@ public interface IFailFastConnection extends IConnectionWrapper {
 	 * @see  AbortedSQLException
 	 */
 	@Override
-	public void abort(Executor executor) throws SQLException;
+	void abort(Executor executor) throws SQLException;
 }
