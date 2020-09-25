@@ -105,11 +105,11 @@ public class LogManagerUtil {
 
 	/**
 	 * Package private method to get a String property.
-     * If the property is not defined we return the given
-     * default value.
+	 * If the property is not defined we return the given
+	 * default value.
 	 */
 	// @see LogManager#getStringProperty(java.lang.String, java.lang.String)
-    public static String getStringProperty(LogManager manager, String name, String defaultValue) {
+	public static String getStringProperty(LogManager manager, String name, String defaultValue) {
 		if(getStringPropertyMethod != null) {
 			try {
 				return (String)getStringPropertyMethod.invoke(manager, name, defaultValue);
@@ -120,12 +120,12 @@ public class LogManagerUtil {
 				// Fall-through to copied implementation
 			}
 		}
-        String val = manager.getProperty(name);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.trim();
-    }
+		String val = manager.getProperty(name);
+		if (val == null) {
+			return defaultValue;
+		}
+		return val.trim();
+	}
 
 	private static Method getLevelPropertyMethod;
 	static {

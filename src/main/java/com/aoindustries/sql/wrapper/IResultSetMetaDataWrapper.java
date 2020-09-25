@@ -52,47 +52,47 @@ public interface IResultSetMetaDataWrapper extends IWrapper, ResultSetMetaData, 
 	}
 
 	@Override
-    default boolean isAutoIncrement(int column) throws SQLException {
+	default boolean isAutoIncrement(int column) throws SQLException {
 		return getWrapped().isAutoIncrement(column);
 	}
 
 	@Override
-    default boolean isCaseSensitive(int column) throws SQLException {
+	default boolean isCaseSensitive(int column) throws SQLException {
 		return getWrapped().isCaseSensitive(column);
 	}
 
 	@Override
-    default boolean isSearchable(int column) throws SQLException {
+	default boolean isSearchable(int column) throws SQLException {
 		return getWrapped().isSearchable(column);
 	}
 
 	@Override
-    default boolean isCurrency(int column) throws SQLException {
+	default boolean isCurrency(int column) throws SQLException {
 		return getWrapped().isCurrency(column);
 	}
 
 	@Override
-    default int isNullable(int column) throws SQLException {
+	default int isNullable(int column) throws SQLException {
 		return getWrapped().isNullable(column);
 	}
 
 	@Override
-    default boolean isSigned(int column) throws SQLException {
+	default boolean isSigned(int column) throws SQLException {
 		return getWrapped().isSigned(column);
 	}
 
 	@Override
-    default int getColumnDisplaySize(int column) throws SQLException {
+	default int getColumnDisplaySize(int column) throws SQLException {
 		return getWrapped().getColumnDisplaySize(column);
 	}
 
 	@Override
-    default String getColumnLabel(int column) throws SQLException {
+	default String getColumnLabel(int column) throws SQLException {
 		return getWrapped().getColumnLabel(column);
 	}
 
 	@Override
-    default String getColumnName(int column) throws SQLException {
+	default String getColumnName(int column) throws SQLException {
 		return getWrapped().getColumnName(column);
 	}
 
@@ -102,52 +102,52 @@ public interface IResultSetMetaDataWrapper extends IWrapper, ResultSetMetaData, 
 	}
 
 	@Override
-    default int getPrecision(int column) throws SQLException {
+	default int getPrecision(int column) throws SQLException {
 		return getWrapped().getPrecision(column);
 	}
 
 	@Override
-    default int getScale(int column) throws SQLException {
+	default int getScale(int column) throws SQLException {
 		return getWrapped().getScale(column);
 	}
 
 	@Override
-    default String getTableName(int column) throws SQLException {
+	default String getTableName(int column) throws SQLException {
 		return getWrapped().getTableName(column);
 	}
 
 	@Override
-    default String getCatalogName(int column) throws SQLException {
+	default String getCatalogName(int column) throws SQLException {
 		return getWrapped().getCatalogName(column);
 	}
 
 	@Override
-    default int getColumnType(int column) throws SQLException {
+	default int getColumnType(int column) throws SQLException {
 		return getWrapped().getColumnType(column);
 	}
 
 	@Override
-    default String getColumnTypeName(int column) throws SQLException {
+	default String getColumnTypeName(int column) throws SQLException {
 		return getWrapped().getColumnTypeName(column);
 	}
 
 	@Override
-    default boolean isReadOnly(int column) throws SQLException {
+	default boolean isReadOnly(int column) throws SQLException {
 		return getWrapped().isReadOnly(column);
 	}
 
 	@Override
-    default boolean isWritable(int column) throws SQLException {
+	default boolean isWritable(int column) throws SQLException {
 		return getWrapped().isWritable(column);
 	}
 
 	@Override
-    default boolean isDefinitelyWritable(int column) throws SQLException {
+	default boolean isDefinitelyWritable(int column) throws SQLException {
 		return getWrapped().isDefinitelyWritable(column);
 	}
 
 	@Override
-    default String getColumnClassName(int column) throws SQLException {
+	default String getColumnClassName(int column) throws SQLException {
 		return getWrapped().getColumnClassName(column);
 	}
 }

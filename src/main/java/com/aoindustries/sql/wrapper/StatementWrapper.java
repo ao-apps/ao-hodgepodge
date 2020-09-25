@@ -77,12 +77,12 @@ public class StatementWrapper implements IStatementWrapper {
 	 *
 	 * @see  #wrapResultSet(java.sql.ResultSet)
 	 */
-    @Override
+	@Override
 	public ResultSetWrapper getResultSet() throws SQLException {
 		return wrapResultSet(getWrapped().getResultSet());
 	}
 
-    @Override
+	@Override
 	public ConnectionWrapper getConnection() throws SQLException {
 		ConnectionWrapper _connectionWrapper = getConnectionWrapper();
 		assert getWrapped().getConnection() == _connectionWrapper.getWrapped();
@@ -94,7 +94,7 @@ public class StatementWrapper implements IStatementWrapper {
 	 *
 	 * @see  #wrapResultSet(java.sql.ResultSet)
 	 */
-    @Override
+	@Override
 	public ResultSetWrapper getGeneratedKeys() throws SQLException {
 		return wrapResultSet(getWrapped().getGeneratedKeys());
 	}

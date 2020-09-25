@@ -121,9 +121,9 @@ public class LogFollower extends InputStream {
 	}
 
 	/**
-     * @deprecated The finalization mechanism is inherently problematic.
+	 * @deprecated The finalization mechanism is inherently problematic.
 	 */
-    @Deprecated // Java 9: (since="9")
+	@Deprecated // Java 9: (since="9")
 	@Override
 	protected void finalize() throws Throwable {
 		try {
