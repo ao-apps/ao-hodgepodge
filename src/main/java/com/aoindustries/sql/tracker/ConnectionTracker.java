@@ -70,8 +70,8 @@ import java.util.function.Function;
  */
 public class ConnectionTracker extends ConnectionWrapper implements IConnectionTracker {
 
-	public ConnectionTracker(DriverTracker driverTracker, Connection wrapped) {
-		super(driverTracker, wrapped);
+	public ConnectionTracker(DriverTracker driver, Connection wrapped) {
+		super(driver, wrapped);
 	}
 
 	public ConnectionTracker(Connection wrapped) {

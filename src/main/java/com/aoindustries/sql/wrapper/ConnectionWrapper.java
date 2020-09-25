@@ -55,11 +55,11 @@ import java.util.Optional;
  */
 public class ConnectionWrapper implements IConnectionWrapper {
 
-	private final DriverWrapper driverWrapper;
+	private final DriverWrapper driver;
 	private final Connection wrapped;
 
 	public ConnectionWrapper(DriverWrapper driverWrapper, Connection wrapped) {
-		this.driverWrapper = driverWrapper;
+		this.driver = driverWrapper;
 		this.wrapped = wrapped;
 	}
 
@@ -67,8 +67,8 @@ public class ConnectionWrapper implements IConnectionWrapper {
 		this(null, wrapped);
 	}
 
-	protected Optional<? extends DriverWrapper> getDriverWrapper() {
-		return Optional.ofNullable(driverWrapper);
+	protected Optional<? extends DriverWrapper> getDriver() {
+		return Optional.ofNullable(driver);
 	}
 
 	@Override

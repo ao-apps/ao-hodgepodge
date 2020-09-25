@@ -72,7 +72,7 @@ public abstract class DriverWrapper implements Driver {
 		}
 		if(connection instanceof ConnectionWrapper) {
 			ConnectionWrapper _connectionWrapper = (ConnectionWrapper)connection;
-			if(_connectionWrapper.getDriverWrapper().orElse(null) == this) {
+			if(_connectionWrapper.getDriver().orElse(null) == this) {
 				return _connectionWrapper;
 			}
 		}
