@@ -51,7 +51,7 @@ public class Driver extends DriverWrapper {
 	/**
 	 * Registers the driver if not yet already registered.  This is done automatically during class initialization.
 	 *
-	 * @return  {@code true} when an new driver instance if registered, or {@code false} when already registered.
+	 * @return  {@code true} when an new driver instance is registered, or {@code false} when already registered.
 	 *
 	 * @see  DriverManager#registerDriver(java.sql.Driver)
 	 */
@@ -69,7 +69,7 @@ public class Driver extends DriverWrapper {
 	/**
 	 * Deregisters the driver if currently registered.
 	 *
-	 * @return  {@code true} when the driver instance was deregistered, or {@code false} when nothing to deregister.
+	 * @return  {@code true} when the driver instance is deregistered, or {@code false} when nothing to deregister.
 	 *
 	 * @see  DriverManager#deregisterDriver(java.sql.Driver)
 	 */
