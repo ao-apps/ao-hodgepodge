@@ -789,7 +789,7 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 		}
 	}
 
-	private static Map<String,ClientInfoStatus> asMap(Properties props) {
+	private static Map<String,ClientInfoStatus> toClientInfoMap(Properties props) {
 		Map<String,ClientInfoStatus> map = AoCollections.newHashMap(props.size());
 		for(Object key : props.keySet()) {
 			if(key instanceof String) map.put((String)key, ClientInfoStatus.REASON_UNKNOWN);
@@ -799,7 +799,7 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 
 	@Override
 	public void setClientInfo(Properties properties) throws SQLClientInfoException {
-		failFastSQLClientInfoException(() -> asMap(properties));
+		failFastSQLClientInfoException(() -> toClientInfoMap(properties));
 		try {
 			super.setClientInfo(properties);
 		} catch(Throwable t) {
@@ -808,7 +808,7 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 				t,
 				SQLClientInfoException.class,
 				cause -> new SQLClientInfoException(
-					asMap(properties),
+					toClientInfoMap(properties),
 					cause
 				)
 			);
