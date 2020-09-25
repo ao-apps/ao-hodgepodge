@@ -426,7 +426,6 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 		return super.getSchema();
 	}
 
-	
 	/**
 	 * Blocks direct call to wrapped {@link Connection#abort(java.util.concurrent.Executor)}, instead setting closed
 	 * flag and dispatching to {@link #onAbort(java.util.concurrent.Executor)}.  Will only call
