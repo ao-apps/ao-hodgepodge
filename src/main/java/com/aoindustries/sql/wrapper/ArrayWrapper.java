@@ -90,6 +90,7 @@ public class ArrayWrapper implements IArrayWrapper {
 	 */
 	@Override
 	public ResultSetWrapper getResultSet(Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return wrapResultSet(getWrapped().getResultSet(map));
 	}
 
@@ -110,6 +111,7 @@ public class ArrayWrapper implements IArrayWrapper {
 	 */
 	@Override
 	public ResultSetWrapper getResultSet(long index, int count, Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return wrapResultSet(getWrapped().getResultSet(index, count, map));
 	}
 }

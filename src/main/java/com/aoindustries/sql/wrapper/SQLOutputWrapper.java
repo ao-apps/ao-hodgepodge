@@ -30,6 +30,7 @@ import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.Ref;
 import java.sql.RowId;
+import java.sql.SQLData;
 import java.sql.SQLException;
 import java.sql.SQLOutput;
 import java.sql.SQLXML;
@@ -135,6 +136,15 @@ public class SQLOutputWrapper implements ISQLOutputWrapper {
 	}
 
 	/**
+	 * Wraps a {@link SQLData}, if not already wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#wrapSQLData(java.sql.SQLData)
+	 */
+	protected SQLDataWrapper wrapSQLData(SQLData sqlData) {
+		return getConnectionWrapper().wrapSQLData(sqlData);
+	}
+
+	/**
 	 * Unwraps a {@link SQLXML}, if wrapped by this wrapper.
 	 *
 	 * @see  ConnectionWrapper#unwrapSQLXML(java.sql.SQLXML)
@@ -180,6 +190,18 @@ public class SQLOutputWrapper implements ISQLOutputWrapper {
 	@Override
 	public void writeBinaryStream(InputStream x) throws SQLException {
 		getWrapped().writeBinaryStream(unwrapInputStream(x));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  #wrapSQLData(java.sql.SQLData)
+	 */
+	@Override
+	public void writeObject(SQLData x) throws SQLException {
+		try (SQLDataWrapper xWrapper = wrapSQLData(x)) {
+			getWrapped().writeObject(xWrapper);
+		}
 	}
 
 	/**

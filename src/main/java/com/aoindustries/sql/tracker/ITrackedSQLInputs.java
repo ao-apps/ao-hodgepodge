@@ -22,18 +22,18 @@
  */
 package com.aoindustries.sql.tracker;
 
-import java.sql.Connection;
+import com.aoindustries.sql.wrapper.SQLDataWrapper;
 import java.sql.SQLInput;
 import java.util.Map;
 
 public interface ITrackedSQLInputs {
 
 	/**
-	 * Gets all the SQL inputs that have not yet been freed.  SQL input are assumed to be closed with their connection.
+	 * Gets all the SQL inputs that have not yet been closed.
 	 *
 	 * @return  The mapping from wrapped SQL input to tracker without any defensive copy.
 	 *
-	 * @see  Connection#close()
+	 * @see  SQLDataWrapper#readSQL(java.sql.SQLInput, java.lang.String)
 	 */
 	Map<SQLInput,? extends ISQLInputTracker> getTrackedSQLInputs();
 }

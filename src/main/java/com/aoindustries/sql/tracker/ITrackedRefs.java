@@ -29,7 +29,7 @@ import java.util.Map;
 public interface ITrackedRefs {
 
 	/**
-	 * Gets all the refs that have not yet been freed.  Refs are assumed to be closed with their connection.
+	 * Gets all the refs that have not yet been closed.  Refs are assumed to be closed with their connection.
 	 *
 	 * @return  The mapping from wrapped ref to tracker without any defensive copy.
 	 *

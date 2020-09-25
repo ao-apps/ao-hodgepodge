@@ -66,6 +66,7 @@ public interface IArrayWrapper extends IWrapper, Array, AutoCloseable {
 
 	@Override
 	default Object getArray(Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return getWrapped().getArray(map);
 	}
 
@@ -76,6 +77,7 @@ public interface IArrayWrapper extends IWrapper, Array, AutoCloseable {
 
 	@Override
 	default Object getArray(long index, int count, Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return getWrapped().getArray(index, count, map);
 	}
 

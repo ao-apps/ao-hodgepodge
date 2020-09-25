@@ -39,6 +39,7 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
+import java.sql.SQLData;
 import java.sql.SQLException;
 import java.sql.SQLInput;
 import java.sql.SQLOutput;
@@ -212,7 +213,18 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	}
 
 	/**
+	 * Creates a new {@link SQLDataWrapper}.
+	 *
+	 * @see  #wrapSQLData(java.sql.SQLData)
+	 */
+	protected SQLDataWrapper newSQLDataWrapper(SQLData sqlData) {
+		return new SQLDataWrapper(this, sqlData);
+	}
+
+	/**
 	 * Creates a new {@link SQLInputWrapper}.
+	 *
+	 * @see  #wrapSQLInput(java.sql.SQLInput)
 	 */
 	protected SQLInputWrapper newSQLInputWrapper(SQLInput sqlInput) {
 		return new SQLInputWrapper(this, sqlInput);
@@ -220,6 +232,8 @@ public class ConnectionWrapper implements IConnectionWrapper {
 
 	/**
 	 * Creates a new {@link SQLOutputWrapper}.
+	 *
+	 * @see  #wrapSQLOutput(java.sql.SQLOutput)
 	 */
 	protected SQLOutputWrapper newSQLOutputWrapper(SQLOutput sqlOutput) {
 		return new SQLOutputWrapper(this, sqlOutput);
@@ -790,6 +804,63 @@ public class ConnectionWrapper implements IConnectionWrapper {
 			}
 		}
 		return savepoint;
+	}
+
+	/**
+	 * Wraps a {@link SQLData}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newSQLDataWrapper(java.sql.SQLData)
+	 * @see  SQLOutputWrapper#wrapSQLData(java.sql.SQLData)
+	 */
+	protected SQLDataWrapper wrapSQLData(SQLData sqlData) {
+		if(sqlData == null) {
+			return null;
+		}
+		if(sqlData instanceof SQLDataWrapper) {
+			SQLDataWrapper sqlDataWrapper = (SQLDataWrapper)sqlData;
+			if(sqlDataWrapper.getConnectionWrapper() == this) {
+				return sqlDataWrapper;
+			}
+		}
+		return newSQLDataWrapper(sqlData);
+	}
+
+	/**
+	 * Wraps a {@link SQLInput}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newSQLInputWrapper(java.sql.SQLInput)
+	 * @see  SQLDataWrapper#wrapSQLInput(java.sql.SQLInput)
+	 */
+	protected SQLInputWrapper wrapSQLInput(SQLInput sqlInput) {
+		if(sqlInput == null) {
+			return null;
+		}
+		if(sqlInput instanceof SQLInputWrapper) {
+			SQLInputWrapper sqlInputWrapper = (SQLInputWrapper)sqlInput;
+			if(sqlInputWrapper.getConnectionWrapper() == this) {
+				return sqlInputWrapper;
+			}
+		}
+		return newSQLInputWrapper(sqlInput);
+	}
+
+	/**
+	 * Wraps a {@link SQLOutput}, if not already wrapped by this wrapper.
+	 *
+	 * @see  #newSQLOutputWrapper(java.sql.SQLOutput)
+	 * @see  SQLDataWrapper#wrapSQLOutput(java.sql.SQLOutput)
+	 */
+	protected SQLOutputWrapper wrapSQLOutput(SQLOutput sqlOutput) {
+		if(sqlOutput == null) {
+			return null;
+		}
+		if(sqlOutput instanceof SQLOutputWrapper) {
+			SQLOutputWrapper sqlOutputWrapper = (SQLOutputWrapper)sqlOutput;
+			if(sqlOutputWrapper.getConnectionWrapper() == this) {
+				return sqlOutputWrapper;
+			}
+		}
+		return newSQLOutputWrapper(sqlOutput);
 	}
 
 	/**

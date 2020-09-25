@@ -150,11 +150,13 @@ public interface IConnectionWrapper extends IWrapper, Connection {
 
 	@Override
 	default Map<String,Class<?>> getTypeMap() throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return getWrapped().getTypeMap();
 	}
 
 	@Override
 	default void setTypeMap(Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		getWrapped().setTypeMap(map);
 	}
 

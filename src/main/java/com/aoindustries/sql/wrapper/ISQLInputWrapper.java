@@ -45,6 +45,8 @@ public interface ISQLInputWrapper extends IWrapper, SQLInput, AutoCloseable {
 
 	/**
 	 * Releases resources associated with this wrapper.
+	 *
+	 * @see  SQLDataWrapper#readSQL(java.sql.SQLInput, java.lang.String)
 	 */
 	@Override
 	default void close() throws SQLException {

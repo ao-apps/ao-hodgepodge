@@ -20,46 +20,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.sql.wrapper;
+package com.aoindustries.sql.tracker;
 
+import com.aoindustries.sql.wrapper.ISQLDataWrapper;
+import java.sql.SQLData;
 import java.sql.SQLException;
-import java.sql.Struct;
-import java.util.Map;
 
 /**
- * Wraps a {@link Struct}.
+ * Tracks a {@link SQLData} for unclosed or unfreed objects.
  *
  * @author  AO Industries, Inc.
  */
-public interface IStructWrapper extends IWrapper, Struct, AutoCloseable {
+public interface ISQLDataTracker extends ISQLDataWrapper, IOnClose,
+	ITrackedSQLInputs,
+	ITrackedSQLOutputs {
 
 	/**
-	 * Gets the struct that is wrapped.
+	 * Calls onClose handlers, closes all tracked objects, then calls {@code super.close()}.
+	 *
+	 * @see  #addOnClose(java.lang.Runnable)
 	 */
 	@Override
-	Struct getWrapped();
-
-	/**
-	 * Releases resources associated with this wrapper.
-	 */
-	@Override
-	default void close() throws SQLException {
-		// Do nothing by default
-	}
-
-	@Override
-	default String getSQLTypeName() throws SQLException {
-		return getWrapped().getSQLTypeName();
-	}
-
-	@Override
-	default Object[] getAttributes() throws SQLException {
-		return getWrapped().getAttributes();
-	}
-
-	@Override
-	default Object[] getAttributes(Map<String,Class<?>> map) throws SQLException {
-		// TODO: How can we wrap SQLData on UDT maps?
-		return getWrapped().getAttributes(map);
-	}
+	void close() throws SQLException;
 }

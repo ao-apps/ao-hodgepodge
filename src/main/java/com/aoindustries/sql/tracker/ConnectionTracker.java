@@ -45,6 +45,7 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
+import java.sql.SQLData;
 import java.sql.SQLException;
 import java.sql.SQLInput;
 import java.sql.SQLOutput;
@@ -100,6 +101,7 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	private final Map<ResultSet,ResultSetTracker> trackedResultSets = synchronizedMap(new IdentityHashMap<>());
 	private final Map<ResultSetMetaData,ResultSetMetaDataTracker> trackedResultSetMetaDatas = synchronizedMap(new IdentityHashMap<>());
 	private final Map<RowId,RowIdTracker> trackedRowIds = synchronizedMap(new IdentityHashMap<>());
+	private final Map<SQLData,SQLDataTracker> trackedSQLDatas = synchronizedMap(new IdentityHashMap<>());
 	private final Map<SQLInput,SQLInputTracker> trackedSQLInputs = synchronizedMap(new IdentityHashMap<>());
 	private final Map<SQLOutput,SQLOutputTracker> trackedSQLOutputs = synchronizedMap(new IdentityHashMap<>());
 	private final Map<SQLXML,SQLXMLTracker> trackedSQLXMLs = synchronizedMap(new IdentityHashMap<>());
@@ -196,6 +198,12 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	@SuppressWarnings("ReturnOfCollectionOrArrayField") // No defensive copy
 	final public Map<RowId,RowIdTracker> getTrackedRowIds() {
 		return trackedRowIds;
+	}
+
+	@Override
+	@SuppressWarnings("ReturnOfCollectionOrArrayField") // No defensive copy
+	final public Map<SQLData,SQLDataTracker> getTrackedSQLDatas() {
+		return trackedSQLDatas;
 	}
 
 	@Override
@@ -394,6 +402,7 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 			trackedSQLXMLs,
 			trackedStructs,
 			// SQLData
+			trackedSQLDatas,
 			trackedSQLInputs,
 			trackedSQLOutputs,
 			// Meta datas
@@ -429,6 +438,7 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 		clear(trackedResultSets);
 		clear(trackedResultSetMetaDatas);
 		clear(trackedRowIds);
+		clear(trackedSQLDatas);
 		clear(trackedSQLInputs);
 		clear(trackedSQLOutputs);
 		clear(trackedSQLXMLs);
@@ -513,6 +523,11 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	@Override
 	protected RowIdTracker newRowIdWrapper(RowId rowId) {
 		return newIfAbsent(trackedRowIds, rowId, RowIdTracker::new);
+	}
+
+	@Override
+	protected SQLDataTracker newSQLDataWrapper(SQLData sqlData) {
+		return newIfAbsent(trackedSQLDatas, sqlData, SQLDataTracker::new);
 	}
 
 	@Override

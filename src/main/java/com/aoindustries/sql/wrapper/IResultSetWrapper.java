@@ -595,6 +595,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 
 	@Override
 	default Object getObject(int columnIndex, Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return getWrapped().getObject(columnIndex, map);
 	}
 
@@ -612,6 +613,7 @@ public interface IResultSetWrapper extends IWrapper, ResultSet {
 
 	@Override
 	default Object getObject(String columnLabel, Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return getWrapped().getObject(columnLabel, map);
 	}
 

@@ -57,6 +57,8 @@ public interface ISQLOutputWrapper extends IWrapper, SQLOutput, AutoCloseable {
 
 	/**
 	 * Releases resources associated with this wrapper.
+	 *
+	 * @see  SQLDataWrapper#writeSQL(java.sql.SQLOutput)
 	 */
 	@Override
 	default void close() throws SQLException {
@@ -138,9 +140,7 @@ public interface ISQLOutputWrapper extends IWrapper, SQLOutput, AutoCloseable {
 	void writeBinaryStream(InputStream x) throws SQLException;
 
 	@Override
-	default void writeObject(SQLData x) throws SQLException {
-		getWrapped().writeObject(x);
-	}
+	void writeObject(SQLData x) throws SQLException;
 
 	@Override
 	void writeRef(Ref x) throws SQLException;

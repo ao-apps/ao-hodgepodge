@@ -29,7 +29,7 @@ import java.util.Map;
 public interface ITrackedStructs {
 
 	/**
-	 * Gets all the structs that have not yet been freed.  Structs are assumed to be closed with their connection.
+	 * Gets all the structs that have not yet been closed.  Structs are assumed to be closed with their connection.
 	 *
 	 * @return  The mapping from wrapped struct to tracker without any defensive copy.
 	 *

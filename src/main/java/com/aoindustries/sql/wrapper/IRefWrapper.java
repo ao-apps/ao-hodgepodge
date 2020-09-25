@@ -54,6 +54,7 @@ public interface IRefWrapper extends IWrapper, Ref, AutoCloseable {
 
 	@Override
 	default Object getObject(Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return getWrapped().getObject(map);
 	}
 

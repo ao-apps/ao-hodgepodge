@@ -22,22 +22,23 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import java.sql.SQLData;
 import java.sql.SQLException;
-import java.sql.Struct;
-import java.util.Map;
+import java.sql.SQLInput;
+import java.sql.SQLOutput;
 
 /**
- * Wraps a {@link Struct}.
+ * Wraps a {@link SQLData}.
  *
  * @author  AO Industries, Inc.
  */
-public interface IStructWrapper extends IWrapper, Struct, AutoCloseable {
+public interface ISQLDataWrapper extends IWrapper, SQLData, AutoCloseable {
 
 	/**
-	 * Gets the struct that is wrapped.
+	 * Gets the SQL data that is wrapped.
 	 */
 	@Override
-	Struct getWrapped();
+	SQLData getWrapped();
 
 	/**
 	 * Releases resources associated with this wrapper.
@@ -53,13 +54,8 @@ public interface IStructWrapper extends IWrapper, Struct, AutoCloseable {
 	}
 
 	@Override
-	default Object[] getAttributes() throws SQLException {
-		return getWrapped().getAttributes();
-	}
+	void readSQL(SQLInput stream, String typeName) throws SQLException;
 
 	@Override
-	default Object[] getAttributes(Map<String,Class<?>> map) throws SQLException {
-		// TODO: How can we wrap SQLData on UDT maps?
-		return getWrapped().getAttributes(map);
-	}
+	void writeSQL(SQLOutput stream) throws SQLException;
 }

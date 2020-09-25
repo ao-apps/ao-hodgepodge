@@ -146,6 +146,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 
 	@Override
 	default Object getObject(int parameterIndex, Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return getWrapped().getObject(parameterIndex, map);
 	}
 
@@ -392,6 +393,7 @@ public interface ICallableStatementWrapper extends IPreparedStatementWrapper, Ca
 
 	@Override
 	default Object getObject(String parameterName, Map<String,Class<?>> map) throws SQLException {
+		// TODO: How can we wrap SQLData on UDT maps?
 		return getWrapped().getObject(parameterName, map);
 	}
 

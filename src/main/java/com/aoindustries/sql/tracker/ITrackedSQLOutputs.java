@@ -22,18 +22,18 @@
  */
 package com.aoindustries.sql.tracker;
 
-import java.sql.Connection;
+import com.aoindustries.sql.wrapper.SQLDataWrapper;
 import java.sql.SQLOutput;
 import java.util.Map;
 
 public interface ITrackedSQLOutputs {
 
 	/**
-	 * Gets all the SQL outputs that have not yet been freed.  SQL output are assumed to be closed with their connection.
+	 * Gets all the SQL outputs that have not yet been closed.
 	 *
 	 * @return  The mapping from wrapped SQL output to tracker without any defensive copy.
 	 *
-	 * @see  Connection#close()
+	 * @see  SQLDataWrapper#writeSQL(java.sql.SQLOutput)
 	 */
 	Map<SQLOutput,? extends ISQLOutputTracker> getTrackedSQLOutputs();
 }

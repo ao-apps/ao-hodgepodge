@@ -25,6 +25,7 @@ package com.aoindustries.sql.failfast;
 import com.aoindustries.collections.AoCollections;
 import com.aoindustries.lang.Throwables;
 import com.aoindustries.sql.wrapper.ConnectionWrapper;
+import com.aoindustries.sql.wrapper.SQLDataWrapper;
 import com.aoindustries.sql.wrapper.StatementWrapper;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +47,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLClientInfoException;
+import java.sql.SQLData;
 import java.sql.SQLException;
 import java.sql.SQLInput;
 import java.sql.SQLOutput;
@@ -240,6 +242,11 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 	@Override
 	protected FailFastRowId newRowIdWrapper(RowId rowId) {
 		return new FailFastRowId(this, rowId);
+	}
+
+	@Override
+	protected SQLDataWrapper newSQLDataWrapper(SQLData sqlData) {
+		return new FailFastSQLData(this, sqlData);
 	}
 
 	@Override
