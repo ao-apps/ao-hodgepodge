@@ -94,7 +94,7 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 			if(
 				cause == ClosedSQLException.FAST_MARKER_KEEP_PRIVATE
 				|| cause == AbortedSQLException.FAST_MARKER_KEEP_PRIVATE
-			) throw new IllegalArgumentException("Private markers should be set directly without merge");
+			) throw new IllegalArgumentException("Private markers must be set directly without merge");
 			synchronized(failFastLock) {
 				if(
 					// Don't merge if already in terminal fast-fail state
