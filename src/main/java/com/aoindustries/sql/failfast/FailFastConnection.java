@@ -138,7 +138,7 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 	}
 
 	/**
-	 * @throws  SQLException  if a current fail-fast state
+	 * @throws  SQLException  if currently in a fail-fast state
 	 *
 	 * @see  ThrowableUtil#newFailFastSQLException(java.lang.Throwable)
 	 */
@@ -148,7 +148,7 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 	}
 
 	/**
-	 * @throws  SQLClientInfoException  if a current fail-fast state
+	 * @throws  SQLClientInfoException  if currently in a fail-fast state
 	 *
 	 * @see  ThrowableUtil#newSQLClientInfoException(java.util.function.Supplier, java.lang.Throwable)
 	 */
@@ -158,7 +158,7 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 	}
 
 	/**
-	 * @throws  IOException  if a current fail-fast state
+	 * @throws  IOException  if currently in a fail-fast state
 	 *
 	 * @see  ThrowableUtil#newIOException(java.lang.Throwable)
 	 */
