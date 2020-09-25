@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.tracker;
 
+import com.aoindustries.lang.Throwables;
 import com.aoindustries.sql.wrapper.DriverWrapper;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -36,18 +37,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Tracks a {@link Driver} for unclosed or unfreed objects.
+ * Tracks {@linkplain Connection connections} obtained from other {@linkplain Driver drivers} for unclosed or unfreed
+ * objects.
  *
  * @author  AO Industries, Inc.
  */
-// TODO: logger with package as root?
-public class DriverTracker extends DriverWrapper implements IDriverTracker {
+public abstract class DriverTracker extends DriverWrapper implements IOnClose {
 
 	private static final Logger logger = Logger.getLogger(DriverTracker.class.getName());
 
-	public DriverTracker(Driver wrapped) {
-		super(wrapped);
-	}
+	public DriverTracker() {}
 
 	private final List<Runnable> onCloseHandlers = Collections.synchronizedList(new ArrayList<>());
 
@@ -58,9 +57,15 @@ public class DriverTracker extends DriverWrapper implements IDriverTracker {
 
 	private final Map<Connection,ConnectionTracker> trackedConnections = synchronizedMap(new IdentityHashMap<>());
 
-	@Override
+	/**
+	 * Gets all the connections that have not yet been closed.
+	 *
+	 * @return  The mapping from wrapped connection to tracker without any defensive copy.
+	 *
+	 * @see  ConnectionTracker#close()
+	 */
 	@SuppressWarnings("ReturnOfCollectionOrArrayField") // No defensive copy
-	final public Map<Connection,ConnectionTracker> getTrackedConnections() {
+	public final Map<Connection,ConnectionTracker> getTrackedConnections() {
 		return trackedConnections;
 	}
 
@@ -69,11 +74,21 @@ public class DriverTracker extends DriverWrapper implements IDriverTracker {
 		return ConnectionTracker.newIfAbsent(trackedConnections, this, connection, ConnectionTracker::new);
 	}
 
+	/**
+	 * Calls onClose handlers, closes all tracked objects, then calls {@code super.onDeregister()}.
+	 *
+	 * @see  #addOnClose(java.lang.Runnable)
+	 */
 	@Override
-	public void deregister() {
+	protected void onDeregister() {
 		Throwable t0 = ConnectionTracker.clearRunAndCatch(onCloseHandlers);
 		// Close tracked objects
 		t0 = ConnectionTracker.clearCloseAndCatch(t0, trackedConnections);
+		try {
+			super.onDeregister();
+		} catch(Throwable t) {
+			t0 = Throwables.addSuppressed(t0, t);
+		}
 		if(t0 != null) {
 			Logger l;
 			try {

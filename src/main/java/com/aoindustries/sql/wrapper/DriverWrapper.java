@@ -24,26 +24,33 @@ package com.aoindustries.sql.wrapper;
 
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.DriverAction;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
- * Wraps a {@link Driver}.
+ * Wraps {@linkplain Connection connections} obtained from other {@linkplain Driver drivers}.
  *
  * @author  AO Industries, Inc.
  */
-public class DriverWrapper implements IDriverWrapper {
+public abstract class DriverWrapper implements Driver {
 
-	private final Driver wrapped;
-
-	public DriverWrapper(Driver wrapped) {
-		this.wrapped = wrapped;
-	}
+	public DriverWrapper() {}
 
 	@Override
-	public Driver getWrapped() {
-		return wrapped;
+	public String toString() {
+		return "jdbc:" + getUrlPrefix() + ":*";
 	}
+
+	/**
+	 * Gets the JDBC prefix used for this driver wrapper.  This will be inserted after "jdbc:" in the wrapped
+	 * driver URL.  For example, "jdbc:<var>prefix</var>:postgresql://<var>host</var>/<var>database</var>"
+	 */
+	protected abstract String getUrlPrefix();
 
 	/**
 	 * Creates a new {@link ConnectionWrapper}.
@@ -72,8 +79,65 @@ public class DriverWrapper implements IDriverWrapper {
 		return newConnectionWrapper(connection);
 	}
 
+	/**
+	 * Gets the JDBC URL used by the wrapped driver.  This removes the prefix from the URL.
+	 *
+	 * @return  The modified URL or {@code null} when prefix not found in the URL.
+	 */
+	protected String toWrappedUrl(String url) {
+		String prefix = "jdbc:" + getUrlPrefix() + ":";
+		if(url.startsWith(prefix)) {
+			return "jdbc:" + url.substring(prefix.length());
+		} else {
+			return null;
+		}
+	}
+
 	@Override
 	public ConnectionWrapper connect(String url, Properties info) throws SQLException {
-		return wrapConnection(getWrapped().connect(url, info));
+		String wrappedUrl = toWrappedUrl(url);
+		if(wrappedUrl != null) {
+			try {
+				return wrapConnection(DriverManager.getDriver(wrappedUrl).connect(url, info));
+			} catch(SQLException e) {
+				// DriverManager.getDriver(String) throws exception when no match found
+				// Fall-through to return null
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean acceptsURL(String url) throws SQLException {
+		return toWrappedUrl(url) != null;
+	}
+
+	@Override
+	public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
+		return new DriverPropertyInfo[0];
+	}
+
+	@Override
+	public abstract int getMajorVersion();
+
+	@Override
+	public abstract int getMinorVersion();
+
+	@Override
+	public boolean jdbcCompliant() {
+		return false;
+	}
+
+	@Override
+	public abstract Logger getParentLogger() throws SQLFeatureNotSupportedException;
+
+	/**
+	 * Called on driver deregistration.
+	 *
+	 * @see  DriverAction
+	 */
+	@SuppressWarnings("NoopMethodInAbstractClass")
+	protected void onDeregister() {
+		// Nothing to do
 	}
 }

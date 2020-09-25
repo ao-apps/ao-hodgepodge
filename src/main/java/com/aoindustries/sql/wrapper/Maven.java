@@ -20,35 +20,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.sql.tracker;
+package com.aoindustries.sql.wrapper;
 
-import com.aoindustries.sql.wrapper.IDriverWrapper;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverAction;
-import java.util.Map;
+import com.aoindustries.util.PropertiesUtils;
+import java.io.IOException;
+import java.util.Properties;
 
-/**
- * Tracks a {@link Driver} for unclosed or unfreed objects.
- *
- * @author  AO Industries, Inc.
- */
-public interface IDriverTracker extends IDriverWrapper, DriverAction, IOnClose {
+class Maven {
 
-	/**
-	 * Gets all the connections that have not yet been closed.
-	 *
-	 * @return  The mapping from wrapped connection to tracker without any defensive copy.
-	 *
-	 * @see  ConnectionTracker#close()
-	 */
-	Map<Connection,? extends IConnectionTracker> getTrackedConnections();
+	static final Properties properties;
+	static {
+		try {
+			properties = PropertiesUtils.loadFromResource(Maven.class, "Maven.properties");
+		} catch(IOException e) {
+			throw new ExceptionInInitializerError(e);
+		}
+	}
 
-	/**
-	 * Calls onClose handlers, closes all tracked objects, then calls {@code super.deregister()}.
-	 *
-	 * @see  #addOnClose(java.lang.Runnable)
-	 */
-	@Override
-	void deregister();
+	private Maven() {}
 }
