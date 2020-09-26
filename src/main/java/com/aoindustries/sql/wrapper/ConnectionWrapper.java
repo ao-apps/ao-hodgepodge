@@ -757,6 +757,7 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	 *
 	 * @see  PreparedStatementWrapper#unwrapRowId(java.sql.RowId)
 	 * @see  ResultSetWrapper#unwrapRowId(java.sql.RowId)
+	 * @see  RowIdWrapper#unwrapRowId(java.sql.RowId)
 	 * @see  SQLOutputWrapper#unwrapRowId(java.sql.RowId)
 	 */
 	protected RowId unwrapRowId(RowId rowId) {

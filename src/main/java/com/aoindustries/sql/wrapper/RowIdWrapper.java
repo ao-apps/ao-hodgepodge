@@ -51,9 +51,20 @@ public class RowIdWrapper implements IRowIdWrapper {
 		return wrapped;
 	}
 
+	/**
+	 * Unwraps a {@link RowId}, if wrapped by this wrapper.
+	 *
+	 * @see  ConnectionWrapper#unwrapRowId(java.sql.RowId)
+	 */
+	protected RowId unwrapRowId(RowId rowId) {
+		return getConnectionWrapper().unwrapRowId(rowId);
+	}
+
 	@Override
-	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 	public boolean equals(Object obj) {
+		if(obj instanceof RowId) {
+			obj = unwrapRowId((RowId)obj);
+		}
 		return getWrapped().equals(obj);
 	}
 
