@@ -25,7 +25,9 @@ package com.aoindustries.sql;
 import com.aoindustries.io.AOPool;
 import com.aoindustries.lang.AutoCloseables;
 import com.aoindustries.lang.Throwables;
-import com.aoindustries.sql.wrapper.DatabaseMetaDataWrapper;
+import com.aoindustries.sql.tracker.ConnectionTracker;
+import com.aoindustries.sql.tracker.DatabaseMetaDataTracker;
+import com.aoindustries.sql.tracker.IConnectionTracker;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -78,11 +80,11 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 
 	@SuppressWarnings("null")
 	private Connection unwrap(Connection conn) throws SQLException {
-		IPooledConnectionWrapper wrapper;
-		if(conn instanceof IPooledConnectionWrapper) {
-			wrapper = (IPooledConnectionWrapper)conn;
+		IPooledConnection wrapper;
+		if(conn instanceof IPooledConnection) {
+			wrapper = (IPooledConnection)conn;
 		} else {
-			wrapper = conn.unwrap(IPooledConnectionWrapper.class);
+			wrapper = conn.unwrap(IPooledConnection.class);
 		}
 		if(wrapper.getPool() == this) {
 			return wrapper.getWrapped();
@@ -305,15 +307,15 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		}
 	}
 
-	private static class PooledDatabaseMetaDataWrapper extends DatabaseMetaDataWrapper {
+	private static class PooledDatabaseMetaData extends DatabaseMetaDataTracker {
 
-		private PooledDatabaseMetaDataWrapper(PooledConnectionWrapper connectionWrapper, DatabaseMetaData wrapped) {
-			super(connectionWrapper, wrapped);
+		private PooledDatabaseMetaData(PooledConnection pooledConnection, DatabaseMetaData wrapped) {
+			super(pooledConnection, wrapped);
 		}
 
 		@Override
-		protected PooledConnectionWrapper getConnectionWrapper() {
-			return (PooledConnectionWrapper)super.getConnectionWrapper();
+		protected PooledConnection getConnectionWrapper() {
+			return (PooledConnection)super.getConnectionWrapper();
 		}
 
 		@Override
@@ -342,16 +344,15 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		}
 	}
 
-	private static interface IPooledConnectionWrapper extends IUncloseableConnectionWrapper {
+	private static interface IPooledConnection extends IConnectionTracker {
 		AOConnectionPool getPool();
 	}
 
-	private static class PooledConnectionWrapper extends UncloseableConnectionWrapper
-		implements IPooledConnectionWrapper {
+	private static class PooledConnection extends ConnectionTracker implements IPooledConnection {
 
 		private final AOConnectionPool pool;
 
-		private PooledConnectionWrapper(AOConnectionPool pool, Connection wrapped) {
+		private PooledConnection(AOConnectionPool pool, Connection wrapped) {
 			super(wrapped);
 			this.pool = pool;
 		}
@@ -362,11 +363,27 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		}
 
 		@Override
+		protected PooledDatabaseMetaData newDatabaseMetaDataWrapper(DatabaseMetaData metaData) {
+			return new PooledDatabaseMetaData(this, metaData);
+		}
+
+		/**
+		 * Releases to the pool instead of closing the connection.
+		 */
+		@Override
+		protected void doClose() throws SQLException {
+			pool.release(this);
+		}
+
+		/**
+		 * Aborts the connection then releases to the pool.
+		 */
+		@Override
 		@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-		public void onAbort(Executor executor) throws SQLException {
+		protected void doAbort(Executor executor) throws SQLException {
 			Throwable t0 = null;
 			try {
-				super.onAbort(executor);
+				super.doAbort(executor);
 			} catch(Throwable t) {
 				t0 = Throwables.addSuppressed(t0, t);
 			}
@@ -378,16 +395,6 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 			if(t0 != null) {
 				throw Throwables.wrap(t0, SQLException.class, SQLException::new);
 			}
-		}
-
-		@Override
-		public void onClose() throws SQLException {
-			pool.release(this);
-		}
-
-		@Override
-		protected PooledDatabaseMetaDataWrapper newDatabaseMetaDataWrapper(DatabaseMetaData metaData) {
-			return new PooledDatabaseMetaDataWrapper(this, metaData);
 		}
 	}
 
@@ -406,9 +413,9 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 					// to eliminate unnecessary round-trips and improve performance over high-latency links.
 					conn = new PostgresqlConnectionWrapper(conn);
 				}
-				PooledConnectionWrapper connectionWrapper = new PooledConnectionWrapper(this, conn);
+				PooledConnection pooledConnection = new PooledConnection(this, conn);
 				successful = true;
-				return connectionWrapper;
+				return pooledConnection;
 			} finally {
 				if(!successful) conn.close();
 			}
@@ -518,9 +525,19 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 	@Override
 	protected SQLException newException(String message, Throwable cause) {
 		if(cause instanceof SQLException) return (SQLException)cause;
-		SQLException err = new SQLException(message);
-		if(cause != null) err.initCause(cause);
-		return err;
+		if(message == null) {
+			if(cause == null) {
+				return new SQLException();
+			} else {
+				return new SQLException(cause);
+			}
+		} else {
+			if(cause == null) {
+				return new SQLException(message);
+			} else {
+				return new SQLException(message, cause);
+			}
+		}
 	}
 
 	@Override

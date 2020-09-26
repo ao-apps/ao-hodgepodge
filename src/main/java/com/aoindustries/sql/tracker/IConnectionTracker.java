@@ -65,7 +65,8 @@ public interface IConnectionTracker extends IConnectionWrapper, IOnClose,
 	void releaseSavepoint(Savepoint savepoint) throws SQLException;
 
 	/**
-	 * Calls onClose handlers, closes all tracked objects, then calls {@code super.close()}.
+	 * Calls onClose handlers, closes all tracked objects, rolls-back any transaction in-progress and puts back in
+	 * auto-commit mode, then calls {@code super.close()}.
 	 *
 	 * @see  #addOnClose(java.lang.Runnable)
 	 */

@@ -859,10 +859,19 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	/**
 	 * @deprecated  Please release to the pool by {@linkplain AutoCloseable#close() closing the connection},
 	 *              preferably via try-with-resources.
+	 *
+	 * @see  AutoCloseable#close()
 	 */
 	@Deprecated
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	final public void releaseConnection(C connection) throws E {
-		release(connection);
+		try {
+			connection.close();
+		} catch(Throwable t) {
+			if(t instanceof Error) throw (Error)t;
+			if(t instanceof RuntimeException) throw (RuntimeException)t;
+			throw newException(null, t);
+		}
 	}
 
 	/**
