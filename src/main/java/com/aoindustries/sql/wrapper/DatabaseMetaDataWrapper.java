@@ -129,6 +129,7 @@ public class DatabaseMetaDataWrapper implements IDatabaseMetaDataWrapper {
 	 *
 	 * @see  #wrapResultSet(java.sql.ResultSet)
 	 */
+	// TODO: Review uses of {@inheritDoc} that are not necessary
 	@Override
 	public ResultSetWrapper getTableTypes() throws SQLException {
 		return wrapResultSet(getWrapped().getTableTypes());
