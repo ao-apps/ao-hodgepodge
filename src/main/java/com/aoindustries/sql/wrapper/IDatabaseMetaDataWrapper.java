@@ -803,14 +803,36 @@ public interface IDatabaseMetaDataWrapper extends IWrapper, DatabaseMetaData, Au
 		return getWrapped().getDatabaseMinorVersion();
 	}
 
+	/**
+	 * @return  The lower of the wrapped JDBC version and this API JDBC version (currently JDBC 4.2 for Java 8).
+	 */
+	// Java 9: 4.3
 	@Override
 	default int getJDBCMajorVersion() throws SQLException {
-		return getWrapped().getJDBCMajorVersion();
+		final int MAJOR = 4;
+		return Math.min(MAJOR, getWrapped().getJDBCMajorVersion());
 	}
 
+	/**
+	 * @return  The lower of the wrapped JDBC version and this API JDBC version (currently JDBC 4.2 for Java 8).
+	 */
+	// Java 9: 4.3
 	@Override
 	default int getJDBCMinorVersion() throws SQLException {
-		return getWrapped().getJDBCMinorVersion();
+		final int MAJOR = 4, MINOR = 2;
+		DatabaseMetaData wrapped = getWrapped();
+		int wrappedMajor = wrapped.getJDBCMajorVersion();
+		if(wrappedMajor < MAJOR) {
+			// Wrapped has lower major, use its minor directly
+			return wrapped.getJDBCMinorVersion();
+		} else if(wrappedMajor > MAJOR) {
+			// Wrapped has higher major, use our minor directly
+			return MINOR;
+		} else {
+			// Same major, use lower minor
+			assert wrappedMajor == MAJOR;
+			return Math.min(MINOR, wrapped.getJDBCMinorVersion());
+		}
 	}
 
 	@Override
@@ -874,4 +896,6 @@ public interface IDatabaseMetaDataWrapper extends IWrapper, DatabaseMetaData, Au
 	}
 
 	// Java 9: boolean supportsSharding() throws SQLException;
+
+	// Note: When going to JDBC version above 4.2, update getJDBCMajorVersion() and getJDBCMinorVersion() above.
 }
