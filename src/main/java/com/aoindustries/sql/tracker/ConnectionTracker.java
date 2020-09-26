@@ -567,8 +567,12 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 
 	/**
 	 * {@inheritDoc}
+	 * <p>
+	 * This default implementation calls {@link #doClose()}.
+	 * </p>
 	 *
 	 * @see  #closeTracked(java.lang.Throwable)
+	 * @see  #doClose()
 	 */
 	@Override
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
@@ -577,7 +581,7 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 		// Close tracked objects
 		t0 = closeTracked(t0);
 		try {
-			super.close();
+			doClose();
 		} catch(Throwable t) {
 			t0 = Throwables.addSuppressed(t0, t);
 		}
@@ -604,8 +608,12 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 
 	/**
 	 * {@inheritDoc}
+	 * <p>
+	 * This default implementation calls {@link #doAbort(java.util.concurrent.Executor)}.
+	 * </p>
 	 *
 	 * @see  #clearTracking()
+	 * @see  #doAbort(java.util.concurrent.Executor)
 	 */
 	@Override
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
@@ -613,10 +621,36 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 		Throwable t0 = clearRunAndCatch(onCloseHandlers);
 		clearTracking();
 		try {
-			super.abort(executor);
+			doAbort(executor);
 		} catch(Throwable t) {
 			t0 = Throwables.addSuppressed(t0, t);
 		}
 		if(t0 != null) throw Throwables.wrap(t0, SQLException.class, SQLException::new);
+	}
+	/**
+	 * Performs the actual close, called once all onClose handlers completed and all tracked objects closed.
+	 * <p>
+	 * This default implementation calls {@code super.close()}
+	 * </p>
+	 *
+	 * @see  #close()
+	 */
+	@Override
+	protected void doClose() throws SQLException {
+		super.close();
+	}
+
+
+	/**
+	 * Performs the actual abort, called once all onClose handlers completed and all tracking cleared.
+	 * <p>
+	 * This default implementation calls {@code super.abort(executor)}
+	 * </p>
+	 *
+	 * @see  #abort(java.util.concurrent.Executor)
+	 */
+	@Override
+	protected void doAbort(Executor executor) throws SQLException {
+		super.abort(executor);
 	}
 }

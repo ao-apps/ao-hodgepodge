@@ -48,6 +48,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * Wraps a {@link Connection}.
@@ -1016,6 +1017,19 @@ public class ConnectionWrapper implements IConnectionWrapper {
 
 	/**
 	 * {@inheritDoc}
+	 * <p>
+	 * This default implementation calls {@link #doClose()}.
+	 * </p>
+	 *
+	 * @see  #doClose()
+	 */
+	@Override
+	public void close() throws SQLException {
+		doClose();
+	}
+
+	/**
+	 * {@inheritDoc}
 	 *
 	 * @see  #wrapDatabaseMetaData(java.sql.DatabaseMetaData)
 	 */
@@ -1212,5 +1226,42 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	@Override
 	public StructWrapper createStruct(String typeName, Object[] attributes) throws SQLException {
 		return wrapStruct(getWrapped().createStruct(typeName, attributes));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This default implementation calls {@link #doAbort(java.util.concurrent.Executor)}.
+	 * </p>
+	 *
+	 * @see  #doAbort(java.util.concurrent.Executor)
+	 */
+	@Override
+	public void abort(Executor executor) throws SQLException {
+		doAbort(executor);
+	}
+
+	/**
+	 * Performs the actual close.
+	 * <p>
+	 * This default implementation calls {@code getWrapped().close()}
+	 * </p>
+	 *
+	 * @see  #close()
+	 */
+	protected void doClose() throws SQLException {
+		getWrapped().close();
+	}
+
+	/**
+	 * Performs the actual abort.
+	 * <p>
+	 * This default implementation calls {@code getWrapped().abort(executor)}
+	 * </p>
+	 *
+	 * @see  #abort(java.util.concurrent.Executor)
+	 */
+	protected void doAbort(Executor executor) throws SQLException {
+		getWrapped().abort(executor);
 	}
 }

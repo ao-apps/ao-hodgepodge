@@ -86,10 +86,11 @@ public interface IConnectionWrapper extends IWrapper, Connection {
 		getWrapped().rollback();
 	}
 
+	/**
+	 * Performs any clean-up, then calls {@code getWrapped().close()}.
+	 */
 	@Override
-	default void close() throws SQLException {
-		getWrapped().close();
-	}
+	void close() throws SQLException;
 
 	@Override
 	default boolean isClosed() throws SQLException {
@@ -263,8 +264,9 @@ public interface IConnectionWrapper extends IWrapper, Connection {
 		return getWrapped().getSchema();
 	}
 
+	/**
+	 * Performs any clean-up, then calls {@code getWrapped().abort(executor)}.
+	 */
 	@Override
-	default void abort(Executor executor) throws SQLException {
-		getWrapped().abort(executor);
-	}
+	void abort(Executor executor) throws SQLException;
 }
