@@ -96,6 +96,11 @@ public class Driver extends DriverWrapper {
 	}
 
 	@Override
+	protected String getVersion() {
+		return Maven.properties.getProperty("project.version");
+	}
+
+	@Override
 	public int getMajorVersion() {
 		return Integer.parseInt(Maven.properties.getProperty("project.artifact.selectedVersion.majorVersion"));
 	}

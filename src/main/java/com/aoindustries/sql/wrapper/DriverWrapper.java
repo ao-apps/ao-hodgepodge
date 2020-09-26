@@ -120,6 +120,57 @@ public abstract class DriverWrapper implements Driver {
 		return sb.toString();
 	}
 
+	/**
+	 * Gets the driver name for the given wrapped-driver's name.
+	 * <p>
+	 * This default implementation prefixes the wrapped-driver's name with
+	 * <code>{@link #getUrlPrefix()} + ':'</code>.
+	 * </p>
+	 *
+	 * @see  IDatabaseMetaDataWrapper#getDriverName()
+	 */
+	protected String getDriverName(String wrappedName) {
+		return getUrlPrefix() + ':' + wrappedName;
+	}
+
+	/**
+	 * Gets the driver version for the given wrapped-driver's version.
+	 * <p>
+	 * This default implementation prefixes the wrapped-driver's version with
+	 * <code>{@link #getVersion()} + ':'</code>.
+	 * </p>
+	 *
+	 * @see  IDatabaseMetaDataWrapper#getDriverVersion()
+	 * @see  #getVersion()
+	 */
+	protected String getDriverVersion(String wrappedVersion) {
+		return getVersion() + ':' + wrappedVersion;
+	}
+
+	/**
+	 * Gets the driver major version for the given wrapped-driver's major version.
+	 * <p>
+	 * This default implementation returns {@link #getMajorVersion()}.
+	 * </p>
+	 *
+	 * @see  IDatabaseMetaDataWrapper#getDriverMajorVersion()
+	 */
+	protected int getDriverMajorVersion(int wrappedMajor) {
+		return getMajorVersion();
+	}
+
+	/**
+	 * Gets the driver minor version for the given wrapped-driver's minor version.
+	 * <p>
+	 * This default implementation returns {@link #getMinorVersion()}.
+	 * </p>
+	 *
+	 * @see  IDatabaseMetaDataWrapper#getDriverMinorVersion()
+	 */
+	protected int getDriverMinorVersion(int wrappedMinor) {
+		return getMinorVersion();
+	}
+
 	@Override
 	public ConnectionWrapper connect(String url, Properties info) throws SQLException {
 		String wrappedUrl = toWrappedUrl(url);
@@ -143,6 +194,14 @@ public abstract class DriverWrapper implements Driver {
 	public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
 		return new DriverPropertyInfo[0];
 	}
+
+	/**
+	 * Gets the full version string, which may be used for
+	 * {@linkplain IDatabaseMetaDataWrapper#getDriverVersion() the driver version meta data associated with connections}.
+	 *
+	 * @see  #getDriverVersion(java.lang.String)
+	 */
+	protected abstract String getVersion();
 
 	@Override
 	public abstract int getMajorVersion();

@@ -105,25 +105,41 @@ public interface IDatabaseMetaDataWrapper extends IWrapper, DatabaseMetaData, Au
 		return getWrapped().getDatabaseProductVersion();
 	}
 
+	/**
+	 * @return  When this wrapper is associated with a wrapping driver, uses wrapping-driver-provided modification of
+	 *          the wrapped driver's name.
+	 *
+	 * @see  DriverWrapper#getDriverName(java.lang.String)
+	 */
 	@Override
-	default String getDriverName() throws SQLException {
-		return getWrapped().getDriverName();
-	}
+	String getDriverName() throws SQLException;
 
+	/**
+	 * @return  When this wrapper is associated with a wrapping driver, uses wrapping-driver-provided modification of
+	 *          the wrapped driver's version.
+	 *
+	 * @see  DriverWrapper#getDriverVersion(java.lang.String)
+	 */
 	@Override
-	default String getDriverVersion() throws SQLException {
-		return getWrapped().getDriverVersion();
-	}
+	String getDriverVersion() throws SQLException;
 
+	/**
+	 * @return  When this wrapper is associated with a wrapping driver, uses wrapping-driver-provided modification of
+	 *          the wrapped driver's version.
+	 *
+	 * @see  DriverWrapper#getDriverMajorVersion(int)
+	 */
 	@Override
-	default int getDriverMajorVersion() {
-		return getWrapped().getDriverMajorVersion();
-	}
+	int getDriverMajorVersion();
 
+	/**
+	 * @return  When this wrapper is associated with a wrapping driver, uses wrapping-driver-provided modification of
+	 *          the wrapped driver's version.
+	 *
+	 * @see  DriverWrapper#getDriverMinorVersion(int)
+	 */
 	@Override
-	default int getDriverMinorVersion() {
-		return getWrapped().getDriverMinorVersion();
-	}
+	int getDriverMinorVersion();
 
 	@Override
 	default boolean usesLocalFiles() throws SQLException {

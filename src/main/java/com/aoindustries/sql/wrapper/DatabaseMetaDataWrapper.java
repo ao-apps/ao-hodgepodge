@@ -74,6 +74,38 @@ public class DatabaseMetaDataWrapper implements IDatabaseMetaDataWrapper {
 		}
 	}
 
+	@Override
+	public String getDriverName() throws SQLException {
+		String wrappedName = getWrapped().getDriverName();
+		return getConnectionWrapper().getDriver()
+			.map(driver -> driver.getDriverName(wrappedName))
+			.orElse(wrappedName);
+	}
+
+	@Override
+	public String getDriverVersion() throws SQLException {
+		String wrappedVersion = getWrapped().getDriverVersion();
+		return getConnectionWrapper().getDriver()
+			.map(driver -> driver.getDriverVersion(wrappedVersion))
+			.orElse(wrappedVersion);
+	}
+
+	@Override
+	public int getDriverMajorVersion() {
+		int wrappedMajor = getWrapped().getDriverMajorVersion();
+		return getConnectionWrapper().getDriver()
+			.map(driver -> driver.getDriverMajorVersion(wrappedMajor))
+			.orElse(wrappedMajor);
+	}
+
+	@Override
+	public int getDriverMinorVersion() {
+		int wrappedMinor = getWrapped().getDriverMinorVersion();
+		return getConnectionWrapper().getDriver()
+			.map(driver -> driver.getDriverMinorVersion(wrappedMinor))
+			.orElse(wrappedMinor);
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
