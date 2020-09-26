@@ -25,6 +25,7 @@ package com.aoindustries.sql.wrapper;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * Wraps a {@link DatabaseMetaData}.
@@ -60,6 +61,17 @@ public class DatabaseMetaDataWrapper implements IDatabaseMetaDataWrapper {
 	 */
 	protected ResultSetWrapper wrapResultSet(ResultSet results) throws SQLException {
 		return getConnectionWrapper().wrapResultSet(null, results);
+	}
+
+	@Override
+	public String getURL() throws SQLException {
+		String wrappedUrl = getWrapped().getURL();
+		Optional<? extends DriverWrapper> driver = getConnectionWrapper().getDriver();
+		if(driver.isPresent()) {
+			return driver.get().toWrapperUrl(wrappedUrl);
+		} else {
+			return wrappedUrl;
+		}
 	}
 
 	/**

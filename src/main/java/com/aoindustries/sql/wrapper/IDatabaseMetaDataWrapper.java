@@ -57,10 +57,13 @@ public interface IDatabaseMetaDataWrapper extends IWrapper, DatabaseMetaData, Au
 		return getWrapped().allTablesAreSelectable();
 	}
 
+	/**
+	 * @return  When this wrapper is associated with a wrapping driver, inserts the driver prefix into the JDBC URL.
+	 *
+	 * @see  DriverWrapper#toWrapperUrl(java.lang.String)
+	 */
 	@Override
-	default String getURL() throws SQLException {
-		return getWrapped().getURL();
-	}
+	String getURL() throws SQLException;
 
 	@Override
 	default String getUserName() throws SQLException {

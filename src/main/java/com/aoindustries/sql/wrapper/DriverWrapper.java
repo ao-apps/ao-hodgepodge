@@ -39,11 +39,13 @@ import java.util.logging.Logger;
  */
 public abstract class DriverWrapper implements Driver {
 
+	private static final String JDBC_SCHEMA = "jdbc:";
+
 	public DriverWrapper() {}
 
 	@Override
 	public String toString() {
-		return "jdbc:" + getUrlPrefix() + ":*";
+		return JDBC_SCHEMA + getUrlPrefix() + ":*";
 	}
 
 	/**
@@ -84,13 +86,38 @@ public abstract class DriverWrapper implements Driver {
 	 *
 	 * @return  The modified URL or {@code null} when prefix not found in the URL.
 	 */
-	protected String toWrappedUrl(String url) {
-		String prefix = "jdbc:" + getUrlPrefix() + ":";
-		if(url.startsWith(prefix)) {
-			return "jdbc:" + url.substring(prefix.length());
+	protected String toWrappedUrl(String wrapperUrl) {
+		String prefix = JDBC_SCHEMA + getUrlPrefix() + ":";
+		if(wrapperUrl.startsWith(prefix)) {
+			return JDBC_SCHEMA + wrapperUrl.substring(prefix.length());
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Gets the JDBC URL used by the wrapper driver.  This adds the prefix to the URL.
+	 *
+	 * @return  The modified URL, with prefix in the URL.
+	 *
+	 * @throws  SQLException  When the wrapped URL does not begin with {@link #JDBC_SCHEMA}
+	 *
+	 * @see  IDatabaseMetaDataWrapper#getURL()
+	 */
+	protected String toWrapperUrl(String wrappedUrl) throws SQLException {
+		if(!wrappedUrl.startsWith(JDBC_SCHEMA)) {
+			throw new SQLException("Malformed JDBC URL, schema (" + JDBC_SCHEMA + ")  not found: " + wrappedUrl);
+		}
+		String urlPrefix = getUrlPrefix();
+		int wrappedUrlLen = wrappedUrl.length();
+		int sbLen = wrappedUrlLen + urlPrefix.length() + 1;
+		StringBuilder sb = new StringBuilder(sbLen);
+		sb
+			.append(JDBC_SCHEMA)
+			.append(urlPrefix).append(':')
+			.append(wrappedUrl, JDBC_SCHEMA.length(), wrappedUrlLen);
+		assert sbLen == sb.length();
+		return sb.toString();
 	}
 
 	@Override
