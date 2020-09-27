@@ -724,12 +724,9 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 					matched = (value == savepointTracker);
 				}
 			}
-			if(!matched) {
-				toRelease.add(savepointTracker);
-			}
 		}
 		Throwable t0 = null;
-		for(int len = toRelease.size(), i = len-1; i >= 0; i--) {
+		for(int i = toRelease.size() - 1; i >= 0; i--) {
 			SavepointTracker releaseMe = toRelease.get(i);
 			try {
 				releaseMe.onRelease();
@@ -776,7 +773,7 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 			}
 		}
 		Throwable t0 = null;
-		for(int len = toRelease.size(), i = len-1; i >= 0; i--) {
+		for(int i = toRelease.size() - 1; i >= 0; i--) {
 			SavepointTracker releaseMe = toRelease.get(i);
 			try {
 				releaseMe.onRelease();
