@@ -59,10 +59,22 @@ public interface IConnectionTracker extends IConnectionWrapper, IOnClose,
 	ITrackedWriters {
 
 	/**
-	 * Removes tracking while releasing the savepoint.
+	 * Removes tracking of savepoints when auto-commit mode is enabled (which commits any transaction in-progress).
 	 */
 	@Override
-	void releaseSavepoint(Savepoint savepoint) throws SQLException;
+	void setAutoCommit(boolean autoCommit) throws SQLException;
+
+	/**
+	 * Removes tracking of savepoints while committing the transaction.
+	 */
+	@Override
+	void commit() throws SQLException;
+
+	/**
+	 * Removes tracking of savepoints while rolling-back the transaction.
+	 */
+	@Override
+	void rollback() throws SQLException;
 
 	/**
 	 * Calls onClose handlers, closes all tracked objects, rolls-back any transaction in-progress and puts back in
@@ -72,6 +84,18 @@ public interface IConnectionTracker extends IConnectionWrapper, IOnClose,
 	 */
 	@Override
 	void close() throws SQLException;
+
+	/**
+	 * Removes tracking of all savepoints after the given savepoint, the rolls-back to the given savepoint.
+	 */
+	@Override
+	void rollback(Savepoint savepoint) throws SQLException;
+
+	/**
+	 * Removes tracking while releasing the savepoint.
+	 */
+	@Override
+	void releaseSavepoint(Savepoint savepoint) throws SQLException;
 
 	/**
 	 * Calls onClose handlers, clears all tracking, then calls {@code super.abort(executor)}.

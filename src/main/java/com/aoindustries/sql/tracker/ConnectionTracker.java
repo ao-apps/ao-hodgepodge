@@ -22,6 +22,10 @@
  */
 package com.aoindustries.sql.tracker;
 
+import com.aoindustries.collections.IdentityKey;
+import com.aoindustries.collections.wrapper.Converter;
+import com.aoindustries.collections.wrapper.FunctionalConverter;
+import com.aoindustries.collections.wrapper.MapWrapper;
 import com.aoindustries.lang.AutoCloseables;
 import com.aoindustries.lang.Runnables;
 import com.aoindustries.lang.Throwables;
@@ -58,6 +62,8 @@ import java.util.Collection;
 import java.util.Collections;
 import static java.util.Collections.synchronizedMap;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -105,7 +111,24 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	private final Map<SQLInput,SQLInputTracker> trackedSQLInputs = synchronizedMap(new IdentityHashMap<>());
 	private final Map<SQLOutput,SQLOutputTracker> trackedSQLOutputs = synchronizedMap(new IdentityHashMap<>());
 	private final Map<SQLXML,SQLXMLTracker> trackedSQLXMLs = synchronizedMap(new IdentityHashMap<>());
-	private final Map<Savepoint,SavepointTracker> trackedSavepoints = synchronizedMap(new IdentityHashMap<>());
+
+	/**
+	 * Maintains ordering with {@link LinkedHashMap} while using {@link IdentityKey} as a {@linkplain MapWrapper key wrapper}.
+	 */
+	@SuppressWarnings("unchecked")
+	private final Map<Savepoint,SavepointTracker> trackedSavepoints = synchronizedMap(
+		MapWrapper.of(
+			new LinkedHashMap<>(),
+			new FunctionalConverter<>(
+				Savepoint.class,
+				(Class<IdentityKey<Savepoint>>)(Class)IdentityKey.class,
+				IdentityKey::of,
+				IdentityKey::getValue
+			),
+			Converter.identity()
+		)
+	);
+
 	private final Map<Statement,StatementTracker> trackedStatements = synchronizedMap(new IdentityHashMap<>());
 	private final Map<Struct,StructTracker> trackedStructs = synchronizedMap(new IdentityHashMap<>());
 	private final Map<Writer,WriterTracker> trackedWriters = synchronizedMap(new IdentityHashMap<>());
@@ -381,7 +404,8 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	}
 
 	/**
-	 * Closes / frees all tracked objects.
+	 * Closes / frees all tracked objects except savepoints, which are expected to be closed by a following
+	 * {@link #rollback()}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected Throwable closeTracked(Throwable t0) {
@@ -413,9 +437,7 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 			trackedResultSets,
 			trackedCallableStatements,
 			trackedPreparedStatements,
-			trackedStatements,
-			// Transactions
-			trackedSavepoints
+			trackedStatements
 		);
 	}
 
@@ -446,6 +468,26 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 		clear(trackedStatements);
 		clear(trackedStructs);
 		clear(trackedWriters);
+	}
+
+	/**
+	 * Releases all tracked savepoints.
+	 */
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
+	protected Throwable releaseAllTrackedSavepoints(Throwable t0) {
+		List<SavepointTracker> savepoints;
+		synchronized(trackedSavepoints) {
+			savepoints = new ArrayList<>(trackedSavepoints.values());
+			trackedSavepoints.clear();
+		}
+		for(SavepointTracker savepoint : savepoints) {
+			try {
+				savepoint.onRelease();
+			} catch(Throwable t) {
+				t0 = Throwables.addSuppressed(t0, t);
+			}
+		}
+		return t0;
 	}
 
 	@Override
@@ -567,6 +609,66 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @see  SavepointTracker#onRelease()
+	 */
+	@Override
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
+	public void setAutoCommit(boolean autoCommit) throws SQLException {
+		Throwable t0 = null;
+		if(autoCommit) {
+			// Release tracked objects
+			t0 = releaseAllTrackedSavepoints(t0);
+		}
+		try {
+			super.setAutoCommit(autoCommit);
+		} catch(Throwable t) {
+			t0 = Throwables.addSuppressed(t0, t);
+		}
+		if(t0 != null) throw Throwables.wrap(t0, SQLException.class, SQLException::new);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  SavepointTracker#onRelease()
+	 */
+	@Override
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
+	public void commit() throws SQLException {
+		Throwable t0 = null;
+		// TODO: Should onRelease / onClose be called before or after the given action?
+		// Release tracked objects
+		t0 = releaseAllTrackedSavepoints(t0);
+		try {
+			super.commit();
+		} catch(Throwable t) {
+			t0 = Throwables.addSuppressed(t0, t);
+		}
+		if(t0 != null) throw Throwables.wrap(t0, SQLException.class, SQLException::new);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  SavepointTracker#onRelease()
+	 */
+	@Override
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
+	public void rollback() throws SQLException {
+		Throwable t0 = null;
+		// Release tracked objects
+		t0 = releaseAllTrackedSavepoints(t0);
+		try {
+			super.rollback();
+		} catch(Throwable t) {
+			t0 = Throwables.addSuppressed(t0, t);
+		}
+		if(t0 != null) throw Throwables.wrap(t0, SQLException.class, SQLException::new);
+	}
+
+	/**
+	 * {@inheritDoc}
 	 * <p>
 	 * This default implementation calls {@link #doClose()}.
 	 * </p>
@@ -580,8 +682,64 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 		Throwable t0 = clearRunAndCatch(onCloseHandlers);
 		// Close tracked objects
 		t0 = closeTracked(t0);
+		// Rollback any transaction in-progress and put back in auto-commit mode
+		try {
+			if(!isClosed() && !getAutoCommit()) {
+				rollback();
+				setAutoCommit(true);
+			}
+		} catch(Throwable t) {
+			t0 = Throwables.addSuppressed(t0, t);
+		}
+		// Any savepoints not removed on rollback()
+		t0 = clearCloseAndCatch(t0, trackedSavepoints);
 		try {
 			doClose();
+		} catch(Throwable t) {
+			t0 = Throwables.addSuppressed(t0, t);
+		}
+		if(t0 != null) throw Throwables.wrap(t0, SQLException.class, SQLException::new);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see  SavepointTracker#onRelease()
+	 */
+	@Override
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
+	public void rollback(Savepoint savepoint) throws SQLException {
+		// Release tracked objects
+		// Call onRelease for all that follow the given savepoint
+		SavepointTracker savepointTracker = (SavepointTracker)wrapSavepoint(savepoint);
+		List<SavepointTracker> toRelease = new ArrayList<>();
+		synchronized(trackedSavepoints) {
+			Iterator<SavepointTracker> iter = trackedSavepoints.values().iterator();
+			boolean matched = false;
+			while(iter.hasNext()) {
+				SavepointTracker value = iter.next();
+				if(matched) {
+					iter.remove();
+					toRelease.add(value);
+				} else {
+					matched = (value == savepointTracker);
+				}
+			}
+			if(!matched) {
+				toRelease.add(savepointTracker);
+			}
+		}
+		Throwable t0 = null;
+		for(int len = toRelease.size(), i = len-1; i >= 0; i--) {
+			SavepointTracker releaseMe = toRelease.get(i);
+			try {
+				releaseMe.onRelease();
+			} catch(Throwable t) {
+				t0 = Throwables.addSuppressed(t0, t);
+			}
+		}
+		try {
+			super.rollback(savepoint);
 		} catch(Throwable t) {
 			t0 = Throwables.addSuppressed(t0, t);
 		}
@@ -595,15 +753,44 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	 * @see  SavepointTracker#onRelease()
 	 */
 	@Override
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		// TODO: Also call onRelease on all savepoints after this one in the current transaction.
-		//       This could mean tracking the current savepoint, and having a linked-list style "next" reference between
-		//       tracked savepoints.  Alternatively, could maintain a list of savepoints on the connection.  Finally,
-		//       a savepoint could register and onClose handler on its parent savepoint, which would clean - the
-		//       consideration here would be would only need to release the first savepoint.
-		// TODO: Also, remove all savepoints on rollback/commit?
-		((SavepointTracker)wrapSavepoint(savepoint)).onRelease();
-		super.releaseSavepoint(savepoint);
+		// Release tracked objects
+		// Call onRelease for the given savepoint and all that follow
+		SavepointTracker savepointTracker = (SavepointTracker)wrapSavepoint(savepoint);
+		List<SavepointTracker> toRelease = new ArrayList<>();
+		synchronized(trackedSavepoints) {
+			Iterator<SavepointTracker> iter = trackedSavepoints.values().iterator();
+			boolean matched = false;
+			while(iter.hasNext()) {
+				SavepointTracker value = iter.next();
+				if(!matched) {
+					matched = (value == savepointTracker);
+				}
+				if(matched) {
+					iter.remove();
+					toRelease.add(value);
+				}
+			}
+			if(!matched) {
+				toRelease.add(savepointTracker);
+			}
+		}
+		Throwable t0 = null;
+		for(int len = toRelease.size(), i = len-1; i >= 0; i--) {
+			SavepointTracker releaseMe = toRelease.get(i);
+			try {
+				releaseMe.onRelease();
+			} catch(Throwable t) {
+				t0 = Throwables.addSuppressed(t0, t);
+			}
+		}
+		try {
+			super.releaseSavepoint(savepoint);
+		} catch(Throwable t) {
+			t0 = Throwables.addSuppressed(t0, t);
+		}
+		if(t0 != null) throw Throwables.wrap(t0, SQLException.class, SQLException::new);
 	}
 
 	/**
@@ -627,6 +814,7 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 		}
 		if(t0 != null) throw Throwables.wrap(t0, SQLException.class, SQLException::new);
 	}
+
 	/**
 	 * Performs the actual close, called once all onClose handlers completed and all tracked objects closed.
 	 * <p>
@@ -639,7 +827,6 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	protected void doClose() throws SQLException {
 		super.close();
 	}
-
 
 	/**
 	 * Performs the actual abort, called once all onClose handlers completed and all tracking cleared.

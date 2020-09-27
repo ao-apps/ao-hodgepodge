@@ -51,6 +51,10 @@ public class SavepointTracker extends SavepointWrapper implements ISavepointTrac
 	/**
 	 * Called when this savepoint is released.
 	 *
+	 * @see  ConnectionTracker#setAutoCommit(boolean)
+	 * @see  ConnectionTracker#commit()
+	 * @see  ConnectionTracker#rollback()
+	 * @see  ConnectionTracker#rollback(java.sql.Savepoint)
 	 * @see  ConnectionTracker#releaseSavepoint(java.sql.Savepoint)
 	 */
 	protected void onRelease() throws SQLException {
