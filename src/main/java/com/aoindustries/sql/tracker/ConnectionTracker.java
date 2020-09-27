@@ -637,7 +637,6 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public void commit() throws SQLException {
 		Throwable t0 = null;
-		// TODO: Should onRelease / onClose be called before or after the given action?
 		// Release tracked objects
 		t0 = releaseAllTrackedSavepoints(t0);
 		try {
