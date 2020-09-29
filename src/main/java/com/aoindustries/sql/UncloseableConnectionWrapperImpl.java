@@ -53,15 +53,15 @@ import java.util.function.Function;
  * @author  AO Industries, Inc.
  */
 // TODO: Move to own package and extend Tracker
-public class UncloseableConnectionWrapper extends ConnectionWrapperImpl implements IUncloseableConnectionWrapper {
+public class UncloseableConnectionWrapperImpl extends ConnectionWrapperImpl implements IUncloseableConnectionWrapper {
 
 	private final AtomicBoolean closed = new AtomicBoolean();
 
-	public UncloseableConnectionWrapper(DriverWrapper driverWrapper, Connection wrapped) {
+	public UncloseableConnectionWrapperImpl(DriverWrapper driverWrapper, Connection wrapped) {
 		super(driverWrapper, wrapped);
 	}
 
-	public UncloseableConnectionWrapper(Connection wrapped) {
+	public UncloseableConnectionWrapperImpl(Connection wrapped) {
 		super(wrapped);
 	}
 
