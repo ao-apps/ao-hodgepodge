@@ -95,10 +95,15 @@ public interface IFailFastConnection extends IConnectionWrapper {
 
 	/**
 	 * Puts the connection into a terminal {@link ClosedSQLException} fail-fast state then calls
-	 * {@code super.close()}.
+	 * {@link FailFastConnection#doClose(java.lang.Throwable)}.
+	 * <p>
+	 * When already in a terminal state (closed or aborted), is a no-op and does not call
+	 * {@link FailFastConnection#doClose(java.lang.Throwable)}.
+	 * </p>
 	 *
 	 * @see  #addFailFastCause(java.lang.Throwable)
 	 * @see  ClosedSQLException
+	 * @see  FailFastConnection#doClose(java.lang.Throwable)
 	 */
 	@Override
 	void close() throws SQLException;
@@ -116,10 +121,15 @@ public interface IFailFastConnection extends IConnectionWrapper {
 
 	/**
 	 * Puts the connection into a terminal {@link AbortedSQLException} fail-fast state then calls
-	 * {@code super.abort(executor)}.
+	 * {@link FailFastConnection#doAbort(java.lang.Throwable, java.util.concurrent.Executor)}.
+	 * <p>
+	 * When already in a terminal state (closed or aborted), is a no-op and does not call
+	 * {@link FailFastConnection#doAbort(java.lang.Throwable, java.util.concurrent.Executor)}
+	 * </p>
 	 *
 	 * @see  #addFailFastCause(java.lang.Throwable)
 	 * @see  AbortedSQLException
+	 * @see  FailFastConnection#doAbort(java.lang.Throwable, java.util.concurrent.Executor)
 	 */
 	@Override
 	void abort(Executor executor) throws SQLException;

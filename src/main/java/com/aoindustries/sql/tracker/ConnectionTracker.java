@@ -819,7 +819,6 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	 *
 	 * @see  #close()
 	 */
-	@Override
 	protected void doClose() throws SQLException {
 		super.close();
 	}
@@ -832,7 +831,6 @@ public class ConnectionTracker extends ConnectionWrapper implements IConnectionT
 	 *
 	 * @see  #abort(java.util.concurrent.Executor)
 	 */
-	@Override
 	protected void doAbort(Executor executor) throws SQLException {
 		super.abort(executor);
 	}

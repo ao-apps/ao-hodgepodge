@@ -1018,14 +1018,12 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This default implementation calls {@link #doClose()}.
+	 * This default implementation calls {@code getWrapped().close()}.
 	 * </p>
-	 *
-	 * @see  #doClose()
 	 */
 	@Override
 	public void close() throws SQLException {
-		doClose();
+		getWrapped().close();
 	}
 
 	/**
@@ -1231,37 +1229,11 @@ public class ConnectionWrapper implements IConnectionWrapper {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This default implementation calls {@link #doAbort(java.util.concurrent.Executor)}.
+	 * This default implementation calls {@code getWrapped().abort(executor)}.
 	 * </p>
-	 *
-	 * @see  #doAbort(java.util.concurrent.Executor)
 	 */
 	@Override
 	public void abort(Executor executor) throws SQLException {
-		doAbort(executor);
-	}
-
-	/**
-	 * Performs the actual close.
-	 * <p>
-	 * This default implementation calls {@code getWrapped().close()}
-	 * </p>
-	 *
-	 * @see  #close()
-	 */
-	protected void doClose() throws SQLException {
-		getWrapped().close();
-	}
-
-	/**
-	 * Performs the actual abort.
-	 * <p>
-	 * This default implementation calls {@code getWrapped().abort(executor)}
-	 * </p>
-	 *
-	 * @see  #abort(java.util.concurrent.Executor)
-	 */
-	protected void doAbort(Executor executor) throws SQLException {
 		getWrapped().abort(executor);
 	}
 }

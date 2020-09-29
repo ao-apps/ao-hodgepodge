@@ -389,15 +389,21 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 
 	@Override
 	public void close() throws SQLException {
+		Throwable cause;
+		boolean doClose;
 		synchronized(failFastLock) {
+			cause = failFastCause;
 			if(
-				failFastCause != ClosedSQLException.FAST_MARKER_KEEP_PRIVATE
-				&& failFastCause != AbortedSQLException.FAST_MARKER_KEEP_PRIVATE
+				cause != ClosedSQLException.FAST_MARKER_KEEP_PRIVATE
+				&& cause != AbortedSQLException.FAST_MARKER_KEEP_PRIVATE
 			) {
 				failFastCause = ClosedSQLException.FAST_MARKER_KEEP_PRIVATE;
+				doClose = true;
+			} else {
+				doClose = false;
 			}
 		}
-		super.close();
+		if(doClose) doClose(cause);
 	}
 
 	@Override
@@ -912,14 +918,52 @@ public class FailFastConnection extends ConnectionWrapper implements IFailFastCo
 
 	@Override
 	public void abort(Executor executor) throws SQLException {
+		Throwable cause;
+		boolean doAbort;
 		synchronized(failFastLock) {
+			cause = failFastCause;
 			if(
-				failFastCause != ClosedSQLException.FAST_MARKER_KEEP_PRIVATE
-				&& failFastCause != AbortedSQLException.FAST_MARKER_KEEP_PRIVATE
+				cause != ClosedSQLException.FAST_MARKER_KEEP_PRIVATE
+				&& cause != AbortedSQLException.FAST_MARKER_KEEP_PRIVATE
 			) {
 				failFastCause = AbortedSQLException.FAST_MARKER_KEEP_PRIVATE;
+				doAbort = true;
+			} else {
+				doAbort = false;
 			}
 		}
+		if(doAbort) doAbort(failFastCause, executor);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Either this method or {@link #doAbort(java.lang.Throwable, java.util.concurrent.Executor)} is called, and at most
+	 * once.  Once either is called, additional close/abort requests are ignored.
+	 * </p>
+	 * <p>
+	 * This default implementation calls {@code super.close()}.
+	 * </p>
+	 *
+	 * @param  failFastCause  The fail-fast state before close.
+	 */
+	protected void doClose(Throwable failFastCause) throws SQLException {
+		super.close();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Either this method or {@link #doClose(java.lang.Throwable)} is called, and at most once.  Once either is called,
+	 * additional close/abort requests are ignored.
+	 * </p>
+	 * <p>
+	 * This default implementation calls {@code super.abort(executor)}.
+	 * </p>
+	 *
+	 * @param  failFastCause  The fail-fast state before close.
+	 */
+	protected void doAbort(Throwable failFastCause, Executor executor) throws SQLException {
 		super.abort(executor);
 	}
 }

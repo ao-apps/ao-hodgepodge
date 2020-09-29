@@ -78,7 +78,7 @@ public interface IConnectionTracker extends IConnectionWrapper, IOnClose,
 
 	/**
 	 * Calls onClose handlers, closes all tracked objects, rolls-back any transaction in-progress and puts back in
-	 * auto-commit mode, then calls {@code super.close()}.
+	 * auto-commit mode, then calls {@link ConnectionTracker#doClose()}.
 	 *
 	 * @see  #addOnClose(java.lang.Runnable)
 	 */
@@ -98,7 +98,7 @@ public interface IConnectionTracker extends IConnectionWrapper, IOnClose,
 	void releaseSavepoint(Savepoint savepoint) throws SQLException;
 
 	/**
-	 * Calls onClose handlers, clears all tracking, then calls {@code super.abort(executor)}.
+	 * Calls onClose handlers, clears all tracking, then calls {@link ConnectionTracker#doAbort(java.util.concurrent.Executor)}.
 	 * Trusts the underlying implementation of {@link Connection#abort(java.util.concurrent.Executor)} will free all
 	 * resources.
 	 *
