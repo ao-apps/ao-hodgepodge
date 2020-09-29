@@ -30,25 +30,25 @@ import java.io.Reader;
 import java.nio.CharBuffer;
 
 /**
- * @see  FailFastConnection
+ * @see  FailFastConnectionImpl
  *
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 public class FailFastReader extends ReaderWrapper {
 
-	public FailFastReader(FailFastConnection failFastConnection, Reader wrapped) {
+	public FailFastReader(FailFastConnectionImpl failFastConnection, Reader wrapped) {
 		super(failFastConnection, wrapped);
 	}
 
 	@Override
-	protected FailFastConnection getConnectionWrapper() {
-		return (FailFastConnection)super.getConnectionWrapper();
+	protected FailFastConnectionImpl getConnectionWrapper() {
+		return (FailFastConnectionImpl)super.getConnectionWrapper();
 	}
 
 	@Override
 	public int read(CharBuffer target) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.read(target);
@@ -60,7 +60,7 @@ public class FailFastReader extends ReaderWrapper {
 
 	@Override
 	public int read() throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.read();
@@ -72,7 +72,7 @@ public class FailFastReader extends ReaderWrapper {
 
 	@Override
 	public int read(char cbuf[]) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.read(cbuf);
@@ -84,7 +84,7 @@ public class FailFastReader extends ReaderWrapper {
 
 	@Override
 	public int read(char cbuf[], int off, int len) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.read(cbuf, off, len);
@@ -96,7 +96,7 @@ public class FailFastReader extends ReaderWrapper {
 
 	@Override
 	public long skip(long n) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.skip(n);
@@ -108,7 +108,7 @@ public class FailFastReader extends ReaderWrapper {
 
 	@Override
 	public boolean ready() throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.ready();
@@ -120,7 +120,7 @@ public class FailFastReader extends ReaderWrapper {
 
 	@Override
 	public boolean markSupported() {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		if(ffConn.getFailFastCause() == null) {
 			try {
 				return super.markSupported();
@@ -135,7 +135,7 @@ public class FailFastReader extends ReaderWrapper {
 
 	@Override
 	public void mark(int readAheadLimit) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.mark(readAheadLimit);
@@ -147,7 +147,7 @@ public class FailFastReader extends ReaderWrapper {
 
 	@Override
 	public void reset() throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.reset();

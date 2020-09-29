@@ -25,8 +25,8 @@ package com.aoindustries.sql;
 import com.aoindustries.io.AOPool;
 import com.aoindustries.lang.AutoCloseables;
 import com.aoindustries.lang.Throwables;
-import com.aoindustries.sql.tracker.ConnectionTracker;
-import com.aoindustries.sql.tracker.DatabaseMetaDataTracker;
+import com.aoindustries.sql.tracker.ConnectionTrackerImpl;
+import com.aoindustries.sql.tracker.DatabaseMetaDataTrackerImpl;
 import com.aoindustries.sql.tracker.IConnectionTracker;
 import java.io.IOException;
 import java.sql.Connection;
@@ -307,7 +307,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		}
 	}
 
-	private static class PooledDatabaseMetaData extends DatabaseMetaDataTracker {
+	private static class PooledDatabaseMetaData extends DatabaseMetaDataTrackerImpl {
 
 		private PooledDatabaseMetaData(PooledConnection pooledConnection, DatabaseMetaData wrapped) {
 			super(pooledConnection, wrapped);
@@ -348,7 +348,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		AOConnectionPool getPool();
 	}
 
-	private static class PooledConnection extends ConnectionTracker implements IPooledConnection {
+	private static class PooledConnection extends ConnectionTrackerImpl implements IPooledConnection {
 
 		private final AOConnectionPool pool;
 

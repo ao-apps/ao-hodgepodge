@@ -33,10 +33,10 @@ import java.nio.CharBuffer;
  */
 public class ReaderWrapper extends Reader implements IWrapper {
 
-	private final ConnectionWrapper connectionWrapper;
+	private final ConnectionWrapperImpl connectionWrapper;
 	private final Reader wrapped;
 
-	public ReaderWrapper(ConnectionWrapper connectionWrapper, Reader wrapped) {
+	public ReaderWrapper(ConnectionWrapperImpl connectionWrapper, Reader wrapped) {
 		this.connectionWrapper = connectionWrapper;
 		this.wrapped = wrapped;
 	}
@@ -44,7 +44,7 @@ public class ReaderWrapper extends Reader implements IWrapper {
 	/**
 	 * Gets the connection wrapper.
 	 */
-	protected ConnectionWrapper getConnectionWrapper() {
+	protected ConnectionWrapperImpl getConnectionWrapper() {
 		return connectionWrapper;
 	}
 

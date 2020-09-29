@@ -249,10 +249,16 @@ class ThrowableUtil {
 	 * Creates a new {@link SQLException} or {@link FailFastSQLException} with the given cause.
 	 */
 	static SQLException newFailFastSQLException(Throwable cause) {
-		if(cause instanceof SQLException) {
+		if(
+			// Make sure to wrap ApplicationSQLException of different type, to not confuse application-level code setup
+			// to handle application-level exceptions.
+			cause instanceof ApplicationSQLException
+			|| !(cause instanceof SQLException)
+		) {
+			return new FailFastSQLException(cause);
+		} else {
 			return newSQLException((SQLException)cause);
 		}
-		return new FailFastSQLException(cause);
 	}
 
 	/**

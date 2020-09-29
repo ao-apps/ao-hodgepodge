@@ -55,23 +55,23 @@ public abstract class DriverTracker extends DriverWrapper implements IOnClose {
 		onCloseHandlers.add(onCloseHandler);
 	}
 
-	private final Map<Connection,ConnectionTracker> trackedConnections = synchronizedMap(new IdentityHashMap<>());
+	private final Map<Connection,ConnectionTrackerImpl> trackedConnections = synchronizedMap(new IdentityHashMap<>());
 
 	/**
 	 * Gets all the connections that have not yet been closed.
 	 *
 	 * @return  The mapping from wrapped connection to tracker without any defensive copy.
 	 *
-	 * @see  ConnectionTracker#close()
+	 * @see  ConnectionTrackerImpl#close()
 	 */
 	@SuppressWarnings("ReturnOfCollectionOrArrayField") // No defensive copy
-	public final Map<Connection,ConnectionTracker> getTrackedConnections() {
+	public final Map<Connection,ConnectionTrackerImpl> getTrackedConnections() {
 		return trackedConnections;
 	}
 
 	@Override
-	protected ConnectionTracker newConnectionWrapper(Connection connection) {
-		return ConnectionTracker.newIfAbsent(trackedConnections, this, connection, ConnectionTracker::new);
+	protected ConnectionTrackerImpl newConnectionWrapper(Connection connection) {
+		return ConnectionTrackerImpl.newIfAbsent(trackedConnections, this, connection, ConnectionTrackerImpl::new);
 	}
 
 	/**
@@ -81,9 +81,9 @@ public abstract class DriverTracker extends DriverWrapper implements IOnClose {
 	 */
 	@Override
 	protected void onDeregister() {
-		Throwable t0 = ConnectionTracker.clearRunAndCatch(onCloseHandlers);
+		Throwable t0 = ConnectionTrackerImpl.clearRunAndCatch(onCloseHandlers);
 		// Close tracked objects
-		t0 = ConnectionTracker.clearCloseAndCatch(t0, trackedConnections);
+		t0 = ConnectionTrackerImpl.clearCloseAndCatch(t0, trackedConnections);
 		try {
 			super.onDeregister();
 		} catch(Throwable t) {

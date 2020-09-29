@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class WriterTracker extends WriterWrapper implements IOnClose {
 
-	public WriterTracker(ConnectionTracker connectionTracker, Writer wrapped) {
+	public WriterTracker(ConnectionTrackerImpl connectionTracker, Writer wrapped) {
 		super(connectionTracker, wrapped);
 	}
 
@@ -56,7 +56,7 @@ public class WriterTracker extends WriterWrapper implements IOnClose {
 	@Override
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public void close() throws IOException {
-		Throwable t0 = ConnectionTracker.clearRunAndCatch(onCloseHandlers);
+		Throwable t0 = ConnectionTrackerImpl.clearRunAndCatch(onCloseHandlers);
 		try {
 			super.close();
 		} catch(Throwable t) {

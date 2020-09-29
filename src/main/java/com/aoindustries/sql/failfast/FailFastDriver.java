@@ -39,7 +39,7 @@ public abstract class FailFastDriver extends DriverWrapper {
 	public FailFastDriver() {}
 
 	@Override
-	protected FailFastConnection newConnectionWrapper(Connection connection) {
-		return new FailFastConnection(this, connection);
+	protected FailFastConnectionImpl newConnectionWrapper(Connection connection) {
+		return new FailFastConnectionImpl(this, connection);
 	}
 }

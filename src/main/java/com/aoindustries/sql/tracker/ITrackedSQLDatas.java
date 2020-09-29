@@ -32,7 +32,7 @@ public interface ITrackedSQLDatas {
 	 *
 	 * @return  The mapping from wrapped SQL data to tracker without any defensive copy.
 	 *
-	 * @see  SQLOutputTracker#writeObject(java.sql.SQLData)
+	 * @see  SQLOutputTrackerImpl#writeObject(java.sql.SQLData)
 	 */
 	Map<SQLData,? extends ISQLDataTracker> getTrackedSQLDatas();
 }

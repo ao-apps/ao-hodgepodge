@@ -22,7 +22,7 @@
  */
 package com.aoindustries.sql.tracker;
 
-import com.aoindustries.sql.wrapper.SQLDataWrapper;
+import com.aoindustries.sql.wrapper.SQLDataWrapperImpl;
 import java.sql.SQLInput;
 import java.util.Map;
 
@@ -33,7 +33,7 @@ public interface ITrackedSQLInputs {
 	 *
 	 * @return  The mapping from wrapped SQL input to tracker without any defensive copy.
 	 *
-	 * @see  SQLDataWrapper#readSQL(java.sql.SQLInput, java.lang.String)
+	 * @see  SQLDataWrapperImpl#readSQL(java.sql.SQLInput, java.lang.String)
 	 */
 	Map<SQLInput,? extends ISQLInputTracker> getTrackedSQLInputs();
 }

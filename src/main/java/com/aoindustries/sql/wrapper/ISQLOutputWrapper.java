@@ -58,7 +58,7 @@ public interface ISQLOutputWrapper extends IWrapper, SQLOutput, AutoCloseable {
 	/**
 	 * Releases resources associated with this wrapper.
 	 *
-	 * @see  SQLDataWrapper#writeSQL(java.sql.SQLOutput)
+	 * @see  SQLDataWrapperImpl#writeSQL(java.sql.SQLOutput)
 	 */
 	@Override
 	default void close() throws SQLException {

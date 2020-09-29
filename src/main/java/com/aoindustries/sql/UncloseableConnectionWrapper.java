@@ -22,19 +22,19 @@
  */
 package com.aoindustries.sql;
 
-import com.aoindustries.sql.wrapper.ArrayWrapper;
-import com.aoindustries.sql.wrapper.BlobWrapper;
-import com.aoindustries.sql.wrapper.CallableStatementWrapper;
-import com.aoindustries.sql.wrapper.ClobWrapper;
-import com.aoindustries.sql.wrapper.ConnectionWrapper;
-import com.aoindustries.sql.wrapper.DatabaseMetaDataWrapper;
+import com.aoindustries.sql.wrapper.ArrayWrapperImpl;
+import com.aoindustries.sql.wrapper.BlobWrapperImpl;
+import com.aoindustries.sql.wrapper.CallableStatementWrapperImpl;
+import com.aoindustries.sql.wrapper.ClobWrapperImpl;
+import com.aoindustries.sql.wrapper.ConnectionWrapperImpl;
+import com.aoindustries.sql.wrapper.DatabaseMetaDataWrapperImpl;
 import com.aoindustries.sql.wrapper.DriverWrapper;
-import com.aoindustries.sql.wrapper.NClobWrapper;
-import com.aoindustries.sql.wrapper.PreparedStatementWrapper;
-import com.aoindustries.sql.wrapper.SQLXMLWrapper;
-import com.aoindustries.sql.wrapper.SavepointWrapper;
-import com.aoindustries.sql.wrapper.StatementWrapper;
-import com.aoindustries.sql.wrapper.StructWrapper;
+import com.aoindustries.sql.wrapper.NClobWrapperImpl;
+import com.aoindustries.sql.wrapper.PreparedStatementWrapperImpl;
+import com.aoindustries.sql.wrapper.SQLXMLWrapperImpl;
+import com.aoindustries.sql.wrapper.SavepointWrapperImpl;
+import com.aoindustries.sql.wrapper.StatementWrapperImpl;
+import com.aoindustries.sql.wrapper.StructWrapperImpl;
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
@@ -53,7 +53,7 @@ import java.util.function.Function;
  * @author  AO Industries, Inc.
  */
 // TODO: Move to own package and extend Tracker
-public class UncloseableConnectionWrapper extends ConnectionWrapper implements IUncloseableConnectionWrapper {
+public class UncloseableConnectionWrapper extends ConnectionWrapperImpl implements IUncloseableConnectionWrapper {
 
 	private final AtomicBoolean closed = new AtomicBoolean();
 
@@ -103,19 +103,19 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public StatementWrapper createStatement() throws SQLException {
+	public StatementWrapperImpl createStatement() throws SQLException {
 		checkNotClosed();
 		return super.createStatement();
 	}
 
 	@Override
-	public PreparedStatementWrapper prepareStatement(String sql) throws SQLException {
+	public PreparedStatementWrapperImpl prepareStatement(String sql) throws SQLException {
 		checkNotClosed();
 		return super.prepareStatement(sql);
 	}
 
 	@Override
-	public CallableStatementWrapper prepareCall(String sql) throws SQLException {
+	public CallableStatementWrapperImpl prepareCall(String sql) throws SQLException {
 		checkNotClosed();
 		return super.prepareCall(sql);
 	}
@@ -181,7 +181,7 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public DatabaseMetaDataWrapper getMetaData() throws SQLException {
+	public DatabaseMetaDataWrapperImpl getMetaData() throws SQLException {
 		checkNotClosed();
 		return super.getMetaData();
 	}
@@ -235,19 +235,19 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public StatementWrapper createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+	public StatementWrapperImpl createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
 		checkNotClosed();
 		return super.createStatement(resultSetType, resultSetConcurrency);
 	}
 
 	@Override
-	public PreparedStatementWrapper prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+	public PreparedStatementWrapperImpl prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
 		checkNotClosed();
 		return super.prepareStatement(sql, resultSetType, resultSetConcurrency);
 	}
 
 	@Override
-	public CallableStatementWrapper prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+	public CallableStatementWrapperImpl prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
 		checkNotClosed();
 		return super.prepareCall(sql, resultSetType, resultSetConcurrency);
 	}
@@ -277,13 +277,13 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public SavepointWrapper setSavepoint() throws SQLException {
+	public SavepointWrapperImpl setSavepoint() throws SQLException {
 		checkNotClosed();
 		return super.setSavepoint();
 	}
 
 	@Override
-	public SavepointWrapper setSavepoint(String name) throws SQLException {
+	public SavepointWrapperImpl setSavepoint(String name) throws SQLException {
 		checkNotClosed();
 		return super.setSavepoint(name);
 	}
@@ -301,61 +301,61 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public StatementWrapper createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+	public StatementWrapperImpl createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		checkNotClosed();
 		return super.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 
 	@Override
-	public PreparedStatementWrapper prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+	public PreparedStatementWrapperImpl prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		checkNotClosed();
 		return super.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 
 	@Override
-	public CallableStatementWrapper prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+	public CallableStatementWrapperImpl prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		checkNotClosed();
 		return super.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 
 	@Override
-	public PreparedStatementWrapper prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+	public PreparedStatementWrapperImpl prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
 		checkNotClosed();
 		return super.prepareStatement(sql, autoGeneratedKeys);
 	}
 
 	@Override
-	public PreparedStatementWrapper prepareStatement(String sql, int columnIndexes[]) throws SQLException {
+	public PreparedStatementWrapperImpl prepareStatement(String sql, int columnIndexes[]) throws SQLException {
 		checkNotClosed();
 		return super.prepareStatement(sql, columnIndexes);
 	}
 
 	@Override
-	public PreparedStatementWrapper prepareStatement(String sql, String columnNames[]) throws SQLException {
+	public PreparedStatementWrapperImpl prepareStatement(String sql, String columnNames[]) throws SQLException {
 		checkNotClosed();
 		return super.prepareStatement(sql, columnNames);
 	}
 
 	@Override
-	public ClobWrapper createClob() throws SQLException {
+	public ClobWrapperImpl createClob() throws SQLException {
 		checkNotClosed();
 		return super.createClob();
 	}
 
 	@Override
-	public BlobWrapper createBlob() throws SQLException {
+	public BlobWrapperImpl createBlob() throws SQLException {
 		checkNotClosed();
 		return super.createBlob();
 	}
 
 	@Override
-	public NClobWrapper createNClob() throws SQLException {
+	public NClobWrapperImpl createNClob() throws SQLException {
 		checkNotClosed();
 		return super.createNClob();
 	}
 
 	@Override
-	public SQLXMLWrapper createSQLXML() throws SQLException {
+	public SQLXMLWrapperImpl createSQLXML() throws SQLException {
 		checkNotClosed();
 		return super.createSQLXML();
 	}
@@ -391,13 +391,13 @@ public class UncloseableConnectionWrapper extends ConnectionWrapper implements I
 	}
 
 	@Override
-	public ArrayWrapper createArrayOf(String typeName, Object[] elements) throws SQLException {
+	public ArrayWrapperImpl createArrayOf(String typeName, Object[] elements) throws SQLException {
 		checkNotClosed();
 		return super.createArrayOf(typeName, elements);
 	}
 
 	@Override
-	public StructWrapper createStruct(String typeName, Object[] attributes) throws SQLException {
+	public StructWrapperImpl createStruct(String typeName, Object[] attributes) throws SQLException {
 		checkNotClosed();
 		return super.createStruct(typeName, attributes);
 	}

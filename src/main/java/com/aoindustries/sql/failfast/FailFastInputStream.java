@@ -29,25 +29,25 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @see  FailFastConnection
+ * @see  FailFastConnectionImpl
  *
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 public class FailFastInputStream extends InputStreamWrapper {
 
-	public FailFastInputStream(FailFastConnection failFastConnection, InputStream wrapped) {
+	public FailFastInputStream(FailFastConnectionImpl failFastConnection, InputStream wrapped) {
 		super(failFastConnection, wrapped);
 	}
 
 	@Override
-	protected FailFastConnection getConnectionWrapper() {
-		return (FailFastConnection)super.getConnectionWrapper();
+	protected FailFastConnectionImpl getConnectionWrapper() {
+		return (FailFastConnectionImpl)super.getConnectionWrapper();
 	}
 
 	@Override
 	public int read() throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.read();
@@ -59,7 +59,7 @@ public class FailFastInputStream extends InputStreamWrapper {
 
 	@Override
 	public int read(byte b[]) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.read(b);
@@ -71,7 +71,7 @@ public class FailFastInputStream extends InputStreamWrapper {
 
 	@Override
 	public int read(byte b[], int off, int len) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.read(b, off, len);
@@ -87,7 +87,7 @@ public class FailFastInputStream extends InputStreamWrapper {
 
 	@Override
 	public long skip(long n) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.skip(n);
@@ -99,7 +99,7 @@ public class FailFastInputStream extends InputStreamWrapper {
 
 	@Override
 	public int available() throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			return super.available();
@@ -121,7 +121,7 @@ public class FailFastInputStream extends InputStreamWrapper {
 
 	@Override
 	public void mark(int readlimit) {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		if(ffConn.getFailFastCause() == null) {
 			try {
 				super.mark(readlimit);
@@ -134,7 +134,7 @@ public class FailFastInputStream extends InputStreamWrapper {
 
 	@Override
 	public void reset() throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.reset();
@@ -146,7 +146,7 @@ public class FailFastInputStream extends InputStreamWrapper {
 
 	@Override
 	public boolean markSupported() {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		if(ffConn.getFailFastCause() == null) {
 			try {
 				return super.markSupported();

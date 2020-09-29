@@ -26,10 +26,10 @@ import com.aoindustries.sql.wrapper.DriverWrapper;
 import java.sql.Connection;
 
 /**
- * @deprecated  Please use {@link com.aoindustries.sql.wrapper.ConnectionWrapper} in new package.
+ * @deprecated  Please use {@link com.aoindustries.sql.wrapper.ConnectionWrapperImpl} in new package.
  */
 @Deprecated
-public class ConnectionWrapper extends com.aoindustries.sql.wrapper.ConnectionWrapper {
+public class ConnectionWrapper extends com.aoindustries.sql.wrapper.ConnectionWrapperImpl {
 
 	public ConnectionWrapper(DriverWrapper driverWrapper, Connection wrapped) {
 		super(driverWrapper, wrapped);

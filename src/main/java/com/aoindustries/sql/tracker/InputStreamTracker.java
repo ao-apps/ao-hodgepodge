@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class InputStreamTracker extends InputStreamWrapper implements IOnClose {
 
-	public InputStreamTracker(ConnectionTracker connectionTracker, InputStream wrapped) {
+	public InputStreamTracker(ConnectionTrackerImpl connectionTracker, InputStream wrapped) {
 		super(connectionTracker, wrapped);
 	}
 
@@ -56,7 +56,7 @@ public class InputStreamTracker extends InputStreamWrapper implements IOnClose {
 	@Override
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public void close() throws IOException {
-		Throwable t0 = ConnectionTracker.clearRunAndCatch(onCloseHandlers);
+		Throwable t0 = ConnectionTrackerImpl.clearRunAndCatch(onCloseHandlers);
 		try {
 			super.close();
 		} catch(Throwable t) {

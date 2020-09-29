@@ -28,25 +28,25 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * @see  FailFastConnection
+ * @see  FailFastConnectionImpl
  *
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 public class FailFastOutputStream extends OutputStreamWrapper {
 
-	public FailFastOutputStream(FailFastConnection failFastConnection, OutputStream wrapped) {
+	public FailFastOutputStream(FailFastConnectionImpl failFastConnection, OutputStream wrapped) {
 		super(failFastConnection, wrapped);
 	}
 
 	@Override
-	protected FailFastConnection getConnectionWrapper() {
-		return (FailFastConnection)super.getConnectionWrapper();
+	protected FailFastConnectionImpl getConnectionWrapper() {
+		return (FailFastConnectionImpl)super.getConnectionWrapper();
 	}
 
 	@Override
 	public void write(int b) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.write(b);
@@ -58,7 +58,7 @@ public class FailFastOutputStream extends OutputStreamWrapper {
 
 	@Override
 	public void write(byte b[]) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.write(b);
@@ -70,7 +70,7 @@ public class FailFastOutputStream extends OutputStreamWrapper {
 
 	@Override
 	public void write(byte b[], int off, int len) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.write(b, off, len);
@@ -82,7 +82,7 @@ public class FailFastOutputStream extends OutputStreamWrapper {
 
 	@Override
 	public void flush() throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.flush();

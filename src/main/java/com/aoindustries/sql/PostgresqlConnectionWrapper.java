@@ -22,7 +22,7 @@
  */
 package com.aoindustries.sql;
 
-import com.aoindustries.sql.wrapper.ConnectionWrapper;
+import com.aoindustries.sql.wrapper.ConnectionWrapperImpl;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -34,7 +34,7 @@ import java.sql.SQLException;
  */
 // TODO: Rename to something not specific to PostgreSQL?
 // TODO: Cache many other methods, too?
-public class PostgresqlConnectionWrapper extends ConnectionWrapper {
+public class PostgresqlConnectionWrapper extends ConnectionWrapperImpl {
 
 	private final Object transactionIsolationLevelLock = new Object();
 	private int transactionIsolationLevel;

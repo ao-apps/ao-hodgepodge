@@ -55,12 +55,12 @@ public abstract class DriverWrapper implements Driver {
 	protected abstract String getUrlPrefix();
 
 	/**
-	 * Creates a new {@link ConnectionWrapper}.
+	 * Creates a new {@link ConnectionWrapperImpl}.
 	 *
 	 * @see  #wrapConnection(java.sql.Connection)
 	 */
-	protected ConnectionWrapper newConnectionWrapper(Connection connection) {
-		return new ConnectionWrapper(this, connection);
+	protected ConnectionWrapperImpl newConnectionWrapper(Connection connection) {
+		return new ConnectionWrapperImpl(this, connection);
 	}
 
 	/**
@@ -68,12 +68,12 @@ public abstract class DriverWrapper implements Driver {
 	 *
 	 * @see  #newConnectionWrapper(java.sql.Connection)
 	 */
-	protected ConnectionWrapper wrapConnection(Connection connection) {
+	protected ConnectionWrapperImpl wrapConnection(Connection connection) {
 		if(connection == null) {
 			return null;
 		}
-		if(connection instanceof ConnectionWrapper) {
-			ConnectionWrapper _connectionWrapper = (ConnectionWrapper)connection;
+		if(connection instanceof ConnectionWrapperImpl) {
+			ConnectionWrapperImpl _connectionWrapper = (ConnectionWrapperImpl)connection;
 			if(_connectionWrapper.getDriver().orElse(null) == this) {
 				return _connectionWrapper;
 			}
@@ -172,7 +172,7 @@ public abstract class DriverWrapper implements Driver {
 	}
 
 	@Override
-	public ConnectionWrapper connect(String url, Properties info) throws SQLException {
+	public ConnectionWrapperImpl connect(String url, Properties info) throws SQLException {
 		String wrappedUrl = toWrappedUrl(url);
 		if(wrappedUrl != null) {
 			try {

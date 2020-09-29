@@ -32,10 +32,10 @@ import java.io.OutputStream;
  */
 public class OutputStreamWrapper extends OutputStream implements IWrapper {
 
-	private final ConnectionWrapper connectionWrapper;
+	private final ConnectionWrapperImpl connectionWrapper;
 	private final OutputStream wrapped;
 
-	public OutputStreamWrapper(ConnectionWrapper connectionWrapper, OutputStream wrapped) {
+	public OutputStreamWrapper(ConnectionWrapperImpl connectionWrapper, OutputStream wrapped) {
 		this.connectionWrapper = connectionWrapper;
 		this.wrapped = wrapped;
 	}
@@ -43,7 +43,7 @@ public class OutputStreamWrapper extends OutputStream implements IWrapper {
 	/**
 	 * Gets the connection wrapper.
 	 */
-	protected ConnectionWrapper getConnectionWrapper() {
+	protected ConnectionWrapperImpl getConnectionWrapper() {
 		return connectionWrapper;
 	}
 

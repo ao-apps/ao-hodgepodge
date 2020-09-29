@@ -32,10 +32,10 @@ import java.io.Writer;
  */
 public class WriterWrapper extends Writer implements IWrapper {
 
-	private final ConnectionWrapper connectionWrapper;
+	private final ConnectionWrapperImpl connectionWrapper;
 	private final Writer wrapped;
 
-	public WriterWrapper(ConnectionWrapper connectionWrapper, Writer wrapped) {
+	public WriterWrapper(ConnectionWrapperImpl connectionWrapper, Writer wrapped) {
 		this.connectionWrapper = connectionWrapper;
 		this.wrapped = wrapped;
 	}
@@ -43,7 +43,7 @@ public class WriterWrapper extends Writer implements IWrapper {
 	/**
 	 * Gets the connection wrapper.
 	 */
-	protected ConnectionWrapper getConnectionWrapper() {
+	protected ConnectionWrapperImpl getConnectionWrapper() {
 		return connectionWrapper;
 	}
 

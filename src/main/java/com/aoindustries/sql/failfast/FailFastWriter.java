@@ -28,25 +28,25 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * @see  FailFastConnection
+ * @see  FailFastConnectionImpl
  *
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 public class FailFastWriter extends WriterWrapper {
 
-	public FailFastWriter(FailFastConnection failFastConnection, Writer wrapped) {
+	public FailFastWriter(FailFastConnectionImpl failFastConnection, Writer wrapped) {
 		super(failFastConnection, wrapped);
 	}
 
 	@Override
-	protected FailFastConnection getConnectionWrapper() {
-		return (FailFastConnection)super.getConnectionWrapper();
+	protected FailFastConnectionImpl getConnectionWrapper() {
+		return (FailFastConnectionImpl)super.getConnectionWrapper();
 	}
 
 	@Override
 	public void write(int c) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.write(c);
@@ -58,7 +58,7 @@ public class FailFastWriter extends WriterWrapper {
 
 	@Override
 	public void write(char cbuf[]) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.write(cbuf);
@@ -70,7 +70,7 @@ public class FailFastWriter extends WriterWrapper {
 
 	@Override
 	public void write(char cbuf[], int off, int len) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.write(cbuf, off, len);
@@ -82,7 +82,7 @@ public class FailFastWriter extends WriterWrapper {
 
 	@Override
 	public void write(String str) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.write(str);
@@ -94,7 +94,7 @@ public class FailFastWriter extends WriterWrapper {
 
 	@Override
 	public void write(String str, int off, int len) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.write(str, off, len);
@@ -106,7 +106,7 @@ public class FailFastWriter extends WriterWrapper {
 
 	@Override
 	public FailFastWriter append(CharSequence csq) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.append(csq);
@@ -119,7 +119,7 @@ public class FailFastWriter extends WriterWrapper {
 
 	@Override
 	public FailFastWriter append(CharSequence csq, int start, int end) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.append(csq, start, end);
@@ -132,7 +132,7 @@ public class FailFastWriter extends WriterWrapper {
 
 	@Override
 	public FailFastWriter append(char c) throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.append(c);
@@ -145,7 +145,7 @@ public class FailFastWriter extends WriterWrapper {
 
 	@Override
 	public void flush() throws IOException {
-		FailFastConnection ffConn = getConnectionWrapper();
+		FailFastConnectionImpl ffConn = getConnectionWrapper();
 		ffConn.failFastIOException();
 		try {
 			super.flush();

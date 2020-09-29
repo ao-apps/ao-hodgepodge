@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class ReaderTracker extends ReaderWrapper implements IOnClose {
 
-	public ReaderTracker(ConnectionTracker connectionTracker, Reader wrapped) {
+	public ReaderTracker(ConnectionTrackerImpl connectionTracker, Reader wrapped) {
 		super(connectionTracker, wrapped);
 	}
 
@@ -56,7 +56,7 @@ public class ReaderTracker extends ReaderWrapper implements IOnClose {
 	@Override
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public void close() throws IOException {
-		Throwable t0 = ConnectionTracker.clearRunAndCatch(onCloseHandlers);
+		Throwable t0 = ConnectionTrackerImpl.clearRunAndCatch(onCloseHandlers);
 		try {
 			super.close();
 		} catch(Throwable t) {

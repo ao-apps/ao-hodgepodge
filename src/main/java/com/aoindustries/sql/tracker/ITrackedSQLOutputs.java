@@ -22,7 +22,7 @@
  */
 package com.aoindustries.sql.tracker;
 
-import com.aoindustries.sql.wrapper.SQLDataWrapper;
+import com.aoindustries.sql.wrapper.SQLDataWrapperImpl;
 import java.sql.SQLOutput;
 import java.util.Map;
 
@@ -33,7 +33,7 @@ public interface ITrackedSQLOutputs {
 	 *
 	 * @return  The mapping from wrapped SQL output to tracker without any defensive copy.
 	 *
-	 * @see  SQLDataWrapper#writeSQL(java.sql.SQLOutput)
+	 * @see  SQLDataWrapperImpl#writeSQL(java.sql.SQLOutput)
 	 */
 	Map<SQLOutput,? extends ISQLOutputTracker> getTrackedSQLOutputs();
 }
