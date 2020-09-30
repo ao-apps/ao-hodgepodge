@@ -23,6 +23,7 @@
 package com.aoindustries.sql.failfast;
 
 import com.aoindustries.lang.Throwables;
+import com.aoindustries.sql.wrapper.Wrapper;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -35,7 +36,13 @@ import java.util.concurrent.Executor;
  * @author  AO Industries, Inc.
  */
 // Note: Comment matches FailFastConnectionImpl
-public interface FailFastConnection extends Connection {
+public interface FailFastConnection extends Wrapper, Connection {
+
+	/**
+	 * Gets the connection that is wrapped.
+	 */
+	@Override
+	Connection getWrapped();
 
 	enum State {
 		/**
