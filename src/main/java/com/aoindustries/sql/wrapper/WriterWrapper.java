@@ -30,7 +30,7 @@ import java.io.Writer;
  *
  * @author  AO Industries, Inc.
  */
-public class WriterWrapper extends Writer implements IWrapper {
+public class WriterWrapper extends Writer implements Wrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final Writer wrapped;

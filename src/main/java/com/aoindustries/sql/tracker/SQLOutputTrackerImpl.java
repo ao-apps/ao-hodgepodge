@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class SQLOutputTrackerImpl extends SQLOutputWrapperImpl implements ISQLOutputTracker {
+public class SQLOutputTrackerImpl extends SQLOutputWrapperImpl implements SQLOutputTracker {
 
 	public SQLOutputTrackerImpl(ConnectionTrackerImpl connectionTracker, SQLOutput wrapped) {
 		super(connectionTracker, wrapped);

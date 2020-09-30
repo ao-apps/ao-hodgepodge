@@ -49,7 +49,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class CallableStatementTrackerImpl extends CallableStatementWrapperImpl implements ICallableStatementTracker {
+public class CallableStatementTrackerImpl extends CallableStatementWrapperImpl implements CallableStatementTracker {
 
 	public CallableStatementTrackerImpl(ConnectionTrackerImpl connectionTracker, CallableStatement wrapped) {
 		super(connectionTracker, wrapped);

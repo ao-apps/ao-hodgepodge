@@ -47,7 +47,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class SQLInputTrackerImpl extends SQLInputWrapperImpl implements ISQLInputTracker {
+public class SQLInputTrackerImpl extends SQLInputWrapperImpl implements SQLInputTracker {
 
 	public SQLInputTrackerImpl(ConnectionTrackerImpl connectionTracker, SQLInput wrapped) {
 		super(connectionTracker, wrapped);

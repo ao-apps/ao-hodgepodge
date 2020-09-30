@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class SavepointTrackerImpl extends SavepointWrapperImpl implements ISavepointTracker {
+public class SavepointTrackerImpl extends SavepointWrapperImpl implements SavepointTracker {
 
 	public SavepointTrackerImpl(ConnectionTrackerImpl connectionTracker, Savepoint wrapped) {
 		super(connectionTracker, wrapped);

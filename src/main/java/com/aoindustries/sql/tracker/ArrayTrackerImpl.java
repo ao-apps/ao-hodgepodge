@@ -39,7 +39,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class ArrayTrackerImpl extends ArrayWrapperImpl implements IArrayTracker {
+public class ArrayTrackerImpl extends ArrayWrapperImpl implements ArrayTracker {
 
 	public ArrayTrackerImpl(ConnectionTrackerImpl connectionTracker, StatementTrackerImpl stmtTracker, Array wrapped) {
 		super(connectionTracker, stmtTracker, wrapped);

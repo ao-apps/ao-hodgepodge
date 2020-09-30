@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
-public abstract class DriverTracker extends DriverWrapper implements IOnClose {
+public abstract class DriverTracker extends DriverWrapper implements OnCloseHandler {
 
 	private static final Logger logger = Logger.getLogger(DriverTracker.class.getName());
 

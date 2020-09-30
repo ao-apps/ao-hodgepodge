@@ -29,7 +29,7 @@ import java.sql.ResultSetMetaData;
  *
  * @author  AO Industries, Inc.
  */
-public class ResultSetMetaDataWrapperImpl implements IResultSetMetaDataWrapper {
+public class ResultSetMetaDataWrapperImpl implements ResultSetMetaDataWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final ResultSetMetaData wrapped;

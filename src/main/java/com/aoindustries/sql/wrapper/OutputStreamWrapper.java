@@ -30,7 +30,7 @@ import java.io.OutputStream;
  *
  * @author  AO Industries, Inc.
  */
-public class OutputStreamWrapper extends OutputStream implements IWrapper {
+public class OutputStreamWrapper extends OutputStream implements Wrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final OutputStream wrapped;

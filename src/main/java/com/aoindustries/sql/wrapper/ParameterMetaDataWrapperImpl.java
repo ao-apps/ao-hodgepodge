@@ -29,7 +29,7 @@ import java.sql.ParameterMetaData;
  *
  * @author  AO Industries, Inc.
  */
-public class ParameterMetaDataWrapperImpl implements IParameterMetaDataWrapper {
+public class ParameterMetaDataWrapperImpl implements ParameterMetaDataWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final ParameterMetaData wrapped;

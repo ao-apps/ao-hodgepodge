@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class StructTrackerImpl extends StructWrapperImpl implements IStructTracker {
+public class StructTrackerImpl extends StructWrapperImpl implements StructTracker {
 
 	public StructTrackerImpl(ConnectionTrackerImpl connectionTracker, Struct wrapped) {
 		super(connectionTracker, wrapped);

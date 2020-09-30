@@ -32,7 +32,7 @@ import java.sql.SQLOutput;
  *
  * @author  AO Industries, Inc.
  */
-public class SQLDataWrapperImpl implements ISQLDataWrapper {
+public class SQLDataWrapperImpl implements SQLDataWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final SQLData wrapped;

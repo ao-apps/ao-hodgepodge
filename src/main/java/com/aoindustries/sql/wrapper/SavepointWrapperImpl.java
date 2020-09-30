@@ -30,7 +30,7 @@ import java.sql.Savepoint;
  *
  * @author  AO Industries, Inc.
  */
-public class SavepointWrapperImpl implements ISavepointWrapper {
+public class SavepointWrapperImpl implements SavepointWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final Savepoint wrapped;

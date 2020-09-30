@@ -42,7 +42,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class NClobTrackerImpl extends NClobWrapperImpl implements INClobTracker {
+public class NClobTrackerImpl extends NClobWrapperImpl implements NClobTracker {
 
 	public NClobTrackerImpl(ConnectionTrackerImpl connectionTracker, NClob wrapped) {
 		super(connectionTracker, wrapped);

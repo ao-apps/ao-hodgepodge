@@ -29,7 +29,7 @@ import java.sql.RowId;
  *
  * @author  AO Industries, Inc.
  */
-public class RowIdWrapperImpl implements IRowIdWrapper {
+public class RowIdWrapperImpl implements RowIdWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final RowId wrapped;

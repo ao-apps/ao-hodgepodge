@@ -102,7 +102,7 @@ public abstract class DriverWrapper implements Driver {
 	 *
 	 * @throws  SQLException  When the wrapped URL does not begin with {@link #JDBC_SCHEMA}
 	 *
-	 * @see  IDatabaseMetaDataWrapper#getURL()
+	 * @see  DatabaseMetaDataWrapper#getURL()
 	 */
 	protected String toWrapperUrl(String wrappedUrl) throws SQLException {
 		if(!wrappedUrl.startsWith(JDBC_SCHEMA)) {
@@ -127,7 +127,7 @@ public abstract class DriverWrapper implements Driver {
 	 * <code>{@link #getUrlPrefix()} + ':'</code>.
 	 * </p>
 	 *
-	 * @see  IDatabaseMetaDataWrapper#getDriverName()
+	 * @see  DatabaseMetaDataWrapper#getDriverName()
 	 */
 	protected String getDriverName(String wrappedName) {
 		return getUrlPrefix() + ':' + wrappedName;
@@ -140,7 +140,7 @@ public abstract class DriverWrapper implements Driver {
 	 * <code>{@link #getVersion()} + ':'</code>.
 	 * </p>
 	 *
-	 * @see  IDatabaseMetaDataWrapper#getDriverVersion()
+	 * @see  DatabaseMetaDataWrapper#getDriverVersion()
 	 * @see  #getVersion()
 	 */
 	protected String getDriverVersion(String wrappedVersion) {
@@ -153,7 +153,7 @@ public abstract class DriverWrapper implements Driver {
 	 * This default implementation returns {@link #getMajorVersion()}.
 	 * </p>
 	 *
-	 * @see  IDatabaseMetaDataWrapper#getDriverMajorVersion()
+	 * @see  DatabaseMetaDataWrapper#getDriverMajorVersion()
 	 */
 	protected int getDriverMajorVersion(int wrappedMajor) {
 		return getMajorVersion();
@@ -165,7 +165,7 @@ public abstract class DriverWrapper implements Driver {
 	 * This default implementation returns {@link #getMinorVersion()}.
 	 * </p>
 	 *
-	 * @see  IDatabaseMetaDataWrapper#getDriverMinorVersion()
+	 * @see  DatabaseMetaDataWrapper#getDriverMinorVersion()
 	 */
 	protected int getDriverMinorVersion(int wrappedMinor) {
 		return getMinorVersion();
@@ -197,7 +197,7 @@ public abstract class DriverWrapper implements Driver {
 
 	/**
 	 * Gets the full version string, which may be used for
-	 * {@linkplain IDatabaseMetaDataWrapper#getDriverVersion() the driver version meta data associated with connections}.
+	 * {@linkplain DatabaseMetaDataWrapper#getDriverVersion() the driver version meta data associated with connections}.
 	 *
 	 * @see  #getDriverVersion(java.lang.String)
 	 */

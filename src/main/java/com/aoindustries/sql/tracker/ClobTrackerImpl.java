@@ -42,7 +42,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class ClobTrackerImpl extends ClobWrapperImpl implements IClobTracker {
+public class ClobTrackerImpl extends ClobWrapperImpl implements ClobTracker {
 
 	public ClobTrackerImpl(ConnectionTrackerImpl connectionTracker, Clob wrapped) {
 		super(connectionTracker, wrapped);

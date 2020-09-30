@@ -32,7 +32,7 @@ import java.util.Optional;
  *
  * @author  AO Industries, Inc.
  */
-public class DatabaseMetaDataWrapperImpl implements IDatabaseMetaDataWrapper {
+public class DatabaseMetaDataWrapperImpl implements DatabaseMetaDataWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final DatabaseMetaData wrapped;

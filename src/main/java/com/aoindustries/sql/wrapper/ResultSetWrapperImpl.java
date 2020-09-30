@@ -42,7 +42,7 @@ import java.util.Optional;
  *
  * @author  AO Industries, Inc.
  */
-public class ResultSetWrapperImpl implements IResultSetWrapper {
+public class ResultSetWrapperImpl implements ResultSetWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final StatementWrapperImpl stmtWrapper;

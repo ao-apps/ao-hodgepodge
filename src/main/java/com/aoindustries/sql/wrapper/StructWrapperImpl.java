@@ -29,7 +29,7 @@ import java.sql.Struct;
  *
  * @author  AO Industries, Inc.
  */
-public class StructWrapperImpl implements IStructWrapper {
+public class StructWrapperImpl implements StructWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final Struct wrapped;

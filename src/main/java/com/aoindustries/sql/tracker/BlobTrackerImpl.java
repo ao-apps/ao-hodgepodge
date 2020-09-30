@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class BlobTrackerImpl extends BlobWrapperImpl implements IBlobTracker {
+public class BlobTrackerImpl extends BlobWrapperImpl implements BlobTracker {
 
 	public BlobTrackerImpl(ConnectionTrackerImpl connectionTracker, Blob wrapped) {
 		super(connectionTracker, wrapped);

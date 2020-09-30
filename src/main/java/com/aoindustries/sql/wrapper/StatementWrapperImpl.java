@@ -31,7 +31,7 @@ import java.sql.Statement;
  *
  * @author  AO Industries, Inc.
  */
-public class StatementWrapperImpl implements IStatementWrapper {
+public class StatementWrapperImpl implements StatementWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final Statement wrapped;

@@ -75,7 +75,7 @@ import java.util.function.Function;
  *
  * @author  AO Industries, Inc.
  */
-public class ConnectionTrackerImpl extends ConnectionWrapperImpl implements IConnectionTracker {
+public class ConnectionTrackerImpl extends ConnectionWrapperImpl implements ConnectionTracker {
 
 	public ConnectionTrackerImpl(DriverTracker driver, Connection wrapped) {
 		super(driver, wrapped);
@@ -335,7 +335,7 @@ public class ConnectionTrackerImpl extends ConnectionWrapperImpl implements ICon
 	 * 
 	 * @return  The value, either obtained from the map or retrieved
 	 */
-	static <K,V extends IOnClose,E extends Throwable> V getIfAbsent(
+	static <K,V extends OnCloseHandler,E extends Throwable> V getIfAbsent(
 		Map<K,V> map,
 		K wrapped,
 		CallableE<? extends V,? extends E> getTracker,
@@ -375,7 +375,7 @@ public class ConnectionTrackerImpl extends ConnectionWrapperImpl implements ICon
 	 * 
 	 * @return  The value, either obtained from the map or new
 	 */
-	static <T,K,V extends IOnClose> V newIfAbsent(
+	static <T,K,V extends OnCloseHandler> V newIfAbsent(
 		Map<K,V> map,
 		T thisTracker,
 		K wrapped,
@@ -395,7 +395,7 @@ public class ConnectionTrackerImpl extends ConnectionWrapperImpl implements ICon
 	/**
 	 * @see  #newIfAbsent(java.util.Map, java.lang.Object, java.lang.Object, java.util.function.BiFunction)
 	 */
-	private <K,V extends IOnClose> V newIfAbsent(
+	private <K,V extends OnCloseHandler> V newIfAbsent(
 		Map<K,V> map,
 		K wrapped,
 		BiFunction<? super ConnectionTrackerImpl, ? super K, ? extends V> newTracker

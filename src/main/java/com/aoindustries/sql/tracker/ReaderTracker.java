@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class ReaderTracker extends ReaderWrapper implements IOnClose {
+public class ReaderTracker extends ReaderWrapper implements OnCloseHandler {
 
 	public ReaderTracker(ConnectionTrackerImpl connectionTracker, Reader wrapped) {
 		super(connectionTracker, wrapped);

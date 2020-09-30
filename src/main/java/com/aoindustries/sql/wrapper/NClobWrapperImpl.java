@@ -29,7 +29,7 @@ import java.sql.NClob;
  *
  * @author  AO Industries, Inc.
  */
-public class NClobWrapperImpl extends ClobWrapperImpl implements INClobWrapper {
+public class NClobWrapperImpl extends ClobWrapperImpl implements NClobWrapper {
 
 	public NClobWrapperImpl(ConnectionWrapperImpl connectionWrapper, NClob wrapped) {
 		super(connectionWrapper, wrapped);

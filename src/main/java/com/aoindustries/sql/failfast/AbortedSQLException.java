@@ -29,7 +29,7 @@ import java.sql.Connection;
  *
  * @author  AO Industries, Inc.
  *
- * @see  IFailFastConnection#abort(java.util.concurrent.Executor)
+ * @see  FailFastConnection#abort(java.util.concurrent.Executor)
  */
 public class AbortedSQLException extends TerminalSQLException {
 

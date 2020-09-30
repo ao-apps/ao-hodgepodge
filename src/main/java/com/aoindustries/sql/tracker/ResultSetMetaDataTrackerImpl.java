@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class ResultSetMetaDataTrackerImpl extends ResultSetMetaDataWrapperImpl implements IResultSetMetaDataTracker {
+public class ResultSetMetaDataTrackerImpl extends ResultSetMetaDataWrapperImpl implements ResultSetMetaDataTracker {
 
 	public ResultSetMetaDataTrackerImpl(ConnectionTrackerImpl connectionTracker, ResultSetMetaData wrapped) {
 		super(connectionTracker, wrapped);

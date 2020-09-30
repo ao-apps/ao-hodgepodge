@@ -39,7 +39,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class DatabaseMetaDataTrackerImpl extends DatabaseMetaDataWrapperImpl implements IDatabaseMetaDataTracker {
+public class DatabaseMetaDataTrackerImpl extends DatabaseMetaDataWrapperImpl implements DatabaseMetaDataTracker {
 
 	public DatabaseMetaDataTrackerImpl(ConnectionTrackerImpl connectionTracker, DatabaseMetaData wrapped) {
 		super(connectionTracker, wrapped);

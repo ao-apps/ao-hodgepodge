@@ -41,7 +41,7 @@ import java.sql.SQLXML;
  *
  * @author  AO Industries, Inc.
  */
-public class PreparedStatementWrapperImpl extends StatementWrapperImpl implements IPreparedStatementWrapper {
+public class PreparedStatementWrapperImpl extends StatementWrapperImpl implements PreparedStatementWrapper {
 
 	public PreparedStatementWrapperImpl(ConnectionWrapperImpl connectionWrapper, PreparedStatement wrapped) {
 		super(connectionWrapper, wrapped);

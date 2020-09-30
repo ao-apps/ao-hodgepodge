@@ -41,7 +41,7 @@ import java.sql.Struct;
  *
  * @author  AO Industries, Inc.
  */
-public class SQLOutputWrapperImpl implements ISQLOutputWrapper {
+public class SQLOutputWrapperImpl implements SQLOutputWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final SQLOutput wrapped;

@@ -31,7 +31,7 @@ import java.nio.CharBuffer;
  *
  * @author  AO Industries, Inc.
  */
-public class ReaderWrapper extends Reader implements IWrapper {
+public class ReaderWrapper extends Reader implements Wrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final Reader wrapped;

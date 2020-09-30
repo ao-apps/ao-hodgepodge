@@ -39,7 +39,7 @@ import java.sql.SQLXML;
  *
  * @author  AO Industries, Inc.
  */
-public class SQLInputWrapperImpl implements ISQLInputWrapper {
+public class SQLInputWrapperImpl implements SQLInputWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final SQLInput wrapped;

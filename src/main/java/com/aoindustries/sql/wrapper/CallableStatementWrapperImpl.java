@@ -39,7 +39,7 @@ import java.sql.SQLXML;
  *
  * @author  AO Industries, Inc.
  */
-public class CallableStatementWrapperImpl extends PreparedStatementWrapperImpl implements ICallableStatementWrapper {
+public class CallableStatementWrapperImpl extends PreparedStatementWrapperImpl implements CallableStatementWrapper {
 
 	public CallableStatementWrapperImpl(ConnectionWrapperImpl connectionWrapper, CallableStatement wrapped) {
 		super(connectionWrapper, wrapped);

@@ -29,18 +29,18 @@ import java.sql.SQLException;
  * The underlying connection, as well as any transaction in-progress, are both expected to still be valid.
  * <p>
  * Exceptions of this type can put a connection into a fail-fast state, but this state may be
- * {@linkplain IFailFastConnection#clearApplicationFailFast() cleared directly}, instead of requiring a
- * {@link IFailFastConnection#rollback()} or {@link IFailFastConnection#rollback(java.sql.Savepoint)}.
+ * {@linkplain FailFastConnection#clearApplicationFailFast() cleared directly}, instead of requiring a
+ * {@link FailFastConnection#rollback()} or {@link FailFastConnection#rollback(java.sql.Savepoint)}.
  * </p>
  * <p>
  * Applications are expected to be able to catch this exception and continue normally.  When they do, however, the
- * application must {@linkplain IFailFastConnection#clearApplicationFailFast() clear the fail-fast state}.
+ * application must {@linkplain FailFastConnection#clearApplicationFailFast() clear the fail-fast state}.
  * Otherwise, subsequent operations will still fail and the overall transaction may be rolled-back instead of committed.
  * </p>
  *
  * @author  AO Industries, Inc.
  *
- * @see  IFailFastConnection#abort(java.util.concurrent.Executor)
+ * @see  FailFastConnection#abort(java.util.concurrent.Executor)
  */
 public class ApplicationSQLException extends SQLException {
 

@@ -39,7 +39,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class StatementTrackerImpl extends StatementWrapperImpl implements IStatementTracker {
+public class StatementTrackerImpl extends StatementWrapperImpl implements StatementTracker {
 
 	public StatementTrackerImpl(ConnectionTrackerImpl connectionTracker, Statement wrapped) {
 		super(connectionTracker, wrapped);

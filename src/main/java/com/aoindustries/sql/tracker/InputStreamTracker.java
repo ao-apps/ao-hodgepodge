@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class InputStreamTracker extends InputStreamWrapper implements IOnClose {
+public class InputStreamTracker extends InputStreamWrapper implements OnCloseHandler {
 
 	public InputStreamTracker(ConnectionTrackerImpl connectionTracker, InputStream wrapped) {
 		super(connectionTracker, wrapped);

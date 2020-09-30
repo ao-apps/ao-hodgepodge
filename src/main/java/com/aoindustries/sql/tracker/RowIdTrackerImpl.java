@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class RowIdTrackerImpl extends RowIdWrapperImpl implements IRowIdTracker {
+public class RowIdTrackerImpl extends RowIdWrapperImpl implements RowIdTracker {
 
 	public RowIdTrackerImpl(ConnectionTrackerImpl connectionTracker, RowId wrapped) {
 		super(connectionTracker, wrapped);

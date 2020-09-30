@@ -34,7 +34,7 @@ import java.sql.SQLXML;
  *
  * @author  AO Industries, Inc.
  */
-public class SQLXMLWrapperImpl implements ISQLXMLWrapper {
+public class SQLXMLWrapperImpl implements SQLXMLWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final SQLXML wrapped;

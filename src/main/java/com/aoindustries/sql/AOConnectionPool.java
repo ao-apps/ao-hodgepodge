@@ -27,7 +27,6 @@ import com.aoindustries.lang.AutoCloseables;
 import com.aoindustries.lang.Throwables;
 import com.aoindustries.sql.tracker.ConnectionTrackerImpl;
 import com.aoindustries.sql.tracker.DatabaseMetaDataTrackerImpl;
-import com.aoindustries.sql.tracker.IConnectionTracker;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -39,6 +38,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.aoindustries.sql.tracker.ConnectionTracker;
 
 /**
  * Reusable connection pooling with dynamic flaming tiger feature.
@@ -344,7 +344,7 @@ public class AOConnectionPool extends AOPool<Connection,SQLException,SQLExceptio
 		}
 	}
 
-	private static interface IPooledConnection extends IConnectionTracker {
+	private static interface IPooledConnection extends ConnectionTracker {
 		AOConnectionPool getPool();
 	}
 

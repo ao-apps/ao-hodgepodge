@@ -32,7 +32,7 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public class BlobWrapperImpl implements IBlobWrapper {
+public class BlobWrapperImpl implements BlobWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final Blob wrapped;

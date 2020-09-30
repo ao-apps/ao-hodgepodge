@@ -29,7 +29,7 @@ import java.sql.Connection;
  *
  * @author  AO Industries, Inc.
  *
- * @see  IFailFastConnection#close()
+ * @see  FailFastConnection#close()
  */
 public class ClosedSQLException extends TerminalSQLException {
 

@@ -34,7 +34,7 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public class ClobWrapperImpl implements IClobWrapper {
+public class ClobWrapperImpl implements ClobWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final Clob wrapped;

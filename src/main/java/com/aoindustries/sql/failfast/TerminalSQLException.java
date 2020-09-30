@@ -24,8 +24,8 @@ package com.aoindustries.sql.failfast;
 
 /**
  * An exception that puts a connection into a terminal state.  Once in a terminal state, the state cannot be
- * {@linkplain IFailFastConnection#addFailFastCause(java.lang.Throwable) replaced} or
- * {@linkplain IFailFastConnection#clearFailFast() cleared}.
+ * {@linkplain FailFastConnection#addFailFastCause(java.lang.Throwable) replaced} or
+ * {@linkplain FailFastConnection#clearFailFast() cleared}.
  *
  * @author  AO Industries, Inc.
  */

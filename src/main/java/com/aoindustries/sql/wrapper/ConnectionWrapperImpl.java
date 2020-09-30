@@ -55,7 +55,7 @@ import java.util.concurrent.Executor;
  *
  * @author  AO Industries, Inc.
  */
-public class ConnectionWrapperImpl implements IConnectionWrapper {
+public class ConnectionWrapperImpl implements ConnectionWrapper {
 
 	private final DriverWrapper driver;
 	private final Connection wrapped;

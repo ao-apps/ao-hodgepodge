@@ -42,7 +42,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class SQLDataTrackerImpl extends SQLDataWrapperImpl implements ISQLDataTracker {
+public class SQLDataTrackerImpl extends SQLDataWrapperImpl implements SQLDataTracker {
 
 	public SQLDataTrackerImpl(ConnectionTrackerImpl connectionTracker, SQLData wrapped) {
 		super(connectionTracker, wrapped);

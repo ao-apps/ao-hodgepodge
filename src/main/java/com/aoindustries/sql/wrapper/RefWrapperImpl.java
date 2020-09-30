@@ -29,7 +29,7 @@ import java.sql.Ref;
  *
  * @author  AO Industries, Inc.
  */
-public class RefWrapperImpl implements IRefWrapper {
+public class RefWrapperImpl implements RefWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final Ref wrapped;

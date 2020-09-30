@@ -68,9 +68,9 @@ import java.util.function.Supplier;
  *
  * @author  AO Industries, Inc.
  */
-// Note: Comment matches IFailFastConnection
+// Note: Comment matches FailFastConnection
 @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-public class FailFastConnectionImpl extends ConnectionWrapperImpl implements IFailFastConnection {
+public class FailFastConnectionImpl extends ConnectionWrapperImpl implements FailFastConnection {
 
 	private static class FailFastLock {}
 	private final FailFastLock failFastLock = new FailFastLock();

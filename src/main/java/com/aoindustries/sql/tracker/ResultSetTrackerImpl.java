@@ -48,7 +48,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class ResultSetTrackerImpl extends ResultSetWrapperImpl implements IResultSetTracker {
+public class ResultSetTrackerImpl extends ResultSetWrapperImpl implements ResultSetTracker {
 
 	public ResultSetTrackerImpl(ConnectionTrackerImpl connectionTracker, StatementTrackerImpl stmtTracker, ResultSet wrapped) {
 		super(connectionTracker, stmtTracker, wrapped);

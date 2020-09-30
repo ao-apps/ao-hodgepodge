@@ -33,7 +33,7 @@ import java.util.Optional;
  *
  * @author  AO Industries, Inc.
  */
-public class ArrayWrapperImpl implements IArrayWrapper {
+public class ArrayWrapperImpl implements ArrayWrapper {
 
 	private final ConnectionWrapperImpl connectionWrapper;
 	private final StatementWrapperImpl stmtWrapper;

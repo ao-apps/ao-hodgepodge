@@ -41,7 +41,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public class PreparedStatementTrackerImpl extends PreparedStatementWrapperImpl implements IPreparedStatementTracker {
+public class PreparedStatementTrackerImpl extends PreparedStatementWrapperImpl implements PreparedStatementTracker {
 
 	public PreparedStatementTrackerImpl(ConnectionTrackerImpl connectionTracker, PreparedStatement wrapped) {
 		super(connectionTracker, wrapped);

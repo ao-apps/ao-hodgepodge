@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class RefTrackerImpl extends RefWrapperImpl implements IRefTracker {
+public class RefTrackerImpl extends RefWrapperImpl implements RefTracker {
 
 	public RefTrackerImpl(ConnectionTrackerImpl connectionTracker, Ref wrapped) {
 		super(connectionTracker, wrapped);

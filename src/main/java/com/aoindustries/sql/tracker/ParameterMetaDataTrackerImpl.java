@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-public class ParameterMetaDataTrackerImpl extends ParameterMetaDataWrapperImpl implements IParameterMetaDataTracker {
+public class ParameterMetaDataTrackerImpl extends ParameterMetaDataWrapperImpl implements ParameterMetaDataTracker {
 
 	public ParameterMetaDataTrackerImpl(ConnectionTrackerImpl connectionTracker, ParameterMetaData wrapped) {
 		super(connectionTracker, wrapped);
