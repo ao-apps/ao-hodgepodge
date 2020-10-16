@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
@@ -31,7 +32,7 @@ import java.sql.Statement;
  *
  * @author  AO Industries, Inc.
  */
-public interface StatementWrapper extends Wrapper, Statement {
+public interface StatementWrapper extends Wrapper, Statement, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the statement that is wrapped.

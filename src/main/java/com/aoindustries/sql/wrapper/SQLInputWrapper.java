@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Date;
@@ -35,7 +36,7 @@ import java.sql.Timestamp;
  *
  * @author  AO Industries, Inc.
  */
-public interface SQLInputWrapper extends Wrapper, SQLInput, AutoCloseable {
+public interface SQLInputWrapper extends Wrapper, SQLInput, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the SQL input that is wrapped.

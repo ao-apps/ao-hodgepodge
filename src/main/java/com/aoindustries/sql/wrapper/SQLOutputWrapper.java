@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -47,7 +48,7 @@ import java.sql.Timestamp;
  *
  * @author  AO Industries, Inc.
  */
-public interface SQLOutputWrapper extends Wrapper, SQLOutput, AutoCloseable {
+public interface SQLOutputWrapper extends Wrapper, SQLOutput, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the SQL output that is wrapped.

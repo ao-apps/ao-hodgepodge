@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -48,7 +49,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public interface ResultSetWrapper extends Wrapper, ResultSet {
+public interface ResultSetWrapper extends Wrapper, ResultSet, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the results that are wrapped.

@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.sql.Array;
 import java.sql.SQLException;
 import java.util.Map;
@@ -31,7 +32,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public interface ArrayWrapper extends Wrapper, Array, AutoCloseable {
+public interface ArrayWrapper extends Wrapper, Array, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the array that is wrapped.

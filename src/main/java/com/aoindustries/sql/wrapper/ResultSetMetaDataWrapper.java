@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
@@ -30,7 +31,7 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public interface ResultSetMetaDataWrapper extends Wrapper, ResultSetMetaData, AutoCloseable {
+public interface ResultSetMetaDataWrapper extends Wrapper, ResultSetMetaData, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the result set meta data that is wrapped.

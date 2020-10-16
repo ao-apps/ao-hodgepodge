@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -31,7 +32,7 @@ import java.sql.Savepoint;
  *
  * @author  AO Industries, Inc.
  */
-public interface SavepointWrapper extends Wrapper, Savepoint, AutoCloseable {
+public interface SavepointWrapper extends Wrapper, Savepoint, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the savepoint that is wrapped.

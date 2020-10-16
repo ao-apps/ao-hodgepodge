@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.sql.Ref;
 import java.sql.SQLException;
 import java.util.Map;
@@ -31,7 +32,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public interface RefWrapper extends Wrapper, Ref, AutoCloseable {
+public interface RefWrapper extends Wrapper, Ref, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the ref that is wrapped.

@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.sql.Blob;
 import java.sql.SQLException;
 
@@ -30,7 +31,7 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public interface BlobWrapper extends Wrapper, Blob, AutoCloseable {
+public interface BlobWrapper extends Wrapper, Blob, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the blob that is wrapped.

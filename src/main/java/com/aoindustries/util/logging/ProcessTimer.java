@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.logging;
 
+import com.aoindustries.lang.AutoCloseableE;
 import com.aoindustries.lang.Strings;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +42,7 @@ import java.util.logging.Logger;
 //       but this would have to be moved to a different project to avoid picking-up
 //       a dependency.
 
-public class ProcessTimer implements Runnable, AutoCloseable {
+public class ProcessTimer implements Runnable, AutoCloseableE<RuntimeException> {
 
 	final private Logger logger;
 	final private String sourceClass;

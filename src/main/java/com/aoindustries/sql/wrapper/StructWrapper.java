@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.sql.SQLException;
 import java.sql.Struct;
 import java.util.Map;
@@ -31,7 +32,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public interface StructWrapper extends Wrapper, Struct, AutoCloseable {
+public interface StructWrapper extends Wrapper, Struct, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the struct that is wrapped.

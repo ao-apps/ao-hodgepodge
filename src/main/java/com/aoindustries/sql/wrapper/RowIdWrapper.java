@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.sql.RowId;
 import java.sql.SQLException;
 
@@ -30,7 +31,7 @@ import java.sql.SQLException;
  *
  * @author  AO Industries, Inc.
  */
-public interface RowIdWrapper extends Wrapper, RowId, AutoCloseable {
+public interface RowIdWrapper extends Wrapper, RowId, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the row ID that is wrapped.

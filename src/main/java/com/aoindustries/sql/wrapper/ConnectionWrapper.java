@@ -22,6 +22,7 @@
  */
 package com.aoindustries.sql.wrapper;
 
+import com.aoindustries.lang.AutoCloseableE;
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
@@ -36,7 +37,7 @@ import java.util.concurrent.Executor;
  *
  * @author  AO Industries, Inc.
  */
-public interface ConnectionWrapper extends Wrapper, Connection {
+public interface ConnectionWrapper extends Wrapper, Connection, AutoCloseableE<SQLException> {
 
 	/**
 	 * Gets the connection that is wrapped.
