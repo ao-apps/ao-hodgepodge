@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-11-02T20:00:56-06:00"
+		dateModified="2020-11-02T21:26:13-06:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -71,22 +71,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						presence of the constructor.
 					</li>
 					<li>
-						New package <code>com.aoindustries.sql.tracker</code> that tracks objects not closed/freed on a
-						connection, and provides automatic closing of all tracked objects.  This is particularly useful
-						to ensure that everything is completely tidy before releasing a connection back to a pool.
-					</li>
-					<li>
 						<p>
-							Registered JDBC drivers for default tracker and wrapper implementations.  These
-							are activated by including a prefix in the JDBC URL, and may be combined.
+							Registered JDBC driver for default wrapper implementation.  This is activated by including
+							a prefix in the JDBC URL, and may be combined.
 						</p>
 						<p>
-							For example, the following JDBC URL will track the <ao:a href="https://dev.mysql.com/downloads/connector/j/">MySQL JDBC Driver</ao:a>,
-							automatically closing resources that were not explicitly closed:
-							<code>jdbc:tracker:mysql://<var>host</var>/<var>database</var></code>.
-						</p>
-						<p>
-							Furthermore, the following JDBC URL will wrap the <ao:a href="https://jdbc.postgresql.org/">PostgreSQL JDBC Driver</ao:a>,
+							For example, the following JDBC URL will wrap the <ao:a href="https://jdbc.postgresql.org/">PostgreSQL JDBC Driver</ao:a>,
 							shielding the driver behind a thorough façade:
 							<code>jdbc:wrapper:postgresql://<var>host</var>/<var>database</var></code>.
 						</p>
