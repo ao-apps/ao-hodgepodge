@@ -21,6 +21,5 @@
 # along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-com.aoindustries.sql.failfast.Driver
 com.aoindustries.sql.tracker.Driver
 com.aoindustries.sql.wrapper.Driver
