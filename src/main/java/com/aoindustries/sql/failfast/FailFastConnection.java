@@ -51,14 +51,7 @@ public interface FailFastConnection extends Wrapper, Connection {
 		OK,
 
 		/**
-		 * {@link ApplicationSQLException} are application-level issues where the underlying database connection and
-		 * transaction are expected to still be valid.  These are recoverable by simply
-		 * {@link FailFastConnection#clearApplicationFailFast() clearing the fail-fast state}.
-		 */
-		APPLICATION,
-
-		/**
-		 * All {@link Throwable} except {@link ApplicationSQLException}.  These might be recoverable through
+		 * All {@link Throwable} except {@link TerminalSQLException}.  These might be recoverable through
 		 * {@link FailFastConnection#rollback()} or {@link FailFastConnection#rollback(java.sql.Savepoint)}.
 		 */
 		EXCEPTION,
@@ -78,10 +71,8 @@ public interface FailFastConnection extends Wrapper, Connection {
 				return OK;
 			} else if(cause instanceof TerminalSQLException) {
 				return TERMINAL;
-			} else if(!(cause instanceof ApplicationSQLException)) {
-				return EXCEPTION;
 			} else {
-				return APPLICATION;
+				return EXCEPTION;
 			}
 		}
 	}
@@ -91,13 +82,8 @@ public interface FailFastConnection extends Wrapper, Connection {
 	 * <ol>
 	 * <li>{@link TerminalSQLException} take highest precedence, since these are non-recoverable.</li>
 	 * <li>
-	 *   All {@link Throwable} except {@link ApplicationSQLException} are next precedence.  These might be recoverable
-	 *   through {@link FailFastConnection#rollback()} or {@link FailFastConnection#rollback(java.sql.Savepoint)}.
-	 * </li>
-	 * <li>
-	 *   {@link ApplicationSQLException} are lowest precedence, since these are application-level issues where the
-	 *   underlying database connection and transaction are expected to still be valid.  These are recoverable by
-	 *   simply {@link FailFastConnection#clearApplicationFailFast() clearing the fail-fast state}.
+	 *   All other {@link Throwable} are next precedence.  These might be recoverable through
+	 *   {@link FailFastConnection#rollback()} or {@link FailFastConnection#rollback(java.sql.Savepoint)}.
 	 * </li>
 	 * </ol>
 	 * <p>
@@ -153,26 +139,6 @@ public interface FailFastConnection extends Wrapper, Connection {
 	 */
 	// TODO: Should this still be part of the interface and have a public implementation method?
 	Throwable clearFailFast() throws TerminalSQLException;
-
-	/**
-	 * Clears the cause of the current fail-fast state if it is an {@link ApplicationSQLException}.
-	 * This will typically be invoked when an application has caught and handled a {@link ApplicationSQLException}
-	 * and is prepared to continue with the transaction and/or connection.
-	 *
-	 * @return  The cause or {@code null} when was not in an application failure state (operating normally).
-	 *
-	 * @throws  TerminalSQLException if the connection is in a terminal fail-fast state, such as closed or aborted.
-	 * @throws  SQLException  if the connection is in a non-application (driver or database sytsem) fail-fast state.
-	 *
-	 * @see  #getFailFastCause()
-	 */
-	// TODO: Find all uses of NoRowException (and others), and make sure to call this clear - where and how?
-	//       What about when no longer have access to the connection?  How do we know if is handled or not?
-	//       If this whole idea fundamentally broken?
-	//       Instead, do we require explicit commit(), and just group commits by automatic nested transactions (only
-	//       actually perform commit on the outer-most).
-	//       Do we instead not have any ThreadLocal-based automatic transactions?
-	ApplicationSQLException clearApplicationFailFast() throws TerminalSQLException, SQLException;
 
 	/**
 	 * When not in a {@linkplain TerminalSQLException terminal fail-fast state}, will

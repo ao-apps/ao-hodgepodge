@@ -142,19 +142,6 @@ public class FailFastConnectionImpl extends ConnectionWrapperImpl implements Fai
 		}
 	}
 
-	@Override
-	public ApplicationSQLException clearApplicationFailFast() throws TerminalSQLException, SQLException {
-		synchronized(failFastLock) {
-			Throwable cause = failFastCause;
-			// Compare to the constants to distinguish from TerminalSQLException thrown by wrapped connections
-			if(cause == ClosedSQLException.FAST_MARKER_KEEP_PRIVATE) throw new ClosedSQLException();
-			if(cause == AbortedSQLException.FAST_MARKER_KEEP_PRIVATE) throw new AbortedSQLException();
-			if(!(cause instanceof ApplicationSQLException)) throw ThrowableUtil.newFailFastSQLException(cause);
-			failFastCause = null;
-			return (ApplicationSQLException)cause;
-		}
-	}
-
 	/**
 	 * @throws  SQLException  if currently in a fail-fast state
 	 *

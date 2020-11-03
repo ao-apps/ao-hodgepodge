@@ -201,14 +201,9 @@ class ThrowableUtil {
 
 	/**
 	 * Creates a new {@link SQLException} with the given cause.
-	 * <p>
-	 * Will never return {@link ApplicationSQLException}, which are wrapped into {@link FailFastSQLException} within
-	 * {@link #newFailFastSQLException(java.lang.Throwable)}.
-	 * </p>
 	 */
 	@SuppressWarnings("null")
 	static SQLException newSQLException(SQLException cause) {
-		assert !(cause instanceof ApplicationSQLException) : "ApplicationSQLException must always be wrapped in FailFastSQLException within newFastFailSQLException";
 		if(cause instanceof BatchUpdateException) {
 			return newBatchUpdateException((BatchUpdateException)cause);
 		}
@@ -254,15 +249,10 @@ class ThrowableUtil {
 	 * Creates a new {@link SQLException} or {@link FailFastSQLException} with the given cause.
 	 */
 	static SQLException newFailFastSQLException(Throwable cause) {
-		if(
-			// Make sure to wrap ApplicationSQLException of different type, to not confuse application-level code setup
-			// to handle application-level exceptions.
-			cause instanceof ApplicationSQLException
-			|| !(cause instanceof SQLException)
-		) {
-			return new FailFastSQLException(cause);
-		} else {
+		if(cause instanceof SQLException) {
 			return newSQLException((SQLException)cause);
+		} else {
+			return new FailFastSQLException(cause);
 		}
 	}
 
