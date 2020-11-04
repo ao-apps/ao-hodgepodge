@@ -23,11 +23,11 @@
 package com.aoindustries.io;
 
 import com.aoindustries.lang.Strings;
-import com.aoindustries.sql.SQLUtility;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.RandomAccessFile;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.BitSet;
 
@@ -162,9 +162,9 @@ public class ZeroFile {
 					lastVerboseString,
 					Strings.getApproximateSize(pos+blockSize)
 					+ ": "
-					+ SQLUtility.formatDecimal2((long)block * 10000L / (long)blocks)
+					+ BigDecimal.valueOf((long)block * 10000L / (long)blocks, 2)
 					+ "% read, "
-					+ SQLUtility.formatDecimal2((long)numDirtyBlocks * 10000L / (long)block)
+					+ BigDecimal.valueOf((long)numDirtyBlocks * 10000L / (long)block, 2)
 					+ "% dirty",
 					System.err
 				);
@@ -199,7 +199,7 @@ public class ZeroFile {
 						lastVerboseString,
 						Strings.getApproximateSize(bytesWritten)
 						+ ": "
-						+ SQLUtility.formatDecimal2((long)written * 10000L / (long)numDirtyBlocks)
+						+ BigDecimal.valueOf((long)written * 10000L / (long)numDirtyBlocks, 2)
 						+ "% written",
 						System.err
 					);

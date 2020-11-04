@@ -23,8 +23,8 @@
 package com.aoindustries.util.sort;
 
 import com.aoindustries.lang.Strings;
-import com.aoindustries.sql.SQLUtility;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 
 /**
  * Sorting statistics to help determine best algorithm for a specific task.
@@ -150,7 +150,7 @@ final public class SortStatistics {
 		out.print("Total Time...........: ");
 		if(totalTime>Integer.MAX_VALUE) out.println(Strings.getTimeLengthString(totalTime));
 		else {
-			out.print(SQLUtility.formatDecimal3((int)totalTime));
+			out.print(BigDecimal.valueOf(totalTime, 3));
 			out.println(" seconds");
 		}
 		out.print("Max Recursion........: "); out.println(maxRecursion);
