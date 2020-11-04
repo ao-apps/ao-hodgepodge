@@ -60,7 +60,6 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						<Private-Package>
 							com.aoindustries.io;-split-package:=first,
 							com.aoindustries.lang;-split-package:=first,
-							com.aoindustries.sql;-split-package:=first,
 							com.aoindustries.util;-split-package:=first,
 							com.aoindustries.util.i18n;-split-package:=first
 						</Private-Package>

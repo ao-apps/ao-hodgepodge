@@ -24,13 +24,10 @@ package com.aoindustries.io.stream;
 
 import com.aoindustries.security.Identifier;
 import com.aoindustries.security.SmallIdentifier;
-import com.aoindustries.sql.SQLUtility;
-import com.aoindustries.sql.UnmodifiableTimestamp;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Timestamp;
 
 /**
  * Adds compressed data transfer to DataInputStream.  This class is not thread safe.
@@ -243,67 +240,67 @@ public class StreamableInput extends DataInputStream {
 		throw new IOException("Invalid value for nullable boolean: " + b);
 	}
 
-	/**
-	 * Reads a {@link Timestamp}, maintaining the full nanosecond precision.
-	 * Time zone offset is not maintained.
-	 * <p>
-	 * See  {@link StreamableOutput#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
-	 * </p>
-	 */
-	public static Timestamp readTimestamp(DataInputStream in) throws IOException {
-		long seconds = in.readLong();
-		int nanos = readCompressedInt(in);
-		return SQLUtility.newTimestamp(seconds, nanos, IOException::new);
-	}
-
-	/**
-	 * Reads a {@link Timestamp}.
-	 *
-	 * @see  #readTimestamp(java.io.DataInputStream)
-	 */
-	public Timestamp readTimestamp() throws IOException {
-		return readTimestamp(this);
-	}
-
-	/**
-	 * Reads a possibly-{@code null} {@link Timestamp}.
-	 *
-	 * @see  #readTimestamp()
-	 */
-	public Timestamp readNullTimestamp() throws IOException {
-		return readBoolean() ? readTimestamp() : null;
-	}
-
-	/**
-	 * Reads an {@link UnmodifiableTimestamp}, maintaining the full nanosecond precision.
-	 * Time zone offset is not maintained.
-	 * <p>
-	 * See  {@link StreamableOutput#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
-	 * </p>
-	 */
-	public static UnmodifiableTimestamp readUnmodifiableTimestamp(DataInputStream in) throws IOException {
-		long seconds = in.readLong();
-		int nanos = readCompressedInt(in);
-		return SQLUtility.newUnmodifiableTimestamp(seconds, nanos, IOException::new);
-	}
-
-	/**
-	 * Reads an {@link UnmodifiableTimestamp}.
-	 *
-	 * @see  #readUnmodifiableTimestamp(java.io.DataInputStream)
-	 */
-	public UnmodifiableTimestamp readUnmodifiableTimestamp() throws IOException {
-		return readUnmodifiableTimestamp(this);
-	}
-
-	/**
-	 * Reads a possibly-{@code null} {@link UnmodifiableTimestamp}.
-	 *
-	 * @see  #readUnmodifiableTimestamp()
-	 */
-	public UnmodifiableTimestamp readNullUnmodifiableTimestamp() throws IOException {
-		return readBoolean() ? readUnmodifiableTimestamp() : null;
-	}
+//	/**
+//	 * Reads a {@link Timestamp}, maintaining the full nanosecond precision.
+//	 * Time zone offset is not maintained.
+//	 * <p>
+//	 * See  {@link StreamableOutput#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
+//	 * </p>
+//	 */
+//	public static Timestamp readTimestamp(DataInputStream in) throws IOException {
+//		long seconds = in.readLong();
+//		int nanos = readCompressedInt(in);
+//		return SQLUtility.newTimestamp(seconds, nanos, IOException::new);
+//	}
+//
+//	/**
+//	 * Reads a {@link Timestamp}.
+//	 *
+//	 * @see  #readTimestamp(java.io.DataInputStream)
+//	 */
+//	public Timestamp readTimestamp() throws IOException {
+//		return readTimestamp(this);
+//	}
+//
+//	/**
+//	 * Reads a possibly-{@code null} {@link Timestamp}.
+//	 *
+//	 * @see  #readTimestamp()
+//	 */
+//	public Timestamp readNullTimestamp() throws IOException {
+//		return readBoolean() ? readTimestamp() : null;
+//	}
+//
+//	/**
+//	 * Reads an {@link UnmodifiableTimestamp}, maintaining the full nanosecond precision.
+//	 * Time zone offset is not maintained.
+//	 * <p>
+//	 * See  {@link StreamableOutput#writeTimestamp(java.sql.Timestamp, java.io.DataOutputStream)} for wire protocol details.
+//	 * </p>
+//	 */
+//	public static UnmodifiableTimestamp readUnmodifiableTimestamp(DataInputStream in) throws IOException {
+//		long seconds = in.readLong();
+//		int nanos = readCompressedInt(in);
+//		return SQLUtility.newUnmodifiableTimestamp(seconds, nanos, IOException::new);
+//	}
+//
+//	/**
+//	 * Reads an {@link UnmodifiableTimestamp}.
+//	 *
+//	 * @see  #readUnmodifiableTimestamp(java.io.DataInputStream)
+//	 */
+//	public UnmodifiableTimestamp readUnmodifiableTimestamp() throws IOException {
+//		return readUnmodifiableTimestamp(this);
+//	}
+//
+//	/**
+//	 * Reads a possibly-{@code null} {@link UnmodifiableTimestamp}.
+//	 *
+//	 * @see  #readUnmodifiableTimestamp()
+//	 */
+//	public UnmodifiableTimestamp readNullUnmodifiableTimestamp() throws IOException {
+//		return readBoolean() ? readUnmodifiableTimestamp() : null;
+//	}
 
 	/**
 	 * Reads an {@link Identifier}.
