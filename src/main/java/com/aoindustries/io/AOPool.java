@@ -217,7 +217,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 				// Wraparound of 64-bit identifier is unlikely, but still make sure is available for correctness
 				do {
 					id = new SmallIdentifier(++lastId);
-				} while(!threadConnectionsByThreadId.containsKey(id));
+				} while(threadConnectionsByThreadId.containsKey(id));
 				threadConnectionsByThreadId.put(id, new ArrayList<>());
 			}
 			return id;
