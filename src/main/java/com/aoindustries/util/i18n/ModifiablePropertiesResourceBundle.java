@@ -23,6 +23,8 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.io.FileUtils;
+import com.aoindustries.tempfiles.TempFile;
+import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.util.CommentCaptureInputStream;
 import com.aoindustries.util.DiffableProperties;
 import com.aoindustries.util.SkipCommentsFilterOutputStream;
@@ -222,7 +224,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		Enumeration<String> enumeration = (myParent != null) ? myParent.getKeys() : null;
 		return new Enumeration<String>() {
 
-			private Iterator<String> iterator = set.iterator();
+			private final Iterator<String> iterator = set.iterator();
 			private String next = null;
 
 			@Override
@@ -350,13 +352,18 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 				newContent = DiffableProperties.formatProperties(out.toString(propertiesCharset.name())).getBytes(propertiesCharset);
 			}
 			if(!sourceFile.exists() || !FileUtils.contentEquals(sourceFile, newContent)) {
-				File tmpFile = File.createTempFile("ApplicationResources", null, sourceFile.getParentFile());
-				try (OutputStream out = new FileOutputStream(tmpFile)) {
-					out.write(newContent);
+				try (
+					TempFileContext tempFileContext = new TempFileContext(sourceFile.getParentFile());
+					TempFile tempFile = tempFileContext.createTempFile(sourceFile.getName() + '.')
+				) {
+					try (OutputStream out = new FileOutputStream(tempFile.getFile())) {
+						out.write(newContent);
+					}
+					FileUtils.renameAllowNonAtomic(tempFile.getFile(), sourceFile);
 				}
-				FileUtils.renameAllowNonAtomic(tmpFile, sourceFile);
 			}
 		} catch(IOException err) {
+			// TODO: RuntimeException/WrappedException wrapping IOException should be UncheckedIOException broadly
 			throw new RuntimeException(err);
 		}
 	}

@@ -23,6 +23,7 @@
 package com.aoindustries.io;
 
 import com.aoindustries.exception.WrappedException;
+import com.aoindustries.lang.AutoCloseables;
 import com.aoindustries.tempfiles.TempFileContext;
 import java.io.Closeable;
 import java.io.DataInputStream;
@@ -281,6 +282,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 	 */
 	@Deprecated // Java 9: (since="9")
 	@Override
+	@SuppressWarnings("FinalizeDeclaration")
 	protected void finalize() throws Throwable {
 		try {
 			close();
@@ -291,8 +293,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 
 	@Override
 	public void close() throws IOException {
-		frf.close();
-		tempFileContext.close();
+		AutoCloseables.closeAndThrow(IOException.class, IOException::new, frf, tempFileContext);
 	}
 
 	/**
