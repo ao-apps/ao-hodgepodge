@@ -303,7 +303,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 	@Deprecated
 	public static File getTempFile(String prefix, String extension) throws IOException {
 		if(extension == null) extension = "tmp";
-		/* Now just using standard Java temporary files to avoid dependency no new ao-io-unix project.
+		/* Now just using standard Java temporary files to avoid dependency on new ao-io-unix project.
 		try {
 			// First try to use Unix file because it creates the files with 600 permissions.
 			File f=UnixFile.mktemp(System.getProperty("java.io.tmpdir")+'/'+prefix+'_'+extension+'.', true).getFile();

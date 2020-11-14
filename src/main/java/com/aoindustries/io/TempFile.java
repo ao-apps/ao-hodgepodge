@@ -25,6 +25,7 @@ package com.aoindustries.io;
 import com.aoindustries.tempfiles.TempFileContext;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 /**
  * Holds a reference to a temp file.  Automatically deletes the file with
@@ -58,7 +59,7 @@ public class TempFile {
 	public TempFile(String prefix, String suffix, File directory) throws IOException {
 		File checkDir = directory;
 		if(checkDir == null) checkDir = new File(System.getProperty("java.io.tmpdir"));
-		if(!checkDir.exists()) FileUtils.mkdirs(checkDir);
+		if(!checkDir.exists()) Files.createDirectories(checkDir.toPath());
 		tempFile = File.createTempFile(prefix, suffix, directory);
 		tempFile.deleteOnExit();
 		path = tempFile.getPath();
@@ -77,7 +78,7 @@ public class TempFile {
 	public void delete() throws IOException {
 		File f = tempFile;
 		if(f!=null) {
-			FileUtils.delete(f);
+			Files.delete(f.toPath());
 			tempFile = null;
 		}
 	}

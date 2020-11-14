@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -238,7 +239,7 @@ public class ParallelDelete {
 											}
 										}
 									}
-									if(!dryRun) FileUtils.delete(deleteme);
+									if(!dryRun) Files.delete(deleteme.toPath());
 								} catch(IOException err) {
 									synchronized(deleteException) {
 										deleteException[0] = err;
