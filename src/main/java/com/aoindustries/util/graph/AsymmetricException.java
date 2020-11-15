@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -21,6 +21,8 @@
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.aoindustries.util.graph;
+
+import com.aoindustries.lang.Throwables;
 
 /**
  * Thrown when edges are not symmetric in a symmetric graph.
@@ -55,6 +57,12 @@ public class AsymmetricException extends GraphException {
 		this.connected = connected;
 	}
 
+	<V> AsymmetricException(V vertex, V connected, Throwable cause) {
+		super(getMessage(vertex, connected), cause);
+		this.vertex = vertex;
+		this.connected = connected;
+	}
+
 	/**
 	 * Gets the vertex that the connection was from.
 	 */
@@ -67,5 +75,11 @@ public class AsymmetricException extends GraphException {
 	 */
 	public Object getConnected() {
 		return connected;
+	}
+
+	static {
+		Throwables.registerSurrogateFactory(AsymmetricException.class, (template, cause) ->
+			new AsymmetricException(template.vertex, template.connected, cause)
+		);
 	}
 }

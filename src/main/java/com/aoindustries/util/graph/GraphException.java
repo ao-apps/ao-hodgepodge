@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -21,6 +21,8 @@
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.aoindustries.util.graph;
+
+import com.aoindustries.lang.Throwables;
 
 /**
  * Exceptions indicating problems have been detected in graph state.
@@ -45,5 +47,11 @@ public class GraphException extends RuntimeException {
 
 	public GraphException(String message, Throwable cause) {
 		super(message, cause);
+	}
+
+	static {
+		Throwables.registerSurrogateFactory(GraphException.class, (template, cause) ->
+			new GraphException(template.getMessage(), cause)
+		);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.graph;
 
+import com.aoindustries.lang.Throwables;
 import java.util.List;
 
 /**
@@ -56,8 +57,19 @@ public class CycleException extends GraphException {
 
 	/**
 	 * Gets all vertices that are part of the cycle in the order they create the cycle.
+	 *
+	 * @return  No defensive copy
 	 */
+	@SuppressWarnings("ReturnOfCollectionOrArrayField")
 	public List<?> getVertices() {
 		return vertices;
+	}
+
+	static {
+		Throwables.registerSurrogateFactory(CycleException.class, (template, cause) -> {
+			CycleException newEx = new CycleException(template.vertices);
+			newEx.initCause(cause);
+			return newEx;
+		});
 	}
 }
