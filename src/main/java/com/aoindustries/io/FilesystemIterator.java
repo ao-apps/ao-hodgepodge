@@ -22,11 +22,11 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.exception.WrappedException;
 import com.aoindustries.lang.EmptyArrays;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
@@ -399,7 +399,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
 		private final FilesystemIterator filesystemIterator;
 
-		File next;
+		private File next;
 
 		FilenameIterator(FilesystemIterator filesystemIterator) throws IOException {
 			this.filesystemIterator = filesystemIterator;
@@ -419,7 +419,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 				next = filesystemIterator.getNextFile();
 				return retVal;
 			} catch(IOException err) {
-				throw new WrappedException(err);
+				throw new UncheckedIOException(err);
 			}
 		}
 

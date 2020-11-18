@@ -22,7 +22,6 @@
  */
 package com.aoindustries.io;
 
-import com.aoindustries.exception.WrappedException;
 import com.aoindustries.lang.AutoCloseables;
 import com.aoindustries.tempfiles.TempFileContext;
 import java.io.Closeable;
@@ -30,6 +29,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -85,7 +85,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 			frf.removeAllRecords();
 			modCount++;
 		} catch(IOException err) {
-			throw new WrappedException(err, new Object[] {"frf="+frf});
+			throw new UncheckedIOException("frf=" + frf, err);
 		}
 	}
 
@@ -100,7 +100,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 				return obj;
 			} else return null;
 		} catch(IOException err) {
-			throw new WrappedException(err, new Object[] {"frf="+frf});
+			throw new UncheckedIOException("frf=" + frf, err);
 		}
 	}
 
@@ -108,7 +108,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 		try {
 			frf.swap(index1, index2);
 		} catch(IOException err) {
-			throw new WrappedException(err, new Object[] {"frf="+frf});
+			throw new UncheckedIOException("frf=" + frf, err);
 		}
 	}
 
@@ -117,7 +117,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 		try {
 			return frf.getRecordCount();
 		} catch(IOException err) {
-			throw new WrappedException(err, new Object[] {"frf="+frf});
+			throw new UncheckedIOException("frf=" + frf, err);
 		}
 	}
 
@@ -153,7 +153,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 			// Return old object
 			return old;
 		} catch(IOException err) {
-			throw new WrappedException(err, new Object[] {"frf="+frf});
+			throw new UncheckedIOException("frf=" + frf, err);
 		}
 	}
 
@@ -179,7 +179,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 
 			modCount++;
 		} catch(IOException err) {
-			throw new WrappedException(err, new Object[] {"frf="+frf});
+			throw new UncheckedIOException("frf=" + frf, err);
 		}
 	}
 
@@ -238,7 +238,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 				return changed;
 			}
 		} catch(IOException err) {
-			throw new WrappedException(err, new Object[] {"frf="+frf, "index="+index});
+			throw new UncheckedIOException("frf=" + frf + ", index=" + index, err);
 		}
 	}
 
@@ -261,7 +261,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 			// Return the old object
 			return old;
 		} catch(IOException err) {
-			throw new WrappedException(err, new Object[] {"frf="+frf, "index="+index});
+			throw new UncheckedIOException("frf=" + frf + ", index=" + index, err);
 		}
 	}
 

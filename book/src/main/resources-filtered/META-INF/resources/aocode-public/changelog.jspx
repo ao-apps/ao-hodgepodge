@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-11-16T19:28:31-06:00"
+		dateModified="2020-11-17T20:56:25-06:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -86,6 +86,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							is obtained from an <code>ExecutionException</code>.
 						</p>
 					</li>
+					<li>Now using <code>java.io.UncheckedIOException</code> instead of <code>WrappedException</code>.</li>
 				</ul>
 			</changelog:release>
 		</c:if>

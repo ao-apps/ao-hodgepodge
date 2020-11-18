@@ -36,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.Collator;
@@ -193,7 +194,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 					in.close();
 				}
 			} catch(IOException err) {
-				throw new RuntimeException(err);
+				throw new UncheckedIOException(err);
 			}
 		}
 		// Populate the concurrent maps while skipping the validated and modified entries
@@ -363,8 +364,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 				}
 			}
 		} catch(IOException err) {
-			// TODO: RuntimeException/WrappedException wrapping IOException should be UncheckedIOException broadly
-			throw new RuntimeException(err);
+			throw new UncheckedIOException(err);
 		}
 	}
 
