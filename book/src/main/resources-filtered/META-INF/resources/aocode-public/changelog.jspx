@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-11-17T21:50:06-06:00"
+		dateModified="2020-11-25T07:25:09-06:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.aoindustries:aocode-public:pom.version}" />
@@ -66,7 +66,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		>
 			<ul>
 				<li>
-					Moved the <code>com.aoindustries.sql</code> to package to the new
+					Moved the <code>com.aoindustries.sql</code> package to the new
 					<core:link book="/ao-sql" page="/index.jspx" /> project, with the exception
 					of <code>LocalizedSQLException</code> that stays here with other localized exceptions.
 				</li>
