@@ -257,7 +257,9 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 				if(setValueUrl != null) {
 					// Get the set of all locales
 					SortedSet<Locale> allLocales = new TreeSet<>(LocaleComparator.getInstance());
-					for(LookupKey lookupKey : lookupKeys) allLocales.addAll(lookupKey.bundleSet.getLocales());
+					for(LookupKey lookupKey : lookupKeys) {
+						allLocales.addAll(lookupKey.bundleSet.getLocales());
+					}
 
 					out.append("<div style='position:fixed; bottom:0px; left:50%; width:300px; margin-left:-150px; text-align:center'>\n");
 					int invalidatedCount = 0;
@@ -796,6 +798,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	private final Locale locale;
 	private final EditableResourceBundleSet bundleSet;
 
+	@SuppressWarnings("LeakingThisInConstructor")
 	public EditableResourceBundle(Locale locale, EditableResourceBundleSet bundleSet, File... sourceFiles) {
 		super(sourceFiles);
 		this.locale = locale;
@@ -827,6 +830,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	 * @see  BundleLookupThreadContext
 	 */
 	@Override
+	@SuppressWarnings("RedundantStringConstructorCall")
 	public Object handleGetObject(String key) {
 		ThreadSettings threadSettings = currentThreadSettings.get();
 		Object object = super.handleGetObject(key);
