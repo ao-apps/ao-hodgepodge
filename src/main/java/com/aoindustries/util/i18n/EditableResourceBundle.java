@@ -45,6 +45,18 @@ import java.util.TreeSet;
  *
  * @author  AO Industries, Inc.
  */
+// TODO: Implement as a ResourceBundleControlProvider, which would then load all editable resource bundles via
+//       ServiceLoader, instead of having to declare a subclass of EditableResourceBundle for every bundle and language.
+//       This, in turn, would mean a project could be used directly as its ApplicationResources*properties files, but
+//       would also be activated as editable only in a development mode.  This, without depending directly on
+//       aocode-public or having to split into a separate *-i18n sub-project.  When going this route, consider the
+//       implications of ResourceBundleControlProvider having to be a "Java Extension Mechanism" - will it work in a
+//       servlet environment without modification of the Tomcat libraries?
+//       https://docs.oracle.com/javase/8/docs/api/java/util/spi/ResourceBundleControlProvider.html
+//       https://docs.oracle.com/javase/8/docs/api/java/util/ResourceBundle.Control.html
+//       https://docs.oracle.com/javase/8/docs/api/java/util/ResourceBundle.html
+//       https://docs.oracle.com/javase/8/docs/technotes/guides/extensions/index.html
+//
 abstract public class EditableResourceBundle extends ModifiablePropertiesResourceBundle implements Comparable<EditableResourceBundle> {
 
 	public static final String VISIBILITY_COOKIE_NAME = "EditableResourceBundleEditorVisibility";
