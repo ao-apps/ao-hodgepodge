@@ -995,6 +995,71 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		}
 
 		@Override
+		public void appendPrefixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException {
+			if(encoder==null) {
+				appendPrefixTo(markupType, out);
+			} else {
+				switch(markupType) {
+					case NONE :
+						// No markup
+						break;
+					case XHTML :
+						//if(invalidated) SB.append(" style=\"color:red\"");
+						String elementIdString = Long.toString(elementId);
+						encoder
+							.append("<!--", out)
+							.append(Long.toString(lookupId), out)
+							.append("--><span id=\"EditableResourceBundleElement", out)
+							.append(elementIdString, out)
+							.append("\" onmouseover=\"if(typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(", out)
+							.append(elementIdString, out)
+							.append(", true);\"", out)
+							.append(" onmouseout=\"if(typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(", out)
+							.append(elementIdString, out)
+							.append(");\">", out)
+						;
+						break;
+					case TEXT :
+						if(invalidated) {
+							encoder
+								.append("<<<", out)
+								.append(Long.toString(lookupId), out)
+								.append('<', out)
+							;
+						} else if(modifyAllText) {
+							encoder
+								.append('<', out)
+								.append(Long.toString(lookupId), out)
+								.append('<', out)
+							;
+						} else {
+							// No prefix
+						}
+						break;
+					case JAVASCRIPT :
+					case MYSQL :
+					case PSQL :
+					case CSS :
+						encoder
+							.append("/*", out)
+							.append(Long.toString(lookupId), out)
+							.append("*/", out)
+						;
+						break;
+					case SH :
+						encoder
+							.append("`#", out)
+							.append(Long.toString(lookupId), out)
+							.append('`', out)
+						;
+						break;
+					default :
+						throw new AssertionError();
+				}
+			}
+		}
+
+		@Override
 		public void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException {
 			switch(markupType) {
 				case NONE :
@@ -1029,6 +1094,48 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					break;
 				default :
 					throw new AssertionError();
+			}
+		}
+
+		@Override
+		public void appendSuffixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException {
+			if(encoder==null) {
+				appendSuffixTo(markupType, out);
+			} else {
+				switch(markupType) {
+					case NONE :
+						// No markup
+						break;
+					case XHTML :
+						encoder.append("</span>", out);
+						break;
+					case TEXT :
+						if(invalidated) {
+							encoder
+								.append('>', out)
+								.append(Long.toString(lookupId), out)
+								.append(">>>", out)
+							;
+						} else if(modifyAllText) {
+							encoder
+								.append('>', out)
+								.append(Long.toString(lookupId), out)
+								.append('>', out)
+							;
+						} else {
+							// No suffix
+						}
+						break;
+					case JAVASCRIPT :
+					case MYSQL :
+					case PSQL :
+					case CSS :
+					case SH :
+						// No suffix
+						break;
+					default :
+						throw new AssertionError();
+				}
 			}
 		}
 	}
