@@ -62,11 +62,27 @@ public class EditableResourceBundleSet {
 	}
 
 	/**
+	 * @param baseName the class to use as the base name of the default locale's bundle.
+	 * @param locales the set of all allowed locales.
+	 */
+	public EditableResourceBundleSet(Class<?> baseName, Collection<Locale> locales) {
+		this(baseName.getName(), locales);
+	}
+
+	/**
 	 * @param baseName the base name of the default locale's bundle.
 	 * @param locales the set of all allowed locales.
 	 */
 	public EditableResourceBundleSet(String baseName, Locale ... locales) {
 		this(baseName, Arrays.asList(locales));
+	}
+
+	/**
+	 * @param baseName the class to use as the base name of the default locale's bundle.
+	 * @param locales the set of all allowed locales.
+	 */
+	public EditableResourceBundleSet(Class<?> baseName, Locale ... locales) {
+		this(baseName.getName(), Arrays.asList(locales));
 	}
 
 	/**
@@ -85,6 +101,7 @@ public class EditableResourceBundleSet {
 	/**
 	 * Gets the unmodifiable set of all locales supported by this bundle set.
 	 */
+	@SuppressWarnings("ReturnOfCollectionOrArrayField") // Returning unmodifiable
 	public SortedSet<Locale> getLocales() {
 		return locales;
 	}

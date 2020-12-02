@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,9 @@
  */
 package com.aoindustries.version;
 
+import com.aoindustries.lang.LocalizedIllegalArgumentException;
 import com.aoindustries.util.PropertiesUtils;
-import static com.aoindustries.version.ApplicationResources.accessor;
+import com.aoindustries.util.i18n.Resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -37,6 +38,8 @@ import java.util.Properties;
  * @author  AO Industries, Inc.
  */
 public class PropertiesVersions {
+
+	private static final Resources RESOURCES = Resources.getResources(PropertiesVersions.class);
 
 	private static Properties readProperties(InputStream in) throws IOException {
 		Properties props = new Properties();
@@ -72,7 +75,7 @@ public class PropertiesVersions {
 	 */
 	public Version getVersion(String product) throws IllegalArgumentException {
 		String three = properties.getProperty(product);
-		if(three==null) throw new IllegalArgumentException(accessor.getMessage("PropertiesVersions.getVersion.productNotFound", product));
+		if(three==null) throw new LocalizedIllegalArgumentException(RESOURCES, "PropertiesVersions.getVersion.productNotFound", product);
 		return Version.valueOf(three+"."+getBuild());
 	}
 
@@ -81,7 +84,7 @@ public class PropertiesVersions {
 	 */
 	public int getBuild() throws IllegalArgumentException {
 		String build = properties.getProperty("build.number");
-		if(build==null) throw new IllegalArgumentException(accessor.getMessage("PropertiesVersions.getVersion.buildNotFound"));
+		if(build==null) throw new LocalizedIllegalArgumentException(RESOURCES, "PropertiesVersions.getVersion.buildNotFound");
 		return Integer.parseInt(build);
 	}
 }

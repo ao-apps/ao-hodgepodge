@@ -57,6 +57,9 @@ import java.util.TreeSet;
 //       https://docs.oracle.com/javase/8/docs/api/java/util/ResourceBundle.html
 //       https://docs.oracle.com/javase/8/docs/technotes/guides/extensions/index.html
 //
+
+// TODO: In a future major version update, fail when properties source file is unavailable.  This will only be practical
+//       after all uses are from *-i18n sub-projects that are not deployed.
 abstract public class EditableResourceBundle extends ModifiablePropertiesResourceBundle implements Comparable<EditableResourceBundle> {
 
 	public static final String VISIBILITY_COOKIE_NAME = "EditableResourceBundleEditorVisibility";

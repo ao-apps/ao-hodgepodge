@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.swing;
 
+import com.aoindustries.util.i18n.Resources;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
@@ -39,6 +40,8 @@ import javax.swing.SwingUtilities;
  * @author  AO Industries, Inc.
  */
 public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
+
+	private static final Resources RESOURCES = Resources.getResources(SynchronizingComboBoxModel.class);
 
 	private static final long serialVersionUID = 2421298474426921512L;
 
@@ -59,7 +62,7 @@ public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
 	 * Swing event dispatch thread.
 	 */
 	public void synchronize(List<? extends E> list) {
-		assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage("assert.notRunningInSwingEventThread");
+		assert SwingUtilities.isEventDispatchThread() : RESOURCES.getMessage("assert.notRunningInSwingEventThread");
 
 		// Make sure the first element exists and matches
 		int modelOffset;
@@ -93,7 +96,9 @@ public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
 						int removeIndex = foundIndex-1+modelOffset, end = index+modelOffset;
 						removeIndex>=end;
 						removeIndex--
-					) removeElementAt(removeIndex);
+					) {
+						removeElementAt(removeIndex);
+					}
 				} else {
 					// Otherwise, insert in the current index
 					insertElementAt(obj, index+modelOffset);
@@ -101,6 +106,8 @@ public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
 			}
 		}
 		// Remove any extra
-		while((getSize()-modelOffset) > size) removeElementAt(getSize()-1);
+		while((getSize() - modelOffset) > size) {
+			removeElementAt(getSize() - 1);
+		}
 	}
 }

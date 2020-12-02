@@ -23,6 +23,8 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.io.FileUtils;
+import com.aoindustries.io.LocalizedIOException;
+import com.aoindustries.lang.LocalizedIllegalStateException;
 import com.aoindustries.tempfiles.TempFile;
 import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.util.CommentCaptureInputStream;
@@ -76,6 +78,8 @@ import java.util.logging.Logger;
 abstract public class ModifiablePropertiesResourceBundle extends ModifiableResourceBundle {
 
 	private static final Logger logger = Logger.getLogger(ModifiablePropertiesResourceBundle.class.getName());
+
+	private static final Resources RESOURCES = Resources.getResources(ModifiablePropertiesResourceBundle.class);
 
 	private static final Charset propertiesCharset = StandardCharsets.ISO_8859_1;
 
@@ -146,7 +150,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 			for(File file : sourceFiles) {
 				try {
 					if(file.canRead() && file.canWrite()) {
-						if(goodSourceFile!=null) throw new IllegalStateException(ApplicationResources.accessor.getMessage("ModifiablePropertiesResourceBundle.init.moreThanOneSourceFile", goodSourceFile, file));
+						if(goodSourceFile!=null) throw new LocalizedIllegalStateException(RESOURCES, "ModifiablePropertiesResourceBundle.init.moreThanOneSourceFile", goodSourceFile, file);
 						goodSourceFile = file;
 					}
 				} catch(SecurityException e) {
@@ -172,7 +176,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 			} catch(IOException err) {
 				logger.log(
 					Level.WARNING,
-					ApplicationResources.accessor.getMessage("ModifiablePropertiesResourceBundle.init.ioException", goodSourceFile),
+					RESOURCES.getMessage("ModifiablePropertiesResourceBundle.init.ioException", goodSourceFile),
 					err
 				);
 			}
@@ -186,7 +190,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 			Class<?> clazz = getClass();
 			String resourceName = '/'+clazz.getName().replace('.', '/')+".properties";
 			InputStream in = getClass().getResourceAsStream(resourceName);
-			if(in==null) throw new RuntimeException(ApplicationResources.accessor.getMessage("ModifiablePropertiesResourceBundle.init.resourceNotFound", resourceName));
+			if(in==null) throw new UncheckedIOException(new LocalizedIOException(RESOURCES, "ModifiablePropertiesResourceBundle.init.resourceNotFound", resourceName));
 			try {
 				try {
 					properties.load(in);

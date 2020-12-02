@@ -43,6 +43,8 @@ import java.util.Locale;
  */
 final public class BundleLookupThreadContext {
 
+	private static final Resources RESOURCES = Resources.getResources(BundleLookupThreadContext.class);
+
 	static final ThreadLocal<BundleLookupThreadContext> threadContext = new ThreadLocal<>();
 
 	/**
@@ -65,11 +67,11 @@ final public class BundleLookupThreadContext {
 	}
 
 	/**
-	 * Register a listener on {@link ApplicationResourcesAccessor}
+	 * Register a listener on {@link Resources}
 	 */
 	static {
-		ApplicationResourcesAccessor.addListener(
-			(ApplicationResourcesAccessor accessor, Locale locale, String key, Object[] args, String resource, String result) -> {
+		Resources.addListener(
+			(Resources _resources, Locale locale, String key, Object[] args, String resource, String result) -> {
 				// Copy any lookup markup to the newly generated string
 				BundleLookupThreadContext _threadContext = BundleLookupThreadContext.getThreadContext(false);
 				if(_threadContext != null) {
@@ -95,7 +97,7 @@ final public class BundleLookupThreadContext {
 		synchronized(lookupResults) {
 			if(lookupResults.put(lookupResult, lookupMarkup) != null) {
 				throw new IllegalStateException(
-					ApplicationResources.accessor.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")
+					RESOURCES.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")
 				);
 			}
 		}

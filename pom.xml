@@ -29,7 +29,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		<relativePath>../ao-oss-parent/pom.xml</relativePath>
 	</parent>
 
-	<groupId>com.aoindustries</groupId><artifactId>aocode-public</artifactId><version>4.3.0-POST-SNAPSHOT</version>
+	<groupId>com.aoindustries</groupId><artifactId>aocode-public</artifactId><version>4.4.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<name>AOCode Public</name>
@@ -53,13 +53,11 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId><artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
 				<configuration>
 					<instructions>
 						<!-- TODO: Remove these once there are no longer split packages -->
 						<Private-Package>
 							com.aoindustries.io;-split-package:=first,
-							com.aoindustries.lang;-split-package:=first,
 							com.aoindustries.util;-split-package:=first,
 							com.aoindustries.util.i18n;-split-package:=first
 						</Private-Package>
@@ -150,7 +148,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<groupId>com.aoindustries</groupId><artifactId>ao-collections</artifactId><version>1.2.0${POST-SNAPSHOT}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.aoindustries</groupId><artifactId>ao-lang</artifactId><version>4.7.0${POST-SNAPSHOT}</version>
+				<groupId>com.aoindustries</groupId><artifactId>ao-lang</artifactId><version>4.8.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
 			</dependency>
 			<dependency>
 				<groupId>com.aoindustries</groupId><artifactId>ao-tempfiles</artifactId><version>2.0.0${POST-SNAPSHOT}</version>

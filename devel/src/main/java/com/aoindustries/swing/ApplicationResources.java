@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2017, 2019  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,38 +20,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.util;
+package com.aoindustries.swing;
 
 import com.aoindustries.util.i18n.EditableResourceBundle;
 import com.aoindustries.util.i18n.EditableResourceBundleSet;
-import com.aoindustries.util.i18n.Locales;
 import java.io.File;
-import java.util.Arrays;
+import java.util.Locale;
 
 /**
- * Is also an editable resource bundle.
- *
  * @author  AO Industries, Inc.
  */
 public final class ApplicationResources extends EditableResourceBundle {
 
 	static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
-		ApplicationResources.class.getName(),
-		Arrays.asList(
-			Locales.ROOT,
-			Locales.JAPANESE
-		)
+		ApplicationResources.class,
+		Locale.ROOT,
+		Locale.JAPANESE
 	);
 
-	/**
-	 * Do not use directly.
-	 */
+	static File getSourceFile(String filename) {
+		return new File(System.getProperty("user.home") + "/maven2/ao/aocode-public/src/main/resources/com/aoindustries/swing", filename);
+	}
+
 	public ApplicationResources() {
-		super(
-			Locales.ROOT,
-			bundleSet,
-			// This reads from ao-lang project
-			new File(System.getProperty("user.home")+"/maven2/ao/ao-lang/src/main/resources/com/aoindustries/util/ApplicationResources.properties")
-		);
+		super(Locale.ROOT, bundleSet, getSourceFile("ApplicationResources.properties"));
 	}
 }

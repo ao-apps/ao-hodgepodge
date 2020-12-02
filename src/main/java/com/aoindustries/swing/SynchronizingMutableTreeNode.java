@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.swing;
 
+import com.aoindustries.util.i18n.Resources;
 import com.aoindustries.util.tree.Node;
 import com.aoindustries.util.tree.Tree;
 import java.io.IOException;
@@ -46,6 +47,8 @@ import javax.swing.tree.MutableTreeNode;
  */
 public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 
+	private static final Resources RESOURCES = Resources.getResources(SynchronizingMutableTreeNode.class);
+
 	private static final long serialVersionUID = 7316928657213073513L;
 
 	public SynchronizingMutableTreeNode() {
@@ -67,7 +70,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 	 * be called from the Swing event dispatch thread.
 	 */
 	public void synchronize(DefaultTreeModel treeModel, Tree<E> tree) throws IOException, SQLException {
-		assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage("assert.notRunningInSwingEventThread");
+		assert SwingUtilities.isEventDispatchThread() : RESOURCES.getMessage("assert.notRunningInSwingEventThread");
 		synchronize(treeModel, tree.getRootNodes());
 	}
 
@@ -81,10 +84,12 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 	 */
 	@SuppressWarnings("unchecked")
 	public void synchronize(DefaultTreeModel treeModel, List<Node<E>> children) throws IOException, SQLException {
-		assert SwingUtilities.isEventDispatchThread() : ApplicationResources.accessor.getMessage("assert.notRunningInSwingEventThread");
+		assert SwingUtilities.isEventDispatchThread() : RESOURCES.getMessage("assert.notRunningInSwingEventThread");
 		if(children==null) {
 			// No children allowed
-			while(getChildCount()>0) treeModel.removeNodeFromParent((MutableTreeNode)getChildAt(getChildCount()-1));
+			while(getChildCount() > 0) {
+				treeModel.removeNodeFromParent((MutableTreeNode)getChildAt(getChildCount()-1));
+			}
 			if(getAllowsChildren()) {
 				setAllowsChildren(false);
 				treeModel.reload(this);

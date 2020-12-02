@@ -551,6 +551,8 @@ public enum Country {
 	ZM(1974),
 	ZW(1980);
 
+	private static final Resources RESOURCES = Resources.getResources(Country.class);
+
 	private final int since;
 	private final List<String> states;
 
@@ -573,12 +575,13 @@ public enum Country {
 
 	@Override
 	public String toString() {
-		return ApplicationResources.accessor.getMessage("Country."+name()+".toString");
+		return RESOURCES.getMessage("Country."+name()+".toString");
 	}
 
 	/**
 	 * Gets the unmodifiable list of states or <code>null</code> if unknown.
 	 */
+	@SuppressWarnings("ReturnOfCollectionOrArrayField") // Returning unmodifiable
 	public List<String> getStates() {
 		return states;
 	}
