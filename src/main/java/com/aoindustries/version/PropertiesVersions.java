@@ -22,9 +22,9 @@
  */
 package com.aoindustries.version;
 
+import com.aoindustries.i18n.Resources;
 import com.aoindustries.lang.LocalizedIllegalArgumentException;
 import com.aoindustries.util.PropertiesUtils;
-import com.aoindustries.util.i18n.Resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -39,7 +39,7 @@ import java.util.Properties;
  */
 public class PropertiesVersions {
 
-	private static final Resources RESOURCES = Resources.getResources(PropertiesVersions.class);
+	private static final Resources RESOURCES = Resources.getResources(PropertiesVersions.class.getPackage());
 
 	private static Properties readProperties(InputStream in) throws IOException {
 		Properties props = new Properties();

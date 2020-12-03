@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.i18n;
 
+import com.aoindustries.i18n.Resources;
 import java.util.IdentityHashMap;
 import java.util.Locale;
 
@@ -43,7 +44,7 @@ import java.util.Locale;
  */
 final public class BundleLookupThreadContext {
 
-	private static final Resources RESOURCES = Resources.getResources(BundleLookupThreadContext.class);
+	private static final Resources RESOURCES = Resources.getResources(BundleLookupThreadContext.class.getPackage());
 
 	static final ThreadLocal<BundleLookupThreadContext> threadContext = new ThreadLocal<>();
 

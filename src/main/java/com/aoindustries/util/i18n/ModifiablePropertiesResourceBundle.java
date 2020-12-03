@@ -22,6 +22,7 @@
  */
 package com.aoindustries.util.i18n;
 
+import com.aoindustries.i18n.Resources;
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.io.LocalizedIOException;
 import com.aoindustries.lang.LocalizedIllegalStateException;
@@ -79,7 +80,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
 	private static final Logger logger = Logger.getLogger(ModifiablePropertiesResourceBundle.class.getName());
 
-	private static final Resources RESOURCES = Resources.getResources(ModifiablePropertiesResourceBundle.class);
+	private static final Resources RESOURCES = Resources.getResources(ModifiablePropertiesResourceBundle.class.getPackage());
 
 	private static final Charset propertiesCharset = StandardCharsets.ISO_8859_1;
 

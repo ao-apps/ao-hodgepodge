@@ -22,7 +22,7 @@
  */
 package com.aoindustries.swing;
 
-import com.aoindustries.util.i18n.Resources;
+import com.aoindustries.i18n.Resources;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
@@ -41,7 +41,7 @@ import javax.swing.SwingUtilities;
  */
 public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
 
-	private static final Resources RESOURCES = Resources.getResources(SynchronizingComboBoxModel.class);
+	private static final Resources RESOURCES = Resources.getResources(SynchronizingComboBoxModel.class.getPackage());
 
 	private static final long serialVersionUID = 2421298474426921512L;
 

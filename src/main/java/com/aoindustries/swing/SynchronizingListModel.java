@@ -22,7 +22,7 @@
  */
 package com.aoindustries.swing;
 
-import com.aoindustries.util.i18n.Resources;
+import com.aoindustries.i18n.Resources;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.SwingUtilities;
@@ -41,7 +41,7 @@ import javax.swing.SwingUtilities;
  */
 public class SynchronizingListModel<E> extends DefaultListModel<E> {
 
-	private static final Resources RESOURCES = Resources.getResources(SynchronizingListModel.class);
+	private static final Resources RESOURCES = Resources.getResources(SynchronizingListModel.class.getPackage());
 
 	private static final long serialVersionUID = -4928047430792677729L;
 

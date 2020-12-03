@@ -22,7 +22,7 @@
  */
 package com.aoindustries.swing;
 
-import com.aoindustries.util.i18n.Resources;
+import com.aoindustries.i18n.Resources;
 import com.aoindustries.util.tree.Node;
 import com.aoindustries.util.tree.Tree;
 import java.io.IOException;
@@ -47,7 +47,7 @@ import javax.swing.tree.MutableTreeNode;
  */
 public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 
-	private static final Resources RESOURCES = Resources.getResources(SynchronizingMutableTreeNode.class);
+	private static final Resources RESOURCES = Resources.getResources(SynchronizingMutableTreeNode.class.getPackage());
 
 	private static final long serialVersionUID = 7316928657213073513L;
 

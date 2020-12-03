@@ -23,6 +23,7 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.collections.AoCollections;
+import com.aoindustries.i18n.Resources;
 import java.util.Arrays;
 import java.util.List;
 
@@ -551,7 +552,7 @@ public enum Country {
 	ZM(1974),
 	ZW(1980);
 
-	private static final Resources RESOURCES = Resources.getResources(Country.class);
+	private static final Resources RESOURCES = Resources.getResources(Country.class.getPackage());
 
 	private final int since;
 	private final List<String> states;
