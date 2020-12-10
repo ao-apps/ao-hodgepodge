@@ -39,7 +39,7 @@ import java.util.Properties;
  */
 public class PropertiesVersions {
 
-	private static final Resources RESOURCES = Resources.getResources(PropertiesVersions.class.getPackage());
+	private static final Resources RESOURCES = Resources.getResources(PropertiesVersions.class);
 
 	private static Properties readProperties(InputStream in) throws IOException {
 		Properties props = new Properties();
@@ -75,7 +75,7 @@ public class PropertiesVersions {
 	 */
 	public Version getVersion(String product) throws IllegalArgumentException {
 		String three = properties.getProperty(product);
-		if(three==null) throw new LocalizedIllegalArgumentException(RESOURCES, "PropertiesVersions.getVersion.productNotFound", product);
+		if(three==null) throw new LocalizedIllegalArgumentException(RESOURCES, "getVersion.productNotFound", product);
 		return Version.valueOf(three+"."+getBuild());
 	}
 
@@ -84,7 +84,7 @@ public class PropertiesVersions {
 	 */
 	public int getBuild() throws IllegalArgumentException {
 		String build = properties.getProperty("build.number");
-		if(build==null) throw new LocalizedIllegalArgumentException(RESOURCES, "PropertiesVersions.getVersion.buildNotFound");
+		if(build==null) throw new LocalizedIllegalArgumentException(RESOURCES, "getVersion.buildNotFound");
 		return Integer.parseInt(build);
 	}
 }

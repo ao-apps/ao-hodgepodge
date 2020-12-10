@@ -22,7 +22,6 @@
  */
 package com.aoindustries.swing;
 
-import com.aoindustries.i18n.Resources;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.SwingUtilities;
@@ -40,8 +39,6 @@ import javax.swing.SwingUtilities;
  * @author  AO Industries, Inc.
  */
 public class SynchronizingListModel<E> extends DefaultListModel<E> {
-
-	private static final Resources RESOURCES = Resources.getResources(SynchronizingListModel.class.getPackage());
 
 	private static final long serialVersionUID = -4928047430792677729L;
 
@@ -62,7 +59,7 @@ public class SynchronizingListModel<E> extends DefaultListModel<E> {
 	 * Swing event dispatch thread.
 	 */
 	public void synchronize(List<? extends E> list) {
-		assert SwingUtilities.isEventDispatchThread() : RESOURCES.getMessage("assert.notRunningInSwingEventThread");
+		assert SwingUtilities.isEventDispatchThread() : Resources.PACKAGE_RESOURCES.getMessage("assert.notRunningInSwingEventThread");
 
 		// Make sure the first element exists and matches
 		int modelOffset;

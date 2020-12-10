@@ -22,7 +22,6 @@
  */
 package com.aoindustries.swing;
 
-import com.aoindustries.i18n.Resources;
 import com.aoindustries.util.tree.Node;
 import com.aoindustries.util.tree.Tree;
 import java.io.IOException;
@@ -47,8 +46,6 @@ import javax.swing.tree.MutableTreeNode;
  */
 public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 
-	private static final Resources RESOURCES = Resources.getResources(SynchronizingMutableTreeNode.class.getPackage());
-
 	private static final long serialVersionUID = 7316928657213073513L;
 
 	public SynchronizingMutableTreeNode() {
@@ -70,7 +67,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 	 * be called from the Swing event dispatch thread.
 	 */
 	public void synchronize(DefaultTreeModel treeModel, Tree<E> tree) throws IOException, SQLException {
-		assert SwingUtilities.isEventDispatchThread() : RESOURCES.getMessage("assert.notRunningInSwingEventThread");
+		assert SwingUtilities.isEventDispatchThread() : Resources.PACKAGE_RESOURCES.getMessage("assert.notRunningInSwingEventThread");
 		synchronize(treeModel, tree.getRootNodes());
 	}
 
@@ -84,7 +81,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 	 */
 	@SuppressWarnings("unchecked")
 	public void synchronize(DefaultTreeModel treeModel, List<Node<E>> children) throws IOException, SQLException {
-		assert SwingUtilities.isEventDispatchThread() : RESOURCES.getMessage("assert.notRunningInSwingEventThread");
+		assert SwingUtilities.isEventDispatchThread() : Resources.PACKAGE_RESOURCES.getMessage("assert.notRunningInSwingEventThread");
 		if(children==null) {
 			// No children allowed
 			while(getChildCount() > 0) {

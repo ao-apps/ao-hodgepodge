@@ -552,7 +552,7 @@ public enum Country {
 	ZM(1974),
 	ZW(1980);
 
-	private static final Resources RESOURCES = Resources.getResources(Country.class.getPackage());
+	private static final Resources RESOURCES = Resources.getResources(Country.class);
 
 	private final int since;
 	private final List<String> states;
@@ -576,7 +576,7 @@ public enum Country {
 
 	@Override
 	public String toString() {
-		return RESOURCES.getMessage("Country."+name()+".toString");
+		return RESOURCES.getMessage(name() + ".toString");
 	}
 
 	/**

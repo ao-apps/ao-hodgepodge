@@ -22,7 +22,6 @@
  */
 package com.aoindustries.swing;
 
-import com.aoindustries.i18n.Resources;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
@@ -40,8 +39,6 @@ import javax.swing.SwingUtilities;
  * @author  AO Industries, Inc.
  */
 public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
-
-	private static final Resources RESOURCES = Resources.getResources(SynchronizingComboBoxModel.class.getPackage());
 
 	private static final long serialVersionUID = 2421298474426921512L;
 
@@ -62,7 +59,7 @@ public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
 	 * Swing event dispatch thread.
 	 */
 	public void synchronize(List<? extends E> list) {
-		assert SwingUtilities.isEventDispatchThread() : RESOURCES.getMessage("assert.notRunningInSwingEventThread");
+		assert SwingUtilities.isEventDispatchThread() : Resources.PACKAGE_RESOURCES.getMessage("assert.notRunningInSwingEventThread");
 
 		// Make sure the first element exists and matches
 		int modelOffset;

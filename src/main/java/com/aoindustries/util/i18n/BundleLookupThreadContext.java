@@ -23,6 +23,7 @@
 package com.aoindustries.util.i18n;
 
 import com.aoindustries.i18n.Resources;
+import com.aoindustries.lang.LocalizedIllegalStateException;
 import java.util.IdentityHashMap;
 import java.util.Locale;
 
@@ -44,7 +45,7 @@ import java.util.Locale;
  */
 final public class BundleLookupThreadContext {
 
-	private static final Resources RESOURCES = Resources.getResources(BundleLookupThreadContext.class.getPackage());
+	private static final Resources RESOURCES = Resources.getResources(BundleLookupThreadContext.class);
 
 	static final ThreadLocal<BundleLookupThreadContext> threadContext = new ThreadLocal<>();
 
@@ -97,9 +98,7 @@ final public class BundleLookupThreadContext {
 	void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) throws IllegalStateException {
 		synchronized(lookupResults) {
 			if(lookupResults.put(lookupResult, lookupMarkup) != null) {
-				throw new IllegalStateException(
-					RESOURCES.getMessage("BundleLookupThreadContext.addLookupMarkup.stringAlreadyAdded")
-				);
+				throw new LocalizedIllegalStateException(RESOURCES, "addLookupMarkup.stringAlreadyAdded");
 			}
 		}
 	}
