@@ -80,7 +80,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
 		public enum Mode {
 			DISABLED,
-			LOOKUP_ONLY,
+			LOOKUP,
 			NOSCRIPT,
 			MARKUP
 		}
@@ -1020,7 +1020,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 			|| (threadSettings = getThreadSettings()) == null // no settings
 			// markup disabled
 			|| (mode = threadSettings.getMode()) == ThreadSettings.Mode.DISABLED
-			|| mode == ThreadSettings.Mode.LOOKUP_ONLY
+			|| mode == ThreadSettings.Mode.LOOKUP
 		) {
 			return object;
 		}
