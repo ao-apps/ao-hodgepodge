@@ -278,7 +278,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	 *
 	 * @param  threadSettings  When {@code null}, is equivalent to {@link #removeThreadSettings()}.
 	 *
-	 * @see  #printEditableResourceBundleLookups(com.aoindustries.io.Encoder, com.aoindustries.io.Encoder, java.lang.Appendable, int, boolean)
+	 * @see  #printEditableResourceBundleLookups(com.aoindustries.io.Encoder, com.aoindustries.io.Encoder, java.lang.Appendable, boolean, int, boolean)
 	 */
 	@SuppressWarnings("deprecation")
 	public static void setThreadSettings(ThreadSettings threadSettings) {
@@ -364,7 +364,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	 *
 	 * @param  setValueUrl  Must be non-null when {@code canEditResources} is {@code true}.
 	 *
-	 * @see  #printEditableResourceBundleLookups(com.aoindustries.io.Encoder, com.aoindustries.io.Encoder, java.lang.Appendable, int, boolean)
+	 * @see  #printEditableResourceBundleLookups(com.aoindustries.io.Encoder, com.aoindustries.io.Encoder, java.lang.Appendable, boolean, int, boolean)
 	 *
 	 * @deprecated  Please use {@link #setThreadSettings(com.aoindustries.util.i18n.EditableResourceBundle.ThreadSettings)}
 	 *              or {@link #removeThreadSettings()}.
@@ -404,6 +404,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		Encoder textInJavaScriptEncoder,
 		Encoder textInXhtmlEncoder,
 		Appendable out,
+		boolean isXhtml,
 		int editorRows,
 		boolean verticalButtons
 	) throws IOException {
@@ -489,8 +490,9 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 						out.append("  </div>\n"
 								+ "  <div id=\"EditableResourceBundleEditorHeader\" style=\"border-bottom:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; top:0px; height:2em; overflow:hidden\">\n"
 								+ "    <div style=\"float:right; border:2px outset black; margin:.3em\"><a href=\"#\" onclick=\"if(EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility('hidden'); return false;\" style=\"text-decoration:none; color:black; background-color:white; padding-left:2px; padding-right:2px;\">✕</a></div>\n"
-								+ "    <script type=\"" + ContentType.JAVASCRIPT + "\">\n"
-								+ "      // <![CDATA[\n" // TODO: Accept an isXhtml/isXml flag and write accordingly
+								+ "    <script type=\"" + ContentType.JAVASCRIPT + "\">");
+						if(isXhtml) out.append("//<![CDATA[");
+						out.append("\n"
 								+ "      function EditableResourceBundleEditorSetCookie(c_name,value,expiredays) {\n"
 								+ "        var exdate=new Date();\n"
 								+ "        exdate.setDate(exdate.getDate()+expiredays);\n"
@@ -743,8 +745,9 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 								+ "        event.preventDefault();\n"
 								+ "        return false;\n"
 								+ "      }\n"
-								+ "      // ]]>\n"
-								+ "    </script>\n"
+								+ "    ");
+						if(isXhtml) out.append("//]]>");
+						out.append("</script>\n"
 								+ "    <div"
 								+ " style=\"text-align:center; font-weight:bold; font-size:larger\""
 								+ " onmousedown=\"return EditableResourceBundleEditorDragMouseDown(this, event);\""
@@ -867,9 +870,9 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 					// TODO: Why are these functions still written when setValueUrl is null?
 					//       Would they result in undefined errors?
 					//       Either understand intent and test/fix, or don't write setValueUrl is null.
-					out.append("<script type=\"" + ContentType.JAVASCRIPT + "\">\n"
-							+ "  // <![CDATA[\n" // TODO: Accept an isXhtml/isXml flag and write accordingly
-							+ "\n"
+					out.append("<script type=\"" + ContentType.JAVASCRIPT + "\">");
+					if(isXhtml) out.append("//<![CDATA[");
+					out.append("\n"
 							+ "  // Restore the editor to its previous position\n"
 							+ "  var EditableResourceBundleEditorStyle=document.getElementById(\"EditableResourceBundleEditor\").style;\n"
 							+ "  var EditableResourceBundleEditorWidth = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorWidth\");\n"
@@ -957,13 +960,35 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 							+ "  function EditableResourceBundleUnhighlightAll(elementId) {\n"
 							+ "    EditableResourceBundleCancelDelayScroll();\n"
 							+ "    EditableResourceBundleSetAllBackgrounds(elementId, \"transparent\", false);\n"
-							+ "  }\n"
-							+ "  // ]]>\n"
-							+ "</script>\n"
-					);
+							+ "  }\n");
+					if(isXhtml) out.append("//]]>");
+					out.append("</script>\n");
 				}
 			}
 		}
+	}
+
+	/**
+	 * @deprecated  Please use {@link #printEditableResourceBundleLookups(com.aoindustries.io.Encoder, com.aoindustries.io.Encoder, java.lang.Appendable, boolean, int, boolean)}
+	 *              directly, providing whether is SGML or XHTML serialization with the {@code isXhtml} flag.
+	 *              This assumes XHTML serialization for backward-compatibility.
+	 */
+	@Deprecated
+	public static void printEditableResourceBundleLookups(
+		Encoder textInJavaScriptEncoder,
+		Encoder textInXhtmlEncoder,
+		Appendable out,
+		int editorRows,
+		boolean verticalButtons
+	) throws IOException {
+		printEditableResourceBundleLookups(
+			textInJavaScriptEncoder,
+			textInXhtmlEncoder,
+			out,
+			true,
+			editorRows,
+			verticalButtons
+		);
 	}
 
 	private final Locale locale;
