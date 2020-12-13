@@ -73,7 +73,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	public static final String EMPTY_DISPLAY = "[BLANK]";
 
 	/**
-	 * Settings for the current thread.  This object is {@linkplain I18nThreadLocalCallable copied during invocation of subtasks}
+	 * Settings for the current thread.  This object is {@linkplain I18nThreadLocalRunnable copied during invocation of subtasks}
 	 * and therefore has a thread-safe implementation.
 	 */
 	public static class ThreadSettings {

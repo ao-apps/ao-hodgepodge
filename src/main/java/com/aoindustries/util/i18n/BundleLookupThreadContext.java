@@ -36,7 +36,7 @@ import java.util.Locale;
  * </p>
  * <p>
  * Under concurrent programming, one context can
- * {@linkplain I18nThreadLocalCallable end up being accessed concurrently by multiple threads},
+ * {@linkplain I18nThreadLocalRunnable end up being accessed concurrently by multiple threads},
  * thus BundleLookupThreadContext is a thread-safe implementation.
  * </p>
  * <p>
