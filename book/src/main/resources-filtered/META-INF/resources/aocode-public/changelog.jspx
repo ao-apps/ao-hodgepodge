@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-12-12T19:26:26-06:00"
+		dateModified="2020-12-12T20:48:42-06:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -59,6 +59,11 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						such as when generating email body content.
 					</li>
 					<li>In-context translation editor now supports both SGML (HTML) and XML (XHTML) serializations.</li>
+					<li>
+						In-context translations markups may now be disabled while still recording lookups.
+						This allows the user interface to display the editor for lookups that were performed while
+						markup disabled.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
