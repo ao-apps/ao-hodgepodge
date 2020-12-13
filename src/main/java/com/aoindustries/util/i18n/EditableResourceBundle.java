@@ -81,6 +81,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		public enum Mode {
 			DISABLED,
 			LOOKUP_ONLY,
+			NOSCRIPT,
 			MARKUP
 		}
 
@@ -89,7 +90,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 
 		// May be changed
 		private final Mode mode;
-		private final boolean allowScripts;
 		private final boolean modifyAllText;
 
 		private final Sequence elementIdGenerator;
@@ -109,7 +109,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		private ThreadSettings(
 			String setValueUrl,
 			Mode mode,
-			boolean allowScripts,
 			boolean modifyAllText,
 			Sequence elementIdGenerator,
 			Sequence lookupIdGenerator,
@@ -123,7 +122,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 			}
 			this.setValueUrl = setValueUrl;
 			this.mode = mode;
-			this.allowScripts = allowScripts;
 			this.modifyAllText = modifyAllText;
 			this.elementIdGenerator = elementIdGenerator;
 			this.lookupIdGenerator = lookupIdGenerator;
@@ -134,13 +132,11 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		public ThreadSettings(
 			String setValueUrl,
 			Mode mode,
-			boolean allowScripts,
 			boolean modifyAllText
 		) {
 			this(
 				setValueUrl,
 				mode,
-				allowScripts,
 				modifyAllText,
 				new AtomicSequence(),
 				new AtomicSequence(),
@@ -153,7 +149,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		 * Creates new settings in a disable state.
 		 */
 		public ThreadSettings() {
-			this(null, Mode.DISABLED, true, false);
+			this(null, Mode.DISABLED, false);
 		}
 
 		/**
@@ -167,10 +163,9 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		 * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
 		 *          sequences, map, and lookup context.
 		 */
-		public ThreadSettings setSettings(Mode mode, boolean allowScripts, boolean modifyAllText) {
+		public ThreadSettings setSettings(Mode mode, boolean modifyAllText) {
 			if(
 				mode == this.mode
-				&& allowScripts == this.allowScripts
 				&& modifyAllText == this.modifyAllText
 			) {
 				return this;
@@ -178,7 +173,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 				return new ThreadSettings(
 					setValueUrl,
 					mode,
-					allowScripts,
 					modifyAllText,
 					elementIdGenerator,
 					lookupIdGenerator,
@@ -202,30 +196,10 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		 * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
 		 *          sequences, map, and lookup context.
 		 *
-		 * @see  #setSettings(com.aoindustries.util.i18n.EditableResourceBundle.ThreadSettings.Mode, boolean, boolean)
+		 * @see  #setSettings(com.aoindustries.util.i18n.EditableResourceBundle.ThreadSettings.Mode, boolean)
 		 */
 		public ThreadSettings setMode(Mode mode) {
-			return setSettings(mode, allowScripts, modifyAllText);
-		}
-
-		public boolean getAllowScripts() {
-			return allowScripts;
-		}
-
-		/**
-		 * Sets the allow scripts flag.
-		 * <p>
-		 * These new settings are not automatically associated with the current thread.  That must be done via
-		 * {@link #setThreadSettings(com.aoindustries.util.i18n.EditableResourceBundle.ThreadSettings)}.
-		 * </p>
-		 *
-		 * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
-		 *          sequences, map, and lookup context.
-		 *
-		 * @see  #setSettings(com.aoindustries.util.i18n.EditableResourceBundle.ThreadSettings.Mode, boolean, boolean)
-		 */
-		public ThreadSettings setAllowScripts(boolean allowScripts) {
-			return setSettings(mode, allowScripts, modifyAllText);
+			return setSettings(mode, modifyAllText);
 		}
 
 		public boolean getModifyAllText() {
@@ -242,10 +216,10 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		 * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
 		 *          sequences, map, and lookup context.
 		 *
-		 * @see  #setSettings(com.aoindustries.util.i18n.EditableResourceBundle.ThreadSettings.Mode, boolean, boolean)
+		 * @see  #setSettings(com.aoindustries.util.i18n.EditableResourceBundle.ThreadSettings.Mode, boolean)
 		 */
 		public ThreadSettings setModifyAllText(boolean modifyAllText) {
-			return setSettings(mode, allowScripts, modifyAllText);
+			return setSettings(mode, modifyAllText);
 		}
 	}
 
@@ -385,7 +359,6 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 			new ThreadSettings(
 				setValueUrl,
 				canEditResources ? ThreadSettings.Mode.MARKUP : ThreadSettings.Mode.DISABLED,
-				true,
 				modifyAllText
 			)
 		);
@@ -1040,11 +1013,14 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	@SuppressWarnings("RedundantStringConstructorCall")
 	public Object handleGetObject(String key) {
 		final ThreadSettings threadSettings;
+		final ThreadSettings.Mode mode;
 		Object object = super.handleGetObject(key);
 		if(
 			!isModifiable() // unmodifiable
 			|| (threadSettings = getThreadSettings()) == null // no settings
-			|| threadSettings.getMode() != ThreadSettings.Mode.MARKUP // markup disabled
+			// markup disabled
+			|| (mode = threadSettings.getMode()) == ThreadSettings.Mode.DISABLED
+			|| mode == ThreadSettings.Mode.LOOKUP_ONLY
 		) {
 			return object;
 		}
@@ -1107,7 +1083,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 							lookupValue.id,
 							invalidated,
 							elementId,
-							threadSettings.allowScripts,
+							mode == ThreadSettings.Mode.MARKUP,
 							threadSettings.modifyAllText
 						)
 					);
