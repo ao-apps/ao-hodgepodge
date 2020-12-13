@@ -168,7 +168,7 @@ public final class EncodingUtils {
 		if(value!=null) {
 			String str = toString(value);
 			BundleLookupMarkup lookupMarkup;
-			BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext(false);
+			BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext();
 			if(threadContext!=null) {
 				lookupMarkup = threadContext.getLookupMarkup(str);
 			} else {

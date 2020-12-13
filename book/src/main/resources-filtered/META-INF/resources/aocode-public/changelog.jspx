@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-12-05T10:04:01-06:00"
+		dateModified="2020-12-12T14:08:59-06:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -47,7 +47,19 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{project.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{project.scm.url}"
-			/>
+			>
+				<ul>
+					<li>
+						In-context translation settings may now be reset and restored on-the-fly.
+						This allows the in-context translations to be temporarily reconfigured.
+					</li>
+					<li>
+						New option to disable scripts within the in-context translation tools.
+						This is useful when writing HTML that will not be immediately used by the browser,
+						such as when generating email body content.
+					</li>
+				</ul>
+			</changelog:release>
 		</c:if>
 
 		<changelog:release
