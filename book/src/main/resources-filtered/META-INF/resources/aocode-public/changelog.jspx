@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-12-14T21:58:37-06:00"
+		dateModified="2020-12-15T11:40:17-06:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -123,7 +123,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			<ul>
 				<li>
 					Split development-only classes into a new sub-project in <code>devel/</code>.  This
-					sub-project is used development only and is never deployed to artifact repositories.
+					sub-project is used development for only and is never deployed to artifact repositories.
 				</li>
 				<li>
 					<p>
