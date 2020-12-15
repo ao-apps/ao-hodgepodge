@@ -22,9 +22,14 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.lang.AutoCloseables;
+import com.aoindustries.lang.Throwables;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.SecureRandom;
+import java.util.Random;
+import javax.crypto.Cipher;
 
 /**
  * Pads the last block with the necessary number of bytes before closing the stream.
@@ -32,14 +37,52 @@ import java.io.OutputStream;
  */
 public class PaddingOutputStream extends FilterOutputStream {
 
+	private static volatile SecureRandom SECURE_RANDOM;
+
 	private final int blockSize;
+	private final Random random;
 	private final byte padding;
 
 	private long byteCount = 0;
 
+	/**
+	 * Uses the given source of random bytes for padding.
+	 *
+	 * @param  blockSize  When {@code <= 0}, no padding will be performed.  This is consistent with zero returned from
+	 *                    {@link Cipher#getBlockSize()} when not a block cipher.
+	 */
+	public PaddingOutputStream(OutputStream out, int blockSize, Random random) {
+		super(out);
+		this.blockSize = blockSize;
+		this.random = random;
+		this.padding = 0; // Unused
+	}
+
+	/**
+	 * Uses a default instance of {@link SecureRandom} as the source of random bytes for padding.
+	 *
+	 * @param  blockSize  When {@code <= 0}, no padding will be performed.  This is consistent with zero returned from
+	 *                    {@link Cipher#getBlockSize()} when not a block cipher.
+	 */
+	public PaddingOutputStream(OutputStream out, int blockSize) {
+		this(
+			out,
+			blockSize,
+			// Will not use random when there is no blocksize
+			(blockSize <= 0) ? null
+			// No need for atomics, doesn't matter which instance is kept in race condition
+			: (SECURE_RANDOM == null) ? (SECURE_RANDOM = new SecureRandom()) : SECURE_RANDOM
+		);
+	}
+
+	/**
+	 * @deprecated  Please use random padding
+	 */
+	@Deprecated
 	public PaddingOutputStream(OutputStream out, int blockSize, byte padding) {
 		super(out);
 		this.blockSize = blockSize;
+		this.random = null; // Unused
 		this.padding = padding;
 	}
 
@@ -65,12 +108,24 @@ public class PaddingOutputStream extends FilterOutputStream {
 	 * Pads and flushes without closing the underlying stream.
 	 */
 	public void finish() throws IOException {
-		int lastBlockSize = (int)(byteCount % blockSize);
-		if(lastBlockSize!=0) {
-			while(lastBlockSize<blockSize) {
-				out.write(padding);
-				byteCount++;
-				lastBlockSize++;
+		if(blockSize > 0) {
+			int lastBlockSize = (int)(byteCount % blockSize);
+			if(lastBlockSize != 0 && lastBlockSize < blockSize) {
+				if(random != null) {
+					int garbageLen = blockSize - lastBlockSize;
+					byte[] garbage = new byte[garbageLen];
+					random.nextBytes(garbage);
+					out.write(garbage, 0, garbageLen);
+					byteCount += garbageLen;
+					lastBlockSize += garbageLen;
+				} else {
+					do {
+						out.write(padding);
+						byteCount++;
+						lastBlockSize++;
+					} while(lastBlockSize < blockSize);
+				}
+				assert lastBlockSize == blockSize;
 			}
 		}
 		out.flush();
@@ -80,11 +135,14 @@ public class PaddingOutputStream extends FilterOutputStream {
 	 * Pads, flushes, and closes the underlying stream.
 	 */
 	@Override
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public void close() throws IOException {
+		Throwable t0 = null;
 		try {
 			finish();
-		} catch (IOException ignored) {
+		} catch (Throwable t) {
+			t0 = Throwables.addSuppressed(t0, t);
 		}
-		out.close();
+		AutoCloseables.closeAndThrow(t0, IOException.class, IOException::new, out);
 	}
 }
