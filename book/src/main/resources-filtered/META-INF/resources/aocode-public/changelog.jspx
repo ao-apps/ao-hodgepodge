@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-12-14T20:43:24-06:00"
+		dateModified="2020-12-14T21:58:37-06:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -47,16 +47,25 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{project.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{project.scm.url}"
-			>
-				<ul>
-					<li>
-						Deprecated fixed padding in <code>PaddingOutputStream</code> in favor of random padding.
-						Also supports zero value for <code>padding</code>, which disables padding, which is consistent
-						with <code>Cipher.getBlockSize()</code> returning zero when not a block cipher.
-					</li>
-				</ul>
-			</changelog:release>
+			/>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="4.6.0"
+			datePublished="2020-12-14T21:58:37-06:00"
+			groupId="@{project.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{project.scm.url}"
+		>
+			<ul>
+				<li>
+					Deprecated fixed padding in <code>PaddingOutputStream</code> in favor of random padding.
+					Also supports zero value for <code>padding</code>, which disables padding, which is consistent
+					with <code>Cipher.getBlockSize()</code> returning zero when not a block cipher.
+				</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
