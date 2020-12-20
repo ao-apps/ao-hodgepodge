@@ -1,7 +1,9 @@
 package com.aoindustries.util;
 
 /**
- * @deprecated  This is not secure anymore.
+ * @deprecated  This is not secure anymore.  We will be removing in a future major version update.
+ *              If you still require this type of encryption, please use
+ *              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/digest/UnixCrypt.html">Apache Commons Codec - UnixCrypt</a>.
  */
 @Deprecated
 public class UnixCrypt {
