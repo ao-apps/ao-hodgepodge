@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-12-15T11:40:17-06:00"
+		dateModified="2020-12-19T15:55:20-06:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -47,7 +47,15 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				groupId="@{project.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{project.scm.url}"
-			/>
+			>
+				<ul>
+					<li>
+						Deprecated <code>Base64Coder</code> in favor of
+						<code><ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Base64.html">Base64</ao:a></code>
+						available since Java 8.
+					</li>
+				</ul>
+			</changelog:release>
 		</c:if>
 
 		<changelog:release

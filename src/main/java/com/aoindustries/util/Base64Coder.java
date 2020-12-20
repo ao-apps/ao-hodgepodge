@@ -1,6 +1,7 @@
 package com.aoindustries.util;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /**
  * Obtained from: http://www.source-code.biz/snippets/java/Base64Coder.java.txt
@@ -25,7 +26,10 @@ import java.nio.charset.StandardCharsets;
  *  &#160; Method decode(String) renamed to decodeString(String).<br>
  *  &#160; New method encode(byte[],int) added.<br>
  *  &#160; New method decode(String) added.<br>
+ *
+ * @deprecated  Please use {@link Base64} as of Java 8.
  */
+@Deprecated
 public class Base64Coder {
 
 	// Mapping table from 6-bit nibbles to Base64 characters.
