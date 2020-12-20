@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-0500"
-		dateModified="2020-12-20T03:04:44-06:00"
+		dateModified="2020-12-20T03:39:21-06:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -73,7 +73,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 							<code>AOPool</code> now internally tracks thread ID as a
 							<code><ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Long.html">Long</ao:a></code>
 							instead of <code>SmallIdentifier</code>.  This only affects the textual display of thread ID in
-							<code>printStatisticsHTML(…)</code>, and is arguable more meaningful since they are now
+							<code>printStatisticsHTML(…)</code>, and it is arguably more meaningful since they are now
 							sequentially generated.
 						</li>
 						<li>
