@@ -22,8 +22,6 @@
  */
 package com.aoindustries.io.stream;
 
-import com.aoindustries.security.Identifier;
-import com.aoindustries.security.SmallIdentifier;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -238,33 +236,5 @@ public class StreamableInput extends DataInputStream {
 		if(b == 1) return Boolean.TRUE;
 		if(b == 0) return Boolean.FALSE;
 		throw new IOException("Invalid value for nullable boolean: " + b);
-	}
-
-	/**
-	 * Reads an {@link Identifier}.
-	 */
-	public Identifier readIdentifier() throws IOException {
-		return new Identifier(readLong(), readLong());
-	}
-
-	/**
-	 * Reads a possibly-{@code null} {@link Identifier}.
-	 */
-	public Identifier readNullIdentifier() throws IOException {
-		return readBoolean() ? readIdentifier() : null;
-	}
-
-	/**
-	 * Reads a {@link SmallIdentifier}.
-	 */
-	public SmallIdentifier readSmallIdentifier() throws IOException {
-		return new SmallIdentifier(readLong());
-	}
-
-	/**
-	 * Reads a possibly-{@code null} {@link Identifier}.
-	 */
-	public SmallIdentifier readNullSmallIdentifier() throws IOException {
-		return readBoolean() ? readSmallIdentifier() : null;
 	}
 }

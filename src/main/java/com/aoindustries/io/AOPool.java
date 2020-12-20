@@ -26,7 +26,6 @@ import com.aoindustries.collections.AoCollections;
 import com.aoindustries.exception.WrappedExceptions;
 import com.aoindustries.lang.Strings;
 import com.aoindustries.lang.Throwables;
-import com.aoindustries.security.SmallIdentifier;
 import com.aoindustries.util.ErrorPrinter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -202,7 +201,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 *
 	 * @see  #threadConnectionsByThreadId
 	 */
-	private final ThreadLocal<SmallIdentifier> currentThreadId = new ThreadLocal<SmallIdentifier>() {
+	private final ThreadLocal<Long> currentThreadId = new ThreadLocal<Long>() {
 
 		/**
 		 * Incremental allocation of thread IDs, since they are not used outside the scope of this class.
@@ -211,12 +210,13 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 		private long lastId = 0;
 
 		@Override
-		protected SmallIdentifier initialValue() {
-			SmallIdentifier id;
+		@SuppressWarnings({"deprecation", "UnnecessaryBoxing"})
+		protected Long initialValue() {
+			Long id;
 			synchronized(threadConnectionsByThreadId) {
 				// Wraparound of 64-bit identifier is unlikely, but still make sure is available for correctness
 				do {
-					id = new SmallIdentifier(++lastId);
+					id = new Long(++lastId); // Must be a distinct object, since is used a key in weak map
 				} while(threadConnectionsByThreadId.containsKey(id));
 				threadConnectionsByThreadId.put(id, new ArrayList<>());
 			}
@@ -236,7 +236,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 *
 	 * @see  #currentThreadId
 	 */
-	private final Map<SmallIdentifier,List<PooledConnection<C>>> threadConnectionsByThreadId = new WeakHashMap<>();
+	private final Map<Long,List<PooledConnection<C>>> threadConnectionsByThreadId = new WeakHashMap<>();
 
 	/**
 	 * Tracks the thread ID that allocated each connection.
@@ -244,7 +244,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * All access to this map must be synchronized on the map.
 	 * </p>
 	 */
-	private final Map<C,SmallIdentifier> allocationThreadIdByConnection = new IdentityHashMap<>();
+	private final Map<C,Long> allocationThreadIdByConnection = new IdentityHashMap<>();
 
 	/**
 	 * All warnings are sent here if available, otherwise will be written to <code>System.err</code>.
@@ -399,7 +399,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 		if(Thread.interrupted()) throw newInterruptedException(null, null);
 
 		Thread thisThread = Thread.currentThread();
-		SmallIdentifier threadId;
+		Long threadId;
 		List<PooledConnection<C>> threadConnections;
 		synchronized(threadConnectionsByThreadId) {
 			threadId = currentThreadId.get();
@@ -684,7 +684,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 		long[] useCounts;
 		long[] totalTimes;
 		boolean[] isBusies;
-		SmallIdentifier[] allocationThreadIds;
+		Long[] allocationThreadIds;
 		long[] startTimes;
 		long[] releaseTimes;
 		Throwable[] allocateStackTraces;
@@ -696,7 +696,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 			useCounts = new long[numConnections];
 			totalTimes = new long[numConnections];
 			isBusies = new boolean[numConnections];
-			allocationThreadIds = new SmallIdentifier[numConnections];
+			allocationThreadIds = new Long[numConnections];
 			startTimes = new long[numConnections];
 			releaseTimes = new long[numConnections];
 			allocateStackTraces = new Throwable[numConnections];
@@ -712,7 +712,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 				synchronized(pooledConnection) {
 					connection = pooledConnection.connection;
 				}
-				SmallIdentifier allocationThreadId;
+				Long allocationThreadId;
 				if(connection == null) {
 					allocationThreadId = null;
 				} else {
@@ -780,7 +780,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 			boolean isBusy = isBusies[c];
 			if(isBusy) totalTime += time - startTimes[c];
 			long stateTime = isBusy ? (time-startTimes[c]):(time-releaseTimes[c]);
-			SmallIdentifier allocationThreadId = allocationThreadIds[c];
+			Long allocationThreadId = allocationThreadIds[c];
 			out.append("    <tr>\n"
 					+ "      <td>").append(Integer.toString(c+1)).append("</td>\n"
 					+ "      <td>").append(isConnected?"Yes":"No").append("</td>\n"
@@ -795,7 +795,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 			out.append("</td>\n"
 					+ "      <td>").append(Float.toString(totalTime*100/(float)timeLen)).append("%</td>\n"
 					+ "      <td>").append(isBusy?"In Use":isConnected?"Idle":"Closed");
-			if(allocationThreadId != null) out.append(" by Thread #").append(Long.toString(allocationThreadId.getValue()));
+			if(allocationThreadId != null) out.append(" by Thread #").append(allocationThreadId.toString());
 			out.append("</td>\n"
 					+ "      <td>");
 			com.aoindustries.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(stateTime), out, isXhtml);
@@ -897,7 +897,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	protected void release(C connection) throws E {
 		// Find the threadId that had allocated the connection
 		// Will not be found when already released (or not from this pool)
-		SmallIdentifier allocationThreadId;
+		Long allocationThreadId;
 		synchronized(allocationThreadIdByConnection) {
 			allocationThreadId = allocationThreadIdByConnection.remove(connection);
 		}

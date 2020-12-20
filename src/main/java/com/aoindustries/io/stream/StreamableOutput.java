@@ -22,8 +22,6 @@
  */
 package com.aoindustries.io.stream;
 
-import com.aoindustries.security.Identifier;
-import com.aoindustries.security.SmallIdentifier;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -239,36 +237,5 @@ public class StreamableOutput extends DataOutputStream {
 			: b ? 1
 			: 0
 		);
-	}
-
-	/**
-	 * Writes an {@link Identifier}.
-	 */
-	public void writeIdentifier(Identifier identifier) throws IOException {
-		writeLong(identifier.getHi());
-		writeLong(identifier.getLo());
-	}
-
-	/**
-	 * Writes a possibly-{@code null} {@link Identifier}.
-	 */
-	public void writeNullIdentifier(Identifier identifier) throws IOException {
-		writeBoolean(identifier != null);
-		if(identifier != null) writeIdentifier(identifier);
-	}
-
-	/**
-	 * Writes a {@link SmallIdentifier}.
-	 */
-	public void writeSmallIdentifier(SmallIdentifier identifier) throws IOException {
-		writeLong(identifier.getValue());
-	}
-
-	/**
-	 * Writes a possibly-{@code null} {@link SmallIdentifier}.
-	 */
-	public void writeNullSmallIdentifier(SmallIdentifier identifier) throws IOException {
-		writeBoolean(identifier != null);
-		if(identifier != null) writeSmallIdentifier(identifier);
 	}
 }
