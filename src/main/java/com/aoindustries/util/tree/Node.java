@@ -41,7 +41,7 @@ public interface Node<E> {
 	List<Node<E>> getChildren() throws IOException, SQLException;
 
 	/**
-	 * Gets the value contained in this node.  Comparisions of this value
+	 * Gets the value contained in this node.  Comparisons of this value
 	 * will be performed using the equals method.
 	 */
 	E getValue();
