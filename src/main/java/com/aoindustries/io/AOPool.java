@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017, 2018, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -76,6 +76,11 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 
 	public static final int DEFAULT_CONNECT_TIMEOUT = 15 * 1000; // Was 5 seconds for a very long time, but too sensitive to transient network problems
 	public static final int DEFAULT_SOCKET_SO_LINGER = 15;
+
+	/**
+	 * The number of milliseconds between loggings of waiting on full pool.
+	 */
+	private static final long WAIT_LOGGING_INTERVAL = 60_1000L; // One minute
 
 	/**
 	 * All updates to the fields must be synchronized on the {@link PooledConnection} instance.
@@ -292,20 +297,23 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	final public void close() {
 		List<C> connsToClose;
 		synchronized(poolLock) {
-			// Prevent any new connections
-			isClosed = true;
-			// Find any connections that are available and open
-			connsToClose = new ArrayList<>(availableConnections.size());
-			for(PooledConnection<C> availableConnection : availableConnections) {
-				synchronized(availableConnection) {
-					C conn = availableConnection.connection;
-					if(conn!=null) {
-						availableConnection.connection = null;
-						connsToClose.add(conn);
+			try {
+				// Prevent any new connections
+				isClosed = true;
+				// Find any connections that are available and open
+				connsToClose = new ArrayList<>(availableConnections.size());
+				for(PooledConnection<C> availableConnection : availableConnections) {
+					synchronized(availableConnection) {
+						C conn = availableConnection.connection;
+						if(conn!=null) {
+							availableConnection.connection = null;
+							connsToClose.add(conn);
+						}
 					}
 				}
+			} finally {
+				poolLock.notifyAll();
 			}
-			poolLock.notifyAll();
 		}
 		// Close all of the connections
 		for(C conn : connsToClose) {
@@ -364,6 +372,8 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	public C getConnection() throws I, E {
 		return getConnection(1);
 	}
+
+	private static long lastLoggedWait = Long.MIN_VALUE;
 
 	/**
 	 * Gets either an available connection or creates a new connection.
@@ -460,6 +470,37 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 						} else {
 							// Wait for a connection to become available
 							pooledConnection = null;
+							if(logger.isLoggable(Level.WARNING)) {
+								long currentTime = System.currentTimeMillis();
+								if(
+									lastLoggedWait == Long.MIN_VALUE
+									|| (currentTime - lastLoggedWait) >= WAIT_LOGGING_INTERVAL
+									|| (lastLoggedWait - currentTime) >= WAIT_LOGGING_INTERVAL // System time reset into the past
+								) {
+									String eol = System.lineSeparator();
+									StringBuilder message = new StringBuilder();
+									message.append("Warning connection pool is full.  Please review the stacktraces of all allocations:");
+									for(int i = 0, size = allConnections.size(); i < size ; i++) {
+										PooledConnection<C> pc = allConnections.get(i);
+										Throwable ast = pc.allocateStackTrace;
+										message.append(eol).append(eol).append("Connection #").append(i + 1).append(eol);
+										if(ast == null) {
+											message.append("    No allocation registered.");
+										} else {
+											StackTraceElement[] stack = ast.getStackTrace();
+											if(stack == null || stack.length == 0) {
+												message.append("    No stack trace.");
+											} else {
+												for(StackTraceElement ste : stack) {
+													message.append(eol).append("    at ").append(ste.toString());
+												}
+											}
+										}
+									}
+									logger.log(Level.WARNING, message.toString());
+									lastLoggedWait = currentTime;
+								}
+							}
 							try {
 								poolLock.wait();
 							} catch(InterruptedException err) {
@@ -577,20 +618,23 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * this makes the connection available for the next request.
 	 */
 	private void release(PooledConnection<C> pooledConnection) {
-		long currentTime = System.currentTimeMillis();
-		long useTime;
-		synchronized(pooledConnection) {
-			pooledConnection.releaseTime = currentTime;
-			useTime = currentTime - pooledConnection.startTime;
-			if(useTime>0) pooledConnection.totalTime.addAndGet(useTime);
-			pooledConnection.allocateStackTrace = null;
-		}
-		// Remove from the pool
-		synchronized(poolLock) {
-			try {
-				if(busyConnections.remove(pooledConnection)) availableConnections.add(pooledConnection);
-			} finally {
-				poolLock.notify();
+		try {
+			long currentTime = System.currentTimeMillis();
+			long useTime;
+			synchronized(pooledConnection) {
+				pooledConnection.releaseTime = currentTime;
+				useTime = currentTime - pooledConnection.startTime;
+				if(useTime>0) pooledConnection.totalTime.addAndGet(useTime);
+				pooledConnection.allocateStackTrace = null;
+			}
+		} finally {
+			// Remove from the pool
+			synchronized(poolLock) {
+				try {
+					if(busyConnections.remove(pooledConnection)) availableConnections.add(pooledConnection);
+				} finally {
+					poolLock.notify();
+				}
 			}
 		}
 	}
@@ -1025,25 +1069,29 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 					// Find any connections that are available and been idle too long
 					int maxIdle = maxIdleTime;
 					connsToClose = new ArrayList<>(availableConnections.size());
-					for(PooledConnection<C> availableConnection : availableConnections) {
-						synchronized(availableConnection) {
-							C conn = availableConnection.connection;
-							if(conn!=null) {
-								if(
-									(time-availableConnection.releaseTime) > maxIdle // Idle too long
-									|| (
-										maxConnectionAge!=UNLIMITED_MAX_CONNECTION_AGE
-										&& (
-											availableConnection.createTime > time // System time reset?
-											|| (time-availableConnection.createTime) >= maxConnectionAge // Max connection age reached
+					try {
+						for(PooledConnection<C> availableConnection : availableConnections) {
+							synchronized(availableConnection) {
+								C conn = availableConnection.connection;
+								if(conn!=null) {
+									if(
+										(time-availableConnection.releaseTime) > maxIdle // Idle too long
+										|| (
+											maxConnectionAge!=UNLIMITED_MAX_CONNECTION_AGE
+											&& (
+												availableConnection.createTime > time // System time reset?
+												|| (time-availableConnection.createTime) >= maxConnectionAge // Max connection age reached
+											)
 										)
-									)
-								) {
-									availableConnection.connection = null;
-									connsToClose.add(conn);
+									) {
+										availableConnection.connection = null;
+										connsToClose.add(conn);
+									}
 								}
 							}
 						}
+					} finally {
+						if(!connsToClose.isEmpty()) poolLock.notify();
 					}
 				}
 				// Close all of the connections
