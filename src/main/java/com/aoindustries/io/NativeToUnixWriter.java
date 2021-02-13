@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2020  AO Industries, Inc.
+ * Copyright (C) 2013, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,18 +43,14 @@ final public class NativeToUnixWriter {
 	static final String UNIX_EOL = "\n";
 
 	/**
-	 * The end of line character for the current Java virtual machine.
-	 */
-	private static final String EOL = System.lineSeparator();
-
-	/**
 	 * Gets an instance of the Writer that performs the conversion.
 	 * The implementation may be optimized for common platforms.
 	 */
 	public static Writer getInstance(Writer out) {
+		String eol = System.lineSeparator();
 		// Already in Unix format, no conversion necessary
-		if(UNIX_EOL.equals(EOL)) return out;
+		if(UNIX_EOL.equals(eol)) return out;
 		// Use FindReplaceWriter
-		return new FindReplaceWriter(out, EOL, UNIX_EOL);
+		return new FindReplaceWriter(out, eol, UNIX_EOL);
 	}
 }
