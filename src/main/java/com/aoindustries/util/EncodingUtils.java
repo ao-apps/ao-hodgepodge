@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,21 +22,11 @@
  */
 package com.aoindustries.util;
 
-import com.aoindustries.exception.WrappedException;
-import com.aoindustries.io.Writable;
+import com.aoindustries.lang.Coercion;
 import com.aoindustries.util.i18n.BundleLookupMarkup;
 import com.aoindustries.util.i18n.BundleLookupThreadContext;
 import com.aoindustries.util.i18n.MarkupType;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Node;
 
 /**
  * Provides encoding and escaping for various type of data.
@@ -52,51 +42,11 @@ public final class EncodingUtils {
 	}
 
 	/**
-	 * Converts an object to a string.
-	 * 
-	 * @deprecated  Use <a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/Coercion.html#toString(java.lang.Object)">Coercion.toString(Object)</a> instead.
+	 * @deprecated  Use {@link Coercion#toString(java.lang.Object)} instead.
 	 */
 	@Deprecated
 	public static String toString(Object value) {
-		// If A is a string, then the result is A.
-		if(value instanceof String) return (String)value;
-		// Otherwise, if A is null, then the result is "".
-		if(value == null) return "";
-		// Otherwise, if is a Writable, support optimizations
-		if(value instanceof Writable) {
-			// Note: This is only optimal for Writable that are "isFastToString()",
-			//       but we don't have much better option since a String is required.
-			//       Keeping this here, instead of falling-through to toString() below,
-			//       so behavior is consistent in the odd chance a class is a Node and implements Writable.
-			//       This should keep it consistent with other coercions.
-			return value.toString();
-		}
-		// Otherwise, support CharSequence
-		if(value instanceof CharSequence) return value.toString();
-		// Otherwise, support char[]
-		if(value instanceof char[]) return new String((char[])value);
-		// Otherwise, if is a DOM node, serialize the output
-		if(value instanceof Node) {
-			try {
-				// Can use thread-local or pooled transformers if performance is ever an issue
-				TransformerFactory transFactory = TransformerFactory.newInstance();
-				Transformer transformer = transFactory.newTransformer();
-				StringWriter buffer = new StringWriter();
-				transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-				transformer.setOutputProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
-				transformer.transform(
-					new DOMSource((Node)value),
-					new StreamResult(buffer)
-				);
-				return buffer.toString();
-			} catch(TransformerException e) {
-				throw new WrappedException(e);
-			}
-		}
-		// Otherwise, if A.toString() throws an exception, then raise an error
-		String str = value.toString();
-		// Otherwise, the result is A.toString();
-		return str;
+		return Coercion.toString(value);
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="(X)HTML">
@@ -140,7 +90,7 @@ public final class EncodingUtils {
 	 */
 	@Deprecated
 	public static String encodeHtml(Object value, boolean isXhtml) throws IOException {
-		if(value==null) return null;
+		if(value == null) return null;
 		StringBuilder result = new StringBuilder();
 		encodeHtml(value, result, isXhtml);
 		return result.toString();
@@ -165,18 +115,18 @@ public final class EncodingUtils {
 	 */
 	@Deprecated
 	public static void encodeHtml(Object value, boolean make_br, boolean make_nbsp, Appendable out, boolean isXhtml) throws IOException {
-		if(value!=null) {
-			String str = toString(value);
+		if(value != null) {
+			String str = Coercion.toString(value);
 			BundleLookupMarkup lookupMarkup;
 			BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext();
-			if(threadContext!=null) {
+			if(threadContext != null) {
 				lookupMarkup = threadContext.getLookupMarkup(str);
 			} else {
 				lookupMarkup = null;
 			}
-			if(lookupMarkup!=null) lookupMarkup.appendPrefixTo(MarkupType.XHTML, out);
+			if(lookupMarkup != null) lookupMarkup.appendPrefixTo(MarkupType.XHTML, out);
 			encodeHtml(str, 0, str.length(), make_br, make_nbsp, out, isXhtml);
-			if(lookupMarkup!=null) lookupMarkup.appendSuffixTo(MarkupType.XHTML, out);
+			if(lookupMarkup != null) lookupMarkup.appendSuffixTo(MarkupType.XHTML, out);
 		}
 	}
 
@@ -288,7 +238,7 @@ public final class EncodingUtils {
 	 */
 	@Deprecated
 	public static String encodeHtml(Object value, boolean make_br, boolean make_nbsp, boolean isXhtml) throws IOException {
-		if(value==null) return null;
+		if(value == null) return null;
 		StringBuilder result = new StringBuilder();
 		encodeHtml(value, make_br, make_nbsp, result, isXhtml);
 		return result.toString();
