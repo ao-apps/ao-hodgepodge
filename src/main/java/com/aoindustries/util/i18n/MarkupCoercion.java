@@ -27,6 +27,8 @@ import com.aoindustries.io.Writable;
 import com.aoindustries.lang.Coercion;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Optional;
+import javax.swing.text.Segment;
 import org.w3c.dom.Node;
 
 /**
@@ -38,16 +40,19 @@ import org.w3c.dom.Node;
  *
  * @see  Coercion
  */
-// TODO: Add Coercion support for Optional
 public final class MarkupCoercion {
 
 	/**
 	 * Writes an object's String representation with markup enabled,
 	 * supporting streaming for specialized types.
-	 * 
+	 *
 	 * @see  MarkupType
 	 */
 	public static void write(Object value, MarkupType markupType, Writer out) throws IOException {
+		// Support Optional
+		while(value instanceof Optional) {
+			value = ((Optional<?>)value).orElse(null);
+		}
 		if(value != null) {
 			BundleLookupThreadContext threadContext;
 			if(
@@ -60,6 +65,7 @@ public final class MarkupCoercion {
 					&& !((Writable)value).isFastToString()
 				)
 				// Other types that will not be converted to String for bundle lookups
+				|| value instanceof Segment
 				|| value instanceof char[]
 				|| value instanceof Node
 			) {
@@ -75,7 +81,7 @@ public final class MarkupCoercion {
 	}
 
 	/**
-	 * Writes an object's String representation with markup enabled using the provided encoder,
+	 * Encodes an object's String representation with markup enabled using the provided encoder,
 	 * supporting streaming for specialized types.
 	 *
 	 * @param  encodeLookupMarkup  <p>Does the lookup markup need to be encoded?</p>
@@ -107,6 +113,10 @@ public final class MarkupCoercion {
 		if(encoder == null) {
 			write(value, markupType, out);
 		} else {
+			// Support Optional
+			while(value instanceof Optional) {
+				value = ((Optional<?>)value).orElse(null);
+			}
 			if(value != null) {
 				BundleLookupThreadContext threadContext;
 				if(
@@ -119,6 +129,7 @@ public final class MarkupCoercion {
 						&& !((Writable)value).isFastToString()
 					)
 					// Other types that will not be converted to String for bundle lookups
+					|| value instanceof Segment
 					|| value instanceof char[]
 					|| value instanceof Node
 				) {
@@ -143,41 +154,48 @@ public final class MarkupCoercion {
 	/**
 	 * Appends an object's String representation with markup enabled,
 	 * supporting streaming for specialized types.
-	 * 
+	 *
 	 * @see  MarkupType
 	 */
 	public static void append(Object value, MarkupType markupType, Appendable out) throws IOException {
-		if(value != null) {
-			BundleLookupThreadContext threadContext;
-			if(out instanceof Writer) {
-				write(value, markupType, (Writer)out);
-			} else if(
-				markupType == null
-				|| markupType == MarkupType.NONE
-				|| (threadContext = BundleLookupThreadContext.getThreadContext()) == null
-				// Avoid intermediate String from Writable
-				|| (
-					value instanceof Writable
-					&& !((Writable)value).isFastToString()
-				)
-				// Other types that will not be converted to String for bundle lookups
-				|| value instanceof char[]
-				|| value instanceof Node
-			) {
-				Coercion.append(value, out);
-			} else {
-				String str = Coercion.toString(value);
-				BundleLookupMarkup lookupMarkup = threadContext.getLookupMarkup(str);
-				if(lookupMarkup != null) lookupMarkup.appendPrefixTo(markupType, out);
-				assert out != null;
-				out.append(str);
-				if(lookupMarkup != null) lookupMarkup.appendSuffixTo(markupType, out);
+		if(out instanceof Writer) {
+			write(value, markupType, (Writer)out);
+		} else {
+			// Support Optional
+			while(value instanceof Optional) {
+				value = ((Optional<?>)value).orElse(null);
+			}
+			if(value != null) {
+				BundleLookupThreadContext threadContext;
+				if(
+					markupType == null
+					|| markupType == MarkupType.NONE
+					|| (threadContext = BundleLookupThreadContext.getThreadContext()) == null
+					// Avoid intermediate String from Writable
+					|| (
+						value instanceof Writable
+						&& !((Writable)value).isFastToString()
+					)
+					// Other types that will not be converted to String for bundle lookups
+					|| value instanceof Segment
+					|| value instanceof char[]
+					|| value instanceof Node
+				) {
+					Coercion.append(value, out);
+				} else {
+					String str = Coercion.toString(value);
+					BundleLookupMarkup lookupMarkup = threadContext.getLookupMarkup(str);
+					if(lookupMarkup != null) lookupMarkup.appendPrefixTo(markupType, out);
+					assert out != null;
+					out.append(str);
+					if(lookupMarkup != null) lookupMarkup.appendSuffixTo(markupType, out);
+				}
 			}
 		}
 	}
 
 	/**
-	 * Appends an object's String representation with markup enabled using the provided encoder,
+	 * Encodes an object's String representation with markup enabled using the provided encoder,
 	 * supporting streaming for specialized types.
 	 *
 	 * @param  encodeLookupMarkup  <p>Does the lookup markup need to be encoded?</p>
@@ -208,12 +226,16 @@ public final class MarkupCoercion {
 	public static void append(Object value, MarkupType markupType, boolean encodeLookupMarkup, Encoder encoder, boolean encoderPrefixSuffix, Appendable out) throws IOException {
 		if(encoder == null) {
 			append(value, markupType, out);
+		} else if(out instanceof Writer) {
+			write(value, markupType, encodeLookupMarkup, encoder, encoderPrefixSuffix, (Writer)out);
 		} else {
+			// Support Optional
+			while(value instanceof Optional) {
+				value = ((Optional<?>)value).orElse(null);
+			}
 			if(value != null) {
 				BundleLookupThreadContext threadContext;
-				if(out instanceof Writer) {
-					write(value, markupType, encodeLookupMarkup, encoder, encoderPrefixSuffix, (Writer)out);
-				} else if(
+				if(
 					markupType == null
 					|| markupType == MarkupType.NONE
 					|| (threadContext = BundleLookupThreadContext.getThreadContext()) == null
@@ -223,6 +245,7 @@ public final class MarkupCoercion {
 						&& !((Writable)value).isFastToString()
 					)
 					// Other types that will not be converted to String for bundle lookups
+					|| value instanceof Segment
 					|| value instanceof char[]
 					|| value instanceof Node
 				) {
