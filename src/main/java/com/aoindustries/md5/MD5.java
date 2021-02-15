@@ -98,14 +98,17 @@ public class MD5 {
 
 			int i;
 
-			for (i = 0; i < buffer.length; i++)
+			for (i = 0; i < buffer.length; i++) {
 				this.buffer[i] = from.buffer[i];
+			}
 
-			for (i = 0; i < state.length; i++)
+			for (i = 0; i < state.length; i++) {
 				this.state[i] = from.state[i];
+			}
 
-			for (i = 0; i < count.length; i++)
+			for (i = 0; i < count.length; i++) {
 				this.count[i] = from.count[i];
+			}
 		}
 	}
 
@@ -315,13 +318,15 @@ public class MD5 {
 		partlen = 64 - index;
 
 		if (length >= partlen) {
-			for (i = 0; i < partlen; i++)
+			for (i = 0; i < partlen; i++) {
 				stat.buffer[i + index] = buffer[i + offset];
+			}
 
 			Transform(stat, stat.buffer, 0);
 
-			for (i = partlen; (i + 63) < length; i+= 64)
+			for (i = partlen; (i + 63) < length; i+= 64) {
 				Transform(stat, buffer, i);
+			}
 
 			index = 0;
 		} else 
@@ -330,8 +335,9 @@ public class MD5 {
 		/* buffer remaining input */
 		if (i < length) {
 			start = i;
-			for (; i < length; i++) 
+			for (; i < length; i++) {
 				stat.buffer[index + i - start] = buffer[i + offset];
+			}
 		}
 	}
 
@@ -530,6 +536,7 @@ public class MD5 {
 		;
 	}
 
+	@SuppressWarnings("deprecation")
 	private static long getHexValue(char ch) throws IllegalArgumentException {
 		return Strings.getHex(ch);
 	}
