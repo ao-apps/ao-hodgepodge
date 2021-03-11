@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2019, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -84,17 +84,17 @@ final public class DirectoryMetaSnapshot {
 		}
 	}
 
-	final private SortedMap<String,FileMetaSnapshot> files;
+	final private SortedMap<String, FileMetaSnapshot> files;
 
 	public DirectoryMetaSnapshot(String startPath) throws IOException {
-		Map<String,FilesystemIteratorRule> noPrefixRules = Collections.emptyMap();
+		Map<String, FilesystemIteratorRule> noPrefixRules = Collections.emptyMap();
 		FilesystemIterator iter = new FilesystemIterator(
 			Collections.singletonMap(startPath, FilesystemIteratorRule.OK),
 			noPrefixRules,
 			startPath
 		);
 		final String expectedStart = startPath + File.separatorChar;
-		SortedMap<String,FileMetaSnapshot> newFiles = new TreeMap<>();
+		SortedMap<String, FileMetaSnapshot> newFiles = new TreeMap<>();
 		File file;
 		while((file=iter.getNextFile())!=null) {
 			if(file.isFile()) {

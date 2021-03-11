@@ -63,10 +63,12 @@ import java.util.logging.Logger;
  *       hide connection latency on first-use.
  * </p>
  *
+ * @param  <Ex>  An arbitrary exception type that may be thrown
+ *
  * @author  AO Industries, Inc.
  */
 // TODO: Don't extend Thread
-abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I extends Throwable> extends Thread {
+abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I extends Throwable> extends Thread {
 
 	public static final int DEFAULT_DELAY_TIME = 1 * 60 * 1000;
 	public static final int DEFAULT_MAX_IDLE_TIME = 10 * 60 * 1000;
@@ -241,7 +243,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 *
 	 * @see  #currentThreadId
 	 */
-	private final Map<Long,List<PooledConnection<C>>> threadConnectionsByThreadId = new WeakHashMap<>();
+	private final Map<Long, List<PooledConnection<C>>> threadConnectionsByThreadId = new WeakHashMap<>();
 
 	/**
 	 * Tracks the thread ID that allocated each connection.
@@ -249,7 +251,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * All access to this map must be synchronized on the map.
 	 * </p>
 	 */
-	private final Map<C,Long> allocationThreadIdByConnection = new IdentityHashMap<>();
+	private final Map<C, Long> allocationThreadIdByConnection = new IdentityHashMap<>();
 
 	/**
 	 * All warnings are sent here if available, otherwise will be written to <code>System.err</code>.
@@ -288,7 +290,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * Please note, this is distinct from the implementation of {@link AutoCloseable} for use in try-with-resources.
 	 * </p>
 	 */
-	protected abstract void close(C conn) throws E;
+	protected abstract void close(C conn) throws Ex;
 
 	/**
 	 * Shuts down the pool, exceptions during close will be logged as a warning and not thrown.
@@ -360,7 +362,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * @return  Either a reused or new connection
 	 *
 	 * @throws  I  when interrupted
-	 * @throws  E  when an error occurs, or when a thread attempts to allocate more than half the pool
+	 * @throws  Ex  when an error occurs, or when a thread attempts to allocate more than half the pool
 	 *
 	 * @see  #getConnection(int)
 	 * @see  AutoCloseable#close()
@@ -369,7 +371,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	// Note: Matches AOConnectionPool.getConnection()
 	// Note: Matches Database.getConnection()
 	// Note: Matches DatabaseConnection.getConnection()
-	public C getConnection() throws I, E {
+	public C getConnection() throws I, Ex {
 		return getConnection(1);
 	}
 
@@ -393,7 +395,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * @return  Either a reused or new connection
 	 *
 	 * @throws  I  when interrupted
-	 * @throws  E  when an error occurs, or when a thread attempts to allocate more than half the pool
+	 * @throws  Ex  when an error occurs, or when a thread attempts to allocate more than half the pool
 	 *
 	 * @see  #getConnection()
 	 * @see  AutoCloseable#close()
@@ -403,7 +405,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	// Note: Matches Database.getConnection(int)
 	// Note: Matches DatabaseConnection.getConnection(int)
 	@SuppressWarnings({"UseSpecificCatch", "AssignmentToCatchBlockParameter"})
-	public C getConnection(int maxConnections) throws I, E {
+	public C getConnection(int maxConnections) throws I, Ex {
 		if(maxConnections < 1) maxConnections = 1;
 		// Return immediately if already interrupted
 		if(Thread.interrupted()) throw newInterruptedException(null, null);
@@ -607,9 +609,9 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * </p>
 	 *
 	 * @throws I when interrupted
-	 * @throws E when error
+	 * @throws Ex when error
 	 */
-	protected abstract C getConnectionObject() throws I, E;
+	protected abstract C getConnectionObject() throws I, Ex;
 
 	/**
 	 * Releases a PooledConnection.  It is safe to release
@@ -701,7 +703,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * Please note, this is distinct from the implementation of {@link AutoCloseable} for use in try-with-resources.
 	 * </p>
 	 */
-	protected abstract boolean isClosed(C conn) throws E;
+	protected abstract boolean isClosed(C conn) throws Ex;
 
 	/**
 	 * Prints additional connection pool details.  Must have opened the <code>&lt;tbody&gt;</code>.
@@ -714,7 +716,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * Prints complete statistics about connection pool use.
 	 */
 	@SuppressWarnings("deprecation")
-	public final void printStatisticsHTML(Appendable out, boolean isXhtml) throws IOException, E {
+	public final void printStatisticsHTML(Appendable out, boolean isXhtml) throws IOException, Ex {
 		// Get the data
 		boolean myIsClosed;
 		synchronized(poolLock) {
@@ -896,7 +898,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 */
 	@Deprecated
 	@SuppressWarnings("NoopMethodInAbstractClass")
-	public final void printStatisticsHTML(Appendable out) throws IOException, E {
+	public final void printStatisticsHTML(Appendable out) throws IOException, Ex {
 		
 	}
 
@@ -908,7 +910,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 */
 	@Deprecated
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-	final public void releaseConnection(C connection) throws E {
+	final public void releaseConnection(C connection) throws Ex {
 		try {
 			connection.close();
 		} catch(Throwable t) {
@@ -938,7 +940,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * @see  #release(com.aoindustries.io.AOPool.PooledConnection)
 	 */
 	@SuppressWarnings({"UseSpecificCatch", "NestedSynchronizedStatement"})
-	protected void release(C connection) throws E {
+	protected void release(C connection) throws Ex {
 		// Find the threadId that had allocated the connection
 		// Will not be found when already released (or not from this pool)
 		Long allocationThreadId;
@@ -1038,14 +1040,14 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 	 * {@linkplain #isClosed(java.lang.AutoCloseable) closed}.
 	 */
 	@SuppressWarnings("NoopMethodInAbstractClass")
-	protected void logConnection(C conn) throws E {
+	protected void logConnection(C conn) throws Ex {
 		// Nothing by default
 	}
 
 	/**
 	 * Resets the given connection for release back to the pool.
 	 */
-	protected abstract void resetConnection(C conn) throws I, E;
+	protected abstract void resetConnection(C conn) throws I, Ex;
 
 	/**
 	 * The RefreshConnection thread polls every connection in the connection pool. If it
@@ -1112,7 +1114,7 @@ abstract public class AOPool<C extends AutoCloseable,E extends Throwable,I exten
 		}
 	}
 
-	protected abstract E newException(String message, Throwable cause);
+	protected abstract Ex newException(String message, Throwable cause);
 
 	protected abstract I newInterruptedException(String message, Throwable cause);
 

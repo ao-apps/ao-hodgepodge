@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -40,9 +40,11 @@ import java.util.logging.Logger;
  * zero overhead.  Background refreshes only happen on recently used keys.
  * </p>
  *
+ * @param  <Ex>  An arbitrary exception type that may be thrown
+ *
  * @author  AO Industries, Inc.
  */
-public class BackgroundCache<K,V,E extends Throwable> {
+public class BackgroundCache<K, V, Ex extends Throwable> {
 
 	/**
 	 * The thread priority used for the timer.
@@ -51,26 +53,30 @@ public class BackgroundCache<K,V,E extends Throwable> {
 
 	/**
 	 * A callable used to refresh the cache.
+	 *
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
 	 */
 	@FunctionalInterface
-	public static interface Refresher<K,V,E extends Throwable> {
-		V call(K key) throws E;
+	public static interface Refresher<K, V, Ex extends Throwable> {
+		V call(K key) throws Ex;
 	}
 
 	/**
 	 * The result of a refresh.
+	 *
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
 	 */
-	public static class Result<V,E extends Throwable> {
+	public static class Result<V, Ex extends Throwable> {
 
 		private final V value;
-		private final E exception;
+		private final Ex exception;
 
 		Result(V value) {
 			this.value = value;
 			this.exception = null;
 		}
 
-		Result(E exception) {
+		Result(Ex exception) {
 			this.exception = exception;
 			this.value = null;
 		}
@@ -85,7 +91,7 @@ public class BackgroundCache<K,V,E extends Throwable> {
 		/**
 		 * Gets the exception that occurred during refresh.
 		 */
-		public E getException() {
+		public Ex getException() {
 			return exception;
 		}
 	}
@@ -99,12 +105,12 @@ public class BackgroundCache<K,V,E extends Throwable> {
 
 		private final K key;
 
-		private final Refresher<? super K,? extends V,? extends E> refresher;
+		private final Refresher<? super K, ? extends V, ? extends Ex> refresher;
 
 		/**
 		 * The last obtained result.
 		 */
-		private volatile Result<V,E> result;
+		private volatile Result<V, Ex> result;
 
 		/**
 		 * The time the entry was last refreshed.
@@ -129,8 +135,8 @@ public class BackgroundCache<K,V,E extends Throwable> {
 		 */
 		CacheEntry(
 			K key,
-			Refresher<? super K,? extends V,? extends E> refresher,
-			Result<V,E> result
+			Refresher<? super K, ? extends V, ? extends Ex> refresher,
+			Result<V, Ex> result
 		) {
 			long currentTime = System.currentTimeMillis();
 			this.key = key;
@@ -145,7 +151,7 @@ public class BackgroundCache<K,V,E extends Throwable> {
 		 * Gets the most recently obtained result.
 		 * Updates the expiration time as-needed.
 		 */
-		Result<V,E> getResult() {
+		Result<V, Ex> getResult() {
 			if(!accessedSinceRefresh) {
 				accessedSinceRefresh = true;
 				expiration = refreshed + expirationAge;
@@ -200,7 +206,7 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	}
 
 	private final String name;
-	private final Class<? extends E> exceptionClass;
+	private final Class<? extends Ex> exceptionClass;
 	final long refreshInterval;
 	private final long expirationAge;
 	final Logger logger;
@@ -214,7 +220,7 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	 */
 	final Timer timer;
 
-	final ConcurrentMap<K,CacheEntry> map = new ConcurrentHashMap<>();
+	final ConcurrentMap<K, CacheEntry> map = new ConcurrentHashMap<>();
 
 	/**
 	 * @param name             The name resources are based on, such as background thread names.
@@ -229,7 +235,7 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	 */
 	public BackgroundCache(
 		String name,
-		Class<? extends E> exceptionClass,
+		Class<? extends Ex> exceptionClass,
 		long refreshInterval,
 		long expirationAge,
 		Logger logger
@@ -249,7 +255,7 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	 */
 	public BackgroundCache(
 		String name,
-		Class<? extends E> exceptionClass,
+		Class<? extends Ex> exceptionClass,
 		long refreshInterval,
 		long expirationAge
 	) {
@@ -286,11 +292,11 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	 * @see  #get(java.lang.Object)
 	 * @see  #put(java.lang.Object, com.aoindustries.cache.BackgroundCache.Refresher)
 	 */
-	public Result<V,E> get(
+	public Result<V, Ex> get(
 		K key,
-		Refresher<? super K,? extends V,? extends E> refresher
+		Refresher<? super K, ? extends V, ? extends Ex> refresher
 	) {
-		Result<V,E> result = get(key);
+		Result<V, Ex> result = get(key);
 		if(result == null) result = put(key, refresher);
 		return result;
 	}
@@ -299,7 +305,7 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	 * Gets a cached result for the given key, null if not cached.
 	 * Extends the expiration of the cache entry.
 	 */
-	public Result<V,E> get(K key) {
+	public Result<V, Ex> get(K key) {
 		CacheEntry entry = map.get(key);
 		if(entry == null) {
 			return null;
@@ -308,8 +314,8 @@ public class BackgroundCache<K,V,E extends Throwable> {
 		}
 	}
 
-	Result<V,E> runRefresher(
-		Refresher<? super K,? extends V,? extends E> refresher,
+	Result<V, Ex> runRefresher(
+		Refresher<? super K, ? extends V, ? extends Ex> refresher,
 		K key
 	) throws IllegalStateException {
 		try {
@@ -331,11 +337,11 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	 *
 	 * @return  The result obtained from this refresher
 	 */
-	public Result<V,E> put(
+	public Result<V, Ex> put(
 		K key,
-		Refresher<? super K,? extends V,? extends E> refresher
+		Refresher<? super K, ? extends V, ? extends Ex> refresher
 	) {
-		Result<V,E> result = runRefresher(refresher, key);
+		Result<V, Ex> result = runRefresher(refresher, key);
 		put(key, refresher, result);
 		return result;
 	}
@@ -345,7 +351,7 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	 */
 	public void put(
 		K key,
-		Refresher<? super K,? extends V,? extends E> refresher,
+		Refresher<? super K, ? extends V, ? extends Ex> refresher,
 		V value
 	) {
 		put(key, refresher, new Result<>(value));
@@ -356,8 +362,8 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	 */
 	public void put(
 		K key,
-		Refresher<? super K,? extends V,? extends E> refresher,
-		E exception
+		Refresher<? super K, ? extends V, ? extends Ex> refresher,
+		Ex exception
 	) {
 		put(key, refresher, new Result<>(exception));
 	}
@@ -372,8 +378,8 @@ public class BackgroundCache<K,V,E extends Throwable> {
 	 */
 	private void put(
 		K key,
-		Refresher<? super K,? extends V,? extends E> refresher,
-		Result<V,E> result
+		Refresher<? super K, ? extends V, ? extends Ex> refresher,
+		Result<V, Ex> result
 	) {
 		CacheEntry entry = new CacheEntry(key, refresher, result);
 		map.put(key, entry);

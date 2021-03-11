@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,12 +27,15 @@ import java.util.Set;
 /**
  * Sorts the vertices of a graph into a particular order.
  *
+ * @param  <Ex>  An arbitrary exception type that may be thrown
+ *
  * @author  AO Industries, Inc.
  */
 @FunctionalInterface
-public interface GraphSorter<V,EX extends Exception> {
+// TODO: Ex extends Throwable
+public interface GraphSorter<V, Ex extends Exception> {
 
 	// TODO: This should be given the graph as a parameter?
-	Set<V> sortGraph() throws EX;
+	Set<V> sortGraph() throws Ex;
 }
 

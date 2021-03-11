@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016, 2017, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2017, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,20 +37,23 @@ import java.util.Set;
  * See <a href="https://wikipedia.org/wiki/Topological_sorting#Algorithms">https://wikipedia.org/wiki/Topological_sorting#Algorithms</a>
  * </p>
  *
+ * @param  <Ex>  An arbitrary exception type that may be thrown
+ *
  * @author  AO Industries, Inc.
  */
-public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V, EX> {
+// TODO: Ex extends Throwable
+public class TopologicalSorter<V, Ex extends Exception> implements GraphSorter<V, Ex> {
 
-	private final SymmetricMultiGraph<V,?,? extends EX> graph;
+	private final SymmetricMultiGraph<V, ?, ? extends Ex> graph;
 	private final boolean isForward;
 
-	public TopologicalSorter(SymmetricMultiGraph<V,?,? extends EX> graph, boolean isForward) {
+	public TopologicalSorter(SymmetricMultiGraph<V, ?, ? extends Ex> graph, boolean isForward) {
 		this.graph = graph;
 		this.isForward = isForward;
 	}
 
 	@Override
-	public Set<V> sortGraph() throws CycleException, EX {
+	public Set<V> sortGraph() throws CycleException, Ex {
 		Set<V> vertices = graph.getVertices();
 		final int size = vertices.size();
 		Set<V> visited = AoCollections.newHashSet(size);
@@ -80,7 +83,7 @@ public class TopologicalSorter<V, EX extends Exception> implements GraphSorter<V
 	}
 
 	//function visit(node n)
-	private void topologicalSortVisit(V n, Set<V> L, Set<V> visited, Set<V> sequence) throws CycleException, EX {
+	private void topologicalSortVisit(V n, Set<V> L, Set<V> visited, Set<V> sequence) throws CycleException, Ex {
 		//    if n has not been visited yet then
 		//        mark n as visited
 		if(visited.add(n)) {

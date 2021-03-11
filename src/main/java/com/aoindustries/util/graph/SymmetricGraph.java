@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,9 +27,12 @@ import java.util.Set;
 /**
  * A graph where each edge has an edge in the opposite direction.
  *
+ * @param  <Ex>  An arbitrary exception type that may be thrown
+ *
  * @author  AO Industries, Inc.
  */
-public interface SymmetricGraph<V,E extends Edge<V>,EX extends Exception> extends Graph<V,E,EX>, SymmetricMultiGraph<V,E,EX> {
+// TODO: Ex extends Throwable
+public interface SymmetricGraph<V, E extends Edge<V>, Ex extends Exception> extends Graph<V, E, Ex>, SymmetricMultiGraph<V, E, Ex> {
 
 	/**
 	 * {@inheritDoc}
@@ -37,5 +40,5 @@ public interface SymmetricGraph<V,E extends Edge<V>,EX extends Exception> extend
 	 * A graph only allows unique combinations of from and to vertices.
 	 */
 	@Override
-	Set<E> getEdgesTo(V to) throws EX;
+	Set<E> getEdgesTo(V to) throws Ex;
 }

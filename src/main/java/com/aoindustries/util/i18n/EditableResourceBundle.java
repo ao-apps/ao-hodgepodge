@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -99,7 +99,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		/**
 		 * Use of LookupValue must be synchronized on the LookupValue instance.
 		 */
-		private final ConcurrentMap<LookupKey,LookupValue> requestLookups;
+		private final ConcurrentMap<LookupKey, LookupValue> requestLookups;
 
 		/**
 		 * The lookup context that will be active when markup is enabled.
@@ -112,7 +112,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 			boolean modifyAllText,
 			Sequence elementIdGenerator,
 			Sequence lookupIdGenerator,
-			ConcurrentMap<LookupKey,LookupValue> requestLookups,
+			ConcurrentMap<LookupKey, LookupValue> requestLookups,
 			BundleLookupThreadContext lookupContext
 		) {
 			if(setValueUrl != null) {
@@ -344,7 +344,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		 * The set of locales that were queried.
 		 * Access must be synchronized on this LookupValue instance.
 		 */
-		private final Map<Locale,LookupLocaleValue> locales = new HashMap<>();
+		private final Map<Locale, LookupLocaleValue> locales = new HashMap<>();
 
 		private LookupValue(long id) {
 			this.id = id;
@@ -408,7 +408,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 		// Disable on current thread
 		resetThreadSettings();
 		// Get a copy, in case is still being altered by other threads
-		final Map<LookupKey,LookupValue> lookups = new HashMap<>(threadSettings.requestLookups);
+		final Map<LookupKey, LookupValue> lookups = new HashMap<>(threadSettings.requestLookups);
 		if(!lookups.isEmpty()) {
 			// Sort by lookupValue.id to present the information in the same order as first seen in the request
 			List<LookupKey> lookupKeys = new ArrayList<>(lookups.keySet());

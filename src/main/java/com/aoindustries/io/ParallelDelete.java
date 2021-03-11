@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -149,7 +149,7 @@ public class ParallelDelete {
 		// The set of next files is kept in key order so that it can scale with O(n*log(n)) for larger numbers of directories
 		// as opposed to O(n^2) for a list.  This is similar to the fix for AWStats logresolvemerge provided by Dan Armstrong
 		// a couple of years ago.
-		final Map<String,List<FilesystemIterator>> nextFiles = new TreeMap<>((S1, S2) -> {
+		final Map<String, List<FilesystemIterator>> nextFiles = new TreeMap<>((S1, S2) -> {
 			// Make sure directories are sorted after their directory contents
 			int diff = S1.compareTo(S2);
 			if(diff==0) return 0;
@@ -158,7 +158,7 @@ public class ParallelDelete {
 			return diff;
 		});
 		{
-			final Map<String,FilesystemIteratorRule> prefixRules = Collections.emptyMap();
+			final Map<String, FilesystemIteratorRule> prefixRules = Collections.emptyMap();
 			for(File directory : directories) {
 				if(!directory.exists()) throw new IOException("Directory not found: "+directory.getPath());
 				if(!directory.isDirectory()) throw new IOException("Not a directory: "+directory.getPath());

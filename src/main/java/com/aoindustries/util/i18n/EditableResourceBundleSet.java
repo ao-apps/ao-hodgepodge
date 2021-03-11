@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -47,7 +47,7 @@ public class EditableResourceBundleSet {
 	 */
 	private final SortedSet<Locale> locales;
 
-	private final Map<Locale,EditableResourceBundle> bundles = new ConcurrentHashMap<>();
+	private final Map<Locale, EditableResourceBundle> bundles = new ConcurrentHashMap<>();
 
 	/**
 	 * @param baseName the base name of the default locale's bundle.

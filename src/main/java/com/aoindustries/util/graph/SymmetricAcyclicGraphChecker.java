@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,14 +32,17 @@ import java.util.Set;
 /**
  * A symmetric directed acyclic graph checker.
  *
+ * @param  <Ex>  An arbitrary exception type that may be thrown
+ *
  * @author  AO Industries, Inc.
  */
-public class SymmetricAcyclicGraphChecker<V, EX extends Exception> implements GraphChecker<EX> {
+// TODO: Ex extends Throwable
+public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements GraphChecker<Ex> {
 
-	private final SymmetricMultiGraph<V,?,? extends EX> graph;
+	private final SymmetricMultiGraph<V, ?, ? extends Ex> graph;
 	private final boolean isForward;
 
-	public SymmetricAcyclicGraphChecker(SymmetricMultiGraph<V,?,? extends EX> graph, boolean isForward) {
+	public SymmetricAcyclicGraphChecker(SymmetricMultiGraph<V, ?, ? extends Ex> graph, boolean isForward) {
 		this.graph = graph;
 		this.isForward = isForward;
 	}
@@ -60,10 +63,10 @@ public class SymmetricAcyclicGraphChecker<V, EX extends Exception> implements Gr
 	 * @throws CycleException if there is a cycle in the graph
 	 */
 	@Override
-	public void checkGraph() throws AsymmetricException, CycleException, EX {
+	public void checkGraph() throws AsymmetricException, CycleException, Ex {
 		Set<V> vertices = graph.getVertices();
-		Map<V,Color> colors = AoCollections.newHashMap(vertices.size());
-		Map<V,V> predecessors = new HashMap<>(); // Could this be a simple sequence like TopologicalSorter?  Any benefit?
+		Map<V, Color> colors = AoCollections.newHashMap(vertices.size());
+		Map<V, V> predecessors = new HashMap<>(); // Could this be a simple sequence like TopologicalSorter?  Any benefit?
 		for(V v : vertices) {
 			if(!colors.containsKey(v)) doCheck(colors, predecessors, v);
 		}
@@ -72,7 +75,7 @@ public class SymmetricAcyclicGraphChecker<V, EX extends Exception> implements Gr
 	/**
 	 * @throws CycleException if there is a cycle in the graph
 	 */
-	private void doCheck(Map<V,Color> colors, Map<V,V> predecessors, V vertex) throws AsymmetricException, CycleException, EX {
+	private void doCheck(Map<V, Color> colors, Map<V, V> predecessors, V vertex) throws AsymmetricException, CycleException, Ex {
 		colors.put(vertex, Color.GRAY);
 		for(Edge<V> vEdge : isForward ? graph.getEdgesFrom(vertex) : graph.getEdgesTo(vertex)) {
 			//if(!isForward) {

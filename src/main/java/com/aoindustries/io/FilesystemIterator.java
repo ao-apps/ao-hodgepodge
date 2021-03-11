@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2015, 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2015, 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,8 +43,8 @@ import java.util.Stack;
  */
 public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
-	private final Map<String,FilesystemIteratorRule> rules;
-	private final Map<String,FilesystemIteratorRule> prefixRules;
+	private final Map<String, FilesystemIteratorRule> rules;
+	private final Map<String, FilesystemIteratorRule> prefixRules;
 	private final String startPath;
 	private final boolean isPreorder;
 	private final boolean isSorted;
@@ -56,7 +56,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 	 *
 	 * @see  #FilesystemIterator(Map,Map,String,boolean,boolean)
 	 */
-	public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules) {
+	public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules) {
 		this(rules, prefixRules, "", true, true);
 	}
 
@@ -65,7 +65,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 	 *
 	 * @see  #FilesystemIterator(Map,Map,String,boolean,boolean)
 	 */
-	public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, boolean isPreorder, boolean isSorted) {
+	public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules, boolean isPreorder, boolean isSorted) {
 		this(rules, prefixRules, "", isPreorder, isSorted);
 	}
 
@@ -76,7 +76,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 	 *
 	 * @see  #FilesystemIterator(Map,Map,String,boolean,boolean)
 	 */
-	public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, String startPath) {
+	public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules, String startPath) {
 		this(rules, prefixRules, startPath, true, true);
 	}
 
@@ -86,7 +86,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 	 * @param  rules  the rules that will be applied during iteration
 	 * @param  startPath  if "", all roots will be used, otherwise starts at the provided path
 	 */
-	public FilesystemIterator(Map<String,FilesystemIteratorRule> rules, Map<String,FilesystemIteratorRule> prefixRules, String startPath, boolean isPreorder, boolean isSorted) {
+	public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules, String startPath, boolean isPreorder, boolean isSorted) {
 		this.rules=rules;
 		this.prefixRules=prefixRules;
 		currentDirectories=null;
@@ -355,7 +355,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 			// TODO: If there are many more prefix rules than the length of this filename, it will at some threshold
 			//       be faster to do a map lookup for each possible length of the string.
 			//       Would also only need to look down to longestPrefix
-			for(Map.Entry<String,FilesystemIteratorRule> entry : prefixRules.entrySet()) {
+			for(Map.Entry<String, FilesystemIteratorRule> entry : prefixRules.entrySet()) {
 				String prefix = entry.getKey();
 				if(
 					(longestPrefix==null || prefix.length()>longestPrefix.length())
@@ -380,14 +380,14 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
 	private boolean hasIncludedChild(String filenamePlusSlash) throws IOException {
 		// Iterate through all rules, looking for the first one that starts with the current filename+File.separatorChar and has backup enabled
-		for(Map.Entry<String,FilesystemIteratorRule> entry : rules.entrySet()) {
+		for(Map.Entry<String, FilesystemIteratorRule> entry : rules.entrySet()) {
 			String path = entry.getKey();
 			if(path.startsWith(filenamePlusSlash)) {
 				FilesystemIteratorRule rule = entry.getValue();
 				if(rule.isIncluded(filenamePlusSlash)) return true;
 			}
 		}
-		for(Map.Entry<String,FilesystemIteratorRule> entry : prefixRules.entrySet()) {
+		for(Map.Entry<String, FilesystemIteratorRule> entry : prefixRules.entrySet()) {
 			String path = entry.getKey();
 			FilesystemIteratorRule rule = entry.getValue();
 			if(path.startsWith(filenamePlusSlash) && rule.isIncluded(filenamePlusSlash)) return true;

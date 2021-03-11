@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,18 +29,21 @@ import java.util.Set;
  * A multi graph is a set of vertices that are connected by directed edges.  Two
  * vertices may have multiple edges between them.
  *
+ * @param  <Ex>  An arbitrary exception type that may be thrown
+ *
  * @author  AO Industries, Inc.
  */
-public interface MultiGraph<V,E extends Edge<V>,EX extends Exception> {
+// TODO: Ex extends Throwable
+public interface MultiGraph<V, E extends Edge<V>, Ex extends Exception> {
 
 	/**
 	 * Gets the set of vertices for this graph.
 	 */
-	Set<V> getVertices() throws EX;
+	Set<V> getVertices() throws Ex;
 
 	/**
 	 * Gets the edges from the provided vertex.  The vertex must be part of this
 	 * graph, and the results are undefined if it is not.
 	 */
-	Collection<E> getEdgesFrom(V from) throws EX;
+	Collection<E> getEdgesFrom(V from) throws Ex;
 }

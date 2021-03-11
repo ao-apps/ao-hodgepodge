@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,7 +25,7 @@ package com.aoindustries.util.graph;
 /**
  * A weighted edge (or arc) between two vertices.
  */
-public class WeightedEdge<V,W extends Weight<?>> extends Edge<V> {
+public class WeightedEdge<V, W extends Weight<?>> extends Edge<V> {
 
 	protected final W weight;
 

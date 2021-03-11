@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -123,17 +123,17 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 	/**
 	 * All queries are performed on the concurrent map.
 	 */
-	private final Map<String,String> valueMap = new ConcurrentHashMap<>();
+	private final Map<String, String> valueMap = new ConcurrentHashMap<>();
 
 	/**
 	 * All validated queries are performed on this concurrent map.
 	 */
-	private final Map<String,Long> validatedMap = new ConcurrentHashMap<>();
+	private final Map<String, Long> validatedMap = new ConcurrentHashMap<>();
 
 	/**
 	 * All modified queries are performed on this concurrent map.
 	 */
-	private final Map<String,Long> modifiedMap = new ConcurrentHashMap<>();
+	private final Map<String, Long> modifiedMap = new ConcurrentHashMap<>();
 
 	/**
 	 * The properties file is only used for updates.
@@ -203,7 +203,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 			}
 		}
 		// Populate the concurrent maps while skipping the validated and modified entries
-		for(Map.Entry<Object,Object> entry : properties.entrySet()) {
+		for(Map.Entry<Object, Object> entry : properties.entrySet()) {
 			String key = (String)entry.getKey();
 			String value = (String)entry.getValue();
 			if(key.endsWith(VALIDATED_SUFFIX)) {

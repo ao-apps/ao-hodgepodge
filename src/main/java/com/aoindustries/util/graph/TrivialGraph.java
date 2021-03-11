@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -28,9 +28,12 @@ import java.util.Set;
 /**
  * A trivial graph is unmodifiable and has one vertex and no edges.
  *
+ * @param  <Ex>  An arbitrary exception type that may be thrown
+ *
  * @author  AO Industries, Inc.
  */
-public class TrivialGraph<V,E extends Edge<V>,EX extends Exception> implements SymmetricGraph<V,E,EX> {
+// TODO: Ex extends Throwable
+public class TrivialGraph<V, E extends Edge<V>, Ex extends Exception> implements SymmetricGraph<V, E, Ex> {
 
 	private final Set<V> vertices;
 

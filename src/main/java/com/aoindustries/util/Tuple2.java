@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2019, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -30,7 +30,7 @@ import java.util.Objects;
  *
  * @author  AO Industries, Inc.
  */
-public class Tuple2<E1,E2> {
+public class Tuple2<E1, E2> {
 
 	private final E1 element1;
 	private final E2 element2;
@@ -55,8 +55,8 @@ public class Tuple2<E1,E2> {
 	@Override
 	public boolean equals(Object obj) {
 		if(this == obj) return true;
-		if(!(obj instanceof Tuple2<?,?>)) return false;
-		Tuple2<?,?> other = (Tuple2<?,?>)obj;
+		if(!(obj instanceof Tuple2<?, ?>)) return false;
+		Tuple2<?, ?> other = (Tuple2<?, ?>)obj;
 		return
 			Objects.equals(element1, other.element1)
 			&& Objects.equals(element2, other.element2)
