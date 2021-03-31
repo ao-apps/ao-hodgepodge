@@ -1,6 +1,6 @@
 /*
  * aocode-public - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoindustries.io;
 
+import com.aoindustries.lang.ProcessResult;
 import com.aoindustries.lang.Strings;
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +55,7 @@ public class ZeroFile {
 	public ZeroFile() {
 	}
 
+	@SuppressWarnings("UseOfSystemOutOrSystemErr")
 	public static void main(String[] args) {
 		if(args.length!=2) {
 			System.err.println("usage: "+ZeroFile.class.getName()+" <mb_per_sec>[/<mb_per_sec_write>] <path>");
@@ -74,7 +76,7 @@ public class ZeroFile {
 				if(DEBUG) System.err.println("Opening " + file);
 				RandomAccessFile raf = new RandomAccessFile(file, DRY_RUN ? "r" : "rw");
 				try {
-					bytesWritten = zeroFile(bpsIn, bpsOut, raf);
+					bytesWritten = zeroFile(bpsIn, bpsOut, file, raf);
 				} finally {
 					if(DEBUG) System.err.println("Closing " + file);
 					raf.close();
@@ -118,9 +120,18 @@ public class ZeroFile {
 	 * Writes at the maximum provided bpsOut blocks per second.
 	 * Returns the number of bytes written.
 	 */
-	public static long zeroFile(int bpsIn, int bpsOut, RandomAccessFile raf) throws IOException {
+	@SuppressWarnings({"UseOfSystemOutOrSystemErr", "UnusedAssignment"})
+	public static long zeroFile(int bpsIn, int bpsOut, File file, RandomAccessFile raf) throws IOException {
 		// Initialize bitset
-		final long len = raf.length();
+		long len = raf.length();
+		if(len == 0) {
+			System.err.print("Warning: RandomAccessFile.length() returned zero, trying \"/sbin/blockdev --getsize64 " + file.getPath() + "\": ");
+			ProcessResult result = ProcessResult.exec("/sbin/blockdev", "--getsize64", file.getPath());
+			int exitVal = result.getExitVal();
+			if(exitVal != 0) throw new IOException("Non-zero exit from \"/sbin/blockdev --getsize64 " + file.getPath() + "\": " + exitVal + ", stderr: \"" + result.getStderr() + "\"");
+			len = Long.parseLong(result.getStdout().trim());
+			System.err.println(Long.toString(len));
+		}
 		final int blocks;
 		{
 			long blocksLong = len / BLOCK_SIZE;
