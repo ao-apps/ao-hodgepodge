@@ -1,23 +1,23 @@
-# [<img src="ao-logo.png" alt="AO Logo" width="35" height="40">](https://github.com/aoindustries) [AOCode Public](https://github.com/aoindustries/aocode-public)
+# [<img src="ao-logo.png" alt="AO Logo" width="35" height="40">](https://github.com/aoindustries) [AO OSS](https://github.com/aoindustries/ao-oss) / [Hodgepodge](https://github.com/aoindustries/ao-hodgepodge)
 <p>
 	<a href="https://aoindustries.com/life-cycle#project-current-stable">
-		<img src="https://aoindustries.com/ao-badges/project-current-stable.svg" alt="project: current stable" />
+		<img src="https://oss.aoapps.com/ao-badges/project-current-stable.svg" alt="project: current stable" />
 	</a>
 	<a href="https://aoindustries.com/life-cycle#management-production">
-		<img src="https://aoindustries.com/ao-badges/management-production.svg" alt="management: production" />
+		<img src="https://oss.aoapps.com/ao-badges/management-production.svg" alt="management: production" />
 	</a>
 	<a href="https://aoindustries.com/life-cycle#packaging-active">
-		<img src="https://aoindustries.com/ao-badges/packaging-active.svg" alt="packaging: active" />
+		<img src="https://oss.aoapps.com/ao-badges/packaging-active.svg" alt="packaging: active" />
 	</a>
 	<br />
 	<a href="https://docs.oracle.com/javase/8/docs/api/">
-		<img src="https://aoindustries.com/ao-badges/java-8.svg" alt="java: &gt;= 8" />
+		<img src="https://oss.aoapps.com/ao-badges/java-8.svg" alt="java: &gt;= 8" />
 	</a>
 	<a href="http://semver.org/spec/v2.0.0.html">
-		<img src="https://aoindustries.com/ao-badges/semver-2.0.0.svg" alt="semantic versioning: 2.0.0" />
+		<img src="https://oss.aoapps.com/ao-badges/semver-2.0.0.svg" alt="semantic versioning: 2.0.0" />
 	</a>
 	<a href="https://www.gnu.org/licenses/lgpl-3.0">
-		<img src="https://aoindustries.com/ao-badges/license-lgpl-3.0.svg" alt="license: LGPL v3" />
+		<img src="https://oss.aoapps.com/ao-badges/license-lgpl-3.0.svg" alt="license: LGPL v3" />
 	</a>
 </p>
 
@@ -30,11 +30,11 @@ that we hope will be of value.  In the long run this project will completely
 evaporate into nothing.
 
 ## Project Links
-* [Project Home](https://aoindustries.com/aocode-public/)
-* [Changelog](https://aoindustries.com/aocode-public/changelog)
-* [API Docs](https://aoindustries.com/aocode-public/apidocs/)
-* [Maven Central Repository](https://search.maven.org/artifact/com.aoindustries/aocode-public)
-* [GitHub](https://github.com/aoindustries/aocode-public)
+* [Project Home](https://oss.aoapps.com/hodgepodge/)
+* [Changelog](https://oss.aoapps.com/hodgepodge/changelog)
+* [API Docs](https://oss.aoapps.com/hodgepodge/apidocs/)
+* [Maven Central Repository](https://search.maven.org/artifact/com.aoapps/ao-hodgepodge)
+* [GitHub](https://github.com/aoindustries/ao-hodgepodge)
 
 ## Contact Us
 For questions or support, please [contact us](https://aoindustries.com/contact):

@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-aocode-public - Reusable Java library of general tools with minimal external dependencies.
+ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
 Copyright (C) 2016, 2017, 2018, 2019, 2020, 2021  AO Industries, Inc.
     support@aoindustries.com
     7262 Bull Pen Cir
     Mobile, AL 36695
 
-This file is part of aocode-public.
+This file is part of ao-hodgepodge.
 
-aocode-public is free software: you can redistribute it and/or modify
+ao-hodgepodge is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-aocode-public is distributed in the hope that it will be useful,
+ao-hodgepodge is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
+along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 -->
 <jsp:root
-	xmlns:ao="https://aoindustries.com/ao-taglib/"
+	xmlns:ao="https://oss.aoapps.com/taglib/"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:changelog="https://semanticcms.com/changelog/taglib/"
 	xmlns:core="https://semanticcms.com/core/taglib/"
@@ -38,7 +38,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-05:00"
-		dateModified="2021-05-25T18:54:28-05:00"
+		dateModified="2021-05-31T01:04:26-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -46,10 +46,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				version="@{project.version}"
 				groupId="@{project.groupId}"
 				artifactId="@{documented.artifactId}"
+				repository="https://s01.oss.sonatype.org/content/repositories/snapshots/"
 				scmUrl="@{project.scm.url}"
 			>
 				<ul>
 					<li>Updated dependencies.</li>
+					<li>Maven artifact relocated from <code>com.aoindustries:aocode-public</code> to <code>com.aoapps:ao-hodgepodge</code>.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
@@ -58,8 +60,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.9.1"
 			datePublished="2021-03-31T00:07:40-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -74,8 +76,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.9.0"
 			datePublished="2021-02-15T02:32:26-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -93,21 +95,21 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.8.0"
 			datePublished="2021-02-14T05:56:01-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
 				<li>
-					<code>Coercion</code> moved out of <core:link book="/ao-encoding" page="/index.jspx" />:
+					<code>Coercion</code> moved out of <core:link book="/encoding" page="/index.jspx" />:
 					<ol>
-						<li>Non-localized parts moved to <core:link book="/ao-lang" page="/index.jspx" />.</li>
+						<li>Non-localized parts moved to <core:link book="/lang" page="/index.jspx" />.</li>
 						<li>
 							Localized parts moved to this project and
 							renamed to <code>MarkupCoercion</code>.
 						</li>
 						<li>New pluggable <code>CoercionOptimizer</code> to allow this decoupling.</li>
-						<li>Servlet-specific optimizations moved to <core:link book="/ao-servlet-util" page="/index.jspx" />.</li>
+						<li>Servlet-specific optimizations moved to <core:link book="/servlet-util" page="/index.jspx" />.</li>
 					</ol>
 				</li>
 			</ul>
@@ -117,8 +119,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.7.2"
 			datePublished="2021-01-09T11:31:24-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -133,12 +135,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.7.1"
 			datePublished="2020-12-22T09:04:05-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
-				<li>Moved <code>UnixCrypt</code> to the new <core:link book="/ao-security" page="/index.jspx" /> project.</li>
+				<li>Moved <code>UnixCrypt</code> to the new <core:link book="/security" page="/index.jspx" /> project.</li>
 			</ul>
 		</changelog:release>
 
@@ -146,8 +148,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.7.0"
 			datePublished="2020-12-20T03:04:44-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -158,8 +160,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				</li>
 				<li>
 					Removed dependency on the <code>com.aoindustries.security</code> package, which has been split
-					from <core:link book="/ao-lang" page="/index.jspx" /> to the new
-					<core:link book="/ao-security" page="/index.jspx" /> project:
+					from <core:link book="/lang" page="/index.jspx" /> to the new
+					<core:link book="/security" page="/index.jspx" /> project:
 					<ol>
 						<li>
 							<code>AOPool</code> now internally tracks thread ID as a
@@ -182,8 +184,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.6.0"
 			datePublished="2020-12-14T21:58:37-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -199,8 +201,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.5.1"
 			datePublished="2020-12-13T13:22:16-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -217,8 +219,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.5.0"
 			datePublished="2020-12-13T01:58:21-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -244,8 +246,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.4.0"
 			datePublished="2020-12-05T10:04:01-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -286,23 +288,23 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.3.0"
 			datePublished="2020-11-17T21:50:06-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
 				<li>
 					Moved the <code>com.aoindustries.sql</code> package to the new
-					<core:link book="/ao-sql" page="/index.jspx" /> project, with the exception
+					<core:link book="/sql" page="/index.jspx" /> project, with the exception
 					of <code>LocalizedSQLException</code> that stays here with other localized exceptions.
 				</li>
 				<li>
 					<code>ConnectionWrapper</code> moved to new <code>com.aoindustries.sql.wrapper</code> package in
-					the new <core:link book="/ao-sql/wrapper" page="/index.jspx" /> project.
+					the new <core:link book="/sql/wrapper" page="/index.jspx" /> project.
 				</li>
 				<li>
 					<code>AOConnectionPool</code> moved to new <code>com.aoindustries.sql.pool</code> package in
-					the new <core:link book="/ao-sql/pool" page="/index.jspx" /> project.
+					the new <core:link book="/sql/pool" page="/index.jspx" /> project.
 				</li>
 				<li>
 					<code>BackgroundCache</code> now allows all <code>Throwable</code>.
@@ -330,8 +332,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.2.0"
 			datePublished="2020-08-27T21:56:11-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -346,8 +348,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.1.1"
 			datePublished="2020-07-24T17:47:06-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -359,8 +361,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.1.0"
 			datePublished="2020-05-13T17:55:36-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -376,8 +378,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="4.0.0"
 			datePublished="2020-03-25T03:02:42-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -393,9 +395,9 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				</li>
 				<li>
 					Made <code>EncodingUtils.toString(Object)</code> (deprecated) consistent with
-					<ao:a href="https://aoindustries.com/ao-encoding/apidocs/com/aoindustries/encoding/Coercion.html">Coercion</ao:a>:
+					<ao:a href="https://oss.aoapps.com/encoding/apidocs/com/aoindustries/encoding/Coercion.html">Coercion</ao:a>:
 					<ol>
-						<li>Supporting instances of <ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/io/Writable.html">Writable</ao:a>.</li>
+						<li>Supporting instances of <ao:a href="https://oss.aoapps.com/lang/apidocs/com/aoindustries/io/Writable.html">Writable</ao:a>.</li>
 						<li>Supporting instances of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/CharSequence.html">CharSequence</ao:a>.</li>
 						<li>Supporting instances of <code>char[]</code>.</li>
 					</ol>
@@ -421,8 +423,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<ol>
 						<li>
 							<code>com.aoindustries.security.NotAuthenticatedException</code> moved to
-							the <core:link book="/ao-lang" page="/index.jspx" /> project.
-							Resolves this split-package with <core:link book="/ao-lang" page="/index.jspx" />.
+							the <core:link book="/lang" page="/index.jspx" /> project.
+							Resolves this split-package with <core:link book="/lang" page="/index.jspx" />.
 						</li>
 						<li>
 							Removed <code>com.aoindustries.security.AccountDisabledException</code>; please use
@@ -446,8 +448,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 						</li>
 					</ol>
 				</li>
-				<li>Moved the <code>com.aoindustries.util.persistent</code> package to the new <core:link book="/ao-persistence" page="/index.jspx" /> project.</li>
-				<li>Split collection-related utilities into new <core:link book="/ao-collections" page="/index.jspx" /> project.</li>
+				<li>Moved the <code>com.aoindustries.util.persistent</code> package to the new <core:link book="/persistence" page="/index.jspx" /> project.</li>
+				<li>Split collection-related utilities into new <core:link book="/collections" page="/index.jspx" /> project.</li>
 			</ul>
 		</changelog:release>
 
@@ -455,8 +457,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="3.1.1"
 			datePublished="2019-10-04T04:06:38-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -468,16 +470,16 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="3.1.0"
 			datePublished="2019-10-01T20:30:28-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
 				<li>During coercion, XML Node will be output as UTF-8.</li>
-				<li>Moved networking utilities to <core:link book="/ao-net-types" page="/index.jspx" />.</li>
-				<li>Moved Servlet and JSP related utilities to a new <core:link book="/ao-servlet-util" page="/index.jspx" /> project.</li>
+				<li>Moved networking utilities to <core:link book="/net-types" page="/index.jspx" />.</li>
+				<li>Moved Servlet and JSP related utilities to a new <core:link book="/servlet-util" page="/index.jspx" /> project.</li>
 				<li>This project no longer depends on servlet and JSP APIs.</li>
-				<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
+				<li>Moved the following classes to the new <core:link book="/lang" page="/index.jspx" /> project:
 					<ol>
 						<li><code>com.aoindustries.util.StringUtility</code></li>
 					</ol>
@@ -486,7 +488,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					New class <ao:a href="apidocs/com/aoindustries/util/DiffableProperties.html">DiffableProperties</ao:a>
 					to format <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a>
 					files in a way optimized for diff tools, such as <code>git diff</code>.  Best used in conjunction with
-					<ao:a href="https://aoindustries.com/ao-collections/apidocs/com/aoindustries/collections/SortedProperties.html">SortedProperties</ao:a>.
+					<ao:a href="https://oss.aoapps.com/collections/apidocs/com/aoindustries/collections/SortedProperties.html">SortedProperties</ao:a>.
 				</li>
 				<li>
 					Made <ao:a href="apidocs/com/aoindustries/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>
@@ -508,8 +510,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="3.0.0"
 			datePublished="2019-08-11T12:34:51-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -676,8 +678,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="2.1.1"
 			datePublished="2019-06-29T19:36:26-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -685,7 +687,7 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 					<p>
 						Using <code>;-split-package:=first</code> of <ao:a href="http://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html">maven-bundle-plugin</ao:a>
 						to avoid bundling the classes in the split packages from
-						<core:link book="/ao-lang" page="/index.jspx" />.
+						<core:link book="/lang" page="/index.jspx" />.
 					</p>
 					<p>
 						These split packages are transitional.  In the future we will have more fine-grained projects.
@@ -698,8 +700,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="2.1.0"
 			datePublished="2019-06-19T05:59:50-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -740,14 +742,14 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="2.0.0"
 			datePublished="2019-04-18T06:17:06-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
 				<li>Minimum Java version changed from 1.6 to 1.7.</li>
 				<li>
-					Deprecated in favor of new <ao:a href="https://aoindustries.com/ao-tempfiles/apidocs/com/aoindustries/tempfiles/TempFileContext.html">TempFileContext</ao:a>
+					Deprecated in favor of new <ao:a href="https://oss.aoapps.com/tempfiles/apidocs/com/aoindustries/tempfiles/TempFileContext.html">TempFileContext</ao:a>
 					that does not suffer from a memory leak in long-running applications:
 					<ul>
 						<li><ao:a href="apidocs/com/aoindustries/io/TempFile.html">TempFile</ao:a></li>
@@ -779,8 +781,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New methods to join into arbitrary <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Appendable.html">Appendable</ao:a>:
 					<ul>
-						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/lang/Strings.html#join(java.lang.Iterable,java.lang.String,A)">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
-						<li><ao:a href="https://aoindustries.com/ao-lang/apidocs/com/aoindustries/lang/Strings.html#join(java.lang.Object[],java.lang.String,A)">StringUtility.join(Object[], String, Appendable)</ao:a></li>
+						<li><ao:a href="https://oss.aoapps.com/lang/apidocs/com/aoindustries/lang/Strings.html#join(java.lang.Iterable,java.lang.String,A)">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
+						<li><ao:a href="https://oss.aoapps.com/lang/apidocs/com/aoindustries/lang/Strings.html#join(java.lang.Object[],java.lang.String,A)">StringUtility.join(Object[], String, Appendable)</ao:a></li>
 					</ul>
 				</li>
 				<li>
@@ -802,13 +804,13 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.9.0"
 			datePublished="2017-07-19T18:18:38-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
 				<li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
-				<li>Moved the following classes to the new <core:link book="/ao-lang" page="/index.jspx" /> project:
+				<li>Moved the following classes to the new <core:link book="/lang" page="/index.jspx" /> project:
 					<ol>
 						<li><code>com.aoindustries.io.AoByteArrayInputStream</code></li>
 						<li><code>com.aoindustries.io.AoByteArrayOutputStream</code></li>
@@ -949,12 +951,12 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.8.3"
 			datePublished="2016-11-15T02:48:59-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
-				<li>New <core:link book="/ao-oss-parent" page="/index.jspx" /> POM to simplify <code>pom.xml</code> files.</li>
+				<li>New <core:link book="/parent" page="/index.jspx" /> POM to simplify <code>pom.xml</code> files.</li>
 				<li>Project documentation moved to per-project book in <ao:a href="https://semanticcms.com/">SemanticCMS</ao:a> format.</li>
 				<li>Added changelog as top-level project link.</li>
 				<li>Added utility to find the maximum non-null value.</li>
@@ -966,8 +968,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.8.2"
 			datePublished="2016-10-20T15:44:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -995,8 +997,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.8.0"
 			datePublished="2016-10-06T12:28:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -1008,8 +1010,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.7.0"
 			datePublished="2016-10-04T19:17:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<section:section label="Added">
@@ -1046,8 +1048,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.6.1"
 			datePublished="2016-09-02T16:26:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -1059,8 +1061,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.6"
 			datePublished="2016-08-28T20:17:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -1072,8 +1074,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.5"
 			datePublished="2016-08-21T15:14:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -1085,8 +1087,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.4"
 			datePublished="2016-08-19T14:02:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -1102,8 +1104,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.3"
 			datePublished="2016-08-07T23:16:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>
@@ -1115,8 +1117,8 @@ along with aocode-public.  If not, see <http://www.gnu.org/licenses />.
 			projectName="@{documented.name}"
 			version="1.2"
 			datePublished="2016-08-05T12:42:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
+			groupId="com.aoindustries"
+			artifactId="aocode-public"
 			scmUrl="@{project.scm.url}"
 		>
 			<ul>

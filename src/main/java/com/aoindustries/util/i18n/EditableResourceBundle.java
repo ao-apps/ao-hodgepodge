@@ -1,24 +1,24 @@
 /*
- * aocode-public - Reusable Java library of general tools with minimal external dependencies.
+ * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
  * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
  *
- * This file is part of aocode-public.
+ * This file is part of ao-hodgepodge.
  *
- * aocode-public is free software: you can redistribute it and/or modify
+ * ao-hodgepodge is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * aocode-public is distributed in the hope that it will be useful,
+ * ao-hodgepodge is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with aocode-public.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.aoindustries.util.i18n;
 
@@ -52,7 +52,7 @@ import java.util.concurrent.ConcurrentMap;
 //       ServiceLoader, instead of having to declare a subclass of EditableResourceBundle for every bundle and language.
 //       This, in turn, would mean a project could be used directly as its ApplicationResources*properties files, but
 //       would also be activated as editable only in a development mode.  This, without depending directly on
-//       aocode-public or having to split into a separate *-i18n sub-project.  When going this route, consider the
+//       ao-hodgepodge or having to split into a separate *-i18n sub-project.  When going this route, consider the
 //       implications of ResourceBundleControlProvider having to be a "Java Extension Mechanism" - will it work in a
 //       servlet environment without modification of the Tomcat libraries?
 //       https://docs.oracle.com/javase/8/docs/api/java/util/spi/ResourceBundleControlProvider.html
@@ -394,7 +394,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	 * Also clears the {@linkplain BundleLookupThreadContext thread lookup context}.
 	 * </p>
 	 * TODO: Add language resources to properties files (but do not make it an editable properties file to avoid possible infinite recursion?)
-	 * TODO: Decouple from aocode-public and use ao-fluent-html
+	 * TODO: Decouple from ao-hodgepodge and use ao-fluent-html
 	 */
 	public static void printEditableResourceBundleLookups(
 		Encoder textInJavaScriptEncoder,
