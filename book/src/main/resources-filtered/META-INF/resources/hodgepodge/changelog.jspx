@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-05:00"
-		dateModified="2021-05-31T01:04:26-05:00"
+		dateModified="2021-06-03T22:53:21-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -52,6 +52,8 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 				<ul>
 					<li>Updated dependencies.</li>
 					<li>Maven artifact relocated from <code>com.aoindustries:aocode-public</code> to <code>com.aoapps:ao-hodgepodge</code>.</li>
+					<li>Packages renamed from <code>com.aoindustries.*</code> to <code>com.aoapps.hodgepodge.*</code>.</li>
+					<li>Renamed <code>NativeToUnixWriter</code> to <code>NativeToPosixWriter</code>.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
@@ -395,9 +397,9 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 				</li>
 				<li>
 					Made <code>EncodingUtils.toString(Object)</code> (deprecated) consistent with
-					<ao:a href="https://oss.aoapps.com/encoding/apidocs/com/aoindustries/encoding/Coercion.html">Coercion</ao:a>:
+					<ao:a href="https://oss.aoapps.com/encoding/apidocs/com/aoapps/encoding/Coercion.html">Coercion</ao:a>:
 					<ol>
-						<li>Supporting instances of <ao:a href="https://oss.aoapps.com/lang/apidocs/com/aoindustries/io/Writable.html">Writable</ao:a>.</li>
+						<li>Supporting instances of <ao:a href="https://oss.aoapps.com/lang/apidocs/com/aoapps/lang/io/Writable.html">Writable</ao:a>.</li>
 						<li>Supporting instances of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/CharSequence.html">CharSequence</ao:a>.</li>
 						<li>Supporting instances of <code>char[]</code>.</li>
 					</ol>
@@ -407,7 +409,7 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New bundle lookup markup types:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType.html#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/i18n/MarkupType.html#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
 					</ul>
 				</li>
 				<li>
@@ -485,22 +487,22 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 					</ol>
 				</li>
 				<li>
-					New class <ao:a href="apidocs/com/aoindustries/util/DiffableProperties.html">DiffableProperties</ao:a>
+					New class <ao:a href="apidocs/com/aoapps/hodgepodge/util/DiffableProperties.html">DiffableProperties</ao:a>
 					to format <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a>
 					files in a way optimized for diff tools, such as <code>git diff</code>.  Best used in conjunction with
-					<ao:a href="https://oss.aoapps.com/collections/apidocs/com/aoindustries/collections/SortedProperties.html">SortedProperties</ao:a>.
+					<ao:a href="https://oss.aoapps.com/collections/apidocs/com/aoapps/collections/SortedProperties.html">SortedProperties</ao:a>.
 				</li>
 				<li>
-					Made <ao:a href="apidocs/com/aoindustries/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>
+					Made <ao:a href="apidocs/com/aoapps/hodgepodge/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>
 					public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
 				</li>
 				<li>
-					Made <ao:a href="apidocs/com/aoindustries/util/SkipCommentsFilterOutputStream.html">SkipCommentsFilterOutputStream</ao:a>
+					Made <ao:a href="apidocs/com/aoapps/hodgepodge/util/SkipCommentsFilterOutputStream.html">SkipCommentsFilterOutputStream</ao:a>
 					public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
 				</li>
 				<li>
-					<ao:a href="apidocs/com/aoindustries/util/i18n/ModifiablePropertiesResourceBundle.html">ModifiablePropertiesResourceBundle</ao:a>
-					now stores the properties files in the <ao:a href="apidocs/com/aoindustries/util/DiffableProperties.html">maximally diffable format</ao:a>.
+					<ao:a href="apidocs/com/aoapps/hodgepodge/i18n/ModifiablePropertiesResourceBundle.html">ModifiablePropertiesResourceBundle</ao:a>
+					now stores the properties files in the <ao:a href="apidocs/com/aoapps/hodgepodge/util/DiffableProperties.html">maximally diffable format</ao:a>.
 					It also no longer overwrites the file when the content has not changed.
 				</li>
 			</ul>
@@ -516,8 +518,8 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 		>
 			<ul>
 				<li>
-					New abstract class <ao:a href="apidocs/com/aoindustries/sql/ConnectionWrapper.html">ConnectionWrapper</ao:a>
-					split from <ao:a href="apidocs/com/aoindustries/sql/PostgresqlConnectionWrapper.html">PostgresqlConnectionWrapper</ao:a>
+					New abstract class <ao:a href="https://oss.aoapps.com/sql/wrapper/apidocs/com/aoapps/sql/wrapper/ConnectionWrapper.html">ConnectionWrapper</ao:a>
+					split from <ao:a href="https://oss.aoapps.com/sql/pool/apidocs/com/aoapps/sql/pool/PostgresqlConnectionWrapper.html">PostgresqlConnectionWrapper</ao:a>
 					to be used by other implementations of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Connection.html">Connection</ao:a>
 					wrapping.
 				</li>
@@ -566,7 +568,7 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 						<li><code>com.aoindustries.util.persistent.PersistentCollections.bufferToLong(…)</code></li>
 					</ol>
 				</li>
-				<li>Significant, breaking changes to <ao:a href="apidocs/com/aoindustries/sql/SQLUtility.html">SQLUtility</ao:a>:
+				<li>Significant, breaking changes to <ao:a href="https://oss.aoapps.com/sql/apidocs/com/aoapps/sql/SQLUtility.html">SQLUtility</ao:a>:
 					<ol>
 						<li>Renamed <code>getDate(long)</code> to <code>formatDate(long)</code></li>
 						<li>Added <code>formatDate(long, TimeZone)</code> for other time zones</li>
@@ -602,18 +604,18 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 				</li>
 				<li>Renamed <code>Compressed*</code> to <code>Streamable*</code> and moved to new <code>com.aoindustries.io.stream</code> package:
 					<ol>
-						<li>Renamed <code>CompressedDataInputStream</code> to <ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html">StreamableInput</ao:a>.</li>
-						<li>Renamed <code>CompressedDataOutputStream</code> to <ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html">StreamableOutput</ao:a>.</li>
-						<li>Renamed <code>CompressedReadable</code> to <ao:a href="apidocs/com/aoindustries/io/stream/StreamReadable.html">StreamReadable</ao:a>.</li>
-						<li>Renamed <code>CompressedWritable</code> to <ao:a href="apidocs/com/aoindustries/io/stream/StreamWritable.html">StreamWritable</ao:a>.</li>
-						<li>Moved <code>Streamable</code> to <ao:a href="apidocs/com/aoindustries/io/stream/Streamable.html">Streamable</ao:a>.</li>
+						<li>Renamed <code>CompressedDataInputStream</code> to <ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableInput.html">StreamableInput</ao:a>.</li>
+						<li>Renamed <code>CompressedDataOutputStream</code> to <ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableOutput.html">StreamableOutput</ao:a>.</li>
+						<li>Renamed <code>CompressedReadable</code> to <ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamReadable.html">StreamReadable</ao:a>.</li>
+						<li>Renamed <code>CompressedWritable</code> to <ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamWritable.html">StreamWritable</ao:a>.</li>
+						<li>Moved <code>Streamable</code> to <ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/Streamable.html">Streamable</ao:a>.</li>
 					</ol>
 				</li>
 				<li>
 					<p>
 						New methods to read and write possibly nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Timestamp.html">Timestamp</ao:a>
-						in <ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html">StreamableOutput</ao:a>
-						and <ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html">StreamableInput</ao:a>.
+						in <ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableOutput.html">StreamableOutput</ao:a>
+						and <ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableInput.html">StreamableInput</ao:a>.
 					</p>
 					<p>
 						These methods use a wire protocol deliberately compatible with
@@ -708,15 +710,15 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Byte.html">Byte</ao:a>:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html#writeNullByte-java.lang.Byte-">CompressedDataOutputStream.writeNullByte(Byte)</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html#readNullByte--">CompressedDataInputStream.readNullByte()</ao:a></li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullByte-java.lang.Byte-">CompressedDataOutputStream.writeNullByte(Byte)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullByte--">CompressedDataInputStream.readNullByte()</ao:a></li>
 					</ul>
 				</li>
 				<li>
 					New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Short.html">Short</ao:a>:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
 					</ul>
 				</li>
 				<li>Using managed dependencies:
@@ -730,8 +732,8 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 					New methods to quickly get the last modified time of a web resource.
 					The result may be cached for up to five seconds.
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html#getLastModified-java.lang.String-">ServletContextCache.getLastModified(String)</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html#getLastModified-javax.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
+						<li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com/aoapps/servlet/ServletContextCache.html#getLastModified-java.lang.String-">ServletContextCache.getLastModified(String)</ao:a></li>
+						<li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com/aoapps/servlet/ServletContextCache.html#getLastModified-javax.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
 					</ul>
 				</li>
 				<li>Improved implementation of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Wrapper.html">java.sql.Wrapper</ao:a>.</li>
@@ -749,24 +751,24 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 			<ul>
 				<li>Minimum Java version changed from 1.6 to 1.7.</li>
 				<li>
-					Deprecated in favor of new <ao:a href="https://oss.aoapps.com/tempfiles/apidocs/com/aoindustries/tempfiles/TempFileContext.html">TempFileContext</ao:a>
+					Deprecated in favor of new <ao:a href="https://oss.aoapps.com/tempfiles/apidocs/com/aoapps/tempfiles/TempFileContext.html">TempFileContext</ao:a>
 					that does not suffer from a memory leak in long-running applications:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/io/TempFile.html">TempFile</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/io/TempFileList.html">TempFileList</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/io/FileList.html#getTempFile-java.lang.String-java.lang.String-">FileList.getTempFile(String prefix, String extension)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/io/TempFile.html">TempFile</ao:a></li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/io/TempFileList.html">TempFileList</ao:a></li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/io/FileList.html#getTempFile-java.lang.String-java.lang.String-">FileList.getTempFile(String prefix, String extension)</ao:a></li>
 					</ul>
 				</li>
 				<li>
-					Improved <ao:a href="apidocs/com/aoindustries/servlet/ServletContextCache.html">ServletContextCache</ao:a>
+					Improved <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com/aoapps/servlet/ServletContextCache.html">ServletContextCache</ao:a>
 					to still work correctly when accessed before initialized by
-					<ao:a href="apidocs/com/aoindustries/servlet/ServletContextCacheListener.html">ServletContextCacheListener</ao:a>.
+					<ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com/aoapps/servlet/ServletContextCache.Initializer.html">ServletContextCacheListener.Initializer</ao:a>.
 					This allows the caches to safely be used during application initialization.  This also
 					allows the cache to still work correctly without being initialized as a web listener, at the cost
 					of not stopping promptly when context destroyed.
 				</li>
 				<li>
-					New constant <ao:a href="apidocs/com/aoindustries/servlet/http/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
+					New constant <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com/aoapps/servlet/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
 					to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
 					repeatedly during routine operation.
 				</li>
@@ -774,27 +776,27 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Boolean.html">Boolean</ao:a>:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableOutput.html#writeNullBoolean-java.lang.Boolean-">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
-						<li><ao:a href="apidocs/com/aoindustries/io/stream/StreamableInput.html#readNullBoolean--">CompressedDataInputStream.readNullBoolean()</ao:a></li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullBoolean-java.lang.Boolean-">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullBoolean--">CompressedDataInputStream.readNullBoolean()</ao:a></li>
 					</ul>
 				</li>
 				<li>
 					New methods to join into arbitrary <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Appendable.html">Appendable</ao:a>:
 					<ul>
-						<li><ao:a href="https://oss.aoapps.com/lang/apidocs/com/aoindustries/lang/Strings.html#join(java.lang.Iterable,java.lang.String,A)">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
-						<li><ao:a href="https://oss.aoapps.com/lang/apidocs/com/aoindustries/lang/Strings.html#join(java.lang.Object[],java.lang.String,A)">StringUtility.join(Object[], String, Appendable)</ao:a></li>
+						<li><ao:a href="https://oss.aoapps.com/lang/apidocs/com/aoapps/lang/Strings.html#join(java.lang.Iterable,java.lang.String,A)">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
+						<li><ao:a href="https://oss.aoapps.com/lang/apidocs/com/aoapps/lang/Strings.html#join(java.lang.Object[],java.lang.String,A)">StringUtility.join(Object[], String, Appendable)</ao:a></li>
 					</ul>
 				</li>
 				<li>
 					New bundle lookup markup types:
 					<ul>
-						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType.html#MYSQL">MarkupType.MYSQL</ao:a> for the <ao:a href="https://dev.mysql.com/doc/en/mysql.html">MySQL <code>mysql</code> command line</ao:a>.</li>
-						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType.html#PSQL">MarkupType.PSQL</ao:a> for the <ao:a href="https://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL <code>psql</code> command line</ao:a>.</li>
-						<li><ao:a href="apidocs/com/aoindustries/util/i18n/MarkupType.html#SH">MarkupType.SH</ao:a> for shell script encoding.</li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/i18n/MarkupType.html#MYSQL">MarkupType.MYSQL</ao:a> for the <ao:a href="https://dev.mysql.com/doc/en/mysql.html">MySQL <code>mysql</code> command line</ao:a>.</li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/i18n/MarkupType.html#PSQL">MarkupType.PSQL</ao:a> for the <ao:a href="https://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL <code>psql</code> command line</ao:a>.</li>
+						<li><ao:a href="apidocs/com/aoapps/hodgepodge/i18n/MarkupType.html#SH">MarkupType.SH</ao:a> for shell script encoding.</li>
 					</ul>
 				</li>
 				<li>
-					<ao:a href="apidocs/com/aoindustries/servlet/http/Dispatcher.html">Dispatcher</ao:a> may now forward
+					<ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com/aoapps/servlet/http/Dispatcher.html">Dispatcher</ao:a> may now forward
 					and include to caller-provided <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
 				</li>
 			</ul>
