@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2016, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,22 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoapps.hodgepodge.swing;
-
-import java.util.ResourceBundle;
-
-/**
- * Provides a simplified interface for obtaining localized values from the ApplicationResources.properties files.
- *
- * @author  AO Industries, Inc.
- */
-final class Resources {
-
-	static final com.aoapps.lang.i18n.Resources PACKAGE_RESOURCES =
-		com.aoapps.lang.i18n.Resources.getResources(ResourceBundle::getBundle, Resources.class.getPackage());
-
-	/**
-	 * Make no instances.
-	 */
-	private Resources() {}
+module com.aoapps.hodgepodge.devel {
+	exports com.aoapps.hodgepodge.i18n.i18n;
+	exports com.aoapps.hodgepodge.swing.i18n;
+	exports com.aoapps.hodgepodge.version.i18n;
+	// Direct
+	requires com.aoapps.hodgepodge; // <groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId>
 }

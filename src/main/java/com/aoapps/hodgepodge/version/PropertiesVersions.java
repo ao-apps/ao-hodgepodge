@@ -28,6 +28,7 @@ import com.aoapps.lang.util.PropertiesUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * Loads version numbers from a properties file.
@@ -39,7 +40,7 @@ import java.util.Properties;
  */
 public class PropertiesVersions {
 
-	private static final Resources RESOURCES = Resources.getResources(PropertiesVersions.class);
+	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, PropertiesVersions.class);
 
 	private static Properties readProperties(InputStream in) throws IOException {
 		Properties props = new Properties();
@@ -50,7 +51,9 @@ public class PropertiesVersions {
 	private final Properties properties;
 
 	/**
-	 * Loads properties from the classpath.
+	 * Loads properties from a module or classpath resource.
+	 *
+	 * @see  PropertiesUtils#loadFromResource(java.lang.Class, java.lang.String)
 	 */
 	public PropertiesVersions(Class<?> clazz, String resource) throws IOException {
 		this(PropertiesUtils.loadFromResource(clazz, resource));

@@ -38,11 +38,13 @@ import java.util.logging.LogManager;
  * {@link Method#setAccessible(boolean)}, which might give up-to-date implementations.
  * When this fails, uses an implementation copied here from Java 1.8.0_231.
  * </p>
- * 
+ *
  * @see LogManager
- * 
+ *
  * @author  AO Industries, Inc.
  */
+// TODO: This requires "--add-opens java.logging/java.util.logging=com.aoapps.hodgepodge" when running on module-path.
+//       Find a way to do the same in Java 9+ without reflection, or at least handle the exception gracefully.
 @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 public class LogManagerUtil {
 

@@ -32,7 +32,7 @@ import java.io.IOException;
  * Provides encoding and escaping for various type of data.
  *
  * @author  AO Industries, Inc.
- * 
+ *
  * @deprecated  Use new encoding package instead.
  */
 @Deprecated
@@ -58,7 +58,7 @@ public final class EncodingUtils {
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
-	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
 	 * </p>
 	 */
 	@Deprecated
@@ -74,7 +74,7 @@ public final class EncodingUtils {
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
-	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
 	 * </p>
 	 */
 	@Deprecated
@@ -85,7 +85,7 @@ public final class EncodingUtils {
 	/**
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
-	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
 	 * </p>
 	 */
 	@Deprecated
@@ -99,7 +99,7 @@ public final class EncodingUtils {
 	/**
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
-	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
 	 * </p>
 	 */
 	@Deprecated
@@ -110,7 +110,7 @@ public final class EncodingUtils {
 	/**
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
-	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
 	 * </p>
 	 */
 	@Deprecated
@@ -141,7 +141,7 @@ public final class EncodingUtils {
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
-	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
 	 * </p>
 	 */
 	@Deprecated
@@ -233,7 +233,7 @@ public final class EncodingUtils {
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
-	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
 	 * </p>
 	 */
 	@Deprecated
@@ -247,7 +247,7 @@ public final class EncodingUtils {
 	/**
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
-	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
+	 * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
 	 * </p>
 	 */
 	@Deprecated

@@ -26,6 +26,7 @@ import com.aoapps.lang.LocalizedIllegalStateException;
 import com.aoapps.lang.i18n.Resources;
 import java.util.IdentityHashMap;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * <p>
@@ -46,7 +47,7 @@ import java.util.Locale;
  */
 final public class BundleLookupThreadContext {
 
-	private static final Resources RESOURCES = Resources.getResources(BundleLookupThreadContext.class);
+	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, BundleLookupThreadContext.class);
 
 	/**
 	 * @see  I18nThreadLocalRunnable

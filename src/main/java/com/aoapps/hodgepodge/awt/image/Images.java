@@ -84,7 +84,7 @@ final public class Images {
 	 * @param  tolerance  The portion of red, green, and blue differences
 	 *                    allowed before ignoring a certain location.  Zero implies
 	 *                    an exact match.
-	 * 
+	 *
 	 * @return  The top-left point where the top left of the image is found or
 	 *          <code>null</code> if not found within tolerance.
 	 */
@@ -177,7 +177,18 @@ NextLocation :
 	public static Image getImageFromResources(Class<?> clazz, String name, Toolkit toolkit) throws IOException {
 		byte[] imageData;
 		InputStream in = clazz.getResourceAsStream(name);
-		if(in==null) throw new IOException("Unable to find resource: "+name);
+		if(in == null && name.startsWith("/")) {
+			// Try ClassLoader for when modules enabled
+			String resource = name;
+			do {
+				resource = resource.substring(1);
+			} while(resource.startsWith("/"));
+			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+			in = (classloader != null)
+				? classloader.getResourceAsStream(resource)
+				: ClassLoader.getSystemResourceAsStream(resource);
+		}
+		if(in == null) throw new IOException("Unable to find resource: " + name);
 		try {
 			imageData = IoUtils.readFully(in);
 		} finally {

@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2010, 2011, 2016, 2021  AO Industries, Inc.
+ * Copyright (C) 2011, 2012, 2013, 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,41 +20,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoapps.hodgepodge.ws;
+package com.aoapps.hodgepodge.version.i18n;
 
-import java.security.SecureRandom;
-import java.util.Random;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import com.aoapps.hodgepodge.i18n.EditableResourceBundle;
+import com.aoapps.hodgepodge.i18n.EditableResourceBundleSet;
+import java.io.File;
+import java.util.Locale;
 
 /**
- * Tests the WsEncoder for binary transparency.
- *
  * @author  AO Industries, Inc.
  */
-public class WsEncoderTest extends TestCase {
+public final class ApplicationResources extends EditableResourceBundle {
 
-	public WsEncoderTest(String testName) {
-		super(testName);
+	static final EditableResourceBundleSet bundleSet = new EditableResourceBundleSet(
+		ApplicationResources.class,
+		Locale.ROOT,
+		Locale.JAPANESE
+	);
+
+	static File getSourceFile(String filename) {
+		return new File(System.getProperty("user.home") + "/maven2/ao/oss/hodgepodge/src/main/resources/com/aoapps/hodgepodge/version/i18n", filename);
 	}
 
-	public static Test suite() {
-		return new TestSuite(WsEncoderTest.class);
-	}
-
-	public void testEncodeDecode() {
-		Random random = new SecureRandom();
-		StringBuilder SB = new StringBuilder();
-		for(int c=0;c<1000;c++) {
-			SB.setLength(0);
-			for(int d=0;d<100;d++) {
-				SB.append((char)random.nextInt(Character.MAX_VALUE+1));
-			}
-			String value = SB.toString();
-			String encoded = WsEncoder.encode(value);
-			String decoded = WsEncoder.decode(encoded);
-			assertEquals(value, decoded);
-		}
+	public ApplicationResources() {
+		super(Locale.ROOT, bundleSet, getSourceFile("ApplicationResources.properties"));
 	}
 }

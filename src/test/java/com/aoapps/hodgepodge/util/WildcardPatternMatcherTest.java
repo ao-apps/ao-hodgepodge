@@ -39,10 +39,14 @@ public class WildcardPatternMatcherTest extends TestCase {
 		// Got stupid slow at 10000
 		// At 1000, simple matcher was 4,000 times as fast as the regular expressions
 		StringBuilder longSB = new StringBuilder();
-		for(int i=0; i<100; i++) longSB.append("long string ");
+		for(int i=0; i<100; i++) {
+			longSB.append("long string ");
+		}
 		longString = longSB.toString();
 		longSB.setLength(0);
-		for(int i=0; i<100; i++) longSB.append("jpepngifitif");
+		for(int i=0; i<100; i++) {
+			longSB.append("jpepngifitif");
+		}
 		// 			".*(jpg|jpeg|png|gif|tiff)$",
 		craftedLongString = longSB.toString();
 	}
@@ -55,6 +59,7 @@ public class WildcardPatternMatcherTest extends TestCase {
 		return new TestSuite(WildcardPatternMatcherTest.class);
 	}
 
+	@SuppressWarnings("UseOfSystemOutOrSystemErr")
 	private void doTestPerformance(String description, String patterns, String regexp, String text, boolean expectedResult) {
 		System.out.println(description);
 		final int endTestSize = 1000000;

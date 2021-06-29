@@ -26,6 +26,7 @@ import com.aoapps.collections.AoCollections;
 import com.aoapps.lang.i18n.Resources;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * ISO 3166-1 alpha-2 country codes.
@@ -552,7 +553,7 @@ public enum Country {
 	ZM(1974),
 	ZW(1980);
 
-	private static final Resources RESOURCES = Resources.getResources(Country.class);
+	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, Country.class);
 
 	private final int since;
 	private final List<String> states;

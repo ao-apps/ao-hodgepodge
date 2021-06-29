@@ -80,7 +80,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
 	private static final Logger logger = Logger.getLogger(ModifiablePropertiesResourceBundle.class.getName());
 
-	private static final Resources RESOURCES = Resources.getResources(ModifiablePropertiesResourceBundle.class);
+	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, ModifiablePropertiesResourceBundle.class);
 
 	private static final Charset propertiesCharset = StandardCharsets.ISO_8859_1;
 
@@ -189,9 +189,16 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 		// Load from resources if sourceFile inaccessible
 		if(!loaded) {
 			Class<?> clazz = getClass();
-			String resourceName = '/'+clazz.getName().replace('.', '/')+".properties";
-			InputStream in = getClass().getResourceAsStream(resourceName);
-			if(in==null) throw new UncheckedIOException(new LocalizedIOException(RESOURCES, "init.resourceNotFound", resourceName));
+			String resourceName = clazz.getName().replace('.', '/') + ".properties";
+			InputStream in = getClass().getResourceAsStream("/" + resourceName);
+			if(in == null) {
+				// Try ClassLoader for when modules enabled
+				ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+				in = (classloader != null)
+					? classloader.getResourceAsStream(resourceName)
+					: ClassLoader.getSystemResourceAsStream(resourceName);
+			}
+			if(in == null) throw new UncheckedIOException(new LocalizedIOException(RESOURCES, "init.resourceNotFound", resourceName));
 			try {
 				try {
 					properties.load(in);
