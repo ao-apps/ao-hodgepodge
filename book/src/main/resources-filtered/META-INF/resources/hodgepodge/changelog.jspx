@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-05:00"
-		dateModified="2021-06-27T16:13:41-05:00"
+		dateModified="2021-07-01T02:01:35-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -54,6 +54,10 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 					<li>Maven artifact relocated from <code>com.aoindustries:aocode-public</code> to <code>com.aoapps:ao-hodgepodge</code>.</li>
 					<li>Packages renamed from <code>com.aoindustries.*</code> to <code>com.aoapps.hodgepodge.*</code>.</li>
 					<li>Renamed <code>NativeToUnixWriter</code> to <code>NativeToPosixWriter</code>.</li>
+					<li>
+						<code>Images.getImageFromResources</code> now uses a provided lambda function to get the resources.
+						This allows access to resources without opening the package.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>

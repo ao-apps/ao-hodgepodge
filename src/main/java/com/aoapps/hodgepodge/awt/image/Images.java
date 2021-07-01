@@ -22,6 +22,7 @@
  */
 package com.aoapps.hodgepodge.awt.image;
 
+import com.aoapps.lang.function.FunctionE;
 import com.aoapps.lang.io.IoUtils;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -167,27 +168,16 @@ NextLocation :
 	/**
 	 * Loads an image from a resource using the default toolkit.
 	 */
-	public static Image getImageFromResources(Class<?> clazz, String name) throws IOException {
-		return getImageFromResources(clazz, name, Toolkit.getDefaultToolkit());
+	public static Image getImageFromResources(FunctionE<? super String, ? extends InputStream, ? extends IOException> getResourceAsStream, String name) throws IOException {
+		return getImageFromResources(getResourceAsStream, name, Toolkit.getDefaultToolkit());
 	}
 
 	/**
 	 * Loads an image from a resource using the provided toolkit.
 	 */
-	public static Image getImageFromResources(Class<?> clazz, String name, Toolkit toolkit) throws IOException {
+	public static Image getImageFromResources(FunctionE<? super String, ? extends InputStream, ? extends IOException> getResourceAsStream, String name, Toolkit toolkit) throws IOException {
 		byte[] imageData;
-		InputStream in = clazz.getResourceAsStream(name);
-		if(in == null && name.startsWith("/")) {
-			// Try ClassLoader for when modules enabled
-			String resource = name;
-			do {
-				resource = resource.substring(1);
-			} while(resource.startsWith("/"));
-			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-			in = (classloader != null)
-				? classloader.getResourceAsStream(resource)
-				: ClassLoader.getSystemResourceAsStream(resource);
-		}
+		InputStream in = getResourceAsStream.apply(name);
 		if(in == null) throw new IOException("Unable to find resource: " + name);
 		try {
 			imageData = IoUtils.readFully(in);
