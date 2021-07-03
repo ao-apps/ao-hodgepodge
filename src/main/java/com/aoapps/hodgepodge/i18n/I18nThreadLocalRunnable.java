@@ -24,6 +24,7 @@ package com.aoapps.hodgepodge.i18n;
 
 import com.aoapps.lang.concurrent.ThreadLocalsRunnable;
 import com.aoapps.lang.i18n.ThreadLocale;
+import com.aoapps.lang.i18n.impl.ThreadLocaleImpl;
 
 /**
  * Invokes the provided runnable in the same internationalization context.
@@ -37,7 +38,7 @@ public class I18nThreadLocalRunnable extends ThreadLocalsRunnable {
 	 * The set of thread locals that are copied to maintain internationalization context.
 	 */
 	static final ThreadLocal<?>[] i18nThreadLocals = {
-		ThreadLocale.locale, // TODO: cross-module permissions, or move this to ao-lang directly (either as seperate class or extend)
+		ThreadLocaleImpl.locale,
 		BundleLookupThreadContext.threadContext,
 		EditableResourceBundle.currentThreadSettings
 	};
@@ -45,4 +46,4 @@ public class I18nThreadLocalRunnable extends ThreadLocalsRunnable {
 	public I18nThreadLocalRunnable(Runnable task) {
 		super(task, i18nThreadLocals);
 	}
-} 
+}
