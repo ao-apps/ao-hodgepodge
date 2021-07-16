@@ -8,6 +8,7 @@
 [![license: LGPL v3](https://oss.aoapps.com/ao-badges/license-lgpl-3.0.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
 [![Build](https://github.com/aoindustries/ao-hodgepodge/workflows/Build/badge.svg?branch=master)](https://github.com/aoindustries/ao-hodgepodge/actions?query=workflow%3ABuild)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.aoapps/ao-hodgepodge/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.aoapps/ao-hodgepodge)
 
 Reusable Java library of general tools with minimal external dependencies.
 
