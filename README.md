@@ -9,6 +9,12 @@
 
 [![Build](https://github.com/aoindustries/ao-hodgepodge/workflows/Build/badge.svg?branch=master)](https://github.com/aoindustries/ao-hodgepodge/actions?query=workflow%3ABuild)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.aoapps/ao-hodgepodge/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.aoapps/ao-hodgepodge)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=master&project=com.aoapps%3Aao-hodgepodge&metric=alert_status)](https://sonarcloud.io/dashboard?branch=master&id=com.aoapps%3Aao-hodgepodge)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?branch=master&project=com.aoapps%3Aao-hodgepodge&metric=ncloc)](https://sonarcloud.io/component_measures?branch=master&id=com.aoapps%3Aao-hodgepodge&metric=ncloc)  
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?branch=master&project=com.aoapps%3Aao-hodgepodge&metric=reliability_rating)](https://sonarcloud.io/component_measures?branch=master&id=com.aoapps%3Aao-hodgepodge&metric=Reliability)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?branch=master&project=com.aoapps%3Aao-hodgepodge&metric=security_rating)](https://sonarcloud.io/component_measures?branch=master&id=com.aoapps%3Aao-hodgepodge&metric=Security)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?branch=master&project=com.aoapps%3Aao-hodgepodge&metric=sqale_rating)](https://sonarcloud.io/component_measures?branch=master&id=com.aoapps%3Aao-hodgepodge&metric=Maintainability)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=master&project=com.aoapps%3Aao-hodgepodge&metric=coverage)](https://sonarcloud.io/component_measures?branch=master&id=com.aoapps%3Aao-hodgepodge&metric=Coverage)
 
 Reusable Java library of general tools with minimal external dependencies.
 
