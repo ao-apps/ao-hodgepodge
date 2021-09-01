@@ -50,7 +50,7 @@ public enum DayOfWeek {
 			case Calendar.THURSDAY  : return THURSDAY;
 			case Calendar.FRIDAY    : return FRIDAY;
 			case Calendar.SATURDAY  : return SATURDAY;
-			default : throw new AssertionError("Calendar and DayOfWeek mismatch: calendarDayOfWeek = " + calendarDayOfWeek);
+			default : throw new AssertionError("Calendar and DayOfWeek mismatch, all fields set?: calendarDayOfWeek = " + calendarDayOfWeek);
 		}
 	}
 
