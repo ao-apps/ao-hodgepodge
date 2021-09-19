@@ -47,7 +47,7 @@ import java.util.ResourceBundle;
  */
 final public class BundleLookupThreadContext {
 
-	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, BundleLookupThreadContext.class);
+	private static final Resources RESOURCES = Resources.getResources(BundleLookupThreadContext.class, ResourceBundle::getBundle);
 
 	/**
 	 * @see  I18nThreadLocalRunnable
