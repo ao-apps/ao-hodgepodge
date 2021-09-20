@@ -151,11 +151,23 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 			for(File file : sourceFiles) {
 				try {
 					if(file.canRead() && file.canWrite()) {
-						if(goodSourceFile!=null) throw new LocalizedIllegalStateException(RESOURCES, "init.moreThanOneSourceFile", goodSourceFile, file);
+						if(goodSourceFile != null) {
+							throw new LocalizedIllegalStateException(
+								RESOURCES,
+								"init.moreThanOneSourceFile",
+								goodSourceFile,
+								file
+							);
+						}
 						goodSourceFile = file;
 					}
-				} catch(SecurityException e) {
+				} catch(SecurityException err) {
 					// OK when sandboxed, goodSourceFile remains null
+					logger.log(
+						Level.WARNING,
+						RESOURCES.getMessage("init.securityException", file),
+						err
+					);
 				}
 			}
 		}
