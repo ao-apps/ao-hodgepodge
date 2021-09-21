@@ -80,7 +80,7 @@ abstract public class ModifiablePropertiesResourceBundle extends ModifiableResou
 
 	private static final Logger logger = Logger.getLogger(ModifiablePropertiesResourceBundle.class.getName());
 
-	private static final Resources RESOURCES = Resources.getResources(ModifiablePropertiesResourceBundle.class, ResourceBundle::getBundle);
+	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, ModifiablePropertiesResourceBundle.class);
 
 	private static final Charset propertiesCharset = StandardCharsets.ISO_8859_1;
 

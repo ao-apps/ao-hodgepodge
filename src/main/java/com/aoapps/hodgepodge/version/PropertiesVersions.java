@@ -40,7 +40,7 @@ import java.util.ResourceBundle;
  */
 public class PropertiesVersions {
 
-	private static final Resources RESOURCES = Resources.getResources(PropertiesVersions.class, ResourceBundle::getBundle);
+	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, PropertiesVersions.class);
 
 	private static Properties readProperties(InputStream in) throws IOException {
 		Properties props = new Properties();

@@ -553,7 +553,7 @@ public enum Country {
 	ZM(1974),
 	ZW(1980);
 
-	private static final Resources RESOURCES = Resources.getResources(Country.class, ResourceBundle::getBundle);
+	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, Country.class);
 
 	private final int since;
 	private final List<String> states;

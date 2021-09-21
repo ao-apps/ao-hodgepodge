@@ -50,7 +50,6 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 				scmUrl="@{project.scm.url}"
 			>
 				<ul>
-					<li>Updated dependencies.</li>
 					<li>Log warnings when unable to read resource bundle source files due to SecurityException.</li>
 				</ul>
 			</changelog:release>
