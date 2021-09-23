@@ -26,4 +26,6 @@ module com.aoapps.hodgepodge.devel {
 	exports com.aoapps.hodgepodge.version.i18n;
 	// Direct
 	requires com.aoapps.hodgepodge; // <groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId>
+	// Java SE
+	requires java.logging;
 }
