@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-05:00"
-		dateModified="2021-09-20T17:24:32-05:00"
+		dateModified="2021-09-25T23:27:50-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -664,7 +664,7 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 				<li>
 					<p>
 						<code>UrlUtils.encodeUrlPath(String, String)</code> now skips encoding the full set of
-						the characters defined in <ao:a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</ao:a>.
+						the characters defined in <ao:a href="https://datatracker.ietf.org/doc/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</ao:a>.
 						Previously, only a partial subset of these characters were added as-needed.  We have now
 						improved the implementation to match the specification.
 					</p>
