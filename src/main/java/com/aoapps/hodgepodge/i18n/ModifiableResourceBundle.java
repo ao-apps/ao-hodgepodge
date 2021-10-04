@@ -32,7 +32,7 @@ import java.util.ResourceBundle;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class ModifiableResourceBundle extends ResourceBundle {
+public abstract class ModifiableResourceBundle extends ResourceBundle {
 
 	public ModifiableResourceBundle() {
 	}

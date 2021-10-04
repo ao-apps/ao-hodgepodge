@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * Controls the Registry, making sure only one registry is created per port.
  */
-final public class RegistryManager {
+public final class RegistryManager {
 
 	/**
 	 * Make no instances.

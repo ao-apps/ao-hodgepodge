@@ -43,7 +43,7 @@ import java.util.List;
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-final public class RateLimitCat {
+public final class RateLimitCat {
 
 	private RateLimitCat() {
 	}

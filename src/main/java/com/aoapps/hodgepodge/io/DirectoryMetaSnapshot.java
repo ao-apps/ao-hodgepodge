@@ -43,9 +43,9 @@ import java.util.TreeMap;
  *
  * @author  AO Industries, Inc.
  */
-final public class DirectoryMetaSnapshot {
+public final class DirectoryMetaSnapshot {
 
-	final public static class FileMetaSnapshot {
+	public static final class FileMetaSnapshot {
 
 		private final long lastModified;
 		private final long length;
@@ -84,7 +84,7 @@ final public class DirectoryMetaSnapshot {
 		}
 	}
 
-	final private SortedMap<String, FileMetaSnapshot> files;
+	private final SortedMap<String, FileMetaSnapshot> files;
 
 	public DirectoryMetaSnapshot(String startPath) throws IOException {
 		Map<String, FilesystemIteratorRule> noPrefixRules = Collections.emptyMap();

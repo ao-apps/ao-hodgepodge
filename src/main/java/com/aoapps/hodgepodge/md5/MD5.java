@@ -136,7 +136,7 @@ public class MD5 {
 	 * Initialize MD5 internal state (object can be reused just by
 	 * calling Init() after every Final()
 	 */
-	final public synchronized void Init () {
+	public final synchronized void Init () {
 		state = new MD5State();
 		finals = null;
 	}
@@ -385,7 +385,7 @@ public class MD5 {
 	 * @param s		String to be update to hash (is used as
 	 *		       	s.getBytes())
 	 */
-	final public void Update (String s) {
+	public final void Update (String s) {
 		byte[] chars=s.getBytes();
 		// Changed on 2004-04-10 due to getBytes(int,int,char[],byte) being deprecated
 		//byte	chars[];

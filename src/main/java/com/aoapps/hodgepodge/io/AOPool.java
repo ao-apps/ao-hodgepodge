@@ -68,7 +68,7 @@ import java.util.logging.Logger;
  * @author  AO Industries, Inc.
  */
 // TODO: Don't extend Thread
-abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I extends Throwable> extends Thread {
+public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I extends Throwable> extends Thread {
 
 	public static final int DEFAULT_DELAY_TIME = 1 * 60 * 1000;
 	public static final int DEFAULT_MAX_IDLE_TIME = 10 * 60 * 1000;
@@ -158,11 +158,11 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 		}
 	}
 
-	final private int delayTime;
-	final private int maxIdleTime;
-	final private long startTime;
-	final private int poolSize;
-	final private long maxConnectionAge;
+	private final int delayTime;
+	private final int maxIdleTime;
+	private final long startTime;
+	private final int poolSize;
+	private final long maxConnectionAge;
 
 	/**
 	 * Lock for wait/notify
@@ -296,7 +296,7 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	 * Shuts down the pool, exceptions during close will be logged as a warning and not thrown.
 	 */
 	@SuppressWarnings("UseSpecificCatch")
-	final public void close() {
+	public final void close() {
 		List<C> connsToClose;
 		synchronized(poolLock) {
 			try {
@@ -332,7 +332,7 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	/**
 	 * Gets the number of connections that are currently busy.
 	 */
-	final public int getConcurrency() {
+	public final int getConcurrency() {
 		synchronized(poolLock) {
 			return busyConnections.size();
 		}
@@ -341,7 +341,7 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	/**
 	 * Gets the number of connections currently connected.
 	 */
-	final public int getConnectionCount() {
+	public final int getConnectionCount() {
 		int total = 0;
 		synchronized(poolLock) {
 			for(PooledConnection<C> pooledConnection : allConnections) {
@@ -644,7 +644,7 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	/**
 	 * Gets the total number of connects for the entire pool.
 	 */
-	final public long getConnects() {
+	public final long getConnects() {
 		long total = 0;
 		synchronized(poolLock) {
 			for(PooledConnection<C> conn : allConnections) {
@@ -657,14 +657,14 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	/**
 	 * Gets the maximum age for connections.
 	 */
-	final public long getMaxConnectionAge() {
+	public final long getMaxConnectionAge() {
 		return maxConnectionAge;
 	}
 
 	/**
 	 * Gets the maximum number of connections that have been busy at once.
 	 */
-	final public int getMaxConcurrency() {
+	public final int getMaxConcurrency() {
 		synchronized(poolLock) {
 			return maxConcurrency;
 		}
@@ -673,11 +673,11 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	/**
 	 * Gets the maximum number of connections the pool will create at once.
 	 */
-	final public int getPoolSize() {
+	public final int getPoolSize() {
 		return poolSize;
 	}
 
-	final public long getTotalTime() {
+	public final long getTotalTime() {
 		long total = 0;
 		synchronized(poolLock) {
 			for(PooledConnection<C> conn : allConnections) {
@@ -687,7 +687,7 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 		return total;
 	}
 
-	final public long getTransactionCount() {
+	public final long getTransactionCount() {
 		long total = 0;
 		synchronized(poolLock) {
 			for(PooledConnection<C> conn : allConnections) {
@@ -910,7 +910,7 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	 */
 	@Deprecated
 	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-	final public void releaseConnection(C connection) throws Ex {
+	public final void releaseConnection(C connection) throws Ex {
 		try {
 			connection.close();
 		} catch(Throwable t) {
@@ -1056,7 +1056,7 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	 */
 	@Override
 	@SuppressWarnings({"SleepWhileInLoop", "UseSpecificCatch", "TooBroadCatch"})
-	final public void run() {
+	public final void run() {
 		while(true) {
 			try {
 				try {
@@ -1118,7 +1118,7 @@ abstract public class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
 	protected abstract I newInterruptedException(String message, Throwable cause);
 
-	final public Logger getLogger() {
+	public final Logger getLogger() {
 		return logger;
 	}
 }

@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class ShellInterpreter implements Runnable {
+public abstract class ShellInterpreter implements Runnable {
 
 	private static long lastPID=0;
 
@@ -119,11 +119,11 @@ abstract public class ShellInterpreter implements Runnable {
 	/**
 	 * Clears the screen.
 	 */
-	final public void clear(String[] args) throws IOException {
+	public final void clear(String[] args) throws IOException {
 		out.clearScreen();
 	}
 
-	abstract protected String getName();
+	protected abstract String getName();
 
 	private static long getNextPID() {
 		synchronized(ShellInterpreter.class) {
@@ -131,16 +131,16 @@ abstract public class ShellInterpreter implements Runnable {
 		}
 	}
 
-	final public long getPID() {
+	public final long getPID() {
 		return pid;
 	}
 
-	abstract protected String getPrompt() throws IOException, SQLException;
+	protected abstract String getPrompt() throws IOException, SQLException;
 
 	/**
 	 * Processes one command and returns.
 	 */
-	abstract protected boolean handleCommand(String[] args) throws IOException, SQLException;
+	protected abstract boolean handleCommand(String[] args) throws IOException, SQLException;
 
 	/**
 	 * Processes one command and returns.
@@ -194,16 +194,16 @@ abstract public class ShellInterpreter implements Runnable {
 		return handleCommandImpl(myargs);
 	}
 
-	final protected boolean isAlive() {
+	protected final boolean isAlive() {
 		Thread t=this.thread;
 		return t!=null && t.isAlive();
 	}
 
-	final protected boolean isInteractive() {
+	protected final boolean isInteractive() {
 		return isInteractive;
 	}
 
-	final public void jobs(String[] args) {
+	public final void jobs(String[] args) {
 		// Print all jobs
 		synchronized(jobs) {
 			for(int c=0;c<jobs.size();c++) {
@@ -265,7 +265,7 @@ abstract public class ShellInterpreter implements Runnable {
 	 * reads from <code>in</code> until end of file or <code>exit</code>.
 	 */
 	@Override
-	final public void run() {
+	public final void run() {
 		try {
 			if(args.length>0) handleCommand(args);
 			else runImpl();

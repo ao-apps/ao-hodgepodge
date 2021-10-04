@@ -38,9 +38,9 @@ import java.io.InterruptedIOException;
  */
 public class BitRateInputStream extends FilterInputStream {
 
-	public final static long MAX_CATCHUP_TIME=2*1000;
+	public static final long MAX_CATCHUP_TIME=2*1000;
 
-	final private BitRateProvider provider;
+	private final BitRateProvider provider;
 
 	private long blockStart=-1;
 	private long catchupTime;

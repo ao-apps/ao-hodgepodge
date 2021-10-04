@@ -45,7 +45,7 @@ import java.util.ResourceBundle;
  * is disabled (production mode).
  * </p>
  */
-final public class BundleLookupThreadContext {
+public final class BundleLookupThreadContext {
 
 	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, BundleLookupThreadContext.class);
 

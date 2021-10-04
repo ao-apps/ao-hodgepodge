@@ -83,7 +83,7 @@ public class MD5InputStream extends FilterInputStream {
 	/**
 	 * MD5 context
 	 */
-	final private MD5 md5;
+	private final MD5 md5;
 
 	/**
 	 * Creates a MD5InputStream

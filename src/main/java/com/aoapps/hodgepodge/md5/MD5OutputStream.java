@@ -76,7 +76,7 @@ public class MD5OutputStream extends FilterOutputStream {
 	/**
 	 * MD5 context
 	 */
-	final private MD5 md5;
+	private final MD5 md5;
 
 	/**
 	 * Creates MD5OutputStream

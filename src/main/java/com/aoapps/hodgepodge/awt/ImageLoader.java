@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
-final public class ImageLoader implements ImageConsumer {
+public final class ImageLoader implements ImageConsumer {
 
 	private int status = 0;
 
@@ -46,7 +46,7 @@ final public class ImageLoader implements ImageConsumer {
 	}
 
 	@Override
-	synchronized public void imageComplete(int status) {
+	public synchronized void imageComplete(int status) {
 		this.status|=status;
 		notify();
 	}

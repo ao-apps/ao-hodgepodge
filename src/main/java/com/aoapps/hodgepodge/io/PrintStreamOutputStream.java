@@ -37,7 +37,7 @@ import java.io.PrintStream;
  */
 public class PrintStreamOutputStream extends OutputStream {
 
-	final private PrintStream out;
+	private final PrintStream out;
 
 	public PrintStreamOutputStream(PrintStream out) {
 		this.out = out;

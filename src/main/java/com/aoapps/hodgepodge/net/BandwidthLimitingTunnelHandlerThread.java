@@ -41,7 +41,7 @@ import java.net.SocketException;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, BitRateProvider {
+public abstract class BandwidthLimitingTunnelHandlerThread implements Runnable, BitRateProvider {
 
 	/**
 	 * The number of seconds between verbose bits/second output.
@@ -133,9 +133,9 @@ abstract public class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 		return bandwidth;
 	}
 
-	abstract protected String getDirection();
+	protected abstract String getDirection();
 
-	abstract protected OutputStream getOutputStream(Socket listenSocket, Socket connectSocket) throws IOException;
+	protected abstract OutputStream getOutputStream(Socket listenSocket, Socket connectSocket) throws IOException;
 
-	abstract protected InputStream getInputStream(Socket listenSocket, Socket connectSocket) throws IOException;
+	protected abstract InputStream getInputStream(Socket listenSocket, Socket connectSocket) throws IOException;
 }

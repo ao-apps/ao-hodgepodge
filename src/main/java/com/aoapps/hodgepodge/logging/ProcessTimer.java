@@ -43,14 +43,14 @@ import java.util.logging.Logger;
 
 public class ProcessTimer implements Runnable, AutoCloseable {
 
-	final private Logger logger;
-	final private String sourceClass;
-	final private String sourceMethod;
-	final private String subject;
-	final private String processDescription;
-	final private long startTime;
-	final private long maximumTime;
-	final private long reminderInterval;
+	private final Logger logger;
+	private final String sourceClass;
+	private final String sourceMethod;
+	private final String subject;
+	private final String processDescription;
+	private final long startTime;
+	private final long maximumTime;
+	private final long reminderInterval;
 	private volatile Thread thread;
 	private volatile boolean isFinished;
 	private volatile boolean isSleeping;

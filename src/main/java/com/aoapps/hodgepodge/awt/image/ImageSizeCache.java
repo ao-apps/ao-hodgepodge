@@ -36,7 +36,7 @@ import javax.imageio.ImageIO;
  *
  * @author  AO Industries, Inc.
  */
-final public class ImageSizeCache {
+public final class ImageSizeCache {
 
 	static class CacheEntry {
 		long lastModified;

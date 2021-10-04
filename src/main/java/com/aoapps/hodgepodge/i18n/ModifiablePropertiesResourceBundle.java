@@ -76,7 +76,7 @@ import java.util.logging.Logger;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class ModifiablePropertiesResourceBundle extends ModifiableResourceBundle {
+public abstract class ModifiablePropertiesResourceBundle extends ModifiableResourceBundle {
 
 	private static final Logger logger = Logger.getLogger(ModifiablePropertiesResourceBundle.class.getName());
 

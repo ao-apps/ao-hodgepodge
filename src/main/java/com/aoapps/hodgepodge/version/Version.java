@@ -29,7 +29,7 @@ import com.aoapps.lang.NullArgumentException;
  *
  * @author  AO Industries, Inc.
  */
-final public class Version {
+public final class Version {
 
 	/**
 	 * Gets a version number instance from its component parts.

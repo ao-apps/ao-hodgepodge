@@ -64,7 +64,7 @@ import java.util.concurrent.ConcurrentMap;
 
 // TODO: In a future major version update, fail when properties source file is unavailable.  This will only be practical
 //       after all uses are from *-i18n sub-projects that are not deployed.
-abstract public class EditableResourceBundle extends ModifiablePropertiesResourceBundle implements Comparable<EditableResourceBundle> {
+public abstract class EditableResourceBundle extends ModifiablePropertiesResourceBundle implements Comparable<EditableResourceBundle> {
 
 	public static final String VISIBILITY_COOKIE_NAME = "EditableResourceBundleEditorVisibility";
 
@@ -1119,7 +1119,7 @@ abstract public class EditableResourceBundle extends ModifiablePropertiesResourc
 	 * JAVASCRIPT: Adds a comment before the string with the lookup id
 	 * </p>
 	 */
-	final private static class EditableResourceBundleLookupMarkup implements BundleLookupMarkup {
+	private static final class EditableResourceBundleLookupMarkup implements BundleLookupMarkup {
 
 		private final long lookupId;
 		private final boolean invalidated;

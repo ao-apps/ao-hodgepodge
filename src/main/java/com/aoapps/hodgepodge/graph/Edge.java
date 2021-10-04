@@ -40,14 +40,14 @@ public class Edge<V> {
 	/**
 	 * The vertex the edge is from.
 	 */
-	final public V getFrom() {
+	public final V getFrom() {
 		return from;
 	}
 
 	/**
 	 * The vertex the edge is to.
 	 */
-	final public V getTo() {
+	public final V getTo() {
 		return to;
 	}
 
@@ -60,7 +60,7 @@ public class Edge<V> {
 	 * Two edges are equal if they have equal from and to.
 	 */
 	@Override
-	final public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if(!(obj instanceof Edge<?>)) return false;
 		Edge<?> other = (Edge<?>)obj;
 		return
@@ -73,7 +73,7 @@ public class Edge<V> {
 	 * The hashCode is generated from the from and to.
 	 */
 	@Override
-	final public int hashCode() {
+	public final int hashCode() {
 		return from.hashCode() * 31 + to.hashCode();
 	}
 }

@@ -45,16 +45,16 @@ import java.util.RandomAccess;
  */
 public class FileList<T extends FileListObject> extends AbstractList<T> implements RandomAccess, Closeable {
 
-	final private String filenamePrefix;
-	final private String filenameExtension;
-	final private TempFileContext tempFileContext;
-	final private FixedRecordFile frf;
-	final private FileListObjectFactory<T> objectFactory;
+	private final String filenamePrefix;
+	private final String filenameExtension;
+	private final TempFileContext tempFileContext;
+	private final FixedRecordFile frf;
+	private final FileListObjectFactory<T> objectFactory;
 
-	final private AoByteArrayInputStream inBuffer;
-	final private DataInputStream dataInBuffer;
-	final private AoByteArrayOutputStream outBuffer;
-	final private DataOutputStream dataOutBuffer;
+	private final AoByteArrayInputStream inBuffer;
+	private final DataInputStream dataInBuffer;
+	private final AoByteArrayOutputStream outBuffer;
+	private final DataOutputStream dataOutBuffer;
 
 	public FileList(
 		String filenamePrefix,

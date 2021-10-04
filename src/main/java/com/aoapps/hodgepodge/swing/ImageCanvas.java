@@ -69,7 +69,7 @@ public class ImageCanvas extends JComponent {
 	}
 
 	@Override
-	synchronized public boolean imageUpdate(Image img, int flags, int x, int y, int w, int h) {
+	public synchronized boolean imageUpdate(Image img, int flags, int x, int y, int w, int h) {
 		if ((flags & SOMEBITS) != 0) {
 			long time = System.currentTimeMillis();
 			if (time >= nextupdate) {

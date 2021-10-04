@@ -45,7 +45,7 @@ import java.util.logging.StreamHandler;
  * 
  * @author  AO Industries, Inc.
  */
-abstract public class QueuedHandler extends Handler {
+public abstract class QueuedHandler extends Handler {
 
 	/**
 	 * Creates a new executor.  Must be {@linkplain #shutdownExecutor(java.util.concurrent.ExecutorService) shutdown} when no longer needed.

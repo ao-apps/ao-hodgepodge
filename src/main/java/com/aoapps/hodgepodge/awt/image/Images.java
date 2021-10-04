@@ -35,7 +35,7 @@ import java.io.InputStream;
 /**
  * @author  AO Industries, Inc.
  */
-final public class Images {
+public final class Images {
 
 	/**
 	 * Gets an array big enough to hold the pixels for an image of the given size.

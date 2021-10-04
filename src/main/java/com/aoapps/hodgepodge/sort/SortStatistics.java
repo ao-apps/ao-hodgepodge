@@ -31,7 +31,7 @@ import java.math.BigDecimal;
  *
  * @author  AO Industries, Inc.
  */
-final public class SortStatistics {
+public final class SortStatistics {
 
 	private long startTime;
 	private int currentRecursion;

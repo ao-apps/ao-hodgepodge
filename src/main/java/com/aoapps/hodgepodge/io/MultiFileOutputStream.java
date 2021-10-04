@@ -60,7 +60,7 @@ public class MultiFileOutputStream extends OutputStream {
 	}
 
 	@Override
-	synchronized public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		FileOutputStream tempOut=out;
 		if(tempOut!=null) {
 			out=null;
@@ -70,7 +70,7 @@ public class MultiFileOutputStream extends OutputStream {
 	}
 
 	@Override
-	synchronized public void flush() throws IOException {
+	public synchronized void flush() throws IOException {
 		if(out!=null) out.flush();
 	}
 
@@ -80,7 +80,7 @@ public class MultiFileOutputStream extends OutputStream {
 	}
 
 	@Override
-	synchronized public void write(byte[] b, int off, int len) throws IOException {
+	public synchronized void write(byte[] b, int off, int len) throws IOException {
 		while(off<len) {
 			if(out==null) makeNewFile();
 			int blockLen=len;
@@ -102,7 +102,7 @@ public class MultiFileOutputStream extends OutputStream {
 	}
 
 	@Override
-	synchronized public void write(int b) throws IOException {
+	public synchronized void write(int b) throws IOException {
 		out.write(b);
 		bytesOut+=1;
 		if(bytesOut>=fileSize) {

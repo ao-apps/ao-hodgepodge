@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-final public class RGBColor {
+public final class RGBColor {
 
 	/**
 	 * A hash of color names and values, all stored lowercase.  The data will be populated on the
@@ -61,7 +61,7 @@ final public class RGBColor {
 	 * @exception  NullPointerException      if <code>name</code> is <code>null</code>
 	 * @exception  IllegalArgumentException  if unable to determine the color
 	 */
-	public synchronized static int getColor(String name) throws IOException, IllegalArgumentException {
+	public static synchronized int getColor(String name) throws IOException, IllegalArgumentException {
 		if (name == null) throw new NullPointerException("name is null");
 		name = name.trim();
 		if (name.length() == 0) throw new IllegalArgumentException("name is empty");

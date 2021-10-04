@@ -38,7 +38,7 @@ public class RMIClientSocketFactoryTCP implements RMIClientSocketFactory, Serial
 
 	private static final long serialVersionUID = -7065291578204407899L;
 
-	final private String localAddress;
+	private final String localAddress;
 
 	/**
 	 * Will establish connections with the system default local address.

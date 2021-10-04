@@ -29,7 +29,7 @@ import java.io.Writer;
  *
  * @author  AO Industries, Inc.
  */
-final public class NativeToPosixWriter {
+public final class NativeToPosixWriter {
 
 	/**
 	 * Make no instances.

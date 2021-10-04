@@ -60,7 +60,7 @@ public class DefaultJDialog extends JDialog implements WindowListener, Component
 		addComponentListener(this);
 	}
 
-	final public void center(Component parent) {
+	public final void center(Component parent) {
 		Rectangle parentBounds=parent.getBounds();
 		Dimension size=getSize();
 		setBounds(
@@ -77,7 +77,7 @@ public class DefaultJDialog extends JDialog implements WindowListener, Component
 		if(source==this) closeWindow();
 	}
 
-	final public void closeWindow() {
+	public final void closeWindow() {
 		setVisible(false);
 		dispose();
 	}

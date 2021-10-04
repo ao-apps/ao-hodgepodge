@@ -37,7 +37,7 @@ public class WeightedEdge<V, W extends Weight<?>> extends Edge<V> {
 	/**
 	 * The weight of the edge.
 	 */
-	final public W getWeight() {
+	public final W getWeight() {
 		return weight;
 	}
 

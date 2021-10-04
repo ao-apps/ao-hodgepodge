@@ -37,7 +37,7 @@ import javax.net.ssl.SSLServerSocketFactory;
  */
 public class RMIServerSocketFactorySSL implements RMIServerSocketFactory {
 
-	final private String listenAddress;
+	private final String listenAddress;
 
 	/**
 	 * Will listen on the default listen address.

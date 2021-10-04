@@ -59,7 +59,7 @@ import java.util.regex.Pattern;
  *
  * @author  AO Industries, Inc.
  */
-abstract public class WildcardPatternMatcher {
+public abstract class WildcardPatternMatcher {
 
 	private static final WildcardPatternMatcher matchNone = new WildcardPatternMatcher() {
 		@Override
@@ -285,5 +285,5 @@ abstract public class WildcardPatternMatcher {
 	}
 
 	// TODO: Rename "matches", deprecate old with "default" method in Java 1.8?
-	abstract public boolean isMatch(String input);
+	public abstract boolean isMatch(String input);
 }

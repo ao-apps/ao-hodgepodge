@@ -64,9 +64,9 @@ public enum Month {
 		}
 	}
 
-	final private String longName;
-	final private String shortName;
-	final private int calendarMonth;
+	private final String longName;
+	private final String shortName;
+	private final int calendarMonth;
 
 	private Month(String longName, String shortName, int calendarMonth) {
 		this.longName = longName;

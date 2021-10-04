@@ -38,9 +38,9 @@ import java.io.OutputStream;
  */
 public class BitRateOutputStream extends FilterOutputStream {
 
-	public final static long MAX_CATCHUP_TIME=2*1000;
+	public static final long MAX_CATCHUP_TIME=2*1000;
 
-	final private BitRateProvider provider;
+	private final BitRateProvider provider;
 
 	private long blockStart=-1;
 	private long catchupTime;

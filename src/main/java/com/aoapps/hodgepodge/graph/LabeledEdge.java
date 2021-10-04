@@ -36,7 +36,7 @@ public class LabeledEdge<V, L> extends Edge<V> {
 	/**
 	 * The label of the edge.
 	 */
-	final public L getLabel() {
+	public final L getLabel() {
 		return label;
 	}
 

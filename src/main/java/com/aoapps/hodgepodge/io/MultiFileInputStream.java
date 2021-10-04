@@ -44,7 +44,7 @@ public class MultiFileInputStream extends InputStream {
 	}
 
 	@Override
-	synchronized public int available() throws IOException {
+	public synchronized int available() throws IOException {
 		if(in==null) {
 			if(nextFile>=files.length) return 0;
 			in=new FileInputStream(files[nextFile++]);
@@ -53,7 +53,7 @@ public class MultiFileInputStream extends InputStream {
 	}
 
 	@Override
-	synchronized public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		if(nextFile<files.length) nextFile=files.length;
 		FileInputStream tempIn=in;
 		if(tempIn!=null) {
@@ -63,7 +63,7 @@ public class MultiFileInputStream extends InputStream {
 	}
 
 	@Override
-	synchronized public void mark(int readlimit) {
+	public synchronized void mark(int readlimit) {
 		try {
 			if(in==null) {
 				if(nextFile>=files.length) {
@@ -79,7 +79,7 @@ public class MultiFileInputStream extends InputStream {
 	}
 
 	@Override
-	synchronized public boolean markSupported() {
+	public synchronized boolean markSupported() {
 		try {
 			if(in==null) {
 				if(nextFile>=files.length) return false;
@@ -92,7 +92,7 @@ public class MultiFileInputStream extends InputStream {
 	}
 
 	@Override
-	synchronized public int read() throws IOException {
+	public synchronized int read() throws IOException {
 		if(in==null) {
 			if(nextFile>=files.length) return -1;
 			in=new FileInputStream(files[nextFile++]);
@@ -113,7 +113,7 @@ public class MultiFileInputStream extends InputStream {
 	}
 
 	@Override
-	synchronized public int read(byte[] buff) throws IOException {
+	public synchronized int read(byte[] buff) throws IOException {
 		if(buff.length>0) {
 			if(in==null) {
 				if(nextFile>=files.length) return -1;
@@ -137,7 +137,7 @@ public class MultiFileInputStream extends InputStream {
 	}
 
 	@Override
-	synchronized public int read(byte[] buff, int off, int len) throws IOException {
+	public synchronized int read(byte[] buff, int off, int len) throws IOException {
 		if(len>0) {
 			if(in==null) {
 				if(nextFile>=files.length) return -1;
@@ -161,7 +161,7 @@ public class MultiFileInputStream extends InputStream {
 	}
 
 	@Override
-	synchronized public void reset() throws IOException {
+	public synchronized void reset() throws IOException {
 		if(in==null) {
 			if(nextFile>=files.length) {
 				super.reset();
@@ -173,7 +173,7 @@ public class MultiFileInputStream extends InputStream {
 	}
 
 	@Override
-	synchronized public long skip(long n) throws IOException {
+	public synchronized long skip(long n) throws IOException {
 		if(n>0) {
 			if(in==null) {
 				if(nextFile>=files.length) return -1;

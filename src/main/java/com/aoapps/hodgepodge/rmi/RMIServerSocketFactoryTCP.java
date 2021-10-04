@@ -35,7 +35,7 @@ import java.util.Objects;
  */
 public class RMIServerSocketFactoryTCP implements RMIServerSocketFactory {
 
-	final private String listenAddress;
+	private final String listenAddress;
 
 	/**
 	 * Will listen on the default listen address.

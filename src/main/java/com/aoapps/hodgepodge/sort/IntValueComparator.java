@@ -29,7 +29,7 @@ import java.util.Comparator;
  *
  * @author  AO Industries, Inc.
  */
-final public class IntValueComparator implements Comparator<Number> {
+public final class IntValueComparator implements Comparator<Number> {
 
 	private static final IntValueComparator instance = new IntValueComparator();
 

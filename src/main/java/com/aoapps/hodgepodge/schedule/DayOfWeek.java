@@ -54,9 +54,9 @@ public enum DayOfWeek {
 		}
 	}
 
-	final private String longName;
-	final private String shortName;
-	final private int calendarDayOfWeek;
+	private final String longName;
+	private final String shortName;
+	private final int calendarDayOfWeek;
 
 	private DayOfWeek(String longName, String shortName, int calendarDayOfWeek) {
 		this.longName = longName;

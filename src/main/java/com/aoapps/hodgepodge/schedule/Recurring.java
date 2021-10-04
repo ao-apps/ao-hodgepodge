@@ -154,12 +154,12 @@ public abstract class Recurring {
 	 * Recurring schedules are equal when they have both the same type and schedule.
 	 */
 	@Override
-	abstract public boolean equals(Object o);
+	public abstract boolean equals(Object o);
 
 	@Override
-	abstract public int hashCode();
+	public abstract int hashCode();
 
-	abstract public String getRecurringDisplay();
+	public abstract String getRecurringDisplay();
 
 	/**
 	 * Checks if the schedule can start on the given day.
@@ -173,7 +173,7 @@ public abstract class Recurring {
 	 * Gets an iterator over dates in the YYYY-MM-DD format.
 	 * The iteration starts at the given date.
 	 */
-	abstract public Iterator<Calendar> getScheduleIterator(Calendar from);
+	public abstract Iterator<Calendar> getScheduleIterator(Calendar from);
 
 	private static final int EVERYDAY_HASH_CODE = 0;
 	public static final Recurring EVERYDAY = new Recurring() {

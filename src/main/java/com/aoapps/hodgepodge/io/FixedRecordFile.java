@@ -36,10 +36,10 @@ import java.io.RandomAccessFile;
  */
 public class FixedRecordFile extends RandomAccessFile {
 
-	final private int recordLength;
+	private final int recordLength;
 
-	final private byte[] buff1;
-	final private byte[] buff2;
+	private final byte[] buff1;
+	private final byte[] buff2;
 
 	public FixedRecordFile(
 		String name,
