@@ -64,8 +64,8 @@ public class ImageCanvas extends JComponent {
 	public Dimension getPreferredSize() {
 		int iwidth=image.getWidth(this);
 		int iheight=image.getHeight(this);
-		if(iwidth>0&&iheight>0) return new Dimension(iwidth,iheight);
-		return new Dimension(0,0);
+		if(iwidth>0&&iheight>0) return new Dimension(iwidth, iheight);
+		return new Dimension(0, 0);
 	}
 
 	@Override
@@ -92,8 +92,8 @@ public class ImageCanvas extends JComponent {
 	@Override
 	public void paint(Graphics G) {
 		Dimension D;
-		int width,height;
-		int iwidth,iheight;
+		int width, height;
+		int iwidth, iheight;
 		if(
 			G!=null
 			&&(width=(D=getSize()).width)>0
@@ -106,15 +106,15 @@ public class ImageCanvas extends JComponent {
 			int temp=iheight*width/iwidth;
 			if(temp<=height) {
 				int y1=(height-temp)/2;
-				G.fillRect(0,0,width,y1);
-				G.drawImage(image,0,y1,width,temp,background,this);
-				G.fillRect(0,y1+temp,width,height-y1-temp);
+				G.fillRect(0, 0, width, y1);
+				G.drawImage(image, 0, y1, width, temp, background, this);
+				G.fillRect(0, y1+temp, width, height-y1-temp);
 			} else {
 				temp=iwidth*height/iheight;
 				int x1=(width-temp)/2;
-				G.fillRect(0,0,x1,height);
-				G.drawImage(image,x1,0,temp,height,background,this);
-				G.fillRect(x1+temp,0,width-x1-temp,height);
+				G.fillRect(0, 0, x1, height);
+				G.drawImage(image, x1, 0, temp, height, background, this);
+				G.fillRect(x1+temp, 0, width-x1-temp, height);
 			}
 		}
 	}

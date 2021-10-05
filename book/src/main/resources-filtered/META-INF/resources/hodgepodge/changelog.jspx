@@ -1113,7 +1113,7 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 			<ul>
 				<li>Allowing ao-taglib style "arg" maps to be passed through Dispatcher for non-taglib use.</li>
 				<li>args passed unmodifiable.</li>
-				<li><![CDATA[Passing args as Map&lt;String,?&gt; instead of forcing Map&lt;String,Object&gt;]]></li>
+				<li><![CDATA[Passing args as Map&lt;String, ?&gt; instead of forcing Map&lt;String, Object&gt;]]></li>
 				<li>Returning wildcard bound list as it better captures the essence of the unmodifiable list returned.</li>
 				<li>Java 1.7 compatible boolean sorting for pre-Java 1.7 use.</li>
 			</ul>

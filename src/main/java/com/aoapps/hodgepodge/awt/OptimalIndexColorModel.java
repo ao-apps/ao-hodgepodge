@@ -115,7 +115,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
 		int height=image.getHeight();
 		for(int y=0;y<height;y++) {
 			for(int x=0;x<width;x++) {
-				Integer color=image.getRGB(x,y);
+				Integer color=image.getRGB(x, y);
 				ColorCount colorCount = colorCounts.get(color);
 				if(colorCount==null) colorCounts.put(color, colorCount=new ColorCount(color));
 				colorCount.count++;

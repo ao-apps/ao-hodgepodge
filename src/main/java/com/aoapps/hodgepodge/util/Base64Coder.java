@@ -64,7 +64,8 @@ public class Base64Coder {
 	* @return    A character array with the Base64 encoded data.
 	*/
 	public static char[] encode (byte[] in) {
-	   return encode(in,in.length); }
+	   return encode(in, in.length);
+	}
 
 	/**
 	* Encodes a byte array into Base64 format.

@@ -9,27 +9,27 @@
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
  * version 2 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Library General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- * 
+ *
  * See http://www.cs.hut.fi/~santtu/java/ for more information on this
  * class.
- * 
+ *
  * This is rather straight re-implementation of the reference implementation
  * given in RFC1321 by RSA.
  *
  * Passes MD5 test suite as defined in RFC1321.
  *
  *
- * This Java class has been derived from the RSA Data Security, Inc. MD5 
- * Message-Digest Algorithm and its reference implementation. 
+ * This Java class has been derived from the RSA Data Security, Inc. MD5
+ * Message-Digest Algorithm and its reference implementation.
  *
  *
  * $Log: MD5.java,v $
@@ -65,7 +65,7 @@ public class MD5 {
 	 */
 	static class MD5State {
 		/**
-		 * 128-byte state 
+		 * 128-byte state
 		 */
 		final int[] state;
 
@@ -123,12 +123,12 @@ public class MD5 {
 	 */
 	private MD5State finals;
 
-	/** 
+	/**
 	 * Padding for Final()
 	 */
 	private static final byte[] padding = {
-		(byte) 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		(byte) 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	};
 
@@ -173,12 +173,12 @@ public class MD5 {
 		return rotate_left(a, s) + b;
 	}
 
-	private static int HH (int a, int b, int c, int d, int x, int s, int ac) { 
+	private static int HH (int a, int b, int c, int d, int x, int s, int ac) {
 		a = a + (b ^ c ^ d) + x + ac;
 		return rotate_left(a, s) + b;
 	}
 
-	private static int II (int a, int b, int c, int d, int x, int s, int ac) {  
+	private static int II (int a, int b, int c, int d, int x, int s, int ac) {
 		a = a + (c ^ (b | ~d)) + x + ac;
 		return rotate_left(a, s) + b;
 	}
@@ -190,9 +190,9 @@ public class MD5 {
 		out = new int[16];
 
 		for (i = j = 0; j < len; i++, j += 4) {
-			out[i] = (buffer[j + shift] & 0xff) | 
+			out[i] = (buffer[j + shift] & 0xff) |
 				((buffer[j + 1 + shift] & 0xff) << 8) |
-				((buffer[j + 2 + shift] & 0xff) << 16) | 
+				((buffer[j + 2 + shift] & 0xff) << 16) |
 				((buffer[j + 3 + shift] & 0xff) << 24);
 		}
 
@@ -200,7 +200,7 @@ public class MD5 {
 	}
 
 	private static void Transform (MD5State state, byte[] buffer, int shift) {
-		int	
+		int
 			a = state.state[0],
 			b = state.state[1],
 			c = state.state[2],
@@ -287,7 +287,7 @@ public class MD5 {
 		state.state[3] += d;
 	}
 
-	/**	
+	/**
 	 * Updates hash with the bytebuffer given (using at maximum length bytes from
 	 * that buffer)
 	 *
@@ -329,7 +329,7 @@ public class MD5 {
 			}
 
 			index = 0;
-		} else 
+		} else
 			i = 0;
 
 		/* buffer remaining input */
@@ -341,7 +341,7 @@ public class MD5 {
 		}
 	}
 
-	/* 
+	/*
 	 * Update()s for other datatypes than byte[] also. Update(byte[], int)
 	 * is only the main driver.
 	 */
@@ -387,7 +387,7 @@ public class MD5 {
 	 */
 	public final void Update (String s) {
 		byte[] chars=s.getBytes();
-		// Changed on 2004-04-10 due to getBytes(int,int,char[],byte) being deprecated
+		// Changed on 2004-04-10 due to getBytes(int, int, char[], byte) being deprecated
 		//byte	chars[];
 		//chars = new byte[s.length()];
 		//s.getBytes(0, s.length(), chars, 0);
@@ -399,7 +399,7 @@ public class MD5 {
 	 * Update buffer with a single integer (only &amp; 0xff part is used,
 	 * as a byte)
 	 *
-	 * @param i		Integer value, which is then converted to 
+	 * @param i		Integer value, which is then converted to
 	 *			byte as i &amp; 0xff
 	 */
 	public void Update (int i) {
@@ -426,7 +426,7 @@ public class MD5 {
 	 * Returns array of bytes (16 bytes) representing hash as of the
 	 * current state of this object. Note: getting a hash does not
 	 * invalidate the hash object, it only creates a copy of the real
-	 * state which is finalized. 
+	 * state which is finalized.
 	 *
 	 * @return	Array of 16 bytes, the hash of all updated bytes
 	 */
@@ -445,19 +445,19 @@ public class MD5 {
 
 			Update(fin, padding, 0, padlen);
 			/**/
-			Update(fin, bits, 0, 8);	
+			Update(fin, bits, 0, 8);
 
 			/* Update() sets finalds to null */
 			finals = fin;
 		}
 
 		return Encode(finals.state, 16);
-	}    
+	}
 
 	/**
 	 * Turns array of bytes into string representing each byte as
 	 * unsigned hex number.
-	 * 
+	 *
 	 * @param hash	Array of bytes to convert to hex-string
 	 * @return	Generated hex string
 	 */
@@ -466,7 +466,7 @@ public class MD5 {
 		int i;
 
 		for (i = 0; i < hash.length; i++) {
-			if (((int) hash[i] & 0xff) < 0x10) 
+			if (((int) hash[i] & 0xff) < 0x10)
 				buf.append("0");
 
 			buf.append(Long.toString((int) hash[i] & 0xff, 16));
