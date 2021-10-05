@@ -45,7 +45,7 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 / <a target="${javadoc.target}" href="${project.url}">Hodgepodge</a>]]></javadoc.breadcrumbs>
 		<!-- SonarQube -->
 		<sonar.projectKey>${project.groupId}:${project.artifactId}</sonar.projectKey>
-		<sonar.organization>aoindustries</sonar.organization>
+		<sonar.organization>ao-apps</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<!-- Don't try to compile counter_block_device.c -->
 		<sonar.c.file.suffixes>-</sonar.c.file.suffixes>
@@ -80,20 +80,20 @@ along with ao-hodgepodge.  If not, see <http://www.gnu.org/licenses />.
 	</developers>
 
 	<scm>
-		<connection>scm:git:git://github.com/aoindustries/ao-hodgepodge.git</connection>
-		<developerConnection>scm:git:git@github.com:aoindustries/ao-hodgepodge.git</developerConnection>
-		<url>https://github.com/aoindustries/ao-hodgepodge</url>
+		<connection>scm:git:git://github.com/ao-apps/ao-hodgepodge.git</connection>
+		<developerConnection>scm:git:git@github.com:ao-apps/ao-hodgepodge.git</developerConnection>
+		<url>https://github.com/ao-apps/ao-hodgepodge</url>
 		<tag>HEAD</tag>
 	</scm>
 
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/aoindustries/ao-hodgepodge/issues</url>
+		<url>https://github.com/ao-apps/ao-hodgepodge/issues</url>
 	</issueManagement>
 
 	<ciManagement>
 		<system>GitHub Actions</system>
-		<url>https://github.com/aoindustries/ao-hodgepodge/actions</url>
+		<url>https://github.com/ao-apps/ao-hodgepodge/actions</url>
 	</ciManagement>
 
 	<repositories>
