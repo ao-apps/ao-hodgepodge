@@ -64,11 +64,11 @@ public abstract class ShellInterpreter implements Runnable {
 
 	protected String status="Running";
 
-	public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err) {
+	protected ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err) {
 		this(in, out, err, EmptyArrays.EMPTY_STRING_ARRAY);
 	}
 
-	public ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String ... args) {
+	protected ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String ... args) {
 		this.pid=getNextPID();
 		this.in=in;
 		this.out=out;
@@ -99,7 +99,7 @@ public abstract class ShellInterpreter implements Runnable {
 		err.setEnabled(isInteractive);
 	}
 
-	public ShellInterpreter(Reader in, Writer out, Writer err) {
+	protected ShellInterpreter(Reader in, Writer out, Writer err) {
 		this(
 			in,
 			(out instanceof TerminalWriter) ? (TerminalWriter)out : new TerminalWriter(out),
@@ -107,7 +107,7 @@ public abstract class ShellInterpreter implements Runnable {
 		);
 	}
 
-	public ShellInterpreter(Reader in, Writer out, Writer err, String[] args) {
+	protected ShellInterpreter(Reader in, Writer out, Writer err, String[] args) {
 		this(
 			in,
 			(out instanceof TerminalWriter) ? (TerminalWriter)out : new TerminalWriter(out),

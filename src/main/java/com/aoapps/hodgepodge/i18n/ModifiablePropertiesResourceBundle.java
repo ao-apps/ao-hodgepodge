@@ -145,7 +145,7 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
 	 *                    only one may exist and be both readable and writable.  If more than
 	 *                    one possible source file exists, will throw an IllegalStateException.
 	 */
-	public ModifiablePropertiesResourceBundle(File... sourceFiles) {
+	protected ModifiablePropertiesResourceBundle(File... sourceFiles) {
 		File goodSourceFile = null;
 		if(sourceFiles!=null) {
 			for(File file : sourceFiles) {

@@ -94,7 +94,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 		private final boolean modifyAllText;
 
 		private final Sequence elementIdGenerator;
-		
+
 		private final Sequence lookupIdGenerator;
 
 		/**
@@ -995,7 +995,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 	private final EditableResourceBundleSet bundleSet;
 
 	@SuppressWarnings("LeakingThisInConstructor")
-	public EditableResourceBundle(Locale locale, EditableResourceBundleSet bundleSet, File... sourceFiles) {
+	protected EditableResourceBundle(Locale locale, EditableResourceBundleSet bundleSet, File... sourceFiles) {
 		super(sourceFiles);
 		this.locale = locale;
 		this.bundleSet = bundleSet;
@@ -1022,7 +1022,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 	 * Gets an object.
 	 * If editing is enabled and the bundle is modifiable, adds to the thread
 	 * lookup context if present.
-	 * 
+	 *
 	 * @see  BundleLookupThreadContext
 	 */
 	@Override

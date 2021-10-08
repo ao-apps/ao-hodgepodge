@@ -54,7 +54,7 @@ public abstract class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 	private final Socket connectSocket;
 	private volatile Thread thread;
 
-	public BandwidthLimitingTunnelHandlerThread(
+	protected BandwidthLimitingTunnelHandlerThread(
 		boolean verbose,
 		Long bandwidth,
 		Socket listenSocket,
