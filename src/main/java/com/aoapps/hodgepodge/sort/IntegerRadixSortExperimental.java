@@ -192,7 +192,7 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 	}
 
 	// From https://github.com/gorset/radix/blob/master/Radix.java
-	private static void insertionSort(int array[], int offset, int end) {
+	private static void insertionSort(int[] array, int offset, int end) {
 		for (int x=offset; x<end; ++x) {
 			for (int y=x; y>offset && array[y-1]>array[y]; y--) {
 				int temp = array[y];

@@ -388,7 +388,7 @@ public class MD5 {
 	public final void Update (String s) {
 		byte[] chars=s.getBytes();
 		// Changed on 2004-04-10 due to getBytes(int, int, char[], byte) being deprecated
-		//byte	chars[];
+		//byte[]	chars;
 		//chars = new byte[s.length()];
 		//s.getBytes(0, s.length(), chars, 0);
 

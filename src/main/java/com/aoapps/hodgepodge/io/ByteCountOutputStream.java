@@ -48,13 +48,13 @@ public class ByteCountOutputStream extends FilterOutputStream {
 	}
 
 	@Override
-	public void write(byte b[]) throws IOException {
+	public void write(byte[] b) throws IOException {
 		out.write(b, 0, b.length);
 		count+=b.length;
 	}
 
 	@Override
-	public void write(byte b[], int off, int len) throws IOException {
+	public void write(byte[] b, int off, int len) throws IOException {
 		out.write(b, off, len);
 		if(len > 0) count += len;
 	}

@@ -53,12 +53,12 @@ public class StringBuilderWriter extends Writer {
 	}
 
 	@Override
-	public void write(char cbuf[]) {
+	public void write(char[] cbuf) {
 		buffer.append(cbuf);
 	}
 
 	@Override
-	public void write(char cbuf[], int off, int len) {
+	public void write(char[] cbuf, int off, int len) {
 		buffer.append(cbuf, off, len);
 	}
 

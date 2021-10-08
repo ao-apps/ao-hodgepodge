@@ -93,7 +93,7 @@ public class FindReplaceWriter extends Writer {
 	}
 
 	@Override
-	public void write(char cbuf[], int off, int len) throws IOException  {
+	public void write(char[] cbuf, int off, int len) throws IOException  {
 		while(len > 0) {
 			write(cbuf[off++]);
 			len--;

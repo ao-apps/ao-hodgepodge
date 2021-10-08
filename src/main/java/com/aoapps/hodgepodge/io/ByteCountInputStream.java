@@ -49,14 +49,14 @@ public class ByteCountInputStream extends FilterInputStream {
 	}
 
 	@Override
-	public int read(byte b[]) throws IOException {
+	public int read(byte[] b) throws IOException {
 		int bytes = in.read(b);
 		if(bytes > 0) count += bytes;
 		return bytes;
 	}
 
 	@Override
-	public int read(byte b[], int off, int len) throws IOException {
+	public int read(byte[] b, int off, int len) throws IOException {
 		int bytes = in.read(b, off, len);
 		if(bytes > 0) count += bytes;
 		return bytes;

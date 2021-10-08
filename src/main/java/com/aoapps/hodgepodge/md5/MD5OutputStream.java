@@ -102,7 +102,7 @@ public class MD5OutputStream extends FilterOutputStream {
 	 * Writes a sub array of bytes.
 	 */
 	@Override
-	public void write (byte b[], int off, int len) throws IOException {
+	public void write (byte[] b, int off, int len) throws IOException {
 		out.write(b, off, len);
 		md5.Update(b, off, len);
 	}

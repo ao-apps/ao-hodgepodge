@@ -1,4 +1,4 @@
-/* 
+/*
  * $Header: /var/cvs/aocode-public/src/com/aoindustries/md5/MD5InputStream.java,v 1.2 2013/07/10 20:30:28 orion Exp $
  *
  * MD5InputStream, a subclass of FilterInputStream implementing MD5
@@ -11,16 +11,16 @@
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
  * version 2 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Library General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- * 
+ *
  * See http://www.cs.hut.fi/~santtu/java/ for more information on this
  * and the MD5 class.
  *
@@ -96,7 +96,7 @@ public class MD5InputStream extends FilterInputStream {
 	}
 
 	/**
-	 * Read a byte of data. 
+	 * Read a byte of data.
 	 * @see java.io.FilterInputStream
 	 */
 	@Override
@@ -113,7 +113,7 @@ public class MD5InputStream extends FilterInputStream {
 	 * Reads into an array of bytes.
 	 */
 	@Override
-	public int read (byte bytes[], int offset, int length) throws IOException {
+	public int read (byte[] bytes, int offset, int length) throws IOException {
 		int	r;
 
 		if ((r = in.read(bytes, offset, length)) == -1) return -1;
@@ -125,7 +125,7 @@ public class MD5InputStream extends FilterInputStream {
 
 	/**
 	 * Returns array of bytes representing hash of the stream as
-	 * finalized for the current state. 
+	 * finalized for the current state.
 	 * @see MD5#Final()
 	 */
 	public byte [] hash () {

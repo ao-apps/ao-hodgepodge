@@ -50,13 +50,13 @@ public class PrintStreamOutputStream extends OutputStream {
 	}
 
 	@Override
-	public void write(byte b[]) throws IOException {
+	public void write(byte[] b) throws IOException {
 		out.write(b);
 		if(out.checkError()) throw new IOException("Error in print stream");
 	}
 
 	@Override
-	public void write(byte b[], int off, int len) throws IOException {
+	public void write(byte[] b, int off, int len) throws IOException {
 		out.write(b, off, len);
 		if(out.checkError()) throw new IOException("Error in print stream");
 	}
