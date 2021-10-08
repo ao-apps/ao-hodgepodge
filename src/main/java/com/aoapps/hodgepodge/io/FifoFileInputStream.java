@@ -88,10 +88,12 @@ public class FifoFileInputStream extends InputStream {
 					if(b==-1) throw new EOFException("Unexpected EOF");
 					addStats(1);
 					long newFirstIndex=pos+1;
-					while(newFirstIndex>=file.maxFifoLength) newFirstIndex-=file.maxFifoLength;
+					while(newFirstIndex >= file.maxFifoLength) {
+						newFirstIndex -= file.maxFifoLength;
+					}
 					file.setFirstIndex(newFirstIndex);
 					file.setLength(len-1);
-					file.notify();
+					file.notifyAll();
 					return b;
 				}
 				try {
@@ -134,10 +136,12 @@ public class FifoFileInputStream extends InputStream {
 					if(totalRead==-1) throw new EOFException("Unexpected EOF");
 					addStats(totalRead);
 					long newFirstIndex=pos+totalRead;
-					while(newFirstIndex>=file.maxFifoLength) newFirstIndex-=file.maxFifoLength;
+					while(newFirstIndex >= file.maxFifoLength) {
+						newFirstIndex -= file.maxFifoLength;
+					}
 					file.setFirstIndex(newFirstIndex);
 					file.setLength(fileLen-totalRead);
-					file.notify();
+					file.notifyAll();
 					return totalRead;
 				}
 				try {
@@ -169,10 +173,12 @@ public class FifoFileInputStream extends InputStream {
 					// Skip as many bytes as currently available
 					long totalSkipped=skipSize;
 					long newFirstIndex=pos+skipSize;
-					while(newFirstIndex>=file.maxFifoLength) newFirstIndex-=file.maxFifoLength;
+					while(newFirstIndex >= file.maxFifoLength) {
+						newFirstIndex -= file.maxFifoLength;
+					}
 					file.setFirstIndex(newFirstIndex);
 					file.setLength(fileLen-skipSize);
-					file.notify();
+					file.notifyAll();
 					return totalSkipped;
 				}
 				try {

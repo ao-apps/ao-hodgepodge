@@ -79,12 +79,14 @@ public class FifoFileOutputStream extends OutputStream {
 				long len=file.getLength();
 				if(len<file.maxFifoLength) {
 					long pos=file.getFirstIndex()+len;
-					while(pos>=file.maxFifoLength) pos-=file.maxFifoLength;
+					while(pos >= file.maxFifoLength) {
+						pos -= file.maxFifoLength;
+					}
 					file.file.seek(pos+16);
 					file.file.write(b);
 					addStats(1);
 					file.setLength(len+1);
-					file.notify();
+					file.notifyAll();
 					return;
 				}
 				try {
@@ -115,7 +117,9 @@ public class FifoFileOutputStream extends OutputStream {
 					long maxBlockSize=file.maxFifoLength-fileLen;
 					if(maxBlockSize>0) {
 						long pos=file.getFirstIndex()+fileLen;
-						while(pos>=file.maxFifoLength) pos-=file.maxFifoLength;
+						while(pos >= file.maxFifoLength) {
+							pos -= file.maxFifoLength;
+						}
 						int blockSize=maxBlockSize>len?len:(int)maxBlockSize;
 						// When at the end of the file, write the remaining bytes
 						if((pos+blockSize)>file.maxFifoLength) blockSize=(int)(file.maxFifoLength-pos);
@@ -125,7 +129,7 @@ public class FifoFileOutputStream extends OutputStream {
 						file.setLength(fileLen+blockSize);
 						off+=blockSize;
 						len-=blockSize;
-						file.notify();
+						file.notifyAll();
 						break;
 					}
 					try {

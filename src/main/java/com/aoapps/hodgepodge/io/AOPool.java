@@ -314,7 +314,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 					}
 				}
 			} finally {
-				poolLock.notifyAll();
+				poolLock.notify(); // notifyAll() not needed: each waiting thread will also call notify() before returning
 			}
 		}
 		// Close all of the connections
@@ -516,7 +516,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 				if(concurrency>maxConcurrency) maxConcurrency=concurrency;
 				// Notify any others that may be waiting
 			} finally {
-				poolLock.notify();
+				poolLock.notify(); // notifyAll() not needed: each waiting thread will also call notify() before returning
 			}
 		}
 		synchronized(threadConnections) {
@@ -635,7 +635,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 				try {
 					if(busyConnections.remove(pooledConnection)) availableConnections.add(pooledConnection);
 				} finally {
-					poolLock.notify();
+					poolLock.notify(); // notifyAll() not needed: each waiting thread will also call notify() before returning
 				}
 			}
 		}
@@ -899,7 +899,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	@Deprecated
 	@SuppressWarnings("NoopMethodInAbstractClass")
 	public final void printStatisticsHTML(Appendable out) throws IOException, Ex {
-		
+		// Do nothing
 	}
 
 	/**
@@ -1093,7 +1093,9 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 							}
 						}
 					} finally {
-						if(!connsToClose.isEmpty()) poolLock.notify();
+						if(!connsToClose.isEmpty()) {
+							poolLock.notify(); // notifyAll() not needed: each waiting thread will also call notify() before returning
+						}
 					}
 				}
 				// Close all of the connections

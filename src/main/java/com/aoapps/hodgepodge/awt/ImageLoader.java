@@ -25,7 +25,6 @@ package com.aoapps.hodgepodge.awt;
 import java.awt.Image;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageConsumer;
-import java.util.Hashtable;
 import java.util.logging.Logger;
 
 /**
@@ -38,17 +37,23 @@ public final class ImageLoader implements ImageConsumer {
 	private int status = 0;
 
 	private final Image image;
-	private final Logger logger;
 
+	/**
+	 * @deprecated  logger is unused
+	 */
+	@Deprecated
 	public ImageLoader(Image image, Logger logger) {
-		this.image=image;
-		this.logger=logger;
+		this.image = image;
+	}
+
+	public ImageLoader(Image image) {
+		this.image = image;
 	}
 
 	@Override
 	public synchronized void imageComplete(int status) {
-		this.status|=status;
-		notify();
+		this.status |= status;
+		notifyAll();
 	}
 
 	/**
@@ -56,29 +61,42 @@ public final class ImageLoader implements ImageConsumer {
 	 */
 	public void loadImage() throws InterruptedException {
 		synchronized(this) {
-			status=0;
+			status = 0;
 			image.getSource().startProduction(this);
-			while((status&(IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE))==0) {
+			while((status & (IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE)) == 0) {
 				wait();
 			}
 		}
 	}
 
 	@Override
-	public void setColorModel(ColorModel mode) {}
+	public void setColorModel(ColorModel mode) {
+		// Do nothing
+	}
 
 	@Override
-	public void setDimensions(int width, int height) {}
+	public void setDimensions(int width, int height) {
+		// Do nothing
+	}
 
 	@Override
-	public void setHints(int flags) {}
+	public void setHints(int flags) {
+		// Do nothing
+	}
 
 	@Override
-	public void setPixels(int x, int y, int width, int height, ColorModel model, byte[] pixels, int offset, int scansize) {}
+	public void setPixels(int x, int y, int width, int height, ColorModel model, byte[] pixels, int offset, int scansize) {
+		// Do nothing
+	}
 
 	@Override
-	public void setPixels(int x, int y, int width, int height, ColorModel model, int[] pixels, int offset, int scansize) {}
+	public void setPixels(int x, int y, int width, int height, ColorModel model, int[] pixels, int offset, int scansize) {
+		// Do nothing
+	}
 
 	@Override
-	public void setProperties(Hashtable<?, ?> properties) {}
+	@SuppressWarnings("UseOfObsoleteCollectionType") // Hashtable required by ImageConsumer
+	public void setProperties(java.util.Hashtable<?, ?> properties) {
+		// Do nothing
+	}
 }
