@@ -172,16 +172,16 @@ public class StreamableInput extends DataInputStream {
 	 */
 	public String readLongUTF() throws IOException {
 		int length = readCompressedInt();
-		StringBuilder SB = new StringBuilder(length);
+		StringBuilder sb = new StringBuilder(length);
 		for(int position = 0; position<length; position+=20480) {
 			int expectedLen = length - position;
 			if(expectedLen>20480) expectedLen = 20480;
 			String block = readUTF();
 			if(block.length()!=expectedLen) throw new IOException("Block has unexpected length: expected "+expectedLen+", got "+block.length());
-			SB.append(block);
+			sb.append(block);
 		}
-		if(SB.length()!=length) throw new IOException("StringBuilder has unexpected length: expected "+length+", got "+SB.length());
-		return SB.toString();
+		if(sb.length() != length) throw new IOException("StringBuilder has unexpected length: expected " + length + ", got " + sb.length());
+		return sb.toString();
 	}
 
 	/**

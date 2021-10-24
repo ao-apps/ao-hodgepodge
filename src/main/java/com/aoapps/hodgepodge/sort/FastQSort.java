@@ -5,19 +5,19 @@
  *
  * Permission to use, copy, modify, and distribute this software
  * and its documentation for NON-COMMERCIAL or COMMERCIAL purposes and
- * without fee is hereby granted. 
+ * without fee is hereby granted.
  * Please refer to the file http://www.javasoft.com/copy_trademarks.html
  * for further important copyright and trademark information and to
  * http://www.javasoft.com/licensing.html for further important
  * licensing information for the Java (tm) Technology.
- * 
+ *
  * SUN MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF
  * THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
  * TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
  * PARTICULAR PURPOSE, OR NON-INFRINGEMENT. SUN SHALL NOT BE LIABLE FOR
  * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
- * 
+ *
  * THIS SOFTWARE IS NOT DESIGNED OR INTENDED FOR USE OR RESALE AS ON-LINE
  * CONTROL EQUIPMENT IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE
  * PERFORMANCE, SUCH AS IN THE OPERATION OF NUCLEAR FACILITIES, AIRCRAFT
@@ -69,30 +69,30 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
 
 	@Override
 	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		int length=list.size();
 		if(quickSort(list, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
 			insertionSort(list, 0, length-1, comparator, stats);
 		} else {
 			// If quickSort fails, do a more constant-time HeapSort on the remaining data
-			if(stats!=null) stats.sortSwitchingAlgorithms();
+			if(stats != null) stats.sortSwitchingAlgorithms();
 			HeapSort.heapSort(list, comparator, stats);
 		}
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 
 	@Override
 	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		int length=array.length;
 		if(quickSort(array, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
 			insertionSort(array, 0, length-1, comparator, stats);
 		} else {
 			// If quickSort fails, do a more constant-time HeapSort on the remaining data
-			if(stats!=null) stats.sortSwitchingAlgorithms();
+			if(stats != null) stats.sortSwitchingAlgorithms();
 			HeapSort.heapSort(array, comparator, stats);
 		}
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 
 	/**
@@ -113,7 +113,7 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
 	 * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
 	 */
 	private static <T> boolean quickSort(List<T> list, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
-		int M=4;
+		final int M = 4;
 
 		if((r-l)>M) {
 			int i=(r+l)/2;
@@ -140,16 +140,16 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
 
 			int newRecursion=currentRecursion+1;
 			if(newRecursion>maxRecursion) return false;
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			if(!quickSort(list, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			if(!quickSort(list, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 		}
 		return true;
-	} 
+	}
 
 	/**
 	 * This is a generic version of C.A.R Hoare's Quick Sort
@@ -169,7 +169,7 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
 	 * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
 	 */
 	private static <T> boolean quickSort(T[] array, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
-		int M=4;
+		final int M = 4;
 
 		if((r-l)>M) {
 			int i=(r+l)/2;
@@ -196,16 +196,16 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
 
 			int newRecursion=currentRecursion+1;
 			if(newRecursion>maxRecursion) return false;
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			if(!quickSort(array, l, j, comparator, stats, newRecursion, maxRecursion)) return false;
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			if(!quickSort(array, i+1, r, comparator, stats, newRecursion, maxRecursion)) return false;
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 		}
 		return true;
-	} 
+	}
 
 	static <T> void insertionSort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
 		for(int i=lo0+1;i<=hi0;i++) {

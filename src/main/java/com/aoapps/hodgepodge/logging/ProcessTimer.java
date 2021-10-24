@@ -43,6 +43,7 @@ import java.util.logging.Logger;
 
 public class ProcessTimer implements Runnable, AutoCloseable {
 
+	@SuppressWarnings("NonConstantLogger")
 	private final Logger logger;
 	private final String sourceClass;
 	private final String sourceMethod;
@@ -78,12 +79,13 @@ public class ProcessTimer implements Runnable, AutoCloseable {
 	public void close() {
 		isFinished = true;
 		if(isSleeping) {
-			Thread T = thread;
-			if(T != null) T.interrupt();
+			Thread t = thread;
+			if(t != null) t.interrupt();
 		}
 	}
 
 	@Override
+	@SuppressWarnings("SleepWhileInLoop")
 	public void run() {
 		if(!isFinished) {
 			thread = Thread.currentThread();

@@ -70,7 +70,7 @@ public final class EncodingUtils {
 	 * Escapes for use in a (X)HTML document and writes to the provided <code>Appendable</code>.
 	 * In addition to the standard XML Body encoding, it turns newlines into &lt;br /&gt; and spaces to &amp;#160;
 	 *
-	 * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
+	 * @param cs the string to be escaped.  If S is <code>null</code>, nothing is written.
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
@@ -78,8 +78,8 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(CharSequence S, int start, int end, Appendable out, boolean isXhtml) throws IOException {
-		encodeHtml(S, start, end, true, true, out, isXhtml);
+	public static void encodeHtml(CharSequence cs, int start, int end, Appendable out, boolean isXhtml) throws IOException {
+		encodeHtml(cs, start, end, true, true, out, isXhtml);
 	}
 
 	/**
@@ -135,7 +135,7 @@ public final class EncodingUtils {
 	 * Optionally, it turns newlines into &lt;br /&gt; and spaces to &amp;#160;
 	 * Any characters less than 0x1f that are not \t, \r, or \n are completely filtered.
 	 *
-	 * @param S the string to be escaped.  If S is <code>null</code>, nothing is written.
+	 * @param cs the string to be escaped.  If S is <code>null</code>, nothing is written.
 	 * @param make_br  will write &lt;br /&gt; tags for every newline character
 	 * @param make_nbsp  will write &amp;#160; for a space when another space follows
 	 *
@@ -145,40 +145,40 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(CharSequence S, int start, int end, boolean make_br, boolean make_nbsp, Appendable out, boolean isXhtml) throws IOException {
-		if (S != null) {
+	public static void encodeHtml(CharSequence cs, int start, int end, boolean make_br, boolean make_nbsp, Appendable out, boolean isXhtml) throws IOException {
+		if (cs != null) {
 			int toPrint = 0;
 			for (int c = start; c < end; c++) {
-				char ch = S.charAt(c);
+				char ch = cs.charAt(c);
 				switch(ch) {
 					// Standard XML escapes
 					case '<':
-						if(toPrint>0) {
-							out.append(S, c-toPrint, c);
-							toPrint=0;
+						if(toPrint > 0) {
+							out.append(cs, c - toPrint, c);
+							toPrint = 0;
 						}
 						out.append("&lt;");
 						break;
 					case '>':
-						if(toPrint>0) {
-							out.append(S, c-toPrint, c);
-							toPrint=0;
+						if(toPrint > 0) {
+							out.append(cs, c - toPrint, c);
+							toPrint = 0;
 						}
 						out.append("&gt;");
 						break;
 					case '&':
-						if(toPrint>0) {
-							out.append(S, c-toPrint, c);
-							toPrint=0;
+						if(toPrint > 0) {
+							out.append(cs, c - toPrint, c);
+							toPrint = 0;
 						}
 						out.append("&amp;");
 						break;
 					// Special (X)HTML options
 					case ' ':
 						if(make_nbsp) {
-							if(toPrint>0) {
-								out.append(S, c-toPrint, c);
-								toPrint=0;
+							if(toPrint > 0) {
+								out.append(cs, c - toPrint, c);
+								toPrint = 0;
 							}
 							out.append("&#160;");
 						} else {
@@ -186,24 +186,24 @@ public final class EncodingUtils {
 						}
 						break;
 					case '\t':
-						if(toPrint>0) {
-							out.append(S, c-toPrint, c);
-							toPrint=0;
+						if(toPrint > 0) {
+							out.append(cs, c - toPrint, c);
+							toPrint = 0;
 						}
 						out.append("&#x9;");
 						break;
 					case '\r':
-						if(toPrint>0) {
-							out.append(S, c-toPrint, c);
-							toPrint=0;
+						if(toPrint > 0) {
+							out.append(cs, c - toPrint, c);
+							toPrint = 0;
 						}
 						// skip '\r'
 						break;
 					case '\n':
 						if(make_br) {
-							if(toPrint>0) {
-								out.append(S, c-toPrint, c);
-								toPrint=0;
+							if(toPrint > 0) {
+								out.append(cs, c - toPrint, c);
+								toPrint = 0;
 							}
 							out.append(isXhtml ? "<br />" : "<br>").append('\n');
 						} else {
@@ -211,10 +211,10 @@ public final class EncodingUtils {
 						}
 						break;
 					default:
-						if(ch<' ') {
-							if(toPrint>0) {
-								out.append(S, c-toPrint, c);
-								toPrint=0;
+						if(ch < ' ') {
+							if(toPrint > 0) {
+								out.append(cs, c - toPrint, c);
+								toPrint = 0;
 							}
 							// skip the character
 						} else {
@@ -222,7 +222,7 @@ public final class EncodingUtils {
 						}
 				}
 			}
-			if(toPrint>0) out.append(S, end-toPrint, end);
+			if(toPrint > 0) out.append(cs, end - toPrint, end);
 		}
 	}
 

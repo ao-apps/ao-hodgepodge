@@ -27,11 +27,11 @@ import java.util.List;
  * Note: Invented by Donald Lewis Shell [CACM, July, 1959, pages 30-32]
  * @author Jason Harrison@cs.ubc.ca
  * @version 	1.0, 23 Jun 1995
- * @version 	1.1, 12 Apr 2000 
+ * @version 	1.1, 12 Apr 2000
  *              -- fixed java.lang.ArrayIndexOutOfBoundsException
  *                 Joel Berry &lt;jmbshifty@yahoo.com&gt; found this bug
  * <p>
- * http://www.auto.tuwien.ac.at/~blieb/woop/shell.html 
+ * http://www.auto.tuwien.ac.at/~blieb/woop/shell.html
  *
  * Shellsort is a simple extension of insertion sort which gains speed
  * by allowing exchanges of elements that are far apart. The idea is
@@ -64,7 +64,7 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
 
 	@Override
 	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 
 		int h=1;
 
@@ -87,20 +87,20 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
 				/*
 				 * pick the last element in the set
 				 */
-				T B = get(list, i, stats);
+				T b = get(list, i, stats);
 				int j;// = i;
 				/*
 				 * compare the element at B to the one before it in the set
 				 * if they are out of order continue this loop, moving
 				 * elements "back" to make room for B to be inserted.
 				 */
-				for( j = i; (j >= h) && compare(get(list, j-h, stats), B, comparator, stats)>0; j -= h) {
+				for( j = i; (j >= h) && compare(get(list, j-h, stats), b, comparator, stats)>0; j -= h) {
 					set(list, j, get(list, j-h, stats), stats);
 				}
 				/*
 				 *  insert B into the correct place
 				 */
-				set(list, j, B, stats);
+				set(list, j, b, stats);
 			}
 			/*
 			 * all sets h-sorted, now decrease set size
@@ -108,12 +108,12 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
 			h /= 3;
 		}
 
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 
 	@Override
 	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 
 		int h=1;
 
@@ -136,20 +136,20 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
 				/*
 				 * pick the last element in the set
 				 */
-				T B = get(array, i, stats);
+				T b = get(array, i, stats);
 				int j;// = i;
 				/*
 				 * compare the element at B to the one before it in the set
 				 * if they are out of order continue this loop, moving
 				 * elements "back" to make room for B to be inserted.
 				 */
-				for( j = i; (j >= h) && compare(get(array, j-h, stats), B, comparator, stats)>0; j -= h) {
+				for( j = i; (j >= h) && compare(get(array, j-h, stats), b, comparator, stats)>0; j -= h) {
 					set(array, j, get(array, j-h, stats), stats);
 				}
 				/*
 				 *  insert B into the correct place
 				 */
-				set(array, j, B, stats);
+				set(array, j, b, stats);
 			}
 			/*
 			 * all sets h-sorted, now decrease set size
@@ -157,6 +157,6 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
 			h /= 3;
 		}
 
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 }

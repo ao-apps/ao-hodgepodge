@@ -847,13 +847,13 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 			out.append("</td>\n"
 					+ "      <td>").append(Long.toString(totalTime*1000/useCount)).append("&#181;s</td>\n"
 					+ "      <td>");
-			Throwable T = allocateStackTraces[c];
-			if(T == null) out.append("&#160;");
+			Throwable t = allocateStackTraces[c];
+			if(t == null) out.append("&#160;");
 			else {
 				out.append("        <a href=\"#\" onclick='var elem = document.getElementById(\"stack_").append(Integer.toString(c)).append("\").style; elem.visibility=(elem.visibility==\"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
 						+ "        <span id=\"stack_").append(Integer.toString(c)).append("\" style=\"text-align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:").append(Integer.toString(c+1)).append("\">\n"
 						+ "          <pre style=\"text-align:left; background-color:white; border: 2px solid; border-color: black\">\n");
-				ErrorPrinter.printStackTraces(T, out);
+				ErrorPrinter.printStackTraces(t, out);
 				out.append("          </pre>\n"
 						+ "        </span>\n");
 			}

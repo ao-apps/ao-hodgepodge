@@ -130,9 +130,9 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
 	 * @see  #compareTo
 	 */
 	@Override
-	public boolean equals(Object O) {
-		if(!(O instanceof ByteCount)) return false;
-		ByteCount other = (ByteCount)O;
+	public boolean equals(Object obj) {
+		if(!(obj instanceof ByteCount)) return false;
+		ByteCount other = (ByteCount)obj;
 		return quantity==other.quantity && Objects.equals(unit, other.unit);
 	}
 

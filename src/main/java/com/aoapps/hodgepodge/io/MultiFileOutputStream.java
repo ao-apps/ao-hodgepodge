@@ -125,8 +125,6 @@ public class MultiFileOutputStream extends OutputStream {
 	}
 
 	public File[] getFiles() {
-		File[] FA=new File[files.size()];
-		files.toArray(FA);
-		return FA;
+		return files.toArray(new File[files.size()]);
 	}
 }

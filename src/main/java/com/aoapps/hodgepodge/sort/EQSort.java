@@ -33,7 +33,7 @@ import java.util.List;
  *              -Jason Harrison
  *
  * 21 Jun 1996: Modified code based on comments from Paul Haeberli, and
- *              Peter Schweizer (Peter.Schweizer@mni.fh-giessen.de).  
+ *              Peter Schweizer (Peter.Schweizer@mni.fh-giessen.de).
  *              Used Daeron Meyer's (daeron@geom.umn.edu) code for the
  *              new pivoting code. - Jason Harrison
  *
@@ -60,25 +60,25 @@ public final class EQSort extends BaseComparisonSortAlgorithm<Object> {
 
 	@Override
 	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		sort(list, 0, list.size()-1, comparator, stats);
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 
 	@Override
 	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		sort(array, 0, array.length-1, comparator, stats);
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 
 	private static <T> void sort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
 		int lo = lo0;
 		int hi = hi0;
 		if ((hi-lo) <= 3) {
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			brute(list, lo, hi, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 			return;
 		}
 
@@ -129,22 +129,22 @@ public final class EQSort extends BaseComparisonSortAlgorithm<Object> {
 		 *  equal to pivot, elements a[hi+1] to a[hi0] are greater than
 		 *  pivot.
 		 */
-		if(stats!=null) stats.sortRecursing();
+		if(stats != null) stats.sortRecursing();
 		sort(list, lo0, lo-1, comparator, stats);
-		if(stats!=null) stats.sortUnrecursing();
+		if(stats != null) stats.sortUnrecursing();
 
-		if(stats!=null) stats.sortRecursing();
+		if(stats != null) stats.sortRecursing();
 		sort(list, hi+1, hi0, comparator, stats);
-		if(stats!=null) stats.sortUnrecursing();
+		if(stats != null) stats.sortUnrecursing();
 	}
 
 	private static <T> void sort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
 		int lo = lo0;
 		int hi = hi0;
 		if ((hi-lo) <= 3) {
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			brute(array, lo, hi, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 			return;
 		}
 
@@ -195,37 +195,37 @@ public final class EQSort extends BaseComparisonSortAlgorithm<Object> {
 		 *  equal to pivot, elements a[hi+1] to a[hi0] are greater than
 		 *  pivot.
 		 */
-		if(stats!=null) stats.sortRecursing();
+		if(stats != null) stats.sortRecursing();
 		sort(array, lo0, lo-1, comparator, stats);
-		if(stats!=null) stats.sortUnrecursing();
+		if(stats != null) stats.sortUnrecursing();
 
-		if(stats!=null) stats.sortRecursing();
+		if(stats != null) stats.sortRecursing();
 		sort(array, hi+1, hi0, comparator, stats);
-		if(stats!=null) stats.sortUnrecursing();
+		if(stats != null) stats.sortUnrecursing();
 	}
 
 	private static <T> void brute(List<T> list, int lo, int hi, Comparator<? super T> comparator, SortStatistics stats) {
-		if ((hi-lo) == 1) {
-			T Ohi=get(list, hi, stats);
-			T Olo=get(list, lo, stats);
-			if(compare(Ohi, Olo, comparator, stats)<0) {
-				set(list, lo, Ohi, stats);
-				set(list, hi, Olo, stats);
+		if ((hi - lo) == 1) {
+			T ohi = get(list, hi, stats);
+			T olo = get(list, lo, stats);
+			if(compare(ohi, olo, comparator, stats)<0) {
+				set(list, lo, ohi, stats);
+				set(list, hi, olo, stats);
 			}
 		}
-		if ((hi-lo) == 2) {
-			T Olo=get(list, lo, stats);
-			int pmin = compare(Olo, get(list, lo+1, stats), comparator, stats)<0 ? lo : lo+1;
+		if ((hi - lo) == 2) {
+			T olo = get(list, lo, stats);
+			int pmin = compare(olo, get(list, lo+1, stats), comparator, stats)<0 ? lo : lo+1;
 			pmin = compare(get(list, pmin, stats), get(list, lo+2, stats), comparator, stats)<0 ? pmin : lo+2;
 			if (pmin != lo) {
 				set(list, lo, get(list, pmin, stats), stats);
-				set(list, pmin, Olo, stats);
+				set(list, pmin, olo, stats);
 			}
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			brute(list, lo+1, hi, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 		}
-		if ((hi-lo) == 3) {
+		if ((hi - lo) == 3) {
 			int pmin = compare(get(list, lo, stats), get(list, lo+1, stats), comparator, stats)<0 ? lo : lo+1;
 			pmin = compare(get(list, pmin, stats), get(list, lo+2, stats), comparator, stats)<0 ? pmin : lo+2;
 			pmin = compare(get(list, pmin, stats), get(list, lo+3, stats), comparator, stats)<0 ? pmin : lo+3;
@@ -235,34 +235,34 @@ public final class EQSort extends BaseComparisonSortAlgorithm<Object> {
 			pmax = compare(get(list, pmax, stats), get(list, hi-2, stats), comparator, stats)>0 ? pmax : hi-2;
 			if (pmax != hi) swap(list, hi, pmax, stats);
 
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			brute(list, lo+1, hi-1, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 		}
 	}
 
 	private static <T> void brute(T[] array, int lo, int hi, Comparator<T> comparator, SortStatistics stats) {
-		if ((hi-lo) == 1) {
-			T Ohi=get(array, hi, stats);
-			T Olo=get(array, lo, stats);
-			if(compare(Ohi, Olo, comparator, stats)<0) {
-				set(array, lo, Ohi, stats);
-				set(array, hi, Olo, stats);
+		if ((hi - lo) == 1) {
+			T ohi = get(array, hi, stats);
+			T olo = get(array, lo, stats);
+			if(compare(ohi, olo, comparator, stats)<0) {
+				set(array, lo, ohi, stats);
+				set(array, hi, olo, stats);
 			}
 		}
-		if ((hi-lo) == 2) {
-			T Olo=get(array, lo, stats);
-			int pmin = compare(Olo, get(array, lo+1, stats), comparator, stats)<0 ? lo : lo+1;
+		if ((hi - lo) == 2) {
+			T olo = get(array, lo, stats);
+			int pmin = compare(olo, get(array, lo+1, stats), comparator, stats)<0 ? lo : lo+1;
 			pmin = compare(get(array, pmin, stats), get(array, lo+2, stats), comparator, stats)<0 ? pmin : lo+2;
 			if (pmin != lo) {
 				set(array, lo, get(array, pmin, stats), stats);
-				set(array, pmin, Olo, stats);
+				set(array, pmin, olo, stats);
 			}
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			brute(array, lo+1, hi, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 		}
-		if ((hi-lo) == 3) {
+		if ((hi - lo) == 3) {
 			int pmin = compare(get(array, lo, stats), get(array, lo+1, stats), comparator, stats)<0 ? lo : lo+1;
 			pmin = compare(get(array, pmin, stats), get(array, lo+2, stats), comparator, stats)<0 ? pmin : lo+2;
 			pmin = compare(get(array, pmin, stats), get(array, lo+3, stats), comparator, stats)<0 ? pmin : lo+3;
@@ -272,9 +272,9 @@ public final class EQSort extends BaseComparisonSortAlgorithm<Object> {
 			pmax = compare(get(array, pmax, stats), get(array, hi-2, stats), comparator, stats)>0 ? pmax : hi-2;
 			if (pmax != hi) swap(array, hi, pmax, stats);
 
-			if(stats!=null) stats.sortRecursing();
+			if(stats != null) stats.sortRecursing();
 			brute(array, lo+1, hi-1, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
+			if(stats != null) stats.sortUnrecursing();
 		}
 	}
 }

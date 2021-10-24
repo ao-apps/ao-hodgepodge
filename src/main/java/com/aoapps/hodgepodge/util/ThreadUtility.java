@@ -35,9 +35,11 @@ public final class ThreadUtility {
 	}
 
 	public static ThreadGroup getTopLevelThreadGroup() {
-		ThreadGroup TG=Thread.currentThread().getThreadGroup();
+		ThreadGroup tg = Thread.currentThread().getThreadGroup();
 		ThreadGroup parent;
-		while((parent=TG.getParent())!=null) TG=parent;
-		return TG;
+		while((parent = tg.getParent()) != null) {
+			tg = parent;
+		}
+		return tg;
 	}
 }

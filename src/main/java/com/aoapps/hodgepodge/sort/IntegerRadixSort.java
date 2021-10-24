@@ -135,7 +135,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	/**
 	 * Waits for all futures to complete, discarding any results.
-	 * 
+	 *
 	 * Note: This method is cloned from ConcurrentUtils.java to avoid package dependency.
 	 */
 	private static void waitForAll(Iterable<? extends Future<?>> futures) throws InterruptedException, ExecutionException {
@@ -890,13 +890,13 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 		if(list instanceof IntList) {
 			sort((IntList)list);
 		} else {
-			if(stats!=null) stats.sortStarting();
+			if(stats != null) stats.sortStarting();
 			final int size = list.size();
 			if(size < MIN_RADIX_SORT_SIZE) {
-				if(stats!=null) stats.sortSwitchingAlgorithms();
+				if(stats != null) stats.sortSwitchingAlgorithms();
 				Collections.sort(list, IntValueComparator.getInstance());
 			} else {
-				if(stats!=null) {
+				if(stats != null) {
 					// One get and one set for each element
 					stats.sortGetting(size);
 					stats.sortSetting(size);
@@ -922,7 +922,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					);
 				}
 			}
-			if(stats!=null) stats.sortEnding();
+			if(stats != null) stats.sortEnding();
 		}
 	}
 	// </editor-fold>
@@ -984,13 +984,13 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	@Override
 	public <N extends Number> void sort(N[] array, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		final int size = array.length;
 		if(size < MIN_RADIX_SORT_SIZE) {
-			if(stats!=null) stats.sortSwitchingAlgorithms();
+			if(stats != null) stats.sortSwitchingAlgorithms();
 			Arrays.sort(array, IntValueComparator.getInstance());
 		} else {
-			if(stats!=null) {
+			if(stats != null) {
 				// One get and one set for each element
 				stats.sortGetting(size);
 				stats.sortSetting(size);
@@ -1016,7 +1016,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				);
 			}
 		}
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 	// </editor-fold>
 
@@ -1110,13 +1110,13 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	@Override
 	public void sort(IntList list, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		final int size = list.size();
 		if(size < MIN_RADIX_SORT_SIZE) {
-			if(stats!=null) stats.sortSwitchingAlgorithms();
+			if(stats != null) stats.sortSwitchingAlgorithms();
 			Collections.sort(list, IntValueComparator.getInstance());
 		} else {
-			if(stats!=null) {
+			if(stats != null) {
 				// One get and one set for each element
 				stats.sortGetting(size);
 				stats.sortSetting(size);
@@ -1142,7 +1142,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				);
 			}
 		}
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 	// </editor-fold>
 
@@ -1203,13 +1203,13 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	@Override
 	public void sort(int[] array, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		final int size = array.length;
 		if(size < MIN_RADIX_SORT_SIZE) {
-			if(stats!=null) stats.sortSwitchingAlgorithms();
+			if(stats != null) stats.sortSwitchingAlgorithms();
 			Arrays.sort(array);
 		} else {
-			if(stats!=null) {
+			if(stats != null) {
 				// One get and one set for each element
 				stats.sortGetting(size);
 				stats.sortSetting(size);
@@ -1235,7 +1235,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 				);
 			}
 		}
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 	// </editor-fold>
 }

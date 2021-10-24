@@ -35,12 +35,12 @@ public class CycleException extends GraphException {
 	private static final long serialVersionUID = 7713106090763335656L;
 
 	private static String getMessage(List<?> vertices) {
-		StringBuilder SB = new StringBuilder();
-		SB.append("Cycle exists:\n");
+		StringBuilder sb = new StringBuilder();
+		sb.append("Cycle exists:\n");
 		for(Object v : vertices) {
-			SB.append("    ").append(v.getClass().getName()).append("(\"").append(v.toString()).append("\")\n");
+			sb.append("    ").append(v.getClass().getName()).append("(\"").append(v.toString()).append("\")\n");
 		}
-		return SB.toString();
+		return sb.toString();
 	}
 
 	private final List<?> vertices;

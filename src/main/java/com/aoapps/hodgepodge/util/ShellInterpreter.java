@@ -174,14 +174,14 @@ public abstract class ShellInterpreter implements Runnable {
 			} else {
 				return handleCommand(args);
 			}
-		} catch(ThreadDeath TD) {
-			throw TD;
-		} catch(Throwable T) {
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
 			if(isInteractive) {
-				ErrorPrinter.printStackTraces(T, err);
+				ErrorPrinter.printStackTraces(t, err);
 				err.flush();
 				return true;
-			} else throw T;
+			} else throw t;
 		}
 	}
 
@@ -278,11 +278,11 @@ public abstract class ShellInterpreter implements Runnable {
 			this.err.println(getName()+": "+exception.getMessage());
 			status="SQL Error: "+exception.getMessage();
 			this.err.flush();
-		} catch(ThreadDeath TD) {
-			throw TD;
-		} catch(Throwable T) {
-			ErrorPrinter.printStackTraces(T, this.err);
-			status="Error: "+T.toString();
+		} catch(ThreadDeath td) {
+			throw td;
+		} catch(Throwable t) {
+			ErrorPrinter.printStackTraces(t, this.err);
+			status = "Error: " + t.toString();
 			this.err.flush();
 		} finally {
 			if(Thread.currentThread()==thread) thread=null;

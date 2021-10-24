@@ -48,56 +48,56 @@ public final class HeapSort extends BaseComparisonSortAlgorithm<Object> {
 
 	@Override
 	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		heapSort(list, comparator, stats);
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 
 	@Override
 	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		heapSort(array, comparator, stats);
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 
 	static <T> void heapSort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-		int N=list.size();
-		for (int k = N/2; k > 0; k--) {
-			if(stats!=null) stats.sortRecursing();
-			downheap(list, k, N, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
+		int n = list.size();
+		for (int k = n / 2; k > 0; k--) {
+			if(stats != null) stats.sortRecursing();
+			downheap(list, k, n, comparator, stats);
+			if(stats != null) stats.sortUnrecursing();
 		}
 		do {
-			swap(list, 0, N-1, stats);
-			N -= 1;
-			if(stats!=null) stats.sortRecursing();
-			downheap(list, 1, N, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
-		} while (N > 1);
+			swap(list, 0, n - 1, stats);
+			n -= 1;
+			if(stats != null) stats.sortRecursing();
+			downheap(list, 1, n, comparator, stats);
+			if(stats != null) stats.sortUnrecursing();
+		} while (n > 1);
 	}
 
 	static <T> void heapSort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-		int N=array.length;
-		for (int k = N/2; k > 0; k--) {
-			if(stats!=null) stats.sortRecursing();
-			downheap(array, k, N, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
+		int n = array.length;
+		for (int k = n / 2; k > 0; k--) {
+			if(stats != null) stats.sortRecursing();
+			downheap(array, k, n, comparator, stats);
+			if(stats != null) stats.sortUnrecursing();
 		}
 		do {
-			swap(array, 0, N-1, stats);
-			N -= 1;
-			if(stats!=null) stats.sortRecursing();
-			downheap(array, 1, N, comparator, stats);
-			if(stats!=null) stats.sortUnrecursing();
-		} while (N > 1);
+			swap(array, 0, n - 1, stats);
+			n -= 1;
+			if(stats != null) stats.sortRecursing();
+			downheap(array, 1, n, comparator, stats);
+			if(stats != null) stats.sortUnrecursing();
+		} while (n > 1);
 	}
 
-	private static <T> void downheap(List<T> list, int k, int N, Comparator<? super T> comparator, SortStatistics stats) {
-		T temp=get(list, k - 1, stats);
-		while (k <= N/2) {
+	private static <T> void downheap(List<T> list, int k, int n, Comparator<? super T> comparator, SortStatistics stats) {
+		T temp = get(list, k - 1, stats);
+		while (k <= n / 2) {
 			int j = k + k;
 			if(
-				(j < N)
+				(j < n)
 				&& compare(list, j-1, j, comparator, stats) < 0
 			) {
 				j++;
@@ -112,12 +112,12 @@ public final class HeapSort extends BaseComparisonSortAlgorithm<Object> {
 		set(list, k-1, temp, stats);
 	}
 
-	private static <T> void downheap(T[] array, int k, int N, Comparator<? super T> comparator, SortStatistics stats) {
+	private static <T> void downheap(T[] array, int k, int n, Comparator<? super T> comparator, SortStatistics stats) {
 		T temp=get(array, k - 1, stats);
-		while (k <= N/2) {
+		while (k <= n / 2) {
 			int j = k + k;
 			if(
-				(j < N)
+				(j < n)
 				&& compare(array, j-1, j, comparator, stats) < 0
 			) {
 				j++;

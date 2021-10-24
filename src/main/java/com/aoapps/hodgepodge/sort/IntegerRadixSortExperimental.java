@@ -100,9 +100,9 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 
 	@Override
 	public void sort(int[] array, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 			if(array.length < MIN_RADIX_SORT_SIZE) {
-				if(stats!=null) stats.sortSwitchingAlgorithms();
+				if(stats != null) stats.sortSwitchingAlgorithms();
 				Arrays.sort(array);
 			} else {
 			if(ENABLE_CONCURRENCY) {
@@ -119,7 +119,7 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 				sort(array, 0, array.length, 32-R_BITS_PER_PASS, null);
 			}
 		}
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 
 	private static final int UNSIGNED_OFFSET = 0x80000000;

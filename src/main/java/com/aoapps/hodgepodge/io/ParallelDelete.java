@@ -106,6 +106,7 @@ public class ParallelDelete {
 	/**
 	 * Deletes multiple directories in parallel (but not concurrently).
 	 */
+	@SuppressWarnings("UseOfSystemOutOrSystemErr")
 	public static void main(String[] args) {
 		if(args.length==0) {
 			System.err.println("Usage: "+ParallelDelete.class.getName()+" [-n] [-v] [--] path {path}");
@@ -143,6 +144,7 @@ public class ParallelDelete {
 	 * possibly follow a symbolic link and delete outside the intended directory
 	 * trees.
 	 */
+	@SuppressWarnings("ThrowFromFinallyBlock")
 	public static void parallelDelete(List<File> directories, final PrintStream verboseOutput, final boolean dryRun) throws IOException {
 		final int numDirectories = directories.size();
 
@@ -255,7 +257,7 @@ public class ParallelDelete {
 			deleteThread.start();
 			try {
 				// Main loop, continue until nextFiles is empty
-				final StringBuilder SB = new StringBuilder();
+				final StringBuilder sb = new StringBuilder();
 				while(true) {
 					synchronized(deleteException) {
 						if(deleteException[0]!=null) break;
@@ -264,10 +266,10 @@ public class ParallelDelete {
 					if(!iter.hasNext()) break;
 					String relPath = iter.next();
 					for(FilesystemIterator iterator : nextFiles.remove(relPath)) {
-						SB.setLength(0);
-						SB.append(iterator.getStartPath());
-						SB.append(relPath);
-						String fullPath = SB.toString();
+						sb.setLength(0);
+						sb.append(iterator.getStartPath());
+						sb.append(relPath);
+						String fullPath = sb.toString();
 						try {
 							deleteQueue.put(new File(fullPath));
 						} catch(InterruptedException err) {

@@ -37,7 +37,7 @@ import javax.crypto.Cipher;
  */
 public class PaddingOutputStream extends FilterOutputStream {
 
-	private static volatile SecureRandom SECURE_RANDOM;
+	private static volatile SecureRandom secureRandom;
 
 	private final int blockSize;
 	private final Random random;
@@ -71,7 +71,7 @@ public class PaddingOutputStream extends FilterOutputStream {
 			// Will not use random when there is no blocksize
 			(blockSize <= 0) ? null
 			// No need for atomics, doesn't matter which instance is kept in race condition
-			: (SECURE_RANDOM == null) ? (SECURE_RANDOM = new SecureRandom()) : SECURE_RANDOM
+			: (secureRandom == null) ? (secureRandom = new SecureRandom()) : secureRandom
 		);
 	}
 

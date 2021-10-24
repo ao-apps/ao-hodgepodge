@@ -59,7 +59,7 @@ public class TopologicalSorter<V, Ex extends Exception> implements GraphSorter<V
 		Set<V> visited = AoCollections.newHashSet(size);
 		Set<V> sequence = new LinkedHashSet<>();
 		//L ← Empty list that will contain the sorted nodes
-		Set<V> L = AoCollections.newLinkedHashSet(size);
+		Set<V> l = AoCollections.newLinkedHashSet(size);
 		//S ← Set of all nodes with no incoming edges
 		//for each node n in S do
 		for(V n : vertices) {
@@ -69,21 +69,21 @@ public class TopologicalSorter<V, Ex extends Exception> implements GraphSorter<V
 				// This check is looking for starting nodes
 				&& (isForward ? graph.getEdgesTo(n) : graph.getEdgesFrom(n)).isEmpty()
 			) {
-				topologicalSortVisit(n, L, visited, sequence);
+				topologicalSortVisit(n, l, visited, sequence);
 			}
 		}
-		if(L.size() != size) {
+		if(l.size() != size) {
 			throw new IllegalArgumentException(
 				"Not all vertices added.  Does the symmetric graph have consistent edges to and from?\n"
 				+ "    vertices(" + size + "): " + vertices
-				+ "    results(" + L.size() + "): " + L
+				+ "    results(" + l.size() + "): " + l
 			);
 		}
-		return L;
+		return l;
 	}
 
 	//function visit(node n)
-	private void topologicalSortVisit(V n, Set<V> L, Set<V> visited, Set<V> sequence) throws CycleException, Ex {
+	private void topologicalSortVisit(V n, Set<V> l, Set<V> visited, Set<V> sequence) throws CycleException, Ex {
 		//    if n has not been visited yet then
 		//        mark n as visited
 		if(visited.add(n)) {
@@ -101,11 +101,11 @@ public class TopologicalSorter<V, Ex extends Exception> implements GraphSorter<V
 					vertices.add(m);
 					throw new CycleException(AoCollections.optimalUnmodifiableList(vertices));
 				}
-				topologicalSortVisit(m, L, visited, sequence);
+				topologicalSortVisit(m, l, visited, sequence);
 				sequence.remove(m);
 			}
 			//        add n to L
-			if(!L.add(n)) throw new AssertionError();
+			if(!l.add(n)) throw new AssertionError();
 		}
 	}
 }

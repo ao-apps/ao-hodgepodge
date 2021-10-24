@@ -219,11 +219,11 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 					while(records.hasNext()) {
 						// Write to buffer
 						outBuffer.reset();
-						T O=records.next();
-						if(O==null) dataOutBuffer.writeBoolean(false);
+						T o = records.next();
+						if(o == null) dataOutBuffer.writeBoolean(false);
 						else {
 							dataOutBuffer.writeBoolean(true);
-							O.writeRecord(dataOutBuffer);
+							o.writeRecord(dataOutBuffer);
 						}
 						int recordSize=outBuffer.size();
 						if(recordSize>frf.getRecordLength()) throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());

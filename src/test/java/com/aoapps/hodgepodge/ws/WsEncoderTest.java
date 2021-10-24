@@ -45,13 +45,13 @@ public class WsEncoderTest extends TestCase {
 
 	public void testEncodeDecode() {
 		Random random = new SecureRandom();
-		StringBuilder SB = new StringBuilder();
-		for(int c=0;c<1000;c++) {
-			SB.setLength(0);
-			for(int d=0;d<100;d++) {
-				SB.append((char)random.nextInt(Character.MAX_VALUE+1));
+		StringBuilder sb = new StringBuilder();
+		for(int c = 0; c < 1000; c++) {
+			sb.setLength(0);
+			for(int d = 0; d < 100; d++) {
+				sb.append((char)random.nextInt(Character.MAX_VALUE + 1));
 			}
-			String value = SB.toString();
+			String value = sb.toString();
 			String encoded = WsEncoder.encode(value);
 			String decoded = WsEncoder.decode(encoded);
 			assertEquals(value, decoded);

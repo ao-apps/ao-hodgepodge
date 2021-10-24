@@ -96,8 +96,8 @@ public final class RGBColor {
 
 		// Look in the color hash first
 		name = name.toLowerCase(Locale.ROOT);
-		Integer I = colors.get(name);
-		if (I != null) return I;
+		Integer cached = colors.get(name);
+		if (cached != null) return cached;
 
 		int start = 0;
 		if (name.length() >= 1 && name.charAt(0) == '#') start = 1;

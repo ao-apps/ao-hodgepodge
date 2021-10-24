@@ -143,9 +143,9 @@ public class BitRate implements Serializable, Comparable<BitRate> {
 	 * @see  #compareTo
 	 */
 	@Override
-	public boolean equals(Object O) {
-		if(!(O instanceof BitRate)) return false;
-		BitRate other = (BitRate)O;
+	public boolean equals(Object obj) {
+		if(!(obj instanceof BitRate)) return false;
+		BitRate other = (BitRate)obj;
 		return quantity==other.quantity && Objects.equals(unit, other.unit);
 	}
 

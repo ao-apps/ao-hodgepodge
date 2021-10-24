@@ -50,15 +50,15 @@ public final class JavaSort extends BaseComparisonSortAlgorithm<Object> {
 
 	@Override
 	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		Collections.sort(list, comparator);
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 
 	@Override
 	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortStarting();
+		if(stats != null) stats.sortStarting();
 		Arrays.sort(array, comparator);
-		if(stats!=null) stats.sortEnding();
+		if(stats != null) stats.sortEnding();
 	}
 }

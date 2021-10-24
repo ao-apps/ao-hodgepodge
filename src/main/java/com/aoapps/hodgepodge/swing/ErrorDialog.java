@@ -47,12 +47,12 @@ public class ErrorDialog extends DefaultJDialog implements ActionListener {
 
 	private EnterJButton closeButton;
 
-	public ErrorDialog(Component parent, String title, Throwable T) {
-		this(parent, title, T, (Object[])null);
+	public ErrorDialog(Component parent, String title, Throwable t) {
+		this(parent, title, t, (Object[])null);
 	}
 
 	@SuppressWarnings({"LeakingThisInConstructor", "OverridableMethodCallInConstructor"})
-	public ErrorDialog(Component parent, String title, Throwable T, Object... extraInfo) {
+	public ErrorDialog(Component parent, String title, Throwable t, Object... extraInfo) {
 		super((parent instanceof JFrame) ? (JFrame)parent : new JFrame(), title, true, 400, 300);
 
 		@SuppressWarnings("OverridableMethodCallInConstructor")
@@ -66,7 +66,7 @@ public class ErrorDialog extends DefaultJDialog implements ActionListener {
 		// Convert the error
 		CharArrayWriter cout=new CharArrayWriter();
 		PrintWriter pout=new PrintWriter(cout);
-		ErrorPrinter.printStackTraces(T, pout, extraInfo);
+		ErrorPrinter.printStackTraces(t, pout, extraInfo);
 		pout.flush();
 		String errorText=cout.toString();
 

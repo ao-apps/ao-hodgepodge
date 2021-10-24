@@ -117,7 +117,7 @@ public class Benchmark {
 					final int[] counter=new int[1];
 					Thread[] threads=new Thread[concurrency];
 					for(int d=0;d<concurrency;d++) {
-						Thread T=threads[d]=new Thread() {
+						Thread t = threads[d] = new Thread() {
 							@Override
 							public void run() {
 								int count=0;
@@ -142,7 +142,7 @@ public class Benchmark {
 								}
 							}
 						};
-						T.start();
+						t.start();
 					}
 					for(int d=0;d<concurrency;d++) {
 						try {

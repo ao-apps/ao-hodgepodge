@@ -93,10 +93,10 @@ public class BandwidthLimitingTunnel implements Runnable {
 			int listen_port=Integer.parseInt(args[pos++]);
 			String connect_address=args[pos++];
 			int connect_port=Integer.parseInt(args[pos++]);
-			String S = args[pos++];
-			Long upstream_bandwidth=S.length()==0 ? null : Long.parseLong(S);
-			S = args[pos++];
-			Long downstream_bandwidth=S.length()==0 ? null : Long.parseLong(S);
+			String s = args[pos++];
+			Long upstream_bandwidth = s.length() == 0 ? null : Long.parseLong(s);
+			s = args[pos++];
+			Long downstream_bandwidth = s.length() == 0 ? null : Long.parseLong(s);
 			new BandwidthLimitingTunnel(verbose, listen_address, listen_port, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth);
 		} else {
 			printUsage();
@@ -129,10 +129,10 @@ public class BandwidthLimitingTunnel implements Runnable {
 						new BandwidthLimitingTunnelHandler(verbose, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth, socket);
 					}
 				}
-			} catch(ThreadDeath TD) {
-				throw TD;
-			} catch(Throwable T) {
-				ErrorPrinter.printStackTraces(T, System.err);
+			} catch(ThreadDeath td) {
+				throw td;
+			} catch(Throwable t) {
+				ErrorPrinter.printStackTraces(t, System.err);
 				try {
 					Thread.sleep(10000);
 				} catch(InterruptedException err) {

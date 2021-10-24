@@ -73,21 +73,21 @@ abstract class BaseComparisonSortAlgorithm<E> extends BaseSortAlgorithm<E> imple
 
 	@SuppressWarnings({"unchecked"})
 	protected static <T> int compare(List<T> list, int i, int j, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortInListComparing();
+		if(stats != null) stats.sortInListComparing();
 
-		T O1=list.get(i);
-		T O2=list.get(j);
+		T o1 = list.get(i);
+		T o2 = list.get(j);
 
-		if(O1==null) {
-			if(O2==null) return 0;
+		if(o1 == null) {
+			if(o2 == null) return 0;
 			else return -1;
 		} else {
-			if(O2==null) return 1;
+			if(o2 == null) return 1;
 			else {
-				if(comparator!=null) return comparator.compare(O1, O2);
-				else if(O1 instanceof Comparable<?>) {
-					Comparable<? super T> comp1 = (Comparable<? super T>)O1;
-					return comp1.compareTo(O2);
+				if(comparator != null) return comparator.compare(o1, o2);
+				else if(o1 instanceof Comparable<?>) {
+					Comparable<? super T> comp1 = (Comparable<? super T>)o1;
+					return comp1.compareTo(o2);
 				} else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
 			}
 		}
@@ -95,40 +95,40 @@ abstract class BaseComparisonSortAlgorithm<E> extends BaseSortAlgorithm<E> imple
 
 	@SuppressWarnings({"unchecked"})
 	protected static <T> int compare(T[] array, int i, int j, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortInListComparing();
+		if(stats != null) stats.sortInListComparing();
 
-		T O1=array[i];
-		T O2=array[j];
+		T o1 = array[i];
+		T o2 = array[j];
 
-		if(O1==null) {
-			if(O2==null) return 0;
+		if(o1 == null) {
+			if(o2 == null) return 0;
 			else return -1;
 		} else {
-			if(O2==null) return 1;
+			if(o2 == null) return 1;
 			else {
-				if(comparator!=null) return comparator.compare(O1, O2);
-				else if(O1 instanceof Comparable<?>) {
-					Comparable<? super T> comp1 = (Comparable<? super T>)O1;
-					return comp1.compareTo(O2);
+				if(comparator != null) return comparator.compare(o1, o2);
+				else if(o1 instanceof Comparable<?>) {
+					Comparable<? super T> comp1 = (Comparable<? super T>)o1;
+					return comp1.compareTo(o2);
 				} else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
 			}
 		}
 	}
 
 	@SuppressWarnings({"unchecked"})
-	protected static <T> int compare(T O1, T O2, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats!=null) stats.sortObjectComparing();
+	protected static <T> int compare(T o1, T o2, Comparator<? super T> comparator, SortStatistics stats) {
+		if(stats != null) stats.sortObjectComparing();
 
-		if(O1==null) {
-			if(O2==null) return 0;
+		if(o1 == null) {
+			if(o2 == null) return 0;
 			else return -1;
 		} else {
-			if(O2==null) return 1;
+			if(o2 == null) return 1;
 			else {
-				if(comparator!=null) return comparator.compare(O1, O2);
-				else if(O1 instanceof Comparable<?>) {
-					Comparable<? super T> comp1 = (Comparable<? super T>)O1;
-					return comp1.compareTo(O2);
+				if(comparator != null) return comparator.compare(o1, o2);
+				else if(o1 instanceof Comparable<?>) {
+					Comparable<? super T> comp1 = (Comparable<? super T>)o1;
+					return comp1.compareTo(o2);
 				} else throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
 			}
 		}

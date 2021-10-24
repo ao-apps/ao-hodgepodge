@@ -100,47 +100,47 @@ public class MultiBorderLayout extends BorderLayout {
 			// Handle the west
 			int size = westComponents == null ? 0 : westComponents.size();
 			for (int c = 0; c < size; c++) {
-				Component C = westComponents.get(c);
-				if (C.isVisible()) {
-					Dimension D = minimum ? C.getMinimumSize() : C.getPreferredSize();
-					width += D.width + hgap;
-					if (D.height > height) height = D.height;
+				Component component = westComponents.get(c);
+				if (component.isVisible()) {
+					Dimension d = minimum ? component.getMinimumSize() : component.getPreferredSize();
+					width += d.width + hgap;
+					if (d.height > height) height = d.height;
 				}
 			}
 			// Handle the east
 			size = eastComponents == null ? 0 : eastComponents.size();
 			for (int c = 0; c < size; c++) {
-				Component C = eastComponents.get(c);
-				if (C.isVisible()) {
-					Dimension D = minimum ? C.getMinimumSize() : C.getPreferredSize();
-					width += D.width + hgap;
-					if (D.height > height) height = D.height;
+				Component component = eastComponents.get(c);
+				if (component.isVisible()) {
+					Dimension d = minimum ? component.getMinimumSize() : component.getPreferredSize();
+					width += d.width + hgap;
+					if (d.height > height) height = d.height;
 				}
 			}
 			// Handle the center
 			if (center != null && center.isVisible()) {
-				Dimension D = minimum ? center.getMinimumSize() : center.getPreferredSize();
-				width += D.width;
-				if (D.height > height) height = D.height;
+				Dimension d = minimum ? center.getMinimumSize() : center.getPreferredSize();
+				width += d.width;
+				if (d.height > height) height = d.height;
 			}
 			// Handle the north
 			size = northComponents == null ? 0 : northComponents.size();
 			for (int c = 0; c < size; c++) {
-				Component C = northComponents.get(c);
-				if (C.isVisible()) {
-					Dimension D = minimum ? C.getMinimumSize() : C.getPreferredSize();
-					height += D.height + vgap;
-					if (D.width > width) width = D.width;
+				Component component = northComponents.get(c);
+				if (component.isVisible()) {
+					Dimension d = minimum ? component.getMinimumSize() : component.getPreferredSize();
+					height += d.height + vgap;
+					if (d.width > width) width = d.width;
 				}
 			}
 			// Handle the south
 			size = southComponents == null ? 0 : southComponents.size();
 			for (int c = 0; c < size; c++) {
-				Component C = southComponents.get(c);
-				if (C.isVisible()) {
-					Dimension D = minimum ? C.getMinimumSize() : C.getPreferredSize();
-					height += D.height + vgap;
-					if (D.width > width) width = D.width;
+				Component component = southComponents.get(c);
+				if (component.isVisible()) {
+					Dimension d = minimum ? component.getMinimumSize() : component.getPreferredSize();
+					height += d.height + vgap;
+					if (d.width > width) width = d.width;
 				}
 			}
 			Insets insets = target.getInsets();
@@ -154,55 +154,55 @@ public class MultiBorderLayout extends BorderLayout {
 		int vgap = getVgap();
 		synchronized (target.getTreeLock()) {
 			Insets insets = target.getInsets();
-			Dimension D = target.getSize();
+			Dimension d = target.getSize();
 			int top = insets.top;
-			int bottom = D.height - insets.bottom;
+			int bottom = d.height - insets.bottom;
 			int left = insets.left;
-			int right = D.width - insets.right;
+			int right = d.width - insets.right;
 			// Reshape the North Components
 			int size = northComponents == null ? 0 : northComponents.size();
 			for (int c = 0; c < size; c++) {
-				Component C = northComponents.get(c);
-				if (C.isVisible()) {
-					D = C.getSize();
-					C.setSize(right - left, D.height);
-					D = C.getPreferredSize();
-					C.setBounds(left, top, right - left, D.height);
-					top += D.height + vgap;
+				Component component = northComponents.get(c);
+				if (component.isVisible()) {
+					d = component.getSize();
+					component.setSize(right - left, d.height);
+					d = component.getPreferredSize();
+					component.setBounds(left, top, right - left, d.height);
+					top += d.height + vgap;
 				}
 			}
 			// Reshape the South Components
 			for (int c = southComponents == null ? -1 : (southComponents.size() - 1); c >= 0; c--) {
-				Component C = southComponents.get(c);
-				if (C.isVisible()) {
-					D = C.getSize();
-					C.setSize(right - left, D.height);
-					D = C.getPreferredSize();
-					C.setBounds(left, bottom - D.height, right - left, D.height);
-					bottom -= D.height + vgap;
+				Component component = southComponents.get(c);
+				if (component.isVisible()) {
+					d = component.getSize();
+					component.setSize(right - left, d.height);
+					d = component.getPreferredSize();
+					component.setBounds(left, bottom - d.height, right - left, d.height);
+					bottom -= d.height + vgap;
 				}
 			}
 			// Reshape the West Components
 			size = westComponents == null ? 0 : westComponents.size();
 			for (int c = 0; c < size; c++) {
-				Component C = westComponents.get(c);
-				if (C.isVisible()) {
-					D = C.getSize();
-					C.setSize(D.width, bottom - top);
-					D = C.getPreferredSize();
-					C.setBounds(left, top, D.width, bottom - top);
-					left += D.width + hgap;
+				Component component = westComponents.get(c);
+				if (component.isVisible()) {
+					d = component.getSize();
+					component.setSize(d.width, bottom - top);
+					d = component.getPreferredSize();
+					component.setBounds(left, top, d.width, bottom - top);
+					left += d.width + hgap;
 				}
 			}
 			// Reshape the East Components
 			for (int c = eastComponents == null ? -1 : (eastComponents.size() - 1); c >= 0; c--) {
-				Component C = eastComponents.get(c);
-				if (C.isVisible()) {
-					D = C.getSize();
-					C.setSize(D.width, bottom - top);
-					D = C.getPreferredSize();
-					C.setBounds(right - D.width, top, D.width, bottom - top);
-					right -= D.width + hgap;
+				Component component = eastComponents.get(c);
+				if (component.isVisible()) {
+					d = component.getSize();
+					component.setSize(d.width, bottom - top);
+					d = component.getPreferredSize();
+					component.setBounds(right - d.width, top, d.width, bottom - top);
+					right -= d.width + hgap;
 				}
 			}
 			// Reshape the Center Component
@@ -222,11 +222,11 @@ public class MultiBorderLayout extends BorderLayout {
 		return getLayoutSize(target, false);
 	}
 
-	public static boolean remove(Object O, List<Component> V) {
-		int size=V.size();
-		for(int c=0;c<size;c++) {
-			if(V.get(c)==O) {
-				V.remove(c);
+	public static boolean remove(Object o, List<Component> components) {
+		int size = components.size();
+		for(int c = 0; c < size; c++) {
+			if(components.get(c) == o) {
+				components.remove(c);
 				return true;
 			}
 		}

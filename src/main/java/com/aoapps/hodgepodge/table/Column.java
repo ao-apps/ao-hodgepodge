@@ -41,9 +41,9 @@ public class Column implements Comparable<Column> {
 	 * Two column with the same name are equal.
 	 */
 	@Override
-	public boolean equals(Object O) {
-		if(!(O instanceof Column)) return false;
-		Column other = (Column)O;
+	public boolean equals(Object obj) {
+		if(!(obj instanceof Column)) return false;
+		Column other = (Column)obj;
 		return name.equals(other.name);
 	}
 
