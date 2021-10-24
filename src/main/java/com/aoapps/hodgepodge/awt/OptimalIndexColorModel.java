@@ -48,11 +48,10 @@ public class OptimalIndexColorModel extends IndexColorModel {
 		}
 
 		@Override
-		public boolean equals(Object O) {
+		public boolean equals(Object obj) {
 			return
-				O!=null
-				&& (O instanceof ColorCount)
-				&& ((ColorCount)O).color==color
+				(obj instanceof ColorCount)
+				&& ((ColorCount)obj).color==color
 			;
 		}
 
@@ -83,7 +82,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
 
 		@Override
 		public boolean equals(Object obj) {
-			return obj!=null && (obj instanceof ColorCountCountComparator);
+			return (obj instanceof ColorCountCountComparator);
 		}
 
 		@Override

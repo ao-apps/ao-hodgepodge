@@ -144,11 +144,10 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 		}
 
 		@Override
-		public boolean equals(Object O) {
+		public boolean equals(Object obj) {
 			return
-				O!=null
-				&& (O instanceof PooledConnection)
-				&& id == ((PooledConnection)O).id
+				(obj instanceof PooledConnection)
+				&& id == ((PooledConnection)obj).id
 			;
 		}
 

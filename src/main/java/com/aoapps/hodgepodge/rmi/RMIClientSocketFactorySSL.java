@@ -56,11 +56,10 @@ public class RMIClientSocketFactorySSL implements RMIClientSocketFactory, Serial
 	}
 
 	@Override
-	public boolean equals(Object O) {
+	public boolean equals(Object obj) {
 		return
-			O!=null
-			&& (O instanceof RMIClientSocketFactorySSL)
-			&& Objects.equals(localAddress, ((RMIClientSocketFactorySSL)O).localAddress)
+			(obj instanceof RMIClientSocketFactorySSL)
+			&& Objects.equals(localAddress, ((RMIClientSocketFactorySSL)obj).localAddress)
 		;
 	}
 
