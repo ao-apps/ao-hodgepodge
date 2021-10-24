@@ -198,39 +198,6 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	private int maxConcurrency = 0;
 
 	/**
-	 * The allocation id of the current thread.  This is used as a key in the weak map
-	 * {@link #threadConnectionsByThreadId} and is tracked per-connection by {@link #allocationThreadIdByConnection}.
-	 * <p>
-	 * This approach allows sharing of information between threads, while still allowing garbage collection once a
-	 * thread dies.
-	 * </p>
-	 *
-	 * @see  #threadConnectionsByThreadId
-	 */
-	private final ThreadLocal<Long> currentThreadId = new ThreadLocal<Long>() {
-
-		/**
-		 * Incremental allocation of thread IDs, since they are not used outside the scope of this class.
-		 * No benefit to randomizing the values.
-		 */
-		private long lastId = 0;
-
-		@Override
-		@SuppressWarnings({"deprecation", "UnnecessaryBoxing"})
-		protected Long initialValue() {
-			Long id;
-			synchronized(threadConnectionsByThreadId) {
-				// Wraparound of 64-bit identifier is unlikely, but still make sure is available for correctness
-				do {
-					id = new Long(++lastId); // Must be a distinct object, since is used a key in weak map
-				} while(threadConnectionsByThreadId.containsKey(id));
-				threadConnectionsByThreadId.put(id, new ArrayList<>());
-			}
-			return id;
-		}
-	};
-
-	/**
 	 * Connections that are checked-out by the current thread.
 	 * <p>
 	 * All access to this map must be synchronized on the map.
@@ -243,6 +210,35 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	 * @see  #currentThreadId
 	 */
 	private final Map<Long, List<PooledConnection<C>>> threadConnectionsByThreadId = new WeakHashMap<>();
+
+	/**
+	 * Incremental allocation of thread IDs, since they are not used outside the scope of this class.
+	 * No benefit to randomizing the values.
+	 */
+	private long lastId = 0;
+
+	/**
+	 * The allocation id of the current thread.  This is used as a key in the weak map
+	 * {@link #threadConnectionsByThreadId} and is tracked per-connection by {@link #allocationThreadIdByConnection}.
+	 * <p>
+	 * This approach allows sharing of information between threads, while still allowing garbage collection once a
+	 * thread dies.
+	 * </p>
+	 *
+	 * @see  #threadConnectionsByThreadId
+	 */
+	@SuppressWarnings({"deprecation", "UnnecessaryBoxing"})
+	private final ThreadLocal<Long> currentThreadId = ThreadLocal.withInitial(() -> {
+		Long id;
+		synchronized(threadConnectionsByThreadId) {
+			// Wraparound of 64-bit identifier is unlikely, but still make sure is available for correctness
+			do {
+				id = new Long(++lastId); // Must be a distinct object, since is used a key in weak map
+			} while(threadConnectionsByThreadId.containsKey(id));
+			threadConnectionsByThreadId.put(id, new ArrayList<>());
+		}
+		return id;
+	});
 
 	/**
 	 * Tracks the thread ID that allocated each connection.
@@ -294,7 +290,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	/**
 	 * Shuts down the pool, exceptions during close will be logged as a warning and not thrown.
 	 */
-	@SuppressWarnings("UseSpecificCatch")
+	@SuppressWarnings({"UseSpecificCatch", "NestedSynchronizedStatement"})
 	public final void close() {
 		List<C> connsToClose;
 		synchronized(poolLock) {
@@ -416,7 +412,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 			threadId = currentThreadId.get();
 			threadConnections = threadConnectionsByThreadId.get(threadId);
 		}
-		assert threadConnections != null : "The list of connections per-thread is added to map during ThreadLocal.initialValue()";
+		assert threadConnections != null : "The list of connections per-thread is added to map during ThreadLocal.withInitial(…)";
 
 		synchronized(threadConnections) {
 			// Error or warn if this thread already has too many connections

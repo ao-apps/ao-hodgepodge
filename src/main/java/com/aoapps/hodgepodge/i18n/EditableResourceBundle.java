@@ -229,12 +229,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 	 *
 	 * @see  I18nThreadLocalRunnable
 	 */
-	static final ThreadLocal<ThreadSettings> currentThreadSettings = new ThreadLocal<ThreadSettings>() {
-		@Override
-		protected ThreadSettings initialValue() {
-			return new ThreadSettings();
-		}
-	};
+	static final ThreadLocal<ThreadSettings> currentThreadSettings = ThreadLocal.withInitial(ThreadSettings::new);
 
 	/**
 	 * Gets the current settings for the current thread, initialized to {@link ThreadSettings#ThreadSettings()}
