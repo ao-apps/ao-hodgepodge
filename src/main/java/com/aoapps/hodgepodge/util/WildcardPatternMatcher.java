@@ -125,7 +125,9 @@ public abstract class WildcardPatternMatcher {
 						startsWildcard = true;
 						pos++;
 						// Skip consecutive beginning
-						while(pos < end && pattern.charAt(pos) == '*') pos++;
+						while(pos < end && pattern.charAt(pos) == '*') {
+							pos++;
+						}
 						if(pos >= end) {
 							// Is any number of '*' only, matchAll shortcut
 							return matchAll;
@@ -139,7 +141,9 @@ public abstract class WildcardPatternMatcher {
 						endsWildcard = true;
 						end--;
 						// Skip consecutive ending
-						while(end > pos && pattern.charAt(end - 1) == '*') end--;
+						while(end > pos && pattern.charAt(end - 1) == '*') {
+							end--;
+						}
 						assert end > pos;
 					} else {
 						endsWildcard = false;
@@ -158,7 +162,9 @@ public abstract class WildcardPatternMatcher {
 							sequences.add(pattern.substring(pos, starPos));
 							pos = starPos + 1;
 							// Skip consecutive
-							while(pos < end && pattern.charAt(pos) == '*') pos++;
+							while(pos < end && pattern.charAt(pos) == '*') {
+								pos++;
+							}
 						}
 					}
 					int seqCount = sequences.size();
