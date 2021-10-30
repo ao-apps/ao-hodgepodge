@@ -97,18 +97,22 @@ public class ProcessTimer implements Runnable, AutoCloseable {
 				} catch(InterruptedException err) {
 					// Only normal when finish is called
 					if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 				isSleeping=false;
 				if(!isFinished) {
 					logInfo(false);
 					// Reminder loop
-					while(!isFinished) {
+					while(!isFinished && !Thread.currentThread().isInterrupted()) {
 						try {
 							isSleeping = true;
 							Thread.sleep(reminderInterval);
 						} catch(InterruptedException err) {
 							// Only normal when finish is called
 							if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 						}
 						isSleeping = false;
 						if(!isFinished) logInfo(true);

@@ -144,11 +144,14 @@ public class Benchmark {
 						};
 						t.start();
 					}
-					for(int d=0;d<concurrency;d++) {
+					for(int d = 0; d < concurrency; d++) {
 						try {
 							threads[d].join();
 						} catch(InterruptedException err) {
 							ErrorPrinter.printStackTraces(err, System.err);
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
+							return;
 						}
 					}
 					double seekRate = (double)counter[0]/30L;

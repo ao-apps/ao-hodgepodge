@@ -110,6 +110,8 @@ public class ZeroFile {
 		} catch(InterruptedException e) {
 			InterruptedIOException ioExc = new InterruptedIOException(e.getMessage());
 			ioExc.initCause(e);
+			// Restore the interrupted status
+			Thread.currentThread().interrupt();
 			throw ioExc;
 		}
 	}

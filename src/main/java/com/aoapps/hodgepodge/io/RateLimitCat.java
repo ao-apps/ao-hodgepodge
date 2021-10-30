@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -99,6 +100,7 @@ public final class RateLimitCat {
 		long byteCount = 0;
 		try {
 			while(true) {
+				if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 				int blockSize = buff.length;
 				if(bytesRemaining!=null) {
 					if(bytesRemaining[0]<=0) break;

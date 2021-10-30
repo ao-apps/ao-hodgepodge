@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @author  AO Industries, Inc.
  */
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class LoggingProxy {
 
 	private static final Charset CHARSET = StandardCharsets.ISO_8859_1;
@@ -66,19 +67,20 @@ public class LoggingProxy {
 		}
 	}
 
+	@SuppressWarnings("SleepWhileInLoop")
 	public static void main(String[] args) {
 		if(args.length==5) {
 			try {
 				final int listenPort = Integer.parseInt(args[1]);
 				final int connectPort = Integer.parseInt(args[3]);
 				long connectionId = 1;
-				while(true) {
+				while(!Thread.currentThread().isInterrupted()) {
 					try {
 						InetAddress listenAddress = InetAddress.getByName(args[0]);
 						InetAddress connectAddress = InetAddress.getByName(args[2]);
 						File logFile = new File(args[4]);
 						try (ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress)) {
-							while(true) {
+							while(!Thread.currentThread().isInterrupted()) {
 								Socket socketIn = ss.accept();
 								new LoggingProxyThread(socketIn, connectionId++, connectAddress, connectPort, logFile).start();
 							}
@@ -89,6 +91,8 @@ public class LoggingProxy {
 							Thread.sleep(1000);
 						} catch(InterruptedException ie) {
 							ie.printStackTrace(System.err);
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 						}
 					}
 				}
@@ -135,6 +139,8 @@ public class LoggingProxy {
 									inThread.join();
 								} catch(InterruptedException e) {
 									e.printStackTrace(System.err);
+									// Restore the interrupted status
+									Thread.currentThread().interrupt();
 								}
 							}
 						} finally {
@@ -142,6 +148,8 @@ public class LoggingProxy {
 								inThread.join();
 							} catch(InterruptedException e) {
 								e.printStackTrace(System.err);
+								// Restore the interrupted status
+								Thread.currentThread().interrupt();
 							}
 						}
 					}

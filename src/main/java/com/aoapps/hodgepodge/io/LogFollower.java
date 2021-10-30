@@ -81,6 +81,7 @@ public class LogFollower extends InputStream {
 	 * If closed, throws an exception.
 	 * If file doesn't exist, waits until it does exist.
 	 */
+	@SuppressWarnings("SleepWhileInLoop")
 	private void detectFileChange() throws IOException {
 		checkClosed();
 		assert Thread.holdsLock(filePosLock);
@@ -91,6 +92,8 @@ public class LogFollower extends InputStream {
 			} catch(InterruptedException e) {
 				InterruptedIOException newExc = new InterruptedIOException(e.getMessage());
 				newExc.initCause(e);
+				// Restore the interrupted status
+				Thread.currentThread().interrupt();
 				throw newExc;
 			}
 			checkClosed();
@@ -134,9 +137,11 @@ public class LogFollower extends InputStream {
 	}
 
 	@Override
+	@SuppressWarnings("SleepWhileInLoop")
 	public int read() throws IOException {
 		checkClosed();
 		while(true) {
+			if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 			synchronized(filePosLock) {
 				detectFileChange();
 				// Read to the end of the file
@@ -153,7 +158,9 @@ public class LogFollower extends InputStream {
 			try {
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException err) {
-				InterruptedIOException ioErr=new InterruptedIOException();
+				// Restore the interrupted status
+				Thread.currentThread().interrupt();
+				InterruptedIOException ioErr = new InterruptedIOException();
 				ioErr.initCause(err);
 				throw ioErr;
 			}
@@ -161,9 +168,11 @@ public class LogFollower extends InputStream {
 	}
 
 	@Override
+	@SuppressWarnings("SleepWhileInLoop")
 	public int read(byte[] b, int offset, int len) throws IOException {
 		checkClosed();
 		while(true) {
+			if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 			synchronized(filePosLock) {
 				detectFileChange();
 				// Read to the end of the file
@@ -184,7 +193,9 @@ public class LogFollower extends InputStream {
 			try {
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException err) {
-				InterruptedIOException ioErr=new InterruptedIOException();
+				// Restore the interrupted status
+				Thread.currentThread().interrupt();
+				InterruptedIOException ioErr = new InterruptedIOException();
 				ioErr.initCause(err);
 				throw ioErr;
 			}
@@ -192,9 +203,11 @@ public class LogFollower extends InputStream {
 	}
 
 	@Override
+	@SuppressWarnings("SleepWhileInLoop")
 	public long skip(long n) throws IOException {
 		checkClosed();
 		while(true) {
+			if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 			synchronized(filePosLock) {
 				detectFileChange();
 				// Skip to the end of the file
@@ -215,7 +228,9 @@ public class LogFollower extends InputStream {
 			try {
 				Thread.sleep(pollInterval);
 			} catch(InterruptedException err) {
-				InterruptedIOException ioErr=new InterruptedIOException();
+				// Restore the interrupted status
+				Thread.currentThread().interrupt();
+				InterruptedIOException ioErr = new InterruptedIOException();
 				ioErr.initCause(err);
 				throw ioErr;
 			}

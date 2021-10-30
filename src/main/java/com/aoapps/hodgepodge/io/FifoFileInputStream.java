@@ -80,6 +80,7 @@ public class FifoFileInputStream extends InputStream {
 		// Read from the queue
 		synchronized(file) {
 			while(true) {
+				if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 				long len=file.getLength();
 				if(len>=1) {
 					long pos=file.getFirstIndex();
@@ -99,7 +100,9 @@ public class FifoFileInputStream extends InputStream {
 				try {
 					file.wait();
 				} catch(InterruptedException err) {
-					InterruptedIOException ioErr=new InterruptedIOException();
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
+					InterruptedIOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
 				}
@@ -123,6 +126,7 @@ public class FifoFileInputStream extends InputStream {
 		// Read from the queue
 		synchronized(file) {
 			while(true) {
+				if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 				long fileLen=file.getLength();
 				if(fileLen>=1) {
 					long pos=file.getFirstIndex();
@@ -147,7 +151,9 @@ public class FifoFileInputStream extends InputStream {
 				try {
 					file.wait();
 				} catch(InterruptedException err) {
-					InterruptedIOException ioErr=new InterruptedIOException();
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
+					InterruptedIOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
 				}
@@ -163,6 +169,7 @@ public class FifoFileInputStream extends InputStream {
 		// Skip in the queue
 		synchronized(file) {
 			while(true) {
+				if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 				long fileLen=file.getLength();
 				if(fileLen>=1) {
 					long pos=file.getFirstIndex();
@@ -184,7 +191,9 @@ public class FifoFileInputStream extends InputStream {
 				try {
 					file.wait();
 				} catch(InterruptedException err) {
-					InterruptedIOException ioErr=new InterruptedIOException();
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
+					InterruptedIOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
 				}

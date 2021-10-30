@@ -23,6 +23,7 @@
 package com.aoapps.hodgepodge.sort;
 
 import com.aoapps.collections.IntList;
+import com.aoapps.lang.NullArgumentException;
 import com.aoapps.lang.RuntimeUtils;
 import com.aoapps.lang.exception.WrappedException;
 import com.aoapps.lang.util.AtomicSequence;
@@ -235,10 +236,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	static class SingleTaskNumberRadixTable<N extends Number> extends NumberRadixTable<N> {
 
-		N[][] fromQueues;
-		int[] fromQueueLengths;
-		N[][] toQueues;
-		int[] toQueueLengths;
+		private N[][] fromQueues;
+		private int[] fromQueueLengths;
+		private N[][] toQueues;
+		private int[] toQueueLengths;
 
 		@SuppressWarnings("unchecked")
 		SingleTaskNumberRadixTable(int size) {
@@ -310,10 +311,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	static class MultiTaskNumberRadixTable<N extends Number> extends NumberRadixTable<N> {
 
-		N[][][] fromQueues;
-		int[][] fromQueueLengths;
-		N[][][] toQueues;
-		int[][] toQueueLengths;
+		private N[][][] fromQueues;
+		private int[][] fromQueueLengths;
+		private N[][][] toQueues;
+		private int[][] toQueueLengths;
 
 		@SuppressWarnings("unchecked")
 		MultiTaskNumberRadixTable(int size, int numTasks) {
@@ -396,10 +397,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	static class SingleTaskIntRadixTable extends IntRadixTable {
 
-		int[][] fromQueues;
-		int[] fromQueueLengths;
-		int[][] toQueues;
-		int[] toQueueLengths;
+		private int[][] fromQueues;
+		private int[] fromQueueLengths;
+		private int[][] toQueues;
+		private int[] toQueueLengths;
 
 		SingleTaskIntRadixTable(int size) {
 			super(size, 1);
@@ -467,10 +468,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	static class MultiTaskIntRadixTable extends IntRadixTable {
 
-		int[][][] fromQueues;
-		int[][] fromQueueLengths;
-		int[][][] toQueues;
-		int[][] toQueueLengths;
+		private int[][][] fromQueues;
+		private int[][] fromQueueLengths;
+		private int[][][] toQueues;
+		private int[][] toQueueLengths;
 
 		MultiTaskIntRadixTable(int size, int numTasks) {
 			super(size, numTasks);
@@ -791,7 +792,11 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 					0
 				);
 			}
-		} catch(InterruptedException | ExecutionException e) {
+		} catch(InterruptedException e) {
+			// Restore the interrupted status
+			Thread.currentThread().interrupt();
+			throw new WrappedException(e);
+		} catch(ExecutionException e) {
 			throw new WrappedException(e);
 		}
 	}
@@ -887,6 +892,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
 	@Override
 	public <N extends Number> void sort(List<N> list, SortStatistics stats) {
+		if(list == null) throw new NullArgumentException("list");
 		if(list instanceof IntList) {
 			sort((IntList)list);
 		} else {

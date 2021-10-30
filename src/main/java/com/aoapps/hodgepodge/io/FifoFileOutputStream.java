@@ -76,6 +76,7 @@ public class FifoFileOutputStream extends OutputStream {
 		// Write to the queue
 		synchronized(file) {
 			while(true) {
+				if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 				long len=file.getLength();
 				if(len<file.maxFifoLength) {
 					long pos=file.getFirstIndex()+len;
@@ -92,7 +93,9 @@ public class FifoFileOutputStream extends OutputStream {
 				try {
 					file.wait();
 				} catch(InterruptedException err) {
-					InterruptedIOException ioErr=new InterruptedIOException();
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
+					InterruptedIOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
 				}
@@ -113,6 +116,7 @@ public class FifoFileOutputStream extends OutputStream {
 			// Write to the queue
 			synchronized(file) {
 				while(true) {
+					if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 					long fileLen=file.getLength();
 					long maxBlockSize=file.maxFifoLength-fileLen;
 					if(maxBlockSize>0) {
@@ -135,7 +139,9 @@ public class FifoFileOutputStream extends OutputStream {
 					try {
 						file.wait();
 					} catch(InterruptedException err) {
-						InterruptedIOException ioErr=new InterruptedIOException();
+						// Restore the interrupted status
+						Thread.currentThread().interrupt();
+						InterruptedIOException ioErr = new InterruptedIOException();
 						ioErr.initCause(err);
 						throw ioErr;
 					}

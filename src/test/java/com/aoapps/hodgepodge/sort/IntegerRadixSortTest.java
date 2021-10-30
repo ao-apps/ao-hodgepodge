@@ -38,6 +38,7 @@ import junit.framework.TestSuite;
 /**
  * @author  AO Industries, Inc.
  */
+@SuppressWarnings({"SleepWhileInLoop", "UseOfSystemOutOrSystemErr"})
 public class IntegerRadixSortTest extends TestCase {
 
 	private static final boolean GC_EACH_PASS = false;
@@ -97,6 +98,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -117,6 +120,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -138,6 +143,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 			 */
@@ -159,6 +166,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -221,14 +230,18 @@ public class IntegerRadixSortTest extends TestCase {
 			testSize *= 2, passes /= 2
 		) {
 			// Generate testSize random ints
-			while(randomValues.size()>testSize) randomValues.remove(randomValues.size()-1);
-			while(randomValues.size()<testSize) randomValues.add(USE_SORTED ? randomValues.size() : getRandomValue());
+			while(randomValues.size() > testSize) {
+				randomValues.remove(randomValues.size() - 1);
+			}
+			while(randomValues.size() < testSize) {
+				randomValues.add(USE_SORTED ? randomValues.size() : getRandomValue());
+			}
 
 			tests++;
 			doTestListPerformance(
 				randomValues,
 				testSize,
-				passes<1 ? 1 : passes,
+				passes < 1 ? 1 : passes,
 				totalOld,
 				//totalNew,
 				totalExp,
@@ -282,6 +295,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -303,6 +318,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -325,6 +342,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 			 */
@@ -347,6 +366,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -414,13 +435,15 @@ public class IntegerRadixSortTest extends TestCase {
 		) {
 			// Generate testSize random ints
 			Integer[] randomValues = new Integer[testSize];
-			for(int i=0; i<testSize; i++) randomValues[i] = USE_SORTED ? i : getRandomValue();
+			for(int i = 0; i < testSize; i++) {
+				randomValues[i] = USE_SORTED ? i : getRandomValue();
+			}
 
 			tests++;
 			doTestArrayPerformance(
 				randomValues,
 				testSize,
-				passes<1 ? 1 : passes,
+				passes < 1 ? 1 : passes,
 				totalOld,
 				//totalNew,
 				totalExp,
@@ -473,6 +496,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -493,6 +518,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -514,6 +541,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 			 */
@@ -535,6 +564,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -597,14 +628,18 @@ public class IntegerRadixSortTest extends TestCase {
 			testSize *= 2, passes /= 2
 		) {
 			// Generate testSize random ints
-			while(randomValues.size()>testSize) randomValues.removeAtIndex(randomValues.size()-1);
-			while(randomValues.size()<testSize) randomValues.add(USE_SORTED ? randomValues.size() : getRandomValue());
+			while(randomValues.size() > testSize) {
+				randomValues.removeAtIndex(randomValues.size() - 1);
+			}
+			while(randomValues.size() < testSize) {
+				randomValues.add(USE_SORTED ? randomValues.size() : getRandomValue());
+			}
 
 			tests++;
 			doTestListPerformance(
 				randomValues,
 				testSize,
-				passes<1 ? 1 : passes,
+				passes < 1 ? 1 : passes,
 				totalOld,
 				//totalNew,
 				totalExp,
@@ -657,6 +692,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -679,6 +716,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -702,6 +741,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 			 */
@@ -725,6 +766,8 @@ public class IntegerRadixSortTest extends TestCase {
 					Thread.sleep(GC_SLEEP_TIME);
 				} catch(InterruptedException e) {
 					e.printStackTrace(System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 
@@ -792,13 +835,15 @@ public class IntegerRadixSortTest extends TestCase {
 		) {
 			// Generate testSize random ints
 			int[] randomValues = new int[testSize];
-			for(int i=0; i<testSize; i++) randomValues[i] = USE_SORTED ? i : getRandomValue();
+			for(int i = 0; i < testSize; i++) {
+				randomValues[i] = USE_SORTED ? i : getRandomValue();
+			}
 
 			tests++;
 			doTestIntArrayPerformance(
 				randomValues,
 				testSize,
-				passes<1 ? 1 : passes,
+				passes < 1 ? 1 : passes,
 				totalOld,
 				//totalNew,
 				totalExp,

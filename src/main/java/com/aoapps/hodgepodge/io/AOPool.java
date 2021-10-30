@@ -1052,17 +1052,19 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	@Override
 	@SuppressWarnings({"SleepWhileInLoop", "UseSpecificCatch", "TooBroadCatch"})
 	public final void run() {
-		while(true) {
+		while(!Thread.currentThread().isInterrupted()) {
 			try {
 				try {
 					sleep(delayTime);
 				} catch(InterruptedException err) {
 					logger.log(Level.WARNING, null, err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 				long time = System.currentTimeMillis();
 				List<C> connsToClose;
 				synchronized(poolLock) {
-					if(isClosed) return;
+					if(isClosed || Thread.currentThread().isInterrupted()) return;
 					// Find any connections that are available and been idle too long
 					int maxIdle = maxIdleTime;
 					connsToClose = new ArrayList<>(availableConnections.size());
@@ -1113,6 +1115,10 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
 	protected abstract Ex newException(String message, Throwable cause);
 
+	/**
+	 * Throws an exception when interrupted, must either throw {@link InterruptedException} or
+	 * {@linkplain Thread#interrupt() re-interrupt the current thread}.
+	 */
 	protected abstract I newInterruptedException(String message, Throwable cause);
 
 	public final Logger getLogger() {

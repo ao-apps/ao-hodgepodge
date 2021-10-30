@@ -86,6 +86,7 @@ import java.util.concurrent.BlockingQueue;
  *
  * @author  AO Industries, Inc.
  */
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class ParallelDelete {
 
 	/**
@@ -106,7 +107,6 @@ public class ParallelDelete {
 	/**
 	 * Deletes multiple directories in parallel (but not concurrently).
 	 */
-	@SuppressWarnings("UseOfSystemOutOrSystemErr")
 	public static void main(String[] args) {
 		if(args.length==0) {
 			System.err.println("Usage: "+ParallelDelete.class.getName()+" [-n] [-v] [--] path {path}");
@@ -195,7 +195,7 @@ public class ParallelDelete {
 			verboseThread = new Thread("ParallelDelete - Verbose Thread") {
 				@Override
 				public void run() {
-					while(true) {
+					while(!Thread.currentThread().isInterrupted()) {
 						synchronized(verboseThreadRun) {
 							if(!verboseThreadRun[0] && verboseQueue.isEmpty()) break;
 						}
@@ -203,7 +203,9 @@ public class ParallelDelete {
 							verboseOutput.println(verboseQueue.take().getPath());
 							if(verboseQueue.isEmpty()) verboseOutput.flush();
 						} catch(InterruptedException err) {
-							// Normal during thread shutdown
+							err.printStackTrace(System.err);
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 						}
 					}
 				}
@@ -218,7 +220,7 @@ public class ParallelDelete {
 			Thread deleteThread = new Thread("ParallelDelete - Delete Thread") {
 				@Override
 				public void run() {
-					while(true) {
+					while(!Thread.currentThread().isInterrupted()) {
 						synchronized(deleteThreadRun) {
 							if(!deleteThreadRun[0] && deleteQueue.isEmpty()) break;
 						}
@@ -230,17 +232,7 @@ public class ParallelDelete {
 							}
 							if(doDelete) {
 								try {
-									if(verboseQueue!=null) {
-										boolean done = false;
-										while(!done) {
-											try {
-												verboseQueue.put(deleteme);
-												done = true;
-											} catch(InterruptedException err) {
-												// Normal during thread shutdown
-											}
-										}
-									}
+									if(verboseQueue != null) verboseQueue.put(deleteme);
 									if(!dryRun) Files.delete(deleteme.toPath());
 								} catch(IOException err) {
 									synchronized(deleteException) {
@@ -249,7 +241,9 @@ public class ParallelDelete {
 								}
 							}
 						} catch(InterruptedException err) {
-							// Normal during thread shutdown
+							err.printStackTrace(System.err);
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
 						}
 					}
 				}
@@ -259,6 +253,7 @@ public class ParallelDelete {
 				// Main loop, continue until nextFiles is empty
 				final StringBuilder sb = new StringBuilder();
 				while(true) {
+					if(Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
 					synchronized(deleteException) {
 						if(deleteException[0]!=null) break;
 					}
@@ -273,7 +268,9 @@ public class ParallelDelete {
 						try {
 							deleteQueue.put(new File(fullPath));
 						} catch(InterruptedException err) {
-							IOException ioErr = new InterruptedIOException();
+							// Restore the interrupted status
+							Thread.currentThread().interrupt();
+							InterruptedIOException ioErr = new InterruptedIOException();
 							ioErr.initCause(err);
 							throw ioErr;
 						}
@@ -292,11 +289,12 @@ public class ParallelDelete {
 				synchronized(deleteThreadRun) {
 					deleteThreadRun[0] = false;
 				}
-				deleteThread.interrupt();
 				try {
 					deleteThread.join();
 				} catch(InterruptedException err) {
-					IOException ioErr = new InterruptedIOException();
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
+					InterruptedIOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
 				}
@@ -311,11 +309,12 @@ public class ParallelDelete {
 				synchronized(verboseThreadRun) {
 					verboseThreadRun[0] = false;
 				}
-				verboseThread.interrupt();
 				try {
 					verboseThread.join();
 				} catch(InterruptedException err) {
-					IOException ioErr = new InterruptedIOException();
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
+					InterruptedIOException ioErr = new InterruptedIOException();
 					ioErr.initCause(err);
 					throw ioErr;
 				}

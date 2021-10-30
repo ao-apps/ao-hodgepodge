@@ -42,7 +42,7 @@ import java.util.logging.StreamHandler;
  * Configures itself similar to {@link ConsoleHandler} via
  * {@link HandlerUtil#configure(java.util.logging.Handler)}.
  * </p>
- * 
+ *
  * @author  AO Industries, Inc.
  */
 public abstract class QueuedHandler extends Handler {
@@ -69,10 +69,10 @@ public abstract class QueuedHandler extends Handler {
 		executor.shutdown();
 		try {
 			// Wait up to one minute to complete its tasks
-			// NoSuchFieldError in Java 1.5: consoleExecutor.awaitTermination(1, TimeUnit.MINUTES);
-			executor.awaitTermination(60, TimeUnit.SECONDS);
+			executor.awaitTermination(1, TimeUnit.MINUTES);
 		} catch(InterruptedException err) {
-			// Ignored
+			// Restore the interrupted status
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -151,6 +151,7 @@ public abstract class QueuedHandler extends Handler {
 	 * If new log records are added while we wait, don't wait for them.
 	 */
 	@Override
+	@SuppressWarnings("NoopMethodInAbstractClass")
 	public void flush() {
 		// Do nothing
 	}

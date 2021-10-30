@@ -118,16 +118,18 @@ public class BandwidthLimitingTunnel implements Runnable {
 	@Override
 	@SuppressWarnings({"ResultOfObjectAllocationIgnored", "UseSpecificCatch", "TooBroadCatch", "SleepWhileInLoop"})
 	public void run() {
-		while(thread==Thread.currentThread()) {
+		while(thread == Thread.currentThread() && !Thread.currentThread().isInterrupted()) {
 			try {
-				while(thread==Thread.currentThread()) {
-					if(verbose) System.out.println("Accepting connections on "+listen_address+":"+listen_port);
-					ServerSocket serverSocket = new ServerSocket(listen_port, 50, listen_address.equals("*") ? null : InetAddress.getByName(listen_address));
-					while(true) {
-						Socket socket = serverSocket.accept();
-						if(verbose) System.out.println("New connection from "+socket.getInetAddress().getHostAddress()+":"+socket.getPort());
-						new BandwidthLimitingTunnelHandler(verbose, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth, socket);
-					}
+				if(verbose) System.out.println("Accepting connections on " + listen_address + ":" + listen_port);
+				ServerSocket serverSocket = new ServerSocket(
+					listen_port,
+					50,
+					listen_address.equals("*") ? null : InetAddress.getByName(listen_address)
+				);
+				while(!Thread.currentThread().isInterrupted()) {
+					Socket socket = serverSocket.accept();
+					if(verbose) System.out.println("New connection from " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+					new BandwidthLimitingTunnelHandler(verbose, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth, socket);
 				}
 			} catch(ThreadDeath td) {
 				throw td;
@@ -137,6 +139,8 @@ public class BandwidthLimitingTunnel implements Runnable {
 					Thread.sleep(10000);
 				} catch(InterruptedException err) {
 					ErrorPrinter.printStackTraces(err, System.err);
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 				}
 			}
 		}

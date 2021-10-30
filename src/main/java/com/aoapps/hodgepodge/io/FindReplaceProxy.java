@@ -40,6 +40,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class FindReplaceProxy {
 
 	private static final Charset CHARSET = StandardCharsets.ISO_8859_1;
@@ -48,23 +49,20 @@ public class FindReplaceProxy {
 	}
 
 	static class FindReplace {
-		private final String find;
 		private final byte[] findBytes;
-		private final String replace;
 		private final byte[] replaceBytes;
 
 		FindReplace(String find, String replace) {
-			this.find = find;
 			this.findBytes = find.getBytes(CHARSET);
-			this.replace = replace;
 			this.replaceBytes = replace.getBytes(CHARSET);
 		}
 	}
 
+	@SuppressWarnings("SleepWhileInLoop")
 	public static void main(String[] args) {
 		// Must have an even number of arguments
 		boolean showArgs = false;
-		if(((args.length-4)%3)!=0) {
+		if(((args.length - 4) % 3) != 0) {
 			showArgs = true;
 		} else {
 			try {
@@ -73,10 +71,10 @@ public class FindReplaceProxy {
 
 				List<FindReplace> inFindReplaces = new ArrayList<>();
 				List<FindReplace> outFindReplaces = new ArrayList<>();
-				for(int pos=4; pos<args.length; pos+=3) {
+				for(int pos = 4; pos < args.length; pos += 3) {
 					String find = args[pos];
-					String replace = args[pos+1];
-					String mode = args[pos+2];
+					String replace = args[pos + 1];
+					String mode = args[pos + 2];
 					FindReplace findReplace = new FindReplace(find, replace);
 					if("in".equals(mode)) inFindReplaces.add(findReplace);
 					else if("out".equals(mode)) outFindReplaces.add(findReplace);
@@ -89,12 +87,12 @@ public class FindReplaceProxy {
 					}
 				}
 				if(!showArgs) {
-					while(true) {
+					while(!Thread.currentThread().isInterrupted()) {
 						try {
 							InetAddress listenAddress = InetAddress.getByName(args[0]);
 							InetAddress connectAddress = InetAddress.getByName(args[2]);
 							try (ServerSocket ss = new ServerSocket(listenPort, 50, listenAddress)) {
-								while(true) {
+								while(!Thread.currentThread().isInterrupted()) {
 									Socket socketIn = ss.accept();
 									new FindReplaceProxyThread(
 										socketIn,
@@ -112,6 +110,8 @@ public class FindReplaceProxy {
 								Thread.sleep(1000);
 							} catch(InterruptedException ie) {
 								ie.printStackTrace(System.err);
+								// Restore the interrupted status
+								Thread.currentThread().interrupt();
 							}
 						}
 					}
@@ -167,6 +167,8 @@ public class FindReplaceProxy {
 									inThread.join();
 								} catch(InterruptedException e) {
 									e.printStackTrace(System.err);
+									// Restore the interrupted status
+									Thread.currentThread().interrupt();
 								}
 							}
 						} finally {
@@ -174,6 +176,8 @@ public class FindReplaceProxy {
 								inThread.join();
 							} catch(InterruptedException e) {
 								e.printStackTrace(System.err);
+								// Restore the interrupted status
+								Thread.currentThread().interrupt();
 							}
 						}
 					}
