@@ -33,19 +33,31 @@ import java.util.Base64;
 public class Base64Coder {
 
 	// Mapping table from 6-bit nibbles to Base64 characters.
-	private static char[]    map1 = new char[64];
-	   static {
-		  int i=0;
-		  for (char c='A'; c<='Z'; c++) map1[i++] = c;
-		  for (char c='a'; c<='z'; c++) map1[i++] = c;
-		  for (char c='0'; c<='9'; c++) map1[i++] = c;
-		  map1[i++] = '+'; map1[i++] = '/'; }
+	private static final char[]    map1 = new char[64];
+	static {
+	   int i = 0;
+	   for (char c = 'A'; c <= 'Z'; c++) {
+		   map1[i++] = c;
+	   }
+	   for (char c = 'a'; c <= 'z'; c++) {
+		   map1[i++] = c;
+	   }
+	   for (char c = '0'; c <= '9'; c++) {
+		   map1[i++] = c;
+	   }
+	   map1[i++] = '+'; map1[i++] = '/';
+	}
 
 	// Mapping table from Base64 characters to 6-bit nibbles.
-	private static byte[]    map2 = new byte[128];
-	   static {
-		  for (int i=0; i<map2.length; i++) map2[i] = -1;
-		  for (int i=0; i<64; i++) map2[map1[i]] = (byte)i; }
+	private static final byte[]    map2 = new byte[128];
+	static {
+	   for (int i = 0; i < map2.length; i++) {
+		   map2[i] = -1;
+	   }
+	   for (int i = 0; i < 64; i++) {
+		   map2[map1[i]] = (byte)i;
+	   }
+	}
 
 	/**
 	* Encodes a string into Base64 format with {@link StandardCharsets#UTF_8} encoding.
@@ -122,7 +134,9 @@ public class Base64Coder {
 	public static byte[] decode (char[] in) {
 	   int iLen = in.length;
 	   if (iLen%4 != 0) throw new IllegalArgumentException ("Length of Base64 encoded input string is not a multiple of 4.");
-	   while (iLen > 0 && in[iLen-1] == '=') iLen--;
+	   while (iLen > 0 && in[iLen - 1] == '=') {
+		   iLen--;
+	   }
 	   int oLen = (iLen*3) / 4;
 	   byte[] out = new byte[oLen];
 	   int ip = 0;
