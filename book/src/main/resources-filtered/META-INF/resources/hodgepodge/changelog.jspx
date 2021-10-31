@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-05:00"
-		dateModified="2021-10-29T03:58:47-05:00"
+		dateModified="2021-10-31T04:10:58-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -51,6 +51,10 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 			>
 				<ul>
 					<li>Now properly restoring Thread interrupted state on <code>InterruptedException</code>.</li>
+					<li>
+						Cleaning-up ThreadLocal variables when no longer used,
+						see <ao:a href="https://rules.sonarsource.com/java/RSPEC-5164" />.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>

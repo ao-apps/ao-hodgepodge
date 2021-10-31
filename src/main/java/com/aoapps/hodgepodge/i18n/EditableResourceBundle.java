@@ -245,7 +245,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 	 */
 	@SuppressWarnings("deprecation")
 	public static void resetThreadSettings() {
-		currentThreadSettings.set(new ThreadSettings());
+		currentThreadSettings.remove();
 		BundleLookupThreadContext.removeThreadContext();
 	}
 

@@ -95,7 +95,7 @@ public final class BundleLookupThreadContext {
 	 */
 	@Deprecated
 	public static void removeThreadContext() {
-		threadContext.set(null);
+		threadContext.remove();
 	}
 
 	/**
@@ -109,7 +109,8 @@ public final class BundleLookupThreadContext {
 	 * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
 	 */
 	static void setThreadContext(BundleLookupThreadContext context) {
-		threadContext.set(context);
+		if(context == null) threadContext.remove();
+		else threadContext.set(context);
 	}
 
 	/**
