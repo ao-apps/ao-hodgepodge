@@ -125,7 +125,7 @@ public class Benchmark {
 									RandomAccessFile raf=new RandomAccessFile(file, "r");
 									long length=raf.length();
 									try {
-										long endTime=System.currentTimeMillis()+30*1000;
+										long endTime = System.currentTimeMillis() + (30L * 1000);
 										while(System.currentTimeMillis()<endTime) {
 											raf.seek((long)(Math.random()*(length-4096)));
 											raf.read(buff, 0, 4096);

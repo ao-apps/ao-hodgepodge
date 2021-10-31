@@ -43,7 +43,7 @@ import java.io.RandomAccessFile;
  */
 public class LogFollower extends InputStream {
 
-	public static final int DEFAULT_POLL_INTERVAL=60*1000;
+	public static final int DEFAULT_POLL_INTERVAL = 60 * 1000;
 
 	private final int pollInterval;
 	private final File file;

@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class MultiFileOutputStream extends OutputStream {
 
-	public static final long DEFAULT_FILE_SIZE=(long)1024*1024*1024;
+	public static final long DEFAULT_FILE_SIZE = 1024L * 1024 * 1024;
 
 	private final File parent;
 	private final String prefix;

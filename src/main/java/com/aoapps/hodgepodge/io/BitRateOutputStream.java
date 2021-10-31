@@ -38,7 +38,7 @@ import java.io.OutputStream;
  */
 public class BitRateOutputStream extends FilterOutputStream {
 
-	public static final long MAX_CATCHUP_TIME=2*1000;
+	public static final long MAX_CATCHUP_TIME = 2L * 1000;
 
 	private final BitRateProvider provider;
 

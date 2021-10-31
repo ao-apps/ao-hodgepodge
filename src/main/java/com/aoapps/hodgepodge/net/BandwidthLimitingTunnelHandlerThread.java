@@ -46,7 +46,7 @@ public abstract class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 	/**
 	 * The number of seconds between verbose bits/second output.
 	 */
-	private static final long VERBOSE_REPORT_INTERVAL = (long)10*1000;
+	private static final long VERBOSE_REPORT_INTERVAL = 10L * 1000;
 
 	private final boolean verbose;
 	private final Long bandwidth;
