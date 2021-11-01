@@ -300,7 +300,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 	/**
 	 * Gets the rule that best suits the provided filename.  The rule is the longer
 	 * rule between the regular rules and the prefix rules.
-	 * 
+	 *
 	 * The regular rules are scanned first by looking through the filename and then
 	 * all parents up to the root for the first match.  These use Map lookups in the
 	 * set of rules so this should still perform well when there are many rules.
@@ -408,24 +408,19 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
 		@Override
 		public boolean hasNext() {
-			return next!=null;
+			return (next != null);
 		}
 
 		@Override
-		public String next() {
+		public String next() throws NoSuchElementException {
 			try {
-				if(next==null) throw new NoSuchElementException();
+				if(next == null) throw new NoSuchElementException();
 				String retVal = next.getPath();
 				next = filesystemIterator.getNextFile();
 				return retVal;
 			} catch(IOException err) {
 				throw new UncheckedIOException(err);
 			}
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException("Not supported.");
 		}
 	}
 

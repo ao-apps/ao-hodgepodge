@@ -28,6 +28,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * @author  AO Industries, Inc.
@@ -203,17 +204,15 @@ public abstract class Recurring {
 					return true;
 				}
 
+				/**
+				 * Never-ending iterator - will never throw {@link NoSuchElementException}.
+				 */
 				@Override
 				public Calendar next() {
 					Calendar date = (Calendar)cal.clone();
 					// Move the calendar to the next day
 					cal.add(Calendar.DAY_OF_MONTH, 1);
 					return date;
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
 				}
 			};
 		}
@@ -258,6 +257,9 @@ public abstract class Recurring {
 					return true;
 				}
 
+				/**
+				 * Never-ending iterator - will never throw {@link NoSuchElementException}.
+				 */
 				@Override
 				public Calendar next() {
 					// Skip past weekends
@@ -273,11 +275,6 @@ public abstract class Recurring {
 					// Move the calendar to the next day
 					cal.add(Calendar.DAY_OF_MONTH, 1);
 					return date;
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
 				}
 			};
 		}
@@ -336,6 +333,9 @@ public abstract class Recurring {
 					return true;
 				}
 
+				/**
+				 * Never-ending iterator - will never throw {@link NoSuchElementException}.
+				 */
 				@Override
 				public Calendar next() {
 					// Skip past days that are not selected
@@ -351,11 +351,6 @@ public abstract class Recurring {
 					// Move the calendar to the next day
 					cal.add(Calendar.DAY_OF_MONTH, 1);
 					return date;
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
 				}
 			};
 		}
@@ -389,17 +384,15 @@ public abstract class Recurring {
 					return true;
 				}
 
+				/**
+				 * Never-ending iterator - will never throw {@link NoSuchElementException}.
+				 */
 				@Override
 				public Calendar next() {
 					Calendar date = (Calendar)cal.clone();
 					// Move the calendar to the next week
 					cal.add(Calendar.WEEK_OF_YEAR, 1);
 					return date;
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
 				}
 			};
 		}
@@ -434,6 +427,9 @@ public abstract class Recurring {
 					return true;
 				}
 
+				/**
+				 * Never-ending iterator - will never throw {@link NoSuchElementException}.
+				 */
 				@Override
 				public Calendar next() {
 					Calendar date = (Calendar)cal.clone();
@@ -443,11 +439,6 @@ public abstract class Recurring {
 					int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 					cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
 					return date;
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
 				}
 			};
 		}
@@ -496,6 +487,9 @@ public abstract class Recurring {
 					return true;
 				}
 
+				/**
+				 * Never-ending iterator - will never throw {@link NoSuchElementException}.
+				 */
 				@Override
 				public Calendar next() {
 					// Skip past months that are not selected
@@ -511,11 +505,6 @@ public abstract class Recurring {
 					// Move the calendar to the next month
 					cal.add(Calendar.MONTH, 1);
 					return date;
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
 				}
 			};
 		}
@@ -550,6 +539,9 @@ public abstract class Recurring {
 					return true;
 				}
 
+				/**
+				 * Never-ending iterator - will never throw {@link NoSuchElementException}.
+				 */
 				@Override
 				public Calendar next() {
 					Calendar date = (Calendar)cal.clone();
@@ -559,11 +551,6 @@ public abstract class Recurring {
 					int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 					cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
 					return date;
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
 				}
 			};
 		}
@@ -638,17 +625,15 @@ public abstract class Recurring {
 							return true;
 						}
 
+						/**
+						 * Never-ending iterator - will never throw {@link NoSuchElementException}.
+						 */
 						@Override
 						public Calendar next() {
 							Calendar date = (Calendar)cal.clone();
 							// Move the calendar to the next by field and increment
 							cal.add(field, increment);
 							return date;
-						}
-
-						@Override
-						public void remove() {
-							throw new UnsupportedOperationException();
 						}
 					};
 				case Calendar.MONTH :
@@ -661,6 +646,9 @@ public abstract class Recurring {
 							return true;
 						}
 
+						/**
+						 * Never-ending iterator - will never throw {@link NoSuchElementException}.
+						 */
 						@Override
 						public Calendar next() {
 							Calendar date = (Calendar)cal.clone();
@@ -670,11 +658,6 @@ public abstract class Recurring {
 							int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 							cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
 							return date;
-						}
-
-						@Override
-						public void remove() {
-							throw new UnsupportedOperationException();
 						}
 					};
 				default :
