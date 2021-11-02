@@ -121,15 +121,16 @@ public class BandwidthLimitingTunnel implements Runnable {
 		while(thread == Thread.currentThread() && !Thread.currentThread().isInterrupted()) {
 			try {
 				if(verbose) System.out.println("Accepting connections on " + listen_address + ":" + listen_port);
-				ServerSocket serverSocket = new ServerSocket(
+				try (ServerSocket serverSocket = new ServerSocket(
 					listen_port,
 					50,
 					listen_address.equals("*") ? null : InetAddress.getByName(listen_address)
-				);
-				while(!Thread.currentThread().isInterrupted()) {
-					Socket socket = serverSocket.accept();
-					if(verbose) System.out.println("New connection from " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
-					new BandwidthLimitingTunnelHandler(verbose, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth, socket);
+				)) {
+					while(!Thread.currentThread().isInterrupted()) {
+						Socket socket = serverSocket.accept();
+						if(verbose) System.out.println("New connection from " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+						new BandwidthLimitingTunnelHandler(verbose, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth, socket);
+					}
 				}
 			} catch(ThreadDeath td) {
 				throw td;

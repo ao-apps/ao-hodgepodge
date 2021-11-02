@@ -47,17 +47,14 @@ public class BenchmarkCounterBlockDevice {
 				try {
 					for (String filename : args) {
 						long startTime = System.currentTimeMillis();
-						RandomAccessFile raf=new RandomAccessFile(filename, "r");
-						long length=raf.length();
-						try {
-							for(long pos=1;pos<length;pos+=(1024*4096+4096)) {
+						try (RandomAccessFile raf = new RandomAccessFile(filename, "r")) {
+							long length = raf.length();
+							for(long pos = 1; pos < length; pos += (1024 * 4096 + 4096)) {
 								raf.seek(pos);
 								raf.readFully(buff, 0, BufferManager.BUFFER_SIZE);
 							}
-						} finally {
-							raf.close();
 						}
-						System.out.println(filename+" scanned in "+BigDecimal.valueOf(System.currentTimeMillis()-startTime, 3)+" seconds");
+						System.out.println(filename + " scanned in " + BigDecimal.valueOf(System.currentTimeMillis() - startTime, 3) + " seconds");
 					}
 				} finally {
 					BufferManager.release(buff, false);
