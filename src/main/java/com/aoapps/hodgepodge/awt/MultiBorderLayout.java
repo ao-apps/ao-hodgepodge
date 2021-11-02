@@ -160,49 +160,57 @@ public class MultiBorderLayout extends BorderLayout {
 			int left = insets.left;
 			int right = d.width - insets.right;
 			// Reshape the North Components
-			int size = northComponents == null ? 0 : northComponents.size();
-			for (int c = 0; c < size; c++) {
-				Component component = northComponents.get(c);
-				if (component.isVisible()) {
-					d = component.getSize();
-					component.setSize(right - left, d.height);
-					d = component.getPreferredSize();
-					component.setBounds(left, top, right - left, d.height);
-					top += d.height + vgap;
+			if(northComponents != null) {
+				int size = northComponents.size();
+				for (int c = 0; c < size; c++) {
+					Component component = northComponents.get(c);
+					if (component.isVisible()) {
+						d = component.getSize();
+						component.setSize(right - left, d.height);
+						d = component.getPreferredSize();
+						component.setBounds(left, top, right - left, d.height);
+						top += d.height + vgap;
+					}
 				}
 			}
 			// Reshape the South Components
-			for (int c = southComponents == null ? -1 : (southComponents.size() - 1); c >= 0; c--) {
-				Component component = southComponents.get(c);
-				if (component.isVisible()) {
-					d = component.getSize();
-					component.setSize(right - left, d.height);
-					d = component.getPreferredSize();
-					component.setBounds(left, bottom - d.height, right - left, d.height);
-					bottom -= d.height + vgap;
+			if(southComponents != null) {
+				for (int c = (southComponents.size() - 1); c >= 0; c--) {
+					Component component = southComponents.get(c);
+					if (component.isVisible()) {
+						d = component.getSize();
+						component.setSize(right - left, d.height);
+						d = component.getPreferredSize();
+						component.setBounds(left, bottom - d.height, right - left, d.height);
+						bottom -= d.height + vgap;
+					}
 				}
 			}
 			// Reshape the West Components
-			size = westComponents == null ? 0 : westComponents.size();
-			for (int c = 0; c < size; c++) {
-				Component component = westComponents.get(c);
-				if (component.isVisible()) {
-					d = component.getSize();
-					component.setSize(d.width, bottom - top);
-					d = component.getPreferredSize();
-					component.setBounds(left, top, d.width, bottom - top);
-					left += d.width + hgap;
+			if(westComponents != null) {
+				int size = westComponents.size();
+				for (int c = 0; c < size; c++) {
+					Component component = westComponents.get(c);
+					if (component.isVisible()) {
+						d = component.getSize();
+						component.setSize(d.width, bottom - top);
+						d = component.getPreferredSize();
+						component.setBounds(left, top, d.width, bottom - top);
+						left += d.width + hgap;
+					}
 				}
 			}
 			// Reshape the East Components
-			for (int c = eastComponents == null ? -1 : (eastComponents.size() - 1); c >= 0; c--) {
-				Component component = eastComponents.get(c);
-				if (component.isVisible()) {
-					d = component.getSize();
-					component.setSize(d.width, bottom - top);
-					d = component.getPreferredSize();
-					component.setBounds(right - d.width, top, d.width, bottom - top);
-					right -= d.width + hgap;
+			if(eastComponents != null) {
+				for (int c = (eastComponents.size() - 1); c >= 0; c--) {
+					Component component = eastComponents.get(c);
+					if (component.isVisible()) {
+						d = component.getSize();
+						component.setSize(d.width, bottom - top);
+						d = component.getPreferredSize();
+						component.setBounds(right - d.width, top, d.width, bottom - top);
+						right -= d.width + hgap;
+					}
 				}
 			}
 			// Reshape the Center Component
