@@ -138,7 +138,7 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
 
 	@Override
 	public int hashCode() {
-		return (int)(byteCount ^ (byteCount >>> 32));
+		return Long.hashCode(byteCount);
 	}
 
 	@Override

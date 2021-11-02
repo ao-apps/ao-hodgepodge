@@ -98,7 +98,12 @@ public abstract class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 									blockStartTime = currentTime;
 									blockByteCount = 0;
 								} else if(blockTime >= VERBOSE_REPORT_INTERVAL) {
-									System.out.println(getDirection()+" "+totalBytes+" bytes sent in "+BigDecimal.valueOf(currentTime-startTime, 3)+" seconds, "+(blockByteCount * 8000 / blockTime)+" bits/second");
+									System.out.println(
+										getDirection() + " "
+										+ totalBytes + " bytes sent in "
+										+ BigDecimal.valueOf(currentTime - startTime, 3) + " seconds, "
+										+ (blockByteCount * Byte.SIZE * 1000 / blockTime) + " bits/second"
+									);
 									blockStartTime = currentTime;
 									blockByteCount = 0;
 								}
@@ -116,7 +121,12 @@ public abstract class BandwidthLimitingTunnelHandlerThread implements Runnable, 
 			}
 			if(verbose) {
 				long endTime = System.currentTimeMillis();
-				System.out.println(getDirection()+" Connection closing: "+totalBytes+" bytes sent in "+BigDecimal.valueOf(endTime-startTime, 3)+" seconds, "+(totalBytes * 8000 / (endTime - startTime))+" bits/second average");
+				System.out.println(
+					getDirection() + " Connection closing: "
+					+ totalBytes + " bytes sent in "
+					+ BigDecimal.valueOf(endTime - startTime, 3) + " seconds, "
+					+ (totalBytes * Byte.SIZE * 1000 / (endTime - startTime)) + " bits/second average"
+				);
 			}
 		} catch(IOException err) {
 			ErrorPrinter.printStackTraces(err, System.err);

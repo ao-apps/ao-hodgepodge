@@ -38,7 +38,7 @@ import java.util.TreeMap;
  *
  * Only watches the lengths and modified times for filesystem objects that Java
  * considers a file.
- * 
+ *
  * @see  File#isFile()  for what Java considers a file
  *
  * @author  AO Industries, Inc.
@@ -67,12 +67,7 @@ public final class DirectoryMetaSnapshot {
 
 		@Override
 		public int hashCode() {
-			return
-				(int)(lastModified >>> 32)
-				^ (int)lastModified
-				^ (int)(length >>> 32)
-				^ (int)length
-			;
+			return Long.hashCode(lastModified) ^ Long.hashCode(length);
 		}
 
 		public long getLastModified() {
@@ -124,6 +119,7 @@ public final class DirectoryMetaSnapshot {
 		return files.hashCode();
 	}
 
+	@SuppressWarnings("ReturnOfCollectionOrArrayField") // Returning unmodifiable
 	public SortedMap<String, FileMetaSnapshot> getFiles() {
 		return files;
 	}

@@ -153,7 +153,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
 		@Override
 		public int hashCode() {
-			return (int) (this.id ^ (this.id >>> 32));
+			return Long.hashCode(id);
 		}
 	}
 
