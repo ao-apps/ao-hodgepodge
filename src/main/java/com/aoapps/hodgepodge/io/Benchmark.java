@@ -23,6 +23,7 @@
 package com.aoapps.hodgepodge.io;
 
 import com.aoapps.lang.Strings;
+import com.aoapps.lang.io.IoUtils;
 import com.aoapps.lang.math.Statistics;
 import com.aoapps.lang.util.BufferManager;
 import com.aoapps.lang.util.ErrorPrinter;
@@ -31,10 +32,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.security.SecureRandom;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.PrimitiveIterator;
+import java.util.Random;
 
 /**
  * A simple disk concurrency scalability benchmark.  Pass in one or more parameters indicating the files or devices to test, such as <code>/dev/md0</code>
@@ -48,6 +52,11 @@ public class Benchmark {
 
 	private static final int[] blockSizes = {512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576};
 	private static final int[] concurrencies = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64};
+
+	/**
+	 * A fast pseudo-random number generator for non-cryptographic purposes.
+	 */
+	private static final Random fastRandom = new Random(IoUtils.bufferToLong(new SecureRandom().generateSeed(Long.BYTES)));
 
 	private Benchmark() {
 	}
@@ -111,28 +120,27 @@ public class Benchmark {
 			System.out.println("Random Seek by Concurrency (4 kB Blocks)");
 			final byte[] buff = BufferManager.getBytes();
 			try {
-				for(int ci=0;ci<concurrencies.length;ci++) {
+				for(int ci = 0; ci < concurrencies.length; ci++) {
 					List<Double> concurrencySeekRates = fileSeekRates.get(ci);
-					int concurrency=concurrencies[ci];
-					final int[] counter=new int[1];
-					Thread[] threads=new Thread[concurrency];
-					for(int d=0;d<concurrency;d++) {
+					int concurrency = concurrencies[ci];
+					final int[] counter = new int[1];
+					Thread[] threads = new Thread[concurrency];
+					for(int d = 0; d < concurrency; d++) {
 						Thread t = threads[d] = new Thread() {
 							@Override
 							public void run() {
-								int count=0;
+								int count = 0;
 								try {
-									RandomAccessFile raf=new RandomAccessFile(file, "r");
-									long length=raf.length();
-									try {
+									try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+										long length = raf.length();
+										long blocks = length / BufferManager.BUFFER_SIZE;
+										PrimitiveIterator.OfLong randomizer = fastRandom.longs(0, blocks).iterator();
 										long endTime = System.currentTimeMillis() + (30L * 1000);
-										while(System.currentTimeMillis()<endTime) {
-											raf.seek((long)(Math.random()*(length-4096)));
-											raf.read(buff, 0, 4096);
+										while(System.currentTimeMillis() < endTime) {
+											raf.seek(randomizer.nextLong());
+											raf.read(buff, 0, BufferManager.BUFFER_SIZE);
 											count++;
 										}
-									} finally {
-										raf.close();
 									}
 								} catch(IOException err) {
 									ErrorPrinter.printStackTraces(err, System.err);
