@@ -24,6 +24,7 @@ package com.aoapps.hodgepodge.io;
 
 import com.aoapps.hodgepodge.io.stream.StreamableInput;
 import com.aoapps.hodgepodge.io.stream.StreamableOutput;
+import com.aoapps.lang.io.IoUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,6 +43,11 @@ import junit.framework.TestSuite;
  */
 public class CompressedIntTest extends TestCase {
 
+	/**
+	 * A fast pseudo-random number generator for non-cryptographic purposes.
+	 */
+	private static final Random fastRandom = new Random(IoUtils.bufferToLong(new SecureRandom().generateSeed(Long.BYTES)));
+
 	public CompressedIntTest(String testName) {
 		super(testName);
 	}
@@ -52,13 +58,12 @@ public class CompressedIntTest extends TestCase {
 	}
 
 	public void testRandomInts() throws IOException {
-		Random random = new SecureRandom();
 		List<Integer> values = new ArrayList<>();
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		try {
 			for(int c=0;c<10000;c++) {
 				for(int power=1; power<=30; power++) {
-					int value = random.nextInt(1<<power)-(1<<(power-1));
+					int value = fastRandom.nextInt(1<<power)-(1<<(power-1));
 					values.add(value);
 					StreamableOutput.writeCompressedInt(value, bout);
 				}

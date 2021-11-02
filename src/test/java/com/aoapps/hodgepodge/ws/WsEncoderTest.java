@@ -22,6 +22,7 @@
  */
 package com.aoapps.hodgepodge.ws;
 
+import com.aoapps.lang.io.IoUtils;
 import java.security.SecureRandom;
 import java.util.Random;
 import junit.framework.Test;
@@ -35,6 +36,11 @@ import junit.framework.TestSuite;
  */
 public class WsEncoderTest extends TestCase {
 
+	/**
+	 * A fast pseudo-random number generator for non-cryptographic purposes.
+	 */
+	private static final Random fastRandom = new Random(IoUtils.bufferToLong(new SecureRandom().generateSeed(Long.BYTES)));
+
 	public WsEncoderTest(String testName) {
 		super(testName);
 	}
@@ -44,12 +50,11 @@ public class WsEncoderTest extends TestCase {
 	}
 
 	public void testEncodeDecode() {
-		Random random = new SecureRandom();
 		StringBuilder sb = new StringBuilder();
 		for(int c = 0; c < 1000; c++) {
 			sb.setLength(0);
 			for(int d = 0; d < 100; d++) {
-				sb.append((char)random.nextInt(Character.MAX_VALUE + 1));
+				sb.append((char)fastRandom.nextInt(Character.MAX_VALUE + 1));
 			}
 			String value = sb.toString();
 			String encoded = WsEncoder.encode(value);

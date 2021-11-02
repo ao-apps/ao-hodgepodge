@@ -35,9 +35,13 @@ import javax.crypto.Cipher;
  * Pads the last block with the necessary number of bytes before closing the stream.
  * If padding is necessary without closing, use <code>finish</code>.
  */
+// TODO: Use PKCS5 padding instead of random? https://www.di-mgt.com.au/cryptopad.html
 public class PaddingOutputStream extends FilterOutputStream {
 
-	private static volatile SecureRandom secureRandom;
+	/**
+	 * Note: This is not a {@linkplain SecureRandom#getInstanceStrong() strong instance} to avoid blocking.
+	 */
+	private static final SecureRandom secureRandom = new SecureRandom();
 
 	private final int blockSize;
 	private final Random random;
@@ -50,7 +54,11 @@ public class PaddingOutputStream extends FilterOutputStream {
 	 *
 	 * @param  blockSize  When {@code <= 0}, no padding will be performed.  This is consistent with zero returned from
 	 *                    {@link Cipher#getBlockSize()} when not a block cipher.
+	 *
+	 * @deprecated  Please use {@link SecureRandom}.  This method will stay, but will remain deprecated since it should
+	 *              only be used after careful consideration.
 	 */
+	@Deprecated // Java 9: (forRemoval = false)
 	public PaddingOutputStream(OutputStream out, int blockSize, Random random) {
 		super(out);
 		this.blockSize = blockSize;
@@ -59,20 +67,24 @@ public class PaddingOutputStream extends FilterOutputStream {
 	}
 
 	/**
-	 * Uses a default instance of {@link SecureRandom} as the source of random bytes for padding.
+	 * Uses the given source of random bytes for padding.
+	 *
+	 * @param  blockSize  When {@code <= 0}, no padding will be performed.  This is consistent with zero returned from
+	 *                    {@link Cipher#getBlockSize()} when not a block cipher.
+	 */
+	public PaddingOutputStream(OutputStream out, int blockSize, SecureRandom secureRandom) {
+		this(out, blockSize, (Random)secureRandom);
+	}
+
+	/**
+	 * Uses a default instance of {@link SecureRandom}, which is not a {@linkplain SecureRandom#getInstanceStrong() strong instance}
+	 * to avoid blocking, as the source of random bytes for padding.
 	 *
 	 * @param  blockSize  When {@code <= 0}, no padding will be performed.  This is consistent with zero returned from
 	 *                    {@link Cipher#getBlockSize()} when not a block cipher.
 	 */
 	public PaddingOutputStream(OutputStream out, int blockSize) {
-		this(
-			out,
-			blockSize,
-			// Will not use random when there is no blocksize
-			(blockSize <= 0) ? null
-			// No need for atomics, doesn't matter which instance is kept in race condition
-			: (secureRandom == null) ? (secureRandom = new SecureRandom()) : secureRandom
-		);
+		this(out, blockSize, (Random)secureRandom);
 	}
 
 	/**

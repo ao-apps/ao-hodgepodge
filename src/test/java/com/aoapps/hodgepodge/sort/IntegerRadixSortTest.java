@@ -24,6 +24,7 @@ package com.aoapps.hodgepodge.sort;
 
 import com.aoapps.collections.IntArrayList;
 import com.aoapps.collections.IntList;
+import com.aoapps.lang.io.IoUtils;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -63,13 +64,16 @@ public class IntegerRadixSortTest extends TestCase {
 		return new TestSuite(IntegerRadixSortTest.class);
 	}
 
-	private static final Random random = new SecureRandom();
+	/**
+	 * A fast pseudo-random number generator for non-cryptographic purposes.
+	 */
+	private static final Random fastRandom = new Random(IoUtils.bufferToLong(new SecureRandom().generateSeed(Long.BYTES)));
 
 	private static int getRandomValue() {
 		return
-			RANDOM_FULL ? random.nextInt()
-			: RANDOM_NEGATIVE ? (random.nextInt(RANDOM_RANGE) * RANDOM_MULTIPLIER * -1 - 1)
-			: (random.nextInt(RANDOM_RANGE) * RANDOM_MULTIPLIER)
+			RANDOM_FULL ? fastRandom.nextInt()
+			: RANDOM_NEGATIVE ? (fastRandom.nextInt(RANDOM_RANGE) * RANDOM_MULTIPLIER * -1 - 1)
+			: (fastRandom.nextInt(RANDOM_RANGE) * RANDOM_MULTIPLIER)
 		;
 	}
 
