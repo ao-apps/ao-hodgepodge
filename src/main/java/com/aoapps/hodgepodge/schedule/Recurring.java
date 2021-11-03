@@ -180,6 +180,7 @@ public abstract class Recurring {
 	public static final Recurring EVERYDAY = new Recurring() {
 
 		@Override
+		@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 		public boolean equals(Object o) {
 			return o == EVERYDAY;
 		}
@@ -196,6 +197,7 @@ public abstract class Recurring {
 
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+			// Java 9: new Iterator<>
 			return new Iterator<Calendar>() {
 				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -222,6 +224,7 @@ public abstract class Recurring {
 	public static final Recurring WEEKDAYS = new Recurring() {
 
 		@Override
+		@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 		public boolean equals(Object o) {
 			return o == WEEKDAYS;
 		}
@@ -249,6 +252,7 @@ public abstract class Recurring {
 
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+			// Java 9: new Iterator<>
 			return new Iterator<Calendar>() {
 				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -325,6 +329,7 @@ public abstract class Recurring {
 
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+			// Java 9: new Iterator<>
 			return new Iterator<Calendar>() {
 				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -360,6 +365,7 @@ public abstract class Recurring {
 	public static final Recurring WEEKLY = new Recurring() {
 
 		@Override
+		@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 		public boolean equals(Object o) {
 			return o == WEEKLY;
 		}
@@ -376,6 +382,7 @@ public abstract class Recurring {
 
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+			// Java 9: new Iterator<>
 			return new Iterator<Calendar>() {
 				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -402,6 +409,7 @@ public abstract class Recurring {
 	public static final Recurring MONTHLY = new Recurring() {
 
 		@Override
+		@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 		public boolean equals(Object o) {
 			return o == MONTHLY;
 		}
@@ -418,6 +426,7 @@ public abstract class Recurring {
 
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+			// Java 9: new Iterator<>
 			return new Iterator<Calendar>() {
 				private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
 				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
@@ -479,6 +488,7 @@ public abstract class Recurring {
 
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+			// Java 9: new Iterator<>
 			return new Iterator<Calendar>() {
 				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -514,6 +524,7 @@ public abstract class Recurring {
 	public static final Recurring YEARLY = new Recurring() {
 
 		@Override
+		@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 		public boolean equals(Object o) {
 			return o == YEARLY;
 		}
@@ -530,6 +541,7 @@ public abstract class Recurring {
 
 		@Override
 		public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+			// Java 9: new Iterator<>
 			return new Iterator<Calendar>() {
 				private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
 				private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
@@ -617,6 +629,7 @@ public abstract class Recurring {
 				case Calendar.DAY_OF_MONTH :
 				case Calendar.WEEK_OF_YEAR :
 				case Calendar.YEAR :
+					// Java 9: new Iterator<>
 					return new Iterator<Calendar>() {
 						private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -637,6 +650,7 @@ public abstract class Recurring {
 						}
 					};
 				case Calendar.MONTH :
+					// Java 9: new Iterator<>
 					return new Iterator<Calendar>() {
 						private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
 						private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);

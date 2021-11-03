@@ -160,6 +160,7 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
 		}
 
 		@Override
+		@SuppressWarnings({"UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch"})
 		public void run() {
 			Thread currentThread = Thread.currentThread();
 			if(currentThread.getPriority() != TIMER_THREAD_PRIORITY) {
@@ -209,6 +210,7 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
 	private final Class<? extends Ex> exceptionClass;
 	final long refreshInterval;
 	private final long expirationAge;
+	@SuppressWarnings("NonConstantLogger")
 	final Logger logger;
 
 	/**

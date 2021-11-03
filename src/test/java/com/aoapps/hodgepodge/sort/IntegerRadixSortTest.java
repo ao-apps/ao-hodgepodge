@@ -131,7 +131,7 @@ public class IntegerRadixSortTest extends TestCase {
 
 			// Time new radix sort
 			/*
-			List<N> newRadixResult = new ArrayList<N>(randomValues);
+			List<N> newRadixResult = new ArrayList<>(randomValues);
 			{
 				long startNanos = System.nanoTime();
 				NewIntegerRadixSort.getInstance().sort(newRadixResult);

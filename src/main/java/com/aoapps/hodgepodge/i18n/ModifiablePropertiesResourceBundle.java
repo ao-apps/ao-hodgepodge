@@ -247,6 +247,7 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
 		ResourceBundle myParent= this.parent;
 		Set<String> set = valueMap.keySet();
 		Enumeration<String> enumeration = (myParent != null) ? myParent.getKeys() : null;
+		// Java 9: new Enumeration<>
 		return new Enumeration<String>() {
 
 			private final Iterator<String> iterator = set.iterator();
@@ -304,6 +305,7 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
 		if(key.endsWith(MODIFIED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
 	}
 
+	// Java 9: new Comparator<>
 	public static final Comparator<Object> PROPERTIES_KEY_COMPARATOR = new Comparator<Object>() {
 
 		private final Collator collator = Collator.getInstance(Locale.ROOT);
