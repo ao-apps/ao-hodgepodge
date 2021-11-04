@@ -235,7 +235,7 @@ public abstract class ShellInterpreter implements Runnable {
 			}
 			if(changed) {
 				// Trim off any extra entries
-				while(jobs.size() > 0 && jobs.get(jobs.size() - 1) == null) {
+				while(!jobs.isEmpty() && jobs.get(jobs.size() - 1) == null) {
 					jobs.remove(jobs.size() - 1);
 				}
 			}
