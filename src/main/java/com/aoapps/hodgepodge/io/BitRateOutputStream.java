@@ -32,7 +32,7 @@ import java.io.OutputStream;
  * <code>OutputStream</code> to a specific bit rate.
  * Please note that this class is not synchronized
  * so it should only be used from a single Thread
- * or should be synchronized enternally.
+ * or should be synchronized externally.
  *
  * @author  AO Industries, Inc.
  */
