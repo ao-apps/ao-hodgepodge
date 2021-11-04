@@ -30,12 +30,20 @@ import java.io.OutputStream;
  * GZIPOutputStream where the native resources of the GZIPOutputStream need to be released
  * using the close call while the underlying stream is left intact.
  *
+ * @deprecated  Please use {@link NoCloseOutputStream} instead
+ *
  * @author  AO Industries, Inc.
  */
+@Deprecated/* Java 9: (forRemoval = true) */
 public class DontCloseOutputStream extends FilterOutputStream {
 
 	public DontCloseOutputStream(OutputStream out) {
 		super(out);
+	}
+
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+		out.write(b, off, len);
 	}
 
 	/**
