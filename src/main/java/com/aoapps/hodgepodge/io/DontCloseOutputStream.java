@@ -22,7 +22,9 @@
  */
 package com.aoapps.hodgepodge.io;
 
+import com.aoapps.lang.io.NoCloseOutputStream;
 import java.io.FilterOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**

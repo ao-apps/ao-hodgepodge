@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-05:00"
-		dateModified="2021-11-04T01:42:43-05:00"
+		dateModified="2021-11-04T01:47:15-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -56,6 +56,10 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 						see <ao:a href="https://rules.sonarsource.com/java/RSPEC-5164" />.
 					</li>
 					<li><code>DontCloseOutputStream</code> now overrides <code>write(byte[],int,int)</code> for greater performance.</li>
+					<li>
+						Deprecated <code>DontCloseInputStream</code> and <code>DontCloseOutputStream</code> in favor or
+						duplicate <code>NoCloseInputStream</code> and <code>NoCloseOutputStream</code>.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>

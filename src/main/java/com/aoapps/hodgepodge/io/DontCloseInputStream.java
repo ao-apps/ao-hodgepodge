@@ -22,6 +22,7 @@
  */
 package com.aoapps.hodgepodge.io;
 
+import com.aoapps.lang.io.NoCloseInputStream;
 import java.io.FilterInputStream;
 import java.io.InputStream;
 
@@ -30,8 +31,11 @@ import java.io.InputStream;
  * GZIPInputStream where the native resources of the GZIPInputStream need to be released
  * using the close call while the underlying stream is left intact.
  *
+ * @deprecated  Please use {@link NoCloseInputStream} instead
+ *
  * @author  AO Industries, Inc.
  */
+@Deprecated/* Java 9: (forRemoval = true) */
 public class DontCloseInputStream extends FilterInputStream {
 
 	public DontCloseInputStream(InputStream in) {
