@@ -28,6 +28,7 @@ import java.io.InputStream;
 
 /**
  * Wraps an InputStream to count the number of bytes transferred.
+ * Does not count bytes skipped.
  * The counter is not synchronized.  Any necessary synchronization
  * should be externally applied.
  *

@@ -29,6 +29,7 @@ import java.io.InterruptedIOException;
 
 /**
  * A <code>BitRateInputStream</code> regulates an
+ * Does not count bytes skipped toward bit rate.
  * <code>InputStream</code> to a specific bit rate.
  * Please note that this class is not synchronized
  * so it should only be used from a single Thread
