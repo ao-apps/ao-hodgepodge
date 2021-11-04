@@ -908,9 +908,9 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	public final void releaseConnection(C connection) throws Ex {
 		try {
 			connection.close();
+		} catch(Error | RuntimeException e) {
+			throw e;
 		} catch(Throwable t) {
-			if(t instanceof Error) throw (Error)t;
-			if(t instanceof RuntimeException) throw (RuntimeException)t;
 			throw newException(null, t);
 		}
 	}
