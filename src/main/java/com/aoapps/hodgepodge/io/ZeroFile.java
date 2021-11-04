@@ -175,9 +175,9 @@ public class ZeroFile {
 					lastVerboseString,
 					Strings.getApproximateSize(pos+blockSize)
 					+ ": "
-					+ BigDecimal.valueOf((long)block * 10000L / (long)blocks, 2)
+					+ BigDecimal.valueOf(block * 10000L / blocks, 2)
 					+ "% read, "
-					+ BigDecimal.valueOf((long)numDirtyBlocks * 10000L / (long)block, 2)
+					+ BigDecimal.valueOf(numDirtyBlocks * 10000L / block, 2)
 					+ "% dirty",
 					System.err
 				);
@@ -212,7 +212,7 @@ public class ZeroFile {
 						lastVerboseString,
 						Strings.getApproximateSize(bytesWritten)
 						+ ": "
-						+ BigDecimal.valueOf((long)written * 10000L / (long)numDirtyBlocks, 2)
+						+ BigDecimal.valueOf(written * 10000L / numDirtyBlocks, 2)
 						+ "% written",
 						System.err
 					);
