@@ -101,10 +101,10 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 	@Override
 	public void sort(int[] array, SortStatistics stats) {
 		if(stats != null) stats.sortStarting();
-			if(array.length < MIN_RADIX_SORT_SIZE) {
-				if(stats != null) stats.sortSwitchingAlgorithms();
-				Arrays.sort(array);
-			} else {
+		if(array.length < MIN_RADIX_SORT_SIZE) {
+			if(stats != null) stats.sortSwitchingAlgorithms();
+			Arrays.sort(array);
+		} else {
 			if(ENABLE_CONCURRENCY) {
 				Queue<Future<?>> futures = new ConcurrentLinkedQueue<>();
 				sort(array, 0, array.length, 32-FIRST_BITS_PER_PASS, futures);
