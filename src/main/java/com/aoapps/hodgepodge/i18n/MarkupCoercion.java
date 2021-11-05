@@ -40,7 +40,10 @@ import org.w3c.dom.Node;
  *
  * @see  Coercion
  */
-public final class MarkupCoercion {
+public abstract class MarkupCoercion {
+
+	/** Make no instances. */
+	private MarkupCoercion() {throw new AssertionError();}
 
 	/**
 	 * Writes an object's String representation with markup enabled,
@@ -265,11 +268,5 @@ public final class MarkupCoercion {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private MarkupCoercion() {
 	}
 }

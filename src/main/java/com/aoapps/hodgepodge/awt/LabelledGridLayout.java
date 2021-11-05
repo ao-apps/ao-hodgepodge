@@ -81,6 +81,7 @@ public class LabelledGridLayout implements LayoutManager {
 
 	@Override
 	public void addLayoutComponent(String place, Component component) {
+		// Do nothing
 	}
 
 	private Dimension getLayoutSize(Container parent, boolean isMinimum) {
@@ -229,5 +230,6 @@ public class LabelledGridLayout implements LayoutManager {
 
 	@Override
 	public void removeLayoutComponent(Component component) {
+		// Do nothing
 	}
 }

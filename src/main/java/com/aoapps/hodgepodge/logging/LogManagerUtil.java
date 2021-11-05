@@ -46,7 +46,10 @@ import java.util.logging.LogManager;
 // TODO: This requires "--add-opens java.logging/java.util.logging=com.aoapps.hodgepodge" when running on module-path.
 //       Find a way to do the same in Java 9+ without reflection, or at least handle the exception gracefully.
 @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-public class LogManagerUtil {
+public abstract class LogManagerUtil {
+
+	/** Make no instances. */
+	private LogManagerUtil() {throw new AssertionError();}
 
 	/**
 	 * The number of warnings that can be logged before being throttled.
@@ -58,7 +61,7 @@ public class LogManagerUtil {
 	 */
 	private static final int WARN_INTERVAL = 10000;
 
-	private static class WarnLock {}
+	private static class WarnLock {/* Empty lock class to help heap profile */}
 	private static final WarnLock warnLock = new WarnLock();
 
 	private static int burstRemaining = WARN_BURST;
@@ -260,6 +263,4 @@ public class LogManagerUtil {
 		// We got an exception.  Return the defaultValue.
 		return defaultValue;
 	}
-
-	private LogManagerUtil() {}
 }

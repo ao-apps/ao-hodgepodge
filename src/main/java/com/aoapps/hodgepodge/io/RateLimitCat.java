@@ -44,10 +44,10 @@ import java.util.List;
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-public final class RateLimitCat {
+public abstract class RateLimitCat {
 
-	private RateLimitCat() {
-	}
+	/** Make no instances. */
+	private RateLimitCat() {throw new AssertionError();}
 
 	private static void usage() {
 		System.err.println("Usage: "+RateLimitCat.class.getName()+" [--blocksize=BLOCK_SIZE[unit]] [--bwlimit=BANDWIDTH_LIMIT[unit]] [--limit=MAXIMUM_BYTES[unit]] [--output=OUTPUT_FILE] [--progress[={true|false}]] [--] [FILE]...");

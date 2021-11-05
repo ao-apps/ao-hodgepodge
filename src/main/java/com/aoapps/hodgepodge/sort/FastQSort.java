@@ -60,6 +60,7 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
 	}
 
 	private FastQSort() {
+		// Do nothing
 	}
 
 	@Override

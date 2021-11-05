@@ -55,9 +55,10 @@ import java.util.Properties;
  * @see  Properties
  * @see  com.aoapps.collections.SortedProperties
  */
-public class DiffableProperties {
+public abstract class DiffableProperties {
 
-	private DiffableProperties() {}
+	/** Make no instances. */
+	private DiffableProperties() {throw new AssertionError();}
 
 	private static boolean isHex(char ch) {
 		return

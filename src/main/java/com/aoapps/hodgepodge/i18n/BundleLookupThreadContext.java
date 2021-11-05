@@ -135,6 +135,7 @@ public final class BundleLookupThreadContext {
 	private final IdentityHashMap<String, BundleLookupMarkup> lookupResults = new IdentityHashMap<>();
 
 	BundleLookupThreadContext() {
+		// Do nothing
 	}
 
 	/**

@@ -33,6 +33,7 @@ import com.aoapps.hodgepodge.io.FileList;
 abstract class BaseIntegerSortAlgorithm extends BaseSortAlgorithm<Number> implements IntegerSortAlgorithm {
 
 	protected BaseIntegerSortAlgorithm() {
+		// Do nothing
 	}
 
 	@Override

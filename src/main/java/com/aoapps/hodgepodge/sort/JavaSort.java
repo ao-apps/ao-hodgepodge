@@ -41,6 +41,7 @@ public final class JavaSort extends BaseComparisonSortAlgorithm<Object> {
 	}
 
 	private JavaSort() {
+		// Do nothing
 	}
 
 	@Override

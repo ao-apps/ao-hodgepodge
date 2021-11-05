@@ -30,12 +30,10 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
 */
-public class Trees {
+public abstract class Trees {
 
-	/**
-	 * No instances.
-	 */
-	private Trees() {}
+	/** Make no instances. */
+	private Trees() {throw new AssertionError();}
 
 	/**
 	 * @see #emptyTree()

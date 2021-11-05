@@ -39,6 +39,7 @@ public final class HeapSort extends BaseComparisonSortAlgorithm<Object> {
 	}
 
 	private HeapSort() {
+		// Do nothing
 	}
 
 	@Override

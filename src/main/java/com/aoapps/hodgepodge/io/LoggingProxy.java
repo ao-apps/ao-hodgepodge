@@ -41,12 +41,12 @@ import java.nio.charset.StandardCharsets;
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-public class LoggingProxy {
+public abstract class LoggingProxy {
+
+	/** Make no instances. */
+	private LoggingProxy() {throw new AssertionError();}
 
 	private static final Charset CHARSET = StandardCharsets.ISO_8859_1;
-
-	private LoggingProxy() {
-	}
 
 	/**
 	 * Writes one line to the given file, synchronizes on the file object.

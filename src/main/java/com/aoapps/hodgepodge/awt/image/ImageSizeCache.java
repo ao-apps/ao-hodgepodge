@@ -36,7 +36,10 @@ import javax.imageio.ImageIO;
  *
  * @author  AO Industries, Inc.
  */
-public final class ImageSizeCache {
+public abstract class ImageSizeCache {
+
+	/** Make no instances. */
+	private ImageSizeCache() {throw new AssertionError();}
 
 	static class CacheEntry {
 		long lastModified;
@@ -72,11 +75,5 @@ public final class ImageSizeCache {
 			}
 			return new Dimension(entry.size); // Safe copy
 		}
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private ImageSizeCache() {
 	}
 }

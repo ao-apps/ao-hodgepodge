@@ -76,6 +76,7 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 	}
 
 	private IntegerRadixSortExperimental() {
+		// Do nothing
 	}
 
 	@Override

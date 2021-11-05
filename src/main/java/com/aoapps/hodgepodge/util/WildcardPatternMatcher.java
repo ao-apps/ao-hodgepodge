@@ -280,6 +280,7 @@ public abstract class WildcardPatternMatcher {
 	}
 
 	private WildcardPatternMatcher() {
+		// Do nothing
 	}
 
 	/**

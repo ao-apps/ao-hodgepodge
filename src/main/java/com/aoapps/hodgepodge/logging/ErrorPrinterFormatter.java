@@ -41,6 +41,7 @@ public class ErrorPrinterFormatter extends Formatter {
 	 * Public constructor required so can be specified in <code>logging.properties</code>.
 	 */
 	public ErrorPrinterFormatter() {
+		// Do nothing
 	}
 
 	public void format(LogRecord record, Appendable out) {

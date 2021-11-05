@@ -87,7 +87,10 @@ import java.util.concurrent.BlockingQueue;
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-public class ParallelDelete {
+public abstract class ParallelDelete {
+
+	/** Make no instances. */
+	private ParallelDelete() {throw new AssertionError();}
 
 	/**
 	 * The size of the delete queue.
@@ -98,11 +101,6 @@ public class ParallelDelete {
 	 * The size of the verbose output queue.
 	 */
 	private static final int VERBOSE_QUEUE_SIZE = 1000;
-
-	/**
-	 * Make no instances.
-	 */
-	private ParallelDelete() {}
 
 	/**
 	 * Deletes multiple directories in parallel (but not concurrently).

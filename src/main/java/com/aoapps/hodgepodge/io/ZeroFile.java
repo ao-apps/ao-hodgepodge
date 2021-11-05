@@ -52,9 +52,6 @@ public class ZeroFile {
 	 */
 	private static final int BLOCK_SIZE = 1048576;
 
-	public ZeroFile() {
-	}
-
 	@SuppressWarnings("UseOfSystemOutOrSystemErr")
 	public static void main(String[] args) {
 		if(args.length!=2) {

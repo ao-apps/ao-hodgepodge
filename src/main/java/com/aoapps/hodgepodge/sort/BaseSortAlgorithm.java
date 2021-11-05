@@ -33,6 +33,7 @@ import java.util.List;
 abstract class BaseSortAlgorithm<E> implements SortAlgorithm<E>{
 
 	protected BaseSortAlgorithm() {
+		// Do nothing
 	}
 
 	@Override

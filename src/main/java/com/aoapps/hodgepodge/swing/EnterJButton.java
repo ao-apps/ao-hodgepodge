@@ -72,9 +72,11 @@ public class EnterJButton extends JButton implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		// Do nothing
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		// Do nothing
 	}
 }

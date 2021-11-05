@@ -36,7 +36,10 @@ import java.util.Map;
  * @author  AO Industries, Inc.
  */
 @Deprecated
-public class MimeType {
+public abstract class MimeType {
+
+	/** Make no instances. */
+	private MimeType() {throw new AssertionError();}
 
 	public static final String DEFAULT_MIME_TYPE="unknown/unknown";
 
@@ -155,8 +158,6 @@ public class MimeType {
 			if(hash.put(extension, types[c+1])!=null) throw new AssertionError(MimeType.class.getName()+": extension found more than once: "+extension);
 		}
 	}
-
-	private MimeType() {}
 
 	public static String getMimeType(String filename) {
 		int dotPos = filename.lastIndexOf('.');

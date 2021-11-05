@@ -46,9 +46,6 @@ public class SyncFile {
 
 	private static final int BLOCK_SIZE = 1048576;
 
-	public SyncFile() {
-	}
-
 	public static void main(String[] args) {
 		if(args.length!=2) {
 			System.err.println("usage: "+SyncFile.class.getName()+" <from> <to>");

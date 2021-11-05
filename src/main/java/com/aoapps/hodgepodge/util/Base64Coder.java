@@ -30,7 +30,10 @@ import java.util.Base64;
  * @deprecated  Please use {@link Base64} as of Java 8.
  */
 @Deprecated
-public class Base64Coder {
+public abstract class Base64Coder {
+
+	/** Make no instances. */
+	private Base64Coder() {throw new AssertionError();}
 
 	// Mapping table from 6-bit nibbles to Base64 characters.
 	private static final char[]    map1 = new char[64];
@@ -161,8 +164,5 @@ public class Base64Coder {
 		  if (op<oLen) out[op++] = (byte)o1;
 		  if (op<oLen) out[op++] = (byte)o2; }
 	   return out; }
-
-	// Dummy constructor.
-	private Base64Coder() {}
 
 } // end class Base64Coder

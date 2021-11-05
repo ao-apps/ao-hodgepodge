@@ -50,7 +50,7 @@ public class LogFollower extends InputStream {
 
 	private volatile boolean closed;
 
-	private static class FilePosLock {}
+	private static class FilePosLock {/* Empty lock class to help heap profile */}
 	private final FilePosLock filePosLock = new FilePosLock();
 	private long filePos;
 

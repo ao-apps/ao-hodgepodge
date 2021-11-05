@@ -42,6 +42,7 @@ public final class AutoSort extends BaseComparisonSortAlgorithm<Object> {
 	}
 
 	private AutoSort() {
+		// Do nothing
 	}
 
 	@Override

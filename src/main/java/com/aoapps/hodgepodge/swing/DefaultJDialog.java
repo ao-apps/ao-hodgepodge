@@ -64,8 +64,8 @@ public class DefaultJDialog extends JDialog implements WindowListener, Component
 		Rectangle parentBounds=parent.getBounds();
 		Dimension size=getSize();
 		setBounds(
-			parentBounds.x+(parentBounds.width-size.width)/2, 
-			parentBounds.y+(parentBounds.height-size.height)/2, 
+			parentBounds.x+(parentBounds.width-size.width)/2,
+			parentBounds.y+(parentBounds.height-size.height)/2,
 			size.width,
 			size.height
 		);
@@ -84,30 +84,37 @@ public class DefaultJDialog extends JDialog implements WindowListener, Component
 
 	@Override
 	public void windowOpened(WindowEvent e) {
+		// Do nothing
 	}
 
 	@Override
 	public void windowClosed(WindowEvent e) {
+		// Do nothing
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e) {
+		// Do nothing
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
+		// Do nothing
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
+		// Do nothing
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
+		// Do nothing
 	}
 
 	@Override
 	public void componentShown(ComponentEvent e) {
+		// Do nothing
 	}
 
 	@Override
@@ -123,10 +130,12 @@ public class DefaultJDialog extends JDialog implements WindowListener, Component
 
 	@Override
 	public void componentMoved(ComponentEvent e) {
+		// Do nothing
 	}
 
 	@Override
 	public void componentHidden(ComponentEvent e) {
+		// Do nothing
 	}
 
 	@Override

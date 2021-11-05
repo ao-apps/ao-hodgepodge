@@ -553,6 +553,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	abstract static class Source<T extends RadixTable> {
 
 		Source() {
+			// Do nothing
 		}
 
 		/**

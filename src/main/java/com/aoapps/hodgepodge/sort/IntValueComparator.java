@@ -38,6 +38,7 @@ public final class IntValueComparator implements Comparator<Number> {
 	}
 
 	private IntValueComparator() {
+		// Do nothing
 	}
 
 	@Override

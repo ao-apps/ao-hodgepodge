@@ -36,9 +36,6 @@ import java.math.BigDecimal;
  */
 public class BenchmarkCounterBlockDevice {
 
-	public BenchmarkCounterBlockDevice() {
-	}
-
 	@SuppressWarnings("UseOfSystemOutOrSystemErr")
 	public static void main(String[] args) {
 		try {

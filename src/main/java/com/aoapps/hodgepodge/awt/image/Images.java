@@ -35,7 +35,10 @@ import java.io.InputStream;
 /**
  * @author  AO Industries, Inc.
  */
-public final class Images {
+public abstract class Images {
+
+	/** Make no instances. */
+	private Images() {throw new AssertionError();}
 
 	/**
 	 * Gets an array big enough to hold the pixels for an image of the given size.
@@ -185,8 +188,5 @@ NextLocation :
 			in.close();
 		}
 		return toolkit.createImage(imageData);
-	}
-
-	private Images() {
 	}
 }

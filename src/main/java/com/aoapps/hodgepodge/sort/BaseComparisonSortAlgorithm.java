@@ -33,6 +33,7 @@ import java.util.List;
 abstract class BaseComparisonSortAlgorithm<E> extends BaseSortAlgorithm<E> implements ComparisonSortAlgorithm<E> {
 
 	protected BaseComparisonSortAlgorithm() {
+		// Do nothing
 	}
 
 	@Override

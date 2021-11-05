@@ -55,6 +55,7 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
 	}
 
 	private ShellSort() {
+		// Do nothing
 	}
 
 	@Override

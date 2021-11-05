@@ -38,9 +38,6 @@ public class ImagesTest {
 
 	private static final Logger logger = Logger.getLogger(ImagesTest.class.getName());
 
-	public ImagesTest() {
-	}
-
 	private static BufferedImage image;
 	private static BufferedImage findme;
 

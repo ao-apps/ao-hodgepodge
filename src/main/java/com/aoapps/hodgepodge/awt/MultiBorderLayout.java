@@ -52,6 +52,7 @@ public class MultiBorderLayout extends BorderLayout {
 	protected Component center;
 
 	public MultiBorderLayout() {
+		// Do nothing
 	}
 
 	public MultiBorderLayout(int hgap, int vgap) {

@@ -29,13 +29,10 @@ import java.io.Writer;
  *
  * @author  AO Industries, Inc.
  */
-public final class NativeToPosixWriter {
+public abstract class NativeToPosixWriter {
 
-	/**
-	 * Make no instances.
-	 */
-	private NativeToPosixWriter() {
-	}
+	/** Make no instances. */
+	private NativeToPosixWriter() {throw new AssertionError();}
 
 	/**
 	 * The end of line character for POSIX.

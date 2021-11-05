@@ -46,7 +46,10 @@ import java.util.Random;
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-public class Benchmark {
+public abstract class Benchmark {
+
+	/** Make no instances. */
+	private Benchmark() {throw new AssertionError();}
 
 	private static final long MAX_READ_BYTES = 4L * 1024L * 1024L * 1024L;
 
@@ -57,9 +60,6 @@ public class Benchmark {
 	 * A fast pseudo-random number generator for non-cryptographic purposes.
 	 */
 	private static final Random fastRandom = new Random(IoUtils.bufferToLong(new SecureRandom().generateSeed(Long.BYTES)));
-
-	private Benchmark() {
-	}
 
 	private static void benchmark(int pass, String[] args, List<List<List<Double>>> throughputs, List<List<List<Double>>> seekRates, NumberFormat numberFormat) {
 		System.out.print("Pass #");

@@ -47,5 +47,6 @@ public class DontCloseInputStream extends FilterInputStream {
 	 */
 	@Override
 	public void close() {
+		// Do nothing
 	}
 }

@@ -33,12 +33,10 @@ import java.util.Map;
 /**
  * Controls the Registry, making sure only one registry is created per port.
  */
-public final class RegistryManager {
+public abstract class RegistryManager {
 
-	/**
-	 * Make no instances.
-	 */
-	private RegistryManager() {}
+	/** Make no instances. */
+	private RegistryManager() {throw new AssertionError();}
 
 	private static final Map<Integer, Registry> registryCache = new HashMap<>();
 

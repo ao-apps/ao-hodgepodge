@@ -36,10 +36,10 @@ import java.io.IOException;
  * @deprecated  Use new encoding package instead.
  */
 @Deprecated
-public final class EncodingUtils {
+public abstract class EncodingUtils {
 
-	private EncodingUtils() {
-	}
+	/** Make no instances. */
+	private EncodingUtils() {throw new AssertionError();}
 
 	/**
 	 * @deprecated  Use {@link Coercion#toString(java.lang.Object)} instead.

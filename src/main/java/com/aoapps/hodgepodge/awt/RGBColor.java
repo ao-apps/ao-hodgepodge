@@ -36,18 +36,16 @@ import java.util.Map;
  *
  * @author  AO Industries, Inc.
  */
-public final class RGBColor {
+public abstract class RGBColor {
+
+	/** Make no instances. */
+	private RGBColor() {throw new AssertionError();}
 
 	/**
 	 * A hash of color names and values, all stored lowercase.  The data will be populated on the
 	 * first call to <code>getColor</code>.
 	 */
 	private static Map<String, Integer> colors;
-
-	/**
-	 * Make no instances.
-	 */
-	private RGBColor() {}
 
 	/**
 	 * Gets color integers provided color names.  Supports the standard Unix

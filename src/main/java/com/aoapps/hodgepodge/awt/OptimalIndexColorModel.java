@@ -64,7 +64,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
 	/**
 	 * Sorted by count descending.
 	 */
-	static class ColorCountCountComparator implements Comparator<ColorCount> {
+	static final class ColorCountCountComparator implements Comparator<ColorCount> {
 
 		private static final ColorCountCountComparator instance = new ColorCountCountComparator();
 
@@ -73,6 +73,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
 		}
 
 		private ColorCountCountComparator() {
+			// Do nothing
 		}
 
 		@Override

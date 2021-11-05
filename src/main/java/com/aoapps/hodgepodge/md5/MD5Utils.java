@@ -33,13 +33,10 @@ import java.io.InputStream;
  *
  * @author  AO Industries, Inc.
  */
-public final class MD5Utils {
+public abstract class MD5Utils {
 
-	/**
-	 * Make no instances.
-	 */
-	private MD5Utils() {
-	}
+	/** Make no instances. */
+	private MD5Utils() {throw new AssertionError();}
 
 	/**
 	 * Gets the MD5 hashcode of a file.

@@ -41,12 +41,12 @@ import java.util.List;
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-public class FindReplaceProxy {
+public abstract class FindReplaceProxy {
+
+	/** Make no instances. */
+	private FindReplaceProxy() {throw new AssertionError();}
 
 	private static final Charset CHARSET = StandardCharsets.ISO_8859_1;
-
-	private FindReplaceProxy() {
-	}
 
 	static class FindReplace {
 		private final byte[] findBytes;

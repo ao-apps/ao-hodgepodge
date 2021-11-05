@@ -34,10 +34,10 @@ import com.aoapps.lang.Strings;
  *
  * @author  AO Industries, Inc.
  */
-public class WsEncoder {
+public abstract class WsEncoder {
 
-	private WsEncoder() {
-	}
+	/** Make no instances. */
+	private WsEncoder() {throw new AssertionError();}
 
 	private static final char[] hexChars={
 		'0',

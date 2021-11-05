@@ -51,6 +51,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
 	}
 
 	private QubbleSort() {
+		// Do nothing
 	}
 
 	@Override

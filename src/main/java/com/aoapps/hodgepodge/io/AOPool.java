@@ -166,7 +166,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 	/**
 	 * Lock for wait/notify
 	 */
-	private static class PoolLock {}
+	private static class PoolLock {/* Empty lock class to help heap profile */}
 	private final PoolLock poolLock = new PoolLock();
 
 	/**

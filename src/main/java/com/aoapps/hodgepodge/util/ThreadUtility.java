@@ -25,10 +25,10 @@ package com.aoapps.hodgepodge.util;
 /**
  * @author  AO Industries, Inc.
  */
-public final class ThreadUtility {
+public abstract class ThreadUtility {
 
-	private ThreadUtility() {
-	}
+	/** Make no instances. */
+	private ThreadUtility() {throw new AssertionError();}
 
 	public static int getThreadCount() {
 		return getTopLevelThreadGroup().activeCount();

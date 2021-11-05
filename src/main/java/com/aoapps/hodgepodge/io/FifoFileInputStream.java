@@ -35,7 +35,7 @@ import java.io.InterruptedIOException;
 public class FifoFileInputStream extends InputStream {
 
 	private final FifoFile file;
-	private static class StatsLock {}
+	private static class StatsLock {/* Empty lock class to help heap profile */}
 	private final StatsLock statsLock=new StatsLock();
 	private long fifoReadCount=0;
 	private long fifoReadBytes=0;

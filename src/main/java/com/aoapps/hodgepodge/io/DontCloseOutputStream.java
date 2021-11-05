@@ -53,5 +53,6 @@ public class DontCloseOutputStream extends FilterOutputStream {
 	 */
 	@Override
 	public void close() {
+		// Do nothing
 	}
 }

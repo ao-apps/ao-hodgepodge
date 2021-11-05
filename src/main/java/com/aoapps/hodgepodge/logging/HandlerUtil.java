@@ -30,12 +30,15 @@ import java.util.logging.SimpleFormatter;
 
 /**
  * Provides configuration method similar to {@link ConsoleHandler}.
- * 
+ *
  * @see ConsoleHandler
- * 
+ *
  * @author  AO Industries, Inc.
  */
-public class HandlerUtil {
+public abstract class HandlerUtil {
+
+	/** Make no instances. */
+	private HandlerUtil() {throw new AssertionError();}
 
 	/**
 	 * Private method to configure a ConsoleHandler from LogManager
@@ -68,6 +71,4 @@ public class HandlerUtil {
 			}
 		}
 	}
-
-	private HandlerUtil() {}
 }

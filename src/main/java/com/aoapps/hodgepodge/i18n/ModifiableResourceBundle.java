@@ -35,6 +35,7 @@ import java.util.ResourceBundle;
 public abstract class ModifiableResourceBundle extends ResourceBundle {
 
 	protected ModifiableResourceBundle() {
+		// Do nothing
 	}
 
 	/**

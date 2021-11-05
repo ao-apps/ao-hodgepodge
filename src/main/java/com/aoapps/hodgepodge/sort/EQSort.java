@@ -51,6 +51,7 @@ public final class EQSort extends BaseComparisonSortAlgorithm<Object> {
 	}
 
 	private EQSort() {
+		// Do nothing
 	}
 
 	@Override
