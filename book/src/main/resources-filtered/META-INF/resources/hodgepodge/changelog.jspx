@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
-Copyright (C) 2016, 2017, 2018, 2019, 2020, 2021  AO Industries, Inc.
+Copyright (C) 2016, 2017, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
     support@aoindustries.com
     7262 Bull Pen Cir
     Mobile, AL 36695
@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-05:00"
-		dateModified="2021-11-04T01:47:15-05:00"
+		dateModified="2022-02-15T19:01:36-06:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -48,21 +48,30 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 				artifactId="@{documented.artifactId}"
 				repository="@{nexusUrl}content/repositories/snapshots/"
 				scmUrl="@{project.scm.url}"
-			>
-				<ul>
-					<li>Now properly restoring Thread interrupted state on <code>InterruptedException</code>.</li>
-					<li>
-						Cleaning-up ThreadLocal variables when no longer used,
-						see <ao:a href="https://rules.sonarsource.com/java/RSPEC-5164" />.
-					</li>
-					<li><code>DontCloseOutputStream</code> now overrides <code>write(byte[],int,int)</code> for greater performance.</li>
-					<li>
-						Deprecated <code>DontCloseInputStream</code> and <code>DontCloseOutputStream</code> in favor or
-						duplicate <code>NoCloseInputStream</code> and <code>NoCloseOutputStream</code>.
-					</li>
-				</ul>
-			</changelog:release>
+			/>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="5.0.2"
+			datePublished="2022-02-15T19:01:36-06:00"
+			groupId="@{project.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{project.scm.url}"
+		>
+			<ul>
+				<li>Now properly restoring Thread interrupted state on <code>InterruptedException</code>.</li>
+				<li>
+					Cleaning-up ThreadLocal variables when no longer used,
+					see <ao:a href="https://rules.sonarsource.com/java/RSPEC-5164" />.
+				</li>
+				<li><code>DontCloseOutputStream</code> now overrides <code>write(byte[],int,int)</code> for greater performance.</li>
+				<li>
+					Deprecated <code>DontCloseInputStream</code> and <code>DontCloseOutputStream</code> in favor or
+					duplicate <code>NoCloseInputStream</code> and <code>NoCloseOutputStream</code>.
+				</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
