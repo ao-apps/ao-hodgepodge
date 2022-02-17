@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2018, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -937,11 +937,11 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	// <editor-fold defaultstate="collapsed" desc="N[]">
 	static class NumberArraySource<N extends Number> extends Source<NumberRadixTable<N>> {
 
-		private final int size;
+//		private final int size;
 		private final N[] array;
 
 		NumberArraySource(int size, N[] array) {
-			this.size  = size;
+//			this.size  = size;
 			this.array = array;
 		}
 
@@ -1156,11 +1156,11 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 	// <editor-fold defaultstate="collapsed" desc="int[]">
 	static class IntArraySource extends Source<IntRadixTable> {
 
-		private final int size;
+//		private final int size;
 		private final int[] array;
 
 		IntArraySource(int size, int[] array) {
-			this.size  = size;
+//			this.size  = size;
 			this.array = array;
 		}
 
