@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2016, 2018, 2019, 2021  AO Industries, Inc.
+ * Copyright (C) 2012, 2016, 2018, 2019, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,7 +41,7 @@ import java.nio.charset.StandardCharsets;
  * @author  AO Industries, Inc.
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-public abstract class LoggingProxy {
+public final class LoggingProxy {
 
 	/** Make no instances. */
 	private LoggingProxy() {throw new AssertionError();}

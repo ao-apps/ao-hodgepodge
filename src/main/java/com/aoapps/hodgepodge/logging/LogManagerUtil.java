@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -46,7 +46,7 @@ import java.util.logging.LogManager;
 // TODO: This requires "--add-opens java.logging/java.util.logging=com.aoapps.hodgepodge" when running on module-path.
 //       Find a way to do the same in Java 9+ without reflection, or at least handle the exception gracefully.
 @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-public abstract class LogManagerUtil {
+public final class LogManagerUtil {
 
 	/** Make no instances. */
 	private LogManagerUtil() {throw new AssertionError();}

@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2019, 2021  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2019, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,7 +36,7 @@ import javax.imageio.ImageIO;
  *
  * @author  AO Industries, Inc.
  */
-public abstract class ImageSizeCache {
+public final class ImageSizeCache {
 
 	/** Make no instances. */
 	private ImageSizeCache() {throw new AssertionError();}

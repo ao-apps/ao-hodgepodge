@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2019, 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -55,7 +55,7 @@ import java.util.Properties;
  * @see  Properties
  * @see  com.aoapps.collections.SortedProperties
  */
-public abstract class DiffableProperties {
+public final class DiffableProperties {
 
 	/** Make no instances. */
 	private DiffableProperties() {throw new AssertionError();}

@@ -30,7 +30,7 @@ import java.util.Base64;
  * @deprecated  Please use {@link Base64} as of Java 8.
  */
 @Deprecated
-public abstract class Base64Coder {
+public final class Base64Coder {
 
 	/** Make no instances. */
 	private Base64Coder() {throw new AssertionError();}
