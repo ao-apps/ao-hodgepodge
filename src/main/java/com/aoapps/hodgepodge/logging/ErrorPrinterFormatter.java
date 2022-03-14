@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -44,25 +44,25 @@ public class ErrorPrinterFormatter extends Formatter {
 		// Do nothing
 	}
 
-	public void format(LogRecord record, Appendable out) {
+	public void format(LogRecord rec, Appendable out) {
 		List<Object> extraInfo = new ArrayList<>();
-		String loggerName = record.getLoggerName();
-		if(loggerName != null) extraInfo.add("record.loggerName=" + loggerName);
-		extraInfo.add("record.level=" + record.getLevel());
-		extraInfo.add("record.sequenceNumber=" + record.getSequenceNumber());
-		String sourceClassName = record.getSourceClassName();
-		if(sourceClassName != null) extraInfo.add("record.sourceClassName=" + sourceClassName);
-		String sourceMethodName = record.getSourceMethodName();
-		if(sourceMethodName != null) extraInfo.add("record.sourceMethodName=" + sourceMethodName);
-		String message = record.getMessage();
+		String loggerName = rec.getLoggerName();
+		if(loggerName != null) extraInfo.add("rec.loggerName=" + loggerName);
+		extraInfo.add("rec.level=" + rec.getLevel());
+		extraInfo.add("rec.sequenceNumber=" + rec.getSequenceNumber());
+		String sourceClassName = rec.getSourceClassName();
+		if(sourceClassName != null) extraInfo.add("rec.sourceClassName=" + sourceClassName);
+		String sourceMethodName = rec.getSourceMethodName();
+		if(sourceMethodName != null) extraInfo.add("rec.sourceMethodName=" + sourceMethodName);
+		String message = rec.getMessage();
 		if(message == null) message = "";
-		extraInfo.add("record.message=" + message);
-		String formatted = formatMessage(record);
+		extraInfo.add("rec.message=" + message);
+		String formatted = formatMessage(rec);
 		if(formatted == null) formatted = "";
-		if(!message.equals(formatted)) extraInfo.add("record.message.formatted=" + formatted);
-		extraInfo.add("record.threadID=" + record.getThreadID());
-		extraInfo.add("record.millis=" + record.getMillis());
-		Throwable thrown = record.getThrown();
+		if(!message.equals(formatted)) extraInfo.add("rec.message.formatted=" + formatted);
+		extraInfo.add("rec.threadID=" + rec.getThreadID());
+		extraInfo.add("rec.millis=" + rec.getMillis());
+		Throwable thrown = rec.getThrown();
 		ErrorPrinter.printStackTraces(
 			thrown,
 			out,
@@ -71,9 +71,9 @@ public class ErrorPrinterFormatter extends Formatter {
 	}
 
 	@Override
-	public String format(LogRecord record) {
+	public String format(LogRecord rec) {
 		StringBuilder buffer = new StringBuilder(1024);
-		format(record, buffer);
+		format(rec, buffer);
 		return buffer.toString();
 	}
 }
