@@ -166,7 +166,7 @@ NextLocation :
 			}
 		}
 		return null;
-	};
+	}
 
 	/**
 	 * Loads an image from a resource using the default toolkit.

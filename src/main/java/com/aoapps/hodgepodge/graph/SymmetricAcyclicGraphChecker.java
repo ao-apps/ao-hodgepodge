@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2019, 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -47,7 +47,7 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
 		this.isForward = isForward;
 	}
 
-	private enum Color {WHITE, GRAY, BLACK};
+	private enum Color {WHITE, GRAY, BLACK}
 
 	/**
 	 * Test the graph for cycles and makes sure that all connections are consistent with back connections.
