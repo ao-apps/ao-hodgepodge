@@ -114,7 +114,7 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(Object value, boolean make_br, boolean make_nbsp, Appendable out, boolean isXhtml) throws IOException {
+	public static void encodeHtml(Object value, boolean makeBr, boolean makeNbsp, Appendable out, boolean isXhtml) throws IOException {
 		if(value != null) {
 			String str = Coercion.toString(value);
 			BundleLookupMarkup lookupMarkup;
@@ -125,7 +125,7 @@ public final class EncodingUtils {
 				lookupMarkup = null;
 			}
 			if(lookupMarkup != null) lookupMarkup.appendPrefixTo(MarkupType.XHTML, out);
-			encodeHtml(str, 0, str.length(), make_br, make_nbsp, out, isXhtml);
+			encodeHtml(str, 0, str.length(), makeBr, makeNbsp, out, isXhtml);
 			if(lookupMarkup != null) lookupMarkup.appendSuffixTo(MarkupType.XHTML, out);
 		}
 	}
@@ -136,8 +136,8 @@ public final class EncodingUtils {
 	 * Any characters less than 0x1f that are not \t, \r, or \n are completely filtered.
 	 *
 	 * @param cs the string to be escaped.  If S is <code>null</code>, nothing is written.
-	 * @param make_br  will write &lt;br /&gt; tags for every newline character
-	 * @param make_nbsp  will write &amp;#160; for a space when another space follows
+	 * @param makeBr  will write &lt;br /&gt; tags for every newline character
+	 * @param makeNbsp  will write &amp;#160; for a space when another space follows
 	 *
 	 * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
 	 * <p>
@@ -145,7 +145,7 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static void encodeHtml(CharSequence cs, int start, int end, boolean make_br, boolean make_nbsp, Appendable out, boolean isXhtml) throws IOException {
+	public static void encodeHtml(CharSequence cs, int start, int end, boolean makeBr, boolean makeNbsp, Appendable out, boolean isXhtml) throws IOException {
 		if (cs != null) {
 			int toPrint = 0;
 			for (int c = start; c < end; c++) {
@@ -175,7 +175,7 @@ public final class EncodingUtils {
 						break;
 					// Special (X)HTML options
 					case ' ':
-						if(make_nbsp) {
+						if(makeNbsp) {
 							if(toPrint > 0) {
 								out.append(cs, c - toPrint, c);
 								toPrint = 0;
@@ -200,7 +200,7 @@ public final class EncodingUtils {
 						// skip '\r'
 						break;
 					case '\n':
-						if(make_br) {
+						if(makeBr) {
 							if(toPrint > 0) {
 								out.append(cs, c - toPrint, c);
 								toPrint = 0;
@@ -237,10 +237,10 @@ public final class EncodingUtils {
 	 * </p>
 	 */
 	@Deprecated
-	public static String encodeHtml(Object value, boolean make_br, boolean make_nbsp, boolean isXhtml) throws IOException {
+	public static String encodeHtml(Object value, boolean makeBr, boolean makeNbsp, boolean isXhtml) throws IOException {
 		if(value == null) return null;
 		StringBuilder result = new StringBuilder();
-		encodeHtml(value, make_br, make_nbsp, result, isXhtml);
+		encodeHtml(value, makeBr, makeNbsp, result, isXhtml);
 		return result.toString();
 	}
 
