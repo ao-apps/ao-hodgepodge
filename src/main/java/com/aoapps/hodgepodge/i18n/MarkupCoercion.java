@@ -108,7 +108,7 @@ public final class MarkupCoercion {
 	 * @param  encoder  no encoding performed when null
 	 *
 	 * @param  encoderPrefixSuffix  This includes the encoder {@linkplain Encoder#writePrefixTo(java.lang.Appendable) prefix}
-	 *                              and {@linkplain Encoder#writeSuffixTo(java.lang.Appendable) suffix}.
+	 *                              and {@linkplain Encoder#writeSuffixTo(java.lang.Appendable, boolean) suffix}.
 	 *
 	 * @see  MarkupType
 	 */
@@ -138,7 +138,7 @@ public final class MarkupCoercion {
 				) {
 					if(encoderPrefixSuffix) encoder.writePrefixTo(out);
 					Coercion.write(value, encoder, out);
-					if(encoderPrefixSuffix) encoder.writeSuffixTo(out);
+					if(encoderPrefixSuffix) encoder.writeSuffixTo(out, false);
 				} else {
 					String str = Coercion.toString(value);
 					BundleLookupMarkup lookupMarkup = threadContext.getLookupMarkup(str);
@@ -147,7 +147,7 @@ public final class MarkupCoercion {
 					if(lookupMarkup != null && encodeLookupMarkup) lookupMarkup.appendPrefixTo(markupType, encoder, out);
 					encoder.write(str, out);
 					if(lookupMarkup != null && encodeLookupMarkup) lookupMarkup.appendSuffixTo(markupType, encoder, out);
-					if(encoderPrefixSuffix) encoder.writeSuffixTo(out);
+					if(encoderPrefixSuffix) encoder.writeSuffixTo(out, false);
 					if(lookupMarkup != null && !encodeLookupMarkup) lookupMarkup.appendSuffixTo(markupType, out);
 				}
 			}
@@ -222,7 +222,7 @@ public final class MarkupCoercion {
 	 * @param  encoder  no encoding performed when null
 	 *
 	 * @param  encoderPrefixSuffix  This includes the encoder {@linkplain Encoder#writePrefixTo(java.lang.Appendable) prefix}
-	 *                              and {@linkplain Encoder#writeSuffixTo(java.lang.Appendable) suffix}.
+	 *                              and {@linkplain Encoder#writeSuffixTo(java.lang.Appendable, boolean) suffix}.
 	 *
 	 * @see  MarkupType
 	 */
@@ -254,7 +254,7 @@ public final class MarkupCoercion {
 				) {
 					if(encoderPrefixSuffix) encoder.writePrefixTo(out);
 					Coercion.append(value, encoder, out);
-					if(encoderPrefixSuffix) encoder.writeSuffixTo(out);
+					if(encoderPrefixSuffix) encoder.writeSuffixTo(out, false);
 				} else {
 					String str = Coercion.toString(value);
 					BundleLookupMarkup lookupMarkup = threadContext.getLookupMarkup(str);
@@ -263,7 +263,7 @@ public final class MarkupCoercion {
 					if(lookupMarkup != null && encodeLookupMarkup) lookupMarkup.appendPrefixTo(markupType, encoder, out);
 					encoder.append(str, out);
 					if(lookupMarkup != null && encodeLookupMarkup) lookupMarkup.appendSuffixTo(markupType, encoder, out);
-					if(encoderPrefixSuffix) encoder.writeSuffixTo(out);
+					if(encoderPrefixSuffix) encoder.writeSuffixTo(out, false);
 					if(lookupMarkup != null && !encodeLookupMarkup) lookupMarkup.appendSuffixTo(markupType, out);
 				}
 			}
