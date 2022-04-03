@@ -154,7 +154,7 @@ public final class RateLimitCat {
 			}
 			File output = GetOpt.getOpt(args, "output", File.class); // null for standard output
 			Boolean progressParam = GetOpt.getOpt(args, "progress", Boolean.TYPE);
-			boolean progress = progressParam!=null ? progressParam : false;
+			boolean progress = (progressParam != null) && progressParam;
 			List<String> sourcePaths = GetOpt.getArguments(args);
 			List<File> sourceFiles = new ArrayList<>(sourcePaths.size()+1);
 			boolean allowStdin = true;
