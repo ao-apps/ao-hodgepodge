@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015, 2021  AO Industries, Inc.
+ * Copyright (C) 2015, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,7 +29,7 @@ import java.util.Calendar;
  */
 public class DayDuration {
 
-	public static enum Unit {
+	public enum Unit {
 		DAYS {
 			@Override
 			void toString(int count, StringBuilder sb) {
@@ -129,7 +129,7 @@ public class DayDuration {
 	 *   <li># year</li>
 	 *   <li># years</li>
 	 * </ol>
-	 * 
+	 *
 	 * @see  #toString()
 	 */
 	public static DayDuration valueOf(String duration) {
