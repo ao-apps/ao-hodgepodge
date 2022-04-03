@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -92,10 +92,10 @@ public class ZeroFile {
 			long sleepUntil = lastTime + millisPerBlock;
 			long currentTime = System.currentTimeMillis();
 			long sleepyTime = sleepUntil - currentTime;
-			if(sleepyTime<=0) {
+			if(sleepyTime <= 0) {
 				// IO too slow or system time set to future
 				return currentTime;
-			} if(sleepyTime>millisPerBlock) {
+			} else if(sleepyTime > millisPerBlock) {
 				// System time set to past
 				Thread.sleep(millisPerBlock);
 				return currentTime + millisPerBlock;
