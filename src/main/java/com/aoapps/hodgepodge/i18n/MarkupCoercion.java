@@ -59,7 +59,8 @@ public final class MarkupCoercion {
 	 * Writes an object's String representation with markup enabled,
 	 * supporting streaming for specialized types.
 	 *
-	 * @param  outOptimized  Is {@code out} already known to have been passed through {@link Coercion#optimize(java.io.Writer, com.aoapps.lang.io.Encoder)}?
+	 * @param  outOptimized  Is {@code out} already known to have been passed through {@link Coercion#optimize(java.io.Writer, com.aoapps.lang.io.Encoder)}
+	 *                       (with {@code encoder = null})?
 	 *
 	 * @see  MarkupType
 	 */
@@ -231,7 +232,8 @@ public final class MarkupCoercion {
 	 * Appends an object's String representation with markup enabled,
 	 * supporting streaming for specialized types.
 	 *
-	 * @param  outOptimized  Is {@code out} already known to have been passed through {@link Coercion#optimize(java.io.Writer, com.aoapps.lang.io.Encoder)}?
+	 * @param  outOptimized  Is {@code out} already known to have been passed through {@link Coercion#optimize(java.io.Writer, com.aoapps.lang.io.Encoder)}
+	 *                       (with {@code encoder = null})?
 	 *
 	 * @see  MarkupType
 	 */
