@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2015, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -393,7 +393,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 	 * TODO: Decouple from ao-hodgepodge and use ao-fluent-html
 	 */
 	public static void printEditableResourceBundleLookups(
-		Encoder textInJavaScriptEncoder,
+		Encoder textInJavascriptEncoder,
 		Encoder textInXhtmlEncoder,
 		Appendable out,
 		boolean isXhtml,
@@ -526,7 +526,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 							// Value allowed
 							out.append('"');
 							String value = convertEmpty(bundleSet.getResourceBundle(locale).getValue(lookupKey.key));
-							textInJavaScriptEncoder.append(value, out);
+							textInJavascriptEncoder.append(value, out);
 							out.append('"');
 						} else {
 							// null means not allowed
@@ -543,7 +543,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 					if(didOne1) out.append(',');
 					else didOne1 = true;
 					out.append("\n        \"");
-					textInJavaScriptEncoder.append(lookupKey.bundleSet.getBaseName(), out);
+					textInJavascriptEncoder.append(lookupKey.bundleSet.getBaseName(), out);
 					out.append('"');
 				}
 				out.append("\n  ];\n"
@@ -554,7 +554,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 					if(didOne1) out.append(',');
 					else didOne1 = true;
 					out.append("\n        \"");
-					textInJavaScriptEncoder.append(locale.toString(), out);
+					textInJavascriptEncoder.append(locale.toString(), out);
 					out.append('"');
 				}
 				out.append("\n  ];\n"
@@ -565,7 +565,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 					if(didOne1) out.append(',');
 					else didOne1 = true;
 					out.append("\n        \"");
-					textInJavaScriptEncoder.append(lookupKey.key, out);
+					textInJavascriptEncoder.append(lookupKey.key, out);
 					out.append('"');
 				}
 				out.append("\n  ];\n"
@@ -970,14 +970,14 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 	 */
 	@Deprecated
 	public static void printEditableResourceBundleLookups(
-		Encoder textInJavaScriptEncoder,
+		Encoder textInJavascriptEncoder,
 		Encoder textInXhtmlEncoder,
 		Appendable out,
 		int editorRows,
 		boolean verticalButtons
 	) throws IOException {
 		printEditableResourceBundleLookups(
-			textInJavaScriptEncoder,
+			textInJavascriptEncoder,
 			textInXhtmlEncoder,
 			out,
 			true,
