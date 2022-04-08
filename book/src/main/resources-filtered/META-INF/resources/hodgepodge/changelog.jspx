@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-29T16:23:04-05:00"
-		dateModified="2022-03-28T18:05:16-05:00"
+		dateModified="2022-04-07T17:40:40-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -52,6 +52,16 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 				<ul>
 					<li>Updated dependencies.</li>
 					<li>New interface <code>NoClose</code> along with static <code>wrap(…)</code> methods to avoid duplicate wrapping.</li>
+					<li><code>MarkupCoercion.write(…)</code> disallows potential bypass of buffered encoders.</li>
+					<li>
+						<code>MarkupCoercion</code> always writes prefix/suffix even when value is null, for consistency.
+						For example, writing null text in JavaScript should still be "", since writing null is equivalent to "".
+					</li>
+					<li>
+						<code>MarkupCoercion</code> can unwrap an <code>EncoderWriter</code> when encoder is null.
+						This is done for consistency with the related implementation of <code>Coercion</code> in
+						<core:link book="/lang" page="/index.jspx" />.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
