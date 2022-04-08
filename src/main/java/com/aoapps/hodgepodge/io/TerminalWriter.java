@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2016, 2021  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2016, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoapps.hodgepodge.io;
 
+import com.aoapps.lang.io.NoClose;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -35,7 +36,7 @@ import java.util.Locale;
  *
  * @author  AO Industries, Inc.
  */
-public class TerminalWriter extends PrintWriter {
+public class TerminalWriter extends PrintWriter implements NoClose {
 
 	private static final char ESC=0x1b;
 
@@ -87,7 +88,7 @@ public class TerminalWriter extends PrintWriter {
 	 * (Over)writes a progress line to the given PrintStream.
 	 * Any extra characters from previous output are covered with spaces.
 	 * Any common prefix is not overwritten.
-	 * 
+	 *
 	 * @param  lastVerboseString  The last line output
 	 * @param  newVerboseString   The new line to display
 	 * @return  The new line (newVerboseString)
@@ -102,7 +103,7 @@ public class TerminalWriter extends PrintWriter {
 	 * (Over)writes a progress line to the given PrintStream.
 	 * Any extra characters from previous output are covered with spaces.
 	 * Any common prefix is not overwritten.
-	 * 
+	 *
 	 * @param  lastVerboseString  The last line output
 	 * @param  newVerboseString   The new line to display
 	 * @return  The new line (newVerboseString)
@@ -121,6 +122,11 @@ public class TerminalWriter extends PrintWriter {
 
 	public TerminalWriter(Writer out, boolean autoFlush) {
 		super(out, autoFlush);
+	}
+
+	@Override
+	public boolean isNoClose() {
+		return (out instanceof NoClose) && ((NoClose)out).isNoClose();
 	}
 
 	public void attributesOff() throws IOException {
@@ -176,7 +182,7 @@ public class TerminalWriter extends PrintWriter {
 	}
 
 	/**
-	 * @see  #progressOutput(java.lang.String, java.lang.String, java.io.Writer) 
+	 * @see  #progressOutput(java.lang.String, java.lang.String, java.io.Writer)
 	 */
 	public String progressOutput(String lastVerboseString, String newVerboseString) throws IOException {
 		return progressOutput(lastVerboseString, newVerboseString, out);

@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016, 2021  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoapps.hodgepodge.io;
 
+import com.aoapps.lang.io.NoClose;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -31,7 +32,9 @@ import java.io.Reader;
  *
  * @author  AO Industries, Inc.
  */
-public class SkipLinesReader extends BufferedReader {
+public class SkipLinesReader extends BufferedReader implements NoClose {
+
+	private final Reader in;
 
 	public SkipLinesReader(Reader in, int skipLines) throws IOException {
 		super(in);
@@ -39,5 +42,11 @@ public class SkipLinesReader extends BufferedReader {
 			String line = readLine();
 			if(line==null) break;
 		}
+		this.in = in;
+	}
+
+	@Override
+	public boolean isNoClose() {
+		return (in instanceof NoClose) && ((NoClose)in).isNoClose();
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2018, 2021  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2018, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoapps.hodgepodge.io;
 
+import com.aoapps.lang.io.NoClose;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -36,7 +37,7 @@ import java.io.OutputStream;
  *
  * @author  AO Industries, Inc.
  */
-public class BitRateOutputStream extends FilterOutputStream {
+public class BitRateOutputStream extends FilterOutputStream implements NoClose {
 
 	public static final long MAX_CATCHUP_TIME = 2L * 1000;
 
@@ -80,6 +81,11 @@ public class BitRateOutputStream extends FilterOutputStream {
 		if(blockStart==-1) blockStart=System.currentTimeMillis();
 		out.flush();
 		sleep();
+	}
+
+	@Override
+	public boolean isNoClose() {
+		return (out instanceof NoClose) && ((NoClose)out).isNoClose();
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017, 2021  AO Industries, Inc.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.aoapps.hodgepodge.io;
 
+import com.aoapps.lang.io.NoClose;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,12 +35,17 @@ import java.io.InputStream;
  *
  * @author  AO Industries, Inc.
  */
-public class ByteCountInputStream extends FilterInputStream {
+public class ByteCountInputStream extends FilterInputStream implements NoClose {
 
 	private long count = 0;
 
 	public ByteCountInputStream(InputStream in) {
 		super(in);
+	}
+
+	@Override
+	public boolean isNoClose() {
+		return (in instanceof NoClose) && ((NoClose)in).isNoClose();
 	}
 
 	@Override
