@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2017, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2017, 2019, 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -142,6 +142,7 @@ public final class BundleLookupThreadContext {
 	 * @throws IllegalStateException   if the string has already been added to this context (as matched by identity)
 	 */
 	void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) throws IllegalStateException {
+		assert lookupResult != null;
 		synchronized(lookupResults) {
 			if(lookupResults.put(lookupResult, lookupMarkup) != null) {
 				throw new LocalizedIllegalStateException(RESOURCES, "addLookupMarkup.stringAlreadyAdded");
@@ -173,6 +174,7 @@ public final class BundleLookupThreadContext {
 	 * </p>
 	 */
 	public BundleLookupMarkup getLookupMarkup(String result) {
+		if(result == null) return null;
 		synchronized(lookupResults) {
 			return lookupResults.get(result);
 		}

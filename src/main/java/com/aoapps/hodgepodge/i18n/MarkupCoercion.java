@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import javax.swing.text.Segment;
 import org.w3c.dom.Node;
 
 /**
@@ -108,7 +107,7 @@ public final class MarkupCoercion {
 						&& !((Writable)value).isFastToString()
 					)
 					// Other types that will not be converted to String for bundle lookups
-					|| value instanceof Segment
+					|| (value instanceof CharSequence && !(value instanceof String))
 					|| value instanceof char[]
 					|| value instanceof Node
 				) {
@@ -255,7 +254,7 @@ public final class MarkupCoercion {
 						&& !((Writable)value).isFastToString()
 					)
 					// Other types that will not be converted to String for bundle lookups
-					|| value instanceof Segment
+					|| (value instanceof CharSequence && !(value instanceof String))
 					|| value instanceof char[]
 					|| value instanceof Node
 				) {
@@ -329,7 +328,7 @@ public final class MarkupCoercion {
 						&& !((Writable)value).isFastToString()
 					)
 					// Other types that will not be converted to String for bundle lookups
-					|| value instanceof Segment
+					|| (value instanceof CharSequence && !(value instanceof String))
 					|| value instanceof char[]
 					|| value instanceof Node
 				) {
@@ -469,7 +468,7 @@ public final class MarkupCoercion {
 							&& !((Writable)value).isFastToString()
 						)
 						// Other types that will not be converted to String for bundle lookups
-						|| value instanceof Segment
+						|| (value instanceof CharSequence && !(value instanceof String))
 						|| value instanceof char[]
 						|| value instanceof Node
 					) {
