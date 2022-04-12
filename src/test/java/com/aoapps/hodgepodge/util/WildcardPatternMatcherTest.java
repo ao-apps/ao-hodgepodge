@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2017, 2018, 2021  AO Industries, Inc.
+ * Copyright (C) 2017, 2018, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,6 +33,8 @@ import junit.framework.TestSuite;
  */
 public class WildcardPatternMatcherTest extends TestCase {
 
+	private static final int END_TEST_SIZE = 100000; // 1000000
+
 	private static final String longString;
 	private static final String craftedLongString;
 	static {
@@ -62,14 +64,13 @@ public class WildcardPatternMatcherTest extends TestCase {
 	@SuppressWarnings("UseOfSystemOutOrSystemErr")
 	private void doTestPerformance(String description, String patterns, String regexp, String text, boolean expectedResult) {
 		System.out.println(description);
-		final int endTestSize = 1000000;
-		for(int testSize = 1; testSize <= endTestSize; testSize *= 100) {
+		for(int testSize = 1; testSize <= END_TEST_SIZE; testSize *= 100) {
 			// Time make matcher
 			long startNanos = System.nanoTime();
 			WildcardPatternMatcher wcMatcher = WildcardPatternMatcher.compile(patterns);
 			long timeNanos = System.nanoTime() - startNanos;
 			System.out.println("    " + testSize + ": Created WildcardPatternMatcher in " + BigDecimal.valueOf(timeNanos, 3) + " \u00B5s");
-			
+
 			// Time make pattern
 			startNanos = System.nanoTime();
 			Pattern rePattern = Pattern.compile(regexp);

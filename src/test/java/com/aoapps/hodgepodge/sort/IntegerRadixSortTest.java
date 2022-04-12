@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2018, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -46,8 +46,8 @@ public class IntegerRadixSortTest extends TestCase {
 	private static final long GC_SLEEP_TIME = 100;
 
 	private static final int START_TEST_SIZE = 1; // << 8;
-	private static final int END_TEST_SIZE = 1 << 20; // << 26;
-	private static final int MAX_PASSES = (1 << 20) / START_TEST_SIZE;
+	private static final int END_TEST_SIZE = 1 << 16 /*20*/; // << 26;
+	private static final int MAX_PASSES = (1 << 16 /*20*/) / START_TEST_SIZE;
 
 	private static final boolean USE_SORTED = false;
 
