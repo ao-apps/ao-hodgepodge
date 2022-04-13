@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2017, 2019, 2021  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2017, 2019, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,9 +37,9 @@ import java.util.List;
  * For example, a context might be the lifecycle of serving one HTTP request.
  * Once the request has been completed, any temporary files created should be
  * cleaned-up immediately instead of waiting an indeterminate amount of time
- * for 
+ * for
  * </p>
- * 
+ *
  * @see  TempFile
  *
  * @author  AO Industries, Inc.
@@ -56,15 +56,15 @@ public class TempFileList {
 	private final String suffix;
 	private final File directory;
 
-	public TempFileList(String prefix) throws IOException {
+	public TempFileList(String prefix) {
 		this(prefix, null, null);
 	}
 
-	public TempFileList(String prefix, String suffix) throws IOException {
+	public TempFileList(String prefix, String suffix) {
 		this(prefix, suffix, null);
 	}
 
-	public TempFileList(String prefix, String suffix, File directory) throws IOException {
+	public TempFileList(String prefix, String suffix, File directory) {
 		this.prefix = prefix;
 		this.suffix = suffix;
 		this.directory = directory;
