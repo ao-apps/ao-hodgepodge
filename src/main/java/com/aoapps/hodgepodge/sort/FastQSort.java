@@ -28,6 +28,7 @@
  * SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF FITNESS FOR
  * HIGH RISK ACTIVITIES.
  */
+
 package com.aoapps.hodgepodge.sort;
 
 import java.util.Comparator;

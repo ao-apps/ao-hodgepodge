@@ -16,6 +16,7 @@
  * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
  */
+
 package com.aoapps.hodgepodge.sort;
 
 import java.util.Comparator;
