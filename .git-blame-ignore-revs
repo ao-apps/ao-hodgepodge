@@ -1,30 +1,54 @@
+# Since version 2.23 (released in August 2019), git-blame has a feature
+# to ignore or bypass certain commits.
+#
+# This file contains a list of commits that are not likely what you
+# are looking for in a blame, such as mass reformatting or renaming.
+# You can set this file as a default ignore file for blame by running
+# the following command.
+#
+# $ git config blame.ignoreRevsFile .git-blame-ignore-revs
+
 # Significant manual code formatting clean-up…
 40609b40ac64a7b293ceac06d232f2527bb2bcd4
+
 # Fixed tab indent
 c02e056cf990f8baf35291a6c1fe5fa9e25cf13f
+
 # Fixed tab indent
 7af9eff32206aab934969274249c93e470792cd6
+
 # Removed extraneous space at end of line.
 46849be3cdc7c0a9dd6968e9084f506f22580c1e
+
 # Updated name to be consistent with other projects.
 # cb733e3dadd7fea4ea0148c181f6644b4d162313
+
 # Converted remaining four-space indents to our standard tab indent.
 fc161fe2c289fdb969d29a2150c6c7ab625c4e36
+
 # Fixed whitespace create by maven release plugin
 57eba8b824404c74c68202477d6b02a4b6e3a784
+
 # Removed extraneous space at end of line.
 3791b92df6bd7026ed327a72c73f3b2dc95737f7
+
 # Updated name to be consistent with other projects.
 # 135f9c88042d376713b80b7bcdbd88f9f4fd3b96
+
 # Converted remaining four-space indents to our standard tab indent.
 adf764fbe04560adaf5c8798757c2e725026dec0
+
 # Fixed whitespace create by maven release plugin
 bfcae5e9ac79bc5cee160dfac7e3ce0e677cdf73
+
 # Fixed recurring display formatting.
 # aac0bd99234abbd8231bba8681e15afbf6fbe13d
+
 # Converted all newlines to Unix format.
 8b5fd5c85ce41d2dbf0155a3fe8b4469f7e47f4a
+
 # Working on Java implementation of both client and server for HTTP sockets.
 ef3fc3f4f004192f63c6490b8f9a5289e64d9f3a
+
 # Moving to head
 4e992b24938d76c390a08a65f34020f30c88ec43
