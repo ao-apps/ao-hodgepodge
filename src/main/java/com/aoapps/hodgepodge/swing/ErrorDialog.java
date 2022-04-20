@@ -44,55 +44,57 @@ import javax.swing.JTextArea;
  */
 public class ErrorDialog extends DefaultJDialog implements ActionListener {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private EnterJButton closeButton;
+  private EnterJButton closeButton;
 
-	public ErrorDialog(Component parent, String title, Throwable t) {
-		this(parent, title, t, (Object[])null);
-	}
+  public ErrorDialog(Component parent, String title, Throwable t) {
+    this(parent, title, t, (Object[])null);
+  }
 
-	@SuppressWarnings({"LeakingThisInConstructor", "OverridableMethodCallInConstructor"})
-	public ErrorDialog(Component parent, String title, Throwable t, Object... extraInfo) {
-		super((parent instanceof JFrame) ? (JFrame)parent : new JFrame(), title, true, 400, 300);
+  @SuppressWarnings({"LeakingThisInConstructor", "OverridableMethodCallInConstructor"})
+  public ErrorDialog(Component parent, String title, Throwable t, Object... extraInfo) {
+    super((parent instanceof JFrame) ? (JFrame)parent : new JFrame(), title, true, 400, 300);
 
-		@SuppressWarnings("OverridableMethodCallInConstructor")
-		Container contentPane = getContentPane();
-		contentPane.setLayout(new MultiBorderLayout());
-		contentPane.add(new JLabel(" "), BorderLayout.NORTH);
-		contentPane.add(new JLabel("An application error has occurred.  Please provide a", JLabel.CENTER), BorderLayout.NORTH);
-		contentPane.add(new JLabel("copy of this error to your system administrator.", JLabel.CENTER), BorderLayout.NORTH);
-		contentPane.add(new JLabel(" "), BorderLayout.NORTH);
+    @SuppressWarnings("OverridableMethodCallInConstructor")
+    Container contentPane = getContentPane();
+    contentPane.setLayout(new MultiBorderLayout());
+    contentPane.add(new JLabel(" "), BorderLayout.NORTH);
+    contentPane.add(new JLabel("An application error has occurred.  Please provide a", JLabel.CENTER), BorderLayout.NORTH);
+    contentPane.add(new JLabel("copy of this error to your system administrator.", JLabel.CENTER), BorderLayout.NORTH);
+    contentPane.add(new JLabel(" "), BorderLayout.NORTH);
 
-		// Convert the error
-		CharArrayWriter cout=new CharArrayWriter();
-		PrintWriter pout=new PrintWriter(cout);
-		ErrorPrinter.printStackTraces(t, pout, extraInfo);
-		pout.flush();
-		String errorText=cout.toString();
+    // Convert the error
+    CharArrayWriter cout=new CharArrayWriter();
+    PrintWriter pout=new PrintWriter(cout);
+    ErrorPrinter.printStackTraces(t, pout, extraInfo);
+    pout.flush();
+    String errorText=cout.toString();
 
-		// Setup the GUI
-		JTextArea textArea=new JTextArea(errorText, 25, 80);
-		textArea.setEditable(false);
-		textArea.setCaretPosition(0);
-		contentPane.add(new JScrollPane(textArea));
+    // Setup the GUI
+    JTextArea textArea=new JTextArea(errorText, 25, 80);
+    textArea.setEditable(false);
+    textArea.setCaretPosition(0);
+    contentPane.add(new JScrollPane(textArea));
 
-		JPanel buttonPanel=new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-		contentPane.add(buttonPanel, BorderLayout.SOUTH);
-		closeButton=new EnterJButton("Close");
-		buttonPanel.add(closeButton);
-		closeButton.addActionListener(this);
-		closeButton.setToolTipText("Close this window.");
+    JPanel buttonPanel=new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+    contentPane.add(buttonPanel, BorderLayout.SOUTH);
+    closeButton=new EnterJButton("Close");
+    buttonPanel.add(closeButton);
+    closeButton.addActionListener(this);
+    closeButton.setToolTipText("Close this window.");
 
-		pack();
-		center(parent);
+    pack();
+    center(parent);
 
-		closeButton.requestFocus();
-	}
+    closeButton.requestFocus();
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object source=e.getSource();
-		if(source==closeButton) closeWindow();
-	}
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object source=e.getSource();
+    if (source == closeButton) {
+      closeWindow();
+    }
+  }
 }

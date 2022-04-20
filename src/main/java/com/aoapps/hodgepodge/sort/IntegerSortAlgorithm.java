@@ -32,11 +32,11 @@ import com.aoapps.collections.IntList;
  */
 public interface IntegerSortAlgorithm extends SortAlgorithm<Number> {
 
-	void sort(IntList list);
+  void sort(IntList list);
 
-	void sort(int[] array);
+  void sort(int[] array);
 
-	void sort(IntList list, SortStatistics stats);
+  void sort(IntList list, SortStatistics stats);
 
-	void sort(int[] array, SortStatistics stats);
+  void sort(int[] array, SortStatistics stats);
 }

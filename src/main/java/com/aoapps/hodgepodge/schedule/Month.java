@@ -26,74 +26,74 @@ package com.aoapps.hodgepodge.schedule;
 import java.util.Calendar;
 
 public enum Month {
-	JANUARY  ("January",   "Jan", Calendar.JANUARY),
-	FEBRUARY ("February",  "Feb", Calendar.FEBRUARY),
-	MARCH    ("March",     "Mar", Calendar.MARCH),
-	APRIL    ("April",     "Apr", Calendar.APRIL),
-	MAY      ("May",       "May", Calendar.MAY),
-	JUNE     ("June",      "Jun", Calendar.JUNE),
-	JULY     ("July",      "Jul", Calendar.JULY),
-	AUGUST   ("August",    "Aug", Calendar.AUGUST),
-	SEPTEMBER("September", "Sep", Calendar.SEPTEMBER),
-	OCTOBER  ("October",   "Oct", Calendar.OCTOBER),
-	NOVEMBER ("November",  "Nov", Calendar.NOVEMBER),
-	DECEMBER ("December",  "Dec", Calendar.DECEMBER);
+  JANUARY  ("January",   "Jan", Calendar.JANUARY),
+  FEBRUARY ("February",  "Feb", Calendar.FEBRUARY),
+  MARCH    ("March",     "Mar", Calendar.MARCH),
+  APRIL    ("April",     "Apr", Calendar.APRIL),
+  MAY      ("May",       "May", Calendar.MAY),
+  JUNE     ("June",      "Jun", Calendar.JUNE),
+  JULY     ("July",      "Jul", Calendar.JULY),
+  AUGUST   ("August",    "Aug", Calendar.AUGUST),
+  SEPTEMBER("September", "Sep", Calendar.SEPTEMBER),
+  OCTOBER  ("October",   "Oct", Calendar.OCTOBER),
+  NOVEMBER ("November",  "Nov", Calendar.NOVEMBER),
+  DECEMBER ("December",  "Dec", Calendar.DECEMBER);
 
-	/**
-	 * Copy of values for internal use without temporary array copy.
-	 */
-	static Month[] values = values();
+  /**
+   * Copy of values for internal use without temporary array copy.
+   */
+  static Month[] values = values();
 
-	/**
-	 * Gets the month from the Calendar value.
-	 */
-	public static Month getByCalendarMonth(int calendarMonth) {
-		switch(calendarMonth) {
-			case Calendar.JANUARY   : return JANUARY;
-			case Calendar.FEBRUARY  : return FEBRUARY;
-			case Calendar.MARCH     : return MARCH;
-			case Calendar.APRIL     : return APRIL;
-			case Calendar.MAY       : return MAY;
-			case Calendar.JUNE      : return JUNE;
-			case Calendar.JULY      : return JULY;
-			case Calendar.AUGUST    : return AUGUST;
-			case Calendar.SEPTEMBER : return SEPTEMBER;
-			case Calendar.OCTOBER   : return OCTOBER;
-			case Calendar.NOVEMBER  : return NOVEMBER;
-			case Calendar.DECEMBER  : return DECEMBER;
-			default : throw new AssertionError("Calendar and Month mismatch");
-		}
-	}
+  /**
+   * Gets the month from the Calendar value.
+   */
+  public static Month getByCalendarMonth(int calendarMonth) {
+    switch (calendarMonth) {
+      case Calendar.JANUARY   : return JANUARY;
+      case Calendar.FEBRUARY  : return FEBRUARY;
+      case Calendar.MARCH     : return MARCH;
+      case Calendar.APRIL     : return APRIL;
+      case Calendar.MAY       : return MAY;
+      case Calendar.JUNE      : return JUNE;
+      case Calendar.JULY      : return JULY;
+      case Calendar.AUGUST    : return AUGUST;
+      case Calendar.SEPTEMBER : return SEPTEMBER;
+      case Calendar.OCTOBER   : return OCTOBER;
+      case Calendar.NOVEMBER  : return NOVEMBER;
+      case Calendar.DECEMBER  : return DECEMBER;
+      default : throw new AssertionError("Calendar and Month mismatch");
+    }
+  }
 
-	private final String longName;
-	private final String shortName;
-	private final int calendarMonth;
+  private final String longName;
+  private final String shortName;
+  private final int calendarMonth;
 
-	private Month(String longName, String shortName, int calendarMonth) {
-		this.longName = longName;
-		this.shortName = shortName;
-		this.calendarMonth = calendarMonth;
-	}
+  private Month(String longName, String shortName, int calendarMonth) {
+    this.longName = longName;
+    this.shortName = shortName;
+    this.calendarMonth = calendarMonth;
+  }
 
-	@Override
-	public String toString() {
-		return longName;
-	}
+  @Override
+  public String toString() {
+    return longName;
+  }
 
-	public String getLongName() {
-		return longName;
-	}
+  public String getLongName() {
+    return longName;
+  }
 
-	public String getShortName() {
-		return shortName;
-	}
+  public String getShortName() {
+    return shortName;
+  }
 
-	/**
-	 * Gets the month value used by the Calendar class.
-	 * 
-	 * @see  Calendar
-	 */
-	public int getCalendarMonth() {
-		return calendarMonth;
-	}
+  /**
+   * Gets the month value used by the Calendar class.
+   * 
+   * @see  Calendar
+   */
+  public int getCalendarMonth() {
+    return calendarMonth;
+  }
 }

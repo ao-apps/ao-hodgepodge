@@ -32,27 +32,27 @@ import com.aoapps.lang.Throwables;
  */
 public class GraphException extends RuntimeException {
 
-	private static final long serialVersionUID = -1829212989642756232L;
+  private static final long serialVersionUID = -1829212989642756232L;
 
-	public GraphException() {
-		super();
-	}
+  public GraphException() {
+    super();
+  }
 
-	public GraphException(String message) {
-		super(message);
-	}
+  public GraphException(String message) {
+    super(message);
+  }
 
-	public GraphException(Throwable cause) {
-		super(cause);
-	}
+  public GraphException(Throwable cause) {
+    super(cause);
+  }
 
-	public GraphException(String message, Throwable cause) {
-		super(message, cause);
-	}
+  public GraphException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-	static {
-		Throwables.registerSurrogateFactory(GraphException.class, (template, cause) ->
-			new GraphException(template.getMessage(), cause)
-		);
-	}
+  static {
+    Throwables.registerSurrogateFactory(GraphException.class, (template, cause) ->
+      new GraphException(template.getMessage(), cause)
+    );
+  }
 }

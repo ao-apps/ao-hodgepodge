@@ -36,18 +36,18 @@ import java.io.IOException;
 @FunctionalInterface
 public interface FilesystemIteratorRule {
 
-	/**
-	 * Gets if this item should be included.
-	 */
-	boolean isIncluded(String filename) throws IOException;
+  /**
+   * Gets if this item should be included.
+   */
+  boolean isIncluded(String filename) throws IOException;
 
-	/**
-	 * A rule that will always be backed-up.
-	 */
-	FilesystemIteratorRule OK = filename -> true;
+  /**
+   * A rule that will always be backed-up.
+   */
+  FilesystemIteratorRule OK = filename -> true;
 
-	/**
-	 * A rule that will not be backed-up.
-	 */
-	FilesystemIteratorRule SKIP = filename -> false;
+  /**
+   * A rule that will not be backed-up.
+   */
+  FilesystemIteratorRule SKIP = filename -> false;
 }

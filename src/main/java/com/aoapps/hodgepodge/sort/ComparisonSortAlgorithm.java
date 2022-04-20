@@ -33,11 +33,11 @@ import java.util.List;
  */
 public interface ComparisonSortAlgorithm<E> extends SortAlgorithm<E> {
 
-	<T extends E> void sort(List<T> list, Comparator<? super T> comparator);
+  <T extends E> void sort(List<T> list, Comparator<? super T> comparator);
 
-	<T extends E> void sort(T[] array, Comparator<? super T> comparator);
+  <T extends E> void sort(T[] array, Comparator<? super T> comparator);
 
-	<T extends E> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats);
+  <T extends E> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats);
 
-	<T extends E> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats);
+  <T extends E> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats);
 }

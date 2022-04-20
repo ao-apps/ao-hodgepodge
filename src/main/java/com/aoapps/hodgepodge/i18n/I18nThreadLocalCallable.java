@@ -35,7 +35,7 @@ import java.util.concurrent.Callable;
  */
 public class I18nThreadLocalCallable<T> extends ThreadLocalsCallable<T> {
 
-	public I18nThreadLocalCallable(Callable<T> task) {
-		super(task, I18nThreadLocalRunnable.i18nThreadLocals);
-	}
+  public I18nThreadLocalCallable(Callable<T> task) {
+    super(task, I18nThreadLocalRunnable.i18nThreadLocals);
+  }
 }

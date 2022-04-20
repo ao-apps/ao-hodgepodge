@@ -36,51 +36,51 @@ import com.aoapps.lang.Throwables;
  */
 public class AsymmetricException extends GraphException {
 
-	private static final long serialVersionUID = 7461271328813491659L;
+  private static final long serialVersionUID = 7461271328813491659L;
 
-	private static String getMessage(
-		Object vertex,
-		Object connected
-	) {
-		return
-			"No back connection matching connection:\n"
-			+ "    vertex="+vertex.getClass().getName()+"(\""+vertex.toString()+"\")\n"
-			+ "    connected="+connected.getClass().getName()+"(\""+connected.toString()+"\")"
-		;
-	}
+  private static String getMessage(
+    Object vertex,
+    Object connected
+  ) {
+    return
+      "No back connection matching connection:\n"
+      + "    vertex="+vertex.getClass().getName()+"(\""+vertex.toString()+"\")\n"
+      + "    connected="+connected.getClass().getName()+"(\""+connected.toString()+"\")"
+    ;
+  }
 
-	private final Object vertex;
-	private final Object connected;
+  private final Object vertex;
+  private final Object connected;
 
-	<V> AsymmetricException(V vertex, V connected) {
-		super(getMessage(vertex, connected));
-		this.vertex = vertex;
-		this.connected = connected;
-	}
+  <V> AsymmetricException(V vertex, V connected) {
+    super(getMessage(vertex, connected));
+    this.vertex = vertex;
+    this.connected = connected;
+  }
 
-	<V> AsymmetricException(V vertex, V connected, Throwable cause) {
-		super(getMessage(vertex, connected), cause);
-		this.vertex = vertex;
-		this.connected = connected;
-	}
+  <V> AsymmetricException(V vertex, V connected, Throwable cause) {
+    super(getMessage(vertex, connected), cause);
+    this.vertex = vertex;
+    this.connected = connected;
+  }
 
-	/**
-	 * Gets the vertex that the connection was from.
-	 */
-	public Object getVertex() {
-		return vertex;
-	}
+  /**
+   * Gets the vertex that the connection was from.
+   */
+  public Object getVertex() {
+    return vertex;
+  }
 
-	/**
-	 * Gets the connected vertex that doesn't back connect.
-	 */
-	public Object getConnected() {
-		return connected;
-	}
+  /**
+   * Gets the connected vertex that doesn't back connect.
+   */
+  public Object getConnected() {
+    return connected;
+  }
 
-	static {
-		Throwables.registerSurrogateFactory(AsymmetricException.class, (template, cause) ->
-			new AsymmetricException(template.vertex, template.connected, cause)
-		);
-	}
+  static {
+    Throwables.registerSurrogateFactory(AsymmetricException.class, (template, cause) ->
+      new AsymmetricException(template.vertex, template.connected, cause)
+    );
+  }
 }

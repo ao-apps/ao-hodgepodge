@@ -33,63 +33,76 @@ import java.util.List;
  */
 abstract class BaseSortAlgorithm<E> implements SortAlgorithm<E>{
 
-	protected BaseSortAlgorithm() {
-		// Do nothing
-	}
+  protected BaseSortAlgorithm() {
+    // Do nothing
+  }
 
-	@Override
-	public <T extends E> void sort(List<T> list) {
-		sort(list, null);
-	}
+  @Override
+  public <T extends E> void sort(List<T> list) {
+    sort(list, null);
+  }
 
-	@Override
-	public <T extends E> void sort(T[] array) {
-		sort(array, null);
-	}
+  @Override
+  public <T extends E> void sort(T[] array) {
+    sort(array, null);
+  }
 
-	@Override
-	public abstract <T extends E> void sort(List<T> list, SortStatistics stats);
+  @Override
+  public abstract <T extends E> void sort(List<T> list, SortStatistics stats);
 
-	@Override
-	public abstract <T extends E> void sort(T[] array, SortStatistics stats);
+  @Override
+  public abstract <T extends E> void sort(T[] array, SortStatistics stats);
 
-	protected static <T> T get(List<T> list, int i, SortStatistics stats) {
-		if(stats != null) stats.sortGetting();
-		return list.get(i);
-	}
+  protected static <T> T get(List<T> list, int i, SortStatistics stats) {
+    if (stats != null) {
+      stats.sortGetting();
+    }
+    return list.get(i);
+  }
 
-	protected static <T> T get(T[] array, int i, SortStatistics stats) {
-		if(stats != null) stats.sortGetting();
-		return array[i];
-	}
+  protected static <T> T get(T[] array, int i, SortStatistics stats) {
+    if (stats != null) {
+      stats.sortGetting();
+    }
+    return array[i];
+  }
 
-	protected static <T> void set(List<T> list, int i, T o, SortStatistics stats) {
-		if(stats != null) stats.sortSetting();
-		list.set(i, o);
-	}
+  protected static <T> void set(List<T> list, int i, T o, SortStatistics stats) {
+    if (stats != null) {
+      stats.sortSetting();
+    }
+    list.set(i, o);
+  }
 
-	protected static <T> void set(T[] array, int i, T o, SortStatistics stats) {
-		if(stats != null) stats.sortSetting();
-		array[i] = o;
-	}
+  protected static <T> void set(T[] array, int i, T o, SortStatistics stats) {
+    if (stats != null) {
+      stats.sortSetting();
+    }
+    array[i] = o;
+  }
 
-	protected static <T> void swap(List<T> list, int i, int j, SortStatistics stats) {
-		if(stats != null) stats.sortSwapping();
+  protected static <T> void swap(List<T> list, int i, int j, SortStatistics stats) {
+    if (stats != null) {
+      stats.sortSwapping();
+    }
 
-		if(list instanceof FileList<?>) ((FileList<?>)list).swap(i, j);
-		else {
-			assert list != null;
-			T t = list.get(i);
-			list.set(i, list.get(j));
-			list.set(j, t);
-		}
-	}
+    if (list instanceof FileList<?>) {
+      ((FileList<?>)list).swap(i, j);
+    } else {
+      assert list != null;
+      T t = list.get(i);
+      list.set(i, list.get(j));
+      list.set(j, t);
+    }
+  }
 
-	protected static <T> void swap(T[] array, int i, int j, SortStatistics stats) {
-		if(stats != null) stats.sortSwapping();
+  protected static <T> void swap(T[] array, int i, int j, SortStatistics stats) {
+    if (stats != null) {
+      stats.sortSwapping();
+    }
 
-		T t = array[i];
-		array[i] = array[j];
-		array[j] = t;
-	}
+    T t = array[i];
+    array[i] = array[j];
+    array[j] = t;
+  }
 }

@@ -33,18 +33,18 @@ import java.io.IOException;
  */
 public interface BitRateProvider {
 
-	/**
-	 * The recommended minimum bit rate.
-	 */
-	long MINIMUM_BIT_RATE = 4800;
+  /**
+   * The recommended minimum bit rate.
+   */
+  long MINIMUM_BIT_RATE = 4800;
 
-	/**
-	 * Gets the bit rate in bits per second, <code>null</code> indicates unlimited bandwidth.
-	 */
-	Long getBitRate() throws IOException;
+  /**
+   * Gets the bit rate in bits per second, <code>null</code> indicates unlimited bandwidth.
+   */
+  Long getBitRate() throws IOException;
 
-	/**
-	 * Gets the block size in bytes.
-	 */
-	int getBlockSize();
+  /**
+   * Gets the block size in bytes.
+   */
+  int getBlockSize();
 }

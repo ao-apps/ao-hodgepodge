@@ -35,60 +35,64 @@ import java.util.ResourceBundle;
  */
 public abstract class ModifiableResourceBundle extends ResourceBundle {
 
-	protected ModifiableResourceBundle() {
-		// Do nothing
-	}
+  protected ModifiableResourceBundle() {
+    // Do nothing
+  }
 
-	/**
-	 * Removes a string.
-	 */
-	public final void removeKey(String key) {
-		if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
-		handleRemoveKey(key);
-	}
+  /**
+   * Removes a string.
+   */
+  public final void removeKey(String key) {
+    if (!isModifiable()) {
+      throw new AssertionError("ResourceBundle is not modifiable: "+this);
+    }
+    handleRemoveKey(key);
+  }
 
-	/**
-	 * This will only be called on modifiable bundles.
-	 *
-	 * @see #isModifiable()
-	 */
-	protected abstract void handleRemoveKey(String key);
+  /**
+   * This will only be called on modifiable bundles.
+   *
+   * @see #isModifiable()
+   */
+  protected abstract void handleRemoveKey(String key);
 
-	/**
-	 * @see #setObject(java.lang.String, java.lang.Object, boolean)
-	 */
-	public final void setString(String key, String value, boolean modified) {
-		setObject(key, value, modified);
-	}
+  /**
+   * @see #setObject(java.lang.String, java.lang.Object, boolean)
+   */
+  public final void setString(String key, String value, boolean modified) {
+    setObject(key, value, modified);
+  }
 
-	/**
-	 * @see #setObject(java.lang.String, java.lang.Object, boolean)
-	 */
-	public final void setStringArray(String key, String[] value, boolean modified) {
-		setObject(key, value, modified);
-	}
+  /**
+   * @see #setObject(java.lang.String, java.lang.Object, boolean)
+   */
+  public final void setStringArray(String key, String[] value, boolean modified) {
+    setObject(key, value, modified);
+  }
 
-	/**
-	 * Adds or updates the value associated with the provided key and sets
-	 * the verified time to the current time.  If <code>modified</code>
-	 * is <code>true</code>, the modified time will also be updated, which will
-	 * cause other locales to require verification.
-	 */
-	public final void setObject(String key, Object value, boolean modified) {
-		if(!isModifiable()) throw new AssertionError("ResourceBundle is not modifiable: "+this);
-		handleSetObject(key, value, modified);
-	}
+  /**
+   * Adds or updates the value associated with the provided key and sets
+   * the verified time to the current time.  If <code>modified</code>
+   * is <code>true</code>, the modified time will also be updated, which will
+   * cause other locales to require verification.
+   */
+  public final void setObject(String key, Object value, boolean modified) {
+    if (!isModifiable()) {
+      throw new AssertionError("ResourceBundle is not modifiable: "+this);
+    }
+    handleSetObject(key, value, modified);
+  }
 
-	/**
-	 * Checks if this bundle is currently modifiable.
-	 */
-	public abstract boolean isModifiable();
+  /**
+   * Checks if this bundle is currently modifiable.
+   */
+  public abstract boolean isModifiable();
 
-	/**
-	 * This will only be called on modifiable bundles.
-	 *
-	 * @see #isModifiable()
-	 * @see #setObject(java.lang.String, java.lang.Object, boolean)
-	 */
-	protected abstract void handleSetObject(String key, Object value, boolean modified);
+  /**
+   * This will only be called on modifiable bundles.
+   *
+   * @see #isModifiable()
+   * @see #setObject(java.lang.String, java.lang.Object, boolean)
+   */
+  protected abstract void handleSetObject(String key, Object value, boolean modified);
 }

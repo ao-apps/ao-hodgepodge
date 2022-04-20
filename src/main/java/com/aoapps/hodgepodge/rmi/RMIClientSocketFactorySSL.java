@@ -38,45 +38,47 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class RMIClientSocketFactorySSL implements RMIClientSocketFactory, Serializable {
 
-	private static final long serialVersionUID = 1;
+  private static final long serialVersionUID = 1;
 
-	private final String localAddress;
+  private final String localAddress;
 
-	/**
-	 * Will establish connections with the system default local address.
-	 */
-	public RMIClientSocketFactorySSL() {
-		this.localAddress = null;
-	}
+  /**
+   * Will establish connections with the system default local address.
+   */
+  public RMIClientSocketFactorySSL() {
+    this.localAddress = null;
+  }
 
-	/**
-	 * Will establish connections with the provided local address.
-	 */
-	public RMIClientSocketFactorySSL(String localAddress) {
-		this.localAddress = localAddress;
-	}
+  /**
+   * Will establish connections with the provided local address.
+   */
+  public RMIClientSocketFactorySSL(String localAddress) {
+    this.localAddress = localAddress;
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return
-			(obj instanceof RMIClientSocketFactorySSL)
-			&& Objects.equals(localAddress, ((RMIClientSocketFactorySSL)obj).localAddress)
-		;
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return
+      (obj instanceof RMIClientSocketFactorySSL)
+      && Objects.equals(localAddress, ((RMIClientSocketFactorySSL)obj).localAddress)
+    ;
+  }
 
-	@Override
-	public int hashCode() {
-		return localAddress==null ? 0 : localAddress.hashCode();
-	}
+  @Override
+  public int hashCode() {
+    return localAddress == null ? 0 : localAddress.hashCode();
+  }
 
-	@Override
-	public Socket createSocket(String host, int port) throws IOException {
-		SSLSocketFactory sslFact=(SSLSocketFactory)SSLSocketFactory.getDefault();
-		Socket regSocket = new Socket();
-		if(localAddress!=null) regSocket.bind(new InetSocketAddress(localAddress, 0));
-		regSocket.connect(new InetSocketAddress(host, port), 30000);
-		regSocket.setKeepAlive(true);
-		regSocket.setTcpNoDelay(true);
-		return sslFact.createSocket(regSocket, host, port, true);
-	}
+  @Override
+  public Socket createSocket(String host, int port) throws IOException {
+    SSLSocketFactory sslFact=(SSLSocketFactory)SSLSocketFactory.getDefault();
+    Socket regSocket = new Socket();
+    if (localAddress != null) {
+      regSocket.bind(new InetSocketAddress(localAddress, 0));
+    }
+    regSocket.connect(new InetSocketAddress(host, port), 30000);
+    regSocket.setKeepAlive(true);
+    regSocket.setTcpNoDelay(true);
+    return sslFact.createSocket(regSocket, host, port, true);
+  }
 }

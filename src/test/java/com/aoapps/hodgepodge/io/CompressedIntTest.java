@@ -44,42 +44,42 @@ import junit.framework.TestSuite;
  */
 public class CompressedIntTest extends TestCase {
 
-	/**
-	 * A fast pseudo-random number generator for non-cryptographic purposes.
-	 */
-	private static final Random fastRandom = new Random(IoUtils.bufferToLong(new SecureRandom().generateSeed(Long.BYTES)));
+  /**
+   * A fast pseudo-random number generator for non-cryptographic purposes.
+   */
+  private static final Random fastRandom = new Random(IoUtils.bufferToLong(new SecureRandom().generateSeed(Long.BYTES)));
 
-	public CompressedIntTest(String testName) {
-		super(testName);
-	}
+  public CompressedIntTest(String testName) {
+    super(testName);
+  }
 
-	public static Test suite() {
-		TestSuite suite = new TestSuite(CompressedIntTest.class);
-		return suite;
-	}
+  public static Test suite() {
+    TestSuite suite = new TestSuite(CompressedIntTest.class);
+    return suite;
+  }
 
-	public void testRandomInts() throws IOException {
-		List<Integer> values = new ArrayList<>();
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		try {
-			for(int c=0;c<10000;c++) {
-				for(int power=1; power<=30; power++) {
-					int value = fastRandom.nextInt(1<<power)-(1<<(power-1));
-					values.add(value);
-					StreamableOutput.writeCompressedInt(value, bout);
-				}
-			}
-		} finally {
-			bout.close();
-		}
-		// Read back and make sure matches
-		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
-		try {
-			for(int value : values) {
-				assertEquals(value, StreamableInput.readCompressedInt(bin));
-			}
-		} finally {
-			bin.close();
-		}
-	}
+  public void testRandomInts() throws IOException {
+    List<Integer> values = new ArrayList<>();
+    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+    try {
+      for (int c=0;c<10000;c++) {
+        for (int power=1; power <= 30; power++) {
+          int value = fastRandom.nextInt(1<<power)-(1<<(power-1));
+          values.add(value);
+          StreamableOutput.writeCompressedInt(value, bout);
+        }
+      }
+    } finally {
+      bout.close();
+    }
+    // Read back and make sure matches
+    ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+    try {
+      for (int value : values) {
+        assertEquals(value, StreamableInput.readCompressedInt(bin));
+      }
+    } finally {
+      bin.close();
+    }
+  }
 }

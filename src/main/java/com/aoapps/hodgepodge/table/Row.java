@@ -30,9 +30,9 @@ package com.aoapps.hodgepodge.table;
 */
 public interface Row {
 
-	/**
-	 * Gets the data contained within one column index in this row.
-	 */
-	Object getColumn(int columnIndex);
+  /**
+   * Gets the data contained within one column index in this row.
+   */
+  Object getColumn(int columnIndex);
 
 }

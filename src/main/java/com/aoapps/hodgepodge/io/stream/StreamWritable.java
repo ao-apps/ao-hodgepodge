@@ -32,5 +32,5 @@ import java.io.IOException;
  */
 public interface StreamWritable {
 
-	void write(StreamableOutput out, String protocolVersion) throws IOException;
+  void write(StreamableOutput out, String protocolVersion) throws IOException;
 }

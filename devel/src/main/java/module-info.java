@@ -21,12 +21,12 @@
  * along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
  */
 module com.aoapps.hodgepodge.devel {
-	exports com.aoapps.hodgepodge.i18n.i18n;
-	exports com.aoapps.hodgepodge.swing.i18n;
-	exports com.aoapps.hodgepodge.version.i18n;
-	// Direct
-	requires com.aoapps.hodgepodge; // <groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId>
-	requires static jsr305; // <groupId>com.google.code.findbugs</groupId><artifactId>jsr305</artifactId>
-	// Java SE
-	requires java.logging;
+  exports com.aoapps.hodgepodge.i18n.i18n;
+  exports com.aoapps.hodgepodge.swing.i18n;
+  exports com.aoapps.hodgepodge.version.i18n;
+  // Direct
+  requires com.aoapps.hodgepodge; // <groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId>
+  requires static jsr305; // <groupId>com.google.code.findbugs</groupId><artifactId>jsr305</artifactId>
+  // Java SE
+  requires java.logging;
 }

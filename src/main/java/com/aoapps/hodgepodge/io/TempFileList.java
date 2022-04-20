@@ -51,67 +51,69 @@ import java.util.List;
 @Deprecated
 public class TempFileList {
 
-	private final List<WeakReference<TempFile>> tempFiles = new ArrayList<>();
+  private final List<WeakReference<TempFile>> tempFiles = new ArrayList<>();
 
-	private final String prefix;
-	private final String suffix;
-	private final File directory;
+  private final String prefix;
+  private final String suffix;
+  private final File directory;
 
-	public TempFileList(String prefix) {
-		this(prefix, null, null);
-	}
+  public TempFileList(String prefix) {
+    this(prefix, null, null);
+  }
 
-	public TempFileList(String prefix, String suffix) {
-		this(prefix, suffix, null);
-	}
+  public TempFileList(String prefix, String suffix) {
+    this(prefix, suffix, null);
+  }
 
-	public TempFileList(String prefix, String suffix, File directory) {
-		this.prefix = prefix;
-		this.suffix = suffix;
-		this.directory = directory;
-	}
+  public TempFileList(String prefix, String suffix, File directory) {
+    this.prefix = prefix;
+    this.suffix = suffix;
+    this.directory = directory;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder(
-			directory==null ? 0 : (directory.getPath().length() + 1)
-			+ prefix.length()
-			+ 1
-			+ suffix.length()
-		);
-		if(directory!=null) {
-			sb.append(directory.getPath()).append(File.separatorChar);
-		}
-		sb.append(prefix).append('*').append(suffix);
-		return sb.toString();
-	}
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(
+      directory == null ? 0 : (directory.getPath().length() + 1)
+      + prefix.length()
+      + 1
+      + suffix.length()
+    );
+    if (directory != null) {
+      sb.append(directory.getPath()).append(File.separatorChar);
+    }
+    sb.append(prefix).append('*').append(suffix);
+    return sb.toString();
+  }
 
-	/**
-	 * Creates a new temp file while adding it to the list of files that will
-	 * be explicitly deleted when this list is deleted.
-	 */
-	public TempFile createTempFile() throws IOException {
-		TempFile tempFile = new TempFile(prefix, suffix, directory);
-		synchronized(tempFiles) {
-			tempFiles.add(new WeakReference<>(tempFile));
-		}
-		return tempFile;
-	}
+  /**
+   * Creates a new temp file while adding it to the list of files that will
+   * be explicitly deleted when this list is deleted.
+   */
+  public TempFile createTempFile() throws IOException {
+    TempFile tempFile = new TempFile(prefix, suffix, directory);
+    synchronized (tempFiles) {
+      tempFiles.add(new WeakReference<>(tempFile));
+    }
+    return tempFile;
+  }
 
-	/**
-	 * Deletes all of the underlying temp files immediately.
-	 *
-	 * This list may still be used for additional temp files.
-	 *
-	 * @see  TempFile#delete()
-	 */
-	public void delete() throws IOException {
-		synchronized(tempFiles) {
-			for(WeakReference<TempFile> tempFileRef : tempFiles) {
-				TempFile tempFile = tempFileRef.get();
-				if(tempFile!=null) tempFile.delete();
-			}
-			tempFiles.clear();
-		}
-	}
+  /**
+   * Deletes all of the underlying temp files immediately.
+   *
+   * This list may still be used for additional temp files.
+   *
+   * @see  TempFile#delete()
+   */
+  public void delete() throws IOException {
+    synchronized (tempFiles) {
+      for (WeakReference<TempFile> tempFileRef : tempFiles) {
+        TempFile tempFile = tempFileRef.get();
+        if (tempFile != null) {
+          tempFile.delete();
+        }
+      }
+      tempFiles.clear();
+    }
+  }
 }

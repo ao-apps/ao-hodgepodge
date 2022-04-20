@@ -35,49 +35,51 @@ import javax.swing.JButton;
  */
 public class EnterJButton extends JButton implements KeyListener {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public EnterJButton() {
-		super();
-		init();
-	}
+  public EnterJButton() {
+    super();
+    init();
+  }
 
-	public EnterJButton(String text) {
-		super(text);
-		init();
-	}
+  public EnterJButton(String text) {
+    super(text);
+    init();
+  }
 
-	public EnterJButton(String text, Icon icon) {
-		super(text, icon);
-		init();
-	}
+  public EnterJButton(String text, Icon icon) {
+    super(text, icon);
+    init();
+  }
 
-	public EnterJButton(Action action) {
-		super(action);
-		init();
-	}
+  public EnterJButton(Action action) {
+    super(action);
+    init();
+  }
 
-	public EnterJButton(Icon icon) {
-		super(icon);
-		init();
-	}
+  public EnterJButton(Icon icon) {
+    super(icon);
+    init();
+  }
 
-	public void init() {
-		addKeyListener(this);
-	}
+  public void init() {
+    addKeyListener(this);
+  }
 
-	@Override
-	public void keyTyped(KeyEvent e) {
-		if(e.getKeyChar()=='\n') fireActionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, getText()));
-	}
+  @Override
+  public void keyTyped(KeyEvent e) {
+    if (e.getKeyChar() == '\n') {
+      fireActionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, getText()));
+    }
+  }
 
-	@Override
-	public void keyPressed(KeyEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void keyPressed(KeyEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void keyReleased(KeyEvent e) {
+    // Do nothing
+  }
 }

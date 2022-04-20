@@ -33,44 +33,48 @@ import java.util.List;
  */
 public class CycleException extends GraphException {
 
-	private static final long serialVersionUID = 7713106090763335656L;
+  private static final long serialVersionUID = 7713106090763335656L;
 
-	private static String getMessage(List<?> vertices) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Cycle exists:\n");
-		for(Object v : vertices) {
-			sb.append("    ").append(v.getClass().getName()).append("(\"").append(v.toString()).append("\")\n");
-		}
-		return sb.toString();
-	}
+  private static String getMessage(List<?> vertices) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Cycle exists:\n");
+    for (Object v : vertices) {
+      sb.append("    ").append(v.getClass().getName()).append("(\"").append(v.toString()).append("\")\n");
+    }
+    return sb.toString();
+  }
 
-	private final List<?> vertices;
+  private final List<?> vertices;
 
-	/**
-	 * No defensive copy is made.
-	 */
-	CycleException(List<?> vertices) {
-		super(getMessage(vertices));
-		if(vertices.size()<2) throw new IllegalArgumentException("Cycle must have at least two vertices (could be the same vertex)");
-		if(!vertices.get(0).equals(vertices.get(vertices.size()-1))) throw new IllegalArgumentException("Cycle must start and end on the same vertex");
-		this.vertices = vertices;
-	}
+  /**
+   * No defensive copy is made.
+   */
+  CycleException(List<?> vertices) {
+    super(getMessage(vertices));
+    if (vertices.size()<2) {
+      throw new IllegalArgumentException("Cycle must have at least two vertices (could be the same vertex)");
+    }
+    if (!vertices.get(0).equals(vertices.get(vertices.size()-1))) {
+      throw new IllegalArgumentException("Cycle must start and end on the same vertex");
+    }
+    this.vertices = vertices;
+  }
 
-	/**
-	 * Gets all vertices that are part of the cycle in the order they create the cycle.
-	 *
-	 * @return  No defensive copy
-	 */
-	@SuppressWarnings("ReturnOfCollectionOrArrayField")
-	public List<?> getVertices() {
-		return vertices;
-	}
+  /**
+   * Gets all vertices that are part of the cycle in the order they create the cycle.
+   *
+   * @return  No defensive copy
+   */
+  @SuppressWarnings("ReturnOfCollectionOrArrayField")
+  public List<?> getVertices() {
+    return vertices;
+  }
 
-	static {
-		Throwables.registerSurrogateFactory(CycleException.class, (template, cause) -> {
-			CycleException newEx = new CycleException(template.vertices);
-			newEx.initCause(cause);
-			return newEx;
-		});
-	}
+  static {
+    Throwables.registerSurrogateFactory(CycleException.class, (template, cause) -> {
+      CycleException newEx = new CycleException(template.vertices);
+      newEx.initCause(cause);
+      return newEx;
+    });
+  }
 }

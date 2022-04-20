@@ -29,19 +29,19 @@ package com.aoapps.hodgepodge.table;
  * @author  AO Industries, Inc.
  */
 public enum IndexType {
-	PRIMARY_KEY("primary key"),
-	UNIQUE("unique"),
-	INDEXED("indexed"),
-	NONE("none");
+  PRIMARY_KEY("primary key"),
+  UNIQUE("unique"),
+  INDEXED("indexed"),
+  NONE("none");
 
-	private final String toString;
+  private final String toString;
 
-	private IndexType(String toString) {
-		this.toString = toString;
-	}
+  private IndexType(String toString) {
+    this.toString = toString;
+  }
 
-	@Override
-	public String toString() {
-		return toString;
-	}
+  @Override
+  public String toString() {
+    return toString;
+  }
 }

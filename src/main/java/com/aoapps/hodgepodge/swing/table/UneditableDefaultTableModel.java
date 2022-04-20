@@ -32,18 +32,18 @@ import javax.swing.table.DefaultTableModel;
  */
 public class UneditableDefaultTableModel extends DefaultTableModel {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public UneditableDefaultTableModel(int rowCount, int columnCount) {
-		super(rowCount, columnCount);
-	}
+  public UneditableDefaultTableModel(int rowCount, int columnCount) {
+    super(rowCount, columnCount);
+  }
 
-	public UneditableDefaultTableModel(Object[] columnNames, int rowCount) {
-		super(columnNames, rowCount);
-	}
+  public UneditableDefaultTableModel(Object[] columnNames, int rowCount) {
+    super(columnNames, rowCount);
+  }
 
-	@Override
-	public boolean isCellEditable(int row, int col) {
-		return false;
-	}
+  @Override
+  public boolean isCellEditable(int row, int col) {
+    return false;
+  }
 }

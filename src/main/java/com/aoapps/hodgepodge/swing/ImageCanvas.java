@@ -38,105 +38,109 @@ import javax.swing.SwingUtilities;
  */
 public class ImageCanvas extends JComponent {
 
-	private static final long serialVersionUID = -6487381720349856719L;
+  private static final long serialVersionUID = -6487381720349856719L;
 
-	final Image image;
-	final Window window;
+  final Image image;
+  final Window window;
 
-	private long nextupdate;
-	private boolean resized=false;
+  private long nextupdate;
+  private boolean resized=false;
 
-	public ImageCanvas(Image image) {
-		this.image=image;
-		this.window = null;
-	}
+  public ImageCanvas(Image image) {
+    this.image=image;
+    this.window = null;
+  }
 
-	public ImageCanvas(URL url) {
-		this.image = Toolkit.getDefaultToolkit().getImage(url);
-		this.window = null;
-	}
+  public ImageCanvas(URL url) {
+    this.image = Toolkit.getDefaultToolkit().getImage(url);
+    this.window = null;
+  }
 
-	public ImageCanvas(URL url, Window window) {
-		this.image = Toolkit.getDefaultToolkit().getImage(url);
-		this.window=window;
-	}
+  public ImageCanvas(URL url, Window window) {
+    this.image = Toolkit.getDefaultToolkit().getImage(url);
+    this.window=window;
+  }
 
-	@Override
-	public Dimension getPreferredSize() {
-		int iwidth=image.getWidth(this);
-		int iheight=image.getHeight(this);
-		if(iwidth>0&&iheight>0) return new Dimension(iwidth, iheight);
-		return new Dimension(0, 0);
-	}
+  @Override
+  public Dimension getPreferredSize() {
+    int iwidth=image.getWidth(this);
+    int iheight=image.getHeight(this);
+    if (iwidth>0 && iheight>0) {
+      return new Dimension(iwidth, iheight);
+    }
+    return new Dimension(0, 0);
+  }
 
-	@Override
-	public synchronized boolean imageUpdate(Image img, int flags, int x, int y, int w, int h) {
-		if ((flags & SOMEBITS) != 0) {
-			long time = System.currentTimeMillis();
-			if (time >= nextupdate) {
-				repaint();
-				nextupdate = time + 500;
-			}
-		} else if ((flags & (FRAMEBITS | ALLBITS)) != 0) {
-			if (!resized)
-				resizeIt();
-			repaint();
-		} else if ((flags & (WIDTH | HEIGHT)) != 0) {
-			int iwidth = image.getWidth(this);
-			int iheight = image.getHeight(this);
-			if (iwidth > 0 && iheight > 0)
-				resizeIt();
-		}
-		return (flags & (ALLBITS | ABORT | ERROR)) == 0;
-	}
+  @Override
+  public synchronized boolean imageUpdate(Image img, int flags, int x, int y, int w, int h) {
+    if ((flags & SOMEBITS) != 0) {
+      long time = System.currentTimeMillis();
+      if (time >= nextupdate) {
+        repaint();
+        nextupdate = time + 500;
+      }
+    } else if ((flags & (FRAMEBITS | ALLBITS)) != 0) {
+      if (!resized) {
+        resizeIt();
+      }
+      repaint();
+    } else if ((flags & (WIDTH | HEIGHT)) != 0) {
+      int iwidth = image.getWidth(this);
+      int iheight = image.getHeight(this);
+      if (iwidth > 0 && iheight > 0) {
+        resizeIt();
+      }
+    }
+    return (flags & (ALLBITS | ABORT | ERROR)) == 0;
+  }
 
-	@Override
-	public void paint(Graphics g) {
-		Dimension size = getSize();
-		int width = size.width;
-		int height = size.height;
-		int iwidth, iheight;
-		if(
-			g != null
-			&& width > 0
-			&& height > 0
-			&& (iwidth = image.getWidth(this)) > 0
-			&& (iheight = image.getHeight(this)) > 0
-		) {
-			Color background = getBackground();
-			g.setColor(background);
-			int temp = iheight * width / iwidth;
-			if(temp <= height) {
-				int y1 = (height - temp) / 2;
-				g.fillRect(0, 0, width, y1);
-				g.drawImage(image, 0, y1, width, temp, background, this);
-				g.fillRect(0, y1 + temp, width, height - y1 - temp);
-			} else {
-				temp = iwidth * height / iheight;
-				int x1 = (width - temp) / 2;
-				g.fillRect(0, 0, x1, height);
-				g.drawImage(image, x1, 0, temp, height, background, this);
-				g.fillRect(x1 + temp, 0, width - x1 - temp, height);
-			}
-		}
-	}
+  @Override
+  public void paint(Graphics g) {
+    Dimension size = getSize();
+    int width = size.width;
+    int height = size.height;
+    int iwidth, iheight;
+    if (
+      g != null
+      && width > 0
+      && height > 0
+      && (iwidth = image.getWidth(this)) > 0
+      && (iheight = image.getHeight(this)) > 0
+    ) {
+      Color background = getBackground();
+      g.setColor(background);
+      int temp = iheight * width / iwidth;
+      if (temp <= height) {
+        int y1 = (height - temp) / 2;
+        g.fillRect(0, 0, width, y1);
+        g.drawImage(image, 0, y1, width, temp, background, this);
+        g.fillRect(0, y1 + temp, width, height - y1 - temp);
+      } else {
+        temp = iwidth * height / iheight;
+        int x1 = (width - temp) / 2;
+        g.fillRect(0, 0, x1, height);
+        g.drawImage(image, x1, 0, temp, height, background, this);
+        g.fillRect(x1 + temp, 0, width - x1 - temp, height);
+      }
+    }
+  }
 
-	private void resizeIt() {
-		if(window!=null) {
-			synchronized(window) {
-				window.pack();
-			}
-		} else {
-			SwingUtilities.invokeLater(() -> {
-				getParent().invalidate();
-				getParent().validate();
-			});
-		}
-		resized=true;
-	}
+  private void resizeIt() {
+    if (window != null) {
+      synchronized (window) {
+        window.pack();
+      }
+    } else {
+      SwingUtilities.invokeLater(() -> {
+        getParent().invalidate();
+        getParent().validate();
+      });
+    }
+    resized=true;
+  }
 
-	@Override
-	public void update(Graphics g) {
-		paint(g);
-	}
+  @Override
+  public void update(Graphics g) {
+    paint(g);
+  }
 }

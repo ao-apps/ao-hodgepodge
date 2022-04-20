@@ -32,5 +32,5 @@ import java.io.IOException;
  */
 public interface StreamReadable {
 
-	void read(StreamableInput in, String protocolVersion) throws IOException;
+  void read(StreamableInput in, String protocolVersion) throws IOException;
 }

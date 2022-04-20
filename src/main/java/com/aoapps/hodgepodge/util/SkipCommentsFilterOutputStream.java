@@ -45,22 +45,26 @@ import java.util.Properties;
  */
 public class SkipCommentsFilterOutputStream extends FilterOutputStream implements NoClose {
 
-	public SkipCommentsFilterOutputStream(OutputStream out) {
-		super(out);
-	}
+  public SkipCommentsFilterOutputStream(OutputStream out) {
+    super(out);
+  }
 
-	@Override
-	public boolean isNoClose() {
-		return (out instanceof NoClose) && ((NoClose)out).isNoClose();
-	}
+  @Override
+  public boolean isNoClose() {
+    return (out instanceof NoClose) && ((NoClose)out).isNoClose();
+  }
 
-	private boolean lastCharNewline = true;
-	private boolean isCommentLine = false;
+  private boolean lastCharNewline = true;
+  private boolean isCommentLine = false;
 
-	@Override
-	public void write(int ch) throws IOException {
-		if(lastCharNewline) isCommentLine = ch=='#';
-		lastCharNewline = ch=='\n';
-		if(!isCommentLine) out.write(ch);
-	}
+  @Override
+  public void write(int ch) throws IOException {
+    if (lastCharNewline) {
+      isCommentLine = ch == '#';
+    }
+    lastCharNewline = ch == '\n';
+    if (!isCommentLine) {
+      out.write(ch);
+    }
+  }
 }

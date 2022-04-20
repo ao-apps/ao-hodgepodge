@@ -36,7 +36,7 @@ import java.util.Set;
 // TODO: Ex extends Throwable
 public interface GraphSorter<V, Ex extends Exception> {
 
-	// TODO: This should be given the graph as a parameter?
-	Set<V> sortGraph() throws Ex;
+  // TODO: This should be given the graph as a parameter?
+  Set<V> sortGraph() throws Ex;
 }
 

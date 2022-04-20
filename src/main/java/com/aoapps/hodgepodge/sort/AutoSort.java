@@ -34,70 +34,74 @@ import java.util.List;
  */
 public final class AutoSort extends BaseComparisonSortAlgorithm<Object> {
 
-	private static final int FAST_QSORT_THRESHOLD = 10000;
+  private static final int FAST_QSORT_THRESHOLD = 10000;
 
-	private static final AutoSort instance = new AutoSort();
+  private static final AutoSort instance = new AutoSort();
 
-	public static AutoSort getInstance() {
-		return instance;
-	}
+  public static AutoSort getInstance() {
+    return instance;
+  }
 
-	private AutoSort() {
-		// Do nothing
-	}
+  private AutoSort() {
+    // Do nothing
+  }
 
-	@Override
-	public boolean isStable() {
-		return false;
-	}
+  @Override
+  public boolean isStable() {
+    return false;
+  }
 
-	@Override
-	public <T> void sort(List<T> list) {
-		getRecommendedSortAlgorithm(list).sort(list);
-	}
+  @Override
+  public <T> void sort(List<T> list) {
+    getRecommendedSortAlgorithm(list).sort(list);
+  }
 
-	@Override
-	public <T> void sort(T[] array) {
-		getRecommendedSortAlgorithm(array).sort(array);
-	}
+  @Override
+  public <T> void sort(T[] array) {
+    getRecommendedSortAlgorithm(array).sort(array);
+  }
 
-	@Override
-	public <T> void sort(List<T> list, SortStatistics stats) {
-		getRecommendedSortAlgorithm(list).sort(list, stats);
-	}
+  @Override
+  public <T> void sort(List<T> list, SortStatistics stats) {
+    getRecommendedSortAlgorithm(list).sort(list, stats);
+  }
 
-	@Override
-	public <T> void sort(T[] array, SortStatistics stats) {
-		getRecommendedSortAlgorithm(array).sort(array, stats);
-	}
+  @Override
+  public <T> void sort(T[] array, SortStatistics stats) {
+    getRecommendedSortAlgorithm(array).sort(array, stats);
+  }
 
-	@Override
-	public <T> void sort(List<T> list, Comparator<? super T> comparator) {
-		getRecommendedSortAlgorithm(list).sort(list, comparator);
-	}
+  @Override
+  public <T> void sort(List<T> list, Comparator<? super T> comparator) {
+    getRecommendedSortAlgorithm(list).sort(list, comparator);
+  }
 
-	@Override
-	public <T> void sort(T[] array, Comparator<? super T> comparator) {
-		getRecommendedSortAlgorithm(array).sort(array, comparator);
-	}
+  @Override
+  public <T> void sort(T[] array, Comparator<? super T> comparator) {
+    getRecommendedSortAlgorithm(array).sort(array, comparator);
+  }
 
-	@Override
-	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-		getRecommendedSortAlgorithm(list).sort(list, comparator, stats);
-	}
+  @Override
+  public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
+    getRecommendedSortAlgorithm(list).sort(list, comparator, stats);
+  }
 
-	@Override
-	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-		getRecommendedSortAlgorithm(array).sort(array, comparator, stats);
-	}
+  @Override
+  public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
+    getRecommendedSortAlgorithm(array).sort(array, comparator, stats);
+  }
 
-	public static <T> ComparisonSortAlgorithm<? super T> getRecommendedSortAlgorithm(List<T> list) {
-		if(list.size() >= FAST_QSORT_THRESHOLD) return FastQSort.getInstance();
-		return JavaSort.getInstance();
-	}
+  public static <T> ComparisonSortAlgorithm<? super T> getRecommendedSortAlgorithm(List<T> list) {
+    if (list.size() >= FAST_QSORT_THRESHOLD) {
+      return FastQSort.getInstance();
+    }
+    return JavaSort.getInstance();
+  }
 
-	public static <T> ComparisonSortAlgorithm<? super T> getRecommendedSortAlgorithm(T[] array) {
-		if(array.length >= FAST_QSORT_THRESHOLD) return FastQSort.getInstance();
-		return JavaSort.getInstance();
-	}
+  public static <T> ComparisonSortAlgorithm<? super T> getRecommendedSortAlgorithm(T[] array) {
+    if (array.length >= FAST_QSORT_THRESHOLD) {
+      return FastQSort.getInstance();
+    }
+    return JavaSort.getInstance();
+  }
 }

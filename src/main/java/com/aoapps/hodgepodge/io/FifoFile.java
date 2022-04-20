@@ -45,118 +45,126 @@ import java.io.RandomAccessFile;
  */
 public class FifoFile {
 
-	final RandomAccessFile file;
-	final FifoFileInputStream in;
-	final FifoFileOutputStream out;
-	final long maxFifoLength;
-	final long fileLength;
-	final int _blockSize;
+  final RandomAccessFile file;
+  final FifoFileInputStream in;
+  final FifoFileOutputStream out;
+  final long maxFifoLength;
+  final long fileLength;
+  final int _blockSize;
 
-	public FifoFile(String filename, long maxFifoLength) throws IOException {
-		this(new File(filename), maxFifoLength);
-	}
+  public FifoFile(String filename, long maxFifoLength) throws IOException {
+    this(new File(filename), maxFifoLength);
+  }
 
-	public FifoFile(File file, long maxFifoLength) throws IOException {
-		if(maxFifoLength<1) throw new IllegalArgumentException("The FIFO must be at least one byte long");
+  public FifoFile(File file, long maxFifoLength) throws IOException {
+    if (maxFifoLength<1) {
+      throw new IllegalArgumentException("The FIFO must be at least one byte long");
+    }
 
-		this.maxFifoLength=maxFifoLength;
-		this.fileLength=maxFifoLength+16;
-		this.file=new RandomAccessFile(file, "rw");
-		this.in=new FifoFileInputStream(this);
-		this.out=new FifoFileOutputStream(this);
-		long blockSize=maxFifoLength>>8;
-		this._blockSize=blockSize>=BufferManager.BUFFER_SIZE?BufferManager.BUFFER_SIZE:blockSize<=0?1:(int)blockSize;
-		if(this.file.length()!=fileLength) reset();
-	}
+    this.maxFifoLength=maxFifoLength;
+    this.fileLength=maxFifoLength+16;
+    this.file=new RandomAccessFile(file, "rw");
+    this.in=new FifoFileInputStream(this);
+    this.out=new FifoFileOutputStream(this);
+    long blockSize=maxFifoLength>>8;
+    this._blockSize=blockSize >= BufferManager.BUFFER_SIZE?BufferManager.BUFFER_SIZE:blockSize <= 0?1:(int)blockSize;
+    if (this.file.length() != fileLength) {
+      reset();
+    }
+  }
 
-	public FifoFileInputStream getInputStream() {
-		return in;
-	}
+  public FifoFileInputStream getInputStream() {
+    return in;
+  }
 
-	public FifoFileOutputStream getOutputStream() {
-		return out;
-	}
+  public FifoFileOutputStream getOutputStream() {
+    return out;
+  }
 
-	public long getMaximumFifoLength() {
-		return maxFifoLength;
-	}
+  public long getMaximumFifoLength() {
+    return maxFifoLength;
+  }
 
-	public long getFileLength() {
-		return fileLength;
-	}
+  public long getFileLength() {
+    return fileLength;
+  }
 
-	public int getBlockSize() {
-		return _blockSize;
-	}
+  public int getBlockSize() {
+    return _blockSize;
+  }
 
-	/**
-	 * Resets this <code>FifoFile</code> to contain no contents and start writing at the beginning of the file.
-	 */
-	public void reset() throws IOException {
-		synchronized(this) {
-			file.setLength(fileLength);
-			// A setLength of 0 triggers a setFirstIndex of 0
-			setLength(0);
-		}
-	}
+  /**
+   * Resets this <code>FifoFile</code> to contain no contents and start writing at the beginning of the file.
+   */
+  public void reset() throws IOException {
+    synchronized (this) {
+      file.setLength(fileLength);
+      // A setLength of 0 triggers a setFirstIndex of 0
+      setLength(0);
+    }
+  }
 
-	public void close() throws IOException {
-		synchronized(this) {
-			file.close();
-		}
-	}
+  public void close() throws IOException {
+    synchronized (this) {
+      file.close();
+    }
+  }
 
-	/**
-	 * Gets the data index of the next value that will be read.
-	 */
-	protected long getFirstIndex() throws IOException {
-		synchronized(this) {
-			file.seek(0);
-			return file.readLong();
-		}
-	}
+  /**
+   * Gets the data index of the next value that will be read.
+   */
+  protected long getFirstIndex() throws IOException {
+    synchronized (this) {
+      file.seek(0);
+      return file.readLong();
+    }
+  }
 
-	/**
-	 * Sets the data index of the next value that will be read.
-	 */
-	protected void setFirstIndex(long index) throws IOException {
-		synchronized(this) {
-			file.seek(0);
-			file.writeLong(index);
-		}
-	}
+  /**
+   * Sets the data index of the next value that will be read.
+   */
+  protected void setFirstIndex(long index) throws IOException {
+    synchronized (this) {
+      file.seek(0);
+      file.writeLong(index);
+    }
+  }
 
-	/**
-	 * Gets the number of bytes currently contained by the FIFO.
-	 */
-	public long getLength() throws IOException {
-		synchronized(this) {
-			file.seek(8);
-			return file.readLong();
-		}
-	}
+  /**
+   * Gets the number of bytes currently contained by the FIFO.
+   */
+  public long getLength() throws IOException {
+    synchronized (this) {
+      file.seek(8);
+      return file.readLong();
+    }
+  }
 
-	/**
-	 * Sets the number of bytes currently contained by the FIFO.
-	 */
-	protected void setLength(long length) throws IOException {
-		if(length<0) throw new IllegalArgumentException("Invalid length: "+length);
-		synchronized(this) {
-			file.seek(8);
-			file.writeLong(length);
-			if(length==0) setFirstIndex(0);
-		}
-	}
+  /**
+   * Sets the number of bytes currently contained by the FIFO.
+   */
+  protected void setLength(long length) throws IOException {
+    if (length<0) {
+      throw new IllegalArgumentException("Invalid length: "+length);
+    }
+    synchronized (this) {
+      file.seek(8);
+      file.writeLong(length);
+      if (length == 0) {
+        setFirstIndex(0);
+      }
+    }
+  }
 
-	/**
-	 * Flushes all updates to this file to the underlying storage device.  This is performed by
-	 * <code>RandomAccessFile.getChannel().force(true)</code>.
-	 *
-	 * @see  FifoFileOutputStream#flush()
-	 */
-	public void flush() throws IOException {
-		synchronized(this) {
-			file.getChannel().force(true);
-		}
-	}
+  /**
+   * Flushes all updates to this file to the underlying storage device.  This is performed by
+   * <code>RandomAccessFile.getChannel().force(true)</code>.
+   *
+   * @see  FifoFileOutputStream#flush()
+   */
+  public void flush() throws IOException {
+    synchronized (this) {
+      file.getChannel().force(true);
+    }
+  }
 }

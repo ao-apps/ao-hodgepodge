@@ -38,94 +38,98 @@ import java.util.List;
  */
 public class MultiFileOutputStream extends OutputStream {
 
-	public static final long DEFAULT_FILE_SIZE = 1024L * 1024 * 1024;
+  public static final long DEFAULT_FILE_SIZE = 1024L * 1024 * 1024;
 
-	private final File parent;
-	private final String prefix;
-	private final String suffix;
-	private final long fileSize;
+  private final File parent;
+  private final String prefix;
+  private final String suffix;
+  private final long fileSize;
 
-	private final List<File> files=new ArrayList<>();
-	private FileOutputStream out=null;
-	private long bytesOut=0;
+  private final List<File> files=new ArrayList<>();
+  private FileOutputStream out=null;
+  private long bytesOut=0;
 
-	public MultiFileOutputStream(File parent, String prefix, String suffix) {
-		this(parent, prefix, suffix, DEFAULT_FILE_SIZE);
-	}
+  public MultiFileOutputStream(File parent, String prefix, String suffix) {
+    this(parent, prefix, suffix, DEFAULT_FILE_SIZE);
+  }
 
-	public MultiFileOutputStream(File parent, String prefix, String suffix, long fileSize) {
-		this.parent=parent;
-		this.prefix=prefix;
-		this.suffix=suffix;
-		this.fileSize=fileSize;
-	}
+  public MultiFileOutputStream(File parent, String prefix, String suffix, long fileSize) {
+    this.parent=parent;
+    this.prefix=prefix;
+    this.suffix=suffix;
+    this.fileSize=fileSize;
+  }
 
-	@Override
-	public synchronized void close() throws IOException {
-		FileOutputStream tempOut=out;
-		if(tempOut!=null) {
-			out=null;
-			tempOut.flush();
-			tempOut.close();
-		}
-	}
+  @Override
+  public synchronized void close() throws IOException {
+    FileOutputStream tempOut=out;
+    if (tempOut != null) {
+      out=null;
+      tempOut.flush();
+      tempOut.close();
+    }
+  }
 
-	@Override
-	public synchronized void flush() throws IOException {
-		if(out!=null) out.flush();
-	}
+  @Override
+  public synchronized void flush() throws IOException {
+    if (out != null) {
+      out.flush();
+    }
+  }
 
-	@Override
-	public void write(byte[] b) throws IOException {
-		write(b, 0, b.length);
-	}
+  @Override
+  public void write(byte[] b) throws IOException {
+    write(b, 0, b.length);
+  }
 
-	@Override
-	public synchronized void write(byte[] b, int off, int len) throws IOException {
-		while(off<len) {
-			if(out==null) makeNewFile();
-			int blockLen=len;
-			long newBytesOut=bytesOut+blockLen;
-			if(newBytesOut>fileSize) {
-				blockLen=(int)(fileSize-newBytesOut);
-			}
-			out.write(b, off, blockLen);
-			off+=blockLen;
-			len-=blockLen;
-			bytesOut+=blockLen;
-			if(bytesOut>=fileSize) {
-				try (FileOutputStream tempOut = out) {
-					out=null;
-					tempOut.flush();
-				}
-			}
-		}
-	}
+  @Override
+  public synchronized void write(byte[] b, int off, int len) throws IOException {
+    while (off<len) {
+      if (out == null) {
+        makeNewFile();
+      }
+      int blockLen=len;
+      long newBytesOut=bytesOut+blockLen;
+      if (newBytesOut>fileSize) {
+        blockLen=(int)(fileSize-newBytesOut);
+      }
+      out.write(b, off, blockLen);
+      off+=blockLen;
+      len-=blockLen;
+      bytesOut+=blockLen;
+      if (bytesOut >= fileSize) {
+        try (FileOutputStream tempOut = out) {
+          out=null;
+          tempOut.flush();
+        }
+      }
+    }
+  }
 
-	@Override
-	public synchronized void write(int b) throws IOException {
-		out.write(b);
-		bytesOut+=1;
-		if(bytesOut>=fileSize) {
-			try (FileOutputStream tempOut = out) {
-				out=null;
-				tempOut.flush();
-			}
-		}
-	}
+  @Override
+  public synchronized void write(int b) throws IOException {
+    out.write(b);
+    bytesOut+=1;
+    if (bytesOut >= fileSize) {
+      try (FileOutputStream tempOut = out) {
+        out=null;
+        tempOut.flush();
+      }
+    }
+  }
 
-	/**
-	 * All accesses are already synchronized.
-	 */
-	private void makeNewFile() throws IOException {
-		String filename=prefix+(files.size()+1)+suffix;
-		File file=new File(parent, filename);
-		out=new FileOutputStream(file);
-		bytesOut=0;
-		files.add(file);
-	}
+  /**
+   * All accesses are already synchronized.
+   */
+  private void makeNewFile() throws IOException {
+    String filename=prefix+(files.size()+1)+suffix;
+    File file=new File(parent, filename);
+    out=new FileOutputStream(file);
+    bytesOut=0;
+    files.add(file);
+  }
 
-	public File[] getFiles() {
-		return files.toArray(new File[files.size()]);
-	}
+  public File[] getFiles() {
+    return files.toArray(new File[files.size()]);
+  }
 }

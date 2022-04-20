@@ -42,86 +42,96 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EditableResourceBundleSet {
 
-	private final String baseName;
+  private final String baseName;
 
-	/**
-	 * Unmodifiable set of all supported locales for this bundle.
-	 */
-	private final SortedSet<Locale> locales;
+  /**
+   * Unmodifiable set of all supported locales for this bundle.
+   */
+  private final SortedSet<Locale> locales;
 
-	private final Map<Locale, EditableResourceBundle> bundles = new ConcurrentHashMap<>();
+  private final Map<Locale, EditableResourceBundle> bundles = new ConcurrentHashMap<>();
 
-	/**
-	 * @param baseName the base name of the default locale's bundle.
-	 * @param locales the set of all allowed locales.
-	 */
-	public EditableResourceBundleSet(String baseName, Collection<Locale> locales) {
-		// The locales are sorted by language, country, then variant.
-		SortedSet<Locale> modifiableSet = new TreeSet<>(LocaleComparator.getInstance());
-		modifiableSet.addAll(locales);
-		this.baseName = baseName;
-		this.locales = AoCollections.optimalUnmodifiableSortedSet(modifiableSet);
-	}
+  /**
+   * @param baseName the base name of the default locale's bundle.
+   * @param locales the set of all allowed locales.
+   */
+  public EditableResourceBundleSet(String baseName, Collection<Locale> locales) {
+    // The locales are sorted by language, country, then variant.
+    SortedSet<Locale> modifiableSet = new TreeSet<>(LocaleComparator.getInstance());
+    modifiableSet.addAll(locales);
+    this.baseName = baseName;
+    this.locales = AoCollections.optimalUnmodifiableSortedSet(modifiableSet);
+  }
 
-	/**
-	 * @param baseName the class to use as the base name of the default locale's bundle.
-	 * @param locales the set of all allowed locales.
-	 */
-	public EditableResourceBundleSet(Class<?> baseName, Collection<Locale> locales) {
-		this(baseName.getName(), locales);
-	}
+  /**
+   * @param baseName the class to use as the base name of the default locale's bundle.
+   * @param locales the set of all allowed locales.
+   */
+  public EditableResourceBundleSet(Class<?> baseName, Collection<Locale> locales) {
+    this(baseName.getName(), locales);
+  }
 
-	/**
-	 * @param baseName the base name of the default locale's bundle.
-	 * @param locales the set of all allowed locales.
-	 */
-	public EditableResourceBundleSet(String baseName, Locale ... locales) {
-		this(baseName, Arrays.asList(locales));
-	}
+  /**
+   * @param baseName the base name of the default locale's bundle.
+   * @param locales the set of all allowed locales.
+   */
+  public EditableResourceBundleSet(String baseName, Locale ... locales) {
+    this(baseName, Arrays.asList(locales));
+  }
 
-	/**
-	 * @param baseName the class to use as the base name of the default locale's bundle.
-	 * @param locales the set of all allowed locales.
-	 */
-	public EditableResourceBundleSet(Class<?> baseName, Locale ... locales) {
-		this(baseName.getName(), Arrays.asList(locales));
-	}
+  /**
+   * @param baseName the class to use as the base name of the default locale's bundle.
+   * @param locales the set of all allowed locales.
+   */
+  public EditableResourceBundleSet(Class<?> baseName, Locale ... locales) {
+    this(baseName.getName(), Arrays.asList(locales));
+  }
 
-	/**
-	 * The constructor of EditableResourceBundle adds itself here.
-	 */
-	void addBundle(EditableResourceBundle bundle) {
-		Locale locale = bundle.getBundleLocale();
-		if(!locales.contains(locale)) throw new AssertionError("locale not in locales: "+locale);
-		bundles.put(locale, bundle);
-	}
+  /**
+   * The constructor of EditableResourceBundle adds itself here.
+   */
+  void addBundle(EditableResourceBundle bundle) {
+    Locale locale = bundle.getBundleLocale();
+    if (!locales.contains(locale)) {
+      throw new AssertionError("locale not in locales: "+locale);
+    }
+    bundles.put(locale, bundle);
+  }
 
-	public String getBaseName() {
-		return baseName;
-	}
+  public String getBaseName() {
+    return baseName;
+  }
 
-	/**
-	 * Gets the unmodifiable set of all locales supported by this bundle set.
-	 */
-	@SuppressWarnings("ReturnOfCollectionOrArrayField") // Returning unmodifiable
-	public SortedSet<Locale> getLocales() {
-		return locales;
-	}
+  /**
+   * Gets the unmodifiable set of all locales supported by this bundle set.
+   */
+  @SuppressWarnings("ReturnOfCollectionOrArrayField") // Returning unmodifiable
+  public SortedSet<Locale> getLocales() {
+    return locales;
+  }
 
-	/**
-	 * Gets the editable bundle for the provided locale.
-	 */
-	public EditableResourceBundle getResourceBundle(Locale locale) {
-		EditableResourceBundle localeBundle = bundles.get(locale);
-		if(localeBundle==null) {
-			ResourceBundle resourceBundle = ResourceBundle.getBundle(baseName, locale);
-			if(!resourceBundle.getLocale().equals(locale)) throw new AssertionError("ResourceBundle not for this locale: "+locale);
-			if(!(resourceBundle instanceof EditableResourceBundle)) throw new AssertionError("ResourceBundle is not a EditableResourceBundle: "+resourceBundle);
-			localeBundle = (EditableResourceBundle)resourceBundle;
-			if(localeBundle.getBundleSet()!=this) throw new AssertionError("EditableResourceBundle not for this EditableResourceBundleSet: "+localeBundle);
-			if(!localeBundle.getBundleLocale().equals(locale)) throw new AssertionError("EditableResourceBundle not for this locale: "+locale);
-			// EditableResourceBundle will have added the bundle to the bundles map.
-		}
-		return localeBundle;
-	}
+  /**
+   * Gets the editable bundle for the provided locale.
+   */
+  public EditableResourceBundle getResourceBundle(Locale locale) {
+    EditableResourceBundle localeBundle = bundles.get(locale);
+    if (localeBundle == null) {
+      ResourceBundle resourceBundle = ResourceBundle.getBundle(baseName, locale);
+      if (!resourceBundle.getLocale().equals(locale)) {
+        throw new AssertionError("ResourceBundle not for this locale: "+locale);
+      }
+      if (!(resourceBundle instanceof EditableResourceBundle)) {
+        throw new AssertionError("ResourceBundle is not a EditableResourceBundle: "+resourceBundle);
+      }
+      localeBundle = (EditableResourceBundle)resourceBundle;
+      if (localeBundle.getBundleSet() != this) {
+        throw new AssertionError("EditableResourceBundle not for this EditableResourceBundleSet: "+localeBundle);
+      }
+      if (!localeBundle.getBundleLocale().equals(locale)) {
+        throw new AssertionError("EditableResourceBundle not for this locale: "+locale);
+      }
+      // EditableResourceBundle will have added the bundle to the bundles map.
+    }
+    return localeBundle;
+  }
 }

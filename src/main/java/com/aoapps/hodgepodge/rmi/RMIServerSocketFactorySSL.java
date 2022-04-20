@@ -38,43 +38,43 @@ import javax.net.ssl.SSLServerSocketFactory;
  */
 public class RMIServerSocketFactorySSL implements RMIServerSocketFactory {
 
-	private final String listenAddress;
+  private final String listenAddress;
 
-	/**
-	 * Will listen on the default listen address.
-	 */
-	public RMIServerSocketFactorySSL() {
-		this.listenAddress = null;
-	}
+  /**
+   * Will listen on the default listen address.
+   */
+  public RMIServerSocketFactorySSL() {
+    this.listenAddress = null;
+  }
 
-	/**
-	 * Will listen on the provided listen address.
-	 */
-	public RMIServerSocketFactorySSL(String listenAddress) {
-		this.listenAddress = listenAddress;
-	}
+  /**
+   * Will listen on the provided listen address.
+   */
+  public RMIServerSocketFactorySSL(String listenAddress) {
+    this.listenAddress = listenAddress;
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return
-			(obj instanceof RMIServerSocketFactorySSL)
-			&& Objects.equals(listenAddress, ((RMIServerSocketFactorySSL)obj).listenAddress)
-		;
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return
+      (obj instanceof RMIServerSocketFactorySSL)
+      && Objects.equals(listenAddress, ((RMIServerSocketFactorySSL)obj).listenAddress)
+    ;
+  }
 
-	@Override
-	public int hashCode() {
-		return listenAddress==null ? 0 : listenAddress.hashCode();
-	}
+  @Override
+  public int hashCode() {
+    return listenAddress == null ? 0 : listenAddress.hashCode();
+  }
 
-	@Override
-	public ServerSocket createServerSocket(int port) throws IOException {
-		ServerSocketFactory factory = SSLServerSocketFactory.getDefault();
-		if(listenAddress==null) {
-			return factory.createServerSocket(port, 50);
-		} else {
-			InetAddress address=InetAddress.getByName(listenAddress);
-			return factory.createServerSocket(port, 50, address);
-		}
-	}
+  @Override
+  public ServerSocket createServerSocket(int port) throws IOException {
+    ServerSocketFactory factory = SSLServerSocketFactory.getDefault();
+    if (listenAddress == null) {
+      return factory.createServerSocket(port, 50);
+    } else {
+      InetAddress address=InetAddress.getByName(listenAddress);
+      return factory.createServerSocket(port, 50, address);
+    }
+  }
 }

@@ -38,43 +38,55 @@ import java.util.logging.LogRecord;
  */
 public class ErrorPrinterFormatter extends Formatter {
 
-	/**
-	 * Public constructor required so can be specified in <code>logging.properties</code>.
-	 */
-	public ErrorPrinterFormatter() {
-		// Do nothing
-	}
+  /**
+   * Public constructor required so can be specified in <code>logging.properties</code>.
+   */
+  public ErrorPrinterFormatter() {
+    // Do nothing
+  }
 
-	public void format(LogRecord rec, Appendable out) {
-		List<Object> extraInfo = new ArrayList<>();
-		String loggerName = rec.getLoggerName();
-		if(loggerName != null) extraInfo.add("rec.loggerName=" + loggerName);
-		extraInfo.add("rec.level=" + rec.getLevel());
-		extraInfo.add("rec.sequenceNumber=" + rec.getSequenceNumber());
-		String sourceClassName = rec.getSourceClassName();
-		if(sourceClassName != null) extraInfo.add("rec.sourceClassName=" + sourceClassName);
-		String sourceMethodName = rec.getSourceMethodName();
-		if(sourceMethodName != null) extraInfo.add("rec.sourceMethodName=" + sourceMethodName);
-		String message = rec.getMessage();
-		if(message == null) message = "";
-		extraInfo.add("rec.message=" + message);
-		String formatted = formatMessage(rec);
-		if(formatted == null) formatted = "";
-		if(!message.equals(formatted)) extraInfo.add("rec.message.formatted=" + formatted);
-		extraInfo.add("rec.threadID=" + rec.getThreadID());
-		extraInfo.add("rec.millis=" + rec.getMillis());
-		Throwable thrown = rec.getThrown();
-		ErrorPrinter.printStackTraces(
-			thrown,
-			out,
-			extraInfo.toArray()
-		);
-	}
+  public void format(LogRecord rec, Appendable out) {
+    List<Object> extraInfo = new ArrayList<>();
+    String loggerName = rec.getLoggerName();
+    if (loggerName != null) {
+      extraInfo.add("rec.loggerName=" + loggerName);
+    }
+    extraInfo.add("rec.level=" + rec.getLevel());
+    extraInfo.add("rec.sequenceNumber=" + rec.getSequenceNumber());
+    String sourceClassName = rec.getSourceClassName();
+    if (sourceClassName != null) {
+      extraInfo.add("rec.sourceClassName=" + sourceClassName);
+    }
+    String sourceMethodName = rec.getSourceMethodName();
+    if (sourceMethodName != null) {
+      extraInfo.add("rec.sourceMethodName=" + sourceMethodName);
+    }
+    String message = rec.getMessage();
+    if (message == null) {
+      message = "";
+    }
+    extraInfo.add("rec.message=" + message);
+    String formatted = formatMessage(rec);
+    if (formatted == null) {
+      formatted = "";
+    }
+    if (!message.equals(formatted)) {
+      extraInfo.add("rec.message.formatted=" + formatted);
+    }
+    extraInfo.add("rec.threadID=" + rec.getThreadID());
+    extraInfo.add("rec.millis=" + rec.getMillis());
+    Throwable thrown = rec.getThrown();
+    ErrorPrinter.printStackTraces(
+      thrown,
+      out,
+      extraInfo.toArray()
+    );
+  }
 
-	@Override
-	public String format(LogRecord rec) {
-		StringBuilder buffer = new StringBuilder(1024);
-		format(rec, buffer);
-		return buffer.toString();
-	}
+  @Override
+  public String format(LogRecord rec) {
+    StringBuilder buffer = new StringBuilder(1024);
+    format(rec, buffer);
+    return buffer.toString();
+  }
 }

@@ -41,54 +41,58 @@ import java.util.ResourceBundle;
  */
 public class PropertiesVersions {
 
-	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, PropertiesVersions.class);
+  private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, PropertiesVersions.class);
 
-	private static Properties readProperties(InputStream in) throws IOException {
-		Properties props = new Properties();
-		props.load(in);
-		return props;
-	}
+  private static Properties readProperties(InputStream in) throws IOException {
+    Properties props = new Properties();
+    props.load(in);
+    return props;
+  }
 
-	private final Properties properties;
+  private final Properties properties;
 
-	/**
-	 * Loads properties from a module or classpath resource.
-	 *
-	 * @see  PropertiesUtils#loadFromResource(java.lang.Class, java.lang.String)
-	 */
-	public PropertiesVersions(Class<?> clazz, String resource) throws IOException {
-		this(PropertiesUtils.loadFromResource(clazz, resource));
-	}
+  /**
+   * Loads properties from a module or classpath resource.
+   *
+   * @see  PropertiesUtils#loadFromResource(java.lang.Class, java.lang.String)
+   */
+  public PropertiesVersions(Class<?> clazz, String resource) throws IOException {
+    this(PropertiesUtils.loadFromResource(clazz, resource));
+  }
 
-	/**
-	 * Loads properties from the provided inputstream.
-	 */
-	public PropertiesVersions(InputStream in) throws IOException {
-		this(readProperties(in));
-	}
+  /**
+   * Loads properties from the provided inputstream.
+   */
+  public PropertiesVersions(InputStream in) throws IOException {
+    this(readProperties(in));
+  }
 
-	/**
-	 * Uses the provided properties directly, no defensive copy is made.
-	 */
-	public PropertiesVersions(Properties properties) {
-		this.properties = properties;
-	}
+  /**
+   * Uses the provided properties directly, no defensive copy is made.
+   */
+  public PropertiesVersions(Properties properties) {
+    this.properties = properties;
+  }
 
-	/**
-	 * Gets the version number for the provided product.
-	 */
-	public Version getVersion(String product) throws IllegalArgumentException {
-		String three = properties.getProperty(product);
-		if(three==null) throw new LocalizedIllegalArgumentException(RESOURCES, "getVersion.productNotFound", product);
-		return Version.valueOf(three+"."+getBuild());
-	}
+  /**
+   * Gets the version number for the provided product.
+   */
+  public Version getVersion(String product) throws IllegalArgumentException {
+    String three = properties.getProperty(product);
+    if (three == null) {
+      throw new LocalizedIllegalArgumentException(RESOURCES, "getVersion.productNotFound", product);
+    }
+    return Version.valueOf(three+"."+getBuild());
+  }
 
-	/**
-	 * Gets the build number that is applied to all products.
-	 */
-	public int getBuild() throws IllegalArgumentException {
-		String build = properties.getProperty("build.number");
-		if(build==null) throw new LocalizedIllegalArgumentException(RESOURCES, "getVersion.buildNotFound");
-		return Integer.parseInt(build);
-	}
+  /**
+   * Gets the build number that is applied to all products.
+   */
+  public int getBuild() throws IllegalArgumentException {
+    String build = properties.getProperty("build.number");
+    if (build == null) {
+      throw new LocalizedIllegalArgumentException(RESOURCES, "getVersion.buildNotFound");
+    }
+    return Integer.parseInt(build);
+  }
 }

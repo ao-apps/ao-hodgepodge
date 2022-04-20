@@ -30,157 +30,161 @@ import java.util.Calendar;
  */
 public class DayDuration {
 
-	public enum Unit {
-		DAYS {
-			@Override
-			void toString(int count, StringBuilder sb) {
-				sb.append(count).append(count==1 ? " day" : " days");
-			}
+  public enum Unit {
+    DAYS {
+      @Override
+      void toString(int count, StringBuilder sb) {
+        sb.append(count).append(count == 1 ? " day" : " days");
+      }
 
-			@Override
-			void offset(int count, Calendar cal) {
-				cal.add(Calendar.DATE, count);
-			}
-		},
-		WEEKS {
-			@Override
-			void toString(int count, StringBuilder sb) {
-				sb.append(count).append(count==1 ? " week" : " weeks");
-			}
+      @Override
+      void offset(int count, Calendar cal) {
+        cal.add(Calendar.DATE, count);
+      }
+    },
+    WEEKS {
+      @Override
+      void toString(int count, StringBuilder sb) {
+        sb.append(count).append(count == 1 ? " week" : " weeks");
+      }
 
-			@Override
-			void offset(int count, Calendar cal) {
-				cal.add(Calendar.WEEK_OF_YEAR, count);
-			}
-		},
-		MONTHS {
-			@Override
-			void toString(int count, StringBuilder sb) {
-				sb.append(count).append(count==1 ? " month" : " months");
-			}
+      @Override
+      void offset(int count, Calendar cal) {
+        cal.add(Calendar.WEEK_OF_YEAR, count);
+      }
+    },
+    MONTHS {
+      @Override
+      void toString(int count, StringBuilder sb) {
+        sb.append(count).append(count == 1 ? " month" : " months");
+      }
 
-			@Override
-			void offset(int count, Calendar cal) {
-				cal.add(Calendar.MONTH, count);
-			}
-		},
-		YEARS {
-			@Override
-			void toString(int count, StringBuilder sb) {
-				sb.append(count).append(count==1 ? " year" : " years");
-			}
+      @Override
+      void offset(int count, Calendar cal) {
+        cal.add(Calendar.MONTH, count);
+      }
+    },
+    YEARS {
+      @Override
+      void toString(int count, StringBuilder sb) {
+        sb.append(count).append(count == 1 ? " year" : " years");
+      }
 
-			@Override
-			void offset(int count, Calendar cal) {
-				cal.add(Calendar.YEAR, count);
-			}
-		};
+      @Override
+      void offset(int count, Calendar cal) {
+        cal.add(Calendar.YEAR, count);
+      }
+    };
 
-		/**
-		 * Gets the unit for the given textual representation.
-		 *
-		 * @see  DayDuration#valueOf(java.lang.String)
-		 */
-		static Unit valueOfUnit(String unit) throws IllegalArgumentException {
-			if(
-				"day".equalsIgnoreCase(unit)
-				|| "days".equalsIgnoreCase(unit)
-			) {
-				return DAYS;
-			} else if(
-				"week".equalsIgnoreCase(unit)
-				|| "weeks".equalsIgnoreCase(unit)
-			) {
-				return WEEKS;
-			} else if(
-				"month".equalsIgnoreCase(unit)
-				|| "months".equalsIgnoreCase(unit)
-			) {
-				return MONTHS;
-			} else if(
-				"year".equalsIgnoreCase(unit)
-				|| "years".equalsIgnoreCase(unit)
-			) {
-				return YEARS;
-			} else {
-				throw new IllegalArgumentException("Unknown duration unit: " + unit);
-			}
-		}
+    /**
+     * Gets the unit for the given textual representation.
+     *
+     * @see  DayDuration#valueOf(java.lang.String)
+     */
+    static Unit valueOfUnit(String unit) throws IllegalArgumentException {
+      if (
+        "day".equalsIgnoreCase(unit)
+        || "days".equalsIgnoreCase(unit)
+      ) {
+        return DAYS;
+      } else if (
+        "week".equalsIgnoreCase(unit)
+        || "weeks".equalsIgnoreCase(unit)
+      ) {
+        return WEEKS;
+      } else if (
+        "month".equalsIgnoreCase(unit)
+        || "months".equalsIgnoreCase(unit)
+      ) {
+        return MONTHS;
+      } else if (
+        "year".equalsIgnoreCase(unit)
+        || "years".equalsIgnoreCase(unit)
+      ) {
+        return YEARS;
+      } else {
+        throw new IllegalArgumentException("Unknown duration unit: " + unit);
+      }
+    }
 
-		abstract void toString(int count, StringBuilder sb);
+    abstract void toString(int count, StringBuilder sb);
 
-		abstract void offset(int count, Calendar cal);
-	}
+    abstract void offset(int count, Calendar cal);
+  }
 
-	/**
-	 * Some commonly used constant durations.
-	 */
-	public static final DayDuration ZERO_DAYS = new DayDuration(0, Unit.DAYS);
+  /**
+   * Some commonly used constant durations.
+   */
+  public static final DayDuration ZERO_DAYS = new DayDuration(0, Unit.DAYS);
 
-	/**
-	 * Parses a duration compatible with results of toString.
-	 * Supports:
-	 * <ol>
-	 *   <li># day</li>
-	 *   <li># days</li>
-	 *   <li># week</li>
-	 *   <li># weeks</li>
-	 *   <li># month</li>
-	 *   <li># months</li>
-	 *   <li># year</li>
-	 *   <li># years</li>
-	 * </ol>
-	 *
-	 * @see  #toString()
-	 */
-	public static DayDuration valueOf(String duration) {
-		int spacePos = duration.indexOf(' ');
-		if(spacePos == -1) throw new IllegalArgumentException("Space not found in duration: " + duration);
-		return getInstance(
-			Integer.parseInt(duration.substring(0, spacePos)),
-			Unit.valueOfUnit(duration.substring(spacePos + 1))
-		);
-	}
+  /**
+   * Parses a duration compatible with results of toString.
+   * Supports:
+   * <ol>
+   *   <li># day</li>
+   *   <li># days</li>
+   *   <li># week</li>
+   *   <li># weeks</li>
+   *   <li># month</li>
+   *   <li># months</li>
+   *   <li># year</li>
+   *   <li># years</li>
+   * </ol>
+   *
+   * @see  #toString()
+   */
+  public static DayDuration valueOf(String duration) {
+    int spacePos = duration.indexOf(' ');
+    if (spacePos == -1) {
+      throw new IllegalArgumentException("Space not found in duration: " + duration);
+    }
+    return getInstance(
+      Integer.parseInt(duration.substring(0, spacePos)),
+      Unit.valueOfUnit(duration.substring(spacePos + 1))
+    );
+  }
 
-	public static DayDuration getInstance(int count, Unit unit) {
-		// Shortcuts for constants
-		if(count == 0 && unit == Unit.DAYS) return ZERO_DAYS;
-		// Create new object
-		return new DayDuration(count, unit);
-	}
+  public static DayDuration getInstance(int count, Unit unit) {
+    // Shortcuts for constants
+    if (count == 0 && unit == Unit.DAYS) {
+      return ZERO_DAYS;
+    }
+    // Create new object
+    return new DayDuration(count, unit);
+  }
 
-	private final int count;
-	private final Unit unit;
+  private final int count;
+  private final Unit unit;
 
-	protected DayDuration(int count, Unit unit) {
-		this.count = count;
-		this.unit = unit;
-	}
+  protected DayDuration(int count, Unit unit) {
+    this.count = count;
+    this.unit = unit;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		toString(sb);
-		return sb.toString();
-	}
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    toString(sb);
+    return sb.toString();
+  }
 
-	public void toString(StringBuilder sb) {
-		unit.toString(count, sb);
-	}
+  public void toString(StringBuilder sb) {
+    unit.toString(count, sb);
+  }
 
-	public int getCount() {
-		return count;
-	}
+  public int getCount() {
+    return count;
+  }
 
-	public Unit getUnit() {
-		return unit;
-	}
+  public Unit getUnit() {
+    return unit;
+  }
 
-	/**
-	 * Offsets the given calendar by the unit and count.
-	 * The passed-in Calendar is modified.
-	 */
-	public void offset(Calendar cal) {
-		unit.offset(count, cal);
-	}
+  /**
+   * Offsets the given calendar by the unit and count.
+   * The passed-in Calendar is modified.
+   */
+  public void offset(Calendar cal) {
+    unit.offset(count, cal);
+  }
 }

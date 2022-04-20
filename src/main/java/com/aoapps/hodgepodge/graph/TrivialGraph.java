@@ -36,24 +36,24 @@ import java.util.Set;
 // TODO: Ex extends Throwable
 public class TrivialGraph<V, E extends Edge<V>, Ex extends Exception> implements SymmetricGraph<V, E, Ex> {
 
-	private final Set<V> vertices;
+  private final Set<V> vertices;
 
-	public TrivialGraph(V vertex) {
-		this.vertices = Collections.singleton(vertex);
-	}
+  public TrivialGraph(V vertex) {
+    this.vertices = Collections.singleton(vertex);
+  }
 
-	@Override
-	public Set<V> getVertices() {
-		return vertices;
-	}
+  @Override
+  public Set<V> getVertices() {
+    return vertices;
+  }
 
-	@Override
-	public Set<E> getEdgesFrom(V from) {
-		return Collections.emptySet();
-	}
+  @Override
+  public Set<E> getEdgesFrom(V from) {
+    return Collections.emptySet();
+  }
 
-	@Override
-	public Set<E> getEdgesTo(V to) {
-		return Collections.emptySet();
-	}
+  @Override
+  public Set<E> getEdgesTo(V to) {
+    return Collections.emptySet();
+  }
 }

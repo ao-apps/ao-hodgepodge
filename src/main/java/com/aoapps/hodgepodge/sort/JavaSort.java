@@ -35,32 +35,40 @@ import java.util.List;
  */
 public final class JavaSort extends BaseComparisonSortAlgorithm<Object> {
 
-	private static final JavaSort instance = new JavaSort();
+  private static final JavaSort instance = new JavaSort();
 
-	public static JavaSort getInstance() {
-		return instance;
-	}
+  public static JavaSort getInstance() {
+    return instance;
+  }
 
-	private JavaSort() {
-		// Do nothing
-	}
+  private JavaSort() {
+    // Do nothing
+  }
 
-	@Override
-	public boolean isStable() {
-		return true;
-	}
+  @Override
+  public boolean isStable() {
+    return true;
+  }
 
-	@Override
-	public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats != null) stats.sortStarting();
-		Collections.sort(list, comparator);
-		if(stats != null) stats.sortEnding();
-	}
+  @Override
+  public <T> void sort(List<T> list, Comparator<? super T> comparator, SortStatistics stats) {
+    if (stats != null) {
+      stats.sortStarting();
+    }
+    Collections.sort(list, comparator);
+    if (stats != null) {
+      stats.sortEnding();
+    }
+  }
 
-	@Override
-	public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
-		if(stats != null) stats.sortStarting();
-		Arrays.sort(array, comparator);
-		if(stats != null) stats.sortEnding();
-	}
+  @Override
+  public <T> void sort(T[] array, Comparator<? super T> comparator, SortStatistics stats) {
+    if (stats != null) {
+      stats.sortStarting();
+    }
+    Arrays.sort(array, comparator);
+    if (stats != null) {
+      stats.sortEnding();
+    }
+  }
 }

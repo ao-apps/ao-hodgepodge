@@ -26,64 +26,64 @@ package com.aoapps.hodgepodge.schedule;
 import java.util.Calendar;
 
 public enum DayOfWeek {
-	SUNDAY   ("Sunday",    "Sun", Calendar.SUNDAY),
-	MONDAY   ("Monday",    "Mon", Calendar.MONDAY),
-	TUESDAY  ("Tuesday",   "Tue", Calendar.TUESDAY),
-	WEDNESDAY("Wednesday", "Wed", Calendar.WEDNESDAY),
-	THURSDAY ("Thursday",  "Thu", Calendar.THURSDAY),
-	FRIDAY   ("Friday",    "Fri", Calendar.FRIDAY),
-	SATURDAY ("Saturday",  "Sat", Calendar.SATURDAY);
+  SUNDAY   ("Sunday",    "Sun", Calendar.SUNDAY),
+  MONDAY   ("Monday",    "Mon", Calendar.MONDAY),
+  TUESDAY  ("Tuesday",   "Tue", Calendar.TUESDAY),
+  WEDNESDAY("Wednesday", "Wed", Calendar.WEDNESDAY),
+  THURSDAY ("Thursday",  "Thu", Calendar.THURSDAY),
+  FRIDAY   ("Friday",    "Fri", Calendar.FRIDAY),
+  SATURDAY ("Saturday",  "Sat", Calendar.SATURDAY);
 
-	/**
-	 * Copy of values for internal use without temporary array copy.
-	 */
-	static DayOfWeek[] values = values();
+  /**
+   * Copy of values for internal use without temporary array copy.
+   */
+  static DayOfWeek[] values = values();
 
-	/**
-	 * Gets the day of the week from the Calendar value.
-	 */
-	public static DayOfWeek getByCalendarDayOfWeek(int calendarDayOfWeek) {
-		switch(calendarDayOfWeek) {
-			case Calendar.SUNDAY    : return SUNDAY;
-			case Calendar.MONDAY    : return MONDAY;
-			case Calendar.TUESDAY   : return TUESDAY;
-			case Calendar.WEDNESDAY : return WEDNESDAY;
-			case Calendar.THURSDAY  : return THURSDAY;
-			case Calendar.FRIDAY    : return FRIDAY;
-			case Calendar.SATURDAY  : return SATURDAY;
-			default : throw new AssertionError("Calendar and DayOfWeek mismatch, all fields set?: calendarDayOfWeek = " + calendarDayOfWeek);
-		}
-	}
+  /**
+   * Gets the day of the week from the Calendar value.
+   */
+  public static DayOfWeek getByCalendarDayOfWeek(int calendarDayOfWeek) {
+    switch (calendarDayOfWeek) {
+      case Calendar.SUNDAY    : return SUNDAY;
+      case Calendar.MONDAY    : return MONDAY;
+      case Calendar.TUESDAY   : return TUESDAY;
+      case Calendar.WEDNESDAY : return WEDNESDAY;
+      case Calendar.THURSDAY  : return THURSDAY;
+      case Calendar.FRIDAY    : return FRIDAY;
+      case Calendar.SATURDAY  : return SATURDAY;
+      default : throw new AssertionError("Calendar and DayOfWeek mismatch, all fields set?: calendarDayOfWeek = " + calendarDayOfWeek);
+    }
+  }
 
-	private final String longName;
-	private final String shortName;
-	private final int calendarDayOfWeek;
+  private final String longName;
+  private final String shortName;
+  private final int calendarDayOfWeek;
 
-	private DayOfWeek(String longName, String shortName, int calendarDayOfWeek) {
-		this.longName = longName;
-		this.shortName = shortName;
-		this.calendarDayOfWeek = calendarDayOfWeek;
-	}
+  private DayOfWeek(String longName, String shortName, int calendarDayOfWeek) {
+    this.longName = longName;
+    this.shortName = shortName;
+    this.calendarDayOfWeek = calendarDayOfWeek;
+  }
 
-	@Override
-	public String toString() {
-		return longName;
-	}
+  @Override
+  public String toString() {
+    return longName;
+  }
 
-	public String getLongName() {
-		return longName;
-	}
+  public String getLongName() {
+    return longName;
+  }
 
-	public String getShortName() {
-		return shortName;
-	}
+  public String getShortName() {
+    return shortName;
+  }
 
-	/**
-	 * Gets the day of week value used by the Calendar class.
-	 * 
-	 * @see  Calendar
-	 */
-	public int getCalendarDayOfWeek() {
-		return calendarDayOfWeek;
-	}
+  /**
+   * Gets the day of week value used by the Calendar class.
+   * 
+   * @see  Calendar
+   */
+  public int getCalendarDayOfWeek() {
+    return calendarDayOfWeek;
+  }
 }

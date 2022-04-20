@@ -28,22 +28,22 @@ package com.aoapps.hodgepodge.graph;
  */
 public class WeightedEdge<V, W extends Weight<?>> extends Edge<V> {
 
-	protected final W weight;
+  protected final W weight;
 
-	public WeightedEdge(V from, V to, W weight) {
-		super(from, to);
-		this.weight = weight;
-	}
+  public WeightedEdge(V from, V to, W weight) {
+    super(from, to);
+    this.weight = weight;
+  }
 
-	/**
-	 * The weight of the edge.
-	 */
-	public final W getWeight() {
-		return weight;
-	}
+  /**
+   * The weight of the edge.
+   */
+  public final W getWeight() {
+    return weight;
+  }
 
-	@Override
-	public String toString() {
-		return super.toString()+" ("+weight+')';
-	}
+  @Override
+  public String toString() {
+    return super.toString()+" ("+weight+')';
+  }
 }

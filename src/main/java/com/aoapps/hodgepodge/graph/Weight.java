@@ -30,9 +30,9 @@ package com.aoapps.hodgepodge.graph;
  */
 public interface Weight<T> extends Comparable<T> {
 
-	/**
-	 * Adds this weight to another weight, returning the new weight.
-	 * This weight is not modified.
-	 */
-	T add(T weight);
+  /**
+   * Adds this weight to another weight, returning the new weight.
+   * This weight is not modified.
+   */
+  T add(T weight);
 }

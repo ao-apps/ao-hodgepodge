@@ -36,38 +36,40 @@ import java.io.InputStream;
  */
 public final class MD5Utils {
 
-	/** Make no instances. */
-	private MD5Utils() {throw new AssertionError();}
+  /** Make no instances. */
+  private MD5Utils() {
+    throw new AssertionError();
+  }
 
-	/**
-	 * Gets the MD5 hashcode of a file.
-	 */
-	public static byte[] md5(String filename) throws IOException {
-		return md5(new File(filename));
-	}
+  /**
+   * Gets the MD5 hashcode of a file.
+   */
+  public static byte[] md5(String filename) throws IOException {
+    return md5(new File(filename));
+  }
 
-	/**
-	 * Gets the MD5 hashcode of a file.
-	 */
-	public static byte[] md5(File file) throws IOException {
-		try (InputStream in = new FileInputStream(file)) {
-			return md5(in);
-		}
-	}
+  /**
+   * Gets the MD5 hashcode of a file.
+   */
+  public static byte[] md5(File file) throws IOException {
+    try (InputStream in = new FileInputStream(file)) {
+      return md5(in);
+    }
+  }
 
-	/**
-	 * Gets the MD5 hashcode of an input stream.
-	 */
-	public static byte[] md5(InputStream in) throws IOException {
-		MD5InputStream md5in=new MD5InputStream(in);
-		byte[] trashBuffer = BufferManager.getBytes();
-		try {
-			while(md5in.read(trashBuffer, 0, BufferManager.BUFFER_SIZE) != -1) {
-				// Intentional empty block
-			}
-		} finally {
-			BufferManager.release(trashBuffer, false);
-		}
-		return md5in.hash();
-	}
+  /**
+   * Gets the MD5 hashcode of an input stream.
+   */
+  public static byte[] md5(InputStream in) throws IOException {
+    MD5InputStream md5in=new MD5InputStream(in);
+    byte[] trashBuffer = BufferManager.getBytes();
+    try {
+      while (md5in.read(trashBuffer, 0, BufferManager.BUFFER_SIZE) != -1) {
+        // Intentional empty block
+      }
+    } finally {
+      BufferManager.release(trashBuffer, false);
+    }
+    return md5in.hash();
+  }
 }

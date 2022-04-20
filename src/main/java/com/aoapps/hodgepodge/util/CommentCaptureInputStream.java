@@ -43,71 +43,73 @@ import java.util.Properties;
  */
 public class CommentCaptureInputStream extends InputStream {
 
-	private final InputStream in;
+  private final InputStream in;
 
-	public CommentCaptureInputStream(InputStream in) {
-		this.in = in;
-	}
+  public CommentCaptureInputStream(InputStream in) {
+    this.in = in;
+  }
 
-	private boolean isLeadingWhitespace = true;
-	private boolean isCommentLine = false;
-	private final StringBuilder lineBuffer = new StringBuilder();
+  private boolean isLeadingWhitespace = true;
+  private boolean isCommentLine = false;
+  private final StringBuilder lineBuffer = new StringBuilder();
 
-	private final List<String> comments = new ArrayList<>();
+  private final List<String> comments = new ArrayList<>();
 
-	/**
-	 * Adds any buffered leading whitespace and/or comment.
-	 */
-	private void addComment(boolean eof) {
-		if(isLeadingWhitespace || isCommentLine) {
-			if(lineBuffer.length() > 0 || !eof) {
-				comments.add(lineBuffer.toString());
-				lineBuffer.setLength(0);
-			}
-			isLeadingWhitespace = !eof;
-			isCommentLine = false;
-		}
-	}
+  /**
+   * Adds any buffered leading whitespace and/or comment.
+   */
+  private void addComment(boolean eof) {
+    if (isLeadingWhitespace || isCommentLine) {
+      if (lineBuffer.length() > 0 || !eof) {
+        comments.add(lineBuffer.toString());
+        lineBuffer.setLength(0);
+      }
+      isLeadingWhitespace = !eof;
+      isCommentLine = false;
+    }
+  }
 
-	@Override
-	public int read() throws IOException {
-		int b = in.read();
-		if(b == -1) {
-			addComment(true);
-		} else {
-			// This int -> char conversion by cast only words because ISO-8859-1 encoding
-			char ch = (char)b;
-			if(isLeadingWhitespace) {
-				if(ch != ' ' && ch != '\t' && ch != '\f') {
-					isLeadingWhitespace = false;
-					if(ch == '#') isCommentLine = true;
-				}
-			}
-			if(ch == '\n') {
-				addComment(false);
-				isLeadingWhitespace = true;
-			} else if(
-				(isLeadingWhitespace || isCommentLine)
-				&& ch != '\r'
-			) {
-				lineBuffer.append(ch);
-			}
-		}
-		return b;
-	}
+  @Override
+  public int read() throws IOException {
+    int b = in.read();
+    if (b == -1) {
+      addComment(true);
+    } else {
+      // This int -> char conversion by cast only words because ISO-8859-1 encoding
+      char ch = (char)b;
+      if (isLeadingWhitespace) {
+        if (ch != ' ' && ch != '\t' && ch != '\f') {
+          isLeadingWhitespace = false;
+          if (ch == '#') {
+            isCommentLine = true;
+          }
+        }
+      }
+      if (ch == '\n') {
+        addComment(false);
+        isLeadingWhitespace = true;
+      } else if (
+        (isLeadingWhitespace || isCommentLine)
+        && ch != '\r'
+      ) {
+        lineBuffer.append(ch);
+      }
+    }
+    return b;
+  }
 
-	@Override
-	public int available() throws IOException {
-		return in.available();
-	}
+  @Override
+  public int available() throws IOException {
+    return in.available();
+  }
 
-	@Override
-	public void close() throws IOException {
-		addComment(true);
-		in.close();
-	}
+  @Override
+  public void close() throws IOException {
+    addComment(true);
+    in.close();
+  }
 
-	public List<String> getComments() {
-		return comments;
-	}
+  public List<String> getComments() {
+    return comments;
+  }
 }

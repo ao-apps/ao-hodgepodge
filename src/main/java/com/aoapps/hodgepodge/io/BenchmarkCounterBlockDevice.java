@@ -37,31 +37,31 @@ import java.math.BigDecimal;
  */
 public class BenchmarkCounterBlockDevice {
 
-	@SuppressWarnings("UseOfSystemOutOrSystemErr")
-	public static void main(String[] args) {
-		try {
-			if(args.length>0) {
-				final byte[] buff = BufferManager.getBytes();
-				try {
-					for (String filename : args) {
-						long startTime = System.currentTimeMillis();
-						try (RandomAccessFile raf = new RandomAccessFile(filename, "r")) {
-							long length = raf.length();
-							for(long pos = 1; pos < length; pos += (1024 * 4096 + 4096)) {
-								raf.seek(pos);
-								raf.readFully(buff, 0, BufferManager.BUFFER_SIZE);
-							}
-						}
-						System.out.println(filename + " scanned in " + BigDecimal.valueOf(System.currentTimeMillis() - startTime, 3) + " seconds");
-					}
-				} finally {
-					BufferManager.release(buff, false);
-				}
-			} else {
-				System.err.println("Usage: BenchmarkCounterBlockDevice filename [filename] [...]");
-			}
-		} catch(IOException err) {
-			ErrorPrinter.printStackTraces(err, System.err);
-		}
-	}
+  @SuppressWarnings("UseOfSystemOutOrSystemErr")
+  public static void main(String[] args) {
+    try {
+      if (args.length>0) {
+        final byte[] buff = BufferManager.getBytes();
+        try {
+          for (String filename : args) {
+            long startTime = System.currentTimeMillis();
+            try (RandomAccessFile raf = new RandomAccessFile(filename, "r")) {
+              long length = raf.length();
+              for (long pos = 1; pos < length; pos += (1024 * 4096 + 4096)) {
+                raf.seek(pos);
+                raf.readFully(buff, 0, BufferManager.BUFFER_SIZE);
+              }
+            }
+            System.out.println(filename + " scanned in " + BigDecimal.valueOf(System.currentTimeMillis() - startTime, 3) + " seconds");
+          }
+        } finally {
+          BufferManager.release(buff, false);
+        }
+      } else {
+        System.err.println("Usage: BenchmarkCounterBlockDevice filename [filename] [...]");
+      }
+    } catch (IOException err) {
+      ErrorPrinter.printStackTraces(err, System.err);
+    }
+  }
 }

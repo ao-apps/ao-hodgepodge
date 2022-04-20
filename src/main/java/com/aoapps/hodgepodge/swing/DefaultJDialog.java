@@ -39,109 +39,113 @@ import javax.swing.WindowConstants;
  */
 public class DefaultJDialog extends JDialog implements WindowListener, ComponentListener {
 
-	public static final int
-		DEFAULT_MIN_WIDTH=800,
-		DEFAULT_MIN_HEIGHT=600
-	;
+  public static final int
+    DEFAULT_MIN_WIDTH=800,
+    DEFAULT_MIN_HEIGHT=600
+  ;
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private final int minWidth, minHeight;
+  private final int minWidth, minHeight;
 
-	public DefaultJDialog(JFrame parent, String title, boolean modal) {
-		this(parent, title, modal, DEFAULT_MIN_WIDTH, DEFAULT_MIN_HEIGHT);
-	}
+  public DefaultJDialog(JFrame parent, String title, boolean modal) {
+    this(parent, title, modal, DEFAULT_MIN_WIDTH, DEFAULT_MIN_HEIGHT);
+  }
 
-	public DefaultJDialog(JFrame parent, String title, boolean modal, int minWidth, int minHeight) {
-		super(parent, title, modal);
-		this.minWidth=minWidth;
-		this.minHeight=minHeight;
-		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		addWindowListener(this);
-		addComponentListener(this);
-	}
+  public DefaultJDialog(JFrame parent, String title, boolean modal, int minWidth, int minHeight) {
+    super(parent, title, modal);
+    this.minWidth=minWidth;
+    this.minHeight=minHeight;
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    addWindowListener(this);
+    addComponentListener(this);
+  }
 
-	public final void center(Component parent) {
-		Rectangle parentBounds=parent.getBounds();
-		Dimension size=getSize();
-		setBounds(
-			parentBounds.x+(parentBounds.width-size.width)/2,
-			parentBounds.y+(parentBounds.height-size.height)/2,
-			size.width,
-			size.height
-		);
-	}
+  public final void center(Component parent) {
+    Rectangle parentBounds=parent.getBounds();
+    Dimension size=getSize();
+    setBounds(
+      parentBounds.x+(parentBounds.width-size.width)/2,
+      parentBounds.y+(parentBounds.height-size.height)/2,
+      size.width,
+      size.height
+    );
+  }
 
-	@Override
-	public void windowClosing(WindowEvent e) {
-		Object source=e.getSource();
-		if(source==this) closeWindow();
-	}
+  @Override
+  public void windowClosing(WindowEvent e) {
+    Object source=e.getSource();
+    if (source == this) {
+      closeWindow();
+    }
+  }
 
-	public final void closeWindow() {
-		setVisible(false);
-		dispose();
-	}
+  public final void closeWindow() {
+    setVisible(false);
+    dispose();
+  }
 
-	@Override
-	public void windowOpened(WindowEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void windowOpened(WindowEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void windowClosed(WindowEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void windowClosed(WindowEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void windowIconified(WindowEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void windowIconified(WindowEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void windowDeiconified(WindowEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void windowDeiconified(WindowEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void windowActivated(WindowEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void windowActivated(WindowEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void windowDeactivated(WindowEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void windowDeactivated(WindowEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void componentShown(ComponentEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void componentShown(ComponentEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void componentResized(ComponentEvent e) {
-		checkMin();
-	}
+  @Override
+  public void componentResized(ComponentEvent e) {
+    checkMin();
+  }
 
-	private void checkMin() {
-		int width=getWidth();
-		int height=getHeight();
-		if(width<minWidth || height<minHeight) setSize(Math.max(width, minWidth), Math.max(height, minHeight));
-	}
+  private void checkMin() {
+    int width=getWidth();
+    int height=getHeight();
+    if (width<minWidth || height<minHeight) {
+      setSize(Math.max(width, minWidth), Math.max(height, minHeight));
+    }
+  }
 
-	@Override
-	public void componentMoved(ComponentEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void componentMoved(ComponentEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void componentHidden(ComponentEvent e) {
-		// Do nothing
-	}
+  @Override
+  public void componentHidden(ComponentEvent e) {
+    // Do nothing
+  }
 
-	@Override
-	public void pack() {
-		super.pack();
-		checkMin();
-	}
+  @Override
+  public void pack() {
+    super.pack();
+    checkMin();
+  }
 }

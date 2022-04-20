@@ -44,89 +44,99 @@ import java.util.logging.Logger;
 
 public class ProcessTimer implements Runnable, AutoCloseable {
 
-	@SuppressWarnings("NonConstantLogger")
-	private final Logger logger;
-	private final String sourceClass;
-	private final String sourceMethod;
-	private final String subject;
-	private final String processDescription;
-	private final long startTime;
-	private final long maximumTime;
-	private final long reminderInterval;
-	private volatile Thread thread;
-	private volatile boolean isFinished;
-	private volatile boolean isSleeping;
+  @SuppressWarnings("NonConstantLogger")
+  private final Logger logger;
+  private final String sourceClass;
+  private final String sourceMethod;
+  private final String subject;
+  private final String processDescription;
+  private final long startTime;
+  private final long maximumTime;
+  private final long reminderInterval;
+  private volatile Thread thread;
+  private volatile boolean isFinished;
+  private volatile boolean isSleeping;
 
-	public ProcessTimer(
-		Logger logger,
-		String sourceClass,
-		String sourceMethod,
-		String subject,
-		String processDescription,
-		long maximumTime,
-		long reminderInterval
-	) {
-		this.logger = logger;
-		this.sourceClass = sourceClass;
-		this.sourceMethod = sourceMethod;
-		this.subject=subject;
-		this.processDescription=processDescription;
-		this.startTime=System.currentTimeMillis();
-		this.maximumTime=maximumTime;
-		this.reminderInterval=reminderInterval;
-	}
+  public ProcessTimer(
+    Logger logger,
+    String sourceClass,
+    String sourceMethod,
+    String subject,
+    String processDescription,
+    long maximumTime,
+    long reminderInterval
+  ) {
+    this.logger = logger;
+    this.sourceClass = sourceClass;
+    this.sourceMethod = sourceMethod;
+    this.subject=subject;
+    this.processDescription=processDescription;
+    this.startTime=System.currentTimeMillis();
+    this.maximumTime=maximumTime;
+    this.reminderInterval=reminderInterval;
+  }
 
-	@Override
-	public void close() {
-		isFinished = true;
-		if(isSleeping) {
-			Thread t = thread;
-			if(t != null) t.interrupt();
-		}
-	}
+  @Override
+  public void close() {
+    isFinished = true;
+    if (isSleeping) {
+      Thread t = thread;
+      if (t != null) {
+        t.interrupt();
+      }
+    }
+  }
 
-	@Override
-	@SuppressWarnings("SleepWhileInLoop")
-	public void run() {
-		if(!isFinished) {
-			thread = Thread.currentThread();
-			try {
-				// Initial delay
-				try {
-					isSleeping=true;
-					Thread.sleep(maximumTime);
-				} catch(InterruptedException err) {
-					// Only normal when finish is called
-					if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
-					// Restore the interrupted status
-					Thread.currentThread().interrupt();
-				}
-				isSleeping=false;
-				if(!isFinished) {
-					logInfo(false);
-					// Reminder loop
-					while(!isFinished && !Thread.currentThread().isInterrupted()) {
-						try {
-							isSleeping = true;
-							Thread.sleep(reminderInterval);
-						} catch(InterruptedException err) {
-							// Only normal when finish is called
-							if(!isFinished) logger.log(Level.WARNING, "Interrupted when not finished", err);
-							// Restore the interrupted status
-							Thread.currentThread().interrupt();
-						}
-						isSleeping = false;
-						if(!isFinished) logInfo(true);
-					}
-				}
-			} finally {
-				thread = null;
-			}
-		}
-	}
+  @Override
+  @SuppressWarnings("SleepWhileInLoop")
+  public void run() {
+    if (!isFinished) {
+      thread = Thread.currentThread();
+      try {
+        // Initial delay
+        try {
+          isSleeping=true;
+          Thread.sleep(maximumTime);
+        } catch (InterruptedException err) {
+          // Only normal when finish is called
+          if (!isFinished) {
+            logger.log(Level.WARNING, "Interrupted when not finished", err);
+          }
+          // Restore the interrupted status
+          Thread.currentThread().interrupt();
+        }
+        isSleeping=false;
+        if (!isFinished) {
+          logInfo(false);
+          // Reminder loop
+          while (!isFinished && !Thread.currentThread().isInterrupted()) {
+            try {
+              isSleeping = true;
+              Thread.sleep(reminderInterval);
+            } catch (InterruptedException err) {
+              // Only normal when finish is called
+              if (!isFinished) {
+                logger.log(Level.WARNING, "Interrupted when not finished", err);
+              }
+              // Restore the interrupted status
+              Thread.currentThread().interrupt();
+            }
+            isSleeping = false;
+            if (!isFinished) {
+              logInfo(true);
+            }
+          }
+        }
+      } finally {
+        thread = null;
+      }
+    }
+  }
 
-	private void logInfo(boolean isReminder) {
-		long currentTime = System.currentTimeMillis();
-		if(logger.isLoggable(Level.INFO)) logger.logp(Level.INFO, sourceClass, sourceMethod, subject+": Process="+processDescription+", Duration="+Strings.getTimeLengthString(currentTime-startTime));
-	}
+  private void logInfo(boolean isReminder) {
+    long currentTime = System.currentTimeMillis();
+    if (logger.isLoggable(Level.INFO)) {
+      logger.logp(Level.INFO, sourceClass, sourceMethod, subject+": Process="+processDescription+", Duration="+Strings.getTimeLengthString(currentTime-startTime));
+    }
+  }
 }

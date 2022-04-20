@@ -38,38 +38,40 @@ import java.util.logging.SimpleFormatter;
  */
 public final class HandlerUtil {
 
-	/** Make no instances. */
-	private HandlerUtil() {throw new AssertionError();}
+  /** Make no instances. */
+  private HandlerUtil() {
+    throw new AssertionError();
+  }
 
-	/**
-	 * Private method to configure a ConsoleHandler from LogManager
-	 * properties and/or default values as specified in the class
-	 * javadoc.
-	 */
-	// @see ConsoleHandler#configure()
-	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-	public static void configure(Handler handler) {
-		LogManager manager = LogManager.getLogManager();
-		String cname = handler.getClass().getName();
+  /**
+   * Private method to configure a ConsoleHandler from LogManager
+   * properties and/or default values as specified in the class
+   * javadoc.
+   */
+  // @see ConsoleHandler#configure()
+  @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
+  public static void configure(Handler handler) {
+    LogManager manager = LogManager.getLogManager();
+    String cname = handler.getClass().getName();
 
-		handler.setLevel(LogManagerUtil.getLevelProperty(manager, cname +".level", Level.INFO));
-		handler.setFilter(LogManagerUtil.getFilterProperty(manager, cname +".filter", null));
-		handler.setFormatter(LogManagerUtil.getFormatterProperty(manager, cname +".formatter", new SimpleFormatter()));
-		try {
-			handler.setEncoding(LogManagerUtil.getStringProperty(manager, cname +".encoding", null));
-		} catch (ThreadDeath td) {
-			throw td;
-		} catch (Throwable t) {
-			LogManagerUtil.warn(t);
-			try {
-				handler.setEncoding(null);
-			} catch (ThreadDeath td) {
-				throw td;
-			} catch (Throwable t2) {
-				LogManagerUtil.warn(t2);
-				// doing a setEncoding with null should always work.
-				// assert false;
-			}
-		}
-	}
+    handler.setLevel(LogManagerUtil.getLevelProperty(manager, cname +".level", Level.INFO));
+    handler.setFilter(LogManagerUtil.getFilterProperty(manager, cname +".filter", null));
+    handler.setFormatter(LogManagerUtil.getFormatterProperty(manager, cname +".formatter", new SimpleFormatter()));
+    try {
+      handler.setEncoding(LogManagerUtil.getStringProperty(manager, cname +".encoding", null));
+    } catch (ThreadDeath td) {
+      throw td;
+    } catch (Throwable t) {
+      LogManagerUtil.warn(t);
+      try {
+        handler.setEncoding(null);
+      } catch (ThreadDeath td) {
+        throw td;
+      } catch (Throwable t2) {
+        LogManagerUtil.warn(t2);
+        // doing a setEncoding with null should always work.
+        // assert false;
+      }
+    }
+  }
 }

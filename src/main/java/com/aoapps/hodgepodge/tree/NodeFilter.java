@@ -34,5 +34,5 @@ import java.sql.SQLException;
 @FunctionalInterface
 public interface NodeFilter<E> {
 
-	boolean isNodeFiltered(Node<E> node) throws IOException, SQLException;
+  boolean isNodeFiltered(Node<E> node) throws IOException, SQLException;
 }

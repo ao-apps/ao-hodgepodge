@@ -1,4 +1,4 @@
-/* 
+/*
  * $Header: /var/cvs/aocode-public/src/com/aoindustries/md5/MD5OutputStream.java,v 1.2 2013/07/10 20:30:28 orion Exp $
  *
  * MD5OutputStream, a subclass of FilterOutputStream implementing MD5
@@ -11,18 +11,18 @@
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
  * version 2 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Library General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- * 
+ *
  * See http://www.cs.hut.fi/~santtu/java/ for more information on this
- * and the MD5 class.  
+ * and the MD5 class.
  *
  * $Log: MD5OutputStream.java,v $
  * Revision 1.2  2013/07/10 20:30:28  orion
@@ -68,52 +68,52 @@ import java.io.OutputStream;
  * MD5OutputStream is a subclass of FilterOutputStream adding MD5
  * hashing of the read output.
  *
- * @version	$Revision: 1.2 $
- * @author	Santeri Paavolainen &lt;santtu@cs.hut.fi&gt;
+ * @version $Revision: 1.2 $
+ * @author  Santeri Paavolainen &lt;santtu@cs.hut.fi&gt;
  */
 
 public class MD5OutputStream extends FilterOutputStream {
 
-	/**
-	 * MD5 context
-	 */
-	private final MD5 md5;
+  /**
+   * MD5 context
+   */
+  private final MD5 md5;
 
-	/**
-	 * Creates MD5OutputStream
-	 * @param out	The output stream
-	 */
+  /**
+   * Creates MD5OutputStream
+   * @param out The output stream
+   */
 
-	public MD5OutputStream (OutputStream out) {
-		super(out);
+  public MD5OutputStream (OutputStream out) {
+    super(out);
 
-		md5 = new MD5();
-	}
+    md5 = new MD5();
+  }
 
-	/**
-	 * Writes a byte. 
-	 */
-	@Override
-	public void write (int b) throws IOException {
-		out.write(b);
-		md5.Update((byte) b);
-	}
+  /**
+   * Writes a byte.
+   */
+  @Override
+  public void write (int b) throws IOException {
+    out.write(b);
+    md5.Update((byte) b);
+  }
 
-	/**
-	 * Writes a sub array of bytes.
-	 */
-	@Override
-	public void write (byte[] b, int off, int len) throws IOException {
-		out.write(b, off, len);
-		md5.Update(b, off, len);
-	}
+  /**
+   * Writes a sub array of bytes.
+   */
+  @Override
+  public void write (byte[] b, int off, int len) throws IOException {
+    out.write(b, off, len);
+    md5.Update(b, off, len);
+  }
 
-	/**
-	 * Returns array of bytes representing hash of the stream as finalized
-	 * for the current state.
-	 * @see MD5#Final()
-	 */
-	public byte[] hash () {
-		return md5.Final();
-	}
+  /**
+   * Returns array of bytes representing hash of the stream as finalized
+   * for the current state.
+   * @see MD5#Final()
+   */
+  public byte[] hash () {
+    return md5.Final();
+  }
 }

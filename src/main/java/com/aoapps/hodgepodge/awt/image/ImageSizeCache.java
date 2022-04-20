@@ -39,42 +39,48 @@ import javax.imageio.ImageIO;
  */
 public final class ImageSizeCache {
 
-	/** Make no instances. */
-	private ImageSizeCache() {throw new AssertionError();}
+  /** Make no instances. */
+  private ImageSizeCache() {
+    throw new AssertionError();
+  }
 
-	static class CacheEntry {
-		long lastModified;
-		long length;
-		Dimension size;
-	}
+  static class CacheEntry {
+    long lastModified;
+    long length;
+    Dimension size;
+  }
 
-	private static final Map<String, CacheEntry> sizeCache = new HashMap<>();
+  private static final Map<String, CacheEntry> sizeCache = new HashMap<>();
 
-	public static Dimension getImageSize(File imageFile) throws IOException {
-		// Locate the CacheValue
-		final CacheEntry entry;
-		synchronized(sizeCache) {
-			String canonicalPath = imageFile.getCanonicalPath();
-			CacheEntry ce = sizeCache.get(canonicalPath);
-			if(ce==null) sizeCache.put(canonicalPath, ce = new CacheEntry());
-			entry = ce;
-		}
-		// Synchronize on the cache entry itself.  Allows concurrency for different images
-		synchronized(entry) {
-			long lastModified = imageFile.lastModified();
-			long length = imageFile.length();
-			if(
-				entry.size == null
-				|| lastModified != entry.lastModified
-				|| length != entry.length
-			) {
-				BufferedImage img = ImageIO.read(imageFile);
-				if(img==null) throw new IOException("Unable to read image: " + imageFile);
-				entry.lastModified = lastModified;
-				entry.length = length;
-				entry.size = new Dimension(img.getWidth(), img.getHeight());
-			}
-			return new Dimension(entry.size); // Safe copy
-		}
-	}
+  public static Dimension getImageSize(File imageFile) throws IOException {
+    // Locate the CacheValue
+    final CacheEntry entry;
+    synchronized (sizeCache) {
+      String canonicalPath = imageFile.getCanonicalPath();
+      CacheEntry ce = sizeCache.get(canonicalPath);
+      if (ce == null) {
+        sizeCache.put(canonicalPath, ce = new CacheEntry());
+      }
+      entry = ce;
+    }
+    // Synchronize on the cache entry itself.  Allows concurrency for different images
+    synchronized (entry) {
+      long lastModified = imageFile.lastModified();
+      long length = imageFile.length();
+      if (
+        entry.size == null
+        || lastModified != entry.lastModified
+        || length != entry.length
+      ) {
+        BufferedImage img = ImageIO.read(imageFile);
+        if (img == null) {
+          throw new IOException("Unable to read image: " + imageFile);
+        }
+        entry.lastModified = lastModified;
+        entry.length = length;
+        entry.size = new Dimension(img.getWidth(), img.getHeight());
+      }
+      return new Dimension(entry.size); // Safe copy
+    }
+  }
 }

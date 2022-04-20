@@ -40,103 +40,116 @@ import java.io.OutputStream;
  */
 public class BitRateOutputStream extends FilterOutputStream implements NoClose {
 
-	public static final long MAX_CATCHUP_TIME = 2L * 1000;
+  public static final long MAX_CATCHUP_TIME = 2L * 1000;
 
-	private final BitRateProvider provider;
+  private final BitRateProvider provider;
 
-	private long blockStart=-1;
-	private long catchupTime;
-	private long byteCount;
+  private long blockStart=-1;
+  private long catchupTime;
+  private long byteCount;
 
-	public BitRateOutputStream(OutputStream out, BitRateProvider provider) {
-		super(out);
-		this.provider=provider;
-	}
+  public BitRateOutputStream(OutputStream out, BitRateProvider provider) {
+    super(out);
+    this.provider=provider;
+  }
 
-	@Override
-	public void write(int b) throws IOException {
-		if(blockStart==-1) blockStart=System.currentTimeMillis();
-		out.write(b);
-		byteCount++;
-		sleepIfNeeded();
-	}
+  @Override
+  public void write(int b) throws IOException {
+    if (blockStart == -1) {
+      blockStart=System.currentTimeMillis();
+    }
+    out.write(b);
+    byteCount++;
+    sleepIfNeeded();
+  }
 
-	@Override
-	public void write(byte[] b) throws IOException {
-		if(blockStart==-1) blockStart=System.currentTimeMillis();
-		out.write(b, 0, b.length);
-		byteCount+=b.length;
-		sleepIfNeeded();
-	}
+  @Override
+  public void write(byte[] b) throws IOException {
+    if (blockStart == -1) {
+      blockStart=System.currentTimeMillis();
+    }
+    out.write(b, 0, b.length);
+    byteCount+=b.length;
+    sleepIfNeeded();
+  }
 
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		if(blockStart==-1) blockStart=System.currentTimeMillis();
-		out.write(b, off, len);
-		byteCount+=len;
-		sleepIfNeeded();
-	}
+  @Override
+  public void write(byte[] b, int off, int len) throws IOException {
+    if (blockStart == -1) {
+      blockStart=System.currentTimeMillis();
+    }
+    out.write(b, off, len);
+    byteCount+=len;
+    sleepIfNeeded();
+  }
 
-	@Override
-	public void flush() throws IOException {
-		if(blockStart==-1) blockStart=System.currentTimeMillis();
-		out.flush();
-		sleep();
-	}
+  @Override
+  public void flush() throws IOException {
+    if (blockStart == -1) {
+      blockStart=System.currentTimeMillis();
+    }
+    out.flush();
+    sleep();
+  }
 
-	@Override
-	public boolean isNoClose() {
-		return (out instanceof NoClose) && ((NoClose)out).isNoClose();
-	}
+  @Override
+  public boolean isNoClose() {
+    return (out instanceof NoClose) && ((NoClose)out).isNoClose();
+  }
 
-	@Override
-	public void close() throws IOException {
-		out.flush();
-		out.close();
-		blockStart=-1;
-		catchupTime=0;
-		byteCount=0;
-	}
+  @Override
+  public void close() throws IOException {
+    out.flush();
+    out.close();
+    blockStart=-1;
+    catchupTime=0;
+    byteCount=0;
+  }
 
-	private void sleepIfNeeded() throws IOException {
-		if(byteCount>provider.getBlockSize()) sleep();
-	}
+  private void sleepIfNeeded() throws IOException {
+    if (byteCount>provider.getBlockSize()) {
+      sleep();
+    }
+  }
 
-	private void sleep() throws IOException {
-		if(byteCount>0) {
-			Long bps=provider.getBitRate();
-			if(bps!=null && bps>0) {
-				// Figure out the number of millis to sleep
-				long blockTime=(byteCount*8L*1000L)/bps;
-				long sleepyTime=blockTime-(System.currentTimeMillis()-blockStart);
+  private void sleep() throws IOException {
+    if (byteCount>0) {
+      Long bps=provider.getBitRate();
+      if (bps != null && bps>0) {
+        // Figure out the number of millis to sleep
+        long blockTime=(byteCount*8L*1000L)/bps;
+        long sleepyTime=blockTime-(System.currentTimeMillis()-blockStart);
 
-				if(sleepyTime>0) {
-					if(catchupTime>sleepyTime) catchupTime-=sleepyTime;
-					else {
-						sleepyTime-=catchupTime;
-						catchupTime=0;
-						try {
-							// Birdie - ti ger, nnnnnggggaaaa - sleeepy time
-							Thread.sleep(sleepyTime);
-						} catch(InterruptedException err) {
-							// Restore the interrupted status
-							Thread.currentThread().interrupt();
-							InterruptedIOException ioErr = new InterruptedIOException();
-							ioErr.initCause(err);
-							throw ioErr;
-						}
-					}
-				} else {
-					// Can't sleep the clowns will eat me.
-					catchupTime-=sleepyTime;
-					if(catchupTime>=MAX_CATCHUP_TIME) catchupTime=MAX_CATCHUP_TIME;
-				}
-			} else {
-				// currently flagged as unlimited bandwidth
-				catchupTime=0;
-			}
-			blockStart=System.currentTimeMillis();
-			byteCount=0;
-		}
-	}
+        if (sleepyTime>0) {
+          if (catchupTime>sleepyTime) {
+            catchupTime-=sleepyTime;
+          } else {
+            sleepyTime-=catchupTime;
+            catchupTime=0;
+            try {
+              // Birdie - ti ger, nnnnnggggaaaa - sleeepy time
+              Thread.sleep(sleepyTime);
+            } catch (InterruptedException err) {
+              // Restore the interrupted status
+              Thread.currentThread().interrupt();
+              InterruptedIOException ioErr = new InterruptedIOException();
+              ioErr.initCause(err);
+              throw ioErr;
+            }
+          }
+        } else {
+          // Can't sleep the clowns will eat me.
+          catchupTime-=sleepyTime;
+          if (catchupTime >= MAX_CATCHUP_TIME) {
+            catchupTime=MAX_CATCHUP_TIME;
+          }
+        }
+      } else {
+        // currently flagged as unlimited bandwidth
+        catchupTime=0;
+      }
+      blockStart=System.currentTimeMillis();
+      byteCount=0;
+    }
+  }
 }

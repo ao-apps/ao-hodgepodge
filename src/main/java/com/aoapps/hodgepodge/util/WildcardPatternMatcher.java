@@ -62,236 +62,244 @@ import java.util.regex.Pattern;
  */
 public abstract class WildcardPatternMatcher {
 
-	private static final WildcardPatternMatcher matchNone = new WildcardPatternMatcher() {
-		@Override
-		public boolean isEmpty() {
-			return true;
-		}
+  private static final WildcardPatternMatcher matchNone = new WildcardPatternMatcher() {
+    @Override
+    public boolean isEmpty() {
+      return true;
+    }
 
-		@Override
-		public boolean isMatch(String input) {
-			return false;
-		}
-	};
+    @Override
+    public boolean isMatch(String input) {
+      return false;
+    }
+  };
 
-	/**
-	 * Gets the match none matcher.
-	 */
-	public static WildcardPatternMatcher matchNone() {
-		return matchNone;
-	}
+  /**
+   * Gets the match none matcher.
+   */
+  public static WildcardPatternMatcher matchNone() {
+    return matchNone;
+  }
 
-	private static final WildcardPatternMatcher matchAll = new WildcardPatternMatcher() {
-		@Override
-		public boolean isMatch(String input) {
-			return true;
-		}
-	};
+  private static final WildcardPatternMatcher matchAll = new WildcardPatternMatcher() {
+    @Override
+    public boolean isMatch(String input) {
+      return true;
+    }
+  };
 
-	/**
-	 * Gets the match all matcher.
-	 */
-	public static WildcardPatternMatcher matchAll() {
-		return matchAll;
-	}
+  /**
+   * Gets the match all matcher.
+   */
+  public static WildcardPatternMatcher matchAll() {
+    return matchAll;
+  }
 
-	/**
-	 * Gets the matcher for the comma and/or space separated patterns.
-	 * <p>
-	 * Any null or empty pattern matches none.
-	 * </p>
-	 * <p>
-	 * TODO: New optional flag to limit the matchers to disable the infix matching.
-	 * The prefix and suffix matches will always be fast O(n), but the infix matching
-	 * can be O(n^2).  This may be useful with public facing search forms, for example.
-	 * </p>
-	 */
-	public static WildcardPatternMatcher compile(String patterns) {
-		if(patterns == null || patterns.isEmpty()) {
-			return matchNone;
-		} else {
-			List<String> list = Strings.splitCommaSpace(patterns);
-			// Match none shortcut
-			if(list.isEmpty()) return matchNone;
+  /**
+   * Gets the matcher for the comma and/or space separated patterns.
+   * <p>
+   * Any null or empty pattern matches none.
+   * </p>
+   * <p>
+   * TODO: New optional flag to limit the matchers to disable the infix matching.
+   * The prefix and suffix matches will always be fast O(n), but the infix matching
+   * can be O(n^2).  This may be useful with public facing search forms, for example.
+   * </p>
+   */
+  public static WildcardPatternMatcher compile(String patterns) {
+    if (patterns == null || patterns.isEmpty()) {
+      return matchNone;
+    } else {
+      List<String> list = Strings.splitCommaSpace(patterns);
+      // Match none shortcut
+      if (list.isEmpty()) {
+        return matchNone;
+      }
 
-			// Parse into a series of individual matchers
-			final List<WildcardPatternMatcher> matchers = new ArrayList<>(list.size());
-			for(String pattern : list) {
-				int end = pattern.length();
-				if(end > 0) {
-					// Beginning wildcards
-					int pos = 0;
-					final boolean startsWildcard;
-					if(pattern.charAt(0) == '*') {
-						startsWildcard = true;
-						pos++;
-						// Skip consecutive beginning
-						while(pos < end && pattern.charAt(pos) == '*') {
-							pos++;
-						}
-						if(pos >= end) {
-							// Is any number of '*' only, matchAll shortcut
-							return matchAll;
-						}
-					} else {
-						startsWildcard = false;
-					}
-					// Ending wildcards
-					final boolean endsWildcard;
-					if(pattern.charAt(end - 1) == '*') {
-						endsWildcard = true;
-						end--;
-						// Skip consecutive ending
-						while(end > pos && pattern.charAt(end - 1) == '*') {
-							end--;
-						}
-						assert end > pos;
-					} else {
-						endsWildcard = false;
-					}
-					// Split the remaining pattern on any internal '*'
-					final List<String> sequences = new ArrayList<>();
-					while(pos < end) {
-						assert pattern.charAt(pos) != '*';
-						int starPos = pattern.indexOf('*', pos + 1);
-						if(starPos == -1 || starPos >= end) {
-							// Not more '*' found
-							sequences.add(pattern.substring(pos, end));
-							pos = end;
-						} else {
-							// Found
-							sequences.add(pattern.substring(pos, starPos));
-							pos = starPos + 1;
-							// Skip consecutive
-							while(pos < end && pattern.charAt(pos) == '*') {
-								pos++;
-							}
-						}
-					}
-					int seqCount = sequences.size();
-					assert seqCount >= 1;
-					if(seqCount == 1) {
-						final String sequence = sequences.get(0);
-						if(startsWildcard) {
-							if(endsWildcard) {
-								// *infix*
-								matchers.add(
-									new WildcardPatternMatcher() {
-										@Override
-										public boolean isMatch(String input) {
-											return input.contains(sequence);
-										}
-									}
-								);
-							} else {
-								// *suffix
-								matchers.add(
-									new WildcardPatternMatcher() {
-										@Override
-										public boolean isMatch(String input) {
-											return input.endsWith(sequence);
-										}
-									}
-								);
-							}
-						} else {
-							if(endsWildcard) {
-								// prefix*
-								matchers.add(
-									new WildcardPatternMatcher() {
-										@Override
-										public boolean isMatch(String input) {
-											return input.startsWith(sequence);
-										}
-									}
-								);
-							} else {
-								// exact
-								matchers.add(
-									new WildcardPatternMatcher() {
-										@Override
-										public boolean isMatch(String input) {
-											return input.equals(sequence);
-										}
-									}
-								);
-							}
-						}
-					} else {
-						matchers.add(
-							new WildcardPatternMatcher() {
-								@Override
-								public boolean isMatch(String input) {
-									int index = 0;
-									int indexEnd = sequences.size();
-									int pos = 0;
-									int end = input.length();
-									// Handle non-wildcard start
-									if(!startsWildcard) {
-										String prefix = sequences.get(0);
-										if(!input.startsWith(prefix)) {
-											return false;
-										}
-										index++;
-										pos += prefix.length();
-									}
-									// Handle non-wildcard end
-									if(!endsWildcard) {
-										indexEnd--;
-										String suffix = sequences.get(indexEnd);
-										if(!input.endsWith(suffix)) {
-											return false;
-										}
-										end -= suffix.length();
-									}
-									// Check if overlapping prefix and suffix matches
-									if(end < pos) return false;
-									// Handle any remaining infixes
-									while(index < indexEnd) {
-										String sequence = sequences.get(index++);
-										int sequenceLen = sequence.length();
-										assert sequenceLen > 0;
-										int foundAt = input.indexOf(sequence, pos);
-										if(foundAt == -1 || foundAt > (end - sequenceLen)) {
-											return false;
-										}
-										pos += sequenceLen;
-									}
-									return true;
-								}
-							}
-						);
-					}
-				}
-			}
-			if(matchers.isEmpty()) {
-				return matchNone;
-			}
-			if(matchers.size() == 1) return matchers.get(0);
-			return new WildcardPatternMatcher() {
-				@Override
-				public boolean isMatch(String input) {
-					for(WildcardPatternMatcher matcher : matchers) {
-						if(matcher.isMatch(input)) return true;
-					}
-					return false;
-				}
-			};
-		}
-	}
+      // Parse into a series of individual matchers
+      final List<WildcardPatternMatcher> matchers = new ArrayList<>(list.size());
+      for (String pattern : list) {
+        int end = pattern.length();
+        if (end > 0) {
+          // Beginning wildcards
+          int pos = 0;
+          final boolean startsWildcard;
+          if (pattern.charAt(0) == '*') {
+            startsWildcard = true;
+            pos++;
+            // Skip consecutive beginning
+            while (pos < end && pattern.charAt(pos) == '*') {
+              pos++;
+            }
+            if (pos >= end) {
+              // Is any number of '*' only, matchAll shortcut
+              return matchAll;
+            }
+          } else {
+            startsWildcard = false;
+          }
+          // Ending wildcards
+          final boolean endsWildcard;
+          if (pattern.charAt(end - 1) == '*') {
+            endsWildcard = true;
+            end--;
+            // Skip consecutive ending
+            while (end > pos && pattern.charAt(end - 1) == '*') {
+              end--;
+            }
+            assert end > pos;
+          } else {
+            endsWildcard = false;
+          }
+          // Split the remaining pattern on any internal '*'
+          final List<String> sequences = new ArrayList<>();
+          while (pos < end) {
+            assert pattern.charAt(pos) != '*';
+            int starPos = pattern.indexOf('*', pos + 1);
+            if (starPos == -1 || starPos >= end) {
+              // Not more '*' found
+              sequences.add(pattern.substring(pos, end));
+              pos = end;
+            } else {
+              // Found
+              sequences.add(pattern.substring(pos, starPos));
+              pos = starPos + 1;
+              // Skip consecutive
+              while (pos < end && pattern.charAt(pos) == '*') {
+                pos++;
+              }
+            }
+          }
+          int seqCount = sequences.size();
+          assert seqCount >= 1;
+          if (seqCount == 1) {
+            final String sequence = sequences.get(0);
+            if (startsWildcard) {
+              if (endsWildcard) {
+                // *infix*
+                matchers.add(
+                  new WildcardPatternMatcher() {
+                    @Override
+                    public boolean isMatch(String input) {
+                      return input.contains(sequence);
+                    }
+                  }
+                );
+              } else {
+                // *suffix
+                matchers.add(
+                  new WildcardPatternMatcher() {
+                    @Override
+                    public boolean isMatch(String input) {
+                      return input.endsWith(sequence);
+                    }
+                  }
+                );
+              }
+            } else {
+              if (endsWildcard) {
+                // prefix*
+                matchers.add(
+                  new WildcardPatternMatcher() {
+                    @Override
+                    public boolean isMatch(String input) {
+                      return input.startsWith(sequence);
+                    }
+                  }
+                );
+              } else {
+                // exact
+                matchers.add(
+                  new WildcardPatternMatcher() {
+                    @Override
+                    public boolean isMatch(String input) {
+                      return input.equals(sequence);
+                    }
+                  }
+                );
+              }
+            }
+          } else {
+            matchers.add(
+              new WildcardPatternMatcher() {
+                @Override
+                public boolean isMatch(String input) {
+                  int index = 0;
+                  int indexEnd = sequences.size();
+                  int pos = 0;
+                  int end = input.length();
+                  // Handle non-wildcard start
+                  if (!startsWildcard) {
+                    String prefix = sequences.get(0);
+                    if (!input.startsWith(prefix)) {
+                      return false;
+                    }
+                    index++;
+                    pos += prefix.length();
+                  }
+                  // Handle non-wildcard end
+                  if (!endsWildcard) {
+                    indexEnd--;
+                    String suffix = sequences.get(indexEnd);
+                    if (!input.endsWith(suffix)) {
+                      return false;
+                    }
+                    end -= suffix.length();
+                  }
+                  // Check if overlapping prefix and suffix matches
+                  if (end < pos) {
+                    return false;
+                  }
+                  // Handle any remaining infixes
+                  while (index < indexEnd) {
+                    String sequence = sequences.get(index++);
+                    int sequenceLen = sequence.length();
+                    assert sequenceLen > 0;
+                    int foundAt = input.indexOf(sequence, pos);
+                    if (foundAt == -1 || foundAt > (end - sequenceLen)) {
+                      return false;
+                    }
+                    pos += sequenceLen;
+                  }
+                  return true;
+                }
+              }
+            );
+          }
+        }
+      }
+      if (matchers.isEmpty()) {
+        return matchNone;
+      }
+      if (matchers.size() == 1) {
+        return matchers.get(0);
+      }
+      return new WildcardPatternMatcher() {
+        @Override
+        public boolean isMatch(String input) {
+          for (WildcardPatternMatcher matcher : matchers) {
+            if (matcher.isMatch(input)) {
+              return true;
+            }
+          }
+          return false;
+        }
+      };
+    }
+  }
 
-	private WildcardPatternMatcher() {
-		// Do nothing
-	}
+  private WildcardPatternMatcher() {
+    // Do nothing
+  }
 
-	/**
-	 * Checks if this is empty (has no patterns).
-	 * Any empty matcher does not match anything.
-	 */
-	public boolean isEmpty() {
-		return false;
-	}
+  /**
+   * Checks if this is empty (has no patterns).
+   * Any empty matcher does not match anything.
+   */
+  public boolean isEmpty() {
+    return false;
+  }
 
-	// TODO: Rename "matches", deprecate old with "default" method in Java 1.8?
-	public abstract boolean isMatch(String input);
+  // TODO: Rename "matches", deprecate old with "default" method in Java 1.8?
+  public abstract boolean isMatch(String input);
 }

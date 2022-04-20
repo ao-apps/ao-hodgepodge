@@ -45,68 +45,74 @@ import java.util.Set;
 // TODO: Ex extends Throwable
 public class TopologicalSorter<V, Ex extends Exception> implements GraphSorter<V, Ex> {
 
-	private final SymmetricMultiGraph<V, ?, ? extends Ex> graph;
-	private final boolean isForward;
+  private final SymmetricMultiGraph<V, ?, ? extends Ex> graph;
+  private final boolean isForward;
 
-	public TopologicalSorter(SymmetricMultiGraph<V, ?, ? extends Ex> graph, boolean isForward) {
-		this.graph = graph;
-		this.isForward = isForward;
-	}
+  public TopologicalSorter(SymmetricMultiGraph<V, ?, ? extends Ex> graph, boolean isForward) {
+    this.graph = graph;
+    this.isForward = isForward;
+  }
 
-	@Override
-	public Set<V> sortGraph() throws CycleException, Ex {
-		Set<V> vertices = graph.getVertices();
-		final int size = vertices.size();
-		Set<V> visited = AoCollections.newHashSet(size);
-		Set<V> sequence = new LinkedHashSet<>();
-		//L ← Empty list that will contain the sorted nodes
-		Set<V> l = AoCollections.newLinkedHashSet(size);
-		//S ← Set of all nodes with no incoming edges
-		//for each node n in S do
-		for(V n : vertices) {
-			if(
-				// Getting edges can be expensive, while checking visited should always be cheap
-				!visited.contains(n)
-				// This check is looking for starting nodes
-				&& (isForward ? graph.getEdgesTo(n) : graph.getEdgesFrom(n)).isEmpty()
-			) {
-				topologicalSortVisit(n, l, visited, sequence);
-			}
-		}
-		if(l.size() != size) {
-			throw new IllegalArgumentException(
-				"Not all vertices added.  Does the symmetric graph have consistent edges to and from?\n"
-				+ "    vertices(" + size + "): " + vertices
-				+ "    results(" + l.size() + "): " + l
-			);
-		}
-		return l;
-	}
+  @Override
+  public Set<V> sortGraph() throws CycleException, Ex {
+    Set<V> vertices = graph.getVertices();
+    final int size = vertices.size();
+    Set<V> visited = AoCollections.newHashSet(size);
+    Set<V> sequence = new LinkedHashSet<>();
+    //L ← Empty list that will contain the sorted nodes
+    Set<V> l = AoCollections.newLinkedHashSet(size);
+    //S ← Set of all nodes with no incoming edges
+    //for each node n in S do
+    for (V n : vertices) {
+      if (
+        // Getting edges can be expensive, while checking visited should always be cheap
+        !visited.contains(n)
+        // This check is looking for starting nodes
+        && (isForward ? graph.getEdgesTo(n) : graph.getEdgesFrom(n)).isEmpty()
+      ) {
+        topologicalSortVisit(n, l, visited, sequence);
+      }
+    }
+    if (l.size() != size) {
+      throw new IllegalArgumentException(
+        "Not all vertices added.  Does the symmetric graph have consistent edges to and from?\n"
+        + "    vertices(" + size + "): " + vertices
+        + "    results(" + l.size() + "): " + l
+      );
+    }
+    return l;
+  }
 
-	//function visit(node n)
-	private void topologicalSortVisit(V n, Set<V> l, Set<V> visited, Set<V> sequence) throws CycleException, Ex {
-		//    if n has not been visited yet then
-		//        mark n as visited
-		if(visited.add(n)) {
-			//        for each node m with an edge from n to m do
-			for(Edge<V> e : (isForward ? graph.getEdgesFrom(n) : graph.getEdgesTo(n))) {
-				V m = isForward ? e.getTo() : e.getFrom();
-				//            visit(m)
-				if(!sequence.add(m)) {
-					List<V> vertices = new ArrayList<>();
-					boolean found = false;
-					for(V seq : sequence) {
-						if(!found && seq.equals(m)) found = true;
-						if(found) vertices.add(seq);
-					}
-					vertices.add(m);
-					throw new CycleException(AoCollections.optimalUnmodifiableList(vertices));
-				}
-				topologicalSortVisit(m, l, visited, sequence);
-				sequence.remove(m);
-			}
-			//        add n to L
-			if(!l.add(n)) throw new AssertionError();
-		}
-	}
+  //function visit(node n)
+  private void topologicalSortVisit(V n, Set<V> l, Set<V> visited, Set<V> sequence) throws CycleException, Ex {
+    //    if n has not been visited yet then
+    //        mark n as visited
+    if (visited.add(n)) {
+      //        for each node m with an edge from n to m do
+      for (Edge<V> e : (isForward ? graph.getEdgesFrom(n) : graph.getEdgesTo(n))) {
+        V m = isForward ? e.getTo() : e.getFrom();
+        //            visit(m)
+        if (!sequence.add(m)) {
+          List<V> vertices = new ArrayList<>();
+          boolean found = false;
+          for (V seq : sequence) {
+            if (!found && seq.equals(m)) {
+              found = true;
+            }
+            if (found) {
+              vertices.add(seq);
+            }
+          }
+          vertices.add(m);
+          throw new CycleException(AoCollections.optimalUnmodifiableList(vertices));
+        }
+        topologicalSortVisit(m, l, visited, sequence);
+        sequence.remove(m);
+      }
+      //        add n to L
+      if (!l.add(n)) {
+        throw new AssertionError();
+      }
+    }
+  }
 }

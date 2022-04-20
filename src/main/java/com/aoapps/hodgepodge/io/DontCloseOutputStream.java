@@ -41,20 +41,20 @@ import java.io.OutputStream;
 @Deprecated/* Java 9: (forRemoval = true) */
 public class DontCloseOutputStream extends FilterOutputStream implements NoClose {
 
-	public DontCloseOutputStream(OutputStream out) {
-		super(out);
-	}
+  public DontCloseOutputStream(OutputStream out) {
+    super(out);
+  }
 
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		out.write(b, off, len);
-	}
+  @Override
+  public void write(byte[] b, int off, int len) throws IOException {
+    out.write(b, off, len);
+  }
 
-	/**
-	 * Does nothing on close to protect the wrapped OutputStream.
-	 */
-	@Override
-	public void close() {
-		// Do nothing
-	}
+  /**
+   * Does nothing on close to protect the wrapped OutputStream.
+   */
+  @Override
+  public void close() {
+    // Do nothing
+  }
 }

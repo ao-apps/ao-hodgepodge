@@ -30,53 +30,59 @@ package com.aoapps.hodgepodge.table;
  */
 public class Column implements Comparable<Column> {
 
-	private final String name;
-	private final IndexType indexType;
+  private final String name;
+  private final IndexType indexType;
 
-	public Column(String name, IndexType indexType) {
-		this.name = name;
-		this.indexType = indexType;
-	}
+  public Column(String name, IndexType indexType) {
+    this.name = name;
+    this.indexType = indexType;
+  }
 
-	/**
-	 * Two column with the same name are equal.
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if(!(obj instanceof Column)) return false;
-		Column other = (Column)obj;
-		return name.equals(other.name);
-	}
+  /**
+   * Two column with the same name are equal.
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Column)) {
+      return false;
+    }
+    Column other = (Column)obj;
+    return name.equals(other.name);
+  }
 
-	/**
-	 * Hashed by column name only.
-	 */
-	@Override
-	public int hashCode() {
-		return name.hashCode();
-	}
+  /**
+   * Hashed by column name only.
+   */
+  @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
 
-	/**
-	 * Ordered by column name only.
-	 */
-	@Override
-	public int compareTo(Column o) {
-		int diff = name.compareToIgnoreCase(o.name);
-		if(diff!=0) return diff;
-		return name.compareTo(o.name);
-	}
+  /**
+   * Ordered by column name only.
+   */
+  @Override
+  public int compareTo(Column o) {
+    int diff = name.compareToIgnoreCase(o.name);
+    if (diff != 0) {
+      return diff;
+    }
+    return name.compareTo(o.name);
+  }
 
-	@Override
-	public String toString() {
-		if(indexType!=IndexType.NONE) return name+" ("+indexType+')';
-		return name;
-	}
+  @Override
+  public String toString() {
+    if (indexType != IndexType.NONE) {
+      return name+" ("+indexType+')';
+    }
+    return name;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public IndexType getIndexType() {
-		return indexType;
-	}
+  public IndexType getIndexType() {
+    return indexType;
+  }
 }

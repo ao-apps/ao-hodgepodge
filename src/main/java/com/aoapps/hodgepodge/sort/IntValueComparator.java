@@ -32,22 +32,26 @@ import java.util.Comparator;
  */
 public final class IntValueComparator implements Comparator<Number> {
 
-	private static final IntValueComparator instance = new IntValueComparator();
+  private static final IntValueComparator instance = new IntValueComparator();
 
-	public static IntValueComparator getInstance() {
-		return instance;
-	}
+  public static IntValueComparator getInstance() {
+    return instance;
+  }
 
-	private IntValueComparator() {
-		// Do nothing
-	}
+  private IntValueComparator() {
+    // Do nothing
+  }
 
-	@Override
-	public int compare(Number o1, Number o2) {
-		int i1 = o1.intValue();
-		int i2 = o2.intValue();
-		if(i1<i2) return -1;
-		if(i1>i2) return 1;
-		return 0;
-	}
+  @Override
+  public int compare(Number o1, Number o2) {
+    int i1 = o1.intValue();
+    int i2 = o2.intValue();
+    if (i1<i2) {
+      return -1;
+    }
+    if (i1>i2) {
+      return 1;
+    }
+    return 0;
+  }
 }

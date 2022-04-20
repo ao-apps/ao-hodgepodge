@@ -36,31 +36,31 @@ import java.net.Socket;
  */
 public class BandwidthLimitingTunnelHandler {
 
-	//private boolean verbose;
-	//private String connect_address;
-	//private int connect_port;
-	//private Long upstream_bandwidth;
-	//private Long downstream_bandwidth;
-	//private Socket socket;
+  //private boolean verbose;
+  //private String connect_address;
+  //private int connect_port;
+  //private Long upstream_bandwidth;
+  //private Long downstream_bandwidth;
+  //private Socket socket;
 
-	public BandwidthLimitingTunnelHandler(
-		boolean verbose,
-		String connect_address,
-		int connect_port,
-		Long upstream_bandwidth,
-		Long downstream_bandwidth,
-		Socket socket
-	) throws IOException {
-		//this.verbose = verbose;
-		//this.connect_address = connect_address;
-		//this.connect_port = connect_port;
-		//this.upstream_bandwidth = upstream_bandwidth;
-		//this.downstream_bandwidth = downstream_bandwidth;
-		//this.socket = socket;
+  public BandwidthLimitingTunnelHandler(
+    boolean verbose,
+    String connect_address,
+    int connect_port,
+    Long upstream_bandwidth,
+    Long downstream_bandwidth,
+    Socket socket
+  ) throws IOException {
+    //this.verbose = verbose;
+    //this.connect_address = connect_address;
+    //this.connect_port = connect_port;
+    //this.upstream_bandwidth = upstream_bandwidth;
+    //this.downstream_bandwidth = downstream_bandwidth;
+    //this.socket = socket;
 
-		Socket connectSocket = new Socket(InetAddress.getByName(connect_address), connect_port);
+    Socket connectSocket = new Socket(InetAddress.getByName(connect_address), connect_port);
 
-		new BandwidthLimitingTunnelHandlerUpstreamThread(verbose, upstream_bandwidth, socket, connectSocket).start();
-		new BandwidthLimitingTunnelHandlerDownstreamThread(verbose, downstream_bandwidth, socket, connectSocket).start();
-	}
+    new BandwidthLimitingTunnelHandlerUpstreamThread(verbose, upstream_bandwidth, socket, connectSocket).start();
+    new BandwidthLimitingTunnelHandlerDownstreamThread(verbose, downstream_bandwidth, socket, connectSocket).start();
+  }
 }

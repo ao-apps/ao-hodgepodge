@@ -43,70 +43,76 @@ import java.nio.file.Files;
 @Deprecated
 public class TempFile {
 
-	private volatile File tempFile;
-	private final String path;
+  private volatile File tempFile;
+  private final String path;
 
-	public TempFile(String prefix) throws IOException {
-		this(prefix, null, null);
-	}
+  public TempFile(String prefix) throws IOException {
+    this(prefix, null, null);
+  }
 
-	public TempFile(String prefix, String suffix) throws IOException {
-		this(prefix, suffix, null);
-	}
+  public TempFile(String prefix, String suffix) throws IOException {
+    this(prefix, suffix, null);
+  }
 
-	/**
-	 * Creates the temp directory if missing.
-	 */
-	public TempFile(String prefix, String suffix, File directory) throws IOException {
-		File checkDir = directory;
-		if(checkDir == null) checkDir = new File(System.getProperty("java.io.tmpdir"));
-		if(!checkDir.exists()) Files.createDirectories(checkDir.toPath());
-		tempFile = File.createTempFile(prefix, suffix, directory);
-		tempFile.deleteOnExit();
-		path = tempFile.getPath();
-	}
+  /**
+   * Creates the temp directory if missing.
+   */
+  public TempFile(String prefix, String suffix, File directory) throws IOException {
+    File checkDir = directory;
+    if (checkDir == null) {
+      checkDir = new File(System.getProperty("java.io.tmpdir"));
+    }
+    if (!checkDir.exists()) {
+      Files.createDirectories(checkDir.toPath());
+    }
+    tempFile = File.createTempFile(prefix, suffix, directory);
+    tempFile.deleteOnExit();
+    path = tempFile.getPath();
+  }
 
-	@Override
-	public String toString() {
-		return path;
-	}
+  @Override
+  public String toString() {
+    return path;
+  }
 
-	/**
-	 * Deletes the underlying temp file immediately.
-	 * Subsequent calls will not delete the temp file, even if another file has the same path.
-	 * If already deleted, has no effect.
-	 */
-	public void delete() throws IOException {
-		File f = tempFile;
-		if(f!=null) {
-			Files.delete(f.toPath());
-			tempFile = null;
-		}
-	}
+  /**
+   * Deletes the underlying temp file immediately.
+   * Subsequent calls will not delete the temp file, even if another file has the same path.
+   * If already deleted, has no effect.
+   */
+  public void delete() throws IOException {
+    File f = tempFile;
+    if (f != null) {
+      Files.delete(f.toPath());
+      tempFile = null;
+    }
+  }
 
-	/**
-	 * Deletes the underlying temp file on garbage collection.
-	 *
-	 * @deprecated The finalization mechanism is inherently problematic.
-	 */
-	@Deprecated // Java 9: (since="9")
-	@Override
-	protected void finalize() throws Throwable {
-		try {
-			delete();
-		} finally {
-			super.finalize();
-		}
-	}
+  /**
+   * Deletes the underlying temp file on garbage collection.
+   *
+   * @deprecated The finalization mechanism is inherently problematic.
+   */
+  @Deprecated // Java 9: (since="9")
+  @Override
+  protected void finalize() throws Throwable {
+    try {
+      delete();
+    } finally {
+      super.finalize();
+    }
+  }
 
-	/**
-	 * Gets the temp file.
-	 *
-	 * @exception  IllegalStateException  if already deleted
-	 */
-	public File getFile() throws IllegalStateException {
-		File f = tempFile;
-		if(f==null) throw new IllegalStateException();
-		return f;
-	}
+  /**
+   * Gets the temp file.
+   *
+   * @exception  IllegalStateException  if already deleted
+   */
+  public File getFile() throws IllegalStateException {
+    File f = tempFile;
+    if (f == null) {
+      throw new IllegalStateException();
+    }
+    return f;
+  }
 }

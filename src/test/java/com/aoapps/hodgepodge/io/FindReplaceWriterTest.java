@@ -34,53 +34,53 @@ import junit.framework.TestSuite;
  */
 public class FindReplaceWriterTest extends TestCase {
 
-	public FindReplaceWriterTest(String testName) {
-		super(testName);
-	}
+  public FindReplaceWriterTest(String testName) {
+    super(testName);
+  }
 
-	public static Test suite() {
-		TestSuite suite = new TestSuite(FindReplaceWriterTest.class);
-		return suite;
-	}
+  public static Test suite() {
+    TestSuite suite = new TestSuite(FindReplaceWriterTest.class);
+    return suite;
+  }
 
-	private static void doTest(String unix, String ... dos) throws IOException {
-		StringWriter buffer = new StringWriter(unix.length());
-		try {
-			try (FindReplaceWriter writer = new FindReplaceWriter(buffer, "\r\n", NativeToPosixWriter.POSIX_EOL)) {
-				for(String s : dos) {
-					writer.write(s);
-				}
-			}
-		} finally {
-			buffer.close();
-		}
-		assertEquals(unix, buffer.toString());
-	}
+  private static void doTest(String unix, String ... dos) throws IOException {
+    StringWriter buffer = new StringWriter(unix.length());
+    try {
+      try (FindReplaceWriter writer = new FindReplaceWriter(buffer, "\r\n", NativeToPosixWriter.POSIX_EOL)) {
+        for (String s : dos) {
+          writer.write(s);
+        }
+      }
+    } finally {
+      buffer.close();
+    }
+    assertEquals(unix, buffer.toString());
+  }
 
-	public void testDosToPosixConversion() throws IOException {
-		doTest(
-			"",
-			""
-		);
-		doTest(
-			"Test line without end of line character.",
-			"Test line without end of line character."
-		);
-		doTest(
-			"Test line with end of line character.\n",
-			"Test line with end of line character.\r\n"
-		);
-		doTest(
-			"Test multiline\nwith end of line characters.\n",
-			"Test multiline\r\nwith end of line characters.\r\n"
-		);
-		doTest(
-			"Test multiline\nwith split write.\n",
-			"Test multiline\r", "\nwith split write.\r\n"
-		);
-		doTest(
-			"Test multiline\nwith split write at end.\n",
-			"Test multiline\r", "\nwith split write at end.\r", "\n"
-		);
-	}
+  public void testDosToPosixConversion() throws IOException {
+    doTest(
+      "",
+      ""
+    );
+    doTest(
+      "Test line without end of line character.",
+      "Test line without end of line character."
+    );
+    doTest(
+      "Test line with end of line character.\n",
+      "Test line with end of line character.\r\n"
+    );
+    doTest(
+      "Test multiline\nwith end of line characters.\n",
+      "Test multiline\r\nwith end of line characters.\r\n"
+    );
+    doTest(
+      "Test multiline\nwith split write.\n",
+      "Test multiline\r", "\nwith split write.\r\n"
+    );
+    doTest(
+      "Test multiline\nwith split write at end.\n",
+      "Test multiline\r", "\nwith split write at end.\r", "\n"
+    );
+  }
 }

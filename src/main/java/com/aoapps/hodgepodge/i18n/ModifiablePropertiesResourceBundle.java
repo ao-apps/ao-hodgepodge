@@ -79,372 +79,386 @@ import java.util.logging.Logger;
  */
 public abstract class ModifiablePropertiesResourceBundle extends ModifiableResourceBundle {
 
-	private static final Logger logger = Logger.getLogger(ModifiablePropertiesResourceBundle.class.getName());
+  private static final Logger logger = Logger.getLogger(ModifiablePropertiesResourceBundle.class.getName());
 
-	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, ModifiablePropertiesResourceBundle.class);
+  private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, ModifiablePropertiesResourceBundle.class);
 
-	private static final Charset propertiesCharset = StandardCharsets.ISO_8859_1;
+  private static final Charset propertiesCharset = StandardCharsets.ISO_8859_1;
 
-	private static final String VALIDATED_SUFFIX = ".ModifiableResourceBundle.validated";
-	private static final String MODIFIED_SUFFIX = ".ModifiableResourceBundle.modified";
+  private static final String VALIDATED_SUFFIX = ".ModifiableResourceBundle.validated";
+  private static final String MODIFIED_SUFFIX = ".ModifiableResourceBundle.modified";
 
-	/**
-	 * Checks if a key is used for tracking status.
-	 */
-	public static boolean isTrackingKey(String key) {
-		return
-			key.endsWith(VALIDATED_SUFFIX)
-			|| key.endsWith(MODIFIED_SUFFIX)
-		;
-	}
+  /**
+   * Checks if a key is used for tracking status.
+   */
+  public static boolean isTrackingKey(String key) {
+    return
+      key.endsWith(VALIDATED_SUFFIX)
+      || key.endsWith(MODIFIED_SUFFIX)
+    ;
+  }
 
-	/**
-	 * <p>
-	 * If this sourceFile exists, the properties will be read from that file,
-	 * otherwise it will fall back to <code>Class.getResourceAsStream</code>.
-	 * This allows direct manipulation of the source tree during development,
-	 * while maintaining compatibility with the standard <code>PropertyResourceBundle</code>
-	 * implementation.
-	 * </p>
-	 * <p>
-	 * If this sourceFile does not exist, the bundle will not be modifiable and
-	 * any attempt to modify it will result in a <code>RuntimeException</code>.
-	 * </p>
-	 */
-	private final File sourceFile;
+  /**
+   * <p>
+   * If this sourceFile exists, the properties will be read from that file,
+   * otherwise it will fall back to <code>Class.getResourceAsStream</code>.
+   * This allows direct manipulation of the source tree during development,
+   * while maintaining compatibility with the standard <code>PropertyResourceBundle</code>
+   * implementation.
+   * </p>
+   * <p>
+   * If this sourceFile does not exist, the bundle will not be modifiable and
+   * any attempt to modify it will result in a <code>RuntimeException</code>.
+   * </p>
+   */
+  private final File sourceFile;
 
-	/**
-	 * Any comments from the original source file, if available.  Each does not
-	 * contain an end of line character.
-	 */
-	private final List<String> sourceFileComments;
+  /**
+   * Any comments from the original source file, if available.  Each does not
+   * contain an end of line character.
+   */
+  private final List<String> sourceFileComments;
 
-	private final boolean isModifiable;
+  private final boolean isModifiable;
 
-	/**
-	 * All queries are performed on the concurrent map.
-	 */
-	private final Map<String, String> valueMap = new ConcurrentHashMap<>();
+  /**
+   * All queries are performed on the concurrent map.
+   */
+  private final Map<String, String> valueMap = new ConcurrentHashMap<>();
 
-	/**
-	 * All validated queries are performed on this concurrent map.
-	 */
-	private final Map<String, Long> validatedMap = new ConcurrentHashMap<>();
+  /**
+   * All validated queries are performed on this concurrent map.
+   */
+  private final Map<String, Long> validatedMap = new ConcurrentHashMap<>();
 
-	/**
-	 * All modified queries are performed on this concurrent map.
-	 */
-	private final Map<String, Long> modifiedMap = new ConcurrentHashMap<>();
+  /**
+   * All modified queries are performed on this concurrent map.
+   */
+  private final Map<String, Long> modifiedMap = new ConcurrentHashMap<>();
 
-	/**
-	 * The properties file is only used for updates.
-	 */
-	private final Properties properties = new Properties();
+  /**
+   * The properties file is only used for updates.
+   */
+  private final Properties properties = new Properties();
 
-	/**
-	 * @param sourceFiles The source file(s).  If multiple source files are provided,
-	 *                    only one may exist and be both readable and writable.  If more than
-	 *                    one possible source file exists, will throw an IllegalStateException.
-	 */
-	protected ModifiablePropertiesResourceBundle(File... sourceFiles) {
-		File goodSourceFile = null;
-		if(sourceFiles!=null) {
-			for(File file : sourceFiles) {
-				try {
-					if(file.canRead() && file.canWrite()) {
-						if(goodSourceFile != null) {
-							throw new LocalizedIllegalStateException(
-								RESOURCES,
-								"init.moreThanOneSourceFile",
-								goodSourceFile,
-								file
-							);
-						}
-						goodSourceFile = file;
-					}
-				} catch(SecurityException err) {
-					// OK when sandboxed, goodSourceFile remains null
-					logger.log(
-						Level.WARNING,
-						RESOURCES.getMessage("init.securityException", file),
-						err
-					);
-				}
-			}
-		}
-		this.sourceFile = goodSourceFile;
+  /**
+   * @param sourceFiles The source file(s).  If multiple source files are provided,
+   *                    only one may exist and be both readable and writable.  If more than
+   *                    one possible source file exists, will throw an IllegalStateException.
+   */
+  protected ModifiablePropertiesResourceBundle(File... sourceFiles) {
+    File goodSourceFile = null;
+    if (sourceFiles != null) {
+      for (File file : sourceFiles) {
+        try {
+          if (file.canRead() && file.canWrite()) {
+            if (goodSourceFile != null) {
+              throw new LocalizedIllegalStateException(
+                RESOURCES,
+                "init.moreThanOneSourceFile",
+                goodSourceFile,
+                file
+              );
+            }
+            goodSourceFile = file;
+          }
+        } catch (SecurityException err) {
+          // OK when sandboxed, goodSourceFile remains null
+          logger.log(
+            Level.WARNING,
+            RESOURCES.getMessage("init.securityException", file),
+            err
+          );
+        }
+      }
+    }
+    this.sourceFile = goodSourceFile;
 
-		// Try to load from the sourceFile
-		List<String> mySourceFileComments = null;
-		boolean myIsModifiable = false;
-		boolean loaded = false;
-		if(goodSourceFile!=null) {
-			try {
-				CommentCaptureInputStream in = new CommentCaptureInputStream(new BufferedInputStream(new FileInputStream(goodSourceFile)));
-				try {
-					properties.load(in);
-				} finally {
-					in.close();
-				}
-				mySourceFileComments = in.getComments();
-			} catch(IOException err) {
-				logger.log(
-					Level.WARNING,
-					RESOURCES.getMessage("init.ioException", goodSourceFile),
-					err
-				);
-			}
-			loaded = true;
-			myIsModifiable = true;
-		}
-		this.sourceFileComments = mySourceFileComments;
-		this.isModifiable = myIsModifiable;
-		// Load from resources if sourceFile inaccessible
-		if(!loaded) {
-			Class<?> clazz = getClass();
-			String resourceName = clazz.getName().replace('.', '/') + ".properties";
-			InputStream in = getClass().getResourceAsStream("/" + resourceName);
-			if(in == null) {
-				// Try ClassLoader for when modules enabled
-				ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-				in = (classloader != null)
-					? classloader.getResourceAsStream(resourceName)
-					: ClassLoader.getSystemResourceAsStream(resourceName);
-			}
-			if(in == null) throw new UncheckedIOException(new LocalizedIOException(RESOURCES, "init.resourceNotFound", resourceName));
-			try {
-				try {
-					properties.load(in);
-				} finally {
-					in.close();
-				}
-			} catch(IOException err) {
-				throw new UncheckedIOException(err);
-			}
-		}
-		// Populate the concurrent maps while skipping the validated and modified entries
-		for(Map.Entry<Object, Object> entry : properties.entrySet()) {
-			String key = (String)entry.getKey();
-			String value = (String)entry.getValue();
-			if(key.endsWith(VALIDATED_SUFFIX)) {
-				validatedMap.put(key.substring(0, key.length()-VALIDATED_SUFFIX.length()), Long.parseLong(value));
-			} else if(key.endsWith(MODIFIED_SUFFIX)) {
-				modifiedMap.put(key.substring(0, key.length()-MODIFIED_SUFFIX.length()), Long.parseLong(value));
-			} else {
-				valueMap.put(key, value);
-			}
-		}
-	}
+    // Try to load from the sourceFile
+    List<String> mySourceFileComments = null;
+    boolean myIsModifiable = false;
+    boolean loaded = false;
+    if (goodSourceFile != null) {
+      try {
+        CommentCaptureInputStream in = new CommentCaptureInputStream(new BufferedInputStream(new FileInputStream(goodSourceFile)));
+        try {
+          properties.load(in);
+        } finally {
+          in.close();
+        }
+        mySourceFileComments = in.getComments();
+      } catch (IOException err) {
+        logger.log(
+          Level.WARNING,
+          RESOURCES.getMessage("init.ioException", goodSourceFile),
+          err
+        );
+      }
+      loaded = true;
+      myIsModifiable = true;
+    }
+    this.sourceFileComments = mySourceFileComments;
+    this.isModifiable = myIsModifiable;
+    // Load from resources if sourceFile inaccessible
+    if (!loaded) {
+      Class<?> clazz = getClass();
+      String resourceName = clazz.getName().replace('.', '/') + ".properties";
+      InputStream in = getClass().getResourceAsStream("/" + resourceName);
+      if (in == null) {
+        // Try ClassLoader for when modules enabled
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        in = (classloader != null)
+          ? classloader.getResourceAsStream(resourceName)
+          : ClassLoader.getSystemResourceAsStream(resourceName);
+      }
+      if (in == null) {
+        throw new UncheckedIOException(new LocalizedIOException(RESOURCES, "init.resourceNotFound", resourceName));
+      }
+      try {
+        try {
+          properties.load(in);
+        } finally {
+          in.close();
+        }
+      } catch (IOException err) {
+        throw new UncheckedIOException(err);
+      }
+    }
+    // Populate the concurrent maps while skipping the validated and modified entries
+    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+      String key = (String)entry.getKey();
+      String value = (String)entry.getValue();
+      if (key.endsWith(VALIDATED_SUFFIX)) {
+        validatedMap.put(key.substring(0, key.length()-VALIDATED_SUFFIX.length()), Long.parseLong(value));
+      } else if (key.endsWith(MODIFIED_SUFFIX)) {
+        modifiedMap.put(key.substring(0, key.length()-MODIFIED_SUFFIX.length()), Long.parseLong(value));
+      } else {
+        valueMap.put(key, value);
+      }
+    }
+  }
 
-	@Override
-	protected Object handleGetObject(String key) {
-		if(key==null) throw new NullPointerException();
-		return valueMap.get(key);
-	}
+  @Override
+  protected Object handleGetObject(String key) {
+    if (key == null) {
+      throw new NullPointerException();
+    }
+    return valueMap.get(key);
+  }
 
-	// See sun.util.ResourceBundleEnumeration
-	@Override
-	public Enumeration<String> getKeys() {
-		ResourceBundle myParent= this.parent;
-		Set<String> set = valueMap.keySet();
-		Enumeration<String> enumeration = (myParent != null) ? myParent.getKeys() : null;
-		// Java 9: new Enumeration<>
-		return new Enumeration<String>() {
+  // See sun.util.ResourceBundleEnumeration
+  @Override
+  public Enumeration<String> getKeys() {
+    ResourceBundle myParent= this.parent;
+    Set<String> set = valueMap.keySet();
+    Enumeration<String> enumeration = (myParent != null) ? myParent.getKeys() : null;
+    // Java 9: new Enumeration<>
+    return new Enumeration<String>() {
 
-			private final Iterator<String> iterator = set.iterator();
-			private String next = null;
+      private final Iterator<String> iterator = set.iterator();
+      private String next = null;
 
-			@Override
-			public boolean hasMoreElements() {
-				if (next == null) {
-					if (iterator.hasNext()) {
-						next = iterator.next();
-					} else if (enumeration != null) {
-						while (next == null && enumeration.hasMoreElements()) {
-							next = enumeration.nextElement();
-							if (set.contains(next)) {
-								next = null;
-							}
-						}
-					}
-				}
-				return next != null;
-			}
+      @Override
+      public boolean hasMoreElements() {
+        if (next == null) {
+          if (iterator.hasNext()) {
+            next = iterator.next();
+          } else if (enumeration != null) {
+            while (next == null && enumeration.hasMoreElements()) {
+              next = enumeration.nextElement();
+              if (set.contains(next)) {
+                next = null;
+              }
+            }
+          }
+        }
+        return next != null;
+      }
 
-			@Override
-			public String nextElement() {
-				if (hasMoreElements()) {
-					String result = next;
-					next = null;
-					return result;
-				} else {
-					throw new NoSuchElementException();
-				}
-			}
-		};
-	}
+      @Override
+      public String nextElement() {
+        if (hasMoreElements()) {
+          String result = next;
+          next = null;
+          return result;
+        } else {
+          throw new NoSuchElementException();
+        }
+      }
+    };
+  }
 
-	@Override
-	protected Set<String> handleKeySet() {
-		return valueMap.keySet();
-	}
+  @Override
+  protected Set<String> handleKeySet() {
+    return valueMap.keySet();
+  }
 
-	public Set<String> keySetNoParents() {
-		return valueMap.keySet();
-	}
+  public Set<String> keySetNoParents() {
+    return valueMap.keySet();
+  }
 
-	@Override
-	public boolean isModifiable() {
-		return isModifiable;
-	}
+  @Override
+  public boolean isModifiable() {
+    return isModifiable;
+  }
 
-	/**
-	 * Makes sure the key is allowed, throws <code>IllegalArgumentException</code> when not allowed.
-	 */
-	private static void checkKey(String key) throws IllegalArgumentException {
-		if(key.endsWith(VALIDATED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+VALIDATED_SUFFIX+": "+key);
-		if(key.endsWith(MODIFIED_SUFFIX)) throw new IllegalArgumentException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
-	}
+  /**
+   * Makes sure the key is allowed, throws <code>IllegalArgumentException</code> when not allowed.
+   */
+  private static void checkKey(String key) throws IllegalArgumentException {
+    if (key.endsWith(VALIDATED_SUFFIX)) {
+      throw new IllegalArgumentException("Key may not end with "+VALIDATED_SUFFIX+": "+key);
+    }
+    if (key.endsWith(MODIFIED_SUFFIX)) {
+      throw new IllegalArgumentException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
+    }
+  }
 
-	// Java 9: new Comparator<>
-	public static final Comparator<Object> PROPERTIES_KEY_COMPARATOR = new Comparator<Object>() {
+  // Java 9: new Comparator<>
+  public static final Comparator<Object> PROPERTIES_KEY_COMPARATOR = new Comparator<Object>() {
 
-		private final Collator collator = Collator.getInstance(Locale.ROOT);
+    private final Collator collator = Collator.getInstance(Locale.ROOT);
 
-		@Override
-		public int compare(Object o1, Object o2) {
-			String s1 = (String)o1;
-			String base1;
-			int sub1;
-			if(s1.endsWith(MODIFIED_SUFFIX)) {
-				base1 = s1.substring(0, s1.length() - MODIFIED_SUFFIX.length());
-				sub1 = 1;
-			} else if(s1.endsWith(VALIDATED_SUFFIX)) {
-				base1 = s1.substring(0, s1.length() - VALIDATED_SUFFIX.length());
-				sub1 = 2;
-			} else {
-				base1 = s1;
-				sub1 = 0;
-			}
-			String s2 = (String)o2;
-			String base2;
-			int sub2;
-			if(s2.endsWith(MODIFIED_SUFFIX)) {
-				base2 = s2.substring(0, s2.length() - MODIFIED_SUFFIX.length());
-				sub2 = 1;
-			} else if(s2.endsWith(VALIDATED_SUFFIX)) {
-				base2 = s2.substring(0, s2.length() - VALIDATED_SUFFIX.length());
-				sub2 = 2;
-			} else {
-				base2 = s2;
-				sub2 = 0;
-			}
-			int diff = collator.compare(base1, base2);
-			if(diff != 0) return diff;
-			return Integer.compare(sub1, sub2);
-		}
-	};
+    @Override
+    public int compare(Object o1, Object o2) {
+      String s1 = (String)o1;
+      String base1;
+      int sub1;
+      if (s1.endsWith(MODIFIED_SUFFIX)) {
+        base1 = s1.substring(0, s1.length() - MODIFIED_SUFFIX.length());
+        sub1 = 1;
+      } else if (s1.endsWith(VALIDATED_SUFFIX)) {
+        base1 = s1.substring(0, s1.length() - VALIDATED_SUFFIX.length());
+        sub1 = 2;
+      } else {
+        base1 = s1;
+        sub1 = 0;
+      }
+      String s2 = (String)o2;
+      String base2;
+      int sub2;
+      if (s2.endsWith(MODIFIED_SUFFIX)) {
+        base2 = s2.substring(0, s2.length() - MODIFIED_SUFFIX.length());
+        sub2 = 1;
+      } else if (s2.endsWith(VALIDATED_SUFFIX)) {
+        base2 = s2.substring(0, s2.length() - VALIDATED_SUFFIX.length());
+        sub2 = 2;
+      } else {
+        base2 = s2;
+        sub2 = 0;
+      }
+      int diff = collator.compare(base1, base2);
+      if (diff != 0) {
+        return diff;
+      }
+      return Integer.compare(sub1, sub2);
+    }
+  };
 
-	/**
-	 * Saves the properties file in ascending key order.  All accesses must
-	 * already hold a lock on the properties object.
-	 */
-	private void saveProperties() {
-		assert Thread.holdsLock(properties);
-		try {
-			// Create a properties instance that sorts the output by keys (case-insensitive)
-			@SuppressWarnings("deprecation")
-			com.aoapps.collections.SortedProperties writer = new com.aoapps.collections.SortedProperties() {
-				@Override
-				public Comparator<Object> getKeyComparator() {
-					return PROPERTIES_KEY_COMPARATOR;
-				}
-			};
-			writer.putAll(properties);
-			// Generate new file
-			byte[] newContent;
-			try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-				// Write any comments from when file was read
-				if(sourceFileComments != null) {
-					for(String line : sourceFileComments) {
-						out.write(line.getBytes(propertiesCharset));
-						out.write('\n');
-					}
-				}
-				// Java 9: Support UTF-8 properties files via reader/writer
-				writer.store(
-					// Wrap to skip any comments generated by Properties code
-					new SkipCommentsFilterOutputStream(out),
-					null
-				);
-				newContent = DiffableProperties.formatProperties(out.toString(propertiesCharset.name())).getBytes(propertiesCharset);
-			}
-			if(!sourceFile.exists() || !FileUtils.contentEquals(sourceFile, newContent)) {
-				try (
-					TempFileContext tempFileContext = new TempFileContext(sourceFile.getParentFile());
-					TempFile tempFile = tempFileContext.createTempFile(sourceFile.getName())
-				) {
-					try (OutputStream out = new FileOutputStream(tempFile.getFile())) {
-						out.write(newContent);
-					}
-					FileUtils.renameAllowNonAtomic(tempFile.getFile(), sourceFile);
-				}
-			}
-		} catch(IOException err) {
-			throw new UncheckedIOException(err);
-		}
-	}
+  /**
+   * Saves the properties file in ascending key order.  All accesses must
+   * already hold a lock on the properties object.
+   */
+  private void saveProperties() {
+    assert Thread.holdsLock(properties);
+    try {
+      // Create a properties instance that sorts the output by keys (case-insensitive)
+      @SuppressWarnings("deprecation")
+      com.aoapps.collections.SortedProperties writer = new com.aoapps.collections.SortedProperties() {
+        @Override
+        public Comparator<Object> getKeyComparator() {
+          return PROPERTIES_KEY_COMPARATOR;
+        }
+      };
+      writer.putAll(properties);
+      // Generate new file
+      byte[] newContent;
+      try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        // Write any comments from when file was read
+        if (sourceFileComments != null) {
+          for (String line : sourceFileComments) {
+            out.write(line.getBytes(propertiesCharset));
+            out.write('\n');
+          }
+        }
+        // Java 9: Support UTF-8 properties files via reader/writer
+        writer.store(
+          // Wrap to skip any comments generated by Properties code
+          new SkipCommentsFilterOutputStream(out),
+          null
+        );
+        newContent = DiffableProperties.formatProperties(out.toString(propertiesCharset.name())).getBytes(propertiesCharset);
+      }
+      if (!sourceFile.exists() || !FileUtils.contentEquals(sourceFile, newContent)) {
+        try (
+          TempFileContext tempFileContext = new TempFileContext(sourceFile.getParentFile());
+          TempFile tempFile = tempFileContext.createTempFile(sourceFile.getName())
+        ) {
+          try (OutputStream out = new FileOutputStream(tempFile.getFile())) {
+            out.write(newContent);
+          }
+          FileUtils.renameAllowNonAtomic(tempFile.getFile(), sourceFile);
+        }
+      }
+    } catch (IOException err) {
+      throw new UncheckedIOException(err);
+    }
+  }
 
-	@Override
-	protected void handleRemoveKey(String key) {
-		checkKey(key);
-		// Updates are serialized
-		synchronized(properties) {
-			properties.remove(key);
-			properties.remove(key + VALIDATED_SUFFIX);
-			properties.remove(key + MODIFIED_SUFFIX);
-			saveProperties();
-			valueMap.remove(key);
-			validatedMap.remove(key);
-			modifiedMap.remove(key);
-		}
-	}
+  @Override
+  protected void handleRemoveKey(String key) {
+    checkKey(key);
+    // Updates are serialized
+    synchronized (properties) {
+      properties.remove(key);
+      properties.remove(key + VALIDATED_SUFFIX);
+      properties.remove(key + MODIFIED_SUFFIX);
+      saveProperties();
+      valueMap.remove(key);
+      validatedMap.remove(key);
+      modifiedMap.remove(key);
+    }
+  }
 
-	@Override
-	protected void handleSetObject(String key, Object value, boolean modified) {
-		checkKey(key);
-		// Updates are serialized
-		synchronized(properties) {
-			Long currentTimeLong = System.currentTimeMillis();
-			String currentTimeString = currentTimeLong.toString();
-			properties.setProperty(key, (String)value);
-			properties.setProperty(key+VALIDATED_SUFFIX, currentTimeString);
-			if(modified) properties.setProperty(key+MODIFIED_SUFFIX, currentTimeString);
-			saveProperties();
-			valueMap.put(key, (String)value);
-			validatedMap.put(key, currentTimeLong);
-			if(modified) modifiedMap.put(key, currentTimeLong);
-		}
-	}
+  @Override
+  protected void handleSetObject(String key, Object value, boolean modified) {
+    checkKey(key);
+    // Updates are serialized
+    synchronized (properties) {
+      Long currentTimeLong = System.currentTimeMillis();
+      String currentTimeString = currentTimeLong.toString();
+      properties.setProperty(key, (String)value);
+      properties.setProperty(key+VALIDATED_SUFFIX, currentTimeString);
+      if (modified) {
+        properties.setProperty(key+MODIFIED_SUFFIX, currentTimeString);
+      }
+      saveProperties();
+      valueMap.put(key, (String)value);
+      validatedMap.put(key, currentTimeLong);
+      if (modified) {
+        modifiedMap.put(key, currentTimeLong);
+      }
+    }
+  }
 
-	/**
-	 * Provides direct read access to the value.
-	 */
-	protected String getValue(String key) {
-		return valueMap.get(key);
-	}
+  /**
+   * Provides direct read access to the value.
+   */
+  protected String getValue(String key) {
+    return valueMap.get(key);
+  }
 
-	/**
-	 * Provides direct read access to the validated times.
-	 */
-	public Long getValidatedTime(String key) {
-		return validatedMap.get(key);
-	}
+  /**
+   * Provides direct read access to the validated times.
+   */
+  public Long getValidatedTime(String key) {
+    return validatedMap.get(key);
+  }
 
-	/**
-	 * Provides direct read access to the modified times.
-	 */
-	public Long getModifiedTime(String key) {
-		return modifiedMap.get(key);
-	}
+  /**
+   * Provides direct read access to the modified times.
+   */
+  public Long getModifiedTime(String key) {
+    return modifiedMap.get(key);
+  }
 }

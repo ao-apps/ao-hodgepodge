@@ -46,82 +46,88 @@ import java.util.TreeMap;
  */
 public final class DirectoryMetaSnapshot {
 
-	public static final class FileMetaSnapshot {
+  public static final class FileMetaSnapshot {
 
-		private final long lastModified;
-		private final long length;
+    private final long lastModified;
+    private final long length;
 
-		private FileMetaSnapshot(long lastModified, long length) {
-			this.lastModified = lastModified;
-			this.length = length;
-		}
+    private FileMetaSnapshot(long lastModified, long length) {
+      this.lastModified = lastModified;
+      this.length = length;
+    }
 
-		@Override
-		public boolean equals(Object obj) {
-			if(!(obj instanceof FileMetaSnapshot)) return false;
-			final FileMetaSnapshot other = (FileMetaSnapshot) obj;
-			return
-				lastModified == other.lastModified
-				&& length == other.length
-			;
-		}
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof FileMetaSnapshot)) {
+        return false;
+      }
+      final FileMetaSnapshot other = (FileMetaSnapshot) obj;
+      return
+        lastModified == other.lastModified
+        && length == other.length
+      ;
+    }
 
-		@Override
-		public int hashCode() {
-			return Long.hashCode(lastModified) ^ Long.hashCode(length);
-		}
+    @Override
+    public int hashCode() {
+      return Long.hashCode(lastModified) ^ Long.hashCode(length);
+    }
 
-		public long getLastModified() {
-			return lastModified;
-		}
+    public long getLastModified() {
+      return lastModified;
+    }
 
-		public long getLength() {
-			return length;
-		}
-	}
+    public long getLength() {
+      return length;
+    }
+  }
 
-	private final SortedMap<String, FileMetaSnapshot> files;
+  private final SortedMap<String, FileMetaSnapshot> files;
 
-	public DirectoryMetaSnapshot(String startPath) throws IOException {
-		Map<String, FilesystemIteratorRule> noPrefixRules = Collections.emptyMap();
-		FilesystemIterator iter = new FilesystemIterator(
-			Collections.singletonMap(startPath, FilesystemIteratorRule.OK),
-			noPrefixRules,
-			startPath
-		);
-		final String expectedStart = startPath + File.separatorChar;
-		SortedMap<String, FileMetaSnapshot> newFiles = new TreeMap<>();
-		File file;
-		while((file=iter.getNextFile())!=null) {
-			if(file.isFile()) {
-				String path = file.getPath();
-				if(!path.startsWith(expectedStart)) throw new AssertionError("Unexpected start of path: " + path);
-				newFiles.put(
-					path.substring(expectedStart.length()),
-					new FileMetaSnapshot(file.lastModified(), file.length())
-				);
-			}
-		}
-		this.files = Collections.unmodifiableSortedMap(newFiles);
-	}
+  public DirectoryMetaSnapshot(String startPath) throws IOException {
+    Map<String, FilesystemIteratorRule> noPrefixRules = Collections.emptyMap();
+    FilesystemIterator iter = new FilesystemIterator(
+      Collections.singletonMap(startPath, FilesystemIteratorRule.OK),
+      noPrefixRules,
+      startPath
+    );
+    final String expectedStart = startPath + File.separatorChar;
+    SortedMap<String, FileMetaSnapshot> newFiles = new TreeMap<>();
+    File file;
+    while ((file=iter.getNextFile()) != null) {
+      if (file.isFile()) {
+        String path = file.getPath();
+        if (!path.startsWith(expectedStart)) {
+          throw new AssertionError("Unexpected start of path: " + path);
+        }
+        newFiles.put(
+          path.substring(expectedStart.length()),
+          new FileMetaSnapshot(file.lastModified(), file.length())
+        );
+      }
+    }
+    this.files = Collections.unmodifiableSortedMap(newFiles);
+  }
 
-	/**
-	 * Checks that all meta data is equal in the two directory tree snapshots.
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if(!(obj instanceof DirectoryMetaSnapshot)) return false;
-		final DirectoryMetaSnapshot other = (DirectoryMetaSnapshot) obj;
-		return files.equals(other.files);
-	}
+  /**
+   * Checks that all meta data is equal in the two directory tree snapshots.
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof DirectoryMetaSnapshot)) {
+      return false;
+    }
+    final DirectoryMetaSnapshot other = (DirectoryMetaSnapshot) obj;
+    return files.equals(other.files);
+  }
 
-	@Override
-	public int hashCode() {
-		return files.hashCode();
-	}
+  @Override
+  public int hashCode() {
+    return files.hashCode();
+  }
 
-	@SuppressWarnings("ReturnOfCollectionOrArrayField") // Returning unmodifiable
-	public SortedMap<String, FileMetaSnapshot> getFiles() {
-		return files;
-	}
+  @SuppressWarnings("ReturnOfCollectionOrArrayField") // Returning unmodifiable
+  public SortedMap<String, FileMetaSnapshot> getFiles() {
+    return files;
+  }
 }

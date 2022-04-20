@@ -38,27 +38,27 @@ import java.net.Socket;
  */
 public class BandwidthLimitingTunnelHandlerUpstreamThread extends BandwidthLimitingTunnelHandlerThread {
 
-	public BandwidthLimitingTunnelHandlerUpstreamThread(
-		boolean verbose,
-		Long upstream_bandwidth,
-		Socket listenSocket,
-		Socket connectSocket
-	) {
-		super(verbose, upstream_bandwidth, listenSocket, connectSocket);
-	}
+  public BandwidthLimitingTunnelHandlerUpstreamThread(
+    boolean verbose,
+    Long upstream_bandwidth,
+    Socket listenSocket,
+    Socket connectSocket
+  ) {
+    super(verbose, upstream_bandwidth, listenSocket, connectSocket);
+  }
 
-	@Override
-	protected String getDirection() {
-		return "upstream";
-	}
+  @Override
+  protected String getDirection() {
+    return "upstream";
+  }
 
-	@Override
-	protected OutputStream getOutputStream(Socket listenSocket, Socket connectSocket) throws IOException {
-		return connectSocket.getOutputStream();
-	}
+  @Override
+  protected OutputStream getOutputStream(Socket listenSocket, Socket connectSocket) throws IOException {
+    return connectSocket.getOutputStream();
+  }
 
-	@Override
-	protected InputStream getInputStream(Socket listenSocket, Socket connectSocket) throws IOException {
-		return listenSocket.getInputStream();
-	}
+  @Override
+  protected InputStream getInputStream(Socket listenSocket, Socket connectSocket) throws IOException {
+    return listenSocket.getInputStream();
+  }
 }

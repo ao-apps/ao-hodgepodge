@@ -27,12 +27,12 @@ package com.aoapps.hodgepodge.i18n;
  * The different type of markups allowed for translation integration.
  */
 public enum MarkupType {
-	NONE,
-	XHTML,
-	TEXT,
-	JAVASCRIPT,
-	SH,
-	PSQL,
-	MYSQL,
-	CSS,
+  NONE,
+  XHTML,
+  TEXT,
+  JAVASCRIPT,
+  SH,
+  PSQL,
+  MYSQL,
+  CSS,
 }

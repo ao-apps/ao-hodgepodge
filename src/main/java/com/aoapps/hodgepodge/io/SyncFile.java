@@ -39,91 +39,117 @@ import java.io.RandomAccessFile;
  */
 public class SyncFile {
 
-	/**
-	 * Debug flags.
-	 */
-	private static final boolean DEBUG = true;
-	private static final boolean DRY_RUN = false;
+  /**
+   * Debug flags.
+   */
+  private static final boolean DEBUG = true;
+  private static final boolean DRY_RUN = false;
 
-	private static final int BLOCK_SIZE = 1048576;
+  private static final int BLOCK_SIZE = 1048576;
 
-	public static void main(String[] args) {
-		if(args.length!=2) {
-			System.err.println("usage: "+SyncFile.class.getName()+" <from> <to>");
-			System.exit(1);
-		} else {
-			try {
-				long bytesWritten;
-				File from = new File(args[0]);
-				File to = new File(args[1]);
-				if(DEBUG) System.err.println("Opening " + from);
-				FileInputStream in = new FileInputStream(from);
-				try {
-					if(DEBUG) System.err.println("Opening " + to);
-					RandomAccessFile out = new RandomAccessFile(to, DRY_RUN ? "r" : "rw");
-					try {
-						bytesWritten = syncFile(in, out);
-					} finally {
-						if(DEBUG) System.err.println("Closing " + to);
-						out.close();
-					}
-				} finally {
-					if(DEBUG) System.err.println("Closing " + from);
-					in.close();
-				}
-				if(DEBUG) System.err.println("Wrote " + bytesWritten + " bytes");
-			} catch(IOException e) {
-				e.printStackTrace(System.err);
-			}
-		}
-	}
+  public static void main(String[] args) {
+    if (args.length != 2) {
+      System.err.println("usage: "+SyncFile.class.getName()+" <from> <to>");
+      System.exit(1);
+    } else {
+      try {
+        long bytesWritten;
+        File from = new File(args[0]);
+        File to = new File(args[1]);
+        if (DEBUG) {
+          System.err.println("Opening " + from);
+        }
+        FileInputStream in = new FileInputStream(from);
+        try {
+          if (DEBUG) {
+            System.err.println("Opening " + to);
+          }
+          RandomAccessFile out = new RandomAccessFile(to, DRY_RUN ? "r" : "rw");
+          try {
+            bytesWritten = syncFile(in, out);
+          } finally {
+            if (DEBUG) {
+              System.err.println("Closing " + to);
+            }
+            out.close();
+          }
+        } finally {
+          if (DEBUG) {
+            System.err.println("Closing " + from);
+          }
+          in.close();
+        }
+        if (DEBUG) {
+          System.err.println("Wrote " + bytesWritten + " bytes");
+        }
+      } catch (IOException e) {
+        e.printStackTrace(System.err);
+      }
+    }
+  }
 
-	/**
-	 * Synchronized the input to the provided output, only writing data that
-	 * doesn't already match the input.
-	 * Returns the number of bytes written.
-	 */
-	public static long syncFile(InputStream in, RandomAccessFile out) throws IOException {
-		byte[] inBuff = new byte[BLOCK_SIZE];
-		byte[] outBuff = new byte[BLOCK_SIZE];
-		long pos = 0;
-		long bytesWritten = 0;
-		int numBytes;
-		while((numBytes=in.read(inBuff, 0, BLOCK_SIZE))!=-1) {
-			if(DEBUG) System.err.println(pos+": Read " + numBytes + " bytes of input");
-			out.seek(pos);
-			long blockEnd = pos + numBytes;
-			if(out.length()>=blockEnd) {
-				// Read block from out
-				if(DEBUG) System.err.println(pos+": Reading " + numBytes + " bytes of output");
-				out.readFully(outBuff, 0, numBytes);
-				if(!AoArrays.equals(inBuff, outBuff, 0, numBytes)) {
-					if(DEBUG) System.err.println(pos+": Updating " + numBytes + " bytes of output");
-					out.seek(pos);
-					if(!DRY_RUN) out.write(inBuff, 0, numBytes);
-					bytesWritten += numBytes;
-				} else {
-					if(DEBUG) System.err.println(pos+": Data matches, not writing");
-				}
-			} else {
-				// At end, write entire block
-				if(DEBUG) System.err.println(pos+": Appending " + numBytes +" bytes to output");
-				if(!DRY_RUN) out.write(inBuff, 0, numBytes);
-				bytesWritten += numBytes;
-			}
-			pos = blockEnd;
-		}
-		if(out.length()!=pos) {
-			if(DEBUG) System.err.println(pos+": Truncating output to " + pos + " bytes");
-			assert out.length()>pos;
-			if(!DRY_RUN) {
-				try {
-					out.setLength(pos);
-				} catch(IOException e) {
-					System.err.println("Warning: Unable to truncate output to " + pos +" bytes");
-				}
-			}
-		}
-		return bytesWritten;
-	}
+  /**
+   * Synchronized the input to the provided output, only writing data that
+   * doesn't already match the input.
+   * Returns the number of bytes written.
+   */
+  public static long syncFile(InputStream in, RandomAccessFile out) throws IOException {
+    byte[] inBuff = new byte[BLOCK_SIZE];
+    byte[] outBuff = new byte[BLOCK_SIZE];
+    long pos = 0;
+    long bytesWritten = 0;
+    int numBytes;
+    while ((numBytes=in.read(inBuff, 0, BLOCK_SIZE)) != -1) {
+      if (DEBUG) {
+        System.err.println(pos+": Read " + numBytes + " bytes of input");
+      }
+      out.seek(pos);
+      long blockEnd = pos + numBytes;
+      if (out.length() >= blockEnd) {
+        // Read block from out
+        if (DEBUG) {
+          System.err.println(pos+": Reading " + numBytes + " bytes of output");
+        }
+        out.readFully(outBuff, 0, numBytes);
+        if (!AoArrays.equals(inBuff, outBuff, 0, numBytes)) {
+          if (DEBUG) {
+            System.err.println(pos+": Updating " + numBytes + " bytes of output");
+          }
+          out.seek(pos);
+          if (!DRY_RUN) {
+            out.write(inBuff, 0, numBytes);
+          }
+          bytesWritten += numBytes;
+        } else {
+          if (DEBUG) {
+            System.err.println(pos+": Data matches, not writing");
+          }
+        }
+      } else {
+        // At end, write entire block
+        if (DEBUG) {
+          System.err.println(pos+": Appending " + numBytes +" bytes to output");
+        }
+        if (!DRY_RUN) {
+          out.write(inBuff, 0, numBytes);
+        }
+        bytesWritten += numBytes;
+      }
+      pos = blockEnd;
+    }
+    if (out.length() != pos) {
+      if (DEBUG) {
+        System.err.println(pos+": Truncating output to " + pos + " bytes");
+      }
+      assert out.length()>pos;
+      if (!DRY_RUN) {
+        try {
+          out.setLength(pos);
+        } catch (IOException e) {
+          System.err.println("Warning: Unable to truncate output to " + pos +" bytes");
+        }
+      }
+    }
+    return bytesWritten;
+  }
 }

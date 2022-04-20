@@ -38,39 +38,43 @@ import java.io.InputStream;
  */
 public class ByteCountInputStream extends FilterInputStream implements NoClose {
 
-	private long count = 0;
+  private long count = 0;
 
-	public ByteCountInputStream(InputStream in) {
-		super(in);
-	}
+  public ByteCountInputStream(InputStream in) {
+    super(in);
+  }
 
-	@Override
-	public boolean isNoClose() {
-		return (in instanceof NoClose) && ((NoClose)in).isNoClose();
-	}
+  @Override
+  public boolean isNoClose() {
+    return (in instanceof NoClose) && ((NoClose)in).isNoClose();
+  }
 
-	@Override
-	public int read() throws IOException {
-		int b = in.read();
-		count++;
-		return b;
-	}
+  @Override
+  public int read() throws IOException {
+    int b = in.read();
+    count++;
+    return b;
+  }
 
-	@Override
-	public int read(byte[] b) throws IOException {
-		int bytes = in.read(b);
-		if(bytes > 0) count += bytes;
-		return bytes;
-	}
+  @Override
+  public int read(byte[] b) throws IOException {
+    int bytes = in.read(b);
+    if (bytes > 0) {
+      count += bytes;
+    }
+    return bytes;
+  }
 
-	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
-		int bytes = in.read(b, off, len);
-		if(bytes > 0) count += bytes;
-		return bytes;
-	}
+  @Override
+  public int read(byte[] b, int off, int len) throws IOException {
+    int bytes = in.read(b, off, len);
+    if (bytes > 0) {
+      count += bytes;
+    }
+    return bytes;
+  }
 
-	public long getCount() {
-		return count;
-	}
+  public long getCount() {
+    return count;
+  }
 }

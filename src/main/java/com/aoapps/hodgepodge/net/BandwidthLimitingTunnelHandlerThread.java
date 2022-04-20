@@ -44,109 +44,115 @@ import java.net.SocketException;
  */
 public abstract class BandwidthLimitingTunnelHandlerThread implements Runnable, BitRateProvider {
 
-	/**
-	 * The number of seconds between verbose bits/second output.
-	 */
-	private static final long VERBOSE_REPORT_INTERVAL = 10L * 1000;
+  /**
+   * The number of seconds between verbose bits/second output.
+   */
+  private static final long VERBOSE_REPORT_INTERVAL = 10L * 1000;
 
-	private final boolean verbose;
-	private final Long bandwidth;
-	private final Socket listenSocket;
-	private final Socket connectSocket;
-	private volatile Thread thread;
+  private final boolean verbose;
+  private final Long bandwidth;
+  private final Socket listenSocket;
+  private final Socket connectSocket;
+  private volatile Thread thread;
 
-	protected BandwidthLimitingTunnelHandlerThread(
-		boolean verbose,
-		Long bandwidth,
-		Socket listenSocket,
-		Socket connectSocket
-	) {
-		this.verbose = verbose;
-		this.bandwidth = bandwidth;
-		this.listenSocket = listenSocket;
-		this.connectSocket = connectSocket;
-	}
+  protected BandwidthLimitingTunnelHandlerThread(
+    boolean verbose,
+    Long bandwidth,
+    Socket listenSocket,
+    Socket connectSocket
+  ) {
+    this.verbose = verbose;
+    this.bandwidth = bandwidth;
+    this.listenSocket = listenSocket;
+    this.connectSocket = connectSocket;
+  }
 
-	public void start() {
-		if(thread!=null) throw new IllegalStateException();
-		(this.thread = new Thread(this)).start();
-	}
+  public void start() {
+    if (thread != null) {
+      throw new IllegalStateException();
+    }
+    (this.thread = new Thread(this)).start();
+  }
 
-	@Override
-	@SuppressWarnings("UseOfSystemOutOrSystemErr")
-	public void run() {
-		try {
-			long totalBytes = 0;
-			long startTime = verbose ? System.currentTimeMillis() : 0;
-			byte[] buff = BufferManager.getBytes();
-			try {
-				OutputStream out = getOutputStream(listenSocket, connectSocket);
-				if(bandwidth != null) out = new BitRateOutputStream(out, this);
-				try {
-					try (InputStream in = getInputStream(listenSocket, connectSocket)) {
-						long blockStartTime = verbose ? System.currentTimeMillis() : 0;
-						long blockByteCount = 0;
-						int ret;
-						while((ret=in.read(buff, 0, BufferManager.BUFFER_SIZE))!=-1) {
-							out.write(buff, 0, ret);
-							totalBytes+=ret;
-							if(verbose) {
-								blockByteCount+=ret;
-								long currentTime = System.currentTimeMillis();
-								long blockTime = currentTime - blockStartTime;
-								if(blockTime < 0) {
-									// System time updated
-									blockStartTime = currentTime;
-									blockByteCount = 0;
-								} else if(blockTime >= VERBOSE_REPORT_INTERVAL) {
-									System.out.println(
-										getDirection() + " "
-										+ totalBytes + " bytes sent in "
-										+ BigDecimal.valueOf(currentTime - startTime, 3) + " seconds, "
-										+ (blockByteCount * Byte.SIZE * 1000 / blockTime) + " bits/second"
-									);
-									blockStartTime = currentTime;
-									blockByteCount = 0;
-								}
-							}
-						}
-					} catch(SocketException err) {
-						// Normal socket closure
-						if(!"Socket closed".equals(err.getMessage())) throw err;
-					}
-				} finally {
-					out.close();
-				}
-			} finally {
-				BufferManager.release(buff, false);
-			}
-			if(verbose) {
-				long endTime = System.currentTimeMillis();
-				System.out.println(
-					getDirection() + " Connection closing: "
-					+ totalBytes + " bytes sent in "
-					+ BigDecimal.valueOf(endTime - startTime, 3) + " seconds, "
-					+ (totalBytes * Byte.SIZE * 1000 / (endTime - startTime)) + " bits/second average"
-				);
-			}
-		} catch(IOException err) {
-			ErrorPrinter.printStackTraces(err, System.err);
-		}
-	}
+  @Override
+  @SuppressWarnings("UseOfSystemOutOrSystemErr")
+  public void run() {
+    try {
+      long totalBytes = 0;
+      long startTime = verbose ? System.currentTimeMillis() : 0;
+      byte[] buff = BufferManager.getBytes();
+      try {
+        OutputStream out = getOutputStream(listenSocket, connectSocket);
+        if (bandwidth != null) {
+          out = new BitRateOutputStream(out, this);
+        }
+        try {
+          try (InputStream in = getInputStream(listenSocket, connectSocket)) {
+            long blockStartTime = verbose ? System.currentTimeMillis() : 0;
+            long blockByteCount = 0;
+            int ret;
+            while ((ret=in.read(buff, 0, BufferManager.BUFFER_SIZE)) != -1) {
+              out.write(buff, 0, ret);
+              totalBytes+=ret;
+              if (verbose) {
+                blockByteCount+=ret;
+                long currentTime = System.currentTimeMillis();
+                long blockTime = currentTime - blockStartTime;
+                if (blockTime < 0) {
+                  // System time updated
+                  blockStartTime = currentTime;
+                  blockByteCount = 0;
+                } else if (blockTime >= VERBOSE_REPORT_INTERVAL) {
+                  System.out.println(
+                    getDirection() + " "
+                    + totalBytes + " bytes sent in "
+                    + BigDecimal.valueOf(currentTime - startTime, 3) + " seconds, "
+                    + (blockByteCount * Byte.SIZE * 1000 / blockTime) + " bits/second"
+                  );
+                  blockStartTime = currentTime;
+                  blockByteCount = 0;
+                }
+              }
+            }
+          } catch (SocketException err) {
+            // Normal socket closure
+            if (!"Socket closed".equals(err.getMessage())) {
+              throw err;
+            }
+          }
+        } finally {
+          out.close();
+        }
+      } finally {
+        BufferManager.release(buff, false);
+      }
+      if (verbose) {
+        long endTime = System.currentTimeMillis();
+        System.out.println(
+          getDirection() + " Connection closing: "
+          + totalBytes + " bytes sent in "
+          + BigDecimal.valueOf(endTime - startTime, 3) + " seconds, "
+          + (totalBytes * Byte.SIZE * 1000 / (endTime - startTime)) + " bits/second average"
+        );
+      }
+    } catch (IOException err) {
+      ErrorPrinter.printStackTraces(err, System.err);
+    }
+  }
 
-	@Override
-	public int getBlockSize() {
-		return BufferManager.BUFFER_SIZE;
-	}
+  @Override
+  public int getBlockSize() {
+    return BufferManager.BUFFER_SIZE;
+  }
 
-	@Override
-	public Long getBitRate() {
-		return bandwidth;
-	}
+  @Override
+  public Long getBitRate() {
+    return bandwidth;
+  }
 
-	protected abstract String getDirection();
+  protected abstract String getDirection();
 
-	protected abstract OutputStream getOutputStream(Socket listenSocket, Socket connectSocket) throws IOException;
+  protected abstract OutputStream getOutputStream(Socket listenSocket, Socket connectSocket) throws IOException;
 
-	protected abstract InputStream getInputStream(Socket listenSocket, Socket connectSocket) throws IOException;
+  protected abstract InputStream getInputStream(Socket listenSocket, Socket connectSocket) throws IOException;
 }

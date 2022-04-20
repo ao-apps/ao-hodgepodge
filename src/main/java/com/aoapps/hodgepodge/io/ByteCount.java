@@ -35,133 +35,139 @@ import java.util.Objects;
  */
 public class ByteCount implements Serializable, Comparable<ByteCount> {
 
-	public enum Unit {
-		BYTE("byte",     1L),
-		KBYTE("kbyte",   1000L),
-		KIBYTE("Kibyte", 1024L),
-		MBYTE("Mbyte",   1000L*1000L),
-		MIBYTE("Mibyte", 1024L*1024L),
-		GBYTE("Gbyte",   1000L*1000L*1000L),
-		GIBYTE("Gibyte", 1024L*1024L*1024L),
-		TBYTE("Tbyte",   1000L*1000L*1000L*1000L),
-		TIBYTE("Tibyte", 1024L*1024L*1024L*1024L),
-		PBYTE("Pbyte",   1000L*1000L*1000L*1000L*1000L),
-		PIBYTE("Pibyte", 1024L*1024L*1024L*1024L*1024L),
-		EBYTE("Ebyte",   1000L*1000L*1000L*1000L*1000L*1000L),
-		EIBYTE("Eibyte", 1024L*1024L*1024L*1024L*1024L*1024L);
+  public enum Unit {
+    BYTE("byte",     1L),
+    KBYTE("kbyte",   1000L),
+    KIBYTE("Kibyte", 1024L),
+    MBYTE("Mbyte",   1000L*1000L),
+    MIBYTE("Mibyte", 1024L*1024L),
+    GBYTE("Gbyte",   1000L*1000L*1000L),
+    GIBYTE("Gibyte", 1024L*1024L*1024L),
+    TBYTE("Tbyte",   1000L*1000L*1000L*1000L),
+    TIBYTE("Tibyte", 1024L*1024L*1024L*1024L),
+    PBYTE("Pbyte",   1000L*1000L*1000L*1000L*1000L),
+    PIBYTE("Pibyte", 1024L*1024L*1024L*1024L*1024L),
+    EBYTE("Ebyte",   1000L*1000L*1000L*1000L*1000L*1000L),
+    EIBYTE("Eibyte", 1024L*1024L*1024L*1024L*1024L*1024L);
 
-		private static final Unit[] values = values();
+    private static final Unit[] values = values();
 
-		private final String name;
-		private final long coefficient;
+    private final String name;
+    private final long coefficient;
 
-		private Unit(String name, long coefficient) {
-			this.name = name;
-			this.coefficient = coefficient;
-		}
+    private Unit(String name, long coefficient) {
+      this.name = name;
+      this.coefficient = coefficient;
+    }
 
-		@Override
-		public String toString() {
-			return name;
-		}
+    @Override
+    public String toString() {
+      return name;
+    }
 
-		public String getName() {
-			return name;
-		}
+    public String getName() {
+      return name;
+    }
 
-		public long getCoefficient() {
-			return coefficient;
-		}
-	}
+    public long getCoefficient() {
+      return coefficient;
+    }
+  }
 
-	/**
-	 * @param unit if <code>null</code>, defaults to bits per second.
-	 */
-	private static long getByteCount(long quantity, Unit unit) {
-		if(quantity<1) throw new IllegalArgumentException("quantity<1");
-		return Math.multiplyExact(quantity, unit==null ? 1 : unit.getCoefficient());
-	}
+  /**
+   * @param unit if <code>null</code>, defaults to bits per second.
+   */
+  private static long getByteCount(long quantity, Unit unit) {
+    if (quantity<1) {
+      throw new IllegalArgumentException("quantity<1");
+    }
+    return Math.multiplyExact(quantity, unit == null ? 1 : unit.getCoefficient());
+  }
 
-	public static ByteCount valueOf(String value) {
-		return new ByteCount(value);
-	}
+  public static ByteCount valueOf(String value) {
+    return new ByteCount(value);
+  }
 
-	private static final long serialVersionUID = 1712831669919116474L;
+  private static final long serialVersionUID = 1712831669919116474L;
 
-	private final long quantity;
-	private final Unit unit;
-	private transient long byteCount;
+  private final long quantity;
+  private final Unit unit;
+  private transient long byteCount;
 
-	public ByteCount(long byteCount) {
-		this(byteCount, null);
-	}
+  public ByteCount(long byteCount) {
+    this(byteCount, null);
+  }
 
-	/**
-	 * @param unit if <code>null</code>, defaults to bits per second.
-	 */
-	public ByteCount(long quantity, Unit unit) {
-		this.quantity = quantity;
-		this.unit = unit;
-		this.byteCount = getByteCount(quantity, unit);
-	}
+  /**
+   * @param unit if <code>null</code>, defaults to bits per second.
+   */
+  public ByteCount(long quantity, Unit unit) {
+    this.quantity = quantity;
+    this.unit = unit;
+    this.byteCount = getByteCount(quantity, unit);
+  }
 
-	public ByteCount(String value) {
-		Unit valueUnit = null;
-		for(int c=Unit.values.length-1; c>=0; c--) {
-			Unit u = Unit.values[c];
-			String name = u.getName();
-			if(value.endsWith(name)) {
-				valueUnit = u;
-				value = value.substring(0, value.length() - name.length());
-			}
-		}
-		this.quantity = Long.parseLong(value);
-		this.unit = valueUnit;
-		this.byteCount = getByteCount(quantity, unit);
-	}
+  public ByteCount(String value) {
+    Unit valueUnit = null;
+    for (int c=Unit.values.length-1; c >= 0; c--) {
+      Unit u = Unit.values[c];
+      String name = u.getName();
+      if (value.endsWith(name)) {
+        valueUnit = u;
+        value = value.substring(0, value.length() - name.length());
+      }
+    }
+    this.quantity = Long.parseLong(value);
+    this.unit = valueUnit;
+    this.byteCount = getByteCount(quantity, unit);
+  }
 
-	private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-		ois.defaultReadObject();
-		this.byteCount = getByteCount(quantity, unit);
-	}
+  private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+    ois.defaultReadObject();
+    this.byteCount = getByteCount(quantity, unit);
+  }
 
-	/**
-	 * Two BitRates are equal when they have the same quantity and the same unit.
-	 *
-	 * @see  #compareTo
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if(!(obj instanceof ByteCount)) return false;
-		ByteCount other = (ByteCount)obj;
-		return quantity==other.quantity && Objects.equals(unit, other.unit);
-	}
+  /**
+   * Two BitRates are equal when they have the same quantity and the same unit.
+   *
+   * @see  #compareTo
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof ByteCount)) {
+      return false;
+    }
+    ByteCount other = (ByteCount)obj;
+    return quantity == other.quantity && Objects.equals(unit, other.unit);
+  }
 
-	@Override
-	public int hashCode() {
-		return Long.hashCode(byteCount);
-	}
+  @Override
+  public int hashCode() {
+    return Long.hashCode(byteCount);
+  }
 
-	@Override
-	public String toString() {
-		if(unit==null) return Long.toString(quantity);
-		return Long.toString(quantity)+unit.getName();
-	}
+  @Override
+  public String toString() {
+    if (unit == null) {
+      return Long.toString(quantity);
+    }
+    return Long.toString(quantity)+unit.getName();
+  }
 
-	@Override
-	public int compareTo(ByteCount o) {
-		return byteCount<o.byteCount ? -1 : byteCount==o.byteCount ? 0 : 1;
-	}
+  @Override
+  public int compareTo(ByteCount o) {
+    return byteCount<o.byteCount ? -1 : byteCount == o.byteCount ? 0 : 1;
+  }
 
-	public long getQuantity() {
-		return quantity;
-	}
+  public long getQuantity() {
+    return quantity;
+  }
 
-	public Unit getUnit() {
-		return unit;
-	}
+  public Unit getUnit() {
+    return unit;
+  }
 
-	public long getByteCount() {
-		return byteCount;
-	}
+  public long getByteCount() {
+    return byteCount;
+  }
 }

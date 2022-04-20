@@ -36,23 +36,25 @@ import java.util.Map;
  */
 public final class RegistryManager {
 
-	/** Make no instances. */
-	private RegistryManager() {throw new AssertionError();}
+  /** Make no instances. */
+  private RegistryManager() {
+    throw new AssertionError();
+  }
 
-	private static final Map<Integer, Registry> registryCache = new HashMap<>();
+  private static final Map<Integer, Registry> registryCache = new HashMap<>();
 
-	/**
-	 * Creates a registry or returns the registry that is already using the port.
-	 */
-	public static Registry createRegistry(int port, RMIClientSocketFactory csf, RMIServerSocketFactory ssf) throws RemoteException {
-		synchronized(registryCache) {
-			Integer portObj = port;
-			Registry registry = registryCache.get(portObj);
-			if(registry==null) {
-				registry = LocateRegistry.createRegistry(port, csf, ssf);
-				registryCache.put(portObj, registry);
-			}
-			return registry;
-		}
-	}
+  /**
+   * Creates a registry or returns the registry that is already using the port.
+   */
+  public static Registry createRegistry(int port, RMIClientSocketFactory csf, RMIServerSocketFactory ssf) throws RemoteException {
+    synchronized (registryCache) {
+      Integer portObj = port;
+      Registry registry = registryCache.get(portObj);
+      if (registry == null) {
+        registry = LocateRegistry.createRegistry(port, csf, ssf);
+        registryCache.put(portObj, registry);
+      }
+      return registry;
+    }
+  }
 }

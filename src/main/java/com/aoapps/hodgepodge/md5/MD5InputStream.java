@@ -76,60 +76,64 @@ import java.io.InputStream;
  * MD5InputStream is a subclass of FilterInputStream adding MD5
  * hashing of the read input.
  *
- * @version	$Revision: 1.2 $
- * @author	Santeri Paavolainen &lt;santtu@cs.hut.fi&gt;
+ * @version $Revision: 1.2 $
+ * @author  Santeri Paavolainen &lt;santtu@cs.hut.fi&gt;
  */
 public class MD5InputStream extends FilterInputStream {
 
-	/**
-	 * MD5 context
-	 */
-	private final MD5 md5;
+  /**
+   * MD5 context
+   */
+  private final MD5 md5;
 
-	/**
-	 * Creates a MD5InputStream
-	 * @param in	The input stream
-	 */
-	public MD5InputStream (InputStream in) {
-		super(in);
+  /**
+   * Creates a MD5InputStream
+   * @param in The input stream
+   */
+  public MD5InputStream (InputStream in) {
+    super(in);
 
-		md5 = new MD5();
-	}
+    md5 = new MD5();
+  }
 
-	/**
-	 * Read a byte of data.
-	 * @see java.io.FilterInputStream
-	 */
-	@Override
-	public int read() throws IOException {
-		int c = in.read();
-		if (c == -1) return -1;
+  /**
+   * Read a byte of data.
+   * @see java.io.FilterInputStream
+   */
+  @Override
+  public int read() throws IOException {
+    int c = in.read();
+    if (c == -1) {
+      return -1;
+    }
 
-		md5.Update(c);
+    md5.Update(c);
 
-		return c;
-	}
+    return c;
+  }
 
-	/**
-	 * Reads into an array of bytes.
-	 */
-	@Override
-	public int read (byte[] bytes, int offset, int length) throws IOException {
-		int	r;
+  /**
+   * Reads into an array of bytes.
+   */
+  @Override
+  public int read (byte[] bytes, int offset, int length) throws IOException {
+    int r;
 
-		if ((r = in.read(bytes, offset, length)) == -1) return -1;
+    if ((r = in.read(bytes, offset, length)) == -1) {
+      return -1;
+    }
 
-		md5.Update(bytes, offset, r);
+    md5.Update(bytes, offset, r);
 
-		return r;
-	}
+    return r;
+  }
 
-	/**
-	 * Returns array of bytes representing hash of the stream as
-	 * finalized for the current state.
-	 * @see MD5#Final()
-	 */
-	public byte [] hash () {
-		return md5.Final();
-	}
+  /**
+   * Returns array of bytes representing hash of the stream as
+   * finalized for the current state.
+   * @see MD5#Final()
+   */
+  public byte [] hash () {
+    return md5.Final();
+  }
 }

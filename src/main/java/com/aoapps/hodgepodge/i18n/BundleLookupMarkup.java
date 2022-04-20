@@ -34,23 +34,23 @@ import java.io.IOException;
  */
 public interface BundleLookupMarkup {
 
-	/**
-	 * Appends the prefix to the given out using the given markup type.
-	 */
-	void appendPrefixTo(MarkupType markupType, Appendable out) throws IOException;
+  /**
+   * Appends the prefix to the given out using the given markup type.
+   */
+  void appendPrefixTo(MarkupType markupType, Appendable out) throws IOException;
 
-	/**
-	 * Appends the prefix to the given out using the given encoder and markup type.
-	 */
-	void appendPrefixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException;
+  /**
+   * Appends the prefix to the given out using the given encoder and markup type.
+   */
+  void appendPrefixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException;
 
-	/**
-	 * Appends the suffix to the given out using the given markup type.
-	 */
-	void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException;
+  /**
+   * Appends the suffix to the given out using the given markup type.
+   */
+  void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException;
 
-	/**
-	 * Appends the suffix to the given out using the given encoder and markup type.
-	 */
-	void appendSuffixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException;
+  /**
+   * Appends the suffix to the given out using the given encoder and markup type.
+   */
+  void appendSuffixTo(MarkupType markupType, Encoder encoder, Appendable out) throws IOException;
 }

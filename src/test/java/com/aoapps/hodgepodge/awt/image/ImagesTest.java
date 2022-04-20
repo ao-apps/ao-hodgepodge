@@ -37,58 +37,58 @@ import org.junit.Test;
 
 public class ImagesTest {
 
-	private static final Logger logger = Logger.getLogger(ImagesTest.class.getName());
+  private static final Logger logger = Logger.getLogger(ImagesTest.class.getName());
 
-	private static BufferedImage image;
-	private static BufferedImage findme;
+  private static BufferedImage image;
+  private static BufferedImage findme;
 
-	@BeforeClass
-	public static void setUpClass() throws IOException {
-		// Load saved screen shot
-		InputStream in = ImagesTest.class.getResourceAsStream("ImagesTest-image.png");
-		try {
-			image = ImageIO.read(in);
-		} finally {
-			in.close();
-		}
-		// Load the close button
-		in = ImagesTest.class.getResourceAsStream("ImagesTest-findme.png");
-		try {
-			findme = ImageIO.read(in);
-		} finally {
-			in.close();
-		}
-	}
+  @BeforeClass
+  public static void setUpClass() throws IOException {
+    // Load saved screen shot
+    InputStream in = ImagesTest.class.getResourceAsStream("ImagesTest-image.png");
+    try {
+      image = ImageIO.read(in);
+    } finally {
+      in.close();
+    }
+    // Load the close button
+    in = ImagesTest.class.getResourceAsStream("ImagesTest-findme.png");
+    try {
+      findme = ImageIO.read(in);
+    } finally {
+      in.close();
+    }
+  }
 
-	@Test
-	public void testFindImage() {
-		logger.log(
-			Level.INFO,
-			"Got image: {0} x {1}",
-			new Object[] {
-				image.getWidth(),
-				image.getHeight()
-			}
-		);
-		logger.log(
-			Level.INFO,
-			"Got findme: {0} x {1}",
-			new Object[] {
-				findme.getWidth(),
-				findme.getHeight()
-			}
-		);
-		long startNanos = System.nanoTime();
-		final int repeat = 10;
-		for(int i=0; i<repeat; i++) {
-			testRepeat();
-		}
-		long endNanos = System.nanoTime();
-		logger.log(Level.INFO, "Average time: {0} ms", BigDecimal.valueOf((endNanos - startNanos)/repeat, 6));
-	}
+  @Test
+  public void testFindImage() {
+    logger.log(
+      Level.INFO,
+      "Got image: {0} x {1}",
+      new Object[] {
+        image.getWidth(),
+        image.getHeight()
+      }
+    );
+    logger.log(
+      Level.INFO,
+      "Got findme: {0} x {1}",
+      new Object[] {
+        findme.getWidth(),
+        findme.getHeight()
+      }
+    );
+    long startNanos = System.nanoTime();
+    final int repeat = 10;
+    for (int i=0; i<repeat; i++) {
+      testRepeat();
+    }
+    long endNanos = System.nanoTime();
+    logger.log(Level.INFO, "Average time: {0} ms", BigDecimal.valueOf((endNanos - startNanos)/repeat, 6));
+  }
 
-	private void testRepeat() {
-		Point foundAt = Images.findImage(image, findme, 0);
-		assertEquals(new Point(687, 524), foundAt);
-	}
+  private void testRepeat() {
+    Point foundAt = Images.findImage(image, findme, 0);
+    assertEquals(new Point(687, 524), foundAt);
+  }
 }

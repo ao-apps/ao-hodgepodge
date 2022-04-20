@@ -35,69 +35,69 @@ import java.util.logging.Logger;
  */
 public final class ImageLoader implements ImageConsumer {
 
-	private int status = 0;
+  private int status = 0;
 
-	private final Image image;
+  private final Image image;
 
-	/**
-	 * @deprecated  logger is unused
-	 */
-	@Deprecated
-	public ImageLoader(Image image, Logger logger) {
-		this.image = image;
-	}
+  /**
+   * @deprecated  logger is unused
+   */
+  @Deprecated
+  public ImageLoader(Image image, Logger logger) {
+    this.image = image;
+  }
 
-	public ImageLoader(Image image) {
-		this.image = image;
-	}
+  public ImageLoader(Image image) {
+    this.image = image;
+  }
 
-	@Override
-	public synchronized void imageComplete(int status) {
-		this.status |= status;
-		notifyAll();
-	}
+  @Override
+  public synchronized void imageComplete(int status) {
+    this.status |= status;
+    notifyAll();
+  }
 
-	/**
-	 * Loads an image and returns when a frame is done, the image is done, an error occurs, or the image is aborted.
-	 */
-	public void loadImage() throws InterruptedException {
-		synchronized(this) {
-			status = 0;
-			image.getSource().startProduction(this);
-			while((status & (IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE)) == 0) {
-				wait();
-			}
-		}
-	}
+  /**
+   * Loads an image and returns when a frame is done, the image is done, an error occurs, or the image is aborted.
+   */
+  public void loadImage() throws InterruptedException {
+    synchronized (this) {
+      status = 0;
+      image.getSource().startProduction(this);
+      while ((status & (IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE)) == 0) {
+        wait();
+      }
+    }
+  }
 
-	@Override
-	public void setColorModel(ColorModel mode) {
-		// Do nothing
-	}
+  @Override
+  public void setColorModel(ColorModel mode) {
+    // Do nothing
+  }
 
-	@Override
-	public void setDimensions(int width, int height) {
-		// Do nothing
-	}
+  @Override
+  public void setDimensions(int width, int height) {
+    // Do nothing
+  }
 
-	@Override
-	public void setHints(int flags) {
-		// Do nothing
-	}
+  @Override
+  public void setHints(int flags) {
+    // Do nothing
+  }
 
-	@Override
-	public void setPixels(int x, int y, int width, int height, ColorModel model, byte[] pixels, int offset, int scansize) {
-		// Do nothing
-	}
+  @Override
+  public void setPixels(int x, int y, int width, int height, ColorModel model, byte[] pixels, int offset, int scansize) {
+    // Do nothing
+  }
 
-	@Override
-	public void setPixels(int x, int y, int width, int height, ColorModel model, int[] pixels, int offset, int scansize) {
-		// Do nothing
-	}
+  @Override
+  public void setPixels(int x, int y, int width, int height, ColorModel model, int[] pixels, int offset, int scansize) {
+    // Do nothing
+  }
 
-	@Override
-	@SuppressWarnings("UseOfObsoleteCollectionType") // Hashtable required by ImageConsumer
-	public void setProperties(java.util.Hashtable<?, ?> properties) {
-		// Do nothing
-	}
+  @Override
+  @SuppressWarnings("UseOfObsoleteCollectionType") // Hashtable required by ImageConsumer
+  public void setProperties(java.util.Hashtable<?, ?> properties) {
+    // Do nothing
+  }
 }

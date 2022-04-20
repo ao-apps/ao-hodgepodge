@@ -35,9 +35,9 @@ import java.util.Collection;
 // TODO: Ex extends Throwable
 public interface SymmetricMultiGraph<V, E extends Edge<V>, Ex extends Exception> extends MultiGraph<V, E, Ex> {
 
-	/**
-	 * Gets the edges to the provided vertex.  The vertex must be part of this
-	 * graph, and the results are undefined if it is not.
-	 */
-	Collection<E> getEdgesTo(V to) throws Ex;
+  /**
+   * Gets the edges to the provided vertex.  The vertex must be part of this
+   * graph, and the results are undefined if it is not.
+   */
+  Collection<E> getEdgesTo(V to) throws Ex;
 }

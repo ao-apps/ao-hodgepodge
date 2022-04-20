@@ -33,54 +33,58 @@ import java.util.Objects;
  */
 public class Tuple2<E1, E2> {
 
-	private final E1 element1;
-	private final E2 element2;
+  private final E1 element1;
+  private final E2 element2;
 
-	public Tuple2(
-		E1 element1,
-		E2 element2
-	) {
-		this.element1 = element1;
-		this.element2 = element2;
-	}
+  public Tuple2(
+    E1 element1,
+    E2 element2
+  ) {
+    this.element1 = element1;
+    this.element2 = element2;
+  }
 
-	@Override
-	public String toString() {
-		return
-			"("
-			+ element1
-			+ ',' + element2
-		+ ')';
-	}
+  @Override
+  public String toString() {
+    return
+      "("
+      + element1
+      + ',' + element2
+    + ')';
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if(this == obj) return true;
-		if(!(obj instanceof Tuple2<?, ?>)) return false;
-		Tuple2<?, ?> other = (Tuple2<?, ?>)obj;
-		return
-			Objects.equals(element1, other.element1)
-			&& Objects.equals(element2, other.element2)
-		;
-	}
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof Tuple2<?, ?>)) {
+      return false;
+    }
+    Tuple2<?, ?> other = (Tuple2<?, ?>)obj;
+    return
+      Objects.equals(element1, other.element1)
+      && Objects.equals(element2, other.element2)
+    ;
+  }
 
-	private int hash;
-	@Override
-	public int hashCode() {
-		int h = this.hash;
-		if(h == 0) {
-			h = Objects.hashCode(element1);
-			h = h * 31 + Objects.hashCode(element2);
-			this.hash = h;
-		}
-		return h;
-	}
+  private int hash;
+  @Override
+  public int hashCode() {
+    int h = this.hash;
+    if (h == 0) {
+      h = Objects.hashCode(element1);
+      h = h * 31 + Objects.hashCode(element2);
+      this.hash = h;
+    }
+    return h;
+  }
 
-	public E1 getElement1() {
-		return element1;
-	}
+  public E1 getElement1() {
+    return element1;
+  }
 
-	public E2 getElement2() {
-		return element2;
-	}
+  public E2 getElement2() {
+    return element2;
+  }
 }

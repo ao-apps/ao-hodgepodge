@@ -34,9 +34,9 @@ import java.io.IOException;
  */
 public interface Streamable extends StreamReadable, StreamWritable {
 
-	@Override
-	void read(StreamableInput in, String protocolVersion) throws IOException;
+  @Override
+  void read(StreamableInput in, String protocolVersion) throws IOException;
 
-	@Override
-	void write(StreamableOutput out, String protocolVersion) throws IOException;
+  @Override
+  void write(StreamableOutput out, String protocolVersion) throws IOException;
 }

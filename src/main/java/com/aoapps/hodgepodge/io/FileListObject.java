@@ -36,7 +36,7 @@ import java.io.IOException;
  */
 public interface FileListObject {
 
-	void writeRecord(DataOutputStream out) throws IOException;
+  void writeRecord(DataOutputStream out) throws IOException;
 
-	void readRecord(DataInputStream in) throws IOException;
+  void readRecord(DataInputStream in) throws IOException;
 }

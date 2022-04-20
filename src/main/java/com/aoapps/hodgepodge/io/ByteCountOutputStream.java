@@ -37,36 +37,38 @@ import java.io.OutputStream;
  */
 public class ByteCountOutputStream extends FilterOutputStream implements NoClose {
 
-	private long count = 0;
+  private long count = 0;
 
-	public ByteCountOutputStream(OutputStream out) {
-		super(out);
-	}
+  public ByteCountOutputStream(OutputStream out) {
+    super(out);
+  }
 
-	@Override
-	public boolean isNoClose() {
-		return (out instanceof NoClose) && ((NoClose)out).isNoClose();
-	}
+  @Override
+  public boolean isNoClose() {
+    return (out instanceof NoClose) && ((NoClose)out).isNoClose();
+  }
 
-	@Override
-	public void write(int b) throws IOException {
-		out.write(b);
-		count++;
-	}
+  @Override
+  public void write(int b) throws IOException {
+    out.write(b);
+    count++;
+  }
 
-	@Override
-	public void write(byte[] b) throws IOException {
-		out.write(b, 0, b.length);
-		count+=b.length;
-	}
+  @Override
+  public void write(byte[] b) throws IOException {
+    out.write(b, 0, b.length);
+    count+=b.length;
+  }
 
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		out.write(b, off, len);
-		if(len > 0) count += len;
-	}
+  @Override
+  public void write(byte[] b, int off, int len) throws IOException {
+    out.write(b, off, len);
+    if (len > 0) {
+      count += len;
+    }
+  }
 
-	public long getCount() {
-		return count;
-	}
+  public long getCount() {
+    return count;
+  }
 }

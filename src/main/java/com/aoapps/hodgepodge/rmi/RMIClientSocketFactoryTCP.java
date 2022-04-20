@@ -37,44 +37,46 @@ import java.util.Objects;
  */
 public class RMIClientSocketFactoryTCP implements RMIClientSocketFactory, Serializable {
 
-	private static final long serialVersionUID = -7065291578204407899L;
+  private static final long serialVersionUID = -7065291578204407899L;
 
-	private final String localAddress;
+  private final String localAddress;
 
-	/**
-	 * Will establish connections with the system default local address.
-	 */
-	public RMIClientSocketFactoryTCP() {
-		this.localAddress = null;
-	}
+  /**
+   * Will establish connections with the system default local address.
+   */
+  public RMIClientSocketFactoryTCP() {
+    this.localAddress = null;
+  }
 
-	/**
-	 * Will establish connections with the provided local address.
-	 */
-	public RMIClientSocketFactoryTCP(String localAddress) {
-		this.localAddress = localAddress;
-	}
+  /**
+   * Will establish connections with the provided local address.
+   */
+  public RMIClientSocketFactoryTCP(String localAddress) {
+    this.localAddress = localAddress;
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return
-			(obj instanceof RMIClientSocketFactoryTCP)
-			&& Objects.equals(localAddress, ((RMIClientSocketFactoryTCP)obj).localAddress)
-		;
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return
+      (obj instanceof RMIClientSocketFactoryTCP)
+      && Objects.equals(localAddress, ((RMIClientSocketFactoryTCP)obj).localAddress)
+    ;
+  }
 
-	@Override
-	public int hashCode() {
-		return localAddress==null ? 0 : localAddress.hashCode();
-	}
+  @Override
+  public int hashCode() {
+    return localAddress == null ? 0 : localAddress.hashCode();
+  }
 
-	@Override
-	public Socket createSocket(String host, int port) throws IOException {
-		Socket socket=new Socket();
-		socket.setKeepAlive(true);
-		socket.setTcpNoDelay(true);
-		if(localAddress!=null) socket.bind(new InetSocketAddress(localAddress, 0));
-		socket.connect(new InetSocketAddress(host, port), 30000);
-		return socket;
-	}
+  @Override
+  public Socket createSocket(String host, int port) throws IOException {
+    Socket socket=new Socket();
+    socket.setKeepAlive(true);
+    socket.setTcpNoDelay(true);
+    if (localAddress != null) {
+      socket.bind(new InetSocketAddress(localAddress, 0));
+    }
+    socket.connect(new InetSocketAddress(host, port), 30000);
+    return socket;
+  }
 }

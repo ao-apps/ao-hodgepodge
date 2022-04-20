@@ -28,19 +28,21 @@ package com.aoapps.hodgepodge.util;
  */
 public final class ThreadUtility {
 
-	/** Make no instances. */
-	private ThreadUtility() {throw new AssertionError();}
+  /** Make no instances. */
+  private ThreadUtility() {
+    throw new AssertionError();
+  }
 
-	public static int getThreadCount() {
-		return getTopLevelThreadGroup().activeCount();
-	}
+  public static int getThreadCount() {
+    return getTopLevelThreadGroup().activeCount();
+  }
 
-	public static ThreadGroup getTopLevelThreadGroup() {
-		ThreadGroup tg = Thread.currentThread().getThreadGroup();
-		ThreadGroup parent;
-		while((parent = tg.getParent()) != null) {
-			tg = parent;
-		}
-		return tg;
-	}
+  public static ThreadGroup getTopLevelThreadGroup() {
+    ThreadGroup tg = Thread.currentThread().getThreadGroup();
+    ThreadGroup parent;
+    while ((parent = tg.getParent()) != null) {
+      tg = parent;
+    }
+    return tg;
+  }
 }

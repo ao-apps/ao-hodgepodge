@@ -41,71 +41,75 @@ import javax.swing.SwingUtilities;
  */
 public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
 
-	private static final long serialVersionUID = 2421298474426921512L;
+  private static final long serialVersionUID = 2421298474426921512L;
 
-	private final E constantFirstRow;
+  private final E constantFirstRow;
 
-	public SynchronizingComboBoxModel() {
-		constantFirstRow = null;
-	}
+  public SynchronizingComboBoxModel() {
+    constantFirstRow = null;
+  }
 
-	public SynchronizingComboBoxModel(E constantFirstRow) {
-		this.constantFirstRow = constantFirstRow;
-		addElement(constantFirstRow);
-	}
+  public SynchronizingComboBoxModel(E constantFirstRow) {
+    this.constantFirstRow = constantFirstRow;
+    addElement(constantFirstRow);
+  }
 
-	/**
-	 * Synchronizes the list, adding and removing only a minimum number of elements.
-	 * Comparisons are performed using .equals.  This must be called from the
-	 * Swing event dispatch thread.
-	 */
-	public void synchronize(List<? extends E> list) {
-		assert SwingUtilities.isEventDispatchThread() : Resources.PACKAGE_RESOURCES.getMessage("assert.notRunningInSwingEventThread");
+  /**
+   * Synchronizes the list, adding and removing only a minimum number of elements.
+   * Comparisons are performed using .equals.  This must be called from the
+   * Swing event dispatch thread.
+   */
+  public void synchronize(List<? extends E> list) {
+    assert SwingUtilities.isEventDispatchThread() : Resources.PACKAGE_RESOURCES.getMessage("assert.notRunningInSwingEventThread");
 
-		// Make sure the first element exists and matches
-		int modelOffset;
-		if(constantFirstRow!=null) {
-			modelOffset = 1;
-			if(getSize()==0) addElement(constantFirstRow);
-			else if(!getElementAt(0).equals(constantFirstRow)) {
-				insertElementAt(constantFirstRow, 0);
-			}
-		} else modelOffset = 0;
+    // Make sure the first element exists and matches
+    int modelOffset;
+    if (constantFirstRow != null) {
+      modelOffset = 1;
+      if (getSize() == 0) {
+        addElement(constantFirstRow);
+      } else if (!getElementAt(0).equals(constantFirstRow)) {
+        insertElementAt(constantFirstRow, 0);
+      }
+    } else {
+      modelOffset = 0;
+    }
 
-		// Synchronize the dynamic part of the list
-		int size = list.size();
-		for(int index=0; index<size; index++) {
-			E obj = list.get(index);
-			if(index>=(getSize()-modelOffset)) addElement(obj);
-			else if(!obj.equals(getElementAt(index+modelOffset))) {
-				// Objects don't match
-				// If this object is found further down the list, then delete up to that object
-				int foundIndex = -1;
-				for(int searchIndex = index+1; searchIndex<(getSize()-modelOffset); searchIndex++) {
-					if(obj.equals(getElementAt(searchIndex+modelOffset))) {
-						foundIndex = searchIndex;
-						break;
-					}
-				}
-				if(foundIndex!=-1) {
-					// No removeRange
-					// removeRange(index+modelOffset, foundIndex-1+modelOffset);
-					for(
-						int removeIndex = foundIndex-1+modelOffset, end = index+modelOffset;
-						removeIndex>=end;
-						removeIndex--
-					) {
-						removeElementAt(removeIndex);
-					}
-				} else {
-					// Otherwise, insert in the current index
-					insertElementAt(obj, index+modelOffset);
-				}
-			}
-		}
-		// Remove any extra
-		while((getSize() - modelOffset) > size) {
-			removeElementAt(getSize() - 1);
-		}
-	}
+    // Synchronize the dynamic part of the list
+    int size = list.size();
+    for (int index=0; index<size; index++) {
+      E obj = list.get(index);
+      if (index >= (getSize()-modelOffset)) {
+        addElement(obj);
+      } else if (!obj.equals(getElementAt(index+modelOffset))) {
+        // Objects don't match
+        // If this object is found further down the list, then delete up to that object
+        int foundIndex = -1;
+        for (int searchIndex = index+1; searchIndex<(getSize()-modelOffset); searchIndex++) {
+          if (obj.equals(getElementAt(searchIndex+modelOffset))) {
+            foundIndex = searchIndex;
+            break;
+          }
+        }
+        if (foundIndex != -1) {
+          // No removeRange
+          // removeRange(index+modelOffset, foundIndex-1+modelOffset);
+          for (
+            int removeIndex = foundIndex-1+modelOffset, end = index+modelOffset;
+            removeIndex >= end;
+            removeIndex--
+          ) {
+            removeElementAt(removeIndex);
+          }
+        } else {
+          // Otherwise, insert in the current index
+          insertElementAt(obj, index+modelOffset);
+        }
+      }
+    }
+    // Remove any extra
+    while ((getSize() - modelOffset) > size) {
+      removeElementAt(getSize() - 1);
+    }
+  }
 }

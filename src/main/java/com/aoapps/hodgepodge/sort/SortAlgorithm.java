@@ -32,17 +32,17 @@ import java.util.List;
  */
 public interface SortAlgorithm<E> {
 
-	/**
-	 * Checks if this is a stable sort.  A stable sort will keep elements with
-	 * equal values in their same relative order.
-	 */
-	boolean isStable();
+  /**
+   * Checks if this is a stable sort.  A stable sort will keep elements with
+   * equal values in their same relative order.
+   */
+  boolean isStable();
 
-	<T extends E> void sort(List<T> list);
+  <T extends E> void sort(List<T> list);
 
-	<T extends E> void sort(T[] array);
+  <T extends E> void sort(T[] array);
 
-	<T extends E> void sort(List<T> list, SortStatistics stats);
+  <T extends E> void sort(List<T> list, SortStatistics stats);
 
-	<T extends E> void sort(T[] array, SortStatistics stats);
+  <T extends E> void sort(T[] array, SortStatistics stats);
 }

@@ -35,26 +35,28 @@ import java.io.IOException;
  */
 public class FileExistsRule implements FilesystemIteratorRule {
 
-	private final String[] fullPaths;
-	private final FilesystemIteratorRule existsRule;
-	private final FilesystemIteratorRule notExistsRule;
+  private final String[] fullPaths;
+  private final FilesystemIteratorRule existsRule;
+  private final FilesystemIteratorRule notExistsRule;
 
-	public FileExistsRule(String[] fullPaths, FilesystemIteratorRule existsRule, FilesystemIteratorRule notExistsRule) {
-		this.fullPaths = fullPaths;
-		this.existsRule = existsRule;
-		this.notExistsRule = notExistsRule;
-	}
+  public FileExistsRule(String[] fullPaths, FilesystemIteratorRule existsRule, FilesystemIteratorRule notExistsRule) {
+    this.fullPaths = fullPaths;
+    this.existsRule = existsRule;
+    this.notExistsRule = notExistsRule;
+  }
 
-	public FilesystemIteratorRule getEffectiveRule(String filename) throws IOException {
-		for (String fullPath : fullPaths) {
-			File file = new File(fullPath);
-			if(file.exists()) return existsRule;
-		}
-		return notExistsRule;
-	}
+  public FilesystemIteratorRule getEffectiveRule(String filename) throws IOException {
+    for (String fullPath : fullPaths) {
+      File file = new File(fullPath);
+      if (file.exists()) {
+        return existsRule;
+      }
+    }
+    return notExistsRule;
+  }
 
-	@Override
-	public boolean isIncluded(String filename) throws IOException {
-		return getEffectiveRule(filename).isIncluded(filename);
-	}
+  @Override
+  public boolean isIncluded(String filename) throws IOException {
+    return getEffectiveRule(filename).isIncluded(filename);
+  }
 }

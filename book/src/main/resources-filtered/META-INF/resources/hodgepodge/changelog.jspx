@@ -22,1201 +22,1201 @@ You should have received a copy of the GNU Lesser General Public License
 along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <jsp:root
-	xmlns:ao="https://oss.aoapps.com/taglib/"
-	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:changelog="https://semanticcms.com/changelog/taglib/"
-	xmlns:core="https://semanticcms.com/core/taglib/"
-	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
-	xmlns:jsp="http://java.sun.com/JSP/Page"
-	xmlns:section="https://semanticcms.com/section/taglib/"
-	version="2.1"
+  xmlns:ao="https://oss.aoapps.com/taglib/"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:changelog="https://semanticcms.com/changelog/taglib/"
+  xmlns:core="https://semanticcms.com/core/taglib/"
+  xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+  xmlns:jsp="http://java.sun.com/JSP/Page"
+  xmlns:section="https://semanticcms.com/section/taglib/"
+  version="2.1"
 >
-	<jsp:directive.page language="java" pageEncoding="UTF-8" />
-	<jsp:directive.page session="false" />
-	<core:page
-		title="@{documented.name} Changelog"
-		shortTitle="Changelog"
-		tocLevels="1"
-		datePublished="2016-10-29T16:23:04-05:00"
-		dateModified="2022-04-07T17:40:40-05:00"
-	>
-		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
-			<changelog:release
-				projectName="@{documented.name}"
-				version="@{project.version}"
-				groupId="@{project.groupId}"
-				artifactId="@{documented.artifactId}"
-				repository="@{nexusUrl}content/repositories/snapshots/"
-				scmUrl="@{project.scm.url}"
-			>
-				<ul>
-					<li>Updated dependencies.</li>
-					<li>New interface <code>NoClose</code> along with static <code>wrap(…)</code> methods to avoid duplicate wrapping.</li>
-					<li><code>MarkupCoercion.write(…)</code> disallows potential bypass of buffered encoders.</li>
-					<li>
-						<code>MarkupCoercion</code> always writes prefix/suffix even when value is null, for consistency.
-						For example, writing null text in JavaScript should still be "", since writing null is equivalent to "".
-					</li>
-					<li>
-						<code>MarkupCoercion</code> can unwrap an <code>EncoderWriter</code> when encoder is null.
-						This is done for consistency with the related implementation of <code>Coercion</code> in
-						<core:link book="/lang" page="/index.jspx" />.
-					</li>
-				</ul>
-			</changelog:release>
-		</c:if>
+  <jsp:directive.page language="java" pageEncoding="UTF-8" />
+  <jsp:directive.page session="false" />
+  <core:page
+    title="@{documented.name} Changelog"
+    shortTitle="Changelog"
+    tocLevels="1"
+    datePublished="2016-10-29T16:23:04-05:00"
+    dateModified="2022-04-07T17:40:40-05:00"
+  >
+    <c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
+      <changelog:release
+        projectName="@{documented.name}"
+        version="@{project.version}"
+        groupId="@{project.groupId}"
+        artifactId="@{documented.artifactId}"
+        repository="@{nexusUrl}content/repositories/snapshots/"
+        scmUrl="@{project.scm.url}"
+      >
+        <ul>
+          <li>Updated dependencies.</li>
+          <li>New interface <code>NoClose</code> along with static <code>wrap(…)</code> methods to avoid duplicate wrapping.</li>
+          <li><code>MarkupCoercion.write(…)</code> disallows potential bypass of buffered encoders.</li>
+          <li>
+            <code>MarkupCoercion</code> always writes prefix/suffix even when value is null, for consistency.
+            For example, writing null text in JavaScript should still be "", since writing null is equivalent to "".
+          </li>
+          <li>
+            <code>MarkupCoercion</code> can unwrap an <code>EncoderWriter</code> when encoder is null.
+            This is done for consistency with the related implementation of <code>Coercion</code> in
+            <core:link book="/lang" page="/index.jspx" />.
+          </li>
+        </ul>
+      </changelog:release>
+    </c:if>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="5.0.2"
-			datePublished="2022-02-15T19:01:36-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Now properly restoring Thread interrupted state on <code>InterruptedException</code>.</li>
-				<li>
-					Cleaning-up ThreadLocal variables when no longer used,
-					see <ao:a href="https://rules.sonarsource.com/java/RSPEC-5164" />.
-				</li>
-				<li><code>DontCloseOutputStream</code> now overrides <code>write(byte[],int,int)</code> for greater performance.</li>
-				<li>
-					Deprecated <code>DontCloseInputStream</code> and <code>DontCloseOutputStream</code> in favor or
-					duplicate <code>NoCloseInputStream</code> and <code>NoCloseOutputStream</code>.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="5.0.2"
+      datePublished="2022-02-15T19:01:36-06:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Now properly restoring Thread interrupted state on <code>InterruptedException</code>.</li>
+        <li>
+          Cleaning-up ThreadLocal variables when no longer used,
+          see <ao:a href="https://rules.sonarsource.com/java/RSPEC-5164" />.
+        </li>
+        <li><code>DontCloseOutputStream</code> now overrides <code>write(byte[],int,int)</code> for greater performance.</li>
+        <li>
+          Deprecated <code>DontCloseInputStream</code> and <code>DontCloseOutputStream</code> in favor or
+          duplicate <code>NoCloseInputStream</code> and <code>NoCloseOutputStream</code>.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="5.0.1"
-			datePublished="2021-10-15T19:02:15-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Log warnings when unable to read resource bundle source files due to SecurityException.</li>
-				<li><code>notify()</code> replaced with <code>notifyAll()</code> since more than one thread can be waiting.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="5.0.1"
+      datePublished="2021-10-15T19:02:15-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Log warnings when unable to read resource bundle source files due to SecurityException.</li>
+        <li><code>notify()</code> replaced with <code>notifyAll()</code> since more than one thread can be waiting.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="5.0.0"
-			datePublished="2021-07-04T11:01:16-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Now supports Java 9+ modules with included <code>module-info.class</code>.</li>
-				<li>Maven artifact relocated from <code>com.aoindustries:aocode-public</code> to <code>com.aoapps:ao-hodgepodge</code>.</li>
-				<li>Packages renamed from <code>com.aoindustries.*</code> to <code>com.aoapps.hodgepodge.*</code>.</li>
-				<li>Renamed <code>NativeToUnixWriter</code> to <code>NativeToPosixWriter</code>.</li>
-				<li>
-					<code>Images.getImageFromResources</code> now uses a provided lambda function to get the resources.
-					This allows access to resources without opening the package.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="5.0.0"
+      datePublished="2021-07-04T11:01:16-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Now supports Java 9+ modules with included <code>module-info.class</code>.</li>
+        <li>Maven artifact relocated from <code>com.aoindustries:aocode-public</code> to <code>com.aoapps:ao-hodgepodge</code>.</li>
+        <li>Packages renamed from <code>com.aoindustries.*</code> to <code>com.aoapps.hodgepodge.*</code>.</li>
+        <li>Renamed <code>NativeToUnixWriter</code> to <code>NativeToPosixWriter</code>.</li>
+        <li>
+          <code>Images.getImageFromResources</code> now uses a provided lambda function to get the resources.
+          This allows access to resources without opening the package.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.9.1"
-			datePublished="2021-03-31T00:07:40-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					<code>RandomAccessFile.length()</code> is returning <samp>0</samp> on Linux block devices as of
-					Java 11.  Implemented fall-back to <code>/sbin/blockdev --getsize64 …</code>.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.9.1"
+      datePublished="2021-03-31T00:07:40-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          <code>RandomAccessFile.length()</code> is returning <samp>0</samp> on Linux block devices as of
+          Java 11.  Implemented fall-back to <code>/sbin/blockdev --getsize64 …</code>.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.9.0"
-			datePublished="2021-02-15T02:32:26-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					<code>MarkupCoercion</code> improvements:
-					<ol>
-						<li>Added optimization for <code>Segment</code> to not convert to String for bundle lookups.</li>
-						<li>Added support for <code>Optional</code> by unwrapping the value.</li>
-					</ol>
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.9.0"
+      datePublished="2021-02-15T02:32:26-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          <code>MarkupCoercion</code> improvements:
+          <ol>
+            <li>Added optimization for <code>Segment</code> to not convert to String for bundle lookups.</li>
+            <li>Added support for <code>Optional</code> by unwrapping the value.</li>
+          </ol>
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.8.0"
-			datePublished="2021-02-14T05:56:01-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					<code>Coercion</code> moved out of <core:link book="/encoding" page="/index.jspx" />:
-					<ol>
-						<li>Non-localized parts moved to <core:link book="/lang" page="/index.jspx" />.</li>
-						<li>
-							Localized parts moved to this project and
-							renamed to <code>MarkupCoercion</code>.
-						</li>
-						<li>New pluggable <code>CoercionOptimizer</code> to allow this decoupling.</li>
-						<li>Servlet-specific optimizations moved to <core:link book="/servlet-util" page="/index.jspx" />.</li>
-					</ol>
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.8.0"
+      datePublished="2021-02-14T05:56:01-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          <code>Coercion</code> moved out of <core:link book="/encoding" page="/index.jspx" />:
+          <ol>
+            <li>Non-localized parts moved to <core:link book="/lang" page="/index.jspx" />.</li>
+            <li>
+              Localized parts moved to this project and
+              renamed to <code>MarkupCoercion</code>.
+            </li>
+            <li>New pluggable <code>CoercionOptimizer</code> to allow this decoupling.</li>
+            <li>Servlet-specific optimizations moved to <core:link book="/servlet-util" page="/index.jspx" />.</li>
+          </ol>
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.7.2"
-			datePublished="2021-01-09T11:31:24-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					<code>AOPool</code> now logs allocation stack traces when full and a thread has to wait for a
-					connection.  The logging is limited to once per minute maximum, due to the message length.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.7.2"
+      datePublished="2021-01-09T11:31:24-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          <code>AOPool</code> now logs allocation stack traces when full and a thread has to wait for a
+          connection.  The logging is limited to once per minute maximum, due to the message length.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.7.1"
-			datePublished="2020-12-22T09:04:05-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Moved <code>UnixCrypt</code> to the new <core:link book="/security" page="/index.jspx" /> project.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.7.1"
+      datePublished="2020-12-22T09:04:05-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Moved <code>UnixCrypt</code> to the new <core:link book="/security" page="/index.jspx" /> project.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.7.0"
-			datePublished="2020-12-20T03:04:44-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					Deprecated <code>Base64Coder</code> in favor of
-					<code><ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Base64.html">Base64</ao:a></code>
-					available since Java 8.
-				</li>
-				<li>
-					Removed dependency on the <code>com.aoindustries.security</code> package, which has been split
-					from <core:link book="/lang" page="/index.jspx" /> to the new
-					<core:link book="/security" page="/index.jspx" /> project:
-					<ol>
-						<li>
-							<code>AOPool</code> now internally tracks thread ID as a
-							<code><ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Long.html">Long</ao:a></code>
-							instead of <code>SmallIdentifier</code>.  This only affects the textual display of thread ID in
-							<code>printStatisticsHTML(…)</code>, and it is arguably more meaningful since they are now
-							sequentially generated.
-						</li>
-						<li>
-							Moved read/write methods for <code>Identifier</code> and <code>SmallIdentifier</code> from
-							<code>StreamableInput</code> and <code>StreamableOutput</code> to static methods on a new
-							<code>SecurityStreamables</code> class.
-						</li>
-					</ol>
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.7.0"
+      datePublished="2020-12-20T03:04:44-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          Deprecated <code>Base64Coder</code> in favor of
+          <code><ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Base64.html">Base64</ao:a></code>
+          available since Java 8.
+        </li>
+        <li>
+          Removed dependency on the <code>com.aoindustries.security</code> package, which has been split
+          from <core:link book="/lang" page="/index.jspx" /> to the new
+          <core:link book="/security" page="/index.jspx" /> project:
+          <ol>
+            <li>
+              <code>AOPool</code> now internally tracks thread ID as a
+              <code><ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Long.html">Long</ao:a></code>
+              instead of <code>SmallIdentifier</code>.  This only affects the textual display of thread ID in
+              <code>printStatisticsHTML(…)</code>, and it is arguably more meaningful since they are now
+              sequentially generated.
+            </li>
+            <li>
+              Moved read/write methods for <code>Identifier</code> and <code>SmallIdentifier</code> from
+              <code>StreamableInput</code> and <code>StreamableOutput</code> to static methods on a new
+              <code>SecurityStreamables</code> class.
+            </li>
+          </ol>
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.6.0"
-			datePublished="2020-12-14T21:58:37-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					Deprecated fixed padding in <code>PaddingOutputStream</code> in favor of random padding.
-					Also supports zero value for <code>padding</code>, which disables padding, which is consistent
-					with <code>Cipher.getBlockSize()</code> returning zero when not a block cipher.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.6.0"
+      datePublished="2020-12-14T21:58:37-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          Deprecated fixed padding in <code>PaddingOutputStream</code> in favor of random padding.
+          Also supports zero value for <code>padding</code>, which disables padding, which is consistent
+          with <code>Cipher.getBlockSize()</code> returning zero when not a block cipher.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.5.1"
-			datePublished="2020-12-13T13:22:16-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					Reverted back to the <code>ThreadLocal</code> for in-context translation settings being initialized when
-					missing, instead of returning <code>null</code>.  This is for compatibility with prior versions.
-					With this restored, sub-tasks are part of the same settings, and thus share lookup maps, even
-					when settings are not explicitly set prior to sub-task execution.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.5.1"
+      datePublished="2020-12-13T13:22:16-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          Reverted back to the <code>ThreadLocal</code> for in-context translation settings being initialized when
+          missing, instead of returning <code>null</code>.  This is for compatibility with prior versions.
+          With this restored, sub-tasks are part of the same settings, and thus share lookup maps, even
+          when settings are not explicitly set prior to sub-task execution.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.5.0"
-			datePublished="2020-12-13T01:58:21-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					In-context translation settings may now be reset and restored on-the-fly.
-					This allows the in-context translations to be temporarily reconfigured.
-				</li>
-				<li>
-					New option to disable scripts within the in-context translation tools.
-					This is useful when writing HTML that will not be immediately used by the browser,
-					such as when generating email body content.
-				</li>
-				<li>In-context translation editor now supports both SGML (HTML) and XML (XHTML) serializations.</li>
-				<li>
-					In-context translations markups may now be disabled while still recording lookups.
-					This allows the user interface to display the editor for lookups that were performed while
-					markup disabled.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.5.0"
+      datePublished="2020-12-13T01:58:21-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          In-context translation settings may now be reset and restored on-the-fly.
+          This allows the in-context translations to be temporarily reconfigured.
+        </li>
+        <li>
+          New option to disable scripts within the in-context translation tools.
+          This is useful when writing HTML that will not be immediately used by the browser,
+          such as when generating email body content.
+        </li>
+        <li>In-context translation editor now supports both SGML (HTML) and XML (XHTML) serializations.</li>
+        <li>
+          In-context translations markups may now be disabled while still recording lookups.
+          This allows the user interface to display the editor for lookups that were performed while
+          markup disabled.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.4.0"
-			datePublished="2020-12-05T10:04:01-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					Split development-only classes into a new sub-project in <code>devel/</code>.  This
-					sub-project is used only for development and is never deployed to artifact repositories.
-				</li>
-				<li>
-					<p>
-						Reverted a previous change made on 2020-03-01 that was released in version 4.0.0 on 2020-03-25.
-						Encoding of in-context translation lookup markups is required after all.
-					</p>
-					<p>
-						One example is the lookup IDs added inside alt attributes like
-						<code><![CDATA[alt="&amp;lt;##&amp;lt;value&amp;gt;##&amp;gt;"]]></code>.  With this bug, this was
-						incorrectly written as <code><![CDATA[alt="&lt;##&lt;value&gt;##&gt;"]]></code>, which fails
-						XML validation.
-					</p>
-					<p>
-						This bug is unlikely to affect production systems for two reasons:
-					</p>
-					<ol>
-						<li>
-							Lookup markups are only performed when in-context translations are enabled, which is only
-							when in development mode.
-						</li>
-						<li>
-							Most production sites are served in SGML mode, where browsers will handle the incorrect
-							HTML formatting.  XML mode is used in development specifically for this stricter
-							validation.
-						</li>
-					</ol>
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.4.0"
+      datePublished="2020-12-05T10:04:01-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          Split development-only classes into a new sub-project in <code>devel/</code>.  This
+          sub-project is used only for development and is never deployed to artifact repositories.
+        </li>
+        <li>
+          <p>
+            Reverted a previous change made on 2020-03-01 that was released in version 4.0.0 on 2020-03-25.
+            Encoding of in-context translation lookup markups is required after all.
+          </p>
+          <p>
+            One example is the lookup IDs added inside alt attributes like
+            <code><![CDATA[alt="&amp;lt;##&amp;lt;value&amp;gt;##&amp;gt;"]]></code>.  With this bug, this was
+            incorrectly written as <code><![CDATA[alt="&lt;##&lt;value&gt;##&gt;"]]></code>, which fails
+            XML validation.
+          </p>
+          <p>
+            This bug is unlikely to affect production systems for two reasons:
+          </p>
+          <ol>
+            <li>
+              Lookup markups are only performed when in-context translations are enabled, which is only
+              when in development mode.
+            </li>
+            <li>
+              Most production sites are served in SGML mode, where browsers will handle the incorrect
+              HTML formatting.  XML mode is used in development specifically for this stricter
+              validation.
+            </li>
+          </ol>
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.3.0"
-			datePublished="2020-11-17T21:50:06-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					Moved the <code>com.aoindustries.sql</code> package to the new
-					<core:link book="/sql" page="/index.jspx" /> project, with the exception
-					of <code>LocalizedSQLException</code> that stays here with other localized exceptions.
-				</li>
-				<li>
-					<code>ConnectionWrapper</code> moved to new <code>com.aoindustries.sql.wrapper</code> package in
-					the new <core:link book="/sql/wrapper" page="/index.jspx" /> project.
-				</li>
-				<li>
-					<code>AOConnectionPool</code> moved to new <code>com.aoindustries.sql.pool</code> package in
-					the new <core:link book="/sql/pool" page="/index.jspx" /> project.
-				</li>
-				<li>
-					<code>BackgroundCache</code> now allows all <code>Throwable</code>.
-					This is a source-compatible, but binary-incompatible change.  A recompile of dependents will is
-					required.
-				</li>
-				<li>Temporary files are now created with more secure default permissions.</li>
-				<li>
-					<p>
-						Now registering exception types for use with <code>Throwables.newSurrogate(…)</code> that supports creating new instances
-						of throwables in order to have caller stack trace.  When wrapped, the original throwable is the
-						cause of the new throwable.  When not wrapped, the original throwable is used directly and
-						caller stack trace is lost.
-					</p>
-					<p>
-						This is used to maintain exception types and states across thread boundaries, such as when an exception cause
-						is obtained from an <code>ExecutionException</code>.
-					</p>
-				</li>
-				<li>Now using <code>java.io.UncheckedIOException</code> instead of <code>WrappedException</code>.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.3.0"
+      datePublished="2020-11-17T21:50:06-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          Moved the <code>com.aoindustries.sql</code> package to the new
+          <core:link book="/sql" page="/index.jspx" /> project, with the exception
+          of <code>LocalizedSQLException</code> that stays here with other localized exceptions.
+        </li>
+        <li>
+          <code>ConnectionWrapper</code> moved to new <code>com.aoindustries.sql.wrapper</code> package in
+          the new <core:link book="/sql/wrapper" page="/index.jspx" /> project.
+        </li>
+        <li>
+          <code>AOConnectionPool</code> moved to new <code>com.aoindustries.sql.pool</code> package in
+          the new <core:link book="/sql/pool" page="/index.jspx" /> project.
+        </li>
+        <li>
+          <code>BackgroundCache</code> now allows all <code>Throwable</code>.
+          This is a source-compatible, but binary-incompatible change.  A recompile of dependents will is
+          required.
+        </li>
+        <li>Temporary files are now created with more secure default permissions.</li>
+        <li>
+          <p>
+            Now registering exception types for use with <code>Throwables.newSurrogate(…)</code> that supports creating new instances
+            of throwables in order to have caller stack trace.  When wrapped, the original throwable is the
+            cause of the new throwable.  When not wrapped, the original throwable is used directly and
+            caller stack trace is lost.
+          </p>
+          <p>
+            This is used to maintain exception types and states across thread boundaries, such as when an exception cause
+            is obtained from an <code>ExecutionException</code>.
+          </p>
+        </li>
+        <li>Now using <code>java.io.UncheckedIOException</code> instead of <code>WrappedException</code>.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.2.0"
-			datePublished="2020-08-27T21:56:11-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					Added support for Web development file types <code>*.less</code>, <code>*.sass</code>,
-					<code>*.scss</code>, <code>*.css.map</code>, and <code>*.js.map</code>.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.2.0"
+      datePublished="2020-08-27T21:56:11-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          Added support for Web development file types <code>*.less</code>, <code>*.sass</code>,
+          <code>*.scss</code>, <code>*.css.map</code>, and <code>*.js.map</code>.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.1.1"
-			datePublished="2020-07-24T17:47:06-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li><code>ZeroFile</code> no longer writes blank lines when there are no blocks to read or write.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.1.1"
+      datePublished="2020-07-24T17:47:06-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li><code>ZeroFile</code> no longer writes blank lines when there are no blocks to read or write.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.1.0"
-			datePublished="2020-05-13T17:55:36-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					<code>ModifiablePropertiesResourceBundle</code> now writes properties files with keys
-					sorted (base, base + MODIFIED_SUFFIX, base + VALIDATED_SUFFIX).  This groups
-					the keys together better, which aids version control diffs.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.1.0"
+      datePublished="2020-05-13T17:55:36-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          <code>ModifiablePropertiesResourceBundle</code> now writes properties files with keys
+          sorted (base, base + MODIFIED_SUFFIX, base + VALIDATED_SUFFIX).  This groups
+          the keys together better, which aids version control diffs.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="4.0.0"
-			datePublished="2020-03-25T03:02:42-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Minimum Java version changed from 1.7 to 1.8.</li>
-				<li>
-					Reduced use of property substitutions in <code>pom.xml</code>.
-					This is to help 3rd-party parsers that fail to perform full Maven-compatible substitutions.
-				</li>
-				<li>
-					Deprecated <code>MimeType</code>:
-					This simple hard-coded list of MIME types is not maintained well.
-					It is strongly recommended to use a different, well-supported API.
-				</li>
-				<li>
-					Made <code>EncodingUtils.toString(Object)</code> (deprecated) consistent with
-					<ao:a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/Coercion.html">Coercion</ao:a>:
-					<ol>
-						<li>Supporting instances of <ao:a href="https://oss.aoapps.com/lang/apidocs/com.aoapps.lang/com/aoapps/lang/io/Writable.html">Writable</ao:a>.</li>
-						<li>Supporting instances of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/CharSequence.html">CharSequence</ao:a>.</li>
-						<li>Supporting instances of <code>char[]</code>.</li>
-					</ol>
-				</li>
-				<li><code>EncodingUtils.encodeHtml(…)</code> (deprecated) now require additional <code>isXhtml</code> flag.</li>
-				<li>Connection pool statistics HTML generation now supports both SGML and XML serializations.</li>
-				<li>
-					New bundle lookup markup types:
-					<ul>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/MarkupType.html#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
-					</ul>
-				</li>
-				<li>
-					<code>com.aoindustries.util.logging.*</code> significantly reworked
-					to be compatible with <code>logging.properties</code>.
-				</li>
-				<li>
-					<code>TopologicalSorter</code> now returns a modifiable <code>Set</code>.
-					Previously it returned an unmodifiable <code>List</code>.
-				</li>
-				<li>Updated dependencies.</li>
-				<li>Removed the <code>com.aoindustries.security</code> package:
-					<ol>
-						<li>
-							<code>com.aoindustries.security.NotAuthenticatedException</code> moved to
-							the <core:link book="/lang" page="/index.jspx" /> project.
-							Resolves this split-package with <core:link book="/lang" page="/index.jspx" />.
-						</li>
-						<li>
-							Removed <code>com.aoindustries.security.AccountDisabledException</code>; please use
-							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountLockedException.html">AccountLockedException</ao:a> instead.
-						</li>
-						<li>
-							Removed <code>com.aoindustries.security.AccountNotFoundException</code>; please use
-							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountNotFoundException.html">AccountNotFoundException</ao:a> instead.
-						</li>
-						<li>
-							Removed <code>com.aoindustries.security.BadPasswordException</code>; please use
-							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/FailedLoginException.html">FailedLoginException</ao:a> instead.
-						</li>
-						<li>
-							Removed <code>com.aoindustries.security.IncompleteLoginException</code>; please use
-							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/CredentialNotFoundException.html">CredentialNotFoundException</ao:a> instead.
-						</li>
-						<li>
-							Removed <code>com.aoindustries.security.LoginException</code>; please use
-							<ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/LoginException.html">LoginException</ao:a> instead.
-						</li>
-					</ol>
-				</li>
-				<li>Moved the <code>com.aoindustries.util.persistent</code> package to the new <core:link book="/persistence" page="/index.jspx" /> project.</li>
-				<li>Split collection-related utilities into new <core:link book="/collections" page="/index.jspx" /> project.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="4.0.0"
+      datePublished="2020-03-25T03:02:42-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Minimum Java version changed from 1.7 to 1.8.</li>
+        <li>
+          Reduced use of property substitutions in <code>pom.xml</code>.
+          This is to help 3rd-party parsers that fail to perform full Maven-compatible substitutions.
+        </li>
+        <li>
+          Deprecated <code>MimeType</code>:
+          This simple hard-coded list of MIME types is not maintained well.
+          It is strongly recommended to use a different, well-supported API.
+        </li>
+        <li>
+          Made <code>EncodingUtils.toString(Object)</code> (deprecated) consistent with
+          <ao:a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/Coercion.html">Coercion</ao:a>:
+          <ol>
+            <li>Supporting instances of <ao:a href="https://oss.aoapps.com/lang/apidocs/com.aoapps.lang/com/aoapps/lang/io/Writable.html">Writable</ao:a>.</li>
+            <li>Supporting instances of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/CharSequence.html">CharSequence</ao:a>.</li>
+            <li>Supporting instances of <code>char[]</code>.</li>
+          </ol>
+        </li>
+        <li><code>EncodingUtils.encodeHtml(…)</code> (deprecated) now require additional <code>isXhtml</code> flag.</li>
+        <li>Connection pool statistics HTML generation now supports both SGML and XML serializations.</li>
+        <li>
+          New bundle lookup markup types:
+          <ul>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/MarkupType.html#CSS">MarkupType.CSS</ao:a> for <code>text/css</code>.</li>
+          </ul>
+        </li>
+        <li>
+          <code>com.aoindustries.util.logging.*</code> significantly reworked
+          to be compatible with <code>logging.properties</code>.
+        </li>
+        <li>
+          <code>TopologicalSorter</code> now returns a modifiable <code>Set</code>.
+          Previously it returned an unmodifiable <code>List</code>.
+        </li>
+        <li>Updated dependencies.</li>
+        <li>Removed the <code>com.aoindustries.security</code> package:
+          <ol>
+            <li>
+              <code>com.aoindustries.security.NotAuthenticatedException</code> moved to
+              the <core:link book="/lang" page="/index.jspx" /> project.
+              Resolves this split-package with <core:link book="/lang" page="/index.jspx" />.
+            </li>
+            <li>
+              Removed <code>com.aoindustries.security.AccountDisabledException</code>; please use
+              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountLockedException.html">AccountLockedException</ao:a> instead.
+            </li>
+            <li>
+              Removed <code>com.aoindustries.security.AccountNotFoundException</code>; please use
+              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountNotFoundException.html">AccountNotFoundException</ao:a> instead.
+            </li>
+            <li>
+              Removed <code>com.aoindustries.security.BadPasswordException</code>; please use
+              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/FailedLoginException.html">FailedLoginException</ao:a> instead.
+            </li>
+            <li>
+              Removed <code>com.aoindustries.security.IncompleteLoginException</code>; please use
+              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/CredentialNotFoundException.html">CredentialNotFoundException</ao:a> instead.
+            </li>
+            <li>
+              Removed <code>com.aoindustries.security.LoginException</code>; please use
+              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/LoginException.html">LoginException</ao:a> instead.
+            </li>
+          </ol>
+        </li>
+        <li>Moved the <code>com.aoindustries.util.persistent</code> package to the new <core:link book="/persistence" page="/index.jspx" /> project.</li>
+        <li>Split collection-related utilities into new <core:link book="/collections" page="/index.jspx" /> project.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="3.1.1"
-			datePublished="2019-10-04T04:06:38-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Now supporting queries and anchors on <code>EditableResourceBundle.setValueUrl</code>.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="3.1.1"
+      datePublished="2019-10-04T04:06:38-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Now supporting queries and anchors on <code>EditableResourceBundle.setValueUrl</code>.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="3.1.0"
-			datePublished="2019-10-01T20:30:28-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>During coercion, XML Node will be output as UTF-8.</li>
-				<li>Moved networking utilities to <core:link book="/net-types" page="/index.jspx" />.</li>
-				<li>Moved Servlet and JSP related utilities to a new <core:link book="/servlet-util" page="/index.jspx" /> project.</li>
-				<li>This project no longer depends on servlet and JSP APIs.</li>
-				<li>Moved the following classes to the new <core:link book="/lang" page="/index.jspx" /> project:
-					<ol>
-						<li><code>com.aoindustries.util.StringUtility</code></li>
-					</ol>
-				</li>
-				<li>
-					New class <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/DiffableProperties.html">DiffableProperties</ao:a>
-					to format <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a>
-					files in a way optimized for diff tools, such as <code>git diff</code>.  Best used in conjunction with
-					<ao:a href="https://oss.aoapps.com/collections/apidocs/com.aoapps.collections/com/aoapps/collections/SortedProperties.html">SortedProperties</ao:a>.
-				</li>
-				<li>
-					Made <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>
-					public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
-				</li>
-				<li>
-					Made <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/SkipCommentsFilterOutputStream.html">SkipCommentsFilterOutputStream</ao:a>
-					public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
-				</li>
-				<li>
-					<ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/ModifiablePropertiesResourceBundle.html">ModifiablePropertiesResourceBundle</ao:a>
-					now stores the properties files in the <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/DiffableProperties.html">maximally diffable format</ao:a>.
-					It also no longer overwrites the file when the content has not changed.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="3.1.0"
+      datePublished="2019-10-01T20:30:28-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>During coercion, XML Node will be output as UTF-8.</li>
+        <li>Moved networking utilities to <core:link book="/net-types" page="/index.jspx" />.</li>
+        <li>Moved Servlet and JSP related utilities to a new <core:link book="/servlet-util" page="/index.jspx" /> project.</li>
+        <li>This project no longer depends on servlet and JSP APIs.</li>
+        <li>Moved the following classes to the new <core:link book="/lang" page="/index.jspx" /> project:
+          <ol>
+            <li><code>com.aoindustries.util.StringUtility</code></li>
+          </ol>
+        </li>
+        <li>
+          New class <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/DiffableProperties.html">DiffableProperties</ao:a>
+          to format <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a>
+          files in a way optimized for diff tools, such as <code>git diff</code>.  Best used in conjunction with
+          <ao:a href="https://oss.aoapps.com/collections/apidocs/com.aoapps.collections/com/aoapps/collections/SortedProperties.html">SortedProperties</ao:a>.
+        </li>
+        <li>
+          Made <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>
+          public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
+        </li>
+        <li>
+          Made <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/SkipCommentsFilterOutputStream.html">SkipCommentsFilterOutputStream</ao:a>
+          public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
+        </li>
+        <li>
+          <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/ModifiablePropertiesResourceBundle.html">ModifiablePropertiesResourceBundle</ao:a>
+          now stores the properties files in the <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/DiffableProperties.html">maximally diffable format</ao:a>.
+          It also no longer overwrites the file when the content has not changed.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="3.0.0"
-			datePublished="2019-08-11T12:34:51-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					New abstract class <ao:a href="https://oss.aoapps.com/sql/wrapper/apidocs/com.aoapps.sql.wrapper/com/aoapps/sql/wrapper/ConnectionWrapper.html">ConnectionWrapper</ao:a>
-					split from <ao:a href="https://oss.aoapps.com/sql/pool/apidocs/com.aoapps.sql.pool/com/aoapps/sql/pool/PostgresqlConnectionWrapper.html">PostgresqlConnectionWrapper</ao:a>
-					to be used by other implementations of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Connection.html">Connection</ao:a>
-					wrapping.
-				</li>
-				<li>Removed some long-deprecated or otherwise long-unused classes and methods:
-					<ol>
-						<li><code>com.aoindustries.servlet.http.ServletUtil.getResource(…)</code></li>
-						<li><code>com.aoindustries.servlet.http.ServletUtil.resourceExists(…)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.escapeSQL(…)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.encodeString(String)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.decodeString(String)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.negIntIfEmpty(String)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.negLongIfEmpty(String)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.nullIfEmpty(String)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.getDaysFromMillis(long)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.getMillisFromDays(long)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.roundToDay(long)</code></li>
-						<li><code>com.aoindustries.sql.SQLUtility.printResultSetHTMLTable(ResultSet, Appendable, String, boolean)</code></li>
-						<li><code>com.aoindustries.util.Stack</code></li>
-						<li><code>com.aoindustries.util.StringUtility.buildEmailList(String[])</code></li>
-						<li><code>com.aoindustries.util.StringUtility.buildList(…)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.compareToDDMMYYYY(String, String)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.convertStringDateToTime(String)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.countOccurances(…)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.escapeSQL(String)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.getDateMMDDYYYY(String)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.getDateString(…)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.getDateStringMMDDYYYY(Date)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.getDateStringSecond(…)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.getStringArray(List)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.intern(String)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.isValidDate(String)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.leapYear(int)</code></li>
-						<li><code>com.aoindustries.util.StringUtility.removeChars(…)</code></li>
-						<li><code>com.aoindustries.util.WildcardPatternMatcher.getMatchNone()</code></li>
-						<li><code>com.aoindustries.util.WildcardPatternMatcher.getMatchAll()</code></li>
-						<li><code>com.aoindustries.util.WildcardPatternMatcher.getInstance(String)</code></li>
-						<li><code>com.aoindustries.util.logging.ProcessTimer.ProcessTimer(Logger, <span style="text-decoration: line-through">Random,</span> String, String, String, String, long, long)</code></li>
-						<li><code>com.aoindustries.util.logging.ProcessTimer.finished()</code></li>
-						<li><code>com.aoindustries.util.persistent.PersistentCollections.charToBuffer(…)</code></li>
-						<li><code>com.aoindustries.util.persistent.PersistentCollections.bufferToChar(…)</code></li>
-						<li><code>com.aoindustries.util.persistent.PersistentCollections.shortToBuffer(…)</code></li>
-						<li><code>com.aoindustries.util.persistent.PersistentCollections.bufferToShort(…)</code></li>
-						<li><code>com.aoindustries.util.persistent.PersistentCollections.intToBuffer(…)</code></li>
-						<li><code>com.aoindustries.util.persistent.PersistentCollections.bufferToInt(…)</code></li>
-						<li><code>com.aoindustries.util.persistent.PersistentCollections.longToBuffer(…)</code></li>
-						<li><code>com.aoindustries.util.persistent.PersistentCollections.bufferToLong(…)</code></li>
-					</ol>
-				</li>
-				<li>Significant, breaking changes to <ao:a href="https://oss.aoapps.com/sql/apidocs/com.aoapps.sql/com/aoapps/sql/SQLUtility.html">SQLUtility</ao:a>:
-					<ol>
-						<li>Renamed <code>getDate(long)</code> to <code>formatDate(long)</code></li>
-						<li>Added <code>formatDate(long, TimeZone)</code> for other time zones</li>
-						<li>Added <code>formatDate(Long)</code> for nullable integers</li>
-						<li>Added <code>formatDate(Long, TimeZone)</code> for nullable integers</li>
-						<li>Added <code>formatDate(Date)</code> for dates</li>
-						<li>Added <code>formatDate(Date, TimeZone)</code> for dates</li>
-						<li>Renamed <code>getDate(String)</code> to <code>parseDate(String)</code></li>
-						<li>Added <code>parseDate(String, TimeZone)</code> for other time zones</li>
-						<li>Renamed <code>getDateTime(long)</code> to <code>formatDateTime(long)</code></li>
-						<li>Added <code>formatDateTime(long, TimeZone)</code> for other time zones</li>
-						<li>Added <code>formatDateTime(Long)</code> for nullable integers</li>
-						<li>Added <code>formatDateTime(Long, TimeZone)</code> for nullable integers</li>
-						<li>Added <code>formatDateTime(Date)</code> for dates</li>
-						<li>Added <code>formatDateTime(Date, TimeZone)</code> for dates</li>
-						<li>Renamed <code>getDateTime(String)</code> to <code>parseDateTime(String)</code></li>
-						<li>Added <code>parseDateTime(String, TimeZone)</code> for other time zones</li>
-						<li>Renamed <code>getTime(long)</code> to <code>formatTime(long)</code></li>
-						<li>Added <code>formatTime(long, TimeZone)</code> for other time zones</li>
-						<li>Added <code>formatTime(Long)</code> for nullable integers</li>
-						<li>Added <code>formatTime(Long, TimeZone)</code> for nullable integers</li>
-						<li>Added <code>formatTime(Date)</code> for dates</li>
-						<li>Added <code>formatTime(Date, TimeZone)</code> for dates</li>
-						<li>Renamed <code>getDecimal(int)</code> to <code>formatDecimal2(int)</code></li>
-						<li>Renamed <code>getDecimal(long)</code> to <code>formatDecimal2(long)</code></li>
-						<li>Renamed <code>getPennies(String)</code> to <code>parseDecimal2(String)</code></li>
-						<li>Renamed <code>getPenniesLong(String)</code> to <code>parseLongDecimal2(String)</code></li>
-						<li>Renamed <code>getMilliDecimal(int)</code> to <code>formatDecimal3(int)</code></li>
-						<li>Renamed <code>getMilliDecimal(long)</code> to <code>formatDecimal3(long)</code></li>
-						<li>Renamed <code>getMillis(String)</code> to <code>parseDecimal3(String)</code></li>
-						<li>Added <code>parseLongDecimal3(String)</code></li>
-					</ol>
-				</li>
-				<li>Renamed <code>Compressed*</code> to <code>Streamable*</code> and moved to new <code>com.aoindustries.io.stream</code> package:
-					<ol>
-						<li>Renamed <code>CompressedDataInputStream</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html">StreamableInput</ao:a>.</li>
-						<li>Renamed <code>CompressedDataOutputStream</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html">StreamableOutput</ao:a>.</li>
-						<li>Renamed <code>CompressedReadable</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamReadable.html">StreamReadable</ao:a>.</li>
-						<li>Renamed <code>CompressedWritable</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamWritable.html">StreamWritable</ao:a>.</li>
-						<li>Moved <code>Streamable</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/Streamable.html">Streamable</ao:a>.</li>
-					</ol>
-				</li>
-				<li>
-					<p>
-						New methods to read and write possibly nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Timestamp.html">Timestamp</ao:a>
-						in <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html">StreamableOutput</ao:a>
-						and <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html">StreamableInput</ao:a>.
-					</p>
-					<p>
-						These methods use a wire protocol deliberately compatible with
-						<ao:a rel="nofollow" href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html">Instant</ao:a> in Java 8,
-						however the API remains <code>Timestamp</code>-only since the minimum Java version is still 1.7.
-					</p>
-				</li>
-				<li>
-					Added protocol version to reading in <code>Streamable</code> and <code>CompressedReadable</code>, because a server may be
-					reading objects streamed by older clients.  Protocol compatibility can be necessary both directions.
-				</li>
-				<li>New methods to read and write possibly nullable <code>Identifier</code> and <code>SmallIdentifier</code>.</li>
-				<li><code>FileList</code> now implements <code>Closeable</code>.</li>
-				<li><code>SQLUtility.printTable(…)</code> improvements:
-					<ol>
-						<li>
-							Created a variant of <code>printTable(…)</code> that accepts <code><![CDATA[Iterable&lt;? extends Object[]&gt;]]></code>
-							for row data.  Deprecated the old variants as they forced the caller to combine all their cell values
-							into big collections or arrays, which is not conducive to displaying large, streamed datasets.
-						</li>
-						<li><code>printTable(…)</code> now uses code points to correctly align output with characters outside the Basic Multilingual Plane.</li>
-						<li>Implemented Unicode-formatted output when in interactive mode.</li>
-					</ol>
-				</li>
-				<li>
-					New method <code>FifoFile.flush()</code> that may be used to flush the fifo file.
-					This makes sense here because reads also update the underlying fifo persistence.
-				</li>
-				<li>
-					<p>
-						<code>UrlUtils.encodeUrlPath(String, String)</code> now skips encoding the full set of
-						the characters defined in <ao:a href="https://datatracker.ietf.org/doc/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</ao:a>.
-						Previously, only a partial subset of these characters were added as-needed.  We have now
-						improved the implementation to match the specification.
-					</p>
-					<p>
-						This means "mailto:" links will now maintain the "@" in the email address, instead of it being
-						incorrectly percent-encoded.
-					</p>
-				</li>
-				<li><code>UrlUtils.encodeUrlPath(String, String)</code> now correctly encodes space as <code>%20</code> instead of <code>+</code>.</li>
-				<li><code>UrlUtils.encodeUrlPath(String, String)</code> now determines query string or fragment by first ? or #, accordingly, instead of last.</li>
-				<li>
-					<code>UrlUtils.decodeUrlPath(String, String)</code> now re-encodes characters that decode to reserved characters
-					to avoid ambiguity.
-				</li>
-				<li>
-					Case-insensitive matching of URL schemes.  Previously, URL schemes were matched case-sensitive,
-					while the spec is case-insensitive.  This has been OK given we only use lower-case schemes within our
-					code and tools, but this is now a correct implementation.
-				</li>
-				<li>
-					<code>PersistentLinkedList</code> now implements
-					<ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Deque.html">Deque</ao:a>
-					instead of
-					<ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Queue.html">Queue</ao:a>.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="3.0.0"
+      datePublished="2019-08-11T12:34:51-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          New abstract class <ao:a href="https://oss.aoapps.com/sql/wrapper/apidocs/com.aoapps.sql.wrapper/com/aoapps/sql/wrapper/ConnectionWrapper.html">ConnectionWrapper</ao:a>
+          split from <ao:a href="https://oss.aoapps.com/sql/pool/apidocs/com.aoapps.sql.pool/com/aoapps/sql/pool/PostgresqlConnectionWrapper.html">PostgresqlConnectionWrapper</ao:a>
+          to be used by other implementations of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Connection.html">Connection</ao:a>
+          wrapping.
+        </li>
+        <li>Removed some long-deprecated or otherwise long-unused classes and methods:
+          <ol>
+            <li><code>com.aoindustries.servlet.http.ServletUtil.getResource(…)</code></li>
+            <li><code>com.aoindustries.servlet.http.ServletUtil.resourceExists(…)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.escapeSQL(…)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.encodeString(String)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.decodeString(String)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.negIntIfEmpty(String)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.negLongIfEmpty(String)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.nullIfEmpty(String)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.getDaysFromMillis(long)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.getMillisFromDays(long)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.roundToDay(long)</code></li>
+            <li><code>com.aoindustries.sql.SQLUtility.printResultSetHTMLTable(ResultSet, Appendable, String, boolean)</code></li>
+            <li><code>com.aoindustries.util.Stack</code></li>
+            <li><code>com.aoindustries.util.StringUtility.buildEmailList(String[])</code></li>
+            <li><code>com.aoindustries.util.StringUtility.buildList(…)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.compareToDDMMYYYY(String, String)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.convertStringDateToTime(String)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.countOccurances(…)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.escapeSQL(String)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.getDateMMDDYYYY(String)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.getDateString(…)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.getDateStringMMDDYYYY(Date)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.getDateStringSecond(…)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.getStringArray(List)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.intern(String)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.isValidDate(String)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.leapYear(int)</code></li>
+            <li><code>com.aoindustries.util.StringUtility.removeChars(…)</code></li>
+            <li><code>com.aoindustries.util.WildcardPatternMatcher.getMatchNone()</code></li>
+            <li><code>com.aoindustries.util.WildcardPatternMatcher.getMatchAll()</code></li>
+            <li><code>com.aoindustries.util.WildcardPatternMatcher.getInstance(String)</code></li>
+            <li><code>com.aoindustries.util.logging.ProcessTimer.ProcessTimer(Logger, <span style="text-decoration: line-through">Random,</span> String, String, String, String, long, long)</code></li>
+            <li><code>com.aoindustries.util.logging.ProcessTimer.finished()</code></li>
+            <li><code>com.aoindustries.util.persistent.PersistentCollections.charToBuffer(…)</code></li>
+            <li><code>com.aoindustries.util.persistent.PersistentCollections.bufferToChar(…)</code></li>
+            <li><code>com.aoindustries.util.persistent.PersistentCollections.shortToBuffer(…)</code></li>
+            <li><code>com.aoindustries.util.persistent.PersistentCollections.bufferToShort(…)</code></li>
+            <li><code>com.aoindustries.util.persistent.PersistentCollections.intToBuffer(…)</code></li>
+            <li><code>com.aoindustries.util.persistent.PersistentCollections.bufferToInt(…)</code></li>
+            <li><code>com.aoindustries.util.persistent.PersistentCollections.longToBuffer(…)</code></li>
+            <li><code>com.aoindustries.util.persistent.PersistentCollections.bufferToLong(…)</code></li>
+          </ol>
+        </li>
+        <li>Significant, breaking changes to <ao:a href="https://oss.aoapps.com/sql/apidocs/com.aoapps.sql/com/aoapps/sql/SQLUtility.html">SQLUtility</ao:a>:
+          <ol>
+            <li>Renamed <code>getDate(long)</code> to <code>formatDate(long)</code></li>
+            <li>Added <code>formatDate(long, TimeZone)</code> for other time zones</li>
+            <li>Added <code>formatDate(Long)</code> for nullable integers</li>
+            <li>Added <code>formatDate(Long, TimeZone)</code> for nullable integers</li>
+            <li>Added <code>formatDate(Date)</code> for dates</li>
+            <li>Added <code>formatDate(Date, TimeZone)</code> for dates</li>
+            <li>Renamed <code>getDate(String)</code> to <code>parseDate(String)</code></li>
+            <li>Added <code>parseDate(String, TimeZone)</code> for other time zones</li>
+            <li>Renamed <code>getDateTime(long)</code> to <code>formatDateTime(long)</code></li>
+            <li>Added <code>formatDateTime(long, TimeZone)</code> for other time zones</li>
+            <li>Added <code>formatDateTime(Long)</code> for nullable integers</li>
+            <li>Added <code>formatDateTime(Long, TimeZone)</code> for nullable integers</li>
+            <li>Added <code>formatDateTime(Date)</code> for dates</li>
+            <li>Added <code>formatDateTime(Date, TimeZone)</code> for dates</li>
+            <li>Renamed <code>getDateTime(String)</code> to <code>parseDateTime(String)</code></li>
+            <li>Added <code>parseDateTime(String, TimeZone)</code> for other time zones</li>
+            <li>Renamed <code>getTime(long)</code> to <code>formatTime(long)</code></li>
+            <li>Added <code>formatTime(long, TimeZone)</code> for other time zones</li>
+            <li>Added <code>formatTime(Long)</code> for nullable integers</li>
+            <li>Added <code>formatTime(Long, TimeZone)</code> for nullable integers</li>
+            <li>Added <code>formatTime(Date)</code> for dates</li>
+            <li>Added <code>formatTime(Date, TimeZone)</code> for dates</li>
+            <li>Renamed <code>getDecimal(int)</code> to <code>formatDecimal2(int)</code></li>
+            <li>Renamed <code>getDecimal(long)</code> to <code>formatDecimal2(long)</code></li>
+            <li>Renamed <code>getPennies(String)</code> to <code>parseDecimal2(String)</code></li>
+            <li>Renamed <code>getPenniesLong(String)</code> to <code>parseLongDecimal2(String)</code></li>
+            <li>Renamed <code>getMilliDecimal(int)</code> to <code>formatDecimal3(int)</code></li>
+            <li>Renamed <code>getMilliDecimal(long)</code> to <code>formatDecimal3(long)</code></li>
+            <li>Renamed <code>getMillis(String)</code> to <code>parseDecimal3(String)</code></li>
+            <li>Added <code>parseLongDecimal3(String)</code></li>
+          </ol>
+        </li>
+        <li>Renamed <code>Compressed*</code> to <code>Streamable*</code> and moved to new <code>com.aoindustries.io.stream</code> package:
+          <ol>
+            <li>Renamed <code>CompressedDataInputStream</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html">StreamableInput</ao:a>.</li>
+            <li>Renamed <code>CompressedDataOutputStream</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html">StreamableOutput</ao:a>.</li>
+            <li>Renamed <code>CompressedReadable</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamReadable.html">StreamReadable</ao:a>.</li>
+            <li>Renamed <code>CompressedWritable</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamWritable.html">StreamWritable</ao:a>.</li>
+            <li>Moved <code>Streamable</code> to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/Streamable.html">Streamable</ao:a>.</li>
+          </ol>
+        </li>
+        <li>
+          <p>
+            New methods to read and write possibly nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Timestamp.html">Timestamp</ao:a>
+            in <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html">StreamableOutput</ao:a>
+            and <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html">StreamableInput</ao:a>.
+          </p>
+          <p>
+            These methods use a wire protocol deliberately compatible with
+            <ao:a rel="nofollow" href="https://docs.oracle.com/javase/8/docs/api/java/time/Instant.html">Instant</ao:a> in Java 8,
+            however the API remains <code>Timestamp</code>-only since the minimum Java version is still 1.7.
+          </p>
+        </li>
+        <li>
+          Added protocol version to reading in <code>Streamable</code> and <code>CompressedReadable</code>, because a server may be
+          reading objects streamed by older clients.  Protocol compatibility can be necessary both directions.
+        </li>
+        <li>New methods to read and write possibly nullable <code>Identifier</code> and <code>SmallIdentifier</code>.</li>
+        <li><code>FileList</code> now implements <code>Closeable</code>.</li>
+        <li><code>SQLUtility.printTable(…)</code> improvements:
+          <ol>
+            <li>
+              Created a variant of <code>printTable(…)</code> that accepts <code><![CDATA[Iterable&lt;? extends Object[]&gt;]]></code>
+              for row data.  Deprecated the old variants as they forced the caller to combine all their cell values
+              into big collections or arrays, which is not conducive to displaying large, streamed datasets.
+            </li>
+            <li><code>printTable(…)</code> now uses code points to correctly align output with characters outside the Basic Multilingual Plane.</li>
+            <li>Implemented Unicode-formatted output when in interactive mode.</li>
+          </ol>
+        </li>
+        <li>
+          New method <code>FifoFile.flush()</code> that may be used to flush the fifo file.
+          This makes sense here because reads also update the underlying fifo persistence.
+        </li>
+        <li>
+          <p>
+            <code>UrlUtils.encodeUrlPath(String, String)</code> now skips encoding the full set of
+            the characters defined in <ao:a href="https://datatracker.ietf.org/doc/html/rfc3986#section-2.2">RFC 3986: Reserved Characters</ao:a>.
+            Previously, only a partial subset of these characters were added as-needed.  We have now
+            improved the implementation to match the specification.
+          </p>
+          <p>
+            This means "mailto:" links will now maintain the "@" in the email address, instead of it being
+            incorrectly percent-encoded.
+          </p>
+        </li>
+        <li><code>UrlUtils.encodeUrlPath(String, String)</code> now correctly encodes space as <code>%20</code> instead of <code>+</code>.</li>
+        <li><code>UrlUtils.encodeUrlPath(String, String)</code> now determines query string or fragment by first ? or #, accordingly, instead of last.</li>
+        <li>
+          <code>UrlUtils.decodeUrlPath(String, String)</code> now re-encodes characters that decode to reserved characters
+          to avoid ambiguity.
+        </li>
+        <li>
+          Case-insensitive matching of URL schemes.  Previously, URL schemes were matched case-sensitive,
+          while the spec is case-insensitive.  This has been OK given we only use lower-case schemes within our
+          code and tools, but this is now a correct implementation.
+        </li>
+        <li>
+          <code>PersistentLinkedList</code> now implements
+          <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Deque.html">Deque</ao:a>
+          instead of
+          <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Queue.html">Queue</ao:a>.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="2.1.1"
-			datePublished="2019-06-29T19:36:26-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					<p>
-						Using <code>;-split-package:=first</code> of <ao:a href="http://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html">maven-bundle-plugin</ao:a>
-						to avoid bundling the classes in the split packages from
-						<core:link book="/lang" page="/index.jspx" />.
-					</p>
-					<p>
-						These split packages are transitional.  In the future we will have more fine-grained projects.
-					</p>
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="2.1.1"
+      datePublished="2019-06-29T19:36:26-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          <p>
+            Using <code>;-split-package:=first</code> of <ao:a href="http://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html">maven-bundle-plugin</ao:a>
+            to avoid bundling the classes in the split packages from
+            <core:link book="/lang" page="/index.jspx" />.
+          </p>
+          <p>
+            These split packages are transitional.  In the future we will have more fine-grained projects.
+          </p>
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="2.1.0"
-			datePublished="2019-06-19T05:59:50-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Byte.html">Byte</ao:a>:
-					<ul>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullByte-java.lang.Byte-">CompressedDataOutputStream.writeNullByte(Byte)</ao:a></li>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullByte--">CompressedDataInputStream.readNullByte()</ao:a></li>
-					</ul>
-				</li>
-				<li>
-					New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Short.html">Short</ao:a>:
-					<ul>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
-					</ul>
-				</li>
-				<li>Using managed dependencies:
-					<ol>
-						<li>This project uses managed dependencies.</li>
-						<li>This project's managed dependencies may also be imported by other projects.</li>
-					</ol>
-				</li>
-				<li>Improved API docs linking.</li>
-				<li>
-					New methods to quickly get the last modified time of a web resource.
-					The result may be cached for up to five seconds.
-					<ul>
-						<li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html#getLastModified-java.lang.String-">ServletContextCache.getLastModified(String)</ao:a></li>
-						<li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html#getLastModified-javax.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
-					</ul>
-				</li>
-				<li>Improved implementation of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Wrapper.html">java.sql.Wrapper</ao:a>.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="2.1.0"
+      datePublished="2019-06-19T05:59:50-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Byte.html">Byte</ao:a>:
+          <ul>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullByte-java.lang.Byte-">CompressedDataOutputStream.writeNullByte(Byte)</ao:a></li>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullByte--">CompressedDataInputStream.readNullByte()</ao:a></li>
+          </ul>
+        </li>
+        <li>
+          New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Short.html">Short</ao:a>:
+          <ul>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
+          </ul>
+        </li>
+        <li>Using managed dependencies:
+          <ol>
+            <li>This project uses managed dependencies.</li>
+            <li>This project's managed dependencies may also be imported by other projects.</li>
+          </ol>
+        </li>
+        <li>Improved API docs linking.</li>
+        <li>
+          New methods to quickly get the last modified time of a web resource.
+          The result may be cached for up to five seconds.
+          <ul>
+            <li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html#getLastModified-java.lang.String-">ServletContextCache.getLastModified(String)</ao:a></li>
+            <li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html#getLastModified-javax.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
+          </ul>
+        </li>
+        <li>Improved implementation of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Wrapper.html">java.sql.Wrapper</ao:a>.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="2.0.0"
-			datePublished="2019-04-18T06:17:06-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Minimum Java version changed from 1.6 to 1.7.</li>
-				<li>
-					Deprecated in favor of new <ao:a href="https://oss.aoapps.com/tempfiles/apidocs/com.aoapps.tempfiles/com/aoapps/tempfiles/TempFileContext.html">TempFileContext</ao:a>
-					that does not suffer from a memory leak in long-running applications:
-					<ul>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/TempFile.html">TempFile</ao:a></li>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/TempFileList.html">TempFileList</ao:a></li>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/FileList.html#getTempFile-java.lang.String-java.lang.String-">FileList.getTempFile(String prefix, String extension)</ao:a></li>
-					</ul>
-				</li>
-				<li>
-					Improved <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html">ServletContextCache</ao:a>
-					to still work correctly when accessed before initialized by
-					<ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.Initializer.html">ServletContextCacheListener.Initializer</ao:a>.
-					This allows the caches to safely be used during application initialization.  This also
-					allows the cache to still work correctly without being initialized as a web listener, at the cost
-					of not stopping promptly when context destroyed.
-				</li>
-				<li>
-					New constant <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
-					to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
-					repeatedly during routine operation.
-				</li>
-				<li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
-				<li>
-					New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Boolean.html">Boolean</ao:a>:
-					<ul>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullBoolean-java.lang.Boolean-">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullBoolean--">CompressedDataInputStream.readNullBoolean()</ao:a></li>
-					</ul>
-				</li>
-				<li>
-					New methods to join into arbitrary <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Appendable.html">Appendable</ao:a>:
-					<ul>
-						<li><ao:a href="https://oss.aoapps.com/lang/apidocs/com.aoapps.lang/com/aoapps/lang/Strings.html#join(java.lang.Iterable,java.lang.String,A)">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
-						<li><ao:a href="https://oss.aoapps.com/lang/apidocs/com.aoapps.lang/com/aoapps/lang/Strings.html#join(java.lang.Object[],java.lang.String,A)">StringUtility.join(Object[], String, Appendable)</ao:a></li>
-					</ul>
-				</li>
-				<li>
-					New bundle lookup markup types:
-					<ul>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/MarkupType.html#MYSQL">MarkupType.MYSQL</ao:a> for the <ao:a href="https://dev.mysql.com/doc/en/mysql.html">MySQL <code>mysql</code> command line</ao:a>.</li>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/MarkupType.html#PSQL">MarkupType.PSQL</ao:a> for the <ao:a href="https://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL <code>psql</code> command line</ao:a>.</li>
-						<li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/MarkupType.html#SH">MarkupType.SH</ao:a> for shell script encoding.</li>
-					</ul>
-				</li>
-				<li>
-					<ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/http/Dispatcher.html">Dispatcher</ao:a> may now forward
-					and include to caller-provided <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="2.0.0"
+      datePublished="2019-04-18T06:17:06-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Minimum Java version changed from 1.6 to 1.7.</li>
+        <li>
+          Deprecated in favor of new <ao:a href="https://oss.aoapps.com/tempfiles/apidocs/com.aoapps.tempfiles/com/aoapps/tempfiles/TempFileContext.html">TempFileContext</ao:a>
+          that does not suffer from a memory leak in long-running applications:
+          <ul>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/TempFile.html">TempFile</ao:a></li>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/TempFileList.html">TempFileList</ao:a></li>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/FileList.html#getTempFile-java.lang.String-java.lang.String-">FileList.getTempFile(String prefix, String extension)</ao:a></li>
+          </ul>
+        </li>
+        <li>
+          Improved <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html">ServletContextCache</ao:a>
+          to still work correctly when accessed before initialized by
+          <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.Initializer.html">ServletContextCacheListener.Initializer</ao:a>.
+          This allows the caches to safely be used during application initialization.  This also
+          allows the cache to still work correctly without being initialized as a web listener, at the cost
+          of not stopping promptly when context destroyed.
+        </li>
+        <li>
+          New constant <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
+          to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
+          repeatedly during routine operation.
+        </li>
+        <li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
+        <li>
+          New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Boolean.html">Boolean</ao:a>:
+          <ul>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullBoolean-java.lang.Boolean-">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullBoolean--">CompressedDataInputStream.readNullBoolean()</ao:a></li>
+          </ul>
+        </li>
+        <li>
+          New methods to join into arbitrary <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Appendable.html">Appendable</ao:a>:
+          <ul>
+            <li><ao:a href="https://oss.aoapps.com/lang/apidocs/com.aoapps.lang/com/aoapps/lang/Strings.html#join(java.lang.Iterable,java.lang.String,A)">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
+            <li><ao:a href="https://oss.aoapps.com/lang/apidocs/com.aoapps.lang/com/aoapps/lang/Strings.html#join(java.lang.Object[],java.lang.String,A)">StringUtility.join(Object[], String, Appendable)</ao:a></li>
+          </ul>
+        </li>
+        <li>
+          New bundle lookup markup types:
+          <ul>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/MarkupType.html#MYSQL">MarkupType.MYSQL</ao:a> for the <ao:a href="https://dev.mysql.com/doc/en/mysql.html">MySQL <code>mysql</code> command line</ao:a>.</li>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/MarkupType.html#PSQL">MarkupType.PSQL</ao:a> for the <ao:a href="https://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL <code>psql</code> command line</ao:a>.</li>
+            <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/MarkupType.html#SH">MarkupType.SH</ao:a> for shell script encoding.</li>
+          </ul>
+        </li>
+        <li>
+          <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/http/Dispatcher.html">Dispatcher</ao:a> may now forward
+          and include to caller-provided <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.9.0"
-			datePublished="2017-07-19T18:18:38-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
-				<li>Moved the following classes to the new <core:link book="/lang" page="/index.jspx" /> project:
-					<ol>
-						<li><code>com.aoindustries.io.AoByteArrayInputStream</code></li>
-						<li><code>com.aoindustries.io.AoByteArrayOutputStream</code></li>
-						<li><code>com.aoindustries.io.AoCharArrayWriter</code></li>
-						<li><code>com.aoindustries.io.Encoder</code></li>
-						<li><code>com.aoindustries.io.EncoderWriter</code></li>
-						<li><code>com.aoindustries.io.FastExternalizable</code></li>
-						<li><code>com.aoindustries.io.FastObjectInput</code></li>
-						<li><code>com.aoindustries.io.FastObjectOutput</code></li>
-						<li><code>com.aoindustries.io.FileUtils</code></li>
-						<li><code>com.aoindustries.io.IoUtils</code></li>
-						<li><code>com.aoindustries.io.LocalizedIOException</code></li>
-						<li><code>com.aoindustries.io.NullOutputStream</code></li>
-						<li><code>com.aoindustries.io.NullPrintWriter</code></li>
-						<li><code>com.aoindustries.io.NullWriter</code></li>
-						<li><code>com.aoindustries.io.SniffInputStream</code></li>
-						<li><code>com.aoindustries.io.Writable</code></li>
-						<li><code>com.aoindustries.io.WriterFacade</code></li>
-						<li><code>com.aoindustries.io.WriterOutputStream</code></li>
-						<li><code>com.aoindustries.lang.Disposable</code></li>
-						<li><code>com.aoindustries.lang.DisposedException</code></li>
-						<li><code>com.aoindustries.lang.EnumUtils</code></li>
-						<li><code>com.aoindustries.lang.LocalizedIllegalArgumentException</code></li>
-						<li><code>com.aoindustries.lang.NotImplementedException</code></li>
-						<li><code>com.aoindustries.lang.NullArgumentException</code></li>
-						<li><code>com.aoindustries.lang.ObjectUtils</code></li>
-						<li><code>com.aoindustries.lang.ProcessResult</code></li>
-						<li><code>com.aoindustries.lang.RuntimeUtils</code></li>
-						<li><code>com.aoindustries.lang.SysExits</code></li>
-						<li><code>com.aoindustries.lang.reflect.Methods</code></li>
-						<li><code>com.aoindustries.lang.reflect.ReflectionException</code></li>
-						<li><code>com.aoindustries.math.BigFraction</code></li>
-						<li><code>com.aoindustries.math.LongLong</code></li>
-						<li><code>com.aoindustries.math.NullMath</code></li>
-						<li><code>com.aoindustries.math.SafeMath</code></li>
-						<li><code>com.aoindustries.math.Statistics</code></li>
-						<li><code>com.aoindustries.math.UnsignedLong</code></li>
-						<li><code>com.aoindustries.nio.charset.Charsets</code></li>
-						<li><code>com.aoindustries.security.HashedKey</code></li>
-						<li><code>com.aoindustries.security.HashedPassword</code></li>
-						<li><code>com.aoindustries.security.Identifier</code></li>
-						<li><code>com.aoindustries.security.SmallIdentifier</code></li>
-						<li><code>com.aoindustries.sql.LocalizedSQLException</code></li>
-						<li><code>com.aoindustries.sql.UnmodifiableTimestamp</code></li>
-						<li><code>com.aoindustries.sql.WrappedSQLException</code></li>
-						<li><code>com.aoindustries.text.MessageFormatFactory</code></li>
-						<li><code>com.aoindustries.text.SmartComparator</code></li>
-						<li><code>com.aoindustries.text.UnmodifiableMessageFormat</code></li>
-						<li><code>com.aoindustries.time.Clock</code></li>
-						<li><code>com.aoindustries.time.Duration</code></li>
-						<li><code>com.aoindustries.time.Instant</code></li>
-						<li><code>com.aoindustries.util.AoArrays</code></li>
-						<li><code>com.aoindustries.util.AoCollections</code></li>
-						<li><code>com.aoindustries.util.AtomicSequence</code></li>
-						<li><code>com.aoindustries.util.BufferManager</code></li>
-						<li><code>com.aoindustries.util.CalendarUtils</code></li>
-						<li><code>com.aoindustries.util.ComparatorUtils</code></li>
-						<li><code>com.aoindustries.util.EnumerationIterator</code></li>
-						<li><code>com.aoindustries.util.ErrorPrinter</code></li>
-						<li><code>com.aoindustries.util.GetOpt</code></li>
-						<li><code>com.aoindustries.util.HashCodeComparator</code></li>
-						<li><code>com.aoindustries.util.IdentityKey</code></li>
-						<li><code>com.aoindustries.util.InternUtils</code></li>
-						<li><code>com.aoindustries.util.Internable</code></li>
-						<li><code>com.aoindustries.util.MinimalList</code></li>
-						<li><code>com.aoindustries.util.MinimalMap</code></li>
-						<li><code>com.aoindustries.util.PropertiesUtils</code></li>
-						<li><code>com.aoindustries.util.Sequence</code></li>
-						<li><code>com.aoindustries.util.SortedProperties</code></li>
-						<li><code>com.aoindustries.util.UnmodifiableCalendar</code></li>
-						<li><code>com.aoindustries.util.UnmodifiableDate</code></li>
-						<li><code>com.aoindustries.util.UnsynchronizedSequence</code></li>
-						<li><code>com.aoindustries.util.WrappedException</code></li>
-						<li><code>com.aoindustries.util.WrappedExceptions</code></li>
-						<li><code>com.aoindustries.util.concurrent.ThreadLocalCallable</code></li>
-						<li><code>com.aoindustries.util.concurrent.ThreadLocalRunnable</code></li>
-						<li><code>com.aoindustries.util.concurrent.ThreadLocalsCallable</code></li>
-						<li><code>com.aoindustries.util.concurrent.ThreadLocalsRunnable</code></li>
-						<li><code>com.aoindustries.util.i18n.ApplicationResourcesAccessor</code></li>
-						<li><code>com.aoindustries.util.i18n.CurrencyComparator</code></li>
-						<li><code>com.aoindustries.util.i18n.LocaleComparator</code></li>
-						<li><code>com.aoindustries.util.i18n.LocaleString</code></li>
-						<li><code>com.aoindustries.util.i18n.Locales</code></li>
-						<li><code>com.aoindustries.util.i18n.Money</code></li>
-						<li><code>com.aoindustries.util.i18n.ThreadLocale</code></li>
-						<li><code>com.aoindustries.util.zip.CorrectedGZIPInputStream</code></li>
-						<li><code>com.aoindustries.util.zip.ZipEntryFilter</code></li>
-						<li><code>com.aoindustries.util.zip.ZipUtils</code></li>
-						<li><code>com.aoindustries.xml.XmlUtils</code></li>
-					</ol>
-				</li>
-				<li>
-					New interfaces <code>CompressedReadable</code> and <code>CompressedWritable</code> for
-					code that only needs to handle one direction of <code>Streamable</code>.
-				</li>
-				<li><code>AOPool</code> improvements:
-					<ol>
-						<li>More fine-grained locking through atomics.</li>
-						<li>No longer holding connection lock while connecting.</li>
-						<li>Non-blocking statistics methods.</li>
-						<li>Bug fix: Notifying other threads on connection allocation.</li>
-					</ol>
-				</li>
-				<li>
-					<code>CompressedDataOutputStream</code> and <code>CompressedDataInputStream</code> now
-					support streaming of <code>Enum</code>s.
-				</li>
-				<li>Updated dependencies.</li>
-				<li><code>WildcardPatternMatcher</code> improvements:
-					<ol>
-						<li>Coalesces adjacent '*' into a single '*' during parsing.</li>
-						<li>Compiles patterns instead of interpreting them on the fly.</li>
-						<li>Supports any arbitrary patterns containing '*'.</li>
-						<li>Fast-path checks for none, all, prefix, suffix, and exact matches.</li>
-						<li>Renamed methods to better represent the functionality.  Left deprecated methods for compatibility.</li>
-						<li>Added test suite to verify correctness and benchmark versus equivalent regular expressions.
-							<ol type="a">
-								<li>The typical performance is 8 to 10 times that of the regular expressions.</li>
-								<li>
-									Some operations, in particular suffix matching on long strings, can be as high as 2000 times the
-									performance of regular expressions.  This is not so uncommon, a typical use-case for
-									wildcard patterns is <code>"*.jpg"</code>.
-								</li>
-							</ol>
-						</li>
-						<li>
-							Like any typical "contains" or "indexOf" string operation, the infix matching can fall-flat when trying to
-							find long strings of repeating patterns within an almost-as-long string of repeating patterns
-							following by non-matching padding.  When strictly using prefix or suffix matching this
-							will never occur.
-						</li>
-					</ol>
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.9.0"
+      datePublished="2017-07-19T18:18:38-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Fixed bug in <code>ByteCountInputStream</code> that subtracted the <code>-1</code> returned at end of stream.</li>
+        <li>Moved the following classes to the new <core:link book="/lang" page="/index.jspx" /> project:
+          <ol>
+            <li><code>com.aoindustries.io.AoByteArrayInputStream</code></li>
+            <li><code>com.aoindustries.io.AoByteArrayOutputStream</code></li>
+            <li><code>com.aoindustries.io.AoCharArrayWriter</code></li>
+            <li><code>com.aoindustries.io.Encoder</code></li>
+            <li><code>com.aoindustries.io.EncoderWriter</code></li>
+            <li><code>com.aoindustries.io.FastExternalizable</code></li>
+            <li><code>com.aoindustries.io.FastObjectInput</code></li>
+            <li><code>com.aoindustries.io.FastObjectOutput</code></li>
+            <li><code>com.aoindustries.io.FileUtils</code></li>
+            <li><code>com.aoindustries.io.IoUtils</code></li>
+            <li><code>com.aoindustries.io.LocalizedIOException</code></li>
+            <li><code>com.aoindustries.io.NullOutputStream</code></li>
+            <li><code>com.aoindustries.io.NullPrintWriter</code></li>
+            <li><code>com.aoindustries.io.NullWriter</code></li>
+            <li><code>com.aoindustries.io.SniffInputStream</code></li>
+            <li><code>com.aoindustries.io.Writable</code></li>
+            <li><code>com.aoindustries.io.WriterFacade</code></li>
+            <li><code>com.aoindustries.io.WriterOutputStream</code></li>
+            <li><code>com.aoindustries.lang.Disposable</code></li>
+            <li><code>com.aoindustries.lang.DisposedException</code></li>
+            <li><code>com.aoindustries.lang.EnumUtils</code></li>
+            <li><code>com.aoindustries.lang.LocalizedIllegalArgumentException</code></li>
+            <li><code>com.aoindustries.lang.NotImplementedException</code></li>
+            <li><code>com.aoindustries.lang.NullArgumentException</code></li>
+            <li><code>com.aoindustries.lang.ObjectUtils</code></li>
+            <li><code>com.aoindustries.lang.ProcessResult</code></li>
+            <li><code>com.aoindustries.lang.RuntimeUtils</code></li>
+            <li><code>com.aoindustries.lang.SysExits</code></li>
+            <li><code>com.aoindustries.lang.reflect.Methods</code></li>
+            <li><code>com.aoindustries.lang.reflect.ReflectionException</code></li>
+            <li><code>com.aoindustries.math.BigFraction</code></li>
+            <li><code>com.aoindustries.math.LongLong</code></li>
+            <li><code>com.aoindustries.math.NullMath</code></li>
+            <li><code>com.aoindustries.math.SafeMath</code></li>
+            <li><code>com.aoindustries.math.Statistics</code></li>
+            <li><code>com.aoindustries.math.UnsignedLong</code></li>
+            <li><code>com.aoindustries.nio.charset.Charsets</code></li>
+            <li><code>com.aoindustries.security.HashedKey</code></li>
+            <li><code>com.aoindustries.security.HashedPassword</code></li>
+            <li><code>com.aoindustries.security.Identifier</code></li>
+            <li><code>com.aoindustries.security.SmallIdentifier</code></li>
+            <li><code>com.aoindustries.sql.LocalizedSQLException</code></li>
+            <li><code>com.aoindustries.sql.UnmodifiableTimestamp</code></li>
+            <li><code>com.aoindustries.sql.WrappedSQLException</code></li>
+            <li><code>com.aoindustries.text.MessageFormatFactory</code></li>
+            <li><code>com.aoindustries.text.SmartComparator</code></li>
+            <li><code>com.aoindustries.text.UnmodifiableMessageFormat</code></li>
+            <li><code>com.aoindustries.time.Clock</code></li>
+            <li><code>com.aoindustries.time.Duration</code></li>
+            <li><code>com.aoindustries.time.Instant</code></li>
+            <li><code>com.aoindustries.util.AoArrays</code></li>
+            <li><code>com.aoindustries.util.AoCollections</code></li>
+            <li><code>com.aoindustries.util.AtomicSequence</code></li>
+            <li><code>com.aoindustries.util.BufferManager</code></li>
+            <li><code>com.aoindustries.util.CalendarUtils</code></li>
+            <li><code>com.aoindustries.util.ComparatorUtils</code></li>
+            <li><code>com.aoindustries.util.EnumerationIterator</code></li>
+            <li><code>com.aoindustries.util.ErrorPrinter</code></li>
+            <li><code>com.aoindustries.util.GetOpt</code></li>
+            <li><code>com.aoindustries.util.HashCodeComparator</code></li>
+            <li><code>com.aoindustries.util.IdentityKey</code></li>
+            <li><code>com.aoindustries.util.InternUtils</code></li>
+            <li><code>com.aoindustries.util.Internable</code></li>
+            <li><code>com.aoindustries.util.MinimalList</code></li>
+            <li><code>com.aoindustries.util.MinimalMap</code></li>
+            <li><code>com.aoindustries.util.PropertiesUtils</code></li>
+            <li><code>com.aoindustries.util.Sequence</code></li>
+            <li><code>com.aoindustries.util.SortedProperties</code></li>
+            <li><code>com.aoindustries.util.UnmodifiableCalendar</code></li>
+            <li><code>com.aoindustries.util.UnmodifiableDate</code></li>
+            <li><code>com.aoindustries.util.UnsynchronizedSequence</code></li>
+            <li><code>com.aoindustries.util.WrappedException</code></li>
+            <li><code>com.aoindustries.util.WrappedExceptions</code></li>
+            <li><code>com.aoindustries.util.concurrent.ThreadLocalCallable</code></li>
+            <li><code>com.aoindustries.util.concurrent.ThreadLocalRunnable</code></li>
+            <li><code>com.aoindustries.util.concurrent.ThreadLocalsCallable</code></li>
+            <li><code>com.aoindustries.util.concurrent.ThreadLocalsRunnable</code></li>
+            <li><code>com.aoindustries.util.i18n.ApplicationResourcesAccessor</code></li>
+            <li><code>com.aoindustries.util.i18n.CurrencyComparator</code></li>
+            <li><code>com.aoindustries.util.i18n.LocaleComparator</code></li>
+            <li><code>com.aoindustries.util.i18n.LocaleString</code></li>
+            <li><code>com.aoindustries.util.i18n.Locales</code></li>
+            <li><code>com.aoindustries.util.i18n.Money</code></li>
+            <li><code>com.aoindustries.util.i18n.ThreadLocale</code></li>
+            <li><code>com.aoindustries.util.zip.CorrectedGZIPInputStream</code></li>
+            <li><code>com.aoindustries.util.zip.ZipEntryFilter</code></li>
+            <li><code>com.aoindustries.util.zip.ZipUtils</code></li>
+            <li><code>com.aoindustries.xml.XmlUtils</code></li>
+          </ol>
+        </li>
+        <li>
+          New interfaces <code>CompressedReadable</code> and <code>CompressedWritable</code> for
+          code that only needs to handle one direction of <code>Streamable</code>.
+        </li>
+        <li><code>AOPool</code> improvements:
+          <ol>
+            <li>More fine-grained locking through atomics.</li>
+            <li>No longer holding connection lock while connecting.</li>
+            <li>Non-blocking statistics methods.</li>
+            <li>Bug fix: Notifying other threads on connection allocation.</li>
+          </ol>
+        </li>
+        <li>
+          <code>CompressedDataOutputStream</code> and <code>CompressedDataInputStream</code> now
+          support streaming of <code>Enum</code>s.
+        </li>
+        <li>Updated dependencies.</li>
+        <li><code>WildcardPatternMatcher</code> improvements:
+          <ol>
+            <li>Coalesces adjacent '*' into a single '*' during parsing.</li>
+            <li>Compiles patterns instead of interpreting them on the fly.</li>
+            <li>Supports any arbitrary patterns containing '*'.</li>
+            <li>Fast-path checks for none, all, prefix, suffix, and exact matches.</li>
+            <li>Renamed methods to better represent the functionality.  Left deprecated methods for compatibility.</li>
+            <li>Added test suite to verify correctness and benchmark versus equivalent regular expressions.
+              <ol type="a">
+                <li>The typical performance is 8 to 10 times that of the regular expressions.</li>
+                <li>
+                  Some operations, in particular suffix matching on long strings, can be as high as 2000 times the
+                  performance of regular expressions.  This is not so uncommon, a typical use-case for
+                  wildcard patterns is <code>"*.jpg"</code>.
+                </li>
+              </ol>
+            </li>
+            <li>
+              Like any typical "contains" or "indexOf" string operation, the infix matching can fall-flat when trying to
+              find long strings of repeating patterns within an almost-as-long string of repeating patterns
+              following by non-matching padding.  When strictly using prefix or suffix matching this
+              will never occur.
+            </li>
+          </ol>
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.8.3"
-			datePublished="2016-11-15T02:48:59-06:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>New <core:link book="/parent" page="/index.jspx" /> POM to simplify <code>pom.xml</code> files.</li>
-				<li>Project documentation moved to per-project book in <ao:a href="https://semanticcms.com/">SemanticCMS</ao:a> format.</li>
-				<li>Added changelog as top-level project link.</li>
-				<li>Added utility to find the maximum non-null value.</li>
-				<li>Added support for XML DOM Node in toString type coercion.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.8.3"
+      datePublished="2016-11-15T02:48:59-06:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>New <core:link book="/parent" page="/index.jspx" /> POM to simplify <code>pom.xml</code> files.</li>
+        <li>Project documentation moved to per-project book in <ao:a href="https://semanticcms.com/">SemanticCMS</ao:a> format.</li>
+        <li>Added changelog as top-level project link.</li>
+        <li>Added utility to find the maximum non-null value.</li>
+        <li>Added support for XML DOM Node in toString type coercion.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.8.2"
-			datePublished="2016-10-20T15:44:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Release of 1.8.1 failed due to JDK bug in bootclasspath set for Javadoc: <ao:a href="https://bugs.openjdk.java.net/browse/JDK-8041628" /></li>
-				<li>JDK bug workaround.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.8.2"
+      datePublished="2016-10-20T15:44:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Release of 1.8.1 failed due to JDK bug in bootclasspath set for Javadoc: <ao:a href="https://bugs.openjdk.java.net/browse/JDK-8041628" /></li>
+        <li>JDK bug workaround.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.8.1"
-			tag="aocode-public-1.8.1"
-			datePublished="2016-10-20T15:36:00-05:00"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Main method to generate a random Identifier.</li>
-				<li>Improved Javadoc formatting.</li>
-				<li>Improved README formatting.</li>
-				<li>Allowing varargs for locales.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.8.1"
+      tag="aocode-public-1.8.1"
+      datePublished="2016-10-20T15:36:00-05:00"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Main method to generate a random Identifier.</li>
+        <li>Improved Javadoc formatting.</li>
+        <li>Improved README formatting.</li>
+        <li>Allowing varargs for locales.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.8.0"
-			datePublished="2016-10-06T12:28:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Moved servlet-specific methods to a different class to avoid introducing compile-time dependencies on servlet api to non-servlet projects.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.8.0"
+      datePublished="2016-10-06T12:28:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Moved servlet-specific methods to a different class to avoid introducing compile-time dependencies on servlet api to non-servlet projects.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.7.0"
-			datePublished="2016-10-04T19:17:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<section:section label="Added">
-				<ul>
-					<li>Java 1.7 compatible long sorting for pre-Java 1.7 use.</li>
-					<li>Now automatically maintains some ThreadLocal values between caller and executor during concurrent processing, and provides wrapper hook for subclasses to extend.</li>
-					<li>Recurring now allows null during parsing and returns null.</li>
-					<li>Convenience method to make unmodifiable from MinimalList and MinimalMap.</li>
-					<li>Background-refreshed cache implementation.</li>
-					<li>Caching access to ServletContext to improve performance.</li>
-				</ul>
-			</section:section>
-			<section:section label="Changed">
-				<ul>
-					<li>Improved Javadoc formatting.</li>
-					<li>Additional compiler flags in preparation to do away with our old Ant build system.</li>
-					<li>Using request object instead of ThreadLocals to support asynchronous and concurrent request processing.</li>
-					<li>Working on thread safety for concurrent sub requests.</li>
-					<li>Avoiding setting ThreadLocal when value has not changed.</li>
-					<li>nullIfEmpty moved to StringUtility.</li>
-					<li>Each lock object now a small empty class to help identify lock contention.
-						<p>
-							The lock contention profiler in NetBeans is just showing "java.lang.Object" all over, and can't seem to
-							get from the lock object id to the actual object in the heap dump using OQL (id not found).
-						</p>
-					</li>
-					<li>Using minimal list to efficiently filter small numbers of matches.</li>
-					<li>Number of buffers is now unlimited.</li>
-				</ul>
-			</section:section>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.7.0"
+      datePublished="2016-10-04T19:17:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <section:section label="Added">
+        <ul>
+          <li>Java 1.7 compatible long sorting for pre-Java 1.7 use.</li>
+          <li>Now automatically maintains some ThreadLocal values between caller and executor during concurrent processing, and provides wrapper hook for subclasses to extend.</li>
+          <li>Recurring now allows null during parsing and returns null.</li>
+          <li>Convenience method to make unmodifiable from MinimalList and MinimalMap.</li>
+          <li>Background-refreshed cache implementation.</li>
+          <li>Caching access to ServletContext to improve performance.</li>
+        </ul>
+      </section:section>
+      <section:section label="Changed">
+        <ul>
+          <li>Improved Javadoc formatting.</li>
+          <li>Additional compiler flags in preparation to do away with our old Ant build system.</li>
+          <li>Using request object instead of ThreadLocals to support asynchronous and concurrent request processing.</li>
+          <li>Working on thread safety for concurrent sub requests.</li>
+          <li>Avoiding setting ThreadLocal when value has not changed.</li>
+          <li>nullIfEmpty moved to StringUtility.</li>
+          <li>Each lock object now a small empty class to help identify lock contention.
+            <p>
+              The lock contention profiler in NetBeans is just showing "java.lang.Object" all over, and can't seem to
+              get from the lock object id to the actual object in the heap dump using OQL (id not found).
+            </p>
+          </li>
+          <li>Using minimal list to efficiently filter small numbers of matches.</li>
+          <li>Number of buffers is now unlimited.</li>
+        </ul>
+      </section:section>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.6.1"
-			datePublished="2016-09-02T16:26:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Improved Maven configuration for Java EE 6 dependencies.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.6.1"
+      datePublished="2016-09-02T16:26:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Improved Maven configuration for Java EE 6 dependencies.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.6"
-			datePublished="2016-08-28T20:17:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Efficient way to check if writables empty.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.6"
+      datePublished="2016-08-28T20:17:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Efficient way to check if writables empty.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.5"
-			datePublished="2016-08-21T15:14:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Wildcard to show immutability just cluttered the API, reverted.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.5"
+      datePublished="2016-08-21T15:14:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Wildcard to show immutability just cluttered the API, reverted.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.4"
-			datePublished="2016-08-19T14:02:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Allowing ao-taglib style "arg" maps to be passed through Dispatcher for non-taglib use.</li>
-				<li>args passed unmodifiable.</li>
-				<li><![CDATA[Passing args as Map&lt;String, ?&gt; instead of forcing Map&lt;String, Object&gt;]]></li>
-				<li>Returning wildcard bound list as it better captures the essence of the unmodifiable list returned.</li>
-				<li>Java 1.7 compatible boolean sorting for pre-Java 1.7 use.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.4"
+      datePublished="2016-08-19T14:02:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Allowing ao-taglib style "arg" maps to be passed through Dispatcher for non-taglib use.</li>
+        <li>args passed unmodifiable.</li>
+        <li><![CDATA[Passing args as Map&lt;String, ?&gt; instead of forcing Map&lt;String, Object&gt;]]></li>
+        <li>Returning wildcard bound list as it better captures the essence of the unmodifiable list returned.</li>
+        <li>Java 1.7 compatible boolean sorting for pre-Java 1.7 use.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.3"
-			datePublished="2016-08-07T23:16:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Reverted to Java 1.6 for Android and Java EE 6 compatibility.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.3"
+      datePublished="2016-08-07T23:16:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Reverted to Java 1.6 for Android and Java EE 6 compatibility.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.2"
-			datePublished="2016-08-05T12:42:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="aocode-public"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Testing if nexus-staging:release required when using autoReleaseAfterClose=true</li>
-				<li>Now deployed to The Central Repository.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.2"
+      datePublished="2016-08-05T12:42:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="aocode-public"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Testing if nexus-staging:release required when using autoReleaseAfterClose=true</li>
+        <li>Now deployed to The Central Repository.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.1"
-			tag="aocode-public-1.1"
-			datePublished="2016-08-05T09:32:00-05:00"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Java EE 6 optional, since only used by a subset of the features.</li>
-				<li>Preparing to deploy to The Central Repository.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.1"
+      tag="aocode-public-1.1"
+      datePublished="2016-08-05T09:32:00-05:00"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Java EE 6 optional, since only used by a subset of the features.</li>
+        <li>Preparing to deploy to The Central Repository.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.0"
-			tag="aocode-public-1.0"
-			datePublished="2016-08-04T17:43:00-05:00"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Project moved to GitHub and Maven.</li>
-				<li>Ignoring locales with scripts or extensions since this API predates them.</li>
-			</ul>
-		</changelog:release>
-	</core:page>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.0"
+      tag="aocode-public-1.0"
+      datePublished="2016-08-04T17:43:00-05:00"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Project moved to GitHub and Maven.</li>
+        <li>Ignoring locales with scripts or extensions since this API predates them.</li>
+      </ul>
+    </changelog:release>
+  </core:page>
 </jsp:root>

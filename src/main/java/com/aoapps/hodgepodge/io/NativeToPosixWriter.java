@@ -32,23 +32,27 @@ import java.io.Writer;
  */
 public final class NativeToPosixWriter {
 
-	/** Make no instances. */
-	private NativeToPosixWriter() {throw new AssertionError();}
+  /** Make no instances. */
+  private NativeToPosixWriter() {
+    throw new AssertionError();
+  }
 
-	/**
-	 * The end of line character for POSIX.
-	 */
-	static final String POSIX_EOL = "\n";
+  /**
+   * The end of line character for POSIX.
+   */
+  static final String POSIX_EOL = "\n";
 
-	/**
-	 * Gets an instance of the Writer that performs the conversion.
-	 * The implementation may be optimized for common platforms.
-	 */
-	public static Writer getInstance(Writer out) {
-		String eol = System.lineSeparator();
-		// Already in POSIX format, no conversion necessary
-		if(POSIX_EOL.equals(eol)) return out;
-		// Use FindReplaceWriter
-		return new FindReplaceWriter(out, eol, POSIX_EOL);
-	}
+  /**
+   * Gets an instance of the Writer that performs the conversion.
+   * The implementation may be optimized for common platforms.
+   */
+  public static Writer getInstance(Writer out) {
+    String eol = System.lineSeparator();
+    // Already in POSIX format, no conversion necessary
+    if (POSIX_EOL.equals(eol)) {
+      return out;
+    }
+    // Use FindReplaceWriter
+    return new FindReplaceWriter(out, eol, POSIX_EOL);
+  }
 }

@@ -35,5 +35,5 @@ import java.io.IOException;
 @FunctionalInterface
 public interface FileListObjectFactory<T extends FileListObject> {
 
-	T createInstance() throws IOException;
+  T createInstance() throws IOException;
 }

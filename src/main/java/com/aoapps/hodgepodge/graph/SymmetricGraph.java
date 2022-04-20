@@ -35,11 +35,11 @@ import java.util.Set;
 // TODO: Ex extends Throwable
 public interface SymmetricGraph<V, E extends Edge<V>, Ex extends Exception> extends Graph<V, E, Ex>, SymmetricMultiGraph<V, E, Ex> {
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * A graph only allows unique combinations of from and to vertices.
-	 */
-	@Override
-	Set<E> getEdgesTo(V to) throws Ex;
+  /**
+   * {@inheritDoc}
+   *
+   * A graph only allows unique combinations of from and to vertices.
+   */
+  @Override
+  Set<E> getEdgesTo(V to) throws Ex;
 }

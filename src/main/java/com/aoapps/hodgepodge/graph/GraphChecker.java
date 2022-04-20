@@ -34,5 +34,5 @@ package com.aoapps.hodgepodge.graph;
 // TODO: Ex extends Throwable
 public interface GraphChecker<Ex extends Exception> {
 
-	void checkGraph() throws GraphException, Ex;
+  void checkGraph() throws GraphException, Ex;
 }

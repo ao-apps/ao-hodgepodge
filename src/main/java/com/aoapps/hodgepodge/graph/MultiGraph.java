@@ -37,14 +37,14 @@ import java.util.Set;
 // TODO: Ex extends Throwable
 public interface MultiGraph<V, E extends Edge<V>, Ex extends Exception> {
 
-	/**
-	 * Gets the set of vertices for this graph.
-	 */
-	Set<V> getVertices() throws Ex;
+  /**
+   * Gets the set of vertices for this graph.
+   */
+  Set<V> getVertices() throws Ex;
 
-	/**
-	 * Gets the edges from the provided vertex.  The vertex must be part of this
-	 * graph, and the results are undefined if it is not.
-	 */
-	Collection<E> getEdgesFrom(V from) throws Ex;
+  /**
+   * Gets the edges from the provided vertex.  The vertex must be part of this
+   * graph, and the results are undefined if it is not.
+   */
+  Collection<E> getEdgesFrom(V from) throws Ex;
 }

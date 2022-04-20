@@ -48,136 +48,141 @@ import java.util.ResourceBundle;
  */
 public final class BundleLookupThreadContext {
 
-	private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, BundleLookupThreadContext.class);
+  private static final Resources RESOURCES = Resources.getResources(ResourceBundle::getBundle, BundleLookupThreadContext.class);
 
-	/**
-	 * @see  I18nThreadLocalRunnable
-	 */
-	static final ThreadLocal<BundleLookupThreadContext> threadContext = new ThreadLocal<>();
+  /**
+   * @see  I18nThreadLocalRunnable
+   */
+  static final ThreadLocal<BundleLookupThreadContext> threadContext = new ThreadLocal<>();
 
-	/**
-	 * Gets the current context for the current thread or {@code null} if none set and none created.
-	 *
-	 * @deprecated  Please use {@link #getThreadContext()} directly, since this content is now added and removed based on the
-	 *              {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
-	 *
-	 * @see  #getThreadContext()
-	 * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
-	 */
-	@Deprecated
-	public static BundleLookupThreadContext getThreadContext(boolean createIfMissing) {
-		BundleLookupThreadContext context = threadContext.get();
-		if(createIfMissing && context==null) {
-			context = new BundleLookupThreadContext();
-			threadContext.set(context);
-		}
-		return context;
-	}
+  /**
+   * Gets the current context for the current thread or {@code null} if none set and none created.
+   *
+   * @deprecated  Please use {@link #getThreadContext()} directly, since this content is now added and removed based on the
+   *              {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
+   *
+   * @see  #getThreadContext()
+   * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
+   */
+  @Deprecated
+  public static BundleLookupThreadContext getThreadContext(boolean createIfMissing) {
+    BundleLookupThreadContext context = threadContext.get();
+    if (createIfMissing && context == null) {
+      context = new BundleLookupThreadContext();
+      threadContext.set(context);
+    }
+    return context;
+  }
 
-	/**
-	 * Gets the current context for the current thread or {@code null} if none set.
-	 * This content is added and removed based on the
-	 * {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
-	 *
-	 * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
-	 */
-	public static BundleLookupThreadContext getThreadContext() {
-		return threadContext.get();
-	}
+  /**
+   * Gets the current context for the current thread or {@code null} if none set.
+   * This content is added and removed based on the
+   * {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
+   *
+   * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
+   */
+  public static BundleLookupThreadContext getThreadContext() {
+    return threadContext.get();
+  }
 
-	/**
-	 * Removes any current context.
-	 *
-	 * @deprecated  This should not be used directly and will become inaccessible in a future major version release,
-	 *              since this content is now added and removed based on the
-	 *              {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
-	 *
-	 * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
-	 */
-	@Deprecated
-	public static void removeThreadContext() {
-		threadContext.remove();
-	}
+  /**
+   * Removes any current context.
+   *
+   * @deprecated  This should not be used directly and will become inaccessible in a future major version release,
+   *              since this content is now added and removed based on the
+   *              {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
+   *
+   * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
+   */
+  @Deprecated
+  public static void removeThreadContext() {
+    threadContext.remove();
+  }
 
-	/**
-	 * Sets the current context to the given value.
-	 * This may be used to restore a previous context when in-context translation is temporarily disabled.
-	 * This content is added and removed based on the
-	 * {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
-	 *
-	 * @param  context  When {@code null}, is equivalent to {@link #removeThreadContext()}.
-	 *
-	 * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
-	 */
-	static void setThreadContext(BundleLookupThreadContext context) {
-		if(context == null) threadContext.remove();
-		else threadContext.set(context);
-	}
+  /**
+   * Sets the current context to the given value.
+   * This may be used to restore a previous context when in-context translation is temporarily disabled.
+   * This content is added and removed based on the
+   * {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
+   *
+   * @param  context  When {@code null}, is equivalent to {@link #removeThreadContext()}.
+   *
+   * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
+   */
+  static void setThreadContext(BundleLookupThreadContext context) {
+    if (context == null) {
+      threadContext.remove();
+    } else {
+      threadContext.set(context);
+    }
+  }
 
-	/**
-	 * Register a listener on {@link Resources}
-	 */
-	static {
-		Resources.addListener(
-			(Resources _resources, Locale locale, String key, Object[] args, String resource, String result) -> {
-				// Copy any lookup markup to the newly generated string
-				BundleLookupThreadContext _threadContext = BundleLookupThreadContext.getThreadContext();
-				if(_threadContext != null) {
-					BundleLookupMarkup lookupMarkup = _threadContext.getLookupMarkup(resource);
-					_threadContext.addLookupMarkup(
-						result, // This string is already a new instance and therefore is already unique by identity
-						lookupMarkup
-					);
-				}
-			}
-		);
-	}
+  /**
+   * Register a listener on {@link Resources}
+   */
+  static {
+    Resources.addListener(
+      (Resources _resources, Locale locale, String key, Object[] args, String resource, String result) -> {
+        // Copy any lookup markup to the newly generated string
+        BundleLookupThreadContext _threadContext = BundleLookupThreadContext.getThreadContext();
+        if (_threadContext != null) {
+          BundleLookupMarkup lookupMarkup = _threadContext.getLookupMarkup(resource);
+          _threadContext.addLookupMarkup(
+            result, // This string is already a new instance and therefore is already unique by identity
+            lookupMarkup
+          );
+        }
+      }
+    );
+  }
 
-	private final IdentityHashMap<String, BundleLookupMarkup> lookupResults = new IdentityHashMap<>();
+  private final IdentityHashMap<String, BundleLookupMarkup> lookupResults = new IdentityHashMap<>();
 
-	BundleLookupThreadContext() {
-		// Do nothing
-	}
+  BundleLookupThreadContext() {
+    // Do nothing
+  }
 
-	/**
-	 * @throws IllegalStateException   if the string has already been added to this context (as matched by identity)
-	 */
-	void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) throws IllegalStateException {
-		assert lookupResult != null;
-		synchronized(lookupResults) {
-			if(lookupResults.put(lookupResult, lookupMarkup) != null) {
-				throw new LocalizedIllegalStateException(RESOURCES, "addLookupMarkup.stringAlreadyAdded");
-			}
-		}
-	}
+  /**
+   * @throws IllegalStateException   if the string has already been added to this context (as matched by identity)
+   */
+  void addLookupMarkup(String lookupResult, BundleLookupMarkup lookupMarkup) throws IllegalStateException {
+    assert lookupResult != null;
+    synchronized (lookupResults) {
+      if (lookupResults.put(lookupResult, lookupMarkup) != null) {
+        throw new LocalizedIllegalStateException(RESOURCES, "addLookupMarkup.stringAlreadyAdded");
+      }
+    }
+  }
 
-	/**
-	 * Removes all lookups stored in this context.
-	 *
-	 * @deprecated  Lookups are no longer reset.  Instead, they are now added and removed based on the
-	 *              {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
-	 *
-	 * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
-	 */
-	@Deprecated
-	public void reset() {
-		synchronized(lookupResults) {
-			lookupResults.clear();
-		}
-	}
+  /**
+   * Removes all lookups stored in this context.
+   *
+   * @deprecated  Lookups are no longer reset.  Instead, they are now added and removed based on the
+   *              {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
+   *
+   * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
+   */
+  @Deprecated
+  public void reset() {
+    synchronized (lookupResults) {
+      lookupResults.clear();
+    }
+  }
 
-	/**
-	 * Gets the lookup markup for the given String or {@code null} if not found.
-	 * <p>
-	 * The string is looked-up by identity only: {@link String#equals(java.lang.Object)} is not called.
-	 * This is to give a more precise match to lookups.  Much care is taken care to support this string
-	 * identity lookup, including things like resource bundles, I/O buffers, and tag attribute manipulation.
-	 * </p>
-	 */
-	public BundleLookupMarkup getLookupMarkup(String result) {
-		if(result == null) return null;
-		synchronized(lookupResults) {
-			return lookupResults.get(result);
-		}
-	}
+  /**
+   * Gets the lookup markup for the given String or {@code null} if not found.
+   * <p>
+   * The string is looked-up by identity only: {@link String#equals(java.lang.Object)} is not called.
+   * This is to give a more precise match to lookups.  Much care is taken care to support this string
+   * identity lookup, including things like resource bundles, I/O buffers, and tag attribute manipulation.
+   * </p>
+   */
+  public BundleLookupMarkup getLookupMarkup(String result) {
+    if (result == null) {
+      return null;
+    }
+    synchronized (lookupResults) {
+      return lookupResults.get(result);
+    }
+  }
 }

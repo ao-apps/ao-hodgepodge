@@ -40,15 +40,15 @@ import java.io.InputStream;
 @Deprecated/* Java 9: (forRemoval = true) */
 public class DontCloseInputStream extends FilterInputStream implements NoClose {
 
-	public DontCloseInputStream(InputStream in) {
-		super(in);
-	}
+  public DontCloseInputStream(InputStream in) {
+    super(in);
+  }
 
-	/**
-	 * Does nothing on close to protect the wrapped InputStream.
-	 */
-	@Override
-	public void close() {
-		// Do nothing
-	}
+  /**
+   * Does nothing on close to protect the wrapped InputStream.
+   */
+  @Override
+  public void close() {
+    // Do nothing
+  }
 }

@@ -33,26 +33,28 @@ import java.util.List;
 */
 public final class Trees {
 
-	/** Make no instances. */
-	private Trees() {throw new AssertionError();}
+  /** Make no instances. */
+  private Trees() {
+    throw new AssertionError();
+  }
 
-	/**
-	 * @see #emptyTree()
-	 */
-	public static final Tree<?> EMPTY_TREE = new EmptyTree();
+  /**
+   * @see #emptyTree()
+   */
+  public static final Tree<?> EMPTY_TREE = new EmptyTree();
 
-	/**
-	 * Returns the empty list (immutable).
-	 */
-	@SuppressWarnings({"unchecked"})
-	public static final <T> Tree<T> emptyTree() {
-		return (Tree<T>) EMPTY_TREE;
-	}
+  /**
+   * Returns the empty list (immutable).
+   */
+  @SuppressWarnings({"unchecked"})
+  public static final <T> Tree<T> emptyTree() {
+    return (Tree<T>) EMPTY_TREE;
+  }
 
-	private static class EmptyTree implements Tree<Object> {
-		@Override
-		public List<Node<Object>> getRootNodes() {
-			return Collections.emptyList();
-		}
-	}
+  private static class EmptyTree implements Tree<Object> {
+    @Override
+    public List<Node<Object>> getRootNodes() {
+      return Collections.emptyList();
+    }
+  }
 }

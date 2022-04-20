@@ -49,54 +49,58 @@ import java.util.List;
  */
 public class TreeCopy<E> implements Tree<E> {
 
-	private final List<Node<E>> rootNodes;
+  private final List<Node<E>> rootNodes;
 
-	public TreeCopy(Tree<E> source) throws IOException, SQLException {
-		List<Node<E>> sourceRootNodes = source.getRootNodes();
-		int size = sourceRootNodes.size();
-		if(size==0) {
-			// No roots
-			rootNodes = Collections.emptyList();
-		} else if(size==1) {
-			// Single root
-			Node<E> nodeCopy = new NodeCopy<>(sourceRootNodes.get(0));
-			rootNodes = Collections.singletonList(nodeCopy);
-		} else {
-			// Multiple roots
-			List<Node<E>> newRootNodes = new ArrayList<>(size);
-			for(Node<E> rootNode : sourceRootNodes) newRootNodes.add(new NodeCopy<>(rootNode));
-			rootNodes = Collections.unmodifiableList(newRootNodes);
-		}
-	}
+  public TreeCopy(Tree<E> source) throws IOException, SQLException {
+    List<Node<E>> sourceRootNodes = source.getRootNodes();
+    int size = sourceRootNodes.size();
+    if (size == 0) {
+      // No roots
+      rootNodes = Collections.emptyList();
+    } else if (size == 1) {
+      // Single root
+      Node<E> nodeCopy = new NodeCopy<>(sourceRootNodes.get(0));
+      rootNodes = Collections.singletonList(nodeCopy);
+    } else {
+      // Multiple roots
+      List<Node<E>> newRootNodes = new ArrayList<>(size);
+      for (Node<E> rootNode : sourceRootNodes) newRootNodes.add(new NodeCopy<>(rootNode));
+      rootNodes = Collections.unmodifiableList(newRootNodes);
+    }
+  }
 
-	public TreeCopy(Tree<E> source, NodeFilter<E> nodeFilter) throws IOException, SQLException {
-		List<Node<E>> sourceRootNodes = source.getRootNodes();
+  public TreeCopy(Tree<E> source, NodeFilter<E> nodeFilter) throws IOException, SQLException {
+    List<Node<E>> sourceRootNodes = source.getRootNodes();
 
-		// Apply filter
-		List<Node<E>> filteredRootNodes = new ArrayList<>(sourceRootNodes.size());
-		for(Node<E> sourceRootNode : sourceRootNodes) if(!nodeFilter.isNodeFiltered(sourceRootNode)) filteredRootNodes.add(sourceRootNode);
+    // Apply filter
+    List<Node<E>> filteredRootNodes = new ArrayList<>(sourceRootNodes.size());
+    for (Node<E> sourceRootNode : sourceRootNodes) {
+      if (!nodeFilter.isNodeFiltered(sourceRootNode)) {
+        filteredRootNodes.add(sourceRootNode);
+      }
+    }
 
-		int size = filteredRootNodes.size();
-		if(size==0) {
-			// No roots
-			rootNodes = Collections.emptyList();
-		} else if(size==1) {
-			// Single root
-			Node<E> nodeCopy = new NodeCopy<>(filteredRootNodes.get(0), nodeFilter);
-			rootNodes = Collections.singletonList(nodeCopy);
-		} else {
-			// Multiple roots
-			List<Node<E>> newRootNodes = new ArrayList<>(size);
-			for(Node<E> rootNode : filteredRootNodes) newRootNodes.add(new NodeCopy<>(rootNode, nodeFilter));
-			rootNodes = Collections.unmodifiableList(newRootNodes);
-		}
-	}
+    int size = filteredRootNodes.size();
+    if (size == 0) {
+      // No roots
+      rootNodes = Collections.emptyList();
+    } else if (size == 1) {
+      // Single root
+      Node<E> nodeCopy = new NodeCopy<>(filteredRootNodes.get(0), nodeFilter);
+      rootNodes = Collections.singletonList(nodeCopy);
+    } else {
+      // Multiple roots
+      List<Node<E>> newRootNodes = new ArrayList<>(size);
+      for (Node<E> rootNode : filteredRootNodes) newRootNodes.add(new NodeCopy<>(rootNode, nodeFilter));
+      rootNodes = Collections.unmodifiableList(newRootNodes);
+    }
+  }
 
-	/**
-	 * Gets the list of root nodes.
-	 */
-	@Override
-	public List<Node<E>> getRootNodes() {
-		return rootNodes;
-	}
+  /**
+   * Gets the list of root nodes.
+   */
+  @Override
+  public List<Node<E>> getRootNodes() {
+    return rootNodes;
+  }
 }

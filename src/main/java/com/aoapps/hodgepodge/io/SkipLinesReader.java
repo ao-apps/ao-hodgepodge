@@ -35,19 +35,21 @@ import java.io.Reader;
  */
 public class SkipLinesReader extends BufferedReader implements NoClose {
 
-	private final Reader in;
+  private final Reader in;
 
-	public SkipLinesReader(Reader in, int skipLines) throws IOException {
-		super(in);
-		for(int i=0; i<skipLines; i++) {
-			String line = readLine();
-			if(line==null) break;
-		}
-		this.in = in;
-	}
+  public SkipLinesReader(Reader in, int skipLines) throws IOException {
+    super(in);
+    for (int i=0; i<skipLines; i++) {
+      String line = readLine();
+      if (line == null) {
+        break;
+      }
+    }
+    this.in = in;
+  }
 
-	@Override
-	public boolean isNoClose() {
-		return (in instanceof NoClose) && ((NoClose)in).isNoClose();
-	}
+  @Override
+  public boolean isNoClose() {
+    return (in instanceof NoClose) && ((NoClose)in).isNoClose();
+  }
 }

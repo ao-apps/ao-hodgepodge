@@ -28,21 +28,21 @@ package com.aoapps.hodgepodge.graph;
  */
 public class LabeledEdge<V, L> extends Edge<V> {
 
-	protected final L label;
+  protected final L label;
 
-	public LabeledEdge(V from, V to, L label) {
-		super(from, to);
-		this.label = label;
-	}
-	/**
-	 * The label of the edge.
-	 */
-	public final L getLabel() {
-		return label;
-	}
+  public LabeledEdge(V from, V to, L label) {
+    super(from, to);
+    this.label = label;
+  }
+  /**
+   * The label of the edge.
+   */
+  public final L getLabel() {
+    return label;
+  }
 
-	@Override
-	public String toString() {
-		return super.toString()+" \""+label+'"';
-	}
+  @Override
+  public String toString() {
+    return super.toString()+" \""+label+'"';
+  }
 }

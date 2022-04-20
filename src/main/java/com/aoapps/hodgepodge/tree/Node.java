@@ -34,16 +34,16 @@ import java.util.List;
 */
 public interface Node<E> {
 
-	/**
-	 * Gets the list of direct children of this node.
-	 * If this node cannot have children then return <code>null</code>.
-	 * If this node can have children but there are none, return an empty List.
-	 */
-	List<Node<E>> getChildren() throws IOException, SQLException;
+  /**
+   * Gets the list of direct children of this node.
+   * If this node cannot have children then return <code>null</code>.
+   * If this node can have children but there are none, return an empty List.
+   */
+  List<Node<E>> getChildren() throws IOException, SQLException;
 
-	/**
-	 * Gets the value contained in this node.  Comparisons of this value
-	 * will be performed using the equals method.
-	 */
-	E getValue();
+  /**
+   * Gets the value contained in this node.  Comparisons of this value
+   * will be performed using the equals method.
+   */
+  E getValue();
 }

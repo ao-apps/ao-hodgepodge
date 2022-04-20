@@ -35,8 +35,8 @@ package com.aoapps.hodgepodge.table;
 @FunctionalInterface
 public interface TableListener {
 
-	/**
-	 * Invoked when a <code>Table</code> is updated.
-	 */
-	void tableUpdated(Table<?> table);
+  /**
+   * Invoked when a <code>Table</code> is updated.
+   */
+  void tableUpdated(Table<?> table);
 }

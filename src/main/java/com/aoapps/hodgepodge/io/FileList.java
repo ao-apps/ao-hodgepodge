@@ -46,279 +46,302 @@ import java.util.RandomAccess;
  */
 public class FileList<T extends FileListObject> extends AbstractList<T> implements RandomAccess, Closeable {
 
-	private final String filenamePrefix;
-	private final String filenameExtension;
-	private final TempFileContext tempFileContext;
-	private final FixedRecordFile frf;
-	private final FileListObjectFactory<T> objectFactory;
+  private final String filenamePrefix;
+  private final String filenameExtension;
+  private final TempFileContext tempFileContext;
+  private final FixedRecordFile frf;
+  private final FileListObjectFactory<T> objectFactory;
 
-	private final AoByteArrayInputStream inBuffer;
-	private final DataInputStream dataInBuffer;
-	private final AoByteArrayOutputStream outBuffer;
-	private final DataOutputStream dataOutBuffer;
+  private final AoByteArrayInputStream inBuffer;
+  private final DataInputStream dataInBuffer;
+  private final AoByteArrayOutputStream outBuffer;
+  private final DataOutputStream dataOutBuffer;
 
-	public FileList(
-		String filenamePrefix,
-		String filenameExtension,
-		int objectLength,
-		FileListObjectFactory<T> objectFactory
-	) throws IOException {
-		this.filenamePrefix=filenamePrefix;
-		this.filenameExtension=filenameExtension;
-		this.tempFileContext = new TempFileContext();
-		this.frf = new FixedRecordFile(
-			tempFileContext.createTempFile(
-				filenamePrefix + '_',
-				filenameExtension == null ? null : ("." + filenameExtension)
-			).getFile(),
-			"rw",
-			objectLength + 1
-		);
-		this.objectFactory=objectFactory;
+  public FileList(
+    String filenamePrefix,
+    String filenameExtension,
+    int objectLength,
+    FileListObjectFactory<T> objectFactory
+  ) throws IOException {
+    this.filenamePrefix=filenamePrefix;
+    this.filenameExtension=filenameExtension;
+    this.tempFileContext = new TempFileContext();
+    this.frf = new FixedRecordFile(
+      tempFileContext.createTempFile(
+        filenamePrefix + '_',
+        filenameExtension == null ? null : ("." + filenameExtension)
+      ).getFile(),
+      "rw",
+      objectLength + 1
+    );
+    this.objectFactory=objectFactory;
 
-		this.inBuffer=new AoByteArrayInputStream(new byte[objectLength+1]);
-		this.dataInBuffer=new DataInputStream(inBuffer);
-		this.outBuffer=new AoByteArrayOutputStream(objectLength+1);
-		this.dataOutBuffer=new DataOutputStream(outBuffer);
-	}
+    this.inBuffer=new AoByteArrayInputStream(new byte[objectLength+1]);
+    this.dataInBuffer=new DataInputStream(inBuffer);
+    this.outBuffer=new AoByteArrayOutputStream(objectLength+1);
+    this.dataOutBuffer=new DataOutputStream(outBuffer);
+  }
 
-	@Override
-	public void clear() {
-		try {
-			frf.removeAllRecords();
-			modCount++;
-		} catch(IOException err) {
-			throw new UncheckedIOException("frf=" + frf, err);
-		}
-	}
+  @Override
+  public void clear() {
+    try {
+      frf.removeAllRecords();
+      modCount++;
+    } catch (IOException err) {
+      throw new UncheckedIOException("frf=" + frf, err);
+    }
+  }
 
-	@Override
-	public T get(int index) {
-		try {
-			frf.seekToExistingRecord(index);
-			inBuffer.fillFrom(frf);
-			if(dataInBuffer.readBoolean()) {
-				T obj=objectFactory.createInstance();
-				obj.readRecord(dataInBuffer);
-				return obj;
-			} else return null;
-		} catch(IOException err) {
-			throw new UncheckedIOException("frf=" + frf, err);
-		}
-	}
+  @Override
+  public T get(int index) {
+    try {
+      frf.seekToExistingRecord(index);
+      inBuffer.fillFrom(frf);
+      if (dataInBuffer.readBoolean()) {
+        T obj=objectFactory.createInstance();
+        obj.readRecord(dataInBuffer);
+        return obj;
+      } else {
+        return null;
+      }
+    } catch (IOException err) {
+      throw new UncheckedIOException("frf=" + frf, err);
+    }
+  }
 
-	public void swap(int index1, int index2) {
-		try {
-			frf.swap(index1, index2);
-		} catch(IOException err) {
-			throw new UncheckedIOException("frf=" + frf, err);
-		}
-	}
+  public void swap(int index1, int index2) {
+    try {
+      frf.swap(index1, index2);
+    } catch (IOException err) {
+      throw new UncheckedIOException("frf=" + frf, err);
+    }
+  }
 
-	@Override
-	public int size() {
-		try {
-			return frf.getRecordCount();
-		} catch(IOException err) {
-			throw new UncheckedIOException("frf=" + frf, err);
-		}
-	}
+  @Override
+  public int size() {
+    try {
+      return frf.getRecordCount();
+    } catch (IOException err) {
+      throw new UncheckedIOException("frf=" + frf, err);
+    }
+  }
 
-	public int getRecordLength() {
-		return frf.getRecordLength();
-	}
+  public int getRecordLength() {
+    return frf.getRecordLength();
+  }
 
-	@Override
-	public T set(int index, T element) {
-		try {
-			// Read old object
-			frf.seekToExistingRecord(index);
-			inBuffer.fillFrom(frf);
-			T old;
-			if(dataInBuffer.readBoolean()) {
-				old=objectFactory.createInstance();
-				old.readRecord(dataInBuffer);
-			} else old=null;
+  @Override
+  public T set(int index, T element) {
+    try {
+      // Read old object
+      frf.seekToExistingRecord(index);
+      inBuffer.fillFrom(frf);
+      T old;
+      if (dataInBuffer.readBoolean()) {
+        old=objectFactory.createInstance();
+        old.readRecord(dataInBuffer);
+      } else {
+        old=null;
+      }
 
-			// Write new object
-			frf.seekToExistingRecord(index);
-			outBuffer.reset();
-			if(element==null) dataOutBuffer.writeBoolean(false);
-			else {
-				T newObj=element;
-				dataOutBuffer.writeBoolean(true);
-				newObj.writeRecord(dataOutBuffer);
-			}
-			int recordSize=outBuffer.size();
-			if(recordSize>frf.getRecordLength()) throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
-			outBuffer.writeTo(frf);
+      // Write new object
+      frf.seekToExistingRecord(index);
+      outBuffer.reset();
+      if (element == null) {
+        dataOutBuffer.writeBoolean(false);
+      } else {
+        T newObj=element;
+        dataOutBuffer.writeBoolean(true);
+        newObj.writeRecord(dataOutBuffer);
+      }
+      int recordSize=outBuffer.size();
+      if (recordSize>frf.getRecordLength()) {
+        throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
+      }
+      outBuffer.writeTo(frf);
 
-			// Return old object
-			return old;
-		} catch(IOException err) {
-			throw new UncheckedIOException("frf=" + frf, err);
-		}
-	}
+      // Return old object
+      return old;
+    } catch (IOException err) {
+      throw new UncheckedIOException("frf=" + frf, err);
+    }
+  }
 
-	@Override
-	public void add(int index, T element) {
-		try {
-			// Write to buffer
-			outBuffer.reset();
-			if(element==null) dataOutBuffer.writeBoolean(false);
-			else {
-				T newObj=element;
-				dataOutBuffer.writeBoolean(true);
-				newObj.writeRecord(dataOutBuffer);
-			}
-			int recordSize=outBuffer.size();
-			if(recordSize>frf.getRecordLength()) throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
+  @Override
+  public void add(int index, T element) {
+    try {
+      // Write to buffer
+      outBuffer.reset();
+      if (element == null) {
+        dataOutBuffer.writeBoolean(false);
+      } else {
+        T newObj=element;
+        dataOutBuffer.writeBoolean(true);
+        newObj.writeRecord(dataOutBuffer);
+      }
+      int recordSize=outBuffer.size();
+      if (recordSize>frf.getRecordLength()) {
+        throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
+      }
 
-			// Seeks to beginning of the new record
-			frf.addRecord(index);
+      // Seeks to beginning of the new record
+      frf.addRecord(index);
 
-			// Write new object
-			outBuffer.writeTo(frf);
+      // Write new object
+      outBuffer.writeTo(frf);
 
-			modCount++;
-		} catch(IOException err) {
-			throw new UncheckedIOException("frf=" + frf, err);
-		}
-	}
+      modCount++;
+    } catch (IOException err) {
+      throw new UncheckedIOException("frf=" + frf, err);
+    }
+  }
 
-	@Override
-	public boolean addAll(Collection<? extends T> C) {
-		return addAll(size(), C);
-	}
+  @Override
+  public boolean addAll(Collection<? extends T> C) {
+    return addAll(size(), C);
+  }
 
-	@Override
-	public boolean addAll(int index, Collection<? extends T> C) {
-		try {
-			FileList<? extends T> otherFL;
-			if(
-				(C instanceof FileList)
-				&& (otherFL=(FileList<? extends T>)C).frf.getRecordLength()==frf.getRecordLength()
-			) {
-				// Do direct disk copies
-				boolean changed=false;
-				int otherSize=otherFL.size();
-				if(otherSize>0) {
-					frf.addRecords(index, otherSize);
-					FixedRecordFile.copyRecords(otherFL.frf, 0, frf, index, otherSize);
-					changed=true;
-				}
-				if(changed) modCount++;
-				return changed;
-			} else {
-				// Do block allocate then write
-				boolean changed=false;
-				int otherSize=C.size();
-				if(otherSize>0) {
-					frf.addRecords(index, otherSize);
-					Iterator<? extends T> records = C.iterator();
-					int count=0;
-					while(records.hasNext()) {
-						// Write to buffer
-						outBuffer.reset();
-						T o = records.next();
-						if(o == null) dataOutBuffer.writeBoolean(false);
-						else {
-							dataOutBuffer.writeBoolean(true);
-							o.writeRecord(dataOutBuffer);
-						}
-						int recordSize=outBuffer.size();
-						if(recordSize>frf.getRecordLength()) throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
+  @Override
+  public boolean addAll(int index, Collection<? extends T> C) {
+    try {
+      FileList<? extends T> otherFL;
+      if (
+        (C instanceof FileList)
+        && (otherFL=(FileList<? extends T>)C).frf.getRecordLength() == frf.getRecordLength()
+      ) {
+        // Do direct disk copies
+        boolean changed=false;
+        int otherSize=otherFL.size();
+        if (otherSize>0) {
+          frf.addRecords(index, otherSize);
+          FixedRecordFile.copyRecords(otherFL.frf, 0, frf, index, otherSize);
+          changed=true;
+        }
+        if (changed) {
+          modCount++;
+        }
+        return changed;
+      } else {
+        // Do block allocate then write
+        boolean changed=false;
+        int otherSize=C.size();
+        if (otherSize>0) {
+          frf.addRecords(index, otherSize);
+          Iterator<? extends T> records = C.iterator();
+          int count=0;
+          while (records.hasNext()) {
+            // Write to buffer
+            outBuffer.reset();
+            T o = records.next();
+            if (o == null) {
+              dataOutBuffer.writeBoolean(false);
+            } else {
+              dataOutBuffer.writeBoolean(true);
+              o.writeRecord(dataOutBuffer);
+            }
+            int recordSize=outBuffer.size();
+            if (recordSize>frf.getRecordLength()) {
+              throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
+            }
 
-						// Write to disk
-						frf.seekToExistingRecord(index+count);
-						outBuffer.writeTo(frf);
-						count++;
-					}
-					if(count!=otherSize) throw new IOException("count!=otherSize");
-					changed=true;
-				}
-				if(changed) modCount++;
-				return changed;
-			}
-		} catch(IOException err) {
-			throw new UncheckedIOException("frf=" + frf + ", index=" + index, err);
-		}
-	}
+            // Write to disk
+            frf.seekToExistingRecord(index+count);
+            outBuffer.writeTo(frf);
+            count++;
+          }
+          if (count != otherSize) {
+            throw new IOException("count != otherSize");
+          }
+          changed=true;
+        }
+        if (changed) {
+          modCount++;
+        }
+        return changed;
+      }
+    } catch (IOException err) {
+      throw new UncheckedIOException("frf=" + frf + ", index=" + index, err);
+    }
+  }
 
-	@Override
-	public T remove(int index) {
-		try {
-			// Read the old object
-			frf.seekToExistingRecord(index);
-			inBuffer.fillFrom(frf);
-			T old;
-			if(dataInBuffer.readBoolean()) {
-				old=objectFactory.createInstance();
-				old.readRecord(dataInBuffer);
-			} else old=null;
+  @Override
+  public T remove(int index) {
+    try {
+      // Read the old object
+      frf.seekToExistingRecord(index);
+      inBuffer.fillFrom(frf);
+      T old;
+      if (dataInBuffer.readBoolean()) {
+        old=objectFactory.createInstance();
+        old.readRecord(dataInBuffer);
+      } else {
+        old=null;
+      }
 
-			frf.removeRecord(index);
+      frf.removeRecord(index);
 
-			modCount++;
+      modCount++;
 
-			// Return the old object
-			return old;
-		} catch(IOException err) {
-			throw new UncheckedIOException("frf=" + frf + ", index=" + index, err);
-		}
-	}
+      // Return the old object
+      return old;
+    } catch (IOException err) {
+      throw new UncheckedIOException("frf=" + frf + ", index=" + index, err);
+    }
+  }
 
-	public String getFilenamePrefix() {
-		return filenamePrefix;
-	}
+  public String getFilenamePrefix() {
+    return filenamePrefix;
+  }
 
-	public String getFilenameExtension() {
-		return filenameExtension;
-	}
+  public String getFilenameExtension() {
+    return filenameExtension;
+  }
 
-	public FileListObjectFactory<T> getObjectFactory() {
-		return objectFactory;
-	}
+  public FileListObjectFactory<T> getObjectFactory() {
+    return objectFactory;
+  }
 
-	/**
-	 * @deprecated The finalization mechanism is inherently problematic.
-	 */
-	@Deprecated // Java 9: (since="9")
-	@Override
-	@SuppressWarnings("FinalizeDeclaration")
-	protected void finalize() throws Throwable {
-		try {
-			close();
-		} finally {
-			super.finalize();
-		}
-	}
+  /**
+   * @deprecated The finalization mechanism is inherently problematic.
+   */
+  @Deprecated // Java 9: (since="9")
+  @Override
+  @SuppressWarnings("FinalizeDeclaration")
+  protected void finalize() throws Throwable {
+    try {
+      close();
+    } finally {
+      super.finalize();
+    }
+  }
 
-	@Override
-	public void close() throws IOException {
-		AutoCloseables.closeAndThrow(IOException.class, IOException::new, frf, tempFileContext);
-	}
+  @Override
+  public void close() throws IOException {
+    AutoCloseables.closeAndThrow(IOException.class, IOException::new, frf, tempFileContext);
+  }
 
-	/**
-	 * @deprecated  Please use {@link TempFileContext}
-	 *              as {@link File#deleteOnExit()} is prone to memory leaks in long-running applications.
-	 */
-	@Deprecated
-	public static File getTempFile(String prefix, String extension) throws IOException {
-		if(extension == null) extension = "tmp";
-		/* Now just using standard Java temporary files to avoid dependency on new ao-io-posix project.
-		try {
-			// First try to use Unix file because it creates the files with 600 permissions.
-			File f=PosixFile.mktemp(System.getProperty("java.io.tmpdir")+'/'+prefix+'_'+extension+'.', true).getFile();
-			return f;
-		} catch(SecurityException err) {
-			// This is OK if now allowed to load libraries
-		} catch(UnsatisfiedLinkError err) {
-			// This is OK if the library is not supported on this platform
-		}
-		 */
-		File f = File.createTempFile(prefix + '_', '.' + extension);
-		f.deleteOnExit();
-		return f;
-	}
+  /**
+   * @deprecated  Please use {@link TempFileContext}
+   *              as {@link File#deleteOnExit()} is prone to memory leaks in long-running applications.
+   */
+  @Deprecated
+  public static File getTempFile(String prefix, String extension) throws IOException {
+    if (extension == null) {
+      extension = "tmp";
+    }
+    /* Now just using standard Java temporary files to avoid dependency on new ao-io-posix project.
+    try {
+      // First try to use Unix file because it creates the files with 600 permissions.
+      File f=PosixFile.mktemp(System.getProperty("java.io.tmpdir")+'/'+prefix+'_'+extension+'.', true).getFile();
+      return f;
+    } catch (SecurityException err) {
+      // This is OK if now allowed to load libraries
+    } catch (UnsatisfiedLinkError err) {
+      // This is OK if the library is not supported on this platform
+    }
+     */
+    File f = File.createTempFile(prefix + '_', '.' + extension);
+    f.deleteOnExit();
+    return f;
+  }
 }

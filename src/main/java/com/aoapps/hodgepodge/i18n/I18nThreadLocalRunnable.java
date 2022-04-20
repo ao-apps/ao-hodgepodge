@@ -35,16 +35,16 @@ import com.aoapps.lang.i18n.impl.ThreadLocaleImpl;
  */
 public class I18nThreadLocalRunnable extends ThreadLocalsRunnable {
 
-	/**
-	 * The set of thread locals that are copied to maintain internationalization context.
-	 */
-	static final ThreadLocal<?>[] i18nThreadLocals = {
-		ThreadLocaleImpl.locale,
-		BundleLookupThreadContext.threadContext,
-		EditableResourceBundle.currentThreadSettings
-	};
+  /**
+   * The set of thread locals that are copied to maintain internationalization context.
+   */
+  static final ThreadLocal<?>[] i18nThreadLocals = {
+    ThreadLocaleImpl.locale,
+    BundleLookupThreadContext.threadContext,
+    EditableResourceBundle.currentThreadSettings
+  };
 
-	public I18nThreadLocalRunnable(Runnable task) {
-		super(task, i18nThreadLocals);
-	}
+  public I18nThreadLocalRunnable(Runnable task) {
+    super(task, i18nThreadLocals);
+  }
 }

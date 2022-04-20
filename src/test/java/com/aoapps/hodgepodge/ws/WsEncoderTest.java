@@ -37,30 +37,30 @@ import junit.framework.TestSuite;
  */
 public class WsEncoderTest extends TestCase {
 
-	/**
-	 * A fast pseudo-random number generator for non-cryptographic purposes.
-	 */
-	private static final Random fastRandom = new Random(IoUtils.bufferToLong(new SecureRandom().generateSeed(Long.BYTES)));
+  /**
+   * A fast pseudo-random number generator for non-cryptographic purposes.
+   */
+  private static final Random fastRandom = new Random(IoUtils.bufferToLong(new SecureRandom().generateSeed(Long.BYTES)));
 
-	public WsEncoderTest(String testName) {
-		super(testName);
-	}
+  public WsEncoderTest(String testName) {
+    super(testName);
+  }
 
-	public static Test suite() {
-		return new TestSuite(WsEncoderTest.class);
-	}
+  public static Test suite() {
+    return new TestSuite(WsEncoderTest.class);
+  }
 
-	public void testEncodeDecode() {
-		StringBuilder sb = new StringBuilder();
-		for(int c = 0; c < 1000; c++) {
-			sb.setLength(0);
-			for(int d = 0; d < 100; d++) {
-				sb.append((char)fastRandom.nextInt(Character.MAX_VALUE + 1));
-			}
-			String value = sb.toString();
-			String encoded = WsEncoder.encode(value);
-			String decoded = WsEncoder.decode(encoded);
-			assertEquals(value, decoded);
-		}
-	}
+  public void testEncodeDecode() {
+    StringBuilder sb = new StringBuilder();
+    for (int c = 0; c < 1000; c++) {
+      sb.setLength(0);
+      for (int d = 0; d < 100; d++) {
+        sb.append((char)fastRandom.nextInt(Character.MAX_VALUE + 1));
+      }
+      String value = sb.toString();
+      String encoded = WsEncoder.encode(value);
+      String decoded = WsEncoder.decode(encoded);
+      assertEquals(value, decoded);
+    }
+  }
 }

@@ -48,126 +48,128 @@ import java.util.logging.StreamHandler;
  */
 public abstract class QueuedHandler extends Handler {
 
-	/**
-	 * Creates a new executor.  Must be {@linkplain #shutdownExecutor(java.util.concurrent.ExecutorService) shutdown} when no longer needed.
-	 */
-	protected static ExecutorService newExecutor(String executorThreadName) {
-		return Executors.newSingleThreadExecutor(r -> {
-			Thread thread = new Thread(r);
-			thread.setName(executorThreadName);
-			thread.setDaemon(true);
-			thread.setPriority(Thread.NORM_PRIORITY - 1);
-			return thread;
-		});
-	}
+  /**
+   * Creates a new executor.  Must be {@linkplain #shutdownExecutor(java.util.concurrent.ExecutorService) shutdown} when no longer needed.
+   */
+  protected static ExecutorService newExecutor(String executorThreadName) {
+    return Executors.newSingleThreadExecutor(r -> {
+      Thread thread = new Thread(r);
+      thread.setName(executorThreadName);
+      thread.setDaemon(true);
+      thread.setPriority(Thread.NORM_PRIORITY - 1);
+      return thread;
+    });
+  }
 
-	/**
-	 * Shuts down the executor, waiting up to one minute for tasks to complete.
-	 */
-	protected static void shutdownExecutor(ExecutorService executor) throws SecurityException {
-		executor.shutdown();
-		try {
-			// Wait up to one minute to complete its tasks
-			executor.awaitTermination(1, TimeUnit.MINUTES);
-		} catch(InterruptedException err) {
-			// Restore the interrupted status
-			Thread.currentThread().interrupt();
-		}
-	}
+  /**
+   * Shuts down the executor, waiting up to one minute for tasks to complete.
+   */
+  protected static void shutdownExecutor(ExecutorService executor) throws SecurityException {
+    executor.shutdown();
+    try {
+      // Wait up to one minute to complete its tasks
+      executor.awaitTermination(1, TimeUnit.MINUTES);
+    } catch (InterruptedException err) {
+      // Restore the interrupted status
+      Thread.currentThread().interrupt();
+    }
+  }
 
-	private final ExecutorService executor;
-	private final boolean isOwnExecutor;
+  private final ExecutorService executor;
+  private final boolean isOwnExecutor;
 
-	/**
-	 * Manages the queue internally.
-	 */
-	protected QueuedHandler(String executorThreadName) {
-		executor = newExecutor(executorThreadName);
-		isOwnExecutor = true;
-		HandlerUtil.configure(this);
-	}
+  /**
+   * Manages the queue internally.
+   */
+  protected QueuedHandler(String executorThreadName) {
+    executor = newExecutor(executorThreadName);
+    isOwnExecutor = true;
+    HandlerUtil.configure(this);
+  }
 
-	/**
-	 * Uses the provided executor.  The executor is
-	 * not {@linkplain ExecutorService#shutdown() shutdown} on {@link #close()};
-	 * it is up to the caller to manage the executor lifecycle.
-	 *
-	 * @see #newExecutor(java.lang.String)
-	 * @see #shutdownExecutor(java.util.concurrent.ExecutorService)
-	 */
-	protected QueuedHandler(ExecutorService executor) {
-		this.executor = executor;
-		this.isOwnExecutor = false;
-		HandlerUtil.configure(this);
-	}
+  /**
+   * Uses the provided executor.  The executor is
+   * not {@linkplain ExecutorService#shutdown() shutdown} on {@link #close()};
+   * it is up to the caller to manage the executor lifecycle.
+   *
+   * @see #newExecutor(java.lang.String)
+   * @see #shutdownExecutor(java.util.concurrent.ExecutorService)
+   */
+  protected QueuedHandler(ExecutorService executor) {
+    this.executor = executor;
+    this.isOwnExecutor = false;
+    HandlerUtil.configure(this);
+  }
 
-	/**
-	 * @see StreamHandler#publish(java.util.logging.LogRecord)
-	 */
-	@Override
-	public void publish(LogRecord rec) {
-		// Don't queue if not needed
-		if(isLoggable(rec)) {
-			// Format first to have correct threading information
-			Formatter formatter;
-			String msg;
-			try {
-				formatter = getFormatter();
-				msg = formatter.format(rec);
-			} catch(Exception ex) {
-				// We don't want to throw an exception here, but we
-				// report the exception to any registered ErrorManager.
-				reportError(null, ex, ErrorManager.FORMAT_FAILURE);
-				return;
-			}
-			// Queue for custom action
-	        try {
-				executor.submit(
-					() -> {
-						try {
-							backgroundPublish(
-								formatter,
-								rec,
-								msg
-							);
-						} catch (Exception ex) {
-							// We don't want to throw an exception here, but we
-							// report the exception to any registered ErrorManager.
-							reportError(null, ex, ErrorManager.WRITE_FAILURE);
-						}
-					}
-				);
-			} catch (Exception ex) {
-				// We don't want to throw an exception here, but we
-				// report the exception to any registered ErrorManager.
-				reportError(null, ex, ErrorManager.GENERIC_FAILURE);
-			}
-		}
-	}
+  /**
+   * @see StreamHandler#publish(java.util.logging.LogRecord)
+   */
+  @Override
+  public void publish(LogRecord rec) {
+    // Don't queue if not needed
+    if (isLoggable(rec)) {
+      // Format first to have correct threading information
+      Formatter formatter;
+      String msg;
+      try {
+        formatter = getFormatter();
+        msg = formatter.format(rec);
+      } catch (Exception ex) {
+        // We don't want to throw an exception here, but we
+        // report the exception to any registered ErrorManager.
+        reportError(null, ex, ErrorManager.FORMAT_FAILURE);
+        return;
+      }
+      // Queue for custom action
+          try {
+        executor.submit(
+          () -> {
+            try {
+              backgroundPublish(
+                formatter,
+                rec,
+                msg
+              );
+            } catch (Exception ex) {
+              // We don't want to throw an exception here, but we
+              // report the exception to any registered ErrorManager.
+              reportError(null, ex, ErrorManager.WRITE_FAILURE);
+            }
+          }
+        );
+      } catch (Exception ex) {
+        // We don't want to throw an exception here, but we
+        // report the exception to any registered ErrorManager.
+        reportError(null, ex, ErrorManager.GENERIC_FAILURE);
+      }
+    }
+  }
 
-	/**
-	 * TODO: Could wait until all queued log records up to this moment have been handled.
-	 * If new log records are added while we wait, don't wait for them.
-	 */
-	@Override
-	@SuppressWarnings("NoopMethodInAbstractClass")
-	public void flush() {
-		// Do nothing
-	}
+  /**
+   * TODO: Could wait until all queued log records up to this moment have been handled.
+   * If new log records are added while we wait, don't wait for them.
+   */
+  @Override
+  @SuppressWarnings("NoopMethodInAbstractClass")
+  public void flush() {
+    // Do nothing
+  }
 
-	@Override
-	public void close() throws SecurityException {
-		if(isOwnExecutor) shutdownExecutor(executor);
-	}
+  @Override
+  public void close() throws SecurityException {
+    if (isOwnExecutor) {
+      shutdownExecutor(executor);
+    }
+  }
 
-	/**
-	 * This is called in a background thread.
-	 *
-	 * @param formatter  the formatter at the time the record was queued
-	 * @param rec        the queued record
-	 * @param fullReport the complete message generated by the formatter before
-	 *                   the record was queued.  The message is generated before
-	 *                   so it can have accurate thread and time information.
-	 */
-	protected abstract void backgroundPublish(Formatter formatter, LogRecord rec, String fullReport) throws Exception;
+  /**
+   * This is called in a background thread.
+   *
+   * @param formatter  the formatter at the time the record was queued
+   * @param rec        the queued record
+   * @param fullReport the complete message generated by the formatter before
+   *                   the record was queued.  The message is generated before
+   *                   so it can have accurate thread and time information.
+   */
+  protected abstract void backgroundPublish(Formatter formatter, LogRecord rec, String fullReport) throws Exception;
 }
