@@ -60,7 +60,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     if (stats != null) {
       stats.sortStarting();
     }
-    sort(list, 0, list.size()-1, comparator, stats);
+    sort(list, 0, list.size() - 1, comparator, stats);
     if (stats != null) {
       stats.sortEnding();
     }
@@ -71,7 +71,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     if (stats != null) {
       stats.sortStarting();
     }
-    sort(array, 0, array.length-1, comparator, stats);
+    sort(array, 0, array.length - 1, comparator, stats);
     if (stats != null) {
       stats.sortEnding();
     }
@@ -89,7 +89,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     /*
      *  Bubble sort if the number of elements is less than 6
      */
-    if ((hi-lo) <= 6) {
+    if ((hi - lo) <= 6) {
       if (stats != null) {
         stats.sortRecursing();
       }
@@ -103,18 +103,18 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     /*
      *  Pick a pivot and move it out of the way
      */
-    T pivot = get(list, (lo+hi)/2, stats);
-    set(list, (lo+hi)/2, get(list, hi, stats), stats);
+    T pivot = get(list, (lo + hi) / 2, stats);
+    set(list, (lo + hi) / 2, get(list, hi, stats), stats);
     set(list, hi, pivot, stats);
 
-    while (lo<hi) {
+    while (lo < hi) {
       /*
        *  Search forward from a[lo] until an element is found that
        *  is greater than the pivot or lo >= hi
        */
       while (
-        compare(get(list, lo, stats), pivot, comparator, stats) <= 0
-        && lo < hi
+          compare(get(list, lo, stats), pivot, comparator, stats) <= 0
+              && lo < hi
       ) {
         lo++;
       }
@@ -124,8 +124,8 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
        *  is less than the pivot, or hi <= lo
        */
       while (
-        compare(pivot, get(list, hi, stats), comparator, stats) <= 0
-        && lo < hi
+          compare(pivot, get(list, hi, stats), comparator, stats) <= 0
+              && lo < hi
       ) {
         hi--;
       }
@@ -133,7 +133,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
       /*
        *  Swap elements a[lo] and a[hi]
        */
-      if ( lo < hi ) {
+      if (lo < hi) {
         swap(list, hi, lo, stats);
       }
     }
@@ -152,7 +152,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     if (stats != null) {
       stats.sortRecursing();
     }
-    sort(list, lo0, lo-1, comparator, stats);
+    sort(list, lo0, lo - 1, comparator, stats);
     if (stats != null) {
       stats.sortUnrecursing();
     }
@@ -160,7 +160,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     if (stats != null) {
       stats.sortRecursing();
     }
-    sort(list, hi+1, hi0, comparator, stats);
+    sort(list, hi + 1, hi0, comparator, stats);
     if (stats != null) {
       stats.sortUnrecursing();
     }
@@ -173,7 +173,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     /*
      *  Bubble sort if the number of elements is less than 6
      */
-    if ((hi-lo) <= 6) {
+    if ((hi - lo) <= 6) {
       if (stats != null) {
         stats.sortRecursing();
       }
@@ -187,18 +187,18 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     /*
      *  Pick a pivot and move it out of the way
      */
-    T pivot = get(array, (lo+hi)/2, stats);
-    set(array, (lo+hi)/2, get(array, hi, stats), stats);
+    T pivot = get(array, (lo + hi) / 2, stats);
+    set(array, (lo + hi) / 2, get(array, hi, stats), stats);
     set(array, hi, pivot, stats);
 
-    while (lo<hi) {
+    while (lo < hi) {
       /*
        *  Search forward from a[lo] until an element is found that
        *  is greater than the pivot or lo >= hi
        */
       while (
-        compare(get(array, lo, stats), pivot, comparator, stats) <= 0
-        && lo < hi
+          compare(get(array, lo, stats), pivot, comparator, stats) <= 0
+              && lo < hi
       ) {
         lo++;
       }
@@ -208,8 +208,8 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
        *  is less than the pivot, or hi <= lo
        */
       while (
-        compare(pivot, get(array, hi, stats), comparator, stats) <= 0
-        && lo < hi
+          compare(pivot, get(array, hi, stats), comparator, stats) <= 0
+              && lo < hi
       ) {
         hi--;
       }
@@ -217,7 +217,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
       /*
        *  Swap elements a[lo] and a[hi]
        */
-      if ( lo < hi ) {
+      if (lo < hi) {
         swap(array, hi, lo, stats);
       }
     }
@@ -236,7 +236,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     if (stats != null) {
       stats.sortRecursing();
     }
-    sort(array, lo0, lo-1, comparator, stats);
+    sort(array, lo0, lo - 1, comparator, stats);
     if (stats != null) {
       stats.sortUnrecursing();
     }
@@ -244,7 +244,7 @@ public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
     if (stats != null) {
       stats.sortRecursing();
     }
-    sort(array, hi+1, hi0, comparator, stats);
+    sort(array, hi + 1, hi0, comparator, stats);
     if (stats != null) {
       stats.sortUnrecursing();
     }

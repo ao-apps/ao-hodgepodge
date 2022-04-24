@@ -60,14 +60,14 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
   private static final int MIN_CONCURRENCY_SIZE = 1 << 9; // TODO: 1 << 16
 
   private static final ExecutorService executor = !ENABLE_CONCURRENCY ? null : Executors.newFixedThreadPool(
-    RuntimeUtils.getAvailableProcessors(),
-    new ThreadFactory() {
-      private final Sequence idSequence = new AtomicSequence();
-      @Override
-      public Thread newThread(Runnable target) {
-        return new Thread(target, IntegerRadixSortExperimental.class.getName()+".executor: id=" + idSequence.getNextSequenceValue());
+      RuntimeUtils.getAvailableProcessors(),
+      new ThreadFactory() {
+        private final Sequence idSequence = new AtomicSequence();
+        @Override
+        public Thread newThread(Runnable target) {
+          return new Thread(target, IntegerRadixSortExperimental.class.getName() + ".executor: id=" + idSequence.getNextSequenceValue());
+        }
       }
-    }
   );
 
   private static final IntegerRadixSortExperimental instance = new IntegerRadixSortExperimental();
@@ -113,7 +113,7 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
     } else {
       if (ENABLE_CONCURRENCY) {
         Queue<Future<?>> futures = new ConcurrentLinkedQueue<>();
-        sort(array, 0, array.length, 32-FIRST_BITS_PER_PASS, futures);
+        sort(array, 0, array.length, 32 - FIRST_BITS_PER_PASS, futures);
         try {
           while (!futures.isEmpty()) {
             futures.remove().get();
@@ -126,7 +126,7 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
           throw new WrappedException(e);
         }
       } else {
-        sort(array, 0, array.length, 32-R_BITS_PER_PASS, null);
+        sort(array, 0, array.length, 32 - R_BITS_PER_PASS, null);
       }
     }
     if (stats != null) {
@@ -150,26 +150,26 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
     int[] last = new int[PASS_SIZE];
     final int[] pointer = new int[PASS_SIZE];
 
-    for (int x=offset; x<end; ++x) {
-      ++last[((array[x]+UNSIGNED_OFFSET) >> shift) & PASS_MASK];
+    for (int x = offset; x < end; ++x) {
+      ++last[((array[x] + UNSIGNED_OFFSET) >> shift) & PASS_MASK];
     }
 
     last[0] += offset;
     pointer[0] = offset;
-    for (int x=1; x<PASS_SIZE; ++x) {
-      pointer[x] = last[x-1];
-      last[x] += last[x-1];
+    for (int x = 1; x < PASS_SIZE; ++x) {
+      pointer[x] = last[x - 1];
+      last[x] += last[x - 1];
     }
 
-    for (int x=0; x<PASS_SIZE; ++x) {
+    for (int x = 0; x < PASS_SIZE; ++x) {
       while (pointer[x] != last[x]) {
         int value = array[pointer[x]];
-        int y = ((value+UNSIGNED_OFFSET) >> shift) & PASS_MASK;
+        int y = ((value + UNSIGNED_OFFSET) >> shift) & PASS_MASK;
         while (x != y) {
           int temp = array[pointer[y]];
           array[pointer[y]++] = value;
           value = temp;
-          y = ((value+UNSIGNED_OFFSET) >> shift) & PASS_MASK;
+          y = ((value + UNSIGNED_OFFSET) >> shift) & PASS_MASK;
         }
         array[pointer[x]++] = value;
       }
@@ -177,20 +177,20 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
     if (shift > 0) {
       // TODO: Additional criteria
       shift -= BITS_PER_PASS;
-      for (int x=0; x<PASS_SIZE; ++x) {
-        final int size = x > 0 ? (pointer[x] - pointer[x-1]) : (pointer[0] - offset);
+      for (int x = 0; x < PASS_SIZE; ++x) {
+        final int size = x > 0 ? (pointer[x] - pointer[x - 1]) : (pointer[0] - offset);
         if (size > 64) {
           final int newOffset = pointer[x] - size;
           final int newEnd = pointer[x];
           if (
-            ENABLE_CONCURRENCY
-            && (newEnd-newOffset) >= MIN_CONCURRENCY_SIZE
+              ENABLE_CONCURRENCY
+                  && (newEnd - newOffset) >= MIN_CONCURRENCY_SIZE
           ) {
             final int finalShift = shift;
             futures.add(
-              executor.submit(
-                () -> sort(array, newOffset, newEnd, finalShift, futures)
-              )
+                executor.submit(
+                    () -> sort(array, newOffset, newEnd, finalShift, futures)
+                )
             );
           } else {
             sort(array, newOffset, newEnd, shift, futures);
@@ -205,11 +205,11 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 
   // From https://github.com/gorset/radix/blob/master/Radix.java
   private static void insertionSort(int[] array, int offset, int end) {
-    for (int x=offset; x<end; ++x) {
-      for (int y=x; y>offset && array[y-1]>array[y]; y--) {
+    for (int x = offset; x < end; ++x) {
+      for (int y = x; y > offset && array[y - 1] > array[y]; y--) {
         int temp = array[y];
-        array[y] = array[y-1];
-        array[y-1] = temp;
+        array[y] = array[y - 1];
+        array[y - 1] = temp;
       }
     }
   }

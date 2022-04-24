@@ -51,37 +51,37 @@ public final class SortStatistics {
   }
 
   public void reset() {
-    startTime=-1;
-    currentRecursion=0;
-    totalTime=0;
-    algorithmSwitches=0;
-    gets=0;
-    sets=0;
-    objectComparisons=0;
-    inListComparisons=0;
-    swaps=0;
-    maxRecursion=0;
+    startTime = -1;
+    currentRecursion = 0;
+    totalTime = 0;
+    algorithmSwitches = 0;
+    gets = 0;
+    sets = 0;
+    objectComparisons = 0;
+    inListComparisons = 0;
+    swaps = 0;
+    maxRecursion = 0;
   }
 
   public void sortStarting() {
     if (startTime != -1) {
       throw new RuntimeException("sortStarting already called");
     }
-    startTime=System.currentTimeMillis();
+    startTime = System.currentTimeMillis();
   }
 
   public void sortEnding() {
     if (startTime == -1) {
       throw new RuntimeException("sortStarting not yet called");
     }
-    totalTime+=(System.currentTimeMillis()-startTime);
-    startTime=-1;
+    totalTime += (System.currentTimeMillis() - startTime);
+    startTime = -1;
   }
 
   public void sortRecursing() {
     currentRecursion++;
-    if (currentRecursion>maxRecursion) {
-      maxRecursion=currentRecursion;
+    if (currentRecursion > maxRecursion) {
+      maxRecursion = currentRecursion;
     }
   }
 
@@ -155,18 +155,25 @@ public final class SortStatistics {
 
   public void printStats(PrintWriter out) {
     out.print("Total Time...........: ");
-    if (totalTime>Integer.MAX_VALUE) {
+    if (totalTime > Integer.MAX_VALUE) {
       out.println(Strings.getTimeLengthString(totalTime));
     } else {
       out.print(BigDecimal.valueOf(totalTime, 3));
       out.println(" seconds");
     }
-    out.print("Max Recursion........: "); out.println(maxRecursion);
-    out.print("Algorithm Switches...: "); out.println(algorithmSwitches);
-    out.print("Gets.................: "); out.println(gets);
-    out.print("Sets.................: "); out.println(sets);
-    out.print("In-List Swaps........: "); out.println(swaps);
-    out.print("Object Comparisons...: "); out.println(objectComparisons);
-    out.print("In-List Comparisons..: "); out.println(inListComparisons);
+    out.print("Max Recursion........: ");
+    out.println(maxRecursion);
+    out.print("Algorithm Switches...: ");
+    out.println(algorithmSwitches);
+    out.print("Gets.................: ");
+    out.println(gets);
+    out.print("Sets.................: ");
+    out.println(sets);
+    out.print("In-List Swaps........: ");
+    out.println(swaps);
+    out.print("Object Comparisons...: ");
+    out.println(objectComparisons);
+    out.print("In-List Comparisons..: ");
+    out.println(inListComparisons);
   }
 }

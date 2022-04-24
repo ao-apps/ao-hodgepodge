@@ -39,29 +39,29 @@ public class BitRate implements Serializable, Comparable<BitRate> {
     BIT("bit",     1L),
     KBIT("kbit",   1000L),
     KIBIT("Kibit", 1024L),
-    MBIT("Mbit",   1000L*1000L),
-    MIBIT("Mibit", 1024L*1024L),
-    GBIT("Gbit",   1000L*1000L*1000L),
-    GIBIT("Gibit", 1024L*1024L*1024L),
-    TBIT("Tbit",   1000L*1000L*1000L*1000L),
-    TIBIT("Tibit", 1024L*1024L*1024L*1024L),
-    PBIT("Pbit",   1000L*1000L*1000L*1000L*1000L),
-    PIBIT("Pibit", 1024L*1024L*1024L*1024L*1024L),
-    EBIT("Ebit",   1000L*1000L*1000L*1000L*1000L*1000L),
-    EIBIT("Eibit", 1024L*1024L*1024L*1024L*1024L*1024L),
-    BYTE("byte",     8L*1L),
-    KBYTE("kbyte",   8L*1000L),
-    KIBYTE("Kibyte", 8L*1024L),
-    MBYTE("Mbyte",   8L*1000L*1000L),
-    MIBYTE("Mibyte", 8L*1024L*1024L),
-    GBYTE("Gbyte",   8L*1000L*1000L*1000L),
-    GIBYTE("Gibyte", 8L*1024L*1024L*1024L),
-    TBYTE("Tbyte",   8L*1000L*1000L*1000L*1000L),
-    TIBYTE("Tibyte", 8L*1024L*1024L*1024L*1024L),
-    PBYTE("Pbyte",   8L*1000L*1000L*1000L*1000L*1000L),
-    PIBYTE("Pibyte", 8L*1024L*1024L*1024L*1024L*1024L),
-    EBYTE("Ebyte",   8L*1000L*1000L*1000L*1000L*1000L*1000L),
-    EIBYTE("Eibyte", 8L*1024L*1024L*1024L*1024L*1024L*1024L);
+    MBIT("Mbit",   1000L * 1000L),
+    MIBIT("Mibit", 1024L * 1024L),
+    GBIT("Gbit",   1000L * 1000L * 1000L),
+    GIBIT("Gibit", 1024L * 1024L * 1024L),
+    TBIT("Tbit",   1000L * 1000L * 1000L * 1000L),
+    TIBIT("Tibit", 1024L * 1024L * 1024L * 1024L),
+    PBIT("Pbit",   1000L * 1000L * 1000L * 1000L * 1000L),
+    PIBIT("Pibit", 1024L * 1024L * 1024L * 1024L * 1024L),
+    EBIT("Ebit",   1000L * 1000L * 1000L * 1000L * 1000L * 1000L),
+    EIBIT("Eibit", 1024L * 1024L * 1024L * 1024L * 1024L * 1024L),
+    BYTE("byte",     8L * 1L),
+    KBYTE("kbyte",   8L * 1000L),
+    KIBYTE("Kibyte", 8L * 1024L),
+    MBYTE("Mbyte",   8L * 1000L * 1000L),
+    MIBYTE("Mibyte", 8L * 1024L * 1024L),
+    GBYTE("Gbyte",   8L * 1000L * 1000L * 1000L),
+    GIBYTE("Gibyte", 8L * 1024L * 1024L * 1024L),
+    TBYTE("Tbyte",   8L * 1000L * 1000L * 1000L * 1000L),
+    TIBYTE("Tibyte", 8L * 1024L * 1024L * 1024L * 1024L),
+    PBYTE("Pbyte",   8L * 1000L * 1000L * 1000L * 1000L * 1000L),
+    PIBYTE("Pibyte", 8L * 1024L * 1024L * 1024L * 1024L * 1024L),
+    EBYTE("Ebyte",   8L * 1000L * 1000L * 1000L * 1000L * 1000L * 1000L),
+    EIBYTE("Eibyte", 8L * 1024L * 1024L * 1024L * 1024L * 1024L * 1024L);
 
     private static final Unit[] values = values();
 
@@ -91,7 +91,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
    * @param unit if <code>null</code>, defaults to bits per second.
    */
   private static long getBitRate(long quantity, Unit unit) {
-    if (quantity<1) {
+    if (quantity < 1) {
       throw new IllegalArgumentException("quantity<1");
     }
     return Math.multiplyExact(quantity, unit == null ? 1 : unit.getCoefficient());
@@ -122,7 +122,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
 
   public BitRate(String value) {
     Unit valueUnit = null;
-    for (int c=Unit.values.length-1; c >= 0; c--) {
+    for (int c = Unit.values.length - 1; c >= 0; c--) {
       Unit u = Unit.values[c];
       String name = u.getName();
       if (value.endsWith(name)) {
@@ -150,7 +150,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
     if (!(obj instanceof BitRate)) {
       return false;
     }
-    BitRate other = (BitRate)obj;
+    BitRate other = (BitRate) obj;
     return quantity == other.quantity && Objects.equals(unit, other.unit);
   }
 
@@ -164,7 +164,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
     if (unit == null) {
       return Long.toString(quantity);
     }
-    return Long.toString(quantity)+unit.getName();
+    return Long.toString(quantity) + unit.getName();
   }
 
   @Override

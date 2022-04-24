@@ -39,7 +39,7 @@ public class SkipLinesReader extends BufferedReader implements NoClose {
 
   public SkipLinesReader(Reader in, int skipLines) throws IOException {
     super(in);
-    for (int i=0; i<skipLines; i++) {
+    for (int i = 0; i < skipLines; i++) {
       String line = readLine();
       if (line == null) {
         break;
@@ -50,6 +50,6 @@ public class SkipLinesReader extends BufferedReader implements NoClose {
 
   @Override
   public boolean isNoClose() {
-    return (in instanceof NoClose) && ((NoClose)in).isNoClose();
+    return (in instanceof NoClose) && ((NoClose) in).isNoClose();
   }
 }

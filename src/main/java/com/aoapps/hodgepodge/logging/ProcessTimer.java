@@ -58,22 +58,22 @@ public class ProcessTimer implements Runnable, AutoCloseable {
   private volatile boolean isSleeping;
 
   public ProcessTimer(
-    Logger logger,
-    String sourceClass,
-    String sourceMethod,
-    String subject,
-    String processDescription,
-    long maximumTime,
-    long reminderInterval
+      Logger logger,
+      String sourceClass,
+      String sourceMethod,
+      String subject,
+      String processDescription,
+      long maximumTime,
+      long reminderInterval
   ) {
     this.logger = logger;
     this.sourceClass = sourceClass;
     this.sourceMethod = sourceMethod;
-    this.subject=subject;
-    this.processDescription=processDescription;
-    this.startTime=System.currentTimeMillis();
-    this.maximumTime=maximumTime;
-    this.reminderInterval=reminderInterval;
+    this.subject = subject;
+    this.processDescription = processDescription;
+    this.startTime = System.currentTimeMillis();
+    this.maximumTime = maximumTime;
+    this.reminderInterval = reminderInterval;
   }
 
   @Override
@@ -95,7 +95,7 @@ public class ProcessTimer implements Runnable, AutoCloseable {
       try {
         // Initial delay
         try {
-          isSleeping=true;
+          isSleeping = true;
           Thread.sleep(maximumTime);
         } catch (InterruptedException err) {
           // Only normal when finish is called
@@ -105,7 +105,7 @@ public class ProcessTimer implements Runnable, AutoCloseable {
           // Restore the interrupted status
           Thread.currentThread().interrupt();
         }
-        isSleeping=false;
+        isSleeping = false;
         if (!isFinished) {
           logInfo(false);
           // Reminder loop
@@ -136,7 +136,7 @@ public class ProcessTimer implements Runnable, AutoCloseable {
   private void logInfo(boolean isReminder) {
     long currentTime = System.currentTimeMillis();
     if (logger.isLoggable(Level.INFO)) {
-      logger.logp(Level.INFO, sourceClass, sourceMethod, subject+": Process="+processDescription+", Duration="+Strings.getTimeLengthString(currentTime-startTime));
+      logger.logp(Level.INFO, sourceClass, sourceMethod, subject + ": Process=" + processDescription + ", Duration=" + Strings.getTimeLengthString(currentTime - startTime));
     }
   }
 }

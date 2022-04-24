@@ -40,7 +40,7 @@ public class BenchmarkCounterBlockDevice {
   @SuppressWarnings("UseOfSystemOutOrSystemErr")
   public static void main(String[] args) {
     try {
-      if (args.length>0) {
+      if (args.length > 0) {
         final byte[] buff = BufferManager.getBytes();
         try {
           for (String filename : args) {

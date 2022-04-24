@@ -44,12 +44,12 @@ public class BandwidthLimitingTunnelHandler {
   //private Socket socket;
 
   public BandwidthLimitingTunnelHandler(
-    boolean verbose,
-    String connect_address,
-    int connect_port,
-    Long upstream_bandwidth,
-    Long downstream_bandwidth,
-    Socket socket
+      boolean verbose,
+      String connect_address,
+      int connect_port,
+      Long upstream_bandwidth,
+      Long downstream_bandwidth,
+      Socket socket
   ) throws IOException {
     //this.verbose = verbose;
     //this.connect_address = connect_address;

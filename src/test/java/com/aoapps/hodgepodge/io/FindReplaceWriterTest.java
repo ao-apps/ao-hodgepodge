@@ -59,28 +59,28 @@ public class FindReplaceWriterTest extends TestCase {
 
   public void testDosToPosixConversion() throws IOException {
     doTest(
-      "",
-      ""
+        "",
+        ""
     );
     doTest(
-      "Test line without end of line character.",
-      "Test line without end of line character."
+        "Test line without end of line character.",
+        "Test line without end of line character."
     );
     doTest(
-      "Test line with end of line character.\n",
-      "Test line with end of line character.\r\n"
+        "Test line with end of line character.\n",
+        "Test line with end of line character.\r\n"
     );
     doTest(
-      "Test multiline\nwith end of line characters.\n",
-      "Test multiline\r\nwith end of line characters.\r\n"
+        "Test multiline\nwith end of line characters.\n",
+        "Test multiline\r\nwith end of line characters.\r\n"
     );
     doTest(
-      "Test multiline\nwith split write.\n",
-      "Test multiline\r", "\nwith split write.\r\n"
+        "Test multiline\nwith split write.\n",
+        "Test multiline\r", "\nwith split write.\r\n"
     );
     doTest(
-      "Test multiline\nwith split write at end.\n",
-      "Test multiline\r", "\nwith split write at end.\r", "\n"
+        "Test multiline\nwith split write at end.\n",
+        "Test multiline\r", "\nwith split write at end.\r", "\n"
     );
   }
 }

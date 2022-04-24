@@ -123,19 +123,19 @@ public abstract class QueuedHandler extends Handler {
       // Queue for custom action
           try {
         executor.submit(
-          () -> {
-            try {
-              backgroundPublish(
-                formatter,
-                rec,
-                msg
-              );
-            } catch (Exception ex) {
-              // We don't want to throw an exception here, but we
-              // report the exception to any registered ErrorManager.
-              reportError(null, ex, ErrorManager.WRITE_FAILURE);
+            () -> {
+              try {
+                backgroundPublish(
+                    formatter,
+                    rec,
+                    msg
+                );
+              } catch (Exception ex) {
+                // We don't want to throw an exception here, but we
+                // report the exception to any registered ErrorManager.
+                reportError(null, ex, ErrorManager.WRITE_FAILURE);
+              }
             }
-          }
         );
       } catch (Exception ex) {
         // We don't want to throw an exception here, but we

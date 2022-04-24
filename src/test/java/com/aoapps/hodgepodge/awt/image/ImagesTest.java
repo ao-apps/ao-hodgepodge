@@ -63,28 +63,28 @@ public class ImagesTest {
   @Test
   public void testFindImage() {
     logger.log(
-      Level.INFO,
-      "Got image: {0} x {1}",
-      new Object[] {
-        image.getWidth(),
-        image.getHeight()
-      }
+        Level.INFO,
+        "Got image: {0} x {1}",
+        new Object[]{
+            image.getWidth(),
+            image.getHeight()
+        }
     );
     logger.log(
-      Level.INFO,
-      "Got findme: {0} x {1}",
-      new Object[] {
-        findme.getWidth(),
-        findme.getHeight()
-      }
+        Level.INFO,
+        "Got findme: {0} x {1}",
+        new Object[]{
+            findme.getWidth(),
+            findme.getHeight()
+        }
     );
     long startNanos = System.nanoTime();
     final int repeat = 10;
-    for (int i=0; i<repeat; i++) {
+    for (int i = 0; i < repeat; i++) {
       testRepeat();
     }
     long endNanos = System.nanoTime();
-    logger.log(Level.INFO, "Average time: {0} ms", BigDecimal.valueOf((endNanos - startNanos)/repeat, 6));
+    logger.log(Level.INFO, "Average time: {0} ms", BigDecimal.valueOf((endNanos - startNanos) / repeat, 6));
   }
 
   private void testRepeat() {

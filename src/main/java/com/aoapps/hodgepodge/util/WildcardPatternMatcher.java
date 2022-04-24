@@ -178,92 +178,92 @@ public abstract class WildcardPatternMatcher {
               if (endsWildcard) {
                 // *infix*
                 matchers.add(
-                  new WildcardPatternMatcher() {
-                    @Override
-                    public boolean isMatch(String input) {
-                      return input.contains(sequence);
+                    new WildcardPatternMatcher() {
+                      @Override
+                      public boolean isMatch(String input) {
+                        return input.contains(sequence);
+                      }
                     }
-                  }
                 );
               } else {
                 // *suffix
                 matchers.add(
-                  new WildcardPatternMatcher() {
-                    @Override
-                    public boolean isMatch(String input) {
-                      return input.endsWith(sequence);
+                    new WildcardPatternMatcher() {
+                      @Override
+                      public boolean isMatch(String input) {
+                        return input.endsWith(sequence);
+                      }
                     }
-                  }
                 );
               }
             } else {
               if (endsWildcard) {
                 // prefix*
                 matchers.add(
-                  new WildcardPatternMatcher() {
-                    @Override
-                    public boolean isMatch(String input) {
-                      return input.startsWith(sequence);
+                    new WildcardPatternMatcher() {
+                      @Override
+                      public boolean isMatch(String input) {
+                        return input.startsWith(sequence);
+                      }
                     }
-                  }
                 );
               } else {
                 // exact
                 matchers.add(
-                  new WildcardPatternMatcher() {
-                    @Override
-                    public boolean isMatch(String input) {
-                      return input.equals(sequence);
+                    new WildcardPatternMatcher() {
+                      @Override
+                      public boolean isMatch(String input) {
+                        return input.equals(sequence);
+                      }
                     }
-                  }
                 );
               }
             }
           } else {
             matchers.add(
-              new WildcardPatternMatcher() {
-                @Override
-                public boolean isMatch(String input) {
-                  int index = 0;
-                  int indexEnd = sequences.size();
-                  int pos = 0;
-                  int end = input.length();
-                  // Handle non-wildcard start
-                  if (!startsWildcard) {
-                    String prefix = sequences.get(0);
-                    if (!input.startsWith(prefix)) {
+                new WildcardPatternMatcher() {
+                  @Override
+                  public boolean isMatch(String input) {
+                    int index = 0;
+                    int indexEnd = sequences.size();
+                    int pos = 0;
+                    int end = input.length();
+                    // Handle non-wildcard start
+                    if (!startsWildcard) {
+                      String prefix = sequences.get(0);
+                      if (!input.startsWith(prefix)) {
+                        return false;
+                      }
+                      index++;
+                      pos += prefix.length();
+                    }
+                    // Handle non-wildcard end
+                    if (!endsWildcard) {
+                      indexEnd--;
+                      String suffix = sequences.get(indexEnd);
+                      if (!input.endsWith(suffix)) {
+                        return false;
+                      }
+                      end -= suffix.length();
+                    }
+                    // Check if overlapping prefix and suffix matches
+                    if (end < pos) {
                       return false;
                     }
-                    index++;
-                    pos += prefix.length();
-                  }
-                  // Handle non-wildcard end
-                  if (!endsWildcard) {
-                    indexEnd--;
-                    String suffix = sequences.get(indexEnd);
-                    if (!input.endsWith(suffix)) {
-                      return false;
+                    // Handle any remaining infixes
+                    while (index < indexEnd) {
+                      String sequence = sequences.get(index++);
+                      int sequenceLen = sequence.length();
+                      assert sequenceLen > 0;
+                      int foundAt = input.indexOf(sequence, pos);
+                      if (foundAt == -1 || foundAt > (end - sequenceLen)) {
+                        return false;
+                      }
+                      pos += sequenceLen;
                     }
-                    end -= suffix.length();
+                    return true;
                   }
-                  // Check if overlapping prefix and suffix matches
-                  if (end < pos) {
-                    return false;
-                  }
-                  // Handle any remaining infixes
-                  while (index < indexEnd) {
-                    String sequence = sequences.get(index++);
-                    int sequenceLen = sequence.length();
-                    assert sequenceLen > 0;
-                    int foundAt = input.indexOf(sequence, pos);
-                    if (foundAt == -1 || foundAt > (end - sequenceLen)) {
-                      return false;
-                    }
-                    pos += sequenceLen;
-                  }
-                  return true;
                 }
-              }
             );
           }
         }

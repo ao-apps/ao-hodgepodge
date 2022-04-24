@@ -44,7 +44,7 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
 
   @Override
   public boolean isNoClose() {
-    return (out instanceof NoClose) && ((NoClose)out).isNoClose();
+    return (out instanceof NoClose) && ((NoClose) out).isNoClose();
   }
 
   /**
@@ -78,35 +78,35 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
   public static void writeCompressedInt(int i, OutputStream out) throws IOException {
     int t;
     if (
-      (t=i&0xfffffff0) == 0
-      || t == 0xfffffff0
+        (t = i & 0xfffffff0) == 0
+            || t == 0xfffffff0
     ) {
       // 5 bit
-      out.write(i&0x1f);
+      out.write(i & 0x1f);
     } else if (
-      (t=i&0xfffff000) == 0
-      || t == 0xfffff000
+        (t = i & 0xfffff000) == 0
+            || t == 0xfffff000
     ) {
       // 13 bit
-      out.write(0x20|((i&0x1f00)>>>8));
-      out.write(i&0xff);
+      out.write(0x20 | ((i & 0x1f00) >>> 8));
+      out.write(i & 0xff);
     } else if (
-      (t=i&0xffe00000) == 0
-      || t == 0xffe00000
+        (t = i & 0xffe00000) == 0
+            || t == 0xffe00000
     ) {
       // 22 bit
-      out.write(0x40|((i&0x3f0000)>>>16));
-      out.write((i&0xff00)>>>8);
-      out.write(i&0xff);
+      out.write(0x40 | ((i & 0x3f0000) >>> 16));
+      out.write((i & 0xff00) >>> 8);
+      out.write(i & 0xff);
     } else if (
-      (t=i&0xc0000000) == 0
-      || t == 0xc0000000
+        (t = i & 0xc0000000) == 0
+            || t == 0xc0000000
     ) {
       // 31 bit
-      out.write(0x80|((i&0x7f000000)>>>24));
-      out.write((i&0xff0000)>>>16);
-      out.write((i&0xff00)>>>8);
-      out.write(i&0xff);
+      out.write(0x80 | ((i & 0x7f000000) >>> 24));
+      out.write((i & 0xff0000) >>> 16);
+      out.write((i & 0xff00) >>> 8);
+      out.write(i & 0xff);
     } else {
       checkCompressedInt(i);
       throw new AssertionError("Must have already been out of range");
@@ -142,41 +142,41 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
    * </pre>
    */
   public void writeCompressedUTF(String str, int slot) throws IOException {
-    if (slot<0 || slot>0x3f) {
-      throw new IOException("Slot out of range (0-63): "+slot);
+    if (slot < 0 || slot > 0x3f) {
+      throw new IOException("Slot out of range (0-63): " + slot);
     }
     if (lastStrings == null) {
-      lastStrings=new String[64];
+      lastStrings = new String[64];
     }
-    String last=lastStrings[slot];
+    String last = lastStrings[slot];
     if (last == null) {
-      last="";
+      last = "";
     }
-    int strLen=str.length();
-    int lastLen=last.length();
-    int maxCommon=Math.min(strLen, lastLen);
-    int common=0;
-    for (;common<maxCommon;common++) {
+    int strLen = str.length();
+    int lastLen = last.length();
+    int maxCommon = Math.min(strLen, lastLen);
+    int common = 0;
+    for (; common < maxCommon; common++) {
       if (str.charAt(common) != last.charAt(common)) {
         break;
       }
     }
     if (lastCommonLengths == null) {
-      lastCommonLengths=new int[64];
+      lastCommonLengths = new int[64];
     }
-    int commonDifference=common-lastCommonLengths[slot];
+    int commonDifference = common - lastCommonLengths[slot];
 
     // Write the header byte
     out.write(
-      (commonDifference == 0?0:0x80)
-      | (common == strLen?0:0x40)
-      | slot
+        (commonDifference == 0 ? 0 : 0x80)
+            | (common == strLen ? 0 : 0x40)
+            | slot
     );
 
     // Write the common difference
-    if (commonDifference>0) {
-      writeCompressedInt(commonDifference-1);
-    } else if (commonDifference<0) {
+    if (commonDifference > 0) {
+      writeCompressedInt(commonDifference - 1);
+    } else if (commonDifference < 0) {
       writeCompressedInt(commonDifference);
     }
 
@@ -186,8 +186,8 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
     }
 
     // Get ready for the next call
-    lastStrings[slot]=str;
-    lastCommonLengths[slot]=common;
+    lastStrings[slot] = str;
+    lastCommonLengths[slot] = common;
   }
 
   public void writeNullUTF(String str) throws IOException {
@@ -203,12 +203,12 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
   public void writeLongUTF(String str) throws IOException {
     int length = str.length();
     writeCompressedInt(length);
-    for (int position = 0; position<length; position+=20480) {
+    for (int position = 0; position < length; position += 20480) {
       int blockLength = length - position;
-      if (blockLength>20480) {
+      if (blockLength > 20480) {
         blockLength = 20480;
       }
-      String block = str.substring(position, position+blockLength);
+      String block = str.substring(position, position + blockLength);
       writeUTF(block);
     }
   }
@@ -271,9 +271,9 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
 
   public void writeNullBoolean(Boolean b) throws IOException {
     writeByte(
-      b == null ? (byte)-1
-      : b ? 1
-      : 0
+        b == null ? (byte) -1
+            : b ? 1
+            : 0
     );
   }
 }

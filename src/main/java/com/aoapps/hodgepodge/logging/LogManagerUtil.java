@@ -64,7 +64,9 @@ public final class LogManagerUtil {
    */
   private static final int WARN_INTERVAL = 10000;
 
-  private static class WarnLock {/* Empty lock class to help heap profile */}
+  private static class WarnLock {
+    // Empty lock class to help heap profile
+  }
   private static final WarnLock warnLock = new WarnLock();
 
   private static int burstRemaining = WARN_BURST;
@@ -87,9 +89,9 @@ public final class LogManagerUtil {
         } else {
           long timeSince = currentTime - lastWarned;
           logNow =
-            timeSince >= WARN_INTERVAL
-            // System time set to the past
-            || timeSince <= WARN_INTERVAL;
+              timeSince >= WARN_INTERVAL
+                  // System time set to the past
+                  || timeSince <= WARN_INTERVAL;
         }
         if (logNow) {
           ErrorPrinter.printStackTraces(t, System.err, extraInfo);
@@ -100,6 +102,7 @@ public final class LogManagerUtil {
   }
 
   private static Method getStringPropertyMethod;
+
   static {
     try {
       Method method = LogManager.class.getDeclaredMethod("getStringProperty", String.class, String.class);
@@ -120,7 +123,7 @@ public final class LogManagerUtil {
   public static String getStringProperty(LogManager manager, String name, String defaultValue) {
     if (getStringPropertyMethod != null) {
       try {
-        return (String)getStringPropertyMethod.invoke(manager, name, defaultValue);
+        return (String) getStringPropertyMethod.invoke(manager, name, defaultValue);
       } catch (ThreadDeath td) {
         throw td;
       } catch (Throwable t) {
@@ -136,6 +139,7 @@ public final class LogManagerUtil {
   }
 
   private static Method getLevelPropertyMethod;
+
   static {
     try {
       Method method = LogManager.class.getDeclaredMethod("getLevelProperty", String.class, Level.class);
@@ -156,7 +160,7 @@ public final class LogManagerUtil {
   public static Level getLevelProperty(LogManager manager, String name, Level defaultValue) {
     if (getLevelPropertyMethod != null) {
       try {
-        return (Level)getLevelPropertyMethod.invoke(manager, name, defaultValue);
+        return (Level) getLevelPropertyMethod.invoke(manager, name, defaultValue);
       } catch (ThreadDeath td) {
         throw td;
       } catch (Throwable t) {
@@ -172,6 +176,7 @@ public final class LogManagerUtil {
   }
 
   private static Method getFilterPropertyMethod;
+
   static {
     try {
       Method method = LogManager.class.getDeclaredMethod("getFilterProperty", String.class, Filter.class);
@@ -193,7 +198,7 @@ public final class LogManagerUtil {
   public static Filter getFilterProperty(LogManager manager, String name, Filter defaultValue) {
     if (getFilterPropertyMethod != null) {
       try {
-        return (Filter)getFilterPropertyMethod.invoke(manager, name, defaultValue);
+        return (Filter) getFilterPropertyMethod.invoke(manager, name, defaultValue);
       } catch (ThreadDeath td) {
         throw td;
       } catch (Throwable t) {
@@ -220,6 +225,7 @@ public final class LogManagerUtil {
   }
 
   private static Method getFormatterPropertyMethod;
+
   static {
     try {
       Method method = LogManager.class.getDeclaredMethod("getFormatterProperty", String.class, Formatter.class);
@@ -241,7 +247,7 @@ public final class LogManagerUtil {
   public static Formatter getFormatterProperty(LogManager manager, String name, Formatter defaultValue) {
     if (getFormatterPropertyMethod != null) {
       try {
-        return (Formatter)getFormatterPropertyMethod.invoke(manager, name, defaultValue);
+        return (Formatter) getFormatterPropertyMethod.invoke(manager, name, defaultValue);
       } catch (ThreadDeath td) {
         throw td;
       } catch (Throwable t) {

@@ -61,7 +61,7 @@ public final class MD5Utils {
    * Gets the MD5 hashcode of an input stream.
    */
   public static byte[] md5(InputStream in) throws IOException {
-    MD5InputStream md5in=new MD5InputStream(in);
+    MD5InputStream md5in = new MD5InputStream(in);
     byte[] trashBuffer = BufferManager.getBytes();
     try {
       while (md5in.read(trashBuffer, 0, BufferManager.BUFFER_SIZE) != -1) {

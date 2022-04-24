@@ -49,7 +49,7 @@ public class SyncFile {
 
   public static void main(String[] args) {
     if (args.length != 2) {
-      System.err.println("usage: "+SyncFile.class.getName()+" <from> <to>");
+      System.err.println("usage: " + SyncFile.class.getName() + " <from> <to>");
       System.exit(1);
     } else {
       try {
@@ -99,21 +99,21 @@ public class SyncFile {
     long pos = 0;
     long bytesWritten = 0;
     int numBytes;
-    while ((numBytes=in.read(inBuff, 0, BLOCK_SIZE)) != -1) {
+    while ((numBytes = in.read(inBuff, 0, BLOCK_SIZE)) != -1) {
       if (DEBUG) {
-        System.err.println(pos+": Read " + numBytes + " bytes of input");
+        System.err.println(pos + ": Read " + numBytes + " bytes of input");
       }
       out.seek(pos);
       long blockEnd = pos + numBytes;
       if (out.length() >= blockEnd) {
         // Read block from out
         if (DEBUG) {
-          System.err.println(pos+": Reading " + numBytes + " bytes of output");
+          System.err.println(pos + ": Reading " + numBytes + " bytes of output");
         }
         out.readFully(outBuff, 0, numBytes);
         if (!AoArrays.equals(inBuff, outBuff, 0, numBytes)) {
           if (DEBUG) {
-            System.err.println(pos+": Updating " + numBytes + " bytes of output");
+            System.err.println(pos + ": Updating " + numBytes + " bytes of output");
           }
           out.seek(pos);
           if (!DRY_RUN) {
@@ -122,13 +122,13 @@ public class SyncFile {
           bytesWritten += numBytes;
         } else {
           if (DEBUG) {
-            System.err.println(pos+": Data matches, not writing");
+            System.err.println(pos + ": Data matches, not writing");
           }
         }
       } else {
         // At end, write entire block
         if (DEBUG) {
-          System.err.println(pos+": Appending " + numBytes +" bytes to output");
+          System.err.println(pos + ": Appending " + numBytes + " bytes to output");
         }
         if (!DRY_RUN) {
           out.write(inBuff, 0, numBytes);
@@ -139,14 +139,14 @@ public class SyncFile {
     }
     if (out.length() != pos) {
       if (DEBUG) {
-        System.err.println(pos+": Truncating output to " + pos + " bytes");
+        System.err.println(pos + ": Truncating output to " + pos + " bytes");
       }
-      assert out.length()>pos;
+      assert out.length() > pos;
       if (!DRY_RUN) {
         try {
           out.setLength(pos);
         } catch (IOException e) {
-          System.err.println("Warning: Unable to truncate output to " + pos +" bytes");
+          System.err.println("Warning: Unable to truncate output to " + pos + " bytes");
         }
       }
     }

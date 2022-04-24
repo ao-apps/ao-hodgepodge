@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author  AO Industries, Inc.
  */
-abstract class BaseSortAlgorithm<E> implements SortAlgorithm<E>{
+abstract class BaseSortAlgorithm<E> implements SortAlgorithm<E> {
 
   protected BaseSortAlgorithm() {
     // Do nothing
@@ -87,7 +87,7 @@ abstract class BaseSortAlgorithm<E> implements SortAlgorithm<E>{
     }
 
     if (list instanceof FileList<?>) {
-      ((FileList<?>)list).swap(i, j);
+      ((FileList<?>) list).swap(i, j);
     } else {
       assert list != null;
       T t = list.get(i);

@@ -51,7 +51,7 @@ public class SkipCommentsFilterOutputStream extends FilterOutputStream implement
 
   @Override
   public boolean isNoClose() {
-    return (out instanceof NoClose) && ((NoClose)out).isNoClose();
+    return (out instanceof NoClose) && ((NoClose) out).isNoClose();
   }
 
   private boolean lastCharNewline = true;

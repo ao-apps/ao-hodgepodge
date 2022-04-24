@@ -76,7 +76,7 @@ public class CommentCaptureInputStream extends InputStream {
       addComment(true);
     } else {
       // This int -> char conversion by cast only words because ISO-8859-1 encoding
-      char ch = (char)b;
+      char ch = (char) b;
       if (isLeadingWhitespace) {
         if (ch != ' ' && ch != '\t' && ch != '\f') {
           isLeadingWhitespace = false;
@@ -89,8 +89,8 @@ public class CommentCaptureInputStream extends InputStream {
         addComment(false);
         isLeadingWhitespace = true;
       } else if (
-        (isLeadingWhitespace || isCommentLine)
-        && ch != '\r'
+          (isLeadingWhitespace || isCommentLine)
+              && ch != '\r'
       ) {
         lineBuffer.append(ch);
       }

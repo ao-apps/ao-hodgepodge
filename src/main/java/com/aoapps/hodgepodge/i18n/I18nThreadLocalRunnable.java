@@ -39,9 +39,9 @@ public class I18nThreadLocalRunnable extends ThreadLocalsRunnable {
    * The set of thread locals that are copied to maintain internationalization context.
    */
   static final ThreadLocal<?>[] i18nThreadLocals = {
-    ThreadLocaleImpl.locale,
-    BundleLookupThreadContext.threadContext,
-    EditableResourceBundle.currentThreadSettings
+      ThreadLocaleImpl.locale,
+      BundleLookupThreadContext.threadContext,
+      EditableResourceBundle.currentThreadSettings
   };
 
   public I18nThreadLocalRunnable(Runnable task) {

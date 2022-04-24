@@ -93,14 +93,14 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
   // TODO: Allow threads to shut down, like in ao-concurrent
   private static final ExecutorService defaultExecutor = Executors.newCachedThreadPool(
-    new ThreadFactory() {
-      private final Sequence idSequence = new AtomicSequence();
-      @Override
-      public Thread newThread(Runnable target) {
-        long id = idSequence.getNextSequenceValue();
-        return new Thread(target, IntegerRadixSort.class.getName()+".defaultExecutor: id=" + id);
+      new ThreadFactory() {
+        private final Sequence idSequence = new AtomicSequence();
+        @Override
+        public Thread newThread(Runnable target) {
+          long id = idSequence.getNextSequenceValue();
+          return new Thread(target, IntegerRadixSort.class.getName() + ".defaultExecutor: id=" + id);
+        }
       }
-    }
   );
 
   private static final IntegerRadixSort defaultInstance = new IntegerRadixSort(defaultExecutor);
@@ -171,16 +171,14 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     RadixTable(int size, int numTasks) {
       this.numTasks = numTasks;
       // Determine the start queue length
-      {
-        int sql = (size >>> (BITS_PER_PASS-1)) / numTasks; // Double the average size to allow for somewhat uneven distribution before growing arrays
-        if (sql<MINIMUM_START_QUEUE_LENGTH) {
-          sql = MINIMUM_START_QUEUE_LENGTH;
-        }
-        if (sql>size) {
-          sql = size;
-        }
-        this.startQueueLength = sql;
+      int sql = (size >>> (BITS_PER_PASS - 1)) / numTasks; // Double the average size to allow for somewhat uneven distribution before growing arrays
+      if (sql < MINIMUM_START_QUEUE_LENGTH) {
+        sql = MINIMUM_START_QUEUE_LENGTH;
       }
+      if (sql > size) {
+        sql = size;
+      }
+      this.startQueueLength = sql;
     }
 
     /**
@@ -249,9 +247,9 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     @SuppressWarnings("unchecked")
     SingleTaskNumberRadixTable(int size) {
       super(size, 1);
-      this.fromQueues       = (N[][])new Number[PASS_SIZE][];
+      this.fromQueues       = (N[][]) new Number[PASS_SIZE][];
       this.fromQueueLengths = new int[PASS_SIZE];
-      this.toQueues         = (N[][])new Number[PASS_SIZE][];
+      this.toQueues         = (N[][]) new Number[PASS_SIZE][];
       this.toQueueLengths   = new int[PASS_SIZE];
     }
 
@@ -271,7 +269,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       N[] fromQueue = fromQueues[fromQueueNum];
       if (fromQueue != null) {
         int length = fromQueueLengths[fromQueueNum];
-        for (int j=0; j<length; j++) {
+        for (int j = 0; j < length; j++) {
           addToQueue(shift, fromQueue[j], 0);
         }
         fromQueueLengths[fromQueueNum] = 0;
@@ -299,12 +297,12 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       int toQueueLength = toQueueLengths[toQueueNum];
       if (toQueue == null) {
         @SuppressWarnings("unchecked")
-        N[] newQueue = (N[])new Number[startQueueLength];
+        N[] newQueue = (N[]) new Number[startQueueLength];
         toQueues[toQueueNum] = toQueue = newQueue;
       } else if (toQueueLength >= toQueue.length) {
         // Grow queue
         @SuppressWarnings("unchecked")
-        N[] newQueue = (N[])new Number[toQueueLength<<1];
+        N[] newQueue = (N[]) new Number[toQueueLength << 1];
         System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
         toQueues[toQueueNum] = toQueue = newQueue;
       }
@@ -324,9 +322,9 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     @SuppressWarnings("unchecked")
     MultiTaskNumberRadixTable(int size, int numTasks) {
       super(size, numTasks);
-      this.fromQueues       = (N[][][])new Number[numTasks][PASS_SIZE][];
+      this.fromQueues       = (N[][][]) new Number[numTasks][PASS_SIZE][];
       this.fromQueueLengths = new int[numTasks][PASS_SIZE];
-      this.toQueues         = (N[][][])new Number[numTasks][PASS_SIZE][];
+      this.toQueues         = (N[][][]) new Number[numTasks][PASS_SIZE][];
       this.toQueueLengths   = new int[numTasks][PASS_SIZE];
     }
 
@@ -342,7 +340,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
     @Override
     final void gatherScatter(int shift, int fromQueueNum, int toTaskNum) {
-      for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+      for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
         final N[][] taskFromQueues = fromQueues[fromTaskNum];
         N[] fromQueue = taskFromQueues[fromQueueNum];
         if (fromQueue != null) {
@@ -350,7 +348,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
           final N[][] taskToQueues = toQueues[toTaskNum];
           final int[] taskToQueueLengths = toQueueLengths[toTaskNum];
           int length = taskFromQueueLengths[fromQueueNum];
-          for (int j=0; j<length; j++) {
+          for (int j = 0; j < length; j++) {
             addToQueue(shift, fromQueue[j], taskToQueues, taskToQueueLengths);
           }
           taskFromQueueLengths[fromQueueNum] = 0;
@@ -375,12 +373,12 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       int toQueueLength = taskToQueueLengths[toQueueNum];
       if (toQueue == null) {
         @SuppressWarnings("unchecked")
-        N[] newQueue = (N[])new Number[startQueueLength];
+        N[] newQueue = (N[]) new Number[startQueueLength];
         taskToQueues[toQueueNum] = toQueue = newQueue;
       } else if (toQueueLength >= toQueue.length) {
         // Grow queue
         @SuppressWarnings("unchecked")
-        N[] newQueue = (N[])new Number[toQueueLength<<1];
+        N[] newQueue = (N[]) new Number[toQueueLength << 1];
         System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
         taskToQueues[toQueueNum] = toQueue = newQueue;
       }
@@ -392,10 +390,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     @Override
     final int addToQueue(int shift, N number, int toTaskNum) {
       return addToQueue(
-        shift,
-        number,
-        toQueues[toTaskNum],
-        toQueueLengths[toTaskNum]
+          shift,
+          number,
+          toQueues[toTaskNum],
+          toQueueLengths[toTaskNum]
       );
     }
   }
@@ -431,7 +429,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       int[] fromQueue = fromQueues[fromQueueNum];
       if (fromQueue != null) {
         int length = fromQueueLengths[fromQueueNum];
-        for (int j=0; j<length; j++) {
+        for (int j = 0; j < length; j++) {
           addToQueue(shift, fromQueue[j], 0);
         }
         fromQueueLengths[fromQueueNum] = 0;
@@ -461,7 +459,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
         toQueues[toQueueNum] = toQueue = newQueue;
       } else if (toQueueLength >= toQueue.length) {
         // Grow queue
-        int[] newQueue = new int[toQueueLength<<1];
+        int[] newQueue = new int[toQueueLength << 1];
         System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
         toQueues[toQueueNum] = toQueue = newQueue;
       }
@@ -505,7 +503,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
         taskToQueues[toQueueNum] = toQueue = newQueue;
       } else if (toQueueLength >= toQueue.length) {
         // Grow queue
-        int[] newQueue = new int[toQueueLength<<1];
+        int[] newQueue = new int[toQueueLength << 1];
         System.arraycopy(toQueue, 0, newQueue, 0, toQueueLength);
         taskToQueues[toQueueNum] = toQueue = newQueue;
       }
@@ -516,7 +514,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
     @Override
     final void gatherScatter(int shift, int fromQueueNum, int toTaskNum) {
-      for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+      for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
         final int[][] taskFromQueues = fromQueues[fromTaskNum];
         int[] fromQueue = taskFromQueues[fromQueueNum];
         if (fromQueue != null) {
@@ -524,7 +522,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
           final int[][] taskToQueues = toQueues[toTaskNum];
           final int[] taskToQueueLengths = toQueueLengths[toTaskNum];
           int length = taskFromQueueLengths[fromQueueNum];
-          for (int j=0; j<length; j++) {
+          for (int j = 0; j < length; j++) {
             addToQueue(shift, fromQueue[j], taskToQueues, taskToQueueLengths);
           }
           taskFromQueueLengths[fromQueueNum] = 0;
@@ -545,13 +543,14 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     @Override
     final int addToQueue(int shift, int number, int toTaskNum) {
       return addToQueue(
-        shift,
-        number,
-        toQueues[toTaskNum],
-        toQueueLengths[toTaskNum]
+          shift,
+          number,
+          toQueues[toTaskNum],
+          toQueueLengths[toTaskNum]
       );
     }
   }
+
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc="Source">
@@ -569,6 +568,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     static final class ImportDataResult {
       final int bitsSeen;
       final int bitsNotSeen;
+
       ImportDataResult(int bitsSeen, int bitsNotSeen) {
         this.bitsSeen = bitsSeen;
         this.bitsNotSeen = bitsNotSeen;
@@ -585,30 +585,29 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
      */
     abstract void exportData(T table, int fromQueueStart, int fromQueueEnd, int start);
   }
+
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc="radixSort">
   static <T extends RadixTable> void radixSort(
-    final int size,
-    final T table,
-    final Source<? super T> source,
-    final ExecutorService executor
+      final int size,
+      final T table,
+      final Source<? super T> source,
+      final ExecutorService executor
   ) {
     try {
       final int numTasks = table.numTasks;
 
       // Dynamically choose pass size
-      /*
-      // Must be power of two and less than or equal to 32
-      final int BITS_PER_PASS;
-      if (size < 0x80000) {
-        BITS_PER_PASS = 8;
-      } else {
-        BITS_PER_PASS = 16;
-      }
-      final int PASS_SIZE = 1 << BITS_PER_PASS;
-      final int PASS_MASK = PASS_SIZE - 1;
-       */
+//      // Must be power of two and less than or equal to 32
+//      final int BITS_PER_PASS;
+//      if (size < 0x80000) {
+//        BITS_PER_PASS = 8;
+//      } else {
+//        BITS_PER_PASS = 16;
+//      }
+//      final int PASS_SIZE = 1 << BITS_PER_PASS;
+//      final int PASS_MASK = PASS_SIZE - 1;
 
       // The same futures list is used by multiple stages below
       final List<Future<?>> runnableFutures;
@@ -624,7 +623,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
         assert numTasks >= 2 : "Must not have an executor when numTasks < 2";
         runnableFutures = new ArrayList<>(numTasks);
         int spt = size / numTasks;
-        if ((spt*numTasks)<size) {
+        if ((spt * numTasks) < size) {
           spt++; // Round-up instead of down
         }
         sizePerTask = spt;
@@ -641,9 +640,9 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
         // Perform concurrent import
         final List<Future<Source.ImportDataResult>> importStepFutures = new ArrayList<>(numTasks);
         for (
-          int taskStart=0, toTaskNum=0;
-          taskStart<size;
-          taskStart+=sizePerTask, toTaskNum++
+            int taskStart = 0, toTaskNum = 0;
+            taskStart < size;
+            taskStart += sizePerTask, toTaskNum++
         ) {
           int taskEnd = taskStart + sizePerTask;
           if (taskEnd > size) {
@@ -654,9 +653,9 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
           final int finalTaskEnd   = taskEnd;
           final int finalToTaskNum = toTaskNum;
           importStepFutures.add(
-            executor.submit(
-              () -> source.importData(table, finalTaskStart, finalTaskEnd, finalToTaskNum)
-            )
+              executor.submit(
+                  () -> source.importData(table, finalTaskStart, finalTaskEnd, finalToTaskNum)
+              )
           );
         }
 
@@ -679,11 +678,11 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
       // Perform gather/scatter iterations
       int lastShiftUsed = 0;
-      for (int shift=BITS_PER_PASS; shift<32; shift += BITS_PER_PASS) {
+      for (int shift = BITS_PER_PASS; shift < 32; shift += BITS_PER_PASS) {
         // Skip this bit range when all values have equal bits.  For example
         // when going through the upper bits of lists of all smaller positive
         // or negative numbers.
-        if (((bitsSeen>>>shift)&PASS_MASK) != ((bitsNotSeen>>>shift)&PASS_MASK) ) {
+        if (((bitsSeen >>> shift) & PASS_MASK) != ((bitsNotSeen >>> shift) & PASS_MASK)) {
           lastShiftUsed = shift;
           if (executor != null) {
             // Get some final values for anonymous inner class
@@ -692,16 +691,16 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
             int toTaskNum = 0;
             int taskFromQueueStart = 0;
             int taskTotalLength = 0;
-            for (int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
-              for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+            for (int fromQueueNum = 0; fromQueueNum < PASS_SIZE; fromQueueNum++) {
+              for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
                 taskTotalLength += table.getFromQueueLength(fromTaskNum, fromQueueNum);
               }
               if (
-                taskTotalLength>0 // Skip no output, such as all handle in previous tasks
-                && (
-                  taskTotalLength >= sizePerTask // Found fair share (or more)
-                  || fromQueueNum == PASS_MASK // or is last task
-                )
+                  taskTotalLength > 0 // Skip no output, such as all handle in previous tasks
+                      && (
+                      taskTotalLength >= sizePerTask // Found fair share (or more)
+                          || fromQueueNum == PASS_MASK// or is last task
+                  )
               ) {
                 final int finalToTaskNum = toTaskNum;
                 final int finalTaskFromQueueStart = taskFromQueueStart;
@@ -709,17 +708,17 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
                 // Gather/scatter concurrent
                 assert runnableFutures != null;
                 runnableFutures.add(
-                  executor.submit(
-                    () -> {
-                      for (int _fromQueueNum=finalTaskFromQueueStart; _fromQueueNum<taskFromQueueEnd; _fromQueueNum++) {
-                        table.gatherScatter(
-                          finalShift,
-                          _fromQueueNum,
-                          finalToTaskNum
-                        );
-                      }
-                    }
-                  )
+                    executor.submit(
+                        () -> {
+                          for (int _fromQueueNum = finalTaskFromQueueStart; _fromQueueNum < taskFromQueueEnd; _fromQueueNum++) {
+                            table.gatherScatter(
+                                finalShift,
+                                _fromQueueNum,
+                                finalToTaskNum
+                            );
+                          }
+                        }
+                    )
                 );
 
                 // Reset to next task
@@ -733,7 +732,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
             waitForAll(runnableFutures);
             runnableFutures.clear();
           } else {
-            for (int fromQueueNum=0; fromQueueNum<PASS_SIZE; fromQueueNum++) {
+            for (int fromQueueNum = 0; fromQueueNum < PASS_SIZE; fromQueueNum++) {
               table.gatherScatter(shift, fromQueueNum, 0);
             }
           }
@@ -744,26 +743,26 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       }
 
       // Negative before positive to perform as signed integers
-      int fromQueueStart = (lastShiftUsed+BITS_PER_PASS) == 32 ? (PASS_SIZE>>>1) : 0;
+      int fromQueueStart = (lastShiftUsed + BITS_PER_PASS) == 32 ? (PASS_SIZE >>> 1) : 0;
 
       // May only use concurrent export for random access sources
       if (executor != null && source.useRandomAccess()) {
         // Use indexed strategy with balanced concurrency
-        final int fromQueueLast = (fromQueueStart-1) & PASS_MASK;
+        final int fromQueueLast = (fromQueueStart - 1) & PASS_MASK;
         int taskFromQueueStart = fromQueueStart;
         int taskOutIndex = 0;
         int taskTotalLength = 0;
         int fromQueueNum = fromQueueStart;
         do {
-          for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+          for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
             taskTotalLength += table.getFromQueueLength(fromTaskNum, fromQueueNum);
           }
           if (
-            taskTotalLength>0 // Skip no output, such as all handle in previous tasks
-            && (
-              taskTotalLength >= sizePerTask // Found fair share (or more)
-              || fromQueueNum == fromQueueLast // or is last task
-            )
+              taskTotalLength > 0 // Skip no output, such as all handle in previous tasks
+                  && (
+                  taskTotalLength >= sizePerTask // Found fair share (or more)
+                      || fromQueueNum == fromQueueLast// or is last task
+              )
           ) {
             final int finalTaskFromQueueStart = taskFromQueueStart;
             final int finalTaskOutIndex = taskOutIndex;
@@ -771,14 +770,14 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
             // Queue concurrent
             assert runnableFutures != null;
             runnableFutures.add(
-              executor.submit(
-                () -> source.exportData(
-                  table,
-                  finalTaskFromQueueStart,
-                  finalTaskFromQueueEnd,
-                  finalTaskOutIndex
+                executor.submit(
+                    () -> source.exportData(
+                        table,
+                        finalTaskFromQueueStart,
+                        finalTaskFromQueueEnd,
+                        finalTaskOutIndex
+                    )
                 )
-              )
             );
 
             // Reset to next task
@@ -787,8 +786,8 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
             taskTotalLength    = 0;
           }
         } while (
-          (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-          != fromQueueStart
+            (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+                != fromQueueStart
         );
         // Wait for each export task to complete
         waitForAll(runnableFutures);
@@ -796,10 +795,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       } else {
         // Use indexed strategy, single-threaded
         source.exportData(
-          table,
-          fromQueueStart,
-          fromQueueStart,
-          0
+            table,
+            fromQueueStart,
+            fromQueueStart,
+            0
         );
       }
     } catch (InterruptedException e) {
@@ -810,6 +809,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       throw new WrappedException(e);
     }
   }
+
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc="List<N>">
@@ -822,7 +822,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     NumberListSource(int size, List<N> list) {
       this.size            = size;
       this.list            = list;
-      this.useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
+      this.useRandomAccess = size < Integer.MAX_VALUE && (list instanceof RandomAccess);
     }
 
     @Override
@@ -835,7 +835,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       int bSeen = 0;
       int bNotSeen = 0;
       if (useRandomAccess) {
-        for (int i=start;i<end;i++) {
+        for (int i = start; i < end; i++) {
           int numInt = table.addToQueue(0, list.get(i), toTaskNum);
           bSeen |= numInt;
           bNotSeen |= numInt ^ 0xffffffff;
@@ -853,10 +853,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
     @Override
     final void exportData(
-      final NumberRadixTable<N> table,
-      final int fromQueueStart,
-      final int fromQueueEnd,
-      final int start
+        final NumberRadixTable<N> table,
+        final int fromQueueStart,
+        final int fromQueueEnd,
+        final int start
     ) {
       final int numTasks = table.numTasks;
       int fromQueueNum = fromQueueStart;
@@ -864,37 +864,37 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
         // Use indexed strategy
         int outIndex = start;
         do {
-          for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+          for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
             N[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
             if (fromQueue != null) {
               int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
-              for (int j=0; j<length; j++) {
+              for (int j = 0; j < length; j++) {
                 list.set(outIndex++, fromQueue[j]);
               }
             }
           }
         } while (
-          (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-          != fromQueueEnd
+            (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+                != fromQueueEnd
         );
       } else {
         // Use iterator strategy
         assert start == 0 : "Must import all in a single pass for iterator method";
         ListIterator<N> iterator = list.listIterator();
         do {
-          for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+          for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
             N[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
             if (fromQueue != null) {
               int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
-              for (int j=0; j<length; j++) {
+              for (int j = 0; j < length; j++) {
                 iterator.next();
                 iterator.set(fromQueue[j]);
               }
             }
           }
         } while (
-          (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-          != fromQueueEnd
+            (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+                != fromQueueEnd
         );
       }
     }
@@ -906,7 +906,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       throw new NullArgumentException("list");
     }
     if (list instanceof IntList) {
-      sort((IntList)list);
+      sort((IntList) list);
     } else {
       if (stats != null) {
         stats.sortStarting();
@@ -925,22 +925,22 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
         }
         final int numProcessors;
         if (
-          executor == null
-          || size < MIN_CONCURRENCY_SIZE
-          || (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
+            executor == null
+                || size < MIN_CONCURRENCY_SIZE
+                || (numProcessors = RuntimeUtils.getAvailableProcessors()) < MIN_CONCURRENCY_PROCESSORS
         ) {
           radixSort(
-            size,
-            new SingleTaskNumberRadixTable<>(size),
-            new NumberListSource<>(size, list),
-            null
+              size,
+              new SingleTaskNumberRadixTable<>(size),
+              new NumberListSource<>(size, list),
+              null
           );
         } else {
           radixSort(
-            size,
-            new MultiTaskNumberRadixTable<>(size, numProcessors * TASKS_PER_PROCESSOR),
-            new NumberListSource<>(size, list),
-            executor
+              size,
+              new MultiTaskNumberRadixTable<>(size, numProcessors * TASKS_PER_PROCESSOR),
+              new NumberListSource<>(size, list),
+              executor
           );
         }
       }
@@ -949,6 +949,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       }
     }
   }
+
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc="N[]">
@@ -971,7 +972,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     final ImportDataResult importData(NumberRadixTable<N> table, int start, int end, int toTaskNum) {
       int bSeen = 0;
       int bNotSeen = 0;
-      for (int i=start;i<end;i++) {
+      for (int i = start; i < end; i++) {
         int numInt = table.addToQueue(0, array[i], toTaskNum);
         bSeen |= numInt;
         bNotSeen |= numInt ^ 0xffffffff;
@@ -981,17 +982,17 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
     @Override
     final void exportData(
-      final NumberRadixTable<N> table,
-      final int fromQueueStart,
-      final int fromQueueEnd,
-      final int start
+        final NumberRadixTable<N> table,
+        final int fromQueueStart,
+        final int fromQueueEnd,
+        final int start
     ) {
       final int numTasks = table.numTasks;
       int fromQueueNum = fromQueueStart;
       // Use indexed strategy
       int outIndex = start;
       do {
-        for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+        for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
           N[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
           if (fromQueue != null) {
             int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
@@ -1000,8 +1001,8 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
           }
         }
       } while (
-        (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-        != fromQueueEnd
+          (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+              != fromQueueEnd
       );
     }
   }
@@ -1025,22 +1026,22 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       }
       final int numProcessors;
       if (
-        executor == null
-        || size < MIN_CONCURRENCY_SIZE
-        || (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
+          executor == null
+              || size < MIN_CONCURRENCY_SIZE
+              || (numProcessors = RuntimeUtils.getAvailableProcessors()) < MIN_CONCURRENCY_PROCESSORS
       ) {
         radixSort(
-          size,
-          new SingleTaskNumberRadixTable<>(size),
-          new NumberArraySource<>(size, array),
-          null
+            size,
+            new SingleTaskNumberRadixTable<>(size),
+            new NumberArraySource<>(size, array),
+            null
         );
       } else {
         radixSort(
-          size,
-          new MultiTaskNumberRadixTable<>(size, numProcessors * TASKS_PER_PROCESSOR),
-          new NumberArraySource<>(size, array),
-          executor
+            size,
+            new MultiTaskNumberRadixTable<>(size, numProcessors * TASKS_PER_PROCESSOR),
+            new NumberArraySource<>(size, array),
+            executor
         );
       }
     }
@@ -1048,6 +1049,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       stats.sortEnding();
     }
   }
+
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc="IntList">
@@ -1060,7 +1062,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     IntListSource(int size, IntList list) {
       this.size            = size;
       this.list            = list;
-      this.useRandomAccess = size<Integer.MAX_VALUE && (list instanceof RandomAccess);
+      this.useRandomAccess = size < Integer.MAX_VALUE && (list instanceof RandomAccess);
     }
 
     @Override
@@ -1073,7 +1075,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       int bSeen = 0;
       int bNotSeen = 0;
       if (useRandomAccess) {
-        for (int i=start;i<end;i++) {
+        for (int i = start; i < end; i++) {
           int numInt = table.addToQueue(0, list.getInt(i), toTaskNum);
           bSeen |= numInt;
           bNotSeen |= numInt ^ 0xffffffff;
@@ -1091,10 +1093,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
     @Override
     final void exportData(
-      final IntRadixTable table,
-      final int fromQueueStart,
-      final int fromQueueEnd,
-      final int start
+        final IntRadixTable table,
+        final int fromQueueStart,
+        final int fromQueueEnd,
+        final int start
     ) {
       final int numTasks = table.numTasks;
       int fromQueueNum = fromQueueStart;
@@ -1102,37 +1104,37 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
         // Use indexed strategy
         int outIndex = start;
         do {
-          for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+          for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
             int[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
             if (fromQueue != null) {
               int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
-              for (int j=0; j<length; j++) {
+              for (int j = 0; j < length; j++) {
                 list.set(outIndex++, fromQueue[j]);
               }
             }
           }
         } while (
-          (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-          != fromQueueEnd
+            (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+                != fromQueueEnd
         );
       } else {
         // Use iterator strategy
         assert start == 0 : "Must import all in a single pass for iterator method";
         ListIterator<Integer> iterator = list.listIterator();
         do {
-          for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+          for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
             int[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
             if (fromQueue != null) {
               int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
-              for (int j=0; j<length; j++) {
+              for (int j = 0; j < length; j++) {
                 iterator.next();
                 iterator.set(fromQueue[j]);
               }
             }
           }
         } while (
-          (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-          != fromQueueEnd
+            (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+                != fromQueueEnd
         );
       }
     }
@@ -1157,22 +1159,22 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       }
       final int numProcessors;
       if (
-        executor == null
-        || size < MIN_CONCURRENCY_SIZE
-        || (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
+          executor == null
+              || size < MIN_CONCURRENCY_SIZE
+              || (numProcessors = RuntimeUtils.getAvailableProcessors()) < MIN_CONCURRENCY_PROCESSORS
       ) {
         radixSort(
-          size,
-          new SingleTaskIntRadixTable(size),
-          new IntListSource(size, list),
-          null
+            size,
+            new SingleTaskIntRadixTable(size),
+            new IntListSource(size, list),
+            null
         );
       } else {
         radixSort(
-          size,
-          new MultiTaskIntRadixTable(size, numProcessors * TASKS_PER_PROCESSOR),
-          new IntListSource(size, list),
-          executor
+            size,
+            new MultiTaskIntRadixTable(size, numProcessors * TASKS_PER_PROCESSOR),
+            new IntListSource(size, list),
+            executor
         );
       }
     }
@@ -1180,6 +1182,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       stats.sortEnding();
     }
   }
+
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc="int[]">
@@ -1202,7 +1205,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     final ImportDataResult importData(IntRadixTable table, int start, int end, int toTaskNum) {
       int bSeen = 0;
       int bNotSeen = 0;
-      for (int i=start;i<end;i++) {
+      for (int i = start; i < end; i++) {
         int numInt = table.addToQueue(0, array[i], toTaskNum);
         bSeen |= numInt;
         bNotSeen |= numInt ^ 0xffffffff;
@@ -1212,17 +1215,17 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
     @Override
     final void exportData(
-      final IntRadixTable table,
-      final int fromQueueStart,
-      final int fromQueueEnd,
-      final int start
+        final IntRadixTable table,
+        final int fromQueueStart,
+        final int fromQueueEnd,
+        final int start
     ) {
       final int numTasks = table.numTasks;
       int fromQueueNum = fromQueueStart;
       // Use indexed strategy
       int outIndex = start;
       do {
-        for (int fromTaskNum=0; fromTaskNum<numTasks; fromTaskNum++) {
+        for (int fromTaskNum = 0; fromTaskNum < numTasks; fromTaskNum++) {
           int[] fromQueue = table.getFromQueue(fromTaskNum, fromQueueNum);
           if (fromQueue != null) {
             int length = table.getFromQueueLength(fromTaskNum, fromQueueNum);
@@ -1231,8 +1234,8 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
           }
         }
       } while (
-        (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
-        != fromQueueEnd
+          (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
+              != fromQueueEnd
       );
     }
   }
@@ -1256,22 +1259,22 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
       }
       final int numProcessors;
       if (
-        executor == null
-        || size < MIN_CONCURRENCY_SIZE
-        || (numProcessors = RuntimeUtils.getAvailableProcessors())<MIN_CONCURRENCY_PROCESSORS
+          executor == null
+              || size < MIN_CONCURRENCY_SIZE
+              || (numProcessors = RuntimeUtils.getAvailableProcessors()) < MIN_CONCURRENCY_PROCESSORS
       ) {
         radixSort(
-          size,
-          new SingleTaskIntRadixTable(size),
-          new IntArraySource(size, array),
-          null
+            size,
+            new SingleTaskIntRadixTable(size),
+            new IntArraySource(size, array),
+            null
         );
       } else {
         radixSort(
-          size,
-          new MultiTaskIntRadixTable(size, numProcessors * TASKS_PER_PROCESSOR),
-          new IntArraySource(size, array),
-          executor
+            size,
+            new MultiTaskIntRadixTable(size, numProcessors * TASKS_PER_PROCESSOR),
+            new IntArraySource(size, array),
+            executor
         );
       }
     }

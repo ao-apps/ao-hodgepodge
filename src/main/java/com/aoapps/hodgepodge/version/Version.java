@@ -36,10 +36,10 @@ public final class Version {
    * Gets a version number instance from its component parts.
    */
   public static Version getInstance(
-    int major,
-    int minor,
-    int release,
-    int build
+      int major,
+      int minor,
+      int release,
+      int build
   ) {
     return new Version(major, minor, release, build);
   }
@@ -55,19 +55,19 @@ public final class Version {
     if (dot1Pos == -1) {
       throw new IllegalArgumentException(version);
     }
-    int dot2Pos = version.indexOf('.', dot1Pos+1);
+    int dot2Pos = version.indexOf('.', dot1Pos + 1);
     if (dot2Pos == -1) {
       throw new IllegalArgumentException(version);
     }
-    int dot3Pos = version.indexOf('.', dot2Pos+1);
+    int dot3Pos = version.indexOf('.', dot2Pos + 1);
     if (dot3Pos == -1) {
       throw new IllegalArgumentException(version);
     }
     return getInstance(
-      Integer.parseInt(version.substring(0, dot1Pos)),
-      Integer.parseInt(version.substring(dot1Pos+1, dot2Pos)),
-      Integer.parseInt(version.substring(dot2Pos+1, dot3Pos)),
-      Integer.parseInt(version.substring(dot3Pos+1))
+        Integer.parseInt(version.substring(0, dot1Pos)),
+        Integer.parseInt(version.substring(dot1Pos + 1, dot2Pos)),
+        Integer.parseInt(version.substring(dot2Pos + 1, dot3Pos)),
+        Integer.parseInt(version.substring(dot3Pos + 1))
     );
   }
 
@@ -77,10 +77,10 @@ public final class Version {
   private final int build;
 
   private Version(
-    int major,
-    int minor,
-    int release,
-    int build
+      int major,
+      int minor,
+      int release,
+      int build
   ) {
     this.major = major;
     this.minor = minor;
@@ -95,7 +95,7 @@ public final class Version {
    */
   @Override
   public String toString() {
-    return major+"."+minor+"."+release+"."+build;
+    return major + "." + minor + "." + release + "." + build;
   }
 
   @Override
@@ -103,21 +103,21 @@ public final class Version {
     if (!(obj instanceof Version)) {
       return false;
     }
-    Version other = (Version)obj;
+    Version other = (Version) obj;
     return
-      build == other.build // Build changes most - check first
-      && release == other.release
-      && minor == other.minor
-      && major == other.major
+        build == other.build // Build changes most - check first
+            && release == other.release
+            && minor == other.minor
+            && major == other.major
     ;
   }
 
   @Override
   public int hashCode() {
     int hash = major;
-    hash = hash*31 + minor;
-    hash = hash*31 + release;
-    hash = hash*31 + build;
+    hash = hash * 31 + minor;
+    hash = hash * 31 + release;
+    hash = hash * 31 + build;
     return hash;
   }
 

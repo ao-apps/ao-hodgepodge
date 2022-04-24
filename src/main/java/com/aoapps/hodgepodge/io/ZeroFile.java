@@ -56,7 +56,7 @@ public class ZeroFile {
   @SuppressWarnings("UseOfSystemOutOrSystemErr")
   public static void main(String[] args) {
     if (args.length != 2) {
-      System.err.println("usage: "+ZeroFile.class.getName()+" <mb_per_sec>[/<mb_per_sec_write>] <path>");
+      System.err.println("usage: " + ZeroFile.class.getName() + " <mb_per_sec>[/<mb_per_sec_write>] <path>");
       System.exit(1);
     } else {
       try {
@@ -67,7 +67,7 @@ public class ZeroFile {
           bpsIn = bpsOut = Integer.parseInt(bpsArg);
         } else {
           bpsIn = Integer.parseInt(bpsArg.substring(0, slashPos));
-          bpsOut = Integer.parseInt(bpsArg.substring(slashPos+1));
+          bpsOut = Integer.parseInt(bpsArg.substring(slashPos + 1));
         }
         long bytesWritten;
         File file = new File(args[1]);
@@ -143,13 +143,13 @@ public class ZeroFile {
     final int blocks;
     {
       long blocksLong = len / BLOCK_SIZE;
-      if ((len&(BLOCK_SIZE-1)) != 0) {
+      if ((len & (BLOCK_SIZE - 1)) != 0) {
         blocksLong++;
       }
-      if (blocksLong>Integer.MAX_VALUE) {
+      if (blocksLong > Integer.MAX_VALUE) {
         throw new IOException("File too large: " + len);
       }
-      blocks = (int)blocksLong;
+      blocks = (int) blocksLong;
     }
     BitSet dirtyBlocks = new BitSet(blocks);
     int numDirtyBlocks = 0;
@@ -159,18 +159,18 @@ public class ZeroFile {
     int blockIndex = 0;
     String lastVerboseString = "";
     int block = 0;
-    for (long pos=0; pos<len; pos+=BLOCK_SIZE, blockIndex++) {
+    for (long pos = 0; pos < len; pos += BLOCK_SIZE, blockIndex++) {
       int blockSize;
       {
-        long blockSizeLong = len-pos;
-        blockSize = blockSizeLong>BLOCK_SIZE ? BLOCK_SIZE : (int)blockSizeLong;
+        long blockSizeLong = len - pos;
+        blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
       }
       raf.seek(pos);
       raf.readFully(buff, 0, blockSize);
       block++;
       lastTime = sleep(bpsIn, lastTime);
       boolean allZero = true;
-      for (int i=0; i<blockSize; i++) {
+      for (int i = 0; i < blockSize; i++) {
         if (buff[i] != 0) {
           allZero = false;
           break;
@@ -182,14 +182,14 @@ public class ZeroFile {
       }
       if (PROGRESS) {
         lastVerboseString = TerminalWriter.progressOutput(
-          lastVerboseString,
-          Strings.getApproximateSize(pos+blockSize)
-          + ": "
-          + BigDecimal.valueOf(block * 10000L / blocks, 2)
-          + "% read, "
-          + BigDecimal.valueOf(numDirtyBlocks * 10000L / block, 2)
-          + "% dirty",
-          System.err
+            lastVerboseString,
+            Strings.getApproximateSize(pos + blockSize)
+                + ": "
+                + BigDecimal.valueOf(block * 10000L / blocks, 2)
+                + "% read, "
+                + BigDecimal.valueOf(numDirtyBlocks * 10000L / block, 2)
+                + "% dirty",
+            System.err
         );
         //System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": "+(allZero ? "Already zero" : "Dirty"));
       }
@@ -201,14 +201,14 @@ public class ZeroFile {
     // Pass two: write dirty blocks
     long bytesWritten = 0;
     blockIndex = 0;
-    Arrays.fill(buff, (byte)0);
+    Arrays.fill(buff, (byte) 0);
     int written = 0;
-    for (long pos=0; pos<len; pos+=BLOCK_SIZE, blockIndex++) {
+    for (long pos = 0; pos < len; pos += BLOCK_SIZE, blockIndex++) {
       if (dirtyBlocks.get(blockIndex)) {
         int blockSize;
         {
-          long blockSizeLong = len-pos;
-          blockSize = blockSizeLong>BLOCK_SIZE ? BLOCK_SIZE : (int)blockSizeLong;
+          long blockSizeLong = len - pos;
+          blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
         }
         if (!DRY_RUN) {
           raf.seek(pos);
@@ -219,12 +219,12 @@ public class ZeroFile {
         written++;
         if (PROGRESS) {
           lastVerboseString = TerminalWriter.progressOutput(
-            lastVerboseString,
-            Strings.getApproximateSize(bytesWritten)
-            + ": "
-            + BigDecimal.valueOf(written * 10000L / numDirtyBlocks, 2)
-            + "% written",
-            System.err
+              lastVerboseString,
+              Strings.getApproximateSize(bytesWritten)
+                  + ": "
+                  + BigDecimal.valueOf(written * 10000L / numDirtyBlocks, 2)
+                  + "% written",
+              System.err
           );
           // System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": Cleared");
         }

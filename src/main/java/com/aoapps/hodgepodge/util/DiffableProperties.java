@@ -65,14 +65,14 @@ public final class DiffableProperties {
 
   private static boolean isHex(char ch) {
     return
-      (ch >= '0' && ch <= '9')
-      || (ch >= 'a' && ch <= 'f')
-      || (ch >= 'A' && ch <= 'F');
+        (ch >= '0' && ch <= '9')
+            || (ch >= 'a' && ch <= 'f')
+            || (ch >= 'A' && ch <= 'F');
   }
 
   private static char lowerHex(char ch) {
     if (ch >= 'A' && ch <= 'F') {
-      return (char)(ch + ('a' - 'A'));
+      return (char) (ch + ('a' - 'A'));
     } else {
       return ch;
     }
@@ -89,7 +89,7 @@ public final class DiffableProperties {
    */
   public static String formatProperties(String properties) {
     int len = properties.length();
-    StringBuilder sb = new StringBuilder(len * 6/5); // Space for 20% increase before growing buffer
+    StringBuilder sb = new StringBuilder(len * 6 / 5); // Space for 20% increase before growing buffer
     boolean isLeadingWhitespace = true;
     boolean isComment = false;
     int pos = 0;
@@ -103,36 +103,36 @@ public final class DiffableProperties {
         char ch2 = properties.charAt(pos++);
         char ch3, ch4, ch5, ch6;
         if (
-          ch2 == 'u'
-          && (pos + 4) <= len
-          && isHex(ch3 = properties.charAt(pos))
-          && isHex(ch4 = properties.charAt(pos + 1))
-          && isHex(ch5 = properties.charAt(pos + 2))
-          && isHex(ch6 = properties.charAt(pos + 3))
+            ch2 == 'u'
+                && (pos + 4) <= len
+                && isHex(ch3 = properties.charAt(pos))
+                && isHex(ch4 = properties.charAt(pos + 1))
+                && isHex(ch5 = properties.charAt(pos + 2))
+                && isHex(ch6 = properties.charAt(pos + 3))
         ) {
           sb
-            .append(ch1)
-            .append(ch2)
-            .append(lowerHex(ch3))
-            .append(lowerHex(ch4))
-            .append(lowerHex(ch5))
-            .append(lowerHex(ch6));
+              .append(ch1)
+              .append(ch2)
+              .append(lowerHex(ch3))
+              .append(lowerHex(ch4))
+              .append(lowerHex(ch5))
+              .append(lowerHex(ch6));
           pos += 4;
         } else if (
-          ch2 == 'n'
-          // If already at end-of-line, do nothing
-          && !(
-            pos >= len
-            || (ch3 = properties.charAt(pos)) == '\r' || ch3 == '\n'
-          )
-          // If already followed by \(EOL) end-of-line, do nothing
-          && !(
-            ch3 == '\\'
-            && (
-              (pos + 1) >= len
-              || (ch4 = properties.charAt(pos + 1)) == '\r' || ch4 == '\n'
+            ch2 == 'n'
+                // If already at end-of-line, do nothing
+                && !(
+                pos >= len
+                    || (ch3 = properties.charAt(pos)) == '\r' || ch3 == '\n'
             )
-          )
+                // If already followed by \(EOL) end-of-line, do nothing
+                && !(
+                ch3 == '\\'
+                    && (
+                    (pos + 1) >= len
+                        || (ch4 = properties.charAt(pos + 1)) == '\r' || ch4 == '\n'
+                )
+            )
         ) {
           // Add \(EOL) escape, and possible \ if the next value is ' ', '\t', '\f'
           sb.append(ch1).append(ch2).append("\\\n");

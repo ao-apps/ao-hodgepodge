@@ -44,10 +44,10 @@ public class ImageCanvas extends JComponent {
   final Window window;
 
   private long nextupdate;
-  private boolean resized=false;
+  private boolean resized = false;
 
   public ImageCanvas(Image image) {
-    this.image=image;
+    this.image = image;
     this.window = null;
   }
 
@@ -58,14 +58,14 @@ public class ImageCanvas extends JComponent {
 
   public ImageCanvas(URL url, Window window) {
     this.image = Toolkit.getDefaultToolkit().getImage(url);
-    this.window=window;
+    this.window = window;
   }
 
   @Override
   public Dimension getPreferredSize() {
-    int iwidth=image.getWidth(this);
-    int iheight=image.getHeight(this);
-    if (iwidth>0 && iheight>0) {
+    int iwidth = image.getWidth(this);
+    int iheight = image.getHeight(this);
+    if (iwidth > 0 && iheight > 0) {
       return new Dimension(iwidth, iheight);
     }
     return new Dimension(0, 0);
@@ -101,11 +101,11 @@ public class ImageCanvas extends JComponent {
     int height = size.height;
     int iwidth, iheight;
     if (
-      g != null
-      && width > 0
-      && height > 0
-      && (iwidth = image.getWidth(this)) > 0
-      && (iheight = image.getHeight(this)) > 0
+        g != null
+            && width > 0
+            && height > 0
+            && (iwidth = image.getWidth(this)) > 0
+            && (iheight = image.getHeight(this)) > 0
     ) {
       Color background = getBackground();
       g.setColor(background);
@@ -136,7 +136,7 @@ public class ImageCanvas extends JComponent {
         getParent().validate();
       });
     }
-    resized=true;
+    resized = true;
   }
 
   @Override

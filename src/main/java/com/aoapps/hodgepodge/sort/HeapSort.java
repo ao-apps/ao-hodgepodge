@@ -123,38 +123,38 @@ public final class HeapSort extends BaseComparisonSortAlgorithm<Object> {
     while (k <= n / 2) {
       int j = k + k;
       if (
-        (j < n)
-        && compare(list, j-1, j, comparator, stats) < 0
+          (j < n)
+              && compare(list, j - 1, j, comparator, stats) < 0
       ) {
         j++;
       }
-      if (compare(temp, get(list, j-1, stats), comparator, stats) >= 0) {
+      if (compare(temp, get(list, j - 1, stats), comparator, stats) >= 0) {
         break;
       } else {
-        set(list, k-1, get(list, j-1, stats), stats);
+        set(list, k - 1, get(list, j - 1, stats), stats);
         k = j;
       }
     }
-    set(list, k-1, temp, stats);
+    set(list, k - 1, temp, stats);
   }
 
   private static <T> void downheap(T[] array, int k, int n, Comparator<? super T> comparator, SortStatistics stats) {
-    T temp=get(array, k - 1, stats);
+    T temp = get(array, k - 1, stats);
     while (k <= n / 2) {
       int j = k + k;
       if (
-        (j < n)
-        && compare(array, j-1, j, comparator, stats) < 0
+          (j < n)
+              && compare(array, j - 1, j, comparator, stats) < 0
       ) {
         j++;
       }
-      if (compare(temp, get(array, j-1, stats), comparator, stats) >= 0) {
+      if (compare(temp, get(array, j - 1, stats), comparator, stats) >= 0) {
         break;
       } else {
-        set(array, k-1, get(array, j-1, stats), stats);
+        set(array, k - 1, get(array, j - 1, stats), stats);
         k = j;
       }
     }
-    set(array, k-1, temp, stats);
+    set(array, k - 1, temp, stats);
   }
 }

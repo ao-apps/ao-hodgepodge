@@ -55,7 +55,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
    * Performs a preorder traversal - directory before directory contents.
    * The directories are sorted.
    *
-   * @see  #FilesystemIterator(Map,Map,String,boolean,boolean)
+   * @see  #FilesystemIterator(Map, Map, String, boolean, boolean)
    */
   public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules) {
     this(rules, prefixRules, "", true, true);
@@ -64,7 +64,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
   /**
    * Constructs an iterator without any filename conversions and starting at all roots.
    *
-   * @see  #FilesystemIterator(Map,Map,String,boolean,boolean)
+   * @see  #FilesystemIterator(Map, Map, String, boolean, boolean)
    */
   public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules, boolean isPreorder, boolean isSorted) {
     this(rules, prefixRules, "", isPreorder, isSorted);
@@ -75,7 +75,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
    * Performs a preorder traversal - directory before directory contents.
    * The directories are sorted.
    *
-   * @see  #FilesystemIterator(Map,Map,String,boolean,boolean)
+   * @see  #FilesystemIterator(Map, Map, String, boolean, boolean)
    */
   public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules, String startPath) {
     this(rules, prefixRules, startPath, true, true);
@@ -88,12 +88,12 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
    * @param  startPath  if "", all roots will be used, otherwise starts at the provided path
    */
   public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules, String startPath, boolean isPreorder, boolean isSorted) {
-    this.rules=rules;
-    this.prefixRules=prefixRules;
-    currentDirectories=null;
-    currentLists=null;
-    currentIndexes=null;
-    filesDone=false;
+    this.rules = rules;
+    this.prefixRules = prefixRules;
+    currentDirectories = null;
+    currentLists = null;
+    currentIndexes = null;
+    filesDone = false;
     this.startPath = startPath;
     this.isPreorder = isPreorder;
     this.isSorted = isSorted;
@@ -102,7 +102,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
   private Stack<String> currentDirectories;
   private Stack<String[]> currentLists;
   private Stack<Integer> currentIndexes;
-  private boolean filesDone=false;
+  private boolean filesDone = false;
 
   /**
    * Gets the next file from the iterator or <code>null</code> if the iterator has completed the iteration of the file system.
@@ -120,31 +120,31 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
         if (currentDirectories == null) {
           if (startPath.length() == 0) {
             // Starting at root will include the starting directory itself
-            (currentDirectories=new Stack<>()).push("");
-            (currentLists=new Stack<>()).push(getFilesystemRoots());
+            (currentDirectories = new Stack<>()).push("");
+            (currentLists = new Stack<>()).push(getFilesystemRoots());
           } else {
             if (isFilesystemRoot(startPath)) {
               // Starting from a root, has no parent
-              (currentDirectories=new Stack<>()).push("");
-              (currentLists=new Stack<>()).push(new String[] {startPath});
+              (currentDirectories = new Stack<>()).push("");
+              (currentLists = new Stack<>()).push(new String[]{startPath});
             } else {
               // Starting at non root will include the starting directory itself
               File startPathFile = new File(startPath);
               String parent = startPathFile.getParent();
               String name = startPathFile.getName();
-              (currentDirectories=new Stack<>()).push(parent);
-              (currentLists=new Stack<>()).push(new String[] {name});
+              (currentDirectories = new Stack<>()).push(parent);
+              (currentLists = new Stack<>()).push(new String[]{name});
             }
           }
-          (currentIndexes=new Stack<>()).push(0);
+          (currentIndexes = new Stack<>()).push(0);
         }
         String currentDirectory;
-        String[] currentList=null;
-        int currentIndex=-1;
+        String[] currentList = null;
+        int currentIndex = -1;
         try {
-          currentDirectory=currentDirectories.peek();
-          currentList=currentLists.peek();
-          currentIndex=currentIndexes.peek();
+          currentDirectory = currentDirectories.peek();
+          currentList = currentLists.peek();
+          currentIndex = currentIndexes.peek();
 
           // Undo the stack as far as needed
           while (currentDirectory != null && currentIndex >= currentList.length) {
@@ -152,43 +152,43 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
             currentLists.pop();
             currentIndexes.pop();
             String oldCurrentDirectory = currentDirectory;
-            currentDirectory=currentDirectories.peek();
-            currentList=currentLists.peek();
-            currentIndex=currentIndexes.peek();
+            currentDirectory = currentDirectories.peek();
+            currentList = currentLists.peek();
+            currentIndex = currentIndexes.peek();
             if (!isPreorder) {
               return new File(oldCurrentDirectory);
             } // This is performed last because the EmptyStackException caused by peek indicates end of traversal
           }
         } catch (EmptyStackException err) {
-          currentDirectory=null;
+          currentDirectory = null;
         }
         if (currentDirectory == null) {
-          filesDone=true;
+          filesDone = true;
           return null;
         } else {
           // Get the current filename
           final String filename;
           if (currentDirectory.length() == 0) {
-            filename=currentList[currentIndex];
+            filename = currentList[currentIndex];
           } else if (currentDirectory.endsWith(File.separator)) {
-            filename=currentDirectory+currentList[currentIndex];
+            filename = currentDirectory + currentList[currentIndex];
           } else {
-            filename=currentDirectory+File.separatorChar+currentList[currentIndex];
+            filename = currentDirectory + File.separatorChar + currentList[currentIndex];
           }
 
           // Increment index to point to the next file
           currentIndexes.pop();
-          currentIndexes.push(currentIndex+1);
+          currentIndexes.push(currentIndex + 1);
 
           try {
-            final File file=new File(filename);
+            final File file = new File(filename);
             if (file.isDirectory()) {
               // Directories
               final String filenamePlusSlash;
               if (filename.endsWith(File.separator)) {
                 filenamePlusSlash = filename;
               } else {
-                filenamePlusSlash = filename+File.separatorChar;
+                filenamePlusSlash = filename + File.separatorChar;
               }
 
               final boolean includeDirectory;
@@ -228,7 +228,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
                     list = file.list();
                     if (list == null) {
                       list = EmptyArrays.EMPTY_STRING_ARRAY;
-                    } else if (isSorted && list.length>0) {
+                    } else if (isSorted && list.length > 0) {
                       Arrays.sort(list);
                     }
                   } else {
@@ -239,7 +239,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
                   list = EmptyArrays.EMPTY_STRING_ARRAY;
                 }
                 // No need to push onto the stack if the children are empty?
-                if (list.length>0) {
+                if (list.length > 0) {
                   currentDirectories.push(filename);
                   currentLists.push(list);
                   currentIndexes.push(0);
@@ -275,13 +275,13 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
    * @return the number of files in the array, zero (0) indicates iteration has completed
    */
   public int getNextFiles(final File[] files, final int batchSize) throws IOException {
-    int c=0;
-    while (c<batchSize) {
-      File file=getNextFile();
+    int c = 0;
+    while (c < batchSize) {
+      File file = getNextFile();
       if (file == null) {
         break;
       }
-      files[c++]=file;
+      files[c++] = file;
     }
     return c;
   }
@@ -292,15 +292,15 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
    * allow all roots.
    */
   protected String[] getFilesystemRoots() throws IOException {
-    File[] fileRoots=File.listRoots();
-    List<String> tempRoots=new ArrayList<>(fileRoots.length);
+    File[] fileRoots = File.listRoots();
+    List<String> tempRoots = new ArrayList<>(fileRoots.length);
     for (File fileRoot : fileRoots) {
       String root = fileRoot.getPath();
       // Only add if this root is used for at least one backup setting
       FilesystemIteratorRule defaultRule = rules.get("");
       if (
-        (defaultRule != null && defaultRule.isIncluded(root))
-        || hasIncludedChild(root)
+          (defaultRule != null && defaultRule.isIncluded(root))
+              || hasIncludedChild(root)
       ) {
         tempRoots.add(root);
       }
@@ -312,8 +312,8 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
    * Determines if a path is a possible file system root
    */
   protected boolean isFilesystemRoot(String filename) throws IOException {
-    String[] roots=getFilesystemRoots();
-    for (int c=0, len=roots.length;c<len;c++) {
+    String[] roots = getFilesystemRoots();
+    for (int c = 0, len = roots.length; c < len; c++) {
       if (roots[c].equals(filename)) {
         return true;
       }
@@ -369,12 +369,12 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
       int lastSlashPos = path.lastIndexOf(File.separatorChar);
       if (lastSlashPos == -1) {
         path = "";
-      } else if (lastSlashPos == (pathLen-1)) {
+      } else if (lastSlashPos == (pathLen - 1)) {
         // If ends with a slash, remove that slash
         path = path.substring(0, lastSlashPos);
       } else {
         // Otherwise, remove and leave the last slash
-        path = path.substring(0, lastSlashPos+1);
+        path = path.substring(0, lastSlashPos + 1);
       }
     }
     if (prefixRules != null) {
@@ -384,8 +384,8 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
       for (Map.Entry<String, FilesystemIteratorRule> entry : prefixRules.entrySet()) {
         String prefix = entry.getKey();
         if (
-          (longestPrefix == null || prefix.length()>longestPrefix.length())
-          && filename.startsWith(prefix)
+            (longestPrefix == null || prefix.length() > longestPrefix.length())
+                && filename.startsWith(prefix)
         ) {
           //System.err.println("DEBUG: FilesystemIterator: getBestRule: filename="+filename+", prefix="+prefix+", longestPrefix="+longestPrefix);
           longestPrefix = prefix;

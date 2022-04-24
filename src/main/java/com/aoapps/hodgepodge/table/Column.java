@@ -46,7 +46,7 @@ public class Column implements Comparable<Column> {
     if (!(obj instanceof Column)) {
       return false;
     }
-    Column other = (Column)obj;
+    Column other = (Column) obj;
     return name.equals(other.name);
   }
 
@@ -73,7 +73,7 @@ public class Column implements Comparable<Column> {
   @Override
   public String toString() {
     if (indexType != IndexType.NONE) {
-      return name+" ("+indexType+')';
+      return name + " (" + indexType + ')';
     }
     return name;
   }

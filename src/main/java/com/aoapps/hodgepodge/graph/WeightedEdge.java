@@ -44,6 +44,6 @@ public class WeightedEdge<V, W extends Weight<?>> extends Edge<V> {
 
   @Override
   public String toString() {
-    return super.toString()+" ("+weight+')';
+    return super.toString() + " (" + weight + ')';
   }
 }

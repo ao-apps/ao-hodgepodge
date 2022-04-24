@@ -39,18 +39,18 @@ import java.util.Locale;
  */
 public class TerminalWriter extends PrintWriter implements NoClose {
 
-  private static final char ESC=0x1b;
+  private static final char ESC = 0x1b;
 
   private static final char[]
-    CLEAR_SCREEN=new char[] {ESC, '[', 'H', ESC, '[', 'J'},
-    BOLD_ON=new char[] {ESC, '[', '1', 'm'},
-    ATTRIBUTES_OFF=new char[] {ESC, '[', 'm'}
-    //ECHO_OFF=new char[] {ESC, '[', '1', '2', 'h'},
-    //ECHO_ON=new char[] {ESC, '[', '1', '2', 'l'}
+      CLEAR_SCREEN = new char[]{ESC, '[', 'H', ESC, '[', 'J'},
+      BOLD_ON = new char[]{ESC, '[', '1', 'm'},
+      ATTRIBUTES_OFF = new char[]{ESC, '[', 'm'}
+  //ECHO_OFF=new char[] {ESC, '[', '1', '2', 'h'},
+  //ECHO_ON=new char[] {ESC, '[', '1', '2', 'l'}
   ;
 
   // If this is not enough, could also check the TERM environment variable for expected values
-  private static final boolean supported=System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("linux");
+  private static final boolean supported = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("linux");
 
   public static boolean isSupported() {
     return supported;
@@ -63,7 +63,7 @@ public class TerminalWriter extends PrintWriter implements NoClose {
 
     // Find the number of characters that match from before and now
     int sameCount = 0;
-    for (int i=0; i<newLen && i<lastLen; i++) {
+    for (int i = 0; i < newLen && i < lastLen; i++) {
       if (lastVerboseString.charAt(i) != newVerboseString.charAt(i)) {
         break;
       }
@@ -71,15 +71,15 @@ public class TerminalWriter extends PrintWriter implements NoClose {
     }
 
     // backspace and overwrite with spaces when new is shorter than last
-    for (int i=newLen; i<lastLen; i++) {
+    for (int i = newLen; i < lastLen; i++) {
       verboseOut.append('\b');
     }
-    for (int i=newLen; i<lastLen; i++) {
+    for (int i = newLen; i < lastLen; i++) {
       verboseOut.append(' ');
     }
 
     // Backspace to the first character that is different
-    for (int i=0; i<(lastLen - sameCount); i++) verboseOut.append('\b');
+    for (int i = 0; i < (lastLen - sameCount); i++) verboseOut.append('\b');
 
     // Append part of new output that is different
     verboseOut.append(newVerboseString, sameCount, newLen);
@@ -117,7 +117,7 @@ public class TerminalWriter extends PrintWriter implements NoClose {
     return newVerboseString;
   }
 
-  private boolean enabled=true;
+  private boolean enabled = true;
 
   public TerminalWriter(Writer out) {
     super(out);
@@ -129,7 +129,7 @@ public class TerminalWriter extends PrintWriter implements NoClose {
 
   @Override
   public boolean isNoClose() {
-    return (out instanceof NoClose) && ((NoClose)out).isNoClose();
+    return (out instanceof NoClose) && ((NoClose) out).isNoClose();
   }
 
   public void attributesOff() throws IOException {

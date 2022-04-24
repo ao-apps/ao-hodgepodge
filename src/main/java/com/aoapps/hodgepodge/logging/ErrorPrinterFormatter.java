@@ -77,9 +77,9 @@ public class ErrorPrinterFormatter extends Formatter {
     extraInfo.add("rec.millis=" + rec.getMillis());
     Throwable thrown = rec.getThrown();
     ErrorPrinter.printStackTraces(
-      thrown,
-      out,
-      extraInfo.toArray()
+        thrown,
+        out,
+        extraInfo.toArray()
     );
   }
 

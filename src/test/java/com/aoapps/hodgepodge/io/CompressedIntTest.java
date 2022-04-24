@@ -62,9 +62,9 @@ public class CompressedIntTest extends TestCase {
     List<Integer> values = new ArrayList<>();
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     try {
-      for (int c=0;c<10000;c++) {
-        for (int power=1; power <= 30; power++) {
-          int value = fastRandom.nextInt(1<<power)-(1<<(power-1));
+      for (int c = 0; c < 10000; c++) {
+        for (int power = 1; power <= 30; power++) {
+          int value = fastRandom.nextInt(1 << power) - (1 << (power - 1));
           values.add(value);
           StreamableOutput.writeCompressedInt(value, bout);
         }

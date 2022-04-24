@@ -63,8 +63,8 @@ public final class DirectoryMetaSnapshot {
       }
       final FileMetaSnapshot other = (FileMetaSnapshot) obj;
       return
-        lastModified == other.lastModified
-        && length == other.length
+          lastModified == other.lastModified
+              && length == other.length
       ;
     }
 
@@ -87,22 +87,22 @@ public final class DirectoryMetaSnapshot {
   public DirectoryMetaSnapshot(String startPath) throws IOException {
     Map<String, FilesystemIteratorRule> noPrefixRules = Collections.emptyMap();
     FilesystemIterator iter = new FilesystemIterator(
-      Collections.singletonMap(startPath, FilesystemIteratorRule.OK),
-      noPrefixRules,
-      startPath
+        Collections.singletonMap(startPath, FilesystemIteratorRule.OK),
+        noPrefixRules,
+        startPath
     );
     final String expectedStart = startPath + File.separatorChar;
     SortedMap<String, FileMetaSnapshot> newFiles = new TreeMap<>();
     File file;
-    while ((file=iter.getNextFile()) != null) {
+    while ((file = iter.getNextFile()) != null) {
       if (file.isFile()) {
         String path = file.getPath();
         if (!path.startsWith(expectedStart)) {
           throw new AssertionError("Unexpected start of path: " + path);
         }
         newFiles.put(
-          path.substring(expectedStart.length()),
-          new FileMetaSnapshot(file.lastModified(), file.length())
+            path.substring(expectedStart.length()),
+            new FileMetaSnapshot(file.lastModified(), file.length())
         );
       }
     }

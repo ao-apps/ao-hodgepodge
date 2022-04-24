@@ -135,9 +135,9 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
      * A cached result.
      */
     CacheEntry(
-      K key,
-      Refresher<? super K, ? extends V, ? extends Ex> refresher,
-      Result<V, Ex> result
+        K key,
+        Refresher<? super K, ? extends V, ? extends Ex> refresher,
+        Result<V, Ex> result
     ) {
       long currentTime = System.currentTimeMillis();
       this.key = key;
@@ -173,10 +173,10 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
       } else {
         long currentTime = System.currentTimeMillis();
         if (
-          // Expired expired
-          currentTime >= expiration
-          // System time set to the past
-          || currentTime < refreshed
+            // Expired expired
+            currentTime >= expiration
+                // System time set to the past
+                || currentTime < refreshed
         ) {
           // Make sure this has not already been replaced
           map.remove(key, this);
@@ -196,9 +196,9 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
             // Log unexpected exception
             if (logger.isLoggable(Level.WARNING)) {
               logger.log(
-                Level.WARNING,
-                "BackgroundCache(" + name + ").CacheEntry(" + key + ").run(): Unexpected exception in background cache refresh, dropped from cache",
-                t
+                  Level.WARNING,
+                  "BackgroundCache(" + name + ").CacheEntry(" + key + ").run(): Unexpected exception in background cache refresh, dropped from cache",
+                  t
               );
             }
           }
@@ -237,11 +237,11 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
    *                         during refreshes.
    */
   public BackgroundCache(
-    String name,
-    Class<? extends Ex> exceptionClass,
-    long refreshInterval,
-    long expirationAge,
-    Logger logger
+      String name,
+      Class<? extends Ex> exceptionClass,
+      long refreshInterval,
+      long expirationAge,
+      Logger logger
   ) {
     this.name = name;
     this.exceptionClass = exceptionClass;
@@ -257,17 +257,17 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
    * @see  #BackgroundCache(java.lang.String, java.lang.Class, long, long, java.util.logging.Logger)
    */
   public BackgroundCache(
-    String name,
-    Class<? extends Ex> exceptionClass,
-    long refreshInterval,
-    long expirationAge
+      String name,
+      Class<? extends Ex> exceptionClass,
+      long refreshInterval,
+      long expirationAge
   ) {
     this(
-      name,
-      exceptionClass,
-      refreshInterval,
-      expirationAge,
-      Logger.getLogger(BackgroundCache.class.getName())
+        name,
+        exceptionClass,
+        refreshInterval,
+        expirationAge,
+        Logger.getLogger(BackgroundCache.class.getName())
     );
   }
 
@@ -296,8 +296,8 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
    * @see  #put(java.lang.Object, com.aoapps.hodgepodge.cache.BackgroundCache.Refresher)
    */
   public Result<V, Ex> get(
-    K key,
-    Refresher<? super K, ? extends V, ? extends Ex> refresher
+      K key,
+      Refresher<? super K, ? extends V, ? extends Ex> refresher
   ) {
     Result<V, Ex> result = get(key);
     if (result == null) {
@@ -320,8 +320,8 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
   }
 
   Result<V, Ex> runRefresher(
-    Refresher<? super K, ? extends V, ? extends Ex> refresher,
-    K key
+      Refresher<? super K, ? extends V, ? extends Ex> refresher,
+      K key
   ) throws IllegalStateException {
     try {
       return new Result<>(refresher.call(key));
@@ -343,8 +343,8 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
    * @return  The result obtained from this refresher
    */
   public Result<V, Ex> put(
-    K key,
-    Refresher<? super K, ? extends V, ? extends Ex> refresher
+      K key,
+      Refresher<? super K, ? extends V, ? extends Ex> refresher
   ) {
     Result<V, Ex> result = runRefresher(refresher, key);
     put(key, refresher, result);
@@ -355,9 +355,9 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
    * Places a result into the cache, replacing any existing entry under this key.
    */
   public void put(
-    K key,
-    Refresher<? super K, ? extends V, ? extends Ex> refresher,
-    V value
+      K key,
+      Refresher<? super K, ? extends V, ? extends Ex> refresher,
+      V value
   ) {
     put(key, refresher, new Result<>(value));
   }
@@ -366,9 +366,9 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
    * Places a result into the cache, replacing any existing entry under this key.
    */
   public void put(
-    K key,
-    Refresher<? super K, ? extends V, ? extends Ex> refresher,
-    Ex exception
+      K key,
+      Refresher<? super K, ? extends V, ? extends Ex> refresher,
+      Ex exception
   ) {
     put(key, refresher, new Result<>(exception));
   }
@@ -382,9 +382,9 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
    * </p>
    */
   private void put(
-    K key,
-    Refresher<? super K, ? extends V, ? extends Ex> refresher,
-    Result<V, Ex> result
+      K key,
+      Refresher<? super K, ? extends V, ? extends Ex> refresher,
+      Result<V, Ex> result
   ) {
     CacheEntry entry = new CacheEntry(key, refresher, result);
     map.put(key, entry);

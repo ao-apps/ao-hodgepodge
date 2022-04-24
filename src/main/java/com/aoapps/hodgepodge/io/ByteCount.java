@@ -39,16 +39,16 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
     BYTE("byte",     1L),
     KBYTE("kbyte",   1000L),
     KIBYTE("Kibyte", 1024L),
-    MBYTE("Mbyte",   1000L*1000L),
-    MIBYTE("Mibyte", 1024L*1024L),
-    GBYTE("Gbyte",   1000L*1000L*1000L),
-    GIBYTE("Gibyte", 1024L*1024L*1024L),
-    TBYTE("Tbyte",   1000L*1000L*1000L*1000L),
-    TIBYTE("Tibyte", 1024L*1024L*1024L*1024L),
-    PBYTE("Pbyte",   1000L*1000L*1000L*1000L*1000L),
-    PIBYTE("Pibyte", 1024L*1024L*1024L*1024L*1024L),
-    EBYTE("Ebyte",   1000L*1000L*1000L*1000L*1000L*1000L),
-    EIBYTE("Eibyte", 1024L*1024L*1024L*1024L*1024L*1024L);
+    MBYTE("Mbyte",   1000L * 1000L),
+    MIBYTE("Mibyte", 1024L * 1024L),
+    GBYTE("Gbyte",   1000L * 1000L * 1000L),
+    GIBYTE("Gibyte", 1024L * 1024L * 1024L),
+    TBYTE("Tbyte",   1000L * 1000L * 1000L * 1000L),
+    TIBYTE("Tibyte", 1024L * 1024L * 1024L * 1024L),
+    PBYTE("Pbyte",   1000L * 1000L * 1000L * 1000L * 1000L),
+    PIBYTE("Pibyte", 1024L * 1024L * 1024L * 1024L * 1024L),
+    EBYTE("Ebyte",   1000L * 1000L * 1000L * 1000L * 1000L * 1000L),
+    EIBYTE("Eibyte", 1024L * 1024L * 1024L * 1024L * 1024L * 1024L);
 
     private static final Unit[] values = values();
 
@@ -78,7 +78,7 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
    * @param unit if <code>null</code>, defaults to bits per second.
    */
   private static long getByteCount(long quantity, Unit unit) {
-    if (quantity<1) {
+    if (quantity < 1) {
       throw new IllegalArgumentException("quantity<1");
     }
     return Math.multiplyExact(quantity, unit == null ? 1 : unit.getCoefficient());
@@ -109,7 +109,7 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
 
   public ByteCount(String value) {
     Unit valueUnit = null;
-    for (int c=Unit.values.length-1; c >= 0; c--) {
+    for (int c = Unit.values.length - 1; c >= 0; c--) {
       Unit u = Unit.values[c];
       String name = u.getName();
       if (value.endsWith(name)) {
@@ -137,7 +137,7 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
     if (!(obj instanceof ByteCount)) {
       return false;
     }
-    ByteCount other = (ByteCount)obj;
+    ByteCount other = (ByteCount) obj;
     return quantity == other.quantity && Objects.equals(unit, other.unit);
   }
 
@@ -151,12 +151,12 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
     if (unit == null) {
       return Long.toString(quantity);
     }
-    return Long.toString(quantity)+unit.getName();
+    return Long.toString(quantity) + unit.getName();
   }
 
   @Override
   public int compareTo(ByteCount o) {
-    return byteCount<o.byteCount ? -1 : byteCount == o.byteCount ? 0 : 1;
+    return byteCount < o.byteCount ? -1 : byteCount == o.byteCount ? 0 : 1;
   }
 
   public long getQuantity() {

@@ -85,13 +85,13 @@ public final class RGBColor {
             if (ch != '!' && ch != '#') {
               try {
                 colors.put(
-                  line.substring(13).trim(),
-                  (Integer.parseInt(line.substring(0, 3).trim()) << 16)
-                  | (Integer.parseInt(line.substring(4, 7).trim()) << 8)
-                  | Integer.parseInt(line.substring(8, 11).trim())
+                    line.substring(13).trim(),
+                    (Integer.parseInt(line.substring(0, 3).trim()) << 16)
+                        | (Integer.parseInt(line.substring(4, 7).trim()) << 8)
+                        | Integer.parseInt(line.substring(8, 11).trim())
                 );
               } catch (NumberFormatException err) {
-                throw new IOException("Unable to parse line: "+line, err);
+                throw new IOException("Unable to parse line: " + line, err);
               }
             }
           }
@@ -121,7 +121,7 @@ public final class RGBColor {
     // Get the number
     int color = 0;
     for (
-      int i = start, end=start+6;
+      int i = start, end = start + 6;
       i < end;
       i++
     ) {

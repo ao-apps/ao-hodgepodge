@@ -57,17 +57,17 @@ public class FifoFile {
   }
 
   public FifoFile(File file, long maxFifoLength) throws IOException {
-    if (maxFifoLength<1) {
+    if (maxFifoLength < 1) {
       throw new IllegalArgumentException("The FIFO must be at least one byte long");
     }
 
-    this.maxFifoLength=maxFifoLength;
-    this.fileLength=maxFifoLength+16;
-    this.file=new RandomAccessFile(file, "rw");
-    this.in=new FifoFileInputStream(this);
-    this.out=new FifoFileOutputStream(this);
-    long blockSize=maxFifoLength>>8;
-    this._blockSize=blockSize >= BufferManager.BUFFER_SIZE?BufferManager.BUFFER_SIZE:blockSize <= 0?1:(int)blockSize;
+    this.maxFifoLength = maxFifoLength;
+    this.fileLength = maxFifoLength + 16;
+    this.file = new RandomAccessFile(file, "rw");
+    this.in = new FifoFileInputStream(this);
+    this.out = new FifoFileOutputStream(this);
+    long blockSize = maxFifoLength >> 8;
+    this._blockSize = blockSize >= BufferManager.BUFFER_SIZE ? BufferManager.BUFFER_SIZE : blockSize <= 0 ? 1 : (int) blockSize;
     if (this.file.length() != fileLength) {
       reset();
     }
@@ -144,8 +144,8 @@ public class FifoFile {
    * Sets the number of bytes currently contained by the FIFO.
    */
   protected void setLength(long length) throws IOException {
-    if (length<0) {
-      throw new IllegalArgumentException("Invalid length: "+length);
+    if (length < 0) {
+      throw new IllegalArgumentException("Invalid length: " + length);
     }
     synchronized (this) {
       file.seek(8);

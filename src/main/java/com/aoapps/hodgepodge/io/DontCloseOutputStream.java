@@ -38,7 +38,7 @@ import java.io.OutputStream;
  *
  * @author  AO Industries, Inc.
  */
-@Deprecated/* Java 9: (forRemoval = true) */
+@Deprecated // Java 9: (forRemoval = true)
 public class DontCloseOutputStream extends FilterOutputStream implements NoClose {
 
   public DontCloseOutputStream(OutputStream out) {

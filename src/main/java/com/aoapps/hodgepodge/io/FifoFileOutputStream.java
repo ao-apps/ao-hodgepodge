@@ -35,13 +35,16 @@ import java.io.OutputStream;
 public class FifoFileOutputStream extends OutputStream {
 
   private final FifoFile file;
-  private static class StatsLock {/* Empty lock class to help heap profile */}
-  private final StatsLock statsLock=new StatsLock();
-  private long fifoWriteCount=0;
-  private long fifoWriteBytes=0;
+
+  private static class StatsLock {
+    // Empty lock class to help heap profile
+  }
+  private final StatsLock statsLock = new StatsLock();
+  private long fifoWriteCount = 0;
+  private long fifoWriteBytes = 0;
 
   FifoFileOutputStream(FifoFile file) {
-    this.file=file;
+    this.file = file;
   }
 
   /**
@@ -68,7 +71,7 @@ public class FifoFileOutputStream extends OutputStream {
   protected void addStats(long bytes) {
     synchronized (statsLock) {
       fifoWriteCount++;
-      fifoWriteBytes+=bytes;
+      fifoWriteBytes += bytes;
     }
   }
 
@@ -80,16 +83,16 @@ public class FifoFileOutputStream extends OutputStream {
         if (Thread.currentThread().isInterrupted()) {
           throw new InterruptedIOException();
         }
-        long len=file.getLength();
-        if (len<file.maxFifoLength) {
-          long pos=file.getFirstIndex()+len;
+        long len = file.getLength();
+        if (len < file.maxFifoLength) {
+          long pos = file.getFirstIndex() + len;
           while (pos >= file.maxFifoLength) {
             pos -= file.maxFifoLength;
           }
-          file.file.seek(pos+16);
+          file.file.seek(pos + 16);
           file.file.write(b);
           addStats(1);
-          file.setLength(len+1);
+          file.setLength(len + 1);
           file.notifyAll();
           return;
         }
@@ -115,31 +118,31 @@ public class FifoFileOutputStream extends OutputStream {
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
     // Write blocks until all bytes have been written
-    while (len>0) {
+    while (len > 0) {
       // Write to the queue
       synchronized (file) {
         while (true) {
           if (Thread.currentThread().isInterrupted()) {
             throw new InterruptedIOException();
           }
-          long fileLen=file.getLength();
-          long maxBlockSize=file.maxFifoLength-fileLen;
-          if (maxBlockSize>0) {
-            long pos=file.getFirstIndex()+fileLen;
+          long fileLen = file.getLength();
+          long maxBlockSize = file.maxFifoLength - fileLen;
+          if (maxBlockSize > 0) {
+            long pos = file.getFirstIndex() + fileLen;
             while (pos >= file.maxFifoLength) {
               pos -= file.maxFifoLength;
             }
-            int blockSize=maxBlockSize>len?len:(int)maxBlockSize;
+            int blockSize = maxBlockSize > len ? len : (int) maxBlockSize;
             // When at the end of the file, write the remaining bytes
-            if ((pos+blockSize)>file.maxFifoLength) {
-              blockSize=(int)(file.maxFifoLength-pos);
+            if ((pos + blockSize) > file.maxFifoLength) {
+              blockSize = (int) (file.maxFifoLength - pos);
             }
-            file.file.seek(pos+16);
+            file.file.seek(pos + 16);
             file.file.write(b, off, blockSize);
             addStats(blockSize);
-            file.setLength(fileLen+blockSize);
-            off+=blockSize;
-            len-=blockSize;
+            file.setLength(fileLen + blockSize);
+            off += blockSize;
+            len -= blockSize;
             file.notifyAll();
             break;
           }
@@ -174,7 +177,7 @@ public class FifoFileOutputStream extends OutputStream {
    */
   public long available() throws IOException {
     synchronized (file) {
-      return file.maxFifoLength-file.getLength();
+      return file.maxFifoLength - file.getLength();
     }
   }
 

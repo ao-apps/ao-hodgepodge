@@ -37,11 +37,11 @@ import java.io.InputStream;
 public class MultiFileInputStream extends InputStream {
 
   private final File[] files;
-  private int nextFile=0;
-  private FileInputStream in=null;
+  private int nextFile = 0;
+  private FileInputStream in = null;
 
   public MultiFileInputStream(File[] files) {
-    this.files=files;
+    this.files = files;
   }
 
   @Override
@@ -50,19 +50,19 @@ public class MultiFileInputStream extends InputStream {
       if (nextFile >= files.length) {
         return 0;
       }
-      in=new FileInputStream(files[nextFile++]);
+      in = new FileInputStream(files[nextFile++]);
     }
     return in.available();
   }
 
   @Override
   public synchronized void close() throws IOException {
-    if (nextFile<files.length) {
-      nextFile=files.length;
+    if (nextFile < files.length) {
+      nextFile = files.length;
     }
-    FileInputStream tempIn=in;
+    FileInputStream tempIn = in;
     if (tempIn != null) {
-      in=null;
+      in = null;
       tempIn.close();
     }
   }
@@ -75,7 +75,7 @@ public class MultiFileInputStream extends InputStream {
           super.mark(readlimit);
           return;
         }
-        in=new FileInputStream(files[nextFile++]);
+        in = new FileInputStream(files[nextFile++]);
       }
       in.mark(readlimit);
     } catch (IOException err) {
@@ -90,7 +90,7 @@ public class MultiFileInputStream extends InputStream {
         if (nextFile >= files.length) {
           return false;
         }
-        in=new FileInputStream(files[nextFile++]);
+        in = new FileInputStream(files[nextFile++]);
       }
       return in.markSupported();
     } catch (IOException err) {
@@ -104,20 +104,20 @@ public class MultiFileInputStream extends InputStream {
       if (nextFile >= files.length) {
         return -1;
       }
-      in=new FileInputStream(files[nextFile++]);
+      in = new FileInputStream(files[nextFile++]);
     }
-    int value=-1;
+    int value = -1;
     while (value == -1) {
-      value=in.read();
+      value = in.read();
       if (value == -1) {
         try (FileInputStream tempIn = in) {
           assert tempIn == in : "This assert is to avoid compiler warning: auto-closeable resource tempIn is never referenced in body of corresponding try statement";
-          in=null;
+          in = null;
         }
         if (nextFile >= files.length) {
           return -1;
         }
-        in=new FileInputStream(files[nextFile++]);
+        in = new FileInputStream(files[nextFile++]);
       }
     }
     return value;
@@ -125,25 +125,25 @@ public class MultiFileInputStream extends InputStream {
 
   @Override
   public synchronized int read(byte[] buff) throws IOException {
-    if (buff.length>0) {
+    if (buff.length > 0) {
       if (in == null) {
         if (nextFile >= files.length) {
           return -1;
         }
-        in=new FileInputStream(files[nextFile++]);
+        in = new FileInputStream(files[nextFile++]);
       }
-      int count=-1;
+      int count = -1;
       while (count == -1) {
-        count=in.read(buff);
+        count = in.read(buff);
         if (count == -1) {
           try (FileInputStream tempIn = in) {
             assert tempIn == in : "This assert is to avoid compiler warning: auto-closeable resource tempIn is never referenced in body of corresponding try statement";
-            in=null;
+            in = null;
           }
           if (nextFile >= files.length) {
             return -1;
           }
-          in=new FileInputStream(files[nextFile++]);
+          in = new FileInputStream(files[nextFile++]);
         }
       }
       return count;
@@ -153,25 +153,25 @@ public class MultiFileInputStream extends InputStream {
 
   @Override
   public synchronized int read(byte[] buff, int off, int len) throws IOException {
-    if (len>0) {
+    if (len > 0) {
       if (in == null) {
         if (nextFile >= files.length) {
           return -1;
         }
-        in=new FileInputStream(files[nextFile++]);
+        in = new FileInputStream(files[nextFile++]);
       }
-      int count=-1;
+      int count = -1;
       while (count == -1) {
-        count=in.read(buff, off, len);
+        count = in.read(buff, off, len);
         if (count == -1) {
           try (FileInputStream tempIn = in) {
             assert tempIn == in : "This assert is to avoid compiler warning: auto-closeable resource tempIn is never referenced in body of corresponding try statement";
-            in=null;
+            in = null;
           }
           if (nextFile >= files.length) {
             return -1;
           }
-          in=new FileInputStream(files[nextFile++]);
+          in = new FileInputStream(files[nextFile++]);
         }
       }
       return count;
@@ -186,32 +186,32 @@ public class MultiFileInputStream extends InputStream {
         super.reset();
         return;
       }
-      in=new FileInputStream(files[nextFile++]);
+      in = new FileInputStream(files[nextFile++]);
     }
     in.reset();
   }
 
   @Override
   public synchronized long skip(long n) throws IOException {
-    if (n>0) {
+    if (n > 0) {
       if (in == null) {
         if (nextFile >= files.length) {
           return -1;
         }
-        in=new FileInputStream(files[nextFile++]);
+        in = new FileInputStream(files[nextFile++]);
       }
-      long count=-1;
+      long count = -1;
       while (count == -1) {
-        count=in.skip(n);
+        count = in.skip(n);
         if (count == -1) {
           try (FileInputStream tempIn = in) {
             assert tempIn == in : "This assert is to avoid compiler warning: auto-closeable resource tempIn is never referenced in body of corresponding try statement";
-            in=null;
+            in = null;
           }
           if (nextFile >= files.length) {
             return -1;
           }
-          in=new FileInputStream(files[nextFile++]);
+          in = new FileInputStream(files[nextFile++]);
         }
       }
       return count;
@@ -223,7 +223,7 @@ public class MultiFileInputStream extends InputStream {
    * Gets the total number of bytes in all the files that will be read.
    */
   public long length() {
-    long total=0;
+    long total = 0;
     for (File file : files) {
       total += file.length();
     }

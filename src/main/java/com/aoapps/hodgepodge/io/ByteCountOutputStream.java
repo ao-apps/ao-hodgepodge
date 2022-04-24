@@ -45,7 +45,7 @@ public class ByteCountOutputStream extends FilterOutputStream implements NoClose
 
   @Override
   public boolean isNoClose() {
-    return (out instanceof NoClose) && ((NoClose)out).isNoClose();
+    return (out instanceof NoClose) && ((NoClose) out).isNoClose();
   }
 
   @Override
@@ -57,7 +57,7 @@ public class ByteCountOutputStream extends FilterOutputStream implements NoClose
   @Override
   public void write(byte[] b) throws IOException {
     out.write(b, 0, b.length);
-    count+=b.length;
+    count += b.length;
   }
 
   @Override

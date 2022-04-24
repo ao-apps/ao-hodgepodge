@@ -39,10 +39,10 @@ import java.net.Socket;
 public class BandwidthLimitingTunnelHandlerDownstreamThread extends BandwidthLimitingTunnelHandlerThread {
 
   public BandwidthLimitingTunnelHandlerDownstreamThread(
-    boolean verbose,
-    Long downstream_bandwidth,
-    Socket listenSocket,
-    Socket connectSocket
+      boolean verbose,
+      Long downstream_bandwidth,
+      Socket listenSocket,
+      Socket connectSocket
   ) {
     super(verbose, downstream_bandwidth, listenSocket, connectSocket);
   }

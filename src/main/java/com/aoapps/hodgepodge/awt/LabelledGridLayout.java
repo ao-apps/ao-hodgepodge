@@ -56,11 +56,11 @@ public class LabelledGridLayout implements LayoutManager {
    * @param  cgap     the space between the two components in a column
    */
   public LabelledGridLayout(int rows, int columns, int hgap, int vgap, int cgap) {
-    this.rows=rows;
-    this.columns=columns;
-    this.hgap=hgap;
-    this.vgap=vgap;
-    this.cgap=cgap;
+    this.rows = rows;
+    this.columns = columns;
+    this.hgap = hgap;
+    this.vgap = vgap;
+    this.cgap = cgap;
     this.stretchComponents = true;
   }
 
@@ -72,11 +72,11 @@ public class LabelledGridLayout implements LayoutManager {
    * @param  cgap     the space between the two components in a column
    */
   public LabelledGridLayout(int rows, int columns, int hgap, int vgap, int cgap, boolean stretchComponents) {
-    this.rows=rows;
-    this.columns=columns;
-    this.hgap=hgap;
-    this.vgap=vgap;
-    this.cgap=cgap;
+    this.rows = rows;
+    this.columns = columns;
+    this.hgap = hgap;
+    this.vgap = vgap;
+    this.cgap = cgap;
     this.stretchComponents = stretchComponents;
   }
 
@@ -87,53 +87,53 @@ public class LabelledGridLayout implements LayoutManager {
 
   private Dimension getLayoutSize(Container parent, boolean isMinimum) {
     synchronized (parent.getTreeLock()) {
-      Insets insets=parent.getInsets();
-      int ncomponents=parent.getComponentCount();
-      int nrows=rows;
-      int ncols=columns;
-      if (nrows>0) {
-        ncols=((ncomponents/2)+nrows-1)/nrows;
+      Insets insets = parent.getInsets();
+      int ncomponents = parent.getComponentCount();
+      int nrows = rows;
+      int ncols = columns;
+      if (nrows > 0) {
+        ncols = ((ncomponents / 2) + nrows - 1) / nrows;
       } else {
-        nrows=((ncomponents/2)+ncols-1)/ncols;
+        nrows = ((ncomponents / 2) + ncols - 1) / ncols;
       }
-      int[] widths=new int[ncols*2];
-      int totalHeight=0;
-      int highest=0;
-      int pos=0;
+      int[] widths = new int[ncols * 2];
+      int totalHeight = 0;
+      int highest = 0;
+      int pos = 0;
       Loop:
-        for (int y=0;y<nrows;y++) {
-          if (!stretchComponents) {
-            highest=0;
+      for (int y = 0; y < nrows; y++) {
+        if (!stretchComponents) {
+          highest = 0;
+        }
+        for (int x = 0; x < (ncols * 2); x++) {
+          if (pos >= ncomponents) {
+            break Loop;
           }
-          for (int x=0;x<(ncols*2);x++) {
-            if (pos >= ncomponents) {
-              break Loop;
-            }
-            Component component=parent.getComponent(pos++);
-            Dimension d=isMinimum?component.getMinimumSize():component.getPreferredSize();
-            if (d.width>widths[x]) {
-              widths[x]=d.width;
-            }
-            if (d.height>highest) {
-              highest=d.height;
-            }
+          Component component = parent.getComponent(pos++);
+          Dimension d = isMinimum ? component.getMinimumSize() : component.getPreferredSize();
+          if (d.width > widths[x]) {
+            widths[x] = d.width;
           }
-          if (!stretchComponents) {
-            totalHeight+=highest;
+          if (d.height > highest) {
+            highest = d.height;
           }
         }
-        // Find the widest sum of label and component
-        int widest=0;
-        for (int x=0;x<ncols;x++) {
-          int width=widths[x*2]+widths[x*2+1];
-          if (width>widest) {
-            widest=width;
-          }
+        if (!stretchComponents) {
+          totalHeight += highest;
         }
-        return new Dimension(
-          insets.left + ncols*widest + insets.right + hgap*(columns-1) + cgap*columns,
-          insets.top + (stretchComponents?nrows*highest:totalHeight) + insets.bottom + vgap*(rows-1)
-        );
+      }
+      // Find the widest sum of label and component
+      int widest = 0;
+      for (int x = 0; x < ncols; x++) {
+        int width = widths[x * 2] + widths[x * 2 + 1];
+        if (width > widest) {
+          widest = width;
+        }
+      }
+      return new Dimension(
+          insets.left + ncols * widest + insets.right + hgap * (columns - 1) + cgap * columns,
+          insets.top + (stretchComponents ? nrows * highest : totalHeight) + insets.bottom + vgap * (rows - 1)
+      );
     }
   }
 
@@ -145,71 +145,71 @@ public class LabelledGridLayout implements LayoutManager {
   @Override
   public void layoutContainer(Container parent) {
     synchronized (parent.getTreeLock()) {
-      Insets insets=parent.getInsets();
-      int ncomponents=parent.getComponentCount();
+      Insets insets = parent.getInsets();
+      int ncomponents = parent.getComponentCount();
       if (ncomponents == 0) {
         return;
       }
 
-      int nrows=rows;
-      int ncols=columns;
-      if (nrows>0) {
-        ncols=((ncomponents/2)+nrows-1)/nrows;
+      int nrows = rows;
+      int ncols = columns;
+      if (nrows > 0) {
+        ncols = ((ncomponents / 2) + nrows - 1) / nrows;
       } else {
-        nrows=((ncomponents/2)+ncols-1)/ncols;
+        nrows = ((ncomponents / 2) + ncols - 1) / ncols;
       }
 
       // Determine the desired widths for the labels
-      int[] labelWidths=new int[ncols];
-      int pos=0;
-    Loop1:
-      for (int y=0;y<nrows;y++) {
-        for (int x=0;x<ncols;x++) {
+      int[] labelWidths = new int[ncols];
+      int pos = 0;
+      Loop1:
+      for (int y = 0; y < nrows; y++) {
+        for (int x = 0; x < ncols; x++) {
           if (pos >= ncomponents) {
             break Loop1;
           }
-          Component component=parent.getComponent(pos);
-          pos+=2;
-          Dimension d=component.getPreferredSize();
-          if (d.width>labelWidths[x]) {
-            labelWidths[x]=d.width;
+          Component component = parent.getComponent(pos);
+          pos += 2;
+          Dimension d = component.getPreferredSize();
+          if (d.width > labelWidths[x]) {
+            labelWidths[x] = d.width;
           }
         }
       }
-      Dimension parentSize=parent.getSize();
-      int width=parentSize.width-(insets.left+insets.right);
-      int height=parentSize.height-(insets.top+insets.bottom);
-      int lasty=0;
-      pos=0;
-    Loop:
-      for (int y=0;y<nrows;y++) {
-        int yend=0;
-        int cellHeight=0;
+      Dimension parentSize = parent.getSize();
+      int width = parentSize.width - (insets.left + insets.right);
+      int height = parentSize.height - (insets.top + insets.bottom);
+      int lasty = 0;
+      pos = 0;
+      Loop:
+      for (int y = 0; y < nrows; y++) {
+        int yend = 0;
+        int cellHeight = 0;
         if (stretchComponents) {
-          yend=((y+1)*(height+vgap))/nrows-vgap;
-          cellHeight=yend-lasty;
+          yend = ((y + 1) * (height + vgap)) / nrows - vgap;
+          cellHeight = yend - lasty;
         }
-        int lastx=0;
-        for (int x=0;x<ncols;x++) {
+        int lastx = 0;
+        for (int x = 0; x < ncols; x++) {
           if (pos >= ncomponents) {
             break Loop;
           }
-          int xend=((x+1)*(width+hgap))/ncols-hgap;
-          int cellWidth=xend-lastx;
+          int xend = ((x + 1) * (width + hgap)) / ncols - hgap;
+          int cellWidth = xend - lastx;
           // Split this width into two areas, left for label and right for component
-          int availableWidth=labelWidths[x];
-          if (availableWidth>cellWidth) {
-            availableWidth=cellWidth;
+          int availableWidth = labelWidths[x];
+          if (availableWidth > cellWidth) {
+            availableWidth = cellWidth;
           }
           // Reshape the label to fit
-          Component label=parent.getComponent(pos++);
-          Dimension labelD=label.getPreferredSize();
-          Component component=parent.getComponent(pos++);
-          Dimension componentD=component.getPreferredSize();
+          Component label = parent.getComponent(pos++);
+          Dimension labelD = label.getPreferredSize();
+          Component component = parent.getComponent(pos++);
+          Dimension componentD = component.getPreferredSize();
           if (!stretchComponents) {
             cellHeight = Math.max(labelD.height, componentD.height);
-            if ((lasty+cellHeight)>yend) {
-              yend=lasty+cellHeight;
+            if ((lasty + cellHeight) > yend) {
+              yend = lasty + cellHeight;
             }
             // yend = lasty+cellHeight;
           }
@@ -219,34 +219,34 @@ public class LabelledGridLayout implements LayoutManager {
           //  actualWidth=availableWidth;
           //}
           label.setBounds(
-            lastx+insets.left,
-            lasty+insets.top,
-            availableWidth,
-            cellHeight
+              lastx + insets.left,
+              lasty + insets.top,
+              availableWidth,
+              cellHeight
           );
           // Split out the right area
-          if (pos>ncomponents) {
+          if (pos > ncomponents) {
             break Loop;
           }
-          availableWidth=cellWidth-cgap-labelWidths[x];
-          if (availableWidth<0) {
-            availableWidth=0;
+          availableWidth = cellWidth - cgap - labelWidths[x];
+          if (availableWidth < 0) {
+            availableWidth = 0;
           }
           // Reshape the component
-          int actualWidth=componentD.width;
-          if (actualWidth>availableWidth) {
-            actualWidth=availableWidth;
+          int actualWidth = componentD.width;
+          if (actualWidth > availableWidth) {
+            actualWidth = availableWidth;
           }
           component.setBounds(
-            lastx+labelWidths[x]+cgap+insets.left,
-            lasty+insets.top,
-            actualWidth,
-            cellHeight /*Klay--8/22/01*/
+              lastx + labelWidths[x] + cgap + insets.left,
+              lasty + insets.top,
+              actualWidth,
+              cellHeight /*Klay--8/22/01*/
           );
           // Get ready for next iteration
-          lastx=xend+hgap;
+          lastx = xend + hgap;
         }
-        lasty=yend+vgap;
+        lasty = yend + vgap;
       }
     }
   }

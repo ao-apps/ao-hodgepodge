@@ -93,7 +93,7 @@ public class EditableResourceBundleSet {
   void addBundle(EditableResourceBundle bundle) {
     Locale locale = bundle.getBundleLocale();
     if (!locales.contains(locale)) {
-      throw new AssertionError("locale not in locales: "+locale);
+      throw new AssertionError("locale not in locales: " + locale);
     }
     bundles.put(locale, bundle);
   }
@@ -118,17 +118,17 @@ public class EditableResourceBundleSet {
     if (localeBundle == null) {
       ResourceBundle resourceBundle = ResourceBundle.getBundle(baseName, locale);
       if (!resourceBundle.getLocale().equals(locale)) {
-        throw new AssertionError("ResourceBundle not for this locale: "+locale);
+        throw new AssertionError("ResourceBundle not for this locale: " + locale);
       }
       if (!(resourceBundle instanceof EditableResourceBundle)) {
-        throw new AssertionError("ResourceBundle is not a EditableResourceBundle: "+resourceBundle);
+        throw new AssertionError("ResourceBundle is not a EditableResourceBundle: " + resourceBundle);
       }
-      localeBundle = (EditableResourceBundle)resourceBundle;
+      localeBundle = (EditableResourceBundle) resourceBundle;
       if (localeBundle.getBundleSet() != this) {
-        throw new AssertionError("EditableResourceBundle not for this EditableResourceBundleSet: "+localeBundle);
+        throw new AssertionError("EditableResourceBundle not for this EditableResourceBundleSet: " + localeBundle);
       }
       if (!localeBundle.getBundleLocale().equals(locale)) {
-        throw new AssertionError("EditableResourceBundle not for this locale: "+locale);
+        throw new AssertionError("EditableResourceBundle not for this locale: " + locale);
       }
       // EditableResourceBundle will have added the bundle to the bundles map.
     }

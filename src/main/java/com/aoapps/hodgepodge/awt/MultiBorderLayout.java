@@ -44,10 +44,10 @@ public class MultiBorderLayout extends BorderLayout {
   private static final long serialVersionUID = 1L;
 
   protected List<Component>
-    northComponents,
-    westComponents,
-    eastComponents,
-    southComponents
+      northComponents,
+      westComponents,
+      eastComponents,
+      southComponents
   ;
 
   protected Component center;

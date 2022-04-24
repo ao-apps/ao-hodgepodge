@@ -77,16 +77,16 @@ public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
 
     // Synchronize the dynamic part of the list
     int size = list.size();
-    for (int index=0; index<size; index++) {
+    for (int index = 0; index < size; index++) {
       E obj = list.get(index);
-      if (index >= (getSize()-modelOffset)) {
+      if (index >= (getSize() - modelOffset)) {
         addElement(obj);
-      } else if (!obj.equals(getElementAt(index+modelOffset))) {
+      } else if (!obj.equals(getElementAt(index + modelOffset))) {
         // Objects don't match
         // If this object is found further down the list, then delete up to that object
         int foundIndex = -1;
-        for (int searchIndex = index+1; searchIndex<(getSize()-modelOffset); searchIndex++) {
-          if (obj.equals(getElementAt(searchIndex+modelOffset))) {
+        for (int searchIndex = index + 1; searchIndex < (getSize() - modelOffset); searchIndex++) {
+          if (obj.equals(getElementAt(searchIndex + modelOffset))) {
             foundIndex = searchIndex;
             break;
           }
@@ -95,7 +95,7 @@ public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
           // No removeRange
           // removeRange(index+modelOffset, foundIndex-1+modelOffset);
           for (
-            int removeIndex = foundIndex-1+modelOffset, end = index+modelOffset;
+            int removeIndex = foundIndex - 1 + modelOffset, end = index + modelOffset;
             removeIndex >= end;
             removeIndex--
           ) {
@@ -103,7 +103,7 @@ public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
           }
         } else {
           // Otherwise, insert in the current index
-          insertElementAt(obj, index+modelOffset);
+          insertElementAt(obj, index + modelOffset);
         }
       }
     }

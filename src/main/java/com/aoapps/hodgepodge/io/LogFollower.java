@@ -51,7 +51,9 @@ public class LogFollower extends InputStream {
 
   private volatile boolean closed;
 
-  private static class FilePosLock {/* Empty lock class to help heap profile */}
+  private static class FilePosLock {
+    // Empty lock class to help heap profile
+  }
   private final FilePosLock filePosLock = new FilePosLock();
   private long filePos;
 
@@ -74,7 +76,7 @@ public class LogFollower extends InputStream {
 
   private void checkClosed() throws IOException {
     if (closed) {
-      throw new IOException("LogFollower has been closed: "+file.getPath());
+      throw new IOException("LogFollower has been closed: " + file.getPath());
     }
   }
 
@@ -102,7 +104,7 @@ public class LogFollower extends InputStream {
       checkClosed();
     }
     long fileLen = file.length();
-    if (fileLen<filePos) {
+    if (fileLen < filePos) {
       filePos = 0;
     }
   }
@@ -115,10 +117,10 @@ public class LogFollower extends InputStream {
       long available = file.length() - filePos;
       if (available < 0) {
         available = 0;
-      } else if (available>Integer.MAX_VALUE) {
+      } else if (available > Integer.MAX_VALUE) {
         available = Integer.MAX_VALUE;
       }
-      return (int)available;
+      return (int) available;
     }
   }
 
@@ -156,7 +158,7 @@ public class LogFollower extends InputStream {
         detectFileChange();
         // Read to the end of the file
         long ral = file.length();
-        if (ral>filePos) {
+        if (ral > filePos) {
           try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
             randomAccess.seek(filePos++);
             return randomAccess.read();
@@ -189,14 +191,14 @@ public class LogFollower extends InputStream {
         detectFileChange();
         // Read to the end of the file
         long ral = file.length();
-        if (ral>filePos) {
+        if (ral > filePos) {
           try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
             randomAccess.seek(filePos);
             long avail = randomAccess.length() - filePos;
-            if (avail>len) {
+            if (avail > len) {
               avail = len;
             }
-            int actual = randomAccess.read(b, offset, (int)avail);
+            int actual = randomAccess.read(b, offset, (int) avail);
             filePos += actual;
             return actual;
           }
@@ -228,14 +230,14 @@ public class LogFollower extends InputStream {
         detectFileChange();
         // Skip to the end of the file
         long ral = file.length();
-        if (ral>filePos) {
+        if (ral > filePos) {
           try (RandomAccessFile randomAccess = new RandomAccessFile(file, "r")) {
             randomAccess.seek(filePos);
-            long avail = randomAccess.length()-filePos;
-            if (avail>n) {
+            long avail = randomAccess.length() - filePos;
+            if (avail > n) {
               avail = n;
             }
-            int actual = randomAccess.skipBytes((int)avail);
+            int actual = randomAccess.skipBytes((int) avail);
             filePos += actual;
             return actual;
           }

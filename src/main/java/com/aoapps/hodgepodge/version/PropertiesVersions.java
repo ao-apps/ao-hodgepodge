@@ -82,7 +82,7 @@ public class PropertiesVersions {
     if (three == null) {
       throw new LocalizedIllegalArgumentException(RESOURCES, "getVersion.productNotFound", product);
     }
-    return Version.valueOf(three+"."+getBuild());
+    return Version.valueOf(three + "." + getBuild());
   }
 
   /**

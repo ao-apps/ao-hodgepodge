@@ -44,7 +44,7 @@ public abstract class ModifiableResourceBundle extends ResourceBundle {
    */
   public final void removeKey(String key) {
     if (!isModifiable()) {
-      throw new AssertionError("ResourceBundle is not modifiable: "+this);
+      throw new AssertionError("ResourceBundle is not modifiable: " + this);
     }
     handleRemoveKey(key);
   }
@@ -78,7 +78,7 @@ public abstract class ModifiableResourceBundle extends ResourceBundle {
    */
   public final void setObject(String key, Object value, boolean modified) {
     if (!isModifiable()) {
-      throw new AssertionError("ResourceBundle is not modifiable: "+this);
+      throw new AssertionError("ResourceBundle is not modifiable: " + this);
     }
     handleSetObject(key, value, modified);
   }

@@ -38,16 +38,17 @@ public class WildcardPatternMatcherTest extends TestCase {
 
   private static final String longString;
   private static final String craftedLongString;
+
   static {
     // Got stupid slow at 10000
     // At 1000, simple matcher was 4,000 times as fast as the regular expressions
     StringBuilder longSB = new StringBuilder();
-    for (int i=0; i<100; i++) {
+    for (int i = 0; i < 100; i++) {
       longSB.append("long string ");
     }
     longString = longSB.toString();
     longSB.setLength(0);
-    for (int i=0; i<100; i++) {
+    for (int i = 0; i < 100; i++) {
       longSB.append("jpepngifitif");
     }
     // ".*(jpg|jpeg|png|gif|tiff)$",
@@ -82,203 +83,203 @@ public class WildcardPatternMatcherTest extends TestCase {
       startNanos = System.nanoTime();
       for (int i = 0; i < testSize; i++) {
         assertEquals(
-          expectedResult,
-          wcMatcher.isMatch(text)
+            expectedResult,
+            wcMatcher.isMatch(text)
         );
       }
       long wcTimeNanos = System.nanoTime() - startNanos;
-      System.out.println("    " + testSize + ": Uses of WildcardPatternMatcher in " + BigDecimal.valueOf(wcTimeNanos/1000, 3) + " ms");
+      System.out.println("    " + testSize + ": Uses of WildcardPatternMatcher in " + BigDecimal.valueOf(wcTimeNanos / 1000, 3) + " ms");
 
       // Time use pattern
       startNanos = System.nanoTime();
       for (int i = 0; i < testSize; i++) {
         assertEquals(
-          expectedResult,
-          rePattern.matcher(text).matches()
+            expectedResult,
+            rePattern.matcher(text).matches()
         );
       }
       timeNanos = System.nanoTime() - startNanos;
-      System.out.println("    " + testSize + ": Uses of Pattern                in " + BigDecimal.valueOf(timeNanos/1000, 3) + " ms (" + ((float)((double)timeNanos / (double)wcTimeNanos)) + ')');
+      System.out.println("    " + testSize + ": Uses of Pattern                in " + BigDecimal.valueOf(timeNanos / 1000, 3) + " ms (" + ((float) ((double) timeNanos / (double) wcTimeNanos)) + ')');
     }
   }
 
   public void testMatchNoneShortString() {
     doTestPerformance(
-      "Match none, short string",
-      "",
-      "a^",
-      "Short string",
-      false
+        "Match none, short string",
+        "",
+        "a^",
+        "Short string",
+        false
     );
   }
 
   public void testMatchNoneLongString() {
     doTestPerformance(
-      "Match none, long string",
-      "",
-      "a^",
-      longString,
-      false
+        "Match none, long string",
+        "",
+        "a^",
+        longString,
+        false
     );
   }
 
   public void testMatchAllShortString() {
     doTestPerformance(
-      "Match all, short string",
-      "*",
-      ".*",
-      "Short string",
-      true
+        "Match all, short string",
+        "*",
+        ".*",
+        "Short string",
+        true
     );
   }
 
   public void testMatchAllLongString() {
     doTestPerformance(
-      "Match all, long string",
-      "*",
-      ".*",
-      longString,
-      true
+        "Match all, long string",
+        "*",
+        ".*",
+        longString,
+        true
     );
   }
 
   public void testMatchPrefix() {
     doTestPerformance(
-      "Match prefix",
-      "something*",
-      "^something.*",
-      "something that matches",
-      true
+        "Match prefix",
+        "something*",
+        "^something.*",
+        "something that matches",
+        true
     );
   }
 
   public void testNoMatchPrefix() {
     doTestPerformance(
-      "No match prefix",
-      "something*",
-      "^something.*",
-      "Not something that matches",
-      false
+        "No match prefix",
+        "something*",
+        "^something.*",
+        "Not something that matches",
+        false
     );
   }
 
   public void testMatchSuffix() {
     doTestPerformance(
-      "Match suffix",
-      "*something",
-      ".*something$",
-      "matches this something",
-      true
+        "Match suffix",
+        "*something",
+        ".*something$",
+        "matches this something",
+        true
     );
   }
 
   public void testNoMatchSuffix() {
     doTestPerformance(
-      "No match suffix",
-      "*something",
-      ".*something$",
-      "not matches this something else",
-      false
+        "No match suffix",
+        "*something",
+        ".*something$",
+        "not matches this something else",
+        false
     );
   }
 
   public void testNoMatchSuffixLong() {
     doTestPerformance(
-      "No match suffix, long string",
-      "*something",
-      ".*something$",
-      longString,
-      false
+        "No match suffix, long string",
+        "*something",
+        ".*something$",
+        longString,
+        false
     );
   }
 
   public void testMatchPrefixSuffix() {
     doTestPerformance(
-      "Match prefix and suffix",
-      "blargs*something",
-      "^blargs.*something$",
-      "blargssomething",
-      true
+        "Match prefix and suffix",
+        "blargs*something",
+        "^blargs.*something$",
+        "blargssomething",
+        true
     );
   }
 
   public void testNoMatchPrefixSuffix1() {
     doTestPerformance(
-      "No match prefix and suffix 1",
-      "blargs*something",
-      "^blargs.*something$",
-      " blargssomething",
-      false
+        "No match prefix and suffix 1",
+        "blargs*something",
+        "^blargs.*something$",
+        " blargssomething",
+        false
     );
   }
 
   public void testNoMatchPrefixSuffix2() {
     doTestPerformance(
-      "No match prefix and suffix 2",
-      "blargs*something",
-      "^blargs.*something$",
-      "blargssomething ",
-      false
+        "No match prefix and suffix 2",
+        "blargs*something",
+        "^blargs.*something$",
+        "blargssomething ",
+        false
     );
   }
 
   public void testNoMatchPrefixSuffix3() {
     doTestPerformance(
-      "No match prefix and suffix 3",
-      "blargs*something",
-      "^blargs.*something$",
-      "blargsomething",
-      false
+        "No match prefix and suffix 3",
+        "blargs*something",
+        "^blargs.*something$",
+        "blargsomething",
+        false
     );
   }
 
   public void testMatchTestPng() {
     doTestPerformance(
-      "Match test.png vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      ".*(jpg|jpeg|png|gif|tiff)$",
-      "test.png",
-      true
+        "Match test.png vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        ".*(jpg|jpeg|png|gif|tiff)$",
+        "test.png",
+        true
     );
   }
 
   public void testNoMatchTestDoc() {
     doTestPerformance(
-      "Match test.doc vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      ".*(jpg|jpeg|png|gif|tiff)$",
-      "test.doc",
-      false
+        "Match test.doc vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        ".*(jpg|jpeg|png|gif|tiff)$",
+        "test.doc",
+        false
     );
   }
 
   public void testNoMatchTestGifTxt() {
     doTestPerformance(
-      "Match test.gif.txt vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      ".*(jpg|jpeg|png|gif|tiff)$",
-      "test.gif.txt",
-      false
+        "Match test.gif.txt vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        ".*(jpg|jpeg|png|gif|tiff)$",
+        "test.gif.txt",
+        false
     );
   }
 
   public void testNoMatchTestGIF() {
     doTestPerformance(
-      "Match test.GIF vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      ".*(jpg|jpeg|png|gif|tiff)$",
-      "test.GIF",
-      false
+        "Match test.GIF vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        ".*(jpg|jpeg|png|gif|tiff)$",
+        "test.GIF",
+        false
     );
   }
 
   public void testMatchTestTiff() {
     doTestPerformance(
-      "Match test.tiff vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      ".*(jpg|jpeg|png|gif|tiff)$",
-      "test.tiff",
-      true
+        "Match test.tiff vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
+        ".*(jpg|jpeg|png|gif|tiff)$",
+        "test.tiff",
+        true
     );
   }
 

@@ -74,10 +74,10 @@ public class TempFileList {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder(
-      directory == null ? 0 : (directory.getPath().length() + 1)
-      + prefix.length()
-      + 1
-      + suffix.length()
+        directory == null ? 0 : (directory.getPath().length() + 1)
+            + prefix.length()
+            + 1
+            + suffix.length()
     );
     if (directory != null) {
       sb.append(directory.getPath()).append(File.separatorChar);

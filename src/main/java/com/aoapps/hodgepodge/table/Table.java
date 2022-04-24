@@ -39,7 +39,7 @@ public interface Table<T extends Row> {
    * the cached data for this table expires.  The default
    * batching is used.
    *
-   * @see  #addTableListener(TableListener,long)
+   * @see  #addTableListener(TableListener, long)
    */
   void addTableListener(TableListener listener);
 

@@ -58,28 +58,28 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
   private final DataOutputStream dataOutBuffer;
 
   public FileList(
-    String filenamePrefix,
-    String filenameExtension,
-    int objectLength,
-    FileListObjectFactory<T> objectFactory
+      String filenamePrefix,
+      String filenameExtension,
+      int objectLength,
+      FileListObjectFactory<T> objectFactory
   ) throws IOException {
-    this.filenamePrefix=filenamePrefix;
-    this.filenameExtension=filenameExtension;
+    this.filenamePrefix = filenamePrefix;
+    this.filenameExtension = filenameExtension;
     this.tempFileContext = new TempFileContext();
     this.frf = new FixedRecordFile(
-      tempFileContext.createTempFile(
-        filenamePrefix + '_',
-        filenameExtension == null ? null : ("." + filenameExtension)
-      ).getFile(),
-      "rw",
-      objectLength + 1
+        tempFileContext.createTempFile(
+            filenamePrefix + '_',
+            filenameExtension == null ? null : ("." + filenameExtension)
+        ).getFile(),
+        "rw",
+        objectLength + 1
     );
-    this.objectFactory=objectFactory;
+    this.objectFactory = objectFactory;
 
-    this.inBuffer=new AoByteArrayInputStream(new byte[objectLength+1]);
-    this.dataInBuffer=new DataInputStream(inBuffer);
-    this.outBuffer=new AoByteArrayOutputStream(objectLength+1);
-    this.dataOutBuffer=new DataOutputStream(outBuffer);
+    this.inBuffer = new AoByteArrayInputStream(new byte[objectLength + 1]);
+    this.dataInBuffer = new DataInputStream(inBuffer);
+    this.outBuffer = new AoByteArrayOutputStream(objectLength + 1);
+    this.dataOutBuffer = new DataOutputStream(outBuffer);
   }
 
   @Override
@@ -98,7 +98,7 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
       frf.seekToExistingRecord(index);
       inBuffer.fillFrom(frf);
       if (dataInBuffer.readBoolean()) {
-        T obj=objectFactory.createInstance();
+        T obj = objectFactory.createInstance();
         obj.readRecord(dataInBuffer);
         return obj;
       } else {
@@ -138,10 +138,10 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
       inBuffer.fillFrom(frf);
       T old;
       if (dataInBuffer.readBoolean()) {
-        old=objectFactory.createInstance();
+        old = objectFactory.createInstance();
         old.readRecord(dataInBuffer);
       } else {
-        old=null;
+        old = null;
       }
 
       // Write new object
@@ -150,13 +150,13 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
       if (element == null) {
         dataOutBuffer.writeBoolean(false);
       } else {
-        T newObj=element;
+        T newObj = element;
         dataOutBuffer.writeBoolean(true);
         newObj.writeRecord(dataOutBuffer);
       }
-      int recordSize=outBuffer.size();
-      if (recordSize>frf.getRecordLength()) {
-        throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
+      int recordSize = outBuffer.size();
+      if (recordSize > frf.getRecordLength()) {
+        throw new IOException("Record length exceeded: outBuffer.size()=" + recordSize + ", frf.getRecordLength()=" + frf.getRecordLength());
       }
       outBuffer.writeTo(frf);
 
@@ -175,13 +175,13 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
       if (element == null) {
         dataOutBuffer.writeBoolean(false);
       } else {
-        T newObj=element;
+        T newObj = element;
         dataOutBuffer.writeBoolean(true);
         newObj.writeRecord(dataOutBuffer);
       }
-      int recordSize=outBuffer.size();
-      if (recordSize>frf.getRecordLength()) {
-        throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
+      int recordSize = outBuffer.size();
+      if (recordSize > frf.getRecordLength()) {
+        throw new IOException("Record length exceeded: outBuffer.size()=" + recordSize + ", frf.getRecordLength()=" + frf.getRecordLength());
       }
 
       // Seeks to beginning of the new record
@@ -206,16 +206,16 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
     try {
       FileList<? extends T> otherFL;
       if (
-        (C instanceof FileList)
-        && (otherFL=(FileList<? extends T>)C).frf.getRecordLength() == frf.getRecordLength()
+          (C instanceof FileList)
+              && (otherFL = (FileList<? extends T>) C).frf.getRecordLength() == frf.getRecordLength()
       ) {
         // Do direct disk copies
-        boolean changed=false;
-        int otherSize=otherFL.size();
-        if (otherSize>0) {
+        boolean changed = false;
+        int otherSize = otherFL.size();
+        if (otherSize > 0) {
           frf.addRecords(index, otherSize);
           FixedRecordFile.copyRecords(otherFL.frf, 0, frf, index, otherSize);
-          changed=true;
+          changed = true;
         }
         if (changed) {
           modCount++;
@@ -223,12 +223,12 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
         return changed;
       } else {
         // Do block allocate then write
-        boolean changed=false;
-        int otherSize=C.size();
-        if (otherSize>0) {
+        boolean changed = false;
+        int otherSize = C.size();
+        if (otherSize > 0) {
           frf.addRecords(index, otherSize);
           Iterator<? extends T> records = C.iterator();
-          int count=0;
+          int count = 0;
           while (records.hasNext()) {
             // Write to buffer
             outBuffer.reset();
@@ -239,20 +239,20 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
               dataOutBuffer.writeBoolean(true);
               o.writeRecord(dataOutBuffer);
             }
-            int recordSize=outBuffer.size();
-            if (recordSize>frf.getRecordLength()) {
-              throw new IOException("Record length exceeded: outBuffer.size()="+recordSize+", frf.getRecordLength()="+frf.getRecordLength());
+            int recordSize = outBuffer.size();
+            if (recordSize > frf.getRecordLength()) {
+              throw new IOException("Record length exceeded: outBuffer.size()=" + recordSize + ", frf.getRecordLength()=" + frf.getRecordLength());
             }
 
             // Write to disk
-            frf.seekToExistingRecord(index+count);
+            frf.seekToExistingRecord(index + count);
             outBuffer.writeTo(frf);
             count++;
           }
           if (count != otherSize) {
             throw new IOException("count != otherSize");
           }
-          changed=true;
+          changed = true;
         }
         if (changed) {
           modCount++;
@@ -272,10 +272,10 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
       inBuffer.fillFrom(frf);
       T old;
       if (dataInBuffer.readBoolean()) {
-        old=objectFactory.createInstance();
+        old = objectFactory.createInstance();
         old.readRecord(dataInBuffer);
       } else {
-        old=null;
+        old = null;
       }
 
       frf.removeRecord(index);

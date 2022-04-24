@@ -110,7 +110,7 @@ public final class ParallelDelete {
    */
   public static void main(String[] args) {
     if (args.length == 0) {
-      System.err.println("Usage: "+ParallelDelete.class.getName()+" [-n] [-v] [--] path {path}");
+      System.err.println("Usage: " + ParallelDelete.class.getName() + " [-n] [-v] [--] path {path}");
       System.err.println("\t-n\tPerform dry run, do not modify the filesystem");
       System.err.println("\t-v\tWrite the full path to standard error as each file is removed");
       System.err.println("\t--\tEnd options, all additional arguments will be interpreted as paths");
@@ -175,18 +175,18 @@ public final class ParallelDelete {
       final Map<String, FilesystemIteratorRule> prefixRules = Collections.emptyMap();
       for (File directory : directories) {
         if (!directory.exists()) {
-          throw new IOException("Directory not found: "+directory.getPath());
+          throw new IOException("Directory not found: " + directory.getPath());
         }
         if (!directory.isDirectory()) {
-          throw new IOException("Not a directory: "+directory.getPath());
+          throw new IOException("Not a directory: " + directory.getPath());
         }
         String path = directory.getCanonicalPath();
         FilesystemIterator iterator = new FilesystemIterator(
-          Collections.singletonMap(path, FilesystemIteratorRule.OK),
-          prefixRules,
-          path,
-          false,
-          true
+            Collections.singletonMap(path, FilesystemIteratorRule.OK),
+            prefixRules,
+            path,
+            false,
+            true
         );
         File nextFile = iterator.getNextFile();
         if (nextFile != null) {
@@ -209,7 +209,7 @@ public final class ParallelDelete {
       verboseThread = null;
     } else {
       verboseQueue = new ArrayBlockingQueue<>(VERBOSE_QUEUE_SIZE);
-      verboseThreadRun = new boolean[] {true};
+      verboseThreadRun = new boolean[]{true};
       verboseThread = new Thread("ParallelDelete - Verbose Thread") {
         @Override
         public void run() {
@@ -237,7 +237,7 @@ public final class ParallelDelete {
     }
     try {
       final BlockingQueue<File> deleteQueue = new ArrayBlockingQueue<>(DELETE_QUEUE_SIZE);
-      final boolean[] deleteThreadRun = new boolean[] {true};
+      final boolean[] deleteThreadRun = new boolean[]{true};
       final IOException[] deleteException = new IOException[1];
       Thread deleteThread = new Thread("ParallelDelete - Delete Thread") {
         @Override
@@ -367,7 +367,7 @@ public final class ParallelDelete {
     String path = file.getPath();
     String prefix = iterator.getStartPath();
     if (!path.startsWith(prefix)) {
-      throw new IOException("path doesn't start with prefix: path=\""+path+"\", prefix=\""+prefix+"\"");
+      throw new IOException("path doesn't start with prefix: path=\"" + path + "\", prefix=\"" + prefix + "\"");
     }
     return path.substring(prefix.length());
   }

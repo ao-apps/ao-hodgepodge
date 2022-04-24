@@ -48,7 +48,9 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
     this.isForward = isForward;
   }
 
-  private enum Color {WHITE, GRAY, BLACK}
+  private enum Color {
+    WHITE, GRAY, BLACK
+  }
 
   /**
    * Test the graph for cycles and makes sure that all connections are consistent with back connections.
@@ -87,11 +89,11 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
       V connected = isForward ? vEdge.getTo() : vEdge.getFrom();
       // The directed edges should match
       if (
-        !(
-          isForward
-          ? graph.getEdgesTo(connected).contains(new Edge<>(vertex, connected))
-          : graph.getEdgesFrom(connected).contains(new Edge<>(connected, vertex))
-        )
+          !(
+              isForward
+                  ? graph.getEdgesTo(connected).contains(new Edge<>(vertex, connected))
+                  : graph.getEdgesFrom(connected).contains(new Edge<>(connected, vertex))
+          )
       ) {
         throw new AsymmetricException(vertex, connected);
       }

@@ -32,16 +32,16 @@ public class DayDuration {
 
   public enum Unit {
     DAYS {
-      @Override
-      void toString(int count, StringBuilder sb) {
-        sb.append(count).append(count == 1 ? " day" : " days");
-      }
+    @Override
+    void toString(int count, StringBuilder sb) {
+      sb.append(count).append(count == 1 ? " day" : " days");
+    }
 
-      @Override
-      void offset(int count, Calendar cal) {
-        cal.add(Calendar.DATE, count);
-      }
-    },
+    @Override
+    void offset(int count, Calendar cal) {
+      cal.add(Calendar.DATE, count);
+    }
+  },
     WEEKS {
       @Override
       void toString(int count, StringBuilder sb) {
@@ -83,23 +83,23 @@ public class DayDuration {
      */
     static Unit valueOfUnit(String unit) throws IllegalArgumentException {
       if (
-        "day".equalsIgnoreCase(unit)
-        || "days".equalsIgnoreCase(unit)
+          "day".equalsIgnoreCase(unit)
+              || "days".equalsIgnoreCase(unit)
       ) {
         return DAYS;
       } else if (
-        "week".equalsIgnoreCase(unit)
-        || "weeks".equalsIgnoreCase(unit)
+          "week".equalsIgnoreCase(unit)
+              || "weeks".equalsIgnoreCase(unit)
       ) {
         return WEEKS;
       } else if (
-        "month".equalsIgnoreCase(unit)
-        || "months".equalsIgnoreCase(unit)
+          "month".equalsIgnoreCase(unit)
+              || "months".equalsIgnoreCase(unit)
       ) {
         return MONTHS;
       } else if (
-        "year".equalsIgnoreCase(unit)
-        || "years".equalsIgnoreCase(unit)
+          "year".equalsIgnoreCase(unit)
+              || "years".equalsIgnoreCase(unit)
       ) {
         return YEARS;
       } else {
@@ -139,8 +139,8 @@ public class DayDuration {
       throw new IllegalArgumentException("Space not found in duration: " + duration);
     }
     return getInstance(
-      Integer.parseInt(duration.substring(0, spacePos)),
-      Unit.valueOfUnit(duration.substring(spacePos + 1))
+        Integer.parseInt(duration.substring(0, spacePos)),
+        Unit.valueOfUnit(duration.substring(spacePos + 1))
     );
   }
 

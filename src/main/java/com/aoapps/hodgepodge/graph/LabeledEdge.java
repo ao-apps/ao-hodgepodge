@@ -34,6 +34,7 @@ public class LabeledEdge<V, L> extends Edge<V> {
     super(from, to);
     this.label = label;
   }
+
   /**
    * The label of the edge.
    */
@@ -43,6 +44,6 @@ public class LabeledEdge<V, L> extends Edge<V> {
 
   @Override
   public String toString() {
-    return super.toString()+" \""+label+'"';
+    return super.toString() + " \"" + label + '"';
   }
 }

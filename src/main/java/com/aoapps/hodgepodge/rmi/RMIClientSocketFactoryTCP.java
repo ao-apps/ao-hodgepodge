@@ -58,8 +58,8 @@ public class RMIClientSocketFactoryTCP implements RMIClientSocketFactory, Serial
   @Override
   public boolean equals(Object obj) {
     return
-      (obj instanceof RMIClientSocketFactoryTCP)
-      && Objects.equals(localAddress, ((RMIClientSocketFactoryTCP)obj).localAddress)
+        (obj instanceof RMIClientSocketFactoryTCP)
+            && Objects.equals(localAddress, ((RMIClientSocketFactoryTCP) obj).localAddress)
     ;
   }
 
@@ -70,7 +70,7 @@ public class RMIClientSocketFactoryTCP implements RMIClientSocketFactory, Serial
 
   @Override
   public Socket createSocket(String host, int port) throws IOException {
-    Socket socket=new Socket();
+    Socket socket = new Socket();
     socket.setKeepAlive(true);
     socket.setTcpNoDelay(true);
     if (localAddress != null) {

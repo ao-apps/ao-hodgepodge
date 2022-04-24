@@ -65,19 +65,19 @@ public class TopologicalSorter<V, Ex extends Exception> implements GraphSorter<V
     //for each node n in S do
     for (V n : vertices) {
       if (
-        // Getting edges can be expensive, while checking visited should always be cheap
-        !visited.contains(n)
-        // This check is looking for starting nodes
-        && (isForward ? graph.getEdgesTo(n) : graph.getEdgesFrom(n)).isEmpty()
+          // Getting edges can be expensive, while checking visited should always be cheap
+          !visited.contains(n)
+              // This check is looking for starting nodes
+              && (isForward ? graph.getEdgesTo(n) : graph.getEdgesFrom(n)).isEmpty()
       ) {
         topologicalSortVisit(n, l, visited, sequence);
       }
     }
     if (l.size() != size) {
       throw new IllegalArgumentException(
-        "Not all vertices added.  Does the symmetric graph have consistent edges to and from?\n"
-        + "    vertices(" + size + "): " + vertices
-        + "    results(" + l.size() + "): " + l
+          "Not all vertices added.  Does the symmetric graph have consistent edges to and from?\n"
+              + "    vertices(" + size + "): " + vertices
+              + "    results(" + l.size() + "): " + l
       );
     }
     return l;

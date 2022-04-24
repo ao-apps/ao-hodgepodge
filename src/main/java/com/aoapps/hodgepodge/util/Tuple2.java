@@ -37,8 +37,8 @@ public class Tuple2<E1, E2> {
   private final E2 element2;
 
   public Tuple2(
-    E1 element1,
-    E2 element2
+      E1 element1,
+      E2 element2
   ) {
     this.element1 = element1;
     this.element2 = element2;
@@ -47,10 +47,10 @@ public class Tuple2<E1, E2> {
   @Override
   public String toString() {
     return
-      "("
-      + element1
-      + ',' + element2
-    + ')';
+        "("
+            + element1
+            + ',' + element2
+            + ')';
   }
 
   @Override
@@ -61,14 +61,15 @@ public class Tuple2<E1, E2> {
     if (!(obj instanceof Tuple2<?, ?>)) {
       return false;
     }
-    Tuple2<?, ?> other = (Tuple2<?, ?>)obj;
+    Tuple2<?, ?> other = (Tuple2<?, ?>) obj;
     return
-      Objects.equals(element1, other.element1)
-      && Objects.equals(element2, other.element2)
+        Objects.equals(element1, other.element1)
+            && Objects.equals(element2, other.element2)
     ;
   }
 
   private int hash;
+
   @Override
   public int hashCode() {
     int h = this.hash;

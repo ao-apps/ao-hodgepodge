@@ -95,7 +95,7 @@ abstract class BaseComparisonSortAlgorithm<E> extends BaseSortAlgorithm<E> imple
         if (comparator != null) {
           return comparator.compare(o1, o2);
         } else if (o1 instanceof Comparable<?>) {
-          Comparable<? super T> comp1 = (Comparable<? super T>)o1;
+          Comparable<? super T> comp1 = (Comparable<? super T>) o1;
           return comp1.compareTo(o2);
         } else {
           throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
@@ -126,7 +126,7 @@ abstract class BaseComparisonSortAlgorithm<E> extends BaseSortAlgorithm<E> imple
         if (comparator != null) {
           return comparator.compare(o1, o2);
         } else if (o1 instanceof Comparable<?>) {
-          Comparable<? super T> comp1 = (Comparable<? super T>)o1;
+          Comparable<? super T> comp1 = (Comparable<? super T>) o1;
           return comp1.compareTo(o2);
         } else {
           throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");
@@ -154,7 +154,7 @@ abstract class BaseComparisonSortAlgorithm<E> extends BaseSortAlgorithm<E> imple
         if (comparator != null) {
           return comparator.compare(o1, o2);
         } else if (o1 instanceof Comparable<?>) {
-          Comparable<? super T> comp1 = (Comparable<? super T>)o1;
+          Comparable<? super T> comp1 = (Comparable<? super T>) o1;
           return comp1.compareTo(o2);
         } else {
           throw new RuntimeException("Must either provide a Comparator or the objects must be Comparable");

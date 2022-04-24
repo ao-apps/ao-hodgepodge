@@ -39,13 +39,13 @@ public class AsymmetricException extends GraphException {
   private static final long serialVersionUID = 7461271328813491659L;
 
   private static String getMessage(
-    Object vertex,
-    Object connected
+      Object vertex,
+      Object connected
   ) {
     return
-      "No back connection matching connection:\n"
-      + "    vertex="+vertex.getClass().getName()+"(\""+vertex.toString()+"\")\n"
-      + "    connected="+connected.getClass().getName()+"(\""+connected.toString()+"\")"
+        "No back connection matching connection:\n"
+            + "    vertex=" + vertex.getClass().getName() + "(\"" + vertex.toString() + "\")\n"
+            + "    connected=" + connected.getClass().getName() + "(\"" + connected.toString() + "\")"
     ;
   }
 
@@ -80,7 +80,7 @@ public class AsymmetricException extends GraphException {
 
   static {
     Throwables.registerSurrogateFactory(AsymmetricException.class, (template, cause) ->
-      new AsymmetricException(template.vertex, template.connected, cause)
+        new AsymmetricException(template.vertex, template.connected, cause)
     );
   }
 }

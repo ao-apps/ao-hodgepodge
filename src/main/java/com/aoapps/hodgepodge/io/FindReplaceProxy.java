@@ -100,12 +100,12 @@ public final class FindReplaceProxy {
                 while (!Thread.currentThread().isInterrupted()) {
                   Socket socketIn = ss.accept();
                   new FindReplaceProxyThread(
-                    socketIn,
-                    listenAddress,
-                    connectAddress,
-                    connectPort,
-                    Collections.unmodifiableList(inFindReplaces),
-                    Collections.unmodifiableList(outFindReplaces)
+                      socketIn,
+                      listenAddress,
+                      connectAddress,
+                      connectPort,
+                      Collections.unmodifiableList(inFindReplaces),
+                      Collections.unmodifiableList(outFindReplaces)
                   ).start();
                 }
               }
@@ -141,12 +141,12 @@ public final class FindReplaceProxy {
     private final List<FindReplace> outFindReplaces;
 
     FindReplaceProxyThread(
-      Socket socketIn,
-      InetAddress sourceAddress,
-      InetAddress connectAddress,
-      int connectPort,
-      List<FindReplace> inFindReplaces,
-      List<FindReplace> outFindReplaces
+        Socket socketIn,
+        InetAddress sourceAddress,
+        InetAddress connectAddress,
+        int connectPort,
+        List<FindReplace> inFindReplaces,
+        List<FindReplace> outFindReplaces
     ) {
       this.socketIn = socketIn;
       this.sourceAddress = sourceAddress;
@@ -197,11 +197,11 @@ public final class FindReplaceProxy {
 
   static int indexOf(byte[] buff, int numBytes, byte[] findBytes, int pos) {
     final int findLen = findBytes.length;
-    if (findLen>0) {
-      while ((pos+findLen)<numBytes) {
+    if (findLen > 0) {
+      while ((pos + findLen) < numBytes) {
         boolean found = true;
-        for (int i=0; i < findLen; i++) {
-          if (buff[pos+i] != findBytes[i]) {
+        for (int i = 0; i < findLen; i++) {
+          if (buff[pos + i] != findBytes[i]) {
             found = false;
             break;
           }
@@ -236,13 +236,13 @@ public final class FindReplaceProxy {
             while ((numBytes = in.read(buff, 0, 4096)) != -1) {
               // Do find/replace
               int pos = 0;
-              while (pos<numBytes) {
+              while (pos < numBytes) {
                 // Look for the matching find/replace with the lowest index
                 int lowestIndex = -1;
                 FindReplace lowestFindReplace = null;
                 for (FindReplace findReplace : findReplaces) {
                   int index = indexOf(buff, numBytes, findReplace.findBytes, pos);
-                  if (index != -1 && (lowestIndex == -1 || index<lowestIndex)) {
+                  if (index != -1 && (lowestIndex == -1 || index < lowestIndex)) {
                     lowestIndex = index;
                     lowestFindReplace = findReplace;
                   }
@@ -254,7 +254,7 @@ public final class FindReplaceProxy {
                   pos = lowestIndex + lowestFindReplace.findBytes.length;
                 } else {
                   // No more find/replace in this block
-                  out.write(buff, pos, numBytes-pos);
+                  out.write(buff, pos, numBytes - pos);
                   pos = numBytes;
                 }
               }

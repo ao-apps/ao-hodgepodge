@@ -109,13 +109,13 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     private final BundleLookupThreadContext lookupContext;
 
     private ThreadSettings(
-      String setValueUrl,
-      Mode mode,
-      boolean modifyAllText,
-      Sequence elementIdGenerator,
-      Sequence lookupIdGenerator,
-      ConcurrentMap<LookupKey, LookupValue> requestLookups,
-      BundleLookupThreadContext lookupContext
+        String setValueUrl,
+        Mode mode,
+        boolean modifyAllText,
+        Sequence elementIdGenerator,
+        Sequence lookupIdGenerator,
+        ConcurrentMap<LookupKey, LookupValue> requestLookups,
+        BundleLookupThreadContext lookupContext
     ) {
       if (setValueUrl != null) {
         // Strip any anchor
@@ -134,18 +134,18 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     }
 
     public ThreadSettings(
-      String setValueUrl,
-      Mode mode,
-      boolean modifyAllText
+        String setValueUrl,
+        Mode mode,
+        boolean modifyAllText
     ) {
       this(
-        setValueUrl,
-        mode,
-        modifyAllText,
-        new AtomicSequence(),
-        new AtomicSequence(),
-        new ConcurrentHashMap<>(),
-        new BundleLookupThreadContext()
+          setValueUrl,
+          mode,
+          modifyAllText,
+          new AtomicSequence(),
+          new AtomicSequence(),
+          new ConcurrentHashMap<>(),
+          new BundleLookupThreadContext()
       );
     }
 
@@ -169,19 +169,19 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
      */
     public ThreadSettings setSettings(Mode mode, boolean modifyAllText) {
       if (
-        mode == this.mode
-        && modifyAllText == this.modifyAllText
+          mode == this.mode
+              && modifyAllText == this.modifyAllText
       ) {
         return this;
       } else {
         return new ThreadSettings(
-          setValueUrl,
-          mode,
-          modifyAllText,
-          elementIdGenerator,
-          lookupIdGenerator,
-          requestLookups,
-          lookupContext
+            setValueUrl,
+            mode,
+            modifyAllText,
+            elementIdGenerator,
+            lookupIdGenerator,
+            requestLookups,
+            lookupContext
         );
       }
     }
@@ -294,8 +294,8 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     private final String key;
 
     private LookupKey(
-      EditableResourceBundleSet bundleSet,
-      String key
+        EditableResourceBundleSet bundleSet,
+        String key
     ) {
       this.bundleSet = bundleSet;
       this.key = key;
@@ -308,8 +308,8 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
       }
       final LookupKey other = (LookupKey) obj;
       return
-        bundleSet == other.bundleSet
-        && key.equals(other.key)
+          bundleSet == other.bundleSet
+              && key.equals(other.key)
       ;
     }
 
@@ -325,6 +325,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
   private static class LookupLocaleValue {
     private final boolean missing;
     private final boolean invalidated;
+
     private LookupLocaleValue(boolean missing, boolean invalidated) {
       //assert !(missing && invalidated) : "May not be invalidated when missing";
       this.missing = missing;
@@ -374,11 +375,11 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
       throw new IllegalArgumentException("setValueUrl is null when canEditResources is true");
     }
     setThreadSettings(
-      new ThreadSettings(
-        setValueUrl,
-        canEditResources ? ThreadSettings.Mode.MARKUP : ThreadSettings.Mode.DISABLED,
-        modifyAllText
-      )
+        new ThreadSettings(
+            setValueUrl,
+            canEditResources ? ThreadSettings.Mode.MARKUP : ThreadSettings.Mode.DISABLED,
+            modifyAllText
+        )
     );
   }
 
@@ -402,12 +403,12 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
    * TODO: Decouple from ao-hodgepodge and use ao-fluent-html
    */
   public static void printEditableResourceBundleLookups(
-    Encoder textInJavascriptEncoder,
-    Encoder textInXhtmlEncoder,
-    Appendable out,
-    boolean isXhtml,
-    int editorRows,
-    boolean verticalButtons
+      Encoder textInJavascriptEncoder,
+      Encoder textInXhtmlEncoder,
+      Appendable out,
+      boolean isXhtml,
+      int editorRows,
+      boolean verticalButtons
   ) throws IOException {
     final ThreadSettings threadSettings = getThreadSettings();
     // Disable on current thread
@@ -418,8 +419,8 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
       // Sort by lookupValue.id to present the information in the same order as first seen in the request
       List<LookupKey> lookupKeys = new ArrayList<>(lookups.keySet());
       Collections.sort(
-        lookupKeys,
-        (key1, key2) -> Long.compare(lookups.get(key1).id, lookups.get(key2).id)
+          lookupKeys,
+          (key1, key2) -> Long.compare(lookups.get(key1).id, lookups.get(key2).id)
       );
       String setValueUrl = threadSettings.setValueUrl;
       if (setValueUrl != null) {
@@ -444,49 +445,49 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           }
         }
         out.append("  <a href=\"#\" onclick=\"if (EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility(document.getElementById('EditableResourceBundleEditor').style.visibility == 'visible' ? 'hidden' : 'visible'); return false;\" style=\"text-decoration:none; color:black\"><span style='border:1px solid black; background-color:white'>")
-          .append(Integer.toString(lookups.size())).append(lookups.size() == 1 ? " Resource" : " Resources");
-        if (missingCount>0) {
+            .append(Integer.toString(lookups.size())).append(lookups.size() == 1 ? " Resource" : " Resources");
+        if (missingCount > 0) {
           out
-            .append(" | <span style='color:red'>")
-            .append(Integer.toString(missingCount))
-            .append(" Missing</span>")
+              .append(" | <span style='color:red'>")
+              .append(Integer.toString(missingCount))
+              .append(" Missing</span>")
           ;
         }
-        if (invalidatedCount>0) {
+        if (invalidatedCount > 0) {
           out
-            .append(" | <span style='color:blue'>")
-            .append(Integer.toString(invalidatedCount))
-            .append(" Invalidated</span>")
+              .append(" | <span style='color:blue'>")
+              .append(Integer.toString(invalidatedCount))
+              .append(" Invalidated</span>")
           ;
         }
         out.append("</span></a>\n"
             + "</div>\n"
             + "<div id=\"EditableResourceBundleEditor\" style=\"position:fixed; left:50px; width:640px; top:50px; height:480px; visibility:hidden; border-left:1px solid black; border-top:1px solid black; border-right:2px solid black; border-bottom:2px solid black; background-color:white; overflow:hidden\">\n"
-            + "  <div style=\"border-top:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; bottom:0px; height:").append(Integer.toString(allLocales.size()*editorRows)).append("em; overflow:hidden\">\n");
+            + "  <div style=\"border-top:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; bottom:0px; height:").append(Integer.toString(allLocales.size() * editorRows)).append("em; overflow:hidden\">\n");
         int i = 0;
         for (Locale locale : allLocales) {
           String toString = locale.toString();
-          out.append("    <div style=\"position:absolute; left:0px; width:6em; top:").append(Integer.toString(i*editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n"
+          out.append("    <div style=\"position:absolute; left:0px; width:6em; top:").append(Integer.toString(i * editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n"
               // Vertical centering uses Method 1 from http://phrogz.net/CSS/vertical-align/index.html
               + "      <div style=\"position:absolute; top:50%; height:1em; margin-top:-.5em; padding-left:4px; padding-right:2px\">\n"
               + "        ").append(toString.length() == 0 ? "Default" : toString).append("\n"
               + "      </div>\n"
               + "    </div>\n"
-              + "    <div style=\"position:absolute; left:6em; right:").append(verticalButtons ? "10em" : "14em").append("; top:").append(Integer.toString(i*editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n"
-              + "      <textarea disabled=\"disabled\" id=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i+1)).append("\" cols=\"40\" rows=\"").append(Integer.toString(editorRows)).append("\" style=\"width:100%; height:100%\"></textarea>\n"
+              + "    <div style=\"position:absolute; left:6em; right:").append(verticalButtons ? "10em" : "14em").append("; top:").append(Integer.toString(i * editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n"
+              + "      <textarea disabled=\"disabled\" id=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i + 1)).append("\" cols=\"40\" rows=\"").append(Integer.toString(editorRows)).append("\" style=\"width:100%; height:100%\"></textarea>\n"
               + "    </div>\n"
-              + "    <div style=\"position:absolute; width:").append(verticalButtons ? "10em" : "14em").append("; right:0px; top:").append(Integer.toString(i*editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n");
+              + "    <div style=\"position:absolute; width:").append(verticalButtons ? "10em" : "14em").append("; right:0px; top:").append(Integer.toString(i * editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n");
           if (verticalButtons) {
             out.append("      <div style=\"position:absolute; left:0px; width:100%; top:30%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
+                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
                 + "      </div>\n"
                 + "      <div style=\"position:absolute; left:0px; width:100%; top:70%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
+                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
                 + "      </div>\n");
           } else {
             out.append("      <div style=\"position:absolute; left:0px; width:100%; top:50%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
-                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i+1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
+                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
+                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
                 + "      </div>\n");
           }
           out.append("    </div>\n");
@@ -522,7 +523,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             + "\n"
             + "      function EditableResourceBundleEditorSetVisibility(visibility) {\n"
             + "        document.getElementById('EditableResourceBundleEditor').style.visibility=visibility;\n"
-            + "        EditableResourceBundleEditorSetCookie(\""+VISIBILITY_COOKIE_NAME+"\", visibility, 31);\n"
+            + "        EditableResourceBundleEditorSetCookie(\"" + VISIBILITY_COOKIE_NAME + "\", visibility, 31);\n"
             + "      }\n"
             + "\n"
             + "      var EditableResourceBundleEditorRowValues=[");
@@ -656,29 +657,29 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             // Update server
             + "          var request=new XMLHttpRequest();\n"
             + "          var url=\"")
-          .append(setValueUrl)
-          .append(setValueUrl.indexOf('?') == -1 ? '?' : '&')
-          .append("baseName=\"+encodeURIComponent(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])+\"&locale=\"+encodeURIComponent(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURIComponent(EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURIComponent(value)+\"&modified=\"+modified;\n"
-            //+ "          window.alert(url);\n"
-            + "          request.open('GET', url, false);\n"
-            + "          request.send(null);\n"
-            + "          if (request.status != 200) {\n"
-            + "            window.alert(\"Update failed: \"+request.status+\" from \"+url);\n"
-            + "          } else {\n"
-            // Updated local data
-            + "            EditableResourceBundleEditorRowValues[EditableResourceBundleEditorSelectedIndex][localeIndex]=value;\n"
-            // Updated in editor row
-            + "            var rowLocaleElem=document.getElementById(\"EditableResourceBundleEditorRow\"+(EditableResourceBundleEditorSelectedIndex+1)+\"Locale\"+(localeIndex+1));\n"
-            + "            if (rowLocaleElem == null) window.alert(\"rowLocaleElem is null\");\n"
-            + "            else {\n"
-            + "              var rowValue=(value.length>30) ? value.substring(0, 30)+\"\\u2026\" : value;\n"
-            + "              if (rowLocaleElem.firstChild == null) rowLocaleElem.appendChild(document.createTextNode(rowValue));\n"
-            + "              else rowLocaleElem.firstChild.nodeValue=rowValue;\n"
-            + "              if (!modified) rowLocaleElem.style.backgroundColor=\"white\";\n"
-            + "            }\n"
-            // Update background colors in editor row for modify
-            + "            if (modified) {\n"
-            + "              for (var c=0;c<").append(Integer.toString(allLocales.size())).append(";c++) {\n"
+            .append(setValueUrl)
+            .append(setValueUrl.indexOf('?') == -1 ? '?' : '&')
+            .append("baseName=\"+encodeURIComponent(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])+\"&locale=\"+encodeURIComponent(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURIComponent(EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURIComponent(value)+\"&modified=\"+modified;\n"
+                //+ "          window.alert(url);\n"
+                + "          request.open('GET', url, false);\n"
+                + "          request.send(null);\n"
+                + "          if (request.status != 200) {\n"
+                + "            window.alert(\"Update failed: \"+request.status+\" from \"+url);\n"
+                + "          } else {\n"
+                // Updated local data
+                + "            EditableResourceBundleEditorRowValues[EditableResourceBundleEditorSelectedIndex][localeIndex]=value;\n"
+                // Updated in editor row
+                + "            var rowLocaleElem=document.getElementById(\"EditableResourceBundleEditorRow\"+(EditableResourceBundleEditorSelectedIndex+1)+\"Locale\"+(localeIndex+1));\n"
+                + "            if (rowLocaleElem == null) window.alert(\"rowLocaleElem is null\");\n"
+                + "            else {\n"
+                + "              var rowValue=(value.length>30) ? value.substring(0, 30)+\"\\u2026\" : value;\n"
+                + "              if (rowLocaleElem.firstChild == null) rowLocaleElem.appendChild(document.createTextNode(rowValue));\n"
+                + "              else rowLocaleElem.firstChild.nodeValue=rowValue;\n"
+                + "              if (!modified) rowLocaleElem.style.backgroundColor=\"white\";\n"
+                + "            }\n"
+                // Update background colors in editor row for modify
+                + "            if (modified) {\n"
+                + "              for (var c=0;c<").append(Integer.toString(allLocales.size())).append(";c++) {\n"
             + "                rowLocaleElem=document.getElementById(\"EditableResourceBundleEditorRow\"+(EditableResourceBundleEditorSelectedIndex+1)+\"Locale\"+(c+1));\n"
             + "                if (rowLocaleElem != null) rowLocaleElem.style.backgroundColor=c == localeIndex ? \"#c0ffc0\" : \"#c0c0ff\";\n"
             + "              }\n"
@@ -777,7 +778,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             + " onmousedown=\"return EditableResourceBundleEditorDragMouseDown(this, event);\""
             + ">Resource Editor</div>\n"
             + "  </div>\n"
-            + "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:").append(Integer.toString(allLocales.size()*editorRows)).append("em; overflow:auto\">\n"
+            + "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:").append(Integer.toString(allLocales.size() * editorRows)).append("em; overflow:auto\">\n"
             + "    <table style=\"width:100%; border-collapse: collapse; border:1px solid black\">\n" // Not HTML 5 compatible: cellspacing=\"0\" cellpadding=\"2\"
             + "      <tr style=\"background-color:#e0e0e0\">\n"
             + "        <th style=\"border:1px solid black\"></th>\n"
@@ -799,14 +800,14 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             String lookupId = Long.toString(lookupValue.id);
             out.append("      <tr"
                 + " id=\"EditableResourceBundleEditorRow").append(lookupId).append("\""
-                + " style=\"background-color:").append((i&1) == 1 ? "white" : "#e0e0e0").append('"');
+                + " style=\"background-color:").append((i & 1) == 1 ? "white" : "#e0e0e0").append('"');
             if (!elementIds.isEmpty()) {
               out.append(" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(").append(elementIds.get(0).toString()).append(", false);\""
                   + " onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(").append(elementIds.get(0).toString()).append(");\"");
             }
             out.append(">\n"
-                + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1) == 1 ? "white" : "#e0e0e0").append("');\" style=\"text-align:right; border:1px solid black\">").append(Long.toString(lookupValue.id)).append("</td>\n"
-                + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1) == 1 ? "white" : "#e0e0e0").append("');\" style=\"border:1px solid black\">");
+                + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0").append("');\" style=\"text-align:right; border:1px solid black\">").append(Long.toString(lookupValue.id)).append("</td>\n"
+                + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0").append("');\" style=\"border:1px solid black\">");
             textInXhtmlEncoder.append(lookupKey.key, out);
             out.append("</td>\n");
             int localeIndex = 0;
@@ -847,7 +848,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
                   for (Locale possLocale : bundleSet.getLocales()) {
                     EditableResourceBundle possBundle = bundleSet.getResourceBundle(possLocale);
                     Long possModifiedTime = possBundle.getModifiedTime(key);
-                    if (possModifiedTime != null && (newestModifiedTime == null || possModifiedTime>newestModifiedTime)) {
+                    if (possModifiedTime != null && (newestModifiedTime == null || possModifiedTime > newestModifiedTime)) {
                       newestModifiedTime = possModifiedTime;
                     }
                   }
@@ -860,7 +861,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
                       backgroundColor = newestModifiedTime == null ? "white" : "#c0c0ff"; // Not yet validated
                     } else if (newestModifiedTime == null) {
                       backgroundColor = "white"; // Nothing modified, assume OK
-                    } else if (validatedTime<newestModifiedTime) {
+                    } else if (validatedTime < newestModifiedTime) {
                       backgroundColor = "#c0c0ff"; // Invalidated
                     } else {
                       backgroundColor = "white";
@@ -874,9 +875,9 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
                 } else {
                   out.append("border:1px solid black; ");
                 }
-                out.append("background-color:").append(backgroundColor).append("\" onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1) == 1 ? "white" : "#e0e0e0").append("'); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').select(); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').focus();\">");
+                out.append("background-color:").append(backgroundColor).append("\" onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0").append("'); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').select(); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').focus();\">");
                 if (currentValue != null) {
-                  if (currentValue.length()>30) {
+                  if (currentValue.length() > 30) {
                     textInXhtmlEncoder.append(currentValue, 0, 30, out);
                     out.append("\u2026"); // Ellipsis
                   } else {
@@ -890,7 +891,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
               }
             }
             // Base Name
-            out.append("        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i-1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i&1) == 1 ? "white" : "#e0e0e0").append("');\">");
+            out.append("        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0").append("');\">");
             textInXhtmlEncoder.append(bundleSet.getBaseName(), out);
             out.append("</td>\n"
                 + "      </tr>\n");
@@ -899,8 +900,8 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
         out.append("    </table>\n"
             + "  </div>\n"
             + "  <div"
-              + " style=\"position:absolute; right:0px; width:20px; bottom:0px; height:20px; overflow:hidden; cursor:nw-resize\""
-              + " onmousedown=\"return EditableResourceBundleEditorResizeMouseDown(this, event);\""
+            + " style=\"position:absolute; right:0px; width:20px; bottom:0px; height:20px; overflow:hidden; cursor:nw-resize\""
+            + " onmousedown=\"return EditableResourceBundleEditorResizeMouseDown(this, event);\""
             + "></div>\n"
             + "</div>\n");
       }
@@ -923,7 +924,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           + "  if (EditableResourceBundleEditorTop != \"\" && parseInt(EditableResourceBundleEditorTop) >= 0 && (parseInt(EditableResourceBundleEditorTop)+parseInt(EditableResourceBundleEditorStyle.height)) <= window.innerHeight) EditableResourceBundleEditorStyle.top=EditableResourceBundleEditorTop;\n"
           + "  var EditableResourceBundleEditorLeft = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorLeft\");\n"
           + "  if (EditableResourceBundleEditorLeft != \"\" && parseInt(EditableResourceBundleEditorLeft) >= 0 && (parseInt(EditableResourceBundleEditorLeft)+parseInt(EditableResourceBundleEditorStyle.width)) <= window.innerWidth) EditableResourceBundleEditorStyle.left=EditableResourceBundleEditorLeft;\n"
-          + "  var EditableResourceBundleEditorVisibility = EditableResourceBundleEditorGetCookie(\""+VISIBILITY_COOKIE_NAME+"\");\n"
+          + "  var EditableResourceBundleEditorVisibility = EditableResourceBundleEditorGetCookie(\"" + VISIBILITY_COOKIE_NAME + "\");\n"
           + "  if (EditableResourceBundleEditorVisibility != \"\") EditableResourceBundleEditorStyle.visibility=EditableResourceBundleEditorVisibility;\n"
           + "\n"
           + "  var EditableResourceBundleLookupIds=[");
@@ -1028,19 +1029,19 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
    */
   @Deprecated
   public static void printEditableResourceBundleLookups(
-    Encoder textInJavascriptEncoder,
-    Encoder textInXhtmlEncoder,
-    Appendable out,
-    int editorRows,
-    boolean verticalButtons
+      Encoder textInJavascriptEncoder,
+      Encoder textInXhtmlEncoder,
+      Appendable out,
+      int editorRows,
+      boolean verticalButtons
   ) throws IOException {
     printEditableResourceBundleLookups(
-      textInJavascriptEncoder,
-      textInXhtmlEncoder,
-      out,
-      true,
-      editorRows,
-      verticalButtons
+        textInJavascriptEncoder,
+        textInXhtmlEncoder,
+        out,
+        true,
+        editorRows,
+        verticalButtons
     );
   }
 
@@ -1085,16 +1086,16 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     final ThreadSettings.Mode mode;
     Object object = super.handleGetObject(key);
     if (
-      !isModifiable() // unmodifiable
-      // markup disabled
-      || (mode = (threadSettings = getThreadSettings()).getMode()) == ThreadSettings.Mode.DISABLED
-      || mode == ThreadSettings.Mode.LOOKUP
+        !isModifiable() // unmodifiable
+            // markup disabled
+            || (mode = (threadSettings = getThreadSettings()).getMode()) == ThreadSettings.Mode.DISABLED
+            || mode == ThreadSettings.Mode.LOOKUP
     ) {
       return object;
     }
 
     // Must be a string (or null)
-    String value = (String)object;
+    String value = (String) object;
 
     // Determine if the value is validated.  The value is validated
     // when its validated time is greater than the modified time of
@@ -1105,7 +1106,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     for (Locale possLocale : bundleSet.getLocales()) {
       EditableResourceBundle possBundle = bundleSet.getResourceBundle(possLocale);
       Long possModifiedTime = possBundle.getModifiedTime(key);
-      if (possModifiedTime != null && (newestModifiedTime == null || possModifiedTime>newestModifiedTime)) {
+      if (possModifiedTime != null && (newestModifiedTime == null || possModifiedTime > newestModifiedTime)) {
         newestModifiedTime = possModifiedTime;
       }
     }
@@ -1117,7 +1118,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
       if (validatedTime == null) {
         invalidated = true; // Only invalidated when at least one other item
       } else {
-        invalidated = validatedTime<newestModifiedTime;
+        invalidated = validatedTime < newestModifiedTime;
       }
     }
 
@@ -1154,14 +1155,14 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           }
           // Find invalidated flag
           threadContext.addLookupMarkup(
-            value,
-            new EditableResourceBundleLookupMarkup(
-              lookupValue.id,
-              invalidated,
-              elementId,
-              mode == ThreadSettings.Mode.MARKUP,
-              threadSettings.modifyAllText
-            )
+              value,
+              new EditableResourceBundleLookupMarkup(
+                  lookupValue.id,
+                  invalidated,
+                  elementId,
+                  mode == ThreadSettings.Mode.MARKUP,
+                  threadSettings.modifyAllText
+              )
           );
         }
       }
@@ -1189,11 +1190,11 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     private final boolean modifyAllText;
 
     private EditableResourceBundleLookupMarkup(
-      long lookupId,
-      boolean invalidated,
-      long elementId,
-      boolean allowScripts,
-      boolean modifyAllText
+        long lookupId,
+        boolean invalidated,
+        long elementId,
+        boolean allowScripts,
+        boolean modifyAllText
     ) {
       this.lookupId = lookupId;
       this.invalidated = invalidated;
@@ -1215,53 +1216,53 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           if (allowScripts) {
             String elementIdString = Long.toString(elementId);
             out
-              .append("<!--")
-              .append(Long.toString(lookupId))
-              .append("--><span id=\"EditableResourceBundleElement")
-              .append(elementIdString)
-              .append("\" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(")
-              .append(elementIdString)
-              .append(", true);\"")
-              .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(")
-              .append(elementIdString)
-              .append(");\">")
-              // TODO: invalidated/modifyAllText marker here, too?
+                .append("<!--")
+                .append(Long.toString(lookupId))
+                .append("--><span id=\"EditableResourceBundleElement")
+                .append(elementIdString)
+                .append("\" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(")
+                .append(elementIdString)
+                .append(", true);\"")
+                .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(")
+                .append(elementIdString)
+                .append(");\">")
+            // TODO: invalidated/modifyAllText marker here, too?
             ;
           } else {
             // No scripting version, similar to TEXT
             if (invalidated) {
               out
-                .append("&lt;&lt;&lt;")
-                .append(Long.toString(lookupId))
-                .append("&lt;")
+                  .append("&lt;&lt;&lt;")
+                  .append(Long.toString(lookupId))
+                  .append("&lt;")
               ;
             } else if (modifyAllText) {
               out
-                .append("&lt;")
-                .append(Long.toString(lookupId))
-                .append("&lt;")
+                  .append("&lt;")
+                  .append(Long.toString(lookupId))
+                  .append("&lt;")
               ;
             } else {
               // Comments only
               out
-                .append("<!--")
-                .append(Long.toString(lookupId))
-                .append("-->");
+                  .append("<!--")
+                  .append(Long.toString(lookupId))
+                  .append("-->");
             }
           }
           break;
         case TEXT :
           if (invalidated) {
             out
-              .append("<<<")
-              .append(Long.toString(lookupId))
-              .append('<')
+                .append("<<<")
+                .append(Long.toString(lookupId))
+                .append('<')
             ;
           } else if (modifyAllText) {
             out
-              .append('<')
-              .append(Long.toString(lookupId))
-              .append('<')
+                .append('<')
+                .append(Long.toString(lookupId))
+                .append('<')
             ;
           } else {
             // No prefix
@@ -1272,16 +1273,16 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
         case PSQL :
         case CSS :
           out
-            .append("/*")
-            .append(Long.toString(lookupId))
-            .append("*/")
+              .append("/*")
+              .append(Long.toString(lookupId))
+              .append("*/")
           ;
           break;
         case SH :
           out
-            .append("`#")
-            .append(Long.toString(lookupId))
-            .append('`')
+              .append("`#")
+              .append(Long.toString(lookupId))
+              .append('`')
           ;
           break;
         default :
@@ -1305,53 +1306,53 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             if (allowScripts) {
               String elementIdString = Long.toString(elementId);
               encoder
-                .append("<!--", out)
-                .append(Long.toString(lookupId), out)
-                .append("--><span id=\"EditableResourceBundleElement", out)
-                .append(elementIdString, out)
-                .append("\" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(", out)
-                .append(elementIdString, out)
-                .append(", true);\"", out)
-                .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(", out)
-                .append(elementIdString, out)
-                .append(");\">", out)
-                // TODO: invalidated/modifyAllText marker here, too?
+                  .append("<!--", out)
+                  .append(Long.toString(lookupId), out)
+                  .append("--><span id=\"EditableResourceBundleElement", out)
+                  .append(elementIdString, out)
+                  .append("\" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(", out)
+                  .append(elementIdString, out)
+                  .append(", true);\"", out)
+                  .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(", out)
+                  .append(elementIdString, out)
+                  .append(");\">", out)
+              // TODO: invalidated/modifyAllText marker here, too?
               ;
             } else {
               // No scripting version, similar to TEXT
               if (invalidated) {
                 encoder
-                  .append("&lt;&lt;&lt;", out)
-                  .append(Long.toString(lookupId), out)
-                  .append("&lt;", out)
+                    .append("&lt;&lt;&lt;", out)
+                    .append(Long.toString(lookupId), out)
+                    .append("&lt;", out)
                 ;
               } else if (modifyAllText) {
                 encoder
-                  .append("&lt;", out)
-                  .append(Long.toString(lookupId), out)
-                  .append("&lt;", out)
+                    .append("&lt;", out)
+                    .append(Long.toString(lookupId), out)
+                    .append("&lt;", out)
                 ;
               } else {
                 // Comments only
                 encoder
-                  .append("<!--", out)
-                  .append(Long.toString(lookupId), out)
-                  .append("-->", out);
+                    .append("<!--", out)
+                    .append(Long.toString(lookupId), out)
+                    .append("-->", out);
               }
             }
             break;
           case TEXT :
             if (invalidated) {
               encoder
-                .append("<<<", out)
-                .append(Long.toString(lookupId), out)
-                .append('<', out)
+                  .append("<<<", out)
+                  .append(Long.toString(lookupId), out)
+                  .append('<', out)
               ;
             } else if (modifyAllText) {
               encoder
-                .append('<', out)
-                .append(Long.toString(lookupId), out)
-                .append('<', out)
+                  .append('<', out)
+                  .append(Long.toString(lookupId), out)
+                  .append('<', out)
               ;
             } else {
               // No prefix
@@ -1362,16 +1363,16 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           case PSQL :
           case CSS :
             encoder
-              .append("/*", out)
-              .append(Long.toString(lookupId), out)
-              .append("*/", out)
+                .append("/*", out)
+                .append(Long.toString(lookupId), out)
+                .append("*/", out)
             ;
             break;
           case SH :
             encoder
-              .append("`#", out)
-              .append(Long.toString(lookupId), out)
-              .append('`', out)
+                .append("`#", out)
+                .append(Long.toString(lookupId), out)
+                .append('`', out)
             ;
             break;
           default :
@@ -1394,15 +1395,15 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             // No scripting version, similar to TEXT
             if (invalidated) {
               out
-                .append("&gt;")
-                .append(Long.toString(lookupId))
-                .append("&gt;&gt;&gt;")
+                  .append("&gt;")
+                  .append(Long.toString(lookupId))
+                  .append("&gt;&gt;&gt;")
               ;
             } else if (modifyAllText) {
               out
-                .append("&gt;")
-                .append(Long.toString(lookupId))
-                .append("&gt;")
+                  .append("&gt;")
+                  .append(Long.toString(lookupId))
+                  .append("&gt;")
               ;
             } else {
               // No suffix
@@ -1412,15 +1413,15 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
         case TEXT :
           if (invalidated) {
             out
-              .append('>')
-              .append(Long.toString(lookupId))
-              .append(">>>")
+                .append('>')
+                .append(Long.toString(lookupId))
+                .append(">>>")
             ;
           } else if (modifyAllText) {
             out
-              .append('>')
-              .append(Long.toString(lookupId))
-              .append('>')
+                .append('>')
+                .append(Long.toString(lookupId))
+                .append('>')
             ;
           } else {
             // No suffix
@@ -1455,15 +1456,15 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
               // No scripting version, similar to TEXT
               if (invalidated) {
                 encoder
-                  .append("&gt;", out)
-                  .append(Long.toString(lookupId), out)
-                  .append("&gt;&gt;&gt;", out)
+                    .append("&gt;", out)
+                    .append(Long.toString(lookupId), out)
+                    .append("&gt;&gt;&gt;", out)
                 ;
               } else if (modifyAllText) {
                 encoder
-                  .append("&gt;", out)
-                  .append(Long.toString(lookupId), out)
-                  .append("&gt;", out)
+                    .append("&gt;", out)
+                    .append(Long.toString(lookupId), out)
+                    .append("&gt;", out)
                 ;
               } else {
                 // No suffix
@@ -1473,15 +1474,15 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           case TEXT :
             if (invalidated) {
               encoder
-                .append('>', out)
-                .append(Long.toString(lookupId), out)
-                .append(">>>", out)
+                  .append('>', out)
+                  .append(Long.toString(lookupId), out)
+                  .append(">>>", out)
               ;
             } else if (modifyAllText) {
               encoder
-                .append('>', out)
-                .append(Long.toString(lookupId), out)
-                .append('>', out)
+                  .append('>', out)
+                  .append(Long.toString(lookupId), out)
+                  .append('>', out)
               ;
             } else {
               // No suffix

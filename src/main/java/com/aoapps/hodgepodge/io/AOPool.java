@@ -139,10 +139,10 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
      */
     @Override
     public int compareTo(PooledConnection<C> o) {
-      if (id<o.id) {
+      if (id < o.id) {
         return -1;
       }
-      if (id>o.id) {
+      if (id > o.id) {
         return 1;
       }
       return 0;
@@ -151,8 +151,8 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
     @Override
     public boolean equals(Object obj) {
       return
-        (obj instanceof PooledConnection)
-        && id == ((PooledConnection)obj).id
+          (obj instanceof PooledConnection)
+              && id == ((PooledConnection) obj).id
       ;
     }
 
@@ -171,7 +171,9 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
   /**
    * Lock for wait/notify
    */
-  private static class PoolLock {/* Empty lock class to help heap profile */}
+  private static class PoolLock {
+    // Empty lock class to help heap profile
+  }
   private final PoolLock poolLock = new PoolLock();
 
   /**
@@ -265,7 +267,17 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
   @SuppressWarnings("unchecked")
   protected AOPool(int delayTime, int maxIdleTime, String name, int poolSize, long maxConnectionAge, Logger logger) {
-    super(name+"&delayTime="+delayTime+"&maxIdleTime="+maxIdleTime+"&size="+poolSize+"&maxConnectionAge="+(maxConnectionAge == UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":Long.toString(maxConnectionAge)));
+    super(
+        name
+            + "&delayTime="
+            + delayTime
+            + "&maxIdleTime="
+            + maxIdleTime
+            + "&size="
+            + poolSize
+            + "&maxConnectionAge="
+            + (maxConnectionAge == UNLIMITED_MAX_CONNECTION_AGE ? "Unlimited" : Long.toString(maxConnectionAge))
+    );
     this.delayTime = delayTime;
     this.maxIdleTime = maxIdleTime;
     this.startTime = System.currentTimeMillis();
@@ -442,21 +454,21 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
         } // Unlikely case of one-connection pool
         if (useCount >= halfPool) {
           throw newException(
-            "Thread attempting to allocate more than half of the connection pool: " + thisThread.toString(),
-            new WrappedExceptions(allocateStackTraces)
+              "Thread attempting to allocate more than half of the connection pool: " + thisThread.toString(),
+              new WrappedExceptions(allocateStackTraces)
           );
         }
         logger.logp(
-          Level.WARNING,
-          AOPool.class.getName(),
-          "getConnection",
-          null,
-          new WrappedExceptions(
-            "Warning: Thread allocated more than " + maxConnections + " "
-              + (maxConnections == 1 ? "connection" : "connections")
-              + ".  The stack trace at allocation time is included for each connection.",
-            allocateStackTraces
-          )
+            Level.WARNING,
+            AOPool.class.getName(),
+            "getConnection",
+            null,
+            new WrappedExceptions(
+                "Warning: Thread allocated more than " + maxConnections + " "
+                    + (maxConnections == 1 ? "connection" : "connections")
+                    + ".  The stack trace at allocation time is included for each connection.",
+                allocateStackTraces
+            )
         );
       }
     }
@@ -480,7 +492,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
             busyConnections.add(pooledConnection);
           } else {
             // Nothing available, is there room to make a new connection?
-            if (allConnections.size()<poolSize) {
+            if (allConnections.size() < poolSize) {
               // Create a new one
               pooledConnection = new PooledConnection<>();
               allConnections.add(pooledConnection);
@@ -491,14 +503,14 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
               if (logger.isLoggable(Level.WARNING)) {
                 long currentTime = System.currentTimeMillis();
                 if (
-                  lastLoggedWait == Long.MIN_VALUE
-                  || (currentTime - lastLoggedWait) >= WAIT_LOGGING_INTERVAL
-                  || (lastLoggedWait - currentTime) >= WAIT_LOGGING_INTERVAL // System time reset into the past
+                    lastLoggedWait == Long.MIN_VALUE
+                        || (currentTime - lastLoggedWait) >= WAIT_LOGGING_INTERVAL
+                        || (lastLoggedWait - currentTime) >= WAIT_LOGGING_INTERVAL // System time reset into the past
                 ) {
                   String eol = System.lineSeparator();
                   StringBuilder message = new StringBuilder();
                   message.append("Warning connection pool is full.  Please review the stacktraces of all allocations:");
-                  for (int i = 0, size = allConnections.size(); i < size ; i++) {
+                  for (int i = 0, size = allConnections.size(); i < size; i++) {
                     PooledConnection<C> pc = allConnections.get(i);
                     Throwable ast = pc.allocateStackTrace;
                     message.append(eol).append(eol).append("Connection #").append(i + 1).append(eol);
@@ -529,8 +541,8 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
         } while (pooledConnection == null);
         // Keep track of the maximum concurrency hit
         int concurrency = busyConnections.size();
-        if (concurrency>maxConcurrency) {
-          maxConcurrency=concurrency;
+        if (concurrency > maxConcurrency) {
+          maxConcurrency = concurrency;
         }
         // Notify any others that may be waiting
       } finally {
@@ -567,10 +579,10 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
           pooledConnection.createTime = currentTime;
           pooledConnection.connectCount.incrementAndGet();
         }
-        doReset=true;
+        doReset = true;
       } else {
         // Was already reset when released
-        doReset=false;
+        doReset = false;
       }
       // TODO: Measure time used for creating this stack trace.  Is it worth it?
       Throwable allocateStackTrace = new Throwable("StackTrace at getConnection(" + maxConnections + ") for Thread named \"" + thisThread.getName() + "\"");
@@ -614,10 +626,10 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
         }
       }
       if (t0 instanceof Error) {
-        throw (Error)t0;
+        throw (Error) t0;
       }
       if (t0 instanceof RuntimeException) {
-        throw (RuntimeException)t0;
+        throw (RuntimeException) t0;
       }
       throw newException(null, t0);
     }
@@ -650,7 +662,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
       synchronized (pooledConnection) {
         pooledConnection.releaseTime = currentTime;
         useTime = currentTime - pooledConnection.startTime;
-        if (useTime>0) {
+        if (useTime > 0) {
           pooledConnection.totalTime.addAndGet(useTime);
         }
         pooledConnection.allocateStackTrace = null;
@@ -774,7 +786,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
       startTimes = new long[numConnections];
       releaseTimes = new long[numConnections];
       allocateStackTraces = new Throwable[numConnections];
-      for (int c=0;c<numConnections;c++) {
+      for (int c = 0; c < numConnections; c++) {
         PooledConnection<C> pooledConnection = allConnections.get(c);
         isConnecteds[c] = pooledConnection.connection != null;
         createTimes[c] = pooledConnection.createTime;
@@ -801,7 +813,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
       }
     }
     long time = System.currentTimeMillis();
-    long timeLen = time-startTime;
+    long timeLen = time - startTime;
 
     // Print the stats
     out.append("<table class=\"ao-grid\">\n");
@@ -814,7 +826,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
     com.aoapps.hodgepodge.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(maxIdleTime), out, isXhtml);
     out.append("</td></tr>\n"
         + "    <tr><td>Max Connection Age:</td><td>");
-    com.aoapps.hodgepodge.util.EncodingUtils.encodeHtml(maxConnectionAge == UNLIMITED_MAX_CONNECTION_AGE?"Unlimited":Strings.getDecimalTimeLengthString(maxConnectionAge), out, isXhtml);
+    com.aoapps.hodgepodge.util.EncodingUtils.encodeHtml(maxConnectionAge == UNLIMITED_MAX_CONNECTION_AGE ? "Unlimited" : Strings.getDecimalTimeLengthString(maxConnectionAge), out, isXhtml);
     out.append("</td></tr>\n"
         + "    <tr><td>Is Closed:</td><td>").append(Boolean.toString(myIsClosed)).append("</td></tr>\n"
         + "  </tbody>\n"
@@ -849,7 +861,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
     long totalTotalTime = 0;
     int totalBusy = 0;
 
-    for (int c=0;c<numConnections;c++) {
+    for (int c = 0; c < numConnections; c++) {
       long connCount = connectCounts[c];
       boolean isConnected = isConnecteds[c];
       long useCount = useCounts[c];
@@ -858,14 +870,14 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
       if (isBusy) {
         totalTime += time - startTimes[c];
       }
-      long stateTime = isBusy ? (time-startTimes[c]):(time-releaseTimes[c]);
+      long stateTime = isBusy ? (time - startTimes[c]) : (time - releaseTimes[c]);
       Long allocationThreadId = allocationThreadIds[c];
       out.append("    <tr>\n"
-          + "      <td>").append(Integer.toString(c+1)).append("</td>\n"
-          + "      <td>").append(isConnected?"Yes":"No").append("</td>\n"
+          + "      <td>").append(Integer.toString(c + 1)).append("</td>\n"
+          + "      <td>").append(isConnected ? "Yes" : "No").append("</td>\n"
           + "      <td>");
       if (isConnected) {
-        com.aoapps.hodgepodge.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(time-createTimes[c]), out, isXhtml);
+        com.aoapps.hodgepodge.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(time - createTimes[c]), out, isXhtml);
       } else {
         out.append("&#160;");
       }
@@ -875,8 +887,8 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
           + "      <td>");
       com.aoapps.hodgepodge.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(totalTime), out, isXhtml);
       out.append("</td>\n"
-          + "      <td>").append(Float.toString(totalTime*100/(float)timeLen)).append("%</td>\n"
-          + "      <td>").append(isBusy?"In Use":isConnected?"Idle":"Closed");
+          + "      <td>").append(Float.toString(totalTime * 100 / (float) timeLen)).append("%</td>\n"
+          + "      <td>").append(isBusy ? "In Use" : isConnected ? "Idle" : "Closed");
       if (allocationThreadId != null) {
         out.append(" by Thread #").append(allocationThreadId.toString());
       }
@@ -884,15 +896,19 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
           + "      <td>");
       com.aoapps.hodgepodge.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(stateTime), out, isXhtml);
       out.append("</td>\n"
-          + "      <td>").append(Long.toString(totalTime*1000/useCount)).append("&#181;s</td>\n"
+          + "      <td>").append(Long.toString(totalTime * 1000 / useCount)).append("&#181;s</td>\n"
           + "      <td>");
       Throwable t = allocateStackTraces[c];
       if (t == null) {
         out.append("&#160;");
       } else {
         out.append("        <a href=\"#\" onclick='var elem = document.getElementById(\"stack_").append(Integer.toString(c)).append("\").style; elem.visibility=(elem.visibility == \"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
-            + "        <span id=\"stack_").append(Integer.toString(c)).append("\" style=\"text-align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:").append(Integer.toString(c+1)).append("\">\n"
-            + "          <pre style=\"text-align:left; background-color:white; border: 2px solid; border-color: black\">\n");
+            + "        <span id=\"stack_")
+            .append(Integer.toString(c))
+            .append("\" style=\"text-align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:")
+            .append(Integer.toString(c + 1))
+            .append("\">\n"
+                + "          <pre style=\"text-align:left; background-color:white; border: 2px solid; border-color: black\">\n");
         ErrorPrinter.printStackTraces(t, out);
         out.append("          </pre>\n"
             + "        </span>\n");
@@ -904,9 +920,9 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
       if (isConnected) {
         totalConnected++;
       }
-      totalConnects+=connCount;
-      totalUses+=useCount;
-      totalTotalTime+=totalTime;
+      totalConnects += connCount;
+      totalUses += useCount;
+      totalTotalTime += totalTime;
       if (isBusy) {
         totalBusy++;
       }
@@ -922,12 +938,12 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
         + "      <td>");
     com.aoapps.hodgepodge.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(totalTotalTime), out, isXhtml);
     out.append("</td>\n"
-        + "      <td>").append(Float.toString(timeLen == 0 ? 0 : (totalTotalTime*100/(float)timeLen))).append("%</td>\n"
+        + "      <td>").append(Float.toString(timeLen == 0 ? 0 : (totalTotalTime * 100 / (float) timeLen))).append("%</td>\n"
         + "      <td>").append(Integer.toString(totalBusy)).append("</td>\n"
         + "      <td>");
     com.aoapps.hodgepodge.util.EncodingUtils.encodeHtml(Strings.getDecimalTimeLengthString(timeLen), out, isXhtml);
     out.append("</td>\n"
-        + "      <td>").append(Long.toString(totalUses == 0 ? 0 : (totalTotalTime*1000/totalUses))).append("&#181;s</td>\n"
+        + "      <td>").append(Long.toString(totalUses == 0 ? 0 : (totalTotalTime * 1000 / totalUses))).append("&#181;s</td>\n"
         + "      <td>&#160;</td>\n"
         + "    </tr>\n"
         + "  </tfoot>\n"
@@ -1071,10 +1087,10 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
         }
         if (t0 != null) {
           if (t0 instanceof Error) {
-            throw (Error)t0;
+            throw (Error) t0;
           }
           if (t0 instanceof RuntimeException) {
-            throw (RuntimeException)t0;
+            throw (RuntimeException) t0;
           }
           throw newException(null, t0);
         }
@@ -1132,14 +1148,14 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
                 C conn = availableConnection.connection;
                 if (conn != null) {
                   if (
-                    (time-availableConnection.releaseTime) > maxIdle // Idle too long
-                    || (
-                      maxConnectionAge != UNLIMITED_MAX_CONNECTION_AGE
-                      && (
-                        availableConnection.createTime > time // System time reset?
-                        || (time-availableConnection.createTime) >= maxConnectionAge // Max connection age reached
+                      (time - availableConnection.releaseTime) > maxIdle // Idle too long
+                          || (
+                          maxConnectionAge != UNLIMITED_MAX_CONNECTION_AGE
+                              && (
+                              availableConnection.createTime > time // System time reset?
+                                  || (time - availableConnection.createTime) >= maxConnectionAge// Max connection age reached
+                          )
                       )
-                    )
                   ) {
                     availableConnection.connection = null;
                     connsToClose.add(conn);

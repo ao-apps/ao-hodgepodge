@@ -45,18 +45,18 @@ public class BitRateInputStream extends FilterInputStream implements NoClose {
 
   private final BitRateProvider provider;
 
-  private long blockStart=-1;
+  private long blockStart = -1;
   private long catchupTime;
   private long byteCount;
 
   public BitRateInputStream(InputStream out, BitRateProvider provider) {
     super(out);
-    this.provider=provider;
+    this.provider = provider;
   }
 
   @Override
   public boolean isNoClose() {
-    return (in instanceof NoClose) && ((NoClose)in).isNoClose();
+    return (in instanceof NoClose) && ((NoClose) in).isNoClose();
   }
 
   @Override
@@ -68,9 +68,9 @@ public class BitRateInputStream extends FilterInputStream implements NoClose {
   @Override
   public int read() throws IOException {
     if (blockStart == -1) {
-      blockStart=System.currentTimeMillis();
+      blockStart = System.currentTimeMillis();
     }
-    int b=in.read();
+    int b = in.read();
     if (b != -1) {
       byteCount++;
     }
@@ -81,11 +81,11 @@ public class BitRateInputStream extends FilterInputStream implements NoClose {
   @Override
   public int read(byte[] buff) throws IOException {
     if (blockStart == -1) {
-      blockStart=System.currentTimeMillis();
+      blockStart = System.currentTimeMillis();
     }
-    int count=in.read(buff);
+    int count = in.read(buff);
     if (count != -1) {
-      byteCount+=count;
+      byteCount += count;
     }
     sleepIfNeeded();
     return count;
@@ -94,36 +94,36 @@ public class BitRateInputStream extends FilterInputStream implements NoClose {
   @Override
   public int read(byte[] buff, int off, int len) throws IOException {
     if (blockStart == -1) {
-      blockStart=System.currentTimeMillis();
+      blockStart = System.currentTimeMillis();
     }
-    int count=in.read(buff, off, len);
+    int count = in.read(buff, off, len);
     if (count != -1) {
-      byteCount+=count;
+      byteCount += count;
     }
     sleepIfNeeded();
     return count;
   }
 
   private void sleepIfNeeded() throws IOException {
-    if (byteCount>provider.getBlockSize()) {
+    if (byteCount > provider.getBlockSize()) {
       sleep();
     }
   }
 
   private void sleep() throws IOException {
-    if (byteCount>0) {
-      Long bps=provider.getBitRate();
-      if (bps != null && bps>0) {
+    if (byteCount > 0) {
+      Long bps = provider.getBitRate();
+      if (bps != null && bps > 0) {
         // Figure out the number of millis to sleep
-        long blockTime=(byteCount*8L*1000L)/bps;
-        long sleepyTime=blockTime-(System.currentTimeMillis()-blockStart);
+        long blockTime = (byteCount * 8L * 1000L) / bps;
+        long sleepyTime = blockTime - (System.currentTimeMillis() - blockStart);
 
-        if (sleepyTime>0) {
-          if (catchupTime>sleepyTime) {
-            catchupTime-=sleepyTime;
+        if (sleepyTime > 0) {
+          if (catchupTime > sleepyTime) {
+            catchupTime -= sleepyTime;
           } else {
-            sleepyTime-=catchupTime;
-            catchupTime=0;
+            sleepyTime -= catchupTime;
+            catchupTime = 0;
             try {
               // Birdie - ti ger, nnnnnggggaaaa - sleeepy time
               Thread.sleep(sleepyTime);
@@ -137,17 +137,17 @@ public class BitRateInputStream extends FilterInputStream implements NoClose {
           }
         } else {
           // Can't sleep the clowns will eat me.
-          catchupTime-=sleepyTime;
+          catchupTime -= sleepyTime;
           if (catchupTime >= MAX_CATCHUP_TIME) {
-            catchupTime=MAX_CATCHUP_TIME;
+            catchupTime = MAX_CATCHUP_TIME;
           }
         }
       } else {
         // currently flagged as unlimited bandwidth
-        catchupTime=0;
+        catchupTime = 0;
       }
-      blockStart=System.currentTimeMillis();
-      byteCount=0;
+      blockStart = System.currentTimeMillis();
+      byteCount = 0;
     }
   }
 }

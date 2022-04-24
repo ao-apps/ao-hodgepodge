@@ -74,9 +74,9 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
     if (stats != null) {
       stats.sortStarting();
     }
-    int length=list.size();
-    if (quickSort(list, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
-      insertionSort(list, 0, length-1, comparator, stats);
+    int length = list.size();
+    if (quickSort(list, 0, length - 1, comparator, stats, 1, (int) (10 * Math.log(length)))) {
+      insertionSort(list, 0, length - 1, comparator, stats);
     } else {
       // If quickSort fails, do a more constant-time HeapSort on the remaining data
       if (stats != null) {
@@ -94,9 +94,9 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
     if (stats != null) {
       stats.sortStarting();
     }
-    int length=array.length;
-    if (quickSort(array, 0, length-1, comparator, stats, 1, (int)(10*Math.log(length)))) {
-      insertionSort(array, 0, length-1, comparator, stats);
+    int length = array.length;
+    if (quickSort(array, 0, length - 1, comparator, stats, 1, (int) (10 * Math.log(length)))) {
+      insertionSort(array, 0, length - 1, comparator, stats);
     } else {
       // If quickSort fails, do a more constant-time HeapSort on the remaining data
       if (stats != null) {
@@ -129,39 +129,39 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
   private static <T> boolean quickSort(List<T> list, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
     final int M = 4;
 
-    if ((r-l)>M) {
-      int i=(r+l)/2;
+    if ((r - l) > M) {
+      int i = (r + l) / 2;
 
-      if (compare(list, l, i, comparator, stats)>0) {
+      if (compare(list, l, i, comparator, stats) > 0) {
         swap(list, l, i, stats);  // Tri-Median Methode!
       }
-      if (compare(list, l, r, comparator, stats)>0) {
+      if (compare(list, l, r, comparator, stats) > 0) {
         swap(list, l, r, stats);
       }
-      if (compare(list, i, r, comparator, stats)>0) {
+      if (compare(list, i, r, comparator, stats) > 0) {
         swap(list, i, r, stats);
       }
 
-      int j=r-1;
+      int j = r - 1;
       swap(list, i, j, stats);
-      i=l;
-      T v=get(list, j, stats);
-      for (;;) {
-        while (compare(get(list, ++i, stats), v, comparator, stats)<0) {
+      i = l;
+      T v = get(list, j, stats);
+      for (; ; ) {
+        while (compare(get(list, ++i, stats), v, comparator, stats) < 0) {
           // Empty while
         }
-        while (compare(get(list, --j, stats), v, comparator, stats)>0) {
+        while (compare(get(list, --j, stats), v, comparator, stats) > 0) {
           // Empty while
         }
-        if (j<i) {
+        if (j < i) {
           break;
         }
         swap(list, i, j, stats);
       }
-      swap(list, i, r-1, stats);
+      swap(list, i, r - 1, stats);
 
-      int newRecursion=currentRecursion+1;
-      if (newRecursion>maxRecursion) {
+      int newRecursion = currentRecursion + 1;
+      if (newRecursion > maxRecursion) {
         return false;
       }
       if (stats != null) {
@@ -177,7 +177,7 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
       if (stats != null) {
         stats.sortRecursing();
       }
-      if (!quickSort(list, i+1, r, comparator, stats, newRecursion, maxRecursion)) {
+      if (!quickSort(list, i + 1, r, comparator, stats, newRecursion, maxRecursion)) {
         return false;
       }
       if (stats != null) {
@@ -207,39 +207,39 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
   private static <T> boolean quickSort(T[] array, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
     final int M = 4;
 
-    if ((r-l)>M) {
-      int i=(r+l)/2;
+    if ((r - l) > M) {
+      int i = (r + l) / 2;
 
-      if (compare(array, l, i, comparator, stats)>0) {
+      if (compare(array, l, i, comparator, stats) > 0) {
         swap(array, l, i, stats);  // Tri-Median Methode!
       }
-      if (compare(array, l, r, comparator, stats)>0) {
+      if (compare(array, l, r, comparator, stats) > 0) {
         swap(array, l, r, stats);
       }
-      if (compare(array, i, r, comparator, stats)>0) {
+      if (compare(array, i, r, comparator, stats) > 0) {
         swap(array, i, r, stats);
       }
 
-      int j=r-1;
+      int j = r - 1;
       swap(array, i, j, stats);
-      i=l;
-      T v=get(array, j, stats);
-      for (;;) {
-        while (compare(get(array, ++i, stats), v, comparator, stats)<0) {
+      i = l;
+      T v = get(array, j, stats);
+      for (; ; ) {
+        while (compare(get(array, ++i, stats), v, comparator, stats) < 0) {
           // Empty while
         }
-        while (compare(get(array, --j, stats), v, comparator, stats)>0) {
+        while (compare(get(array, --j, stats), v, comparator, stats) > 0) {
           // Empty while
         }
-        if (j<i) {
+        if (j < i) {
           break;
         }
         swap(array, i, j, stats);
       }
-      swap(array, i, r-1, stats);
+      swap(array, i, r - 1, stats);
 
-      int newRecursion=currentRecursion+1;
-      if (newRecursion>maxRecursion) {
+      int newRecursion = currentRecursion + 1;
+      if (newRecursion > maxRecursion) {
         return false;
       }
       if (stats != null) {
@@ -255,7 +255,7 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
       if (stats != null) {
         stats.sortRecursing();
       }
-      if (!quickSort(array, i+1, r, comparator, stats, newRecursion, maxRecursion)) {
+      if (!quickSort(array, i + 1, r, comparator, stats, newRecursion, maxRecursion)) {
         return false;
       }
       if (stats != null) {
@@ -266,13 +266,13 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
   }
 
   static <T> void insertionSort(List<T> list, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
-    for (int i=lo0+1;i <= hi0;i++) {
-      T v=get(list, i, stats);
-      int j=i;
+    for (int i = lo0 + 1; i <= hi0; i++) {
+      T v = get(list, i, stats);
+      int j = i;
       T t;
       while (
-        j>lo0
-        && compare(t=get(list, j-1, stats), v, comparator, stats)>0
+          j > lo0
+              && compare(t = get(list, j - 1, stats), v, comparator, stats) > 0
       ) {
         set(list, j, t, stats);
         j--;
@@ -282,13 +282,13 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
   }
 
   static <T> void insertionSort(T[] array, int lo0, int hi0, Comparator<? super T> comparator, SortStatistics stats) {
-    for (int i=lo0+1;i <= hi0;i++) {
-      T v=get(array, i, stats);
-      int j=i;
+    for (int i = lo0 + 1; i <= hi0; i++) {
+      T v = get(array, i, stats);
+      int j = i;
       T t;
       while (
-        j>lo0
-        && compare(t=get(array, j-1, stats), v, comparator, stats)>0
+          j > lo0
+              && compare(t = get(array, j - 1, stats), v, comparator, stats) > 0
       ) {
         set(array, j, t, stats);
         j--;

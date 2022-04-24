@@ -57,8 +57,8 @@ public class RMIServerSocketFactorySSL implements RMIServerSocketFactory {
   @Override
   public boolean equals(Object obj) {
     return
-      (obj instanceof RMIServerSocketFactorySSL)
-      && Objects.equals(listenAddress, ((RMIServerSocketFactorySSL)obj).listenAddress)
+        (obj instanceof RMIServerSocketFactorySSL)
+            && Objects.equals(listenAddress, ((RMIServerSocketFactorySSL) obj).listenAddress)
     ;
   }
 
@@ -73,7 +73,7 @@ public class RMIServerSocketFactorySSL implements RMIServerSocketFactory {
     if (listenAddress == null) {
       return factory.createServerSocket(port, 50);
     } else {
-      InetAddress address=InetAddress.getByName(listenAddress);
+      InetAddress address = InetAddress.getByName(listenAddress);
       return factory.createServerSocket(port, 50, address);
     }
   }

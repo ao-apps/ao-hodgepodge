@@ -51,7 +51,7 @@ public class StringBuilderWriter extends Writer implements NoClose {
 
   @Override
   public void write(int c) {
-    buffer.append((char)c);
+    buffer.append((char) c);
   }
 
   @Override
@@ -71,7 +71,7 @@ public class StringBuilderWriter extends Writer implements NoClose {
 
   @Override
   public void write(String str, int off, int len) {
-    buffer.append(str, off, off+len);
+    buffer.append(str, off, off + len);
   }
 
   @Override

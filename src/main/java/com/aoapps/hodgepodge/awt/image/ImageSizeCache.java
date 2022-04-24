@@ -68,9 +68,9 @@ public final class ImageSizeCache {
       long lastModified = imageFile.lastModified();
       long length = imageFile.length();
       if (
-        entry.size == null
-        || lastModified != entry.lastModified
-        || length != entry.length
+          entry.size == null
+              || lastModified != entry.lastModified
+              || length != entry.length
       ) {
         BufferedImage img = ImageIO.read(imageFile);
         if (img == null) {

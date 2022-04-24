@@ -298,7 +298,7 @@ public final class EncodingUtils {
         }
         break;
       default:
-        if (ch<' ') {
+        if (ch < ' ') {
           // skip the character
         } else {
           out.append(ch);

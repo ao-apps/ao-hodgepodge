@@ -49,12 +49,12 @@ public class ErrorDialog extends DefaultJDialog implements ActionListener {
   private EnterJButton closeButton;
 
   public ErrorDialog(Component parent, String title, Throwable t) {
-    this(parent, title, t, (Object[])null);
+    this(parent, title, t, (Object[]) null);
   }
 
   @SuppressWarnings({"LeakingThisInConstructor", "OverridableMethodCallInConstructor"})
   public ErrorDialog(Component parent, String title, Throwable t, Object... extraInfo) {
-    super((parent instanceof JFrame) ? (JFrame)parent : new JFrame(), title, true, 400, 300);
+    super((parent instanceof JFrame) ? (JFrame) parent : new JFrame(), title, true, 400, 300);
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
     Container contentPane = getContentPane();
@@ -65,21 +65,21 @@ public class ErrorDialog extends DefaultJDialog implements ActionListener {
     contentPane.add(new JLabel(" "), BorderLayout.NORTH);
 
     // Convert the error
-    CharArrayWriter cout=new CharArrayWriter();
-    PrintWriter pout=new PrintWriter(cout);
+    CharArrayWriter cout = new CharArrayWriter();
+    PrintWriter pout = new PrintWriter(cout);
     ErrorPrinter.printStackTraces(t, pout, extraInfo);
     pout.flush();
-    String errorText=cout.toString();
+    String errorText = cout.toString();
 
     // Setup the GUI
-    JTextArea textArea=new JTextArea(errorText, 25, 80);
+    JTextArea textArea = new JTextArea(errorText, 25, 80);
     textArea.setEditable(false);
     textArea.setCaretPosition(0);
     contentPane.add(new JScrollPane(textArea));
 
-    JPanel buttonPanel=new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
     contentPane.add(buttonPanel, BorderLayout.SOUTH);
-    closeButton=new EnterJButton("Close");
+    closeButton = new EnterJButton("Close");
     buttonPanel.add(closeButton);
     closeButton.addActionListener(this);
     closeButton.setToolTipText("Close this window.");
@@ -92,7 +92,7 @@ public class ErrorDialog extends DefaultJDialog implements ActionListener {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    Object source=e.getSource();
+    Object source = e.getSource();
     if (source == closeButton) {
       closeWindow();
     }

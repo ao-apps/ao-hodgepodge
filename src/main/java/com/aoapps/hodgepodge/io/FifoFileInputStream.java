@@ -36,13 +36,16 @@ import java.io.InterruptedIOException;
 public class FifoFileInputStream extends InputStream {
 
   private final FifoFile file;
-  private static class StatsLock {/* Empty lock class to help heap profile */}
-  private final StatsLock statsLock=new StatsLock();
-  private long fifoReadCount=0;
-  private long fifoReadBytes=0;
+
+  private static class StatsLock {
+    // Empty lock class to help heap profile
+  }
+  private final StatsLock statsLock = new StatsLock();
+  private long fifoReadCount = 0;
+  private long fifoReadBytes = 0;
 
   FifoFileInputStream(FifoFile file) {
-    this.file=file;
+    this.file = file;
   }
 
   /**
@@ -69,7 +72,7 @@ public class FifoFileInputStream extends InputStream {
   protected void addStats(long bytes) {
     synchronized (statsLock) {
       fifoReadCount++;
-      fifoReadBytes+=bytes;
+      fifoReadBytes += bytes;
     }
   }
 
@@ -84,21 +87,21 @@ public class FifoFileInputStream extends InputStream {
         if (Thread.currentThread().isInterrupted()) {
           throw new InterruptedIOException();
         }
-        long len=file.getLength();
+        long len = file.getLength();
         if (len >= 1) {
-          long pos=file.getFirstIndex();
-          file.file.seek(pos+16);
-          int b=file.file.read();
+          long pos = file.getFirstIndex();
+          file.file.seek(pos + 16);
+          int b = file.file.read();
           if (b == -1) {
             throw new EOFException("Unexpected EOF");
           }
           addStats(1);
-          long newFirstIndex=pos+1;
+          long newFirstIndex = pos + 1;
           while (newFirstIndex >= file.maxFifoLength) {
             newFirstIndex -= file.maxFifoLength;
           }
           file.setFirstIndex(newFirstIndex);
-          file.setLength(len-1);
+          file.setLength(len - 1);
           file.notifyAll();
           return b;
         }
@@ -134,28 +137,28 @@ public class FifoFileInputStream extends InputStream {
         if (Thread.currentThread().isInterrupted()) {
           throw new InterruptedIOException();
         }
-        long fileLen=file.getLength();
+        long fileLen = file.getLength();
         if (fileLen >= 1) {
-          long pos=file.getFirstIndex();
-          file.file.seek(pos+16);
-          int readSize=fileLen>len?len:(int)fileLen;
+          long pos = file.getFirstIndex();
+          file.file.seek(pos + 16);
+          int readSize = fileLen > len ? len : (int) fileLen;
           // When at the end of the file, read the remaining bytes
-          if ((pos+readSize)>file.maxFifoLength) {
-            readSize=(int)(file.maxFifoLength-pos);
+          if ((pos + readSize) > file.maxFifoLength) {
+            readSize = (int) (file.maxFifoLength - pos);
           }
 
           // Read as many bytes as currently available
-          int totalRead=file.file.read(b, off, readSize);
+          int totalRead = file.file.read(b, off, readSize);
           if (totalRead == -1) {
             throw new EOFException("Unexpected EOF");
           }
           addStats(totalRead);
-          long newFirstIndex=pos+totalRead;
+          long newFirstIndex = pos + totalRead;
           while (newFirstIndex >= file.maxFifoLength) {
             newFirstIndex -= file.maxFifoLength;
           }
           file.setFirstIndex(newFirstIndex);
-          file.setLength(fileLen-totalRead);
+          file.setLength(fileLen - totalRead);
           file.notifyAll();
           return totalRead;
         }
@@ -183,23 +186,23 @@ public class FifoFileInputStream extends InputStream {
         if (Thread.currentThread().isInterrupted()) {
           throw new InterruptedIOException();
         }
-        long fileLen=file.getLength();
+        long fileLen = file.getLength();
         if (fileLen >= 1) {
-          long pos=file.getFirstIndex();
-          long skipSize=fileLen>n?n:fileLen;
+          long pos = file.getFirstIndex();
+          long skipSize = fileLen > n ? n : fileLen;
           // When at the end of the file, skip the remaining bytes
-          if ((pos+skipSize)>file.maxFifoLength) {
-            skipSize=file.maxFifoLength-pos;
+          if ((pos + skipSize) > file.maxFifoLength) {
+            skipSize = file.maxFifoLength - pos;
           }
 
           // Skip as many bytes as currently available
-          long totalSkipped=skipSize;
-          long newFirstIndex=pos+skipSize;
+          long totalSkipped = skipSize;
+          long newFirstIndex = pos + skipSize;
           while (newFirstIndex >= file.maxFifoLength) {
             newFirstIndex -= file.maxFifoLength;
           }
           file.setFirstIndex(newFirstIndex);
-          file.setLength(fileLen-skipSize);
+          file.setLength(fileLen - skipSize);
           file.notifyAll();
           return totalSkipped;
         }
@@ -222,8 +225,8 @@ public class FifoFileInputStream extends InputStream {
   @Override
   public int available() throws IOException {
     synchronized (file) {
-      long len=file.getLength();
-      return len>Integer.MAX_VALUE?Integer.MAX_VALUE:(int)len;
+      long len = file.getLength();
+      return len > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) len;
     }
   }
 

@@ -84,7 +84,7 @@ public class MD5OutputStream extends FilterOutputStream {
    * @param out The output stream
    */
 
-  public MD5OutputStream (OutputStream out) {
+  public MD5OutputStream(OutputStream out) {
     super(out);
 
     md5 = new MD5();
@@ -94,7 +94,7 @@ public class MD5OutputStream extends FilterOutputStream {
    * Writes a byte.
    */
   @Override
-  public void write (int b) throws IOException {
+  public void write(int b) throws IOException {
     out.write(b);
     md5.Update((byte) b);
   }
@@ -103,7 +103,7 @@ public class MD5OutputStream extends FilterOutputStream {
    * Writes a sub array of bytes.
    */
   @Override
-  public void write (byte[] b, int off, int len) throws IOException {
+  public void write(byte[] b, int off, int len) throws IOException {
     out.write(b, off, len);
     md5.Update(b, off, len);
   }
@@ -113,7 +113,7 @@ public class MD5OutputStream extends FilterOutputStream {
    * for the current state.
    * @see MD5#Final()
    */
-  public byte[] hash () {
+  public byte[] hash() {
     return md5.Final();
   }
 }

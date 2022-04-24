@@ -64,7 +64,7 @@ public final class ImageLoader implements ImageConsumer {
     synchronized (this) {
       status = 0;
       image.getSource().startProduction(this);
-      while ((status & (IMAGEABORTED|IMAGEERROR|SINGLEFRAMEDONE|STATICIMAGEDONE)) == 0) {
+      while ((status & (IMAGEABORTED | IMAGEERROR | SINGLEFRAMEDONE | STATICIMAGEDONE)) == 0) {
         wait();
       }
     }

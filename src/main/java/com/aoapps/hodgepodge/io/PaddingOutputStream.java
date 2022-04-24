@@ -74,7 +74,7 @@ public class PaddingOutputStream extends FilterOutputStream {
    *                    {@link Cipher#getBlockSize()} when not a block cipher.
    */
   public PaddingOutputStream(OutputStream out, int blockSize, SecureRandom secureRandom) {
-    this(out, blockSize, (Random)secureRandom);
+    this(out, blockSize, (Random) secureRandom);
   }
 
   /**
@@ -85,7 +85,7 @@ public class PaddingOutputStream extends FilterOutputStream {
    *                    {@link Cipher#getBlockSize()} when not a block cipher.
    */
   public PaddingOutputStream(OutputStream out, int blockSize) {
-    this(out, blockSize, (Random)secureRandom);
+    this(out, blockSize, (Random) secureRandom);
   }
 
   /**
@@ -122,7 +122,7 @@ public class PaddingOutputStream extends FilterOutputStream {
    */
   public void finish() throws IOException {
     if (blockSize > 0) {
-      int lastBlockSize = (int)(byteCount % blockSize);
+      int lastBlockSize = (int) (byteCount % blockSize);
       if (lastBlockSize != 0 && lastBlockSize < blockSize) {
         if (random != null) {
           int garbageLen = blockSize - lastBlockSize;

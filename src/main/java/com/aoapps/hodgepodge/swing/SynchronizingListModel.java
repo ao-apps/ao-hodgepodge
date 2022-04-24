@@ -77,31 +77,31 @@ public class SynchronizingListModel<E> extends DefaultListModel<E> {
 
     // Synchronize the dynamic part of the list
     int size = list.size();
-    for (int index=0; index<size; index++) {
+    for (int index = 0; index < size; index++) {
       E obj = list.get(index);
-      if (index >= (size()-modelOffset)) {
+      if (index >= (size() - modelOffset)) {
         addElement(obj);
-      } else if (!obj.equals(getElementAt(index+modelOffset))) {
+      } else if (!obj.equals(getElementAt(index + modelOffset))) {
         // Objects don't match
         // If this object is found further down the list, then delete up to that object
         int foundIndex = -1;
-        for (int searchIndex = index+1; searchIndex<(size()-modelOffset); searchIndex++) {
-          if (obj.equals(getElementAt(searchIndex+modelOffset))) {
+        for (int searchIndex = index + 1; searchIndex < (size() - modelOffset); searchIndex++) {
+          if (obj.equals(getElementAt(searchIndex + modelOffset))) {
             foundIndex = searchIndex;
             break;
           }
         }
         if (foundIndex != -1) {
-          removeRange(index+modelOffset, foundIndex-1+modelOffset);
+          removeRange(index + modelOffset, foundIndex - 1 + modelOffset);
         } else {
           // Otherwise, insert in the current index
-          insertElementAt(obj, index+modelOffset);
+          insertElementAt(obj, index + modelOffset);
         }
       }
     }
     // Remove any extra
-    if ((size()-modelOffset) > size) {
-      removeRange(size+modelOffset, size()-1);
+    if ((size() - modelOffset) > size) {
+      removeRange(size + modelOffset, size() - 1);
     }
   }
 }

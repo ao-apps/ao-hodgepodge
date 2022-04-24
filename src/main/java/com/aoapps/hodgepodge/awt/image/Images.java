@@ -103,13 +103,13 @@ public final class Images {
       final int findmeHeight = findme.getHeight();
       if (imageHeight >= findmeHeight) {
         return findImage(
-          getRGB(image),
-          imageWidth,
-          imageHeight,
-          getRGB(findme),
-          findmeWidth,
-          findmeHeight,
-          tolerance
+            getRGB(image),
+            imageWidth,
+            imageHeight,
+            getRGB(findme),
+            findmeWidth,
+            findmeHeight,
+            tolerance
         );
       }
     }
@@ -132,32 +132,32 @@ public final class Images {
       final int searchHeight = imageHeight - findmeHeight;
       if (searchHeight >= 0) {
         // Each pixel can deviate by up to 255 for each primary color
-        final double maxDeviation = (double)3 * (double)255 * (double)findmeWidth * (double)findmeHeight;
-        final long maxMismatch = (long)(tolerance * maxDeviation);
+        final double maxDeviation = (double) 3 * (double) 255 * (double) findmeWidth * (double) findmeHeight;
+        final long maxMismatch = (long) (tolerance * maxDeviation);
         // Get pixels all at once
         for (int imageY = 0; imageY <= searchHeight; imageY++) {
-NextLocation :
+          NextLocation :
           for (int imageX = 0; imageX <= searchWidth; imageX++) {
             long totalMismatch = 0;
             int findMeIndex = 0;
-            for (int findmeY=0; findmeY<findmeHeight; findmeY++) {
-              for (int findmeX=0; findmeX<findmeWidth; findmeX++) {
+            for (int findmeY = 0; findmeY < findmeHeight; findmeY++) {
+              for (int findmeX = 0; findmeX < findmeWidth; findmeX++) {
                 int imagePixel = imagePixels[(imageY + findmeY) * imageWidth + imageX + findmeX];
                 int findmePixel = findmePixels[findMeIndex++];
                 if (
-                  // Check for exact match
-                  imagePixel != findmePixel
-                  // If either is full alpha, consider a match
-                  && (imagePixel & 0xff000000) != 0
-                  && (findmePixel & 0xff000000) != 0
+                    // Check for exact match
+                    imagePixel != findmePixel
+                        // If either is full alpha, consider a match
+                        && (imagePixel & 0xff000000) != 0
+                        && (findmePixel & 0xff000000) != 0
                 ) {
                   totalMismatch +=
-                    // Red difference
-                    Math.abs(((imagePixel >>> 16) & 255) - ((findmePixel >>> 16) & 255))
-                    // Green difference
-                    + Math.abs(((imagePixel >>> 8) & 255) - ((findmePixel >>> 8) & 255))
-                    // Blue difference
-                    + Math.abs((imagePixel & 255) - (findmePixel & 255))
+                      // Red difference
+                      Math.abs(((imagePixel >>> 16) & 255) - ((findmePixel >>> 16) & 255))
+                          // Green difference
+                          + Math.abs(((imagePixel >>> 8) & 255) - ((findmePixel >>> 8) & 255))
+                          // Blue difference
+                          + Math.abs((imagePixel & 255) - (findmePixel & 255))
                   ;
                   if (totalMismatch > maxMismatch) {
                     continue NextLocation;

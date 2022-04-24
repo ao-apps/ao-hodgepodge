@@ -122,17 +122,17 @@ public final class BundleLookupThreadContext {
    */
   static {
     Resources.addListener(
-      (Resources _resources, Locale locale, String key, Object[] args, String resource, String result) -> {
-        // Copy any lookup markup to the newly generated string
-        BundleLookupThreadContext _threadContext = BundleLookupThreadContext.getThreadContext();
-        if (_threadContext != null) {
-          BundleLookupMarkup lookupMarkup = _threadContext.getLookupMarkup(resource);
-          _threadContext.addLookupMarkup(
-            result, // This string is already a new instance and therefore is already unique by identity
-            lookupMarkup
-          );
+        (Resources _resources, Locale locale, String key, Object[] args, String resource, String result) -> {
+          // Copy any lookup markup to the newly generated string
+          BundleLookupThreadContext _threadContext = BundleLookupThreadContext.getThreadContext();
+          if (_threadContext != null) {
+            BundleLookupMarkup lookupMarkup = _threadContext.getLookupMarkup(resource);
+            _threadContext.addLookupMarkup(
+                result, // This string is already a new instance and therefore is already unique by identity
+                lookupMarkup
+            );
+          }
         }
-      }
     );
   }
 

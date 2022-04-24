@@ -52,7 +52,7 @@ public class GraphException extends RuntimeException {
 
   static {
     Throwables.registerSurrogateFactory(GraphException.class, (template, cause) ->
-      new GraphException(template.getMessage(), cause)
+        new GraphException(template.getMessage(), cause)
     );
   }
 }

@@ -42,23 +42,23 @@ public final class WsEncoder {
     throw new AssertionError();
   }
 
-  private static final char[] hexChars={
-    '0',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    'a',
-    'b',
-    'c',
-    'd',
-    'e',
-    'f'
+  private static final char[] hexChars = {
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      'a',
+      'b',
+      'c',
+      'd',
+      'e',
+      'f'
   };
 
   /**
@@ -69,17 +69,17 @@ public final class WsEncoder {
       return null;
     }
 
-    StringBuilder encoded=null;
-    int len=value.length();
-    for (int c=0;c<len;c++) {
-      char ch=value.charAt(c);
+    StringBuilder encoded = null;
+    int len = value.length();
+    for (int c = 0; c < len; c++) {
+      char ch = value.charAt(c);
       if (
-        (ch<' ' && ch != '\n' && ch != '\r')
-        || ch == '\\'
+          (ch < ' ' && ch != '\n' && ch != '\r')
+              || ch == '\\'
       ) {
         if (encoded == null) {
-          encoded=new StringBuilder();
-          if (c>0) {
+          encoded = new StringBuilder();
+          if (c > 0) {
             encoded.append(value, 0, c);
           }
         }
@@ -92,13 +92,13 @@ public final class WsEncoder {
         } else if (ch == '\t') {
           encoded.append("\\t");
         } else {
-          int ich=ch;
+          int ich = ch;
           encoded
-            .append("\\u")
-            .append(hexChars[(ich>>>12)&15])
-            .append(hexChars[(ich>>>8)&15])
-            .append(hexChars[(ich>>>4)&15])
-            .append(hexChars[ich&15])
+              .append("\\u")
+              .append(hexChars[(ich >>> 12) & 15])
+              .append(hexChars[(ich >>> 8) & 15])
+              .append(hexChars[(ich >>> 4) & 15])
+              .append(hexChars[ich & 15])
           ;
         }
       } else {
@@ -116,19 +116,19 @@ public final class WsEncoder {
       return null;
     }
 
-    StringBuilder value=null;
-    int len=encoded.length();
-    for (int c=0;c<len;c++) {
-      char ch=encoded.charAt(c);
+    StringBuilder value = null;
+    int len = encoded.length();
+    for (int c = 0; c < len; c++) {
+      char ch = encoded.charAt(c);
       if (ch == '\\') {
         if (value == null) {
-          value=new StringBuilder();
-          if (c>0) {
+          value = new StringBuilder();
+          if (c > 0) {
             value.append(encoded, 0, c);
           }
         }
-        if (++c<len) {
-          ch=encoded.charAt(c);
+        if (++c < len) {
+          ch = encoded.charAt(c);
           if (ch == '\\') {
             value.append('\\');
           } else if (ch == 'b' || ch == 'B') {
@@ -138,41 +138,41 @@ public final class WsEncoder {
           } else if (ch == 't' || ch == 'T') {
             value.append('\t');
           } else if (ch == 'u' || ch == 'U') {
-            if (++c<len) {
-              char ch1=encoded.charAt(c);
+            if (++c < len) {
+              char ch1 = encoded.charAt(c);
               if (
-                (ch1 >= '0' && ch1 <= '9')
-                || (ch1 >= 'a' && ch1 <= 'f')
-                || (ch1 >= 'A' && ch1 <= 'F')
+                  (ch1 >= '0' && ch1 <= '9')
+                      || (ch1 >= 'a' && ch1 <= 'f')
+                      || (ch1 >= 'A' && ch1 <= 'F')
               ) {
-                if (++c<len) {
-                  char ch2=encoded.charAt(c);
+                if (++c < len) {
+                  char ch2 = encoded.charAt(c);
                   if (
-                    (ch2 >= '0' && ch2 <= '9')
-                    || (ch2 >= 'a' && ch2 <= 'f')
-                    || (ch2 >= 'A' && ch2 <= 'F')
+                      (ch2 >= '0' && ch2 <= '9')
+                          || (ch2 >= 'a' && ch2 <= 'f')
+                          || (ch2 >= 'A' && ch2 <= 'F')
                   ) {
-                    if (++c<len) {
-                      char ch3=encoded.charAt(c);
+                    if (++c < len) {
+                      char ch3 = encoded.charAt(c);
                       if (
-                        (ch3 >= '0' && ch3 <= '9')
-                        || (ch3 >= 'a' && ch3 <= 'f')
-                        || (ch3 >= 'A' && ch3 <= 'F')
+                          (ch3 >= '0' && ch3 <= '9')
+                              || (ch3 >= 'a' && ch3 <= 'f')
+                              || (ch3 >= 'A' && ch3 <= 'F')
                       ) {
-                        if (++c<len) {
-                          char ch4=encoded.charAt(c);
+                        if (++c < len) {
+                          char ch4 = encoded.charAt(c);
                           if (
-                            (ch4 >= '0' && ch4 <= '9')
-                            || (ch4 >= 'a' && ch4 <= 'f')
-                            || (ch4 >= 'A' && ch4 <= 'F')
+                              (ch4 >= '0' && ch4 <= '9')
+                                  || (ch4 >= 'a' && ch4 <= 'f')
+                                  || (ch4 >= 'A' && ch4 <= 'F')
                           ) {
                             value.append(
-                              (char)(
-                                (Strings.getHex(ch1)<<12)
-                                | (Strings.getHex(ch2)<<8)
-                                | (Strings.getHex(ch3)<<4)
-                                | Strings.getHex(ch4)
-                              )
+                                (char) (
+                                    (Strings.getHex(ch1) << 12)
+                                        | (Strings.getHex(ch2) << 8)
+                                        | (Strings.getHex(ch3) << 4)
+                                        | Strings.getHex(ch4)
+                                )
                             );
                           } else {
                             value.append('\\').append(ch).append(ch1).append(ch2).append(ch3).append(ch4);
@@ -210,6 +210,6 @@ public final class WsEncoder {
         }
       }
     }
-    return value == null?encoded:value.toString();
+    return value == null ? encoded : value.toString();
   }
 }

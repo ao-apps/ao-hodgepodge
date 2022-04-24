@@ -80,7 +80,7 @@ public class FindReplaceWriter extends Writer {
 
   @Override
   public void write(int c) throws IOException {
-    char ch = (char)c; // Cast to char to ignore the high-order bits when comparing to the find text
+    char ch = (char) c; // Cast to char to ignore the high-order bits when comparing to the find text
     if (ch == find[findMatched]) {
       findMatched++;
       if (findMatched >= find.length) {

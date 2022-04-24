@@ -75,20 +75,20 @@ public final class MarkupCoercion {
   public static void write(Object value, MarkupType markupType, Writer out, boolean outOptimized) throws IOException {
     // Support Optional
     while (value instanceof Optional) {
-      value = ((Optional<?>)value).orElse(null);
+      value = ((Optional<?>) value).orElse(null);
     }
     if (value != null) {
       if (out instanceof EncoderWriter) {
         // Unwrap media writer and use encoder directly
-        EncoderWriter encoderWriter = (EncoderWriter)out;
+        EncoderWriter encoderWriter = (EncoderWriter) out;
         write(
-          value,
-          markupType,
-          true, // Must run markup through encoder
-          encoderWriter.getEncoder(),
-          false, // No prefix/suffix
-          encoderWriter.getOut(),
-          true // EncoderWriter always optimizes out
+            value,
+            markupType,
+            true, // Must run markup through encoder
+            encoderWriter.getEncoder(),
+            false, // No prefix/suffix
+            encoderWriter.getOut(),
+            true // EncoderWriter always optimizes out
         );
       } else {
         // Optimize output
@@ -101,18 +101,18 @@ public final class MarkupCoercion {
         }
         BundleLookupThreadContext threadContext;
         if (
-          markupType == null
-          || markupType == MarkupType.NONE
-          || (threadContext = BundleLookupThreadContext.getThreadContext()) == null
-          // Avoid intermediate String from Writable
-          || (
-            value instanceof Writable
-            && !((Writable)value).isFastToString()
-          )
-          // Other types that will not be converted to String for bundle lookups
-          || (value instanceof CharSequence && !(value instanceof String))
-          || value instanceof char[]
-          || value instanceof Node
+            markupType == null
+                || markupType == MarkupType.NONE
+                || (threadContext = BundleLookupThreadContext.getThreadContext()) == null
+                // Avoid intermediate String from Writable
+                || (
+                value instanceof Writable
+                    && !((Writable) value).isFastToString()
+            )
+                // Other types that will not be converted to String for bundle lookups
+                || (value instanceof CharSequence && !(value instanceof String))
+                || value instanceof char[]
+                || value instanceof Node
         ) {
           Coercion.write(value, optimized, true);
         } else {
@@ -215,30 +215,30 @@ public final class MarkupCoercion {
         return;
       }
       // Unwrap media writer and use encoder directly
-      EncoderWriter encoderWriter = (EncoderWriter)out;
+      EncoderWriter encoderWriter = (EncoderWriter) out;
       encodeLookupMarkup = true; // Must run markup through encoder
       encoder = encoderWriter.getEncoder();
       encoderPrefixSuffix = false; // No prefix/suffix
       out = encoderWriter.getOut();
       outOptimized = true; // EncoderWriter always optimizes out
     } else if (
-      // Do not allow bypassing a buffered encoder
-      !encoderPrefixSuffix                                   // encoder.writeSuffixTo is not called
-      && !encodeLookupMarkup                                 // markup not sent through encoder
-      && markupType != null && markupType != MarkupType.NONE // there is potentially markup
-      && encoder.isBuffered()                                // the encoder is buffered, and thus would be bypassed
+        // Do not allow bypassing a buffered encoder
+        !encoderPrefixSuffix                                   // encoder.writeSuffixTo is not called
+            && !encodeLookupMarkup                                 // markup not sent through encoder
+            && markupType != null && markupType != MarkupType.NONE // there is potentially markup
+            && encoder.isBuffered()                                // the encoder is buffered, and thus would be bypassed
     ) {
       throw new LocalizedIllegalArgumentException(
-        RESOURCES,
-        "notAllowedToBypassBufferedEncoder",
-        markupType.name(),
-        encoder.getClass().getName(),
-        out.getClass().getName()
+          RESOURCES,
+          "notAllowedToBypassBufferedEncoder",
+          markupType.name(),
+          encoder.getClass().getName(),
+          out.getClass().getName()
       );
     }
     // Support Optional
     while (value instanceof Optional) {
-      value = ((Optional<?>)value).orElse(null);
+      value = ((Optional<?>) value).orElse(null);
     }
     if (value != null || encoderPrefixSuffix) {
       // Optimize output
@@ -252,18 +252,18 @@ public final class MarkupCoercion {
       if (value != null) {
         BundleLookupThreadContext threadContext;
         if (
-          markupType == null
-          || markupType == MarkupType.NONE
-          || (threadContext = BundleLookupThreadContext.getThreadContext()) == null
-          // Avoid intermediate String from Writable
-          || (
-            value instanceof Writable
-            && !((Writable)value).isFastToString()
-          )
-          // Other types that will not be converted to String for bundle lookups
-          || (value instanceof CharSequence && !(value instanceof String))
-          || value instanceof char[]
-          || value instanceof Node
+            markupType == null
+                || markupType == MarkupType.NONE
+                || (threadContext = BundleLookupThreadContext.getThreadContext()) == null
+                // Avoid intermediate String from Writable
+                || (
+                value instanceof Writable
+                    && !((Writable) value).isFastToString()
+            )
+                // Other types that will not be converted to String for bundle lookups
+                || (value instanceof CharSequence && !(value instanceof String))
+                || value instanceof char[]
+                || value instanceof Node
         ) {
           if (encoderPrefixSuffix) {
             encoder.writePrefixTo(optimized);
@@ -325,11 +325,11 @@ public final class MarkupCoercion {
    */
   public static void append(Object value, MarkupType markupType, Appendable out, boolean outOptimized) throws IOException {
     if (out instanceof Writer) {
-      write(value, markupType, (Writer)out, outOptimized);
+      write(value, markupType, (Writer) out, outOptimized);
     } else {
       // Support Optional
       while (value instanceof Optional) {
-        value = ((Optional<?>)value).orElse(null);
+        value = ((Optional<?>) value).orElse(null);
       }
       if (value != null) {
         // Optimize output
@@ -342,18 +342,18 @@ public final class MarkupCoercion {
         }
         BundleLookupThreadContext threadContext;
         if (
-          markupType == null
-          || markupType == MarkupType.NONE
-          || (threadContext = BundleLookupThreadContext.getThreadContext()) == null
-          // Avoid intermediate String from Writable
-          || (
-            value instanceof Writable
-            && !((Writable)value).isFastToString()
-          )
-          // Other types that will not be converted to String for bundle lookups
-          || (value instanceof CharSequence && !(value instanceof String))
-          || value instanceof char[]
-          || value instanceof Node
+            markupType == null
+                || markupType == MarkupType.NONE
+                || (threadContext = BundleLookupThreadContext.getThreadContext()) == null
+                // Avoid intermediate String from Writable
+                || (
+                value instanceof Writable
+                    && !((Writable) value).isFastToString()
+            )
+                // Other types that will not be converted to String for bundle lookups
+                || (value instanceof CharSequence && !(value instanceof String))
+                || value instanceof char[]
+                || value instanceof Node
         ) {
           Coercion.append(value, optimized, true);
         } else {
@@ -454,27 +454,27 @@ public final class MarkupCoercion {
     if (encoder == null) {
       append(value, markupType, out, outOptimized);
     } else if (out instanceof Writer) {
-      write(value, markupType, encodeLookupMarkup, encoder, encoderPrefixSuffix, (Writer)out, outOptimized);
+      write(value, markupType, encodeLookupMarkup, encoder, encoderPrefixSuffix, (Writer) out, outOptimized);
     } else {
       // Do not allow bypassing a buffered encoder
       assert out != null;
       if (
-        !encoderPrefixSuffix                                   // encoder.writeSuffixTo is not called
-        && !encodeLookupMarkup                                 // markup not sent through encoder
-        && markupType != null && markupType != MarkupType.NONE // there is potentially markup
-        && encoder.isBuffered()                                // the encoder is buffered, and thus would be bypassed
+          !encoderPrefixSuffix                                   // encoder.writeSuffixTo is not called
+              && !encodeLookupMarkup                                 // markup not sent through encoder
+              && markupType != null && markupType != MarkupType.NONE // there is potentially markup
+              && encoder.isBuffered()                                // the encoder is buffered, and thus would be bypassed
       ) {
         throw new LocalizedIllegalArgumentException(
-          RESOURCES,
-          "notAllowedToBypassBufferedEncoder",
-          markupType.name(),
-          encoder.getClass().getName(),
-          out.getClass().getName()
+            RESOURCES,
+            "notAllowedToBypassBufferedEncoder",
+            markupType.name(),
+            encoder.getClass().getName(),
+            out.getClass().getName()
         );
       }
       // Support Optional
       while (value instanceof Optional) {
-        value = ((Optional<?>)value).orElse(null);
+        value = ((Optional<?>) value).orElse(null);
       }
       if (value != null || encoderPrefixSuffix) {
         // Optimize output
@@ -488,18 +488,18 @@ public final class MarkupCoercion {
         if (value != null) {
           BundleLookupThreadContext threadContext;
           if (
-            markupType == null
-            || markupType == MarkupType.NONE
-            || (threadContext = BundleLookupThreadContext.getThreadContext()) == null
-            // Avoid intermediate String from Writable
-            || (
-              value instanceof Writable
-              && !((Writable)value).isFastToString()
-            )
-            // Other types that will not be converted to String for bundle lookups
-            || (value instanceof CharSequence && !(value instanceof String))
-            || value instanceof char[]
-            || value instanceof Node
+              markupType == null
+                  || markupType == MarkupType.NONE
+                  || (threadContext = BundleLookupThreadContext.getThreadContext()) == null
+                  // Avoid intermediate String from Writable
+                  || (
+                  value instanceof Writable
+                      && !((Writable) value).isFastToString()
+              )
+                  // Other types that will not be converted to String for bundle lookups
+                  || (value instanceof CharSequence && !(value instanceof String))
+                  || value instanceof char[]
+                  || value instanceof Node
           ) {
             if (encoderPrefixSuffix) {
               encoder.writePrefixTo(optimized);

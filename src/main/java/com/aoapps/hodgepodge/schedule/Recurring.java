@@ -91,8 +91,8 @@ public abstract class Recurring {
         boolean found = false;
         for (DayOfWeek dow : allDaysOfWeek) {
           if (
-            dow.getLongName().equalsIgnoreCase(dayStr)
-            || dow.getShortName().equalsIgnoreCase(dayStr)
+              dow.getLongName().equalsIgnoreCase(dayStr)
+                  || dow.getShortName().equalsIgnoreCase(dayStr)
           ) {
             daysOfWeek.add(dow);
             found = true;
@@ -114,8 +114,8 @@ public abstract class Recurring {
         boolean found = false;
         for (Month month : allMonths) {
           if (
-            month.getLongName().equalsIgnoreCase(monthStr)
-            || month.getShortName().equalsIgnoreCase(monthStr)
+              month.getLongName().equalsIgnoreCase(monthStr)
+                  || month.getShortName().equalsIgnoreCase(monthStr)
           ) {
             months.add(month);
             found = true;
@@ -224,7 +224,7 @@ public abstract class Recurring {
          */
         @Override
         public Calendar next() {
-          Calendar date = (Calendar)cal.clone();
+          Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next day
           cal.add(Calendar.DAY_OF_MONTH, 1);
           return date;
@@ -288,7 +288,7 @@ public abstract class Recurring {
             // Move the calendar to the next day
             cal.add(Calendar.DAY_OF_MONTH, 1);
           }
-          Calendar date = (Calendar)cal.clone();
+          Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next day
           cal.add(Calendar.DAY_OF_MONTH, 1);
           return date;
@@ -313,7 +313,7 @@ public abstract class Recurring {
       if (!(o instanceof DayOfWeekList)) {
         return false;
       }
-      DayOfWeekList other = (DayOfWeekList)o;
+      DayOfWeekList other = (DayOfWeekList) o;
       return daysOfWeek.equals(other.daysOfWeek);
     }
 
@@ -372,7 +372,7 @@ public abstract class Recurring {
             // Move the calendar to the next day
             cal.add(Calendar.DAY_OF_MONTH, 1);
           }
-          Calendar date = (Calendar)cal.clone();
+          Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next day
           cal.add(Calendar.DAY_OF_MONTH, 1);
           return date;
@@ -416,7 +416,7 @@ public abstract class Recurring {
          */
         @Override
         public Calendar next() {
-          Calendar date = (Calendar)cal.clone();
+          Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next week
           cal.add(Calendar.WEEK_OF_YEAR, 1);
           return date;
@@ -461,7 +461,7 @@ public abstract class Recurring {
          */
         @Override
         public Calendar next() {
-          Calendar date = (Calendar)cal.clone();
+          Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next month
           cal.set(Calendar.DAY_OF_MONTH, 1);
           cal.add(Calendar.MONTH, 1);
@@ -489,7 +489,7 @@ public abstract class Recurring {
       if (!(o instanceof MonthList)) {
         return false;
       }
-      MonthList other = (MonthList)o;
+      MonthList other = (MonthList) o;
       return months.equals(other.months);
     }
 
@@ -538,7 +538,7 @@ public abstract class Recurring {
             // Move the calendar to the next day
             cal.add(Calendar.MONTH, 1);
           }
-          Calendar date = (Calendar)cal.clone();
+          Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next month
           cal.add(Calendar.MONTH, 1);
           return date;
@@ -583,7 +583,7 @@ public abstract class Recurring {
          */
         @Override
         public Calendar next() {
-          Calendar date = (Calendar)cal.clone();
+          Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next year
           cal.set(Calendar.DAY_OF_MONTH, 1);
           cal.add(Calendar.YEAR, 1);
@@ -606,10 +606,10 @@ public abstract class Recurring {
       }
       this.increment = increment;
       if (
-        field != Calendar.DAY_OF_MONTH
-        && field != Calendar.WEEK_OF_YEAR
-        && field != Calendar.MONTH
-        && field != Calendar.YEAR
+          field != Calendar.DAY_OF_MONTH
+              && field != Calendar.WEEK_OF_YEAR
+              && field != Calendar.MONTH
+              && field != Calendar.YEAR
       ) {
         throw new IllegalArgumentException("Unexpected value for field: " + field);
       }
@@ -621,10 +621,10 @@ public abstract class Recurring {
       if (!(o instanceof Every)) {
         return false;
       }
-      Every other = (Every)o;
+      Every other = (Every) o;
       return
-        increment == other.increment
-        && field == other.field
+          increment == other.increment
+              && field == other.field
       ;
     }
 
@@ -676,7 +676,7 @@ public abstract class Recurring {
              */
             @Override
             public Calendar next() {
-              Calendar date = (Calendar)cal.clone();
+              Calendar date = (Calendar) cal.clone();
               // Move the calendar to the next by field and increment
               cal.add(field, increment);
               return date;
@@ -698,7 +698,7 @@ public abstract class Recurring {
              */
             @Override
             public Calendar next() {
-              Calendar date = (Calendar)cal.clone();
+              Calendar date = (Calendar) cal.clone();
               // Move the calendar to the next month
               cal.set(Calendar.DAY_OF_MONTH, 1);
               cal.add(Calendar.MONTH, increment);

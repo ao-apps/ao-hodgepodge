@@ -53,14 +53,14 @@ public final class RateLimitCat {
   }
 
   private static void usage() {
-    System.err.println("Usage: "+RateLimitCat.class.getName()+" [--blocksize=BLOCK_SIZE[unit]] [--bwlimit=BANDWIDTH_LIMIT[unit]] [--limit=MAXIMUM_BYTES[unit]] [--output=OUTPUT_FILE] [--progress[={true|false}]] [--] [FILE]...");
+    System.err.println("Usage: " + RateLimitCat.class.getName() + " [--blocksize=BLOCK_SIZE[unit]] [--bwlimit=BANDWIDTH_LIMIT[unit]] [--limit=MAXIMUM_BYTES[unit]] [--output=OUTPUT_FILE] [--progress[={true|false}]] [--] [FILE]...");
     System.err.println();
     System.err.println("\tWhen FILE is not provided, reads from standard input.");
     System.err.println("\tWhen FILE is -, will read from standard input.");
     System.err.println("\tWhen -- is first found, all subsequent arguments will be treated as filenames, including any - and --.");
     System.err.println();
     System.err.println("\t--blocksize  Reads and writes at most BLOCK_SIZE bytes at a time.  Allows an optional unit.");
-    System.err.println("\t             If not provided, defaults to "+BufferManager.BUFFER_SIZE+" bytes.  Unit supports IEC_60027");
+    System.err.println("\t             If not provided, defaults to " + BufferManager.BUFFER_SIZE + " bytes.  Unit supports IEC_60027");
     System.err.println("\t             prefixes on the unit byte, such as kbyte for 1000 bytes or Kibyte for 1024 bytes.");
     System.err.println("\t--bwlimit    The maximum bandwidth for reads and writes.  Allows an optional unit.");
     System.err.println("\t             If not provided, defaults to bits per second.  Unit supports IEC_60027");
@@ -85,7 +85,7 @@ public final class RateLimitCat {
     System.err.print(" seconds (");
     System.err.print(Strings.getTimeLengthString(timespan));
     System.err.print(')');
-    if (bytesRemaining != null && bytesRemaining[0]>0) {
+    if (bytesRemaining != null && bytesRemaining[0] > 0) {
       System.err.print(", ");
       System.err.print(bytesRemaining[0]);
       System.err.print(" bytes (");
@@ -111,11 +111,11 @@ public final class RateLimitCat {
           if (bytesRemaining[0] <= 0) {
             break;
           }
-          if (bytesRemaining[0]<blockSize) {
-            blockSize = (int)bytesRemaining[0];
+          if (bytesRemaining[0] < blockSize) {
+            blockSize = (int) bytesRemaining[0];
           }
         }
-        int bytesRead=in.read(buff, 0, blockSize);
+        int bytesRead = in.read(buff, 0, blockSize);
         if (bytesRead == -1) {
           break; // End of file
         }
@@ -127,7 +127,7 @@ public final class RateLimitCat {
         if (progress && lastReportByteCount != byteCount) {
           long currentTime = System.currentTimeMillis();
           long timeSinceReport = currentTime - lastReportTime;
-          if (timeSinceReport<0) {
+          if (timeSinceReport < 0) {
             // System time reset
             lastReportTime = currentTime;
           } else if (timeSinceReport >= 60000) {
@@ -154,17 +154,17 @@ public final class RateLimitCat {
         blockSize = BufferManager.BUFFER_SIZE;
       } else {
         long longBlockSize = blocksizeParam.getByteCount();
-        if (longBlockSize>Integer.MAX_VALUE) {
-          throw new IllegalArgumentException("blocksize>Integer.MAX_VALUE: "+blocksizeParam);
+        if (longBlockSize > Integer.MAX_VALUE) {
+          throw new IllegalArgumentException("blocksize>Integer.MAX_VALUE: " + blocksizeParam);
         }
-        if (longBlockSize<1) {
-          throw new IllegalArgumentException("blocksize<1: "+blocksizeParam);
+        if (longBlockSize < 1) {
+          throw new IllegalArgumentException("blocksize<1: " + blocksizeParam);
         }
-        blockSize = (int)longBlockSize;
+        blockSize = (int) longBlockSize;
       }
       final BitRate bwlimit = GetOpt.getOpt(args, "bwlimit", BitRate.class);
-      if (bwlimit != null && bwlimit.getBitRate()<1) {
-        throw new IllegalArgumentException("bwlimit<1: "+bwlimit);
+      if (bwlimit != null && bwlimit.getBitRate() < 1) {
+        throw new IllegalArgumentException("bwlimit<1: " + bwlimit);
       }
       ByteCount limit = GetOpt.getOpt(args, "limit", ByteCount.class);
       long[] bytesRemaining;
@@ -172,16 +172,16 @@ public final class RateLimitCat {
         bytesRemaining = null;
       } else {
         long temp = limit.getByteCount();
-        if (temp<0) {
-          throw new IllegalArgumentException("limit<0: "+limit);
+        if (temp < 0) {
+          throw new IllegalArgumentException("limit<0: " + limit);
         }
-        bytesRemaining = new long[] {temp};
+        bytesRemaining = new long[]{temp};
       }
       File output = GetOpt.getOpt(args, "output", File.class); // null for standard output
       Boolean progressParam = GetOpt.getOpt(args, "progress", Boolean.TYPE);
       boolean progress = (progressParam != null) && progressParam;
       List<String> sourcePaths = GetOpt.getArguments(args);
-      List<File> sourceFiles = new ArrayList<>(sourcePaths.size()+1);
+      List<File> sourceFiles = new ArrayList<>(sourcePaths.size() + 1);
       boolean allowStdin = true;
       boolean hasError = false;
       for (String sourcePath : sourcePaths) {
@@ -192,13 +192,13 @@ public final class RateLimitCat {
         } else {
           File sourceFile = new File(sourcePath);
           if (!sourceFile.exists()) {
-            System.err.println("File not found: "+sourcePath);
+            System.err.println("File not found: " + sourcePath);
             hasError = true;
           } else if (sourceFile.isDirectory()) {
-            System.err.println("Directories not supported: "+sourcePath);
+            System.err.println("Directories not supported: " + sourcePath);
             hasError = true;
           } else if (!sourceFile.canRead()) {
-            System.err.println("Unable to read file: "+sourcePath);
+            System.err.println("Unable to read file: " + sourcePath);
             hasError = true;
           } else {
             sourceFiles.add(sourceFile);
@@ -217,17 +217,17 @@ public final class RateLimitCat {
           try {
             if (bwlimit != null) {
               out = new BitRateOutputStream(
-                out,
-                new BitRateProvider() {
-                  @Override
-                  public Long getBitRate() {
-                    return bwlimit.getBitRate();
+                  out,
+                  new BitRateProvider() {
+                    @Override
+                    public Long getBitRate() {
+                      return bwlimit.getBitRate();
+                    }
+                    @Override
+                    public int getBlockSize() {
+                      return blockSize;
+                    }
                   }
-                  @Override
-                  public int getBlockSize() {
-                    return blockSize;
-                  }
-                }
               );
             }
             byte[] buff = new byte[blockSize];
@@ -248,13 +248,13 @@ public final class RateLimitCat {
             out.close();
           }
         } catch (IOException err) {
-          System.err.println("IO Exception: "+err.toString());
+          System.err.println("IO Exception: " + err.toString());
           System.err.flush();
           retval = 3;
         }
       }
     } catch (IllegalArgumentException err) {
-      System.err.println("Illegal Argument: "+err.toString());
+      System.err.println("Illegal Argument: " + err.toString());
       System.err.flush();
       usage();
       retval = 1;

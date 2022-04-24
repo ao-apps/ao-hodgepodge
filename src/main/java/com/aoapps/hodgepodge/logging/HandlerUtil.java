@@ -54,11 +54,11 @@ public final class HandlerUtil {
     LogManager manager = LogManager.getLogManager();
     String cname = handler.getClass().getName();
 
-    handler.setLevel(LogManagerUtil.getLevelProperty(manager, cname +".level", Level.INFO));
-    handler.setFilter(LogManagerUtil.getFilterProperty(manager, cname +".filter", null));
-    handler.setFormatter(LogManagerUtil.getFormatterProperty(manager, cname +".formatter", new SimpleFormatter()));
+    handler.setLevel(LogManagerUtil.getLevelProperty(manager, cname + ".level", Level.INFO));
+    handler.setFilter(LogManagerUtil.getFilterProperty(manager, cname + ".filter", null));
+    handler.setFormatter(LogManagerUtil.getFormatterProperty(manager, cname + ".formatter", new SimpleFormatter()));
     try {
-      handler.setEncoding(LogManagerUtil.getStringProperty(manager, cname +".encoding", null));
+      handler.setEncoding(LogManagerUtil.getStringProperty(manager, cname + ".encoding", null));
     } catch (ThreadDeath td) {
       throw td;
     } catch (Throwable t) {

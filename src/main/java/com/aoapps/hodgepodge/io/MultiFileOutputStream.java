@@ -45,26 +45,26 @@ public class MultiFileOutputStream extends OutputStream {
   private final String suffix;
   private final long fileSize;
 
-  private final List<File> files=new ArrayList<>();
-  private FileOutputStream out=null;
-  private long bytesOut=0;
+  private final List<File> files = new ArrayList<>();
+  private FileOutputStream out = null;
+  private long bytesOut = 0;
 
   public MultiFileOutputStream(File parent, String prefix, String suffix) {
     this(parent, prefix, suffix, DEFAULT_FILE_SIZE);
   }
 
   public MultiFileOutputStream(File parent, String prefix, String suffix, long fileSize) {
-    this.parent=parent;
-    this.prefix=prefix;
-    this.suffix=suffix;
-    this.fileSize=fileSize;
+    this.parent = parent;
+    this.prefix = prefix;
+    this.suffix = suffix;
+    this.fileSize = fileSize;
   }
 
   @Override
   public synchronized void close() throws IOException {
-    FileOutputStream tempOut=out;
+    FileOutputStream tempOut = out;
     if (tempOut != null) {
-      out=null;
+      out = null;
       tempOut.flush();
       tempOut.close();
     }
@@ -84,22 +84,22 @@ public class MultiFileOutputStream extends OutputStream {
 
   @Override
   public synchronized void write(byte[] b, int off, int len) throws IOException {
-    while (off<len) {
+    while (off < len) {
       if (out == null) {
         makeNewFile();
       }
-      int blockLen=len;
-      long newBytesOut=bytesOut+blockLen;
-      if (newBytesOut>fileSize) {
-        blockLen=(int)(fileSize-newBytesOut);
+      int blockLen = len;
+      long newBytesOut = bytesOut + blockLen;
+      if (newBytesOut > fileSize) {
+        blockLen = (int) (fileSize - newBytesOut);
       }
       out.write(b, off, blockLen);
-      off+=blockLen;
-      len-=blockLen;
-      bytesOut+=blockLen;
+      off += blockLen;
+      len -= blockLen;
+      bytesOut += blockLen;
       if (bytesOut >= fileSize) {
         try (FileOutputStream tempOut = out) {
-          out=null;
+          out = null;
           tempOut.flush();
         }
       }
@@ -109,10 +109,10 @@ public class MultiFileOutputStream extends OutputStream {
   @Override
   public synchronized void write(int b) throws IOException {
     out.write(b);
-    bytesOut+=1;
+    bytesOut += 1;
     if (bytesOut >= fileSize) {
       try (FileOutputStream tempOut = out) {
-        out=null;
+        out = null;
         tempOut.flush();
       }
     }
@@ -122,10 +122,10 @@ public class MultiFileOutputStream extends OutputStream {
    * All accesses are already synchronized.
    */
   private void makeNewFile() throws IOException {
-    String filename=prefix+(files.size()+1)+suffix;
-    File file=new File(parent, filename);
-    out=new FileOutputStream(file);
-    bytesOut=0;
+    String filename = prefix + (files.size() + 1) + suffix;
+    File file = new File(parent, filename);
+    out = new FileOutputStream(file);
+    bytesOut = 0;
     files.add(file);
   }
 

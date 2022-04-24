@@ -93,8 +93,8 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
    */
   public static boolean isTrackingKey(String key) {
     return
-      key.endsWith(VALIDATED_SUFFIX)
-      || key.endsWith(MODIFIED_SUFFIX)
+        key.endsWith(VALIDATED_SUFFIX)
+            || key.endsWith(MODIFIED_SUFFIX)
     ;
   }
 
@@ -154,10 +154,10 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
           if (file.canRead() && file.canWrite()) {
             if (goodSourceFile != null) {
               throw new LocalizedIllegalStateException(
-                RESOURCES,
-                "init.moreThanOneSourceFile",
-                goodSourceFile,
-                file
+                  RESOURCES,
+                  "init.moreThanOneSourceFile",
+                  goodSourceFile,
+                  file
               );
             }
             goodSourceFile = file;
@@ -165,9 +165,9 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
         } catch (SecurityException err) {
           // OK when sandboxed, goodSourceFile remains null
           logger.log(
-            Level.WARNING,
-            RESOURCES.getMessage("init.securityException", file),
-            err
+              Level.WARNING,
+              RESOURCES.getMessage("init.securityException", file),
+              err
           );
         }
       }
@@ -189,9 +189,9 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
         mySourceFileComments = in.getComments();
       } catch (IOException err) {
         logger.log(
-          Level.WARNING,
-          RESOURCES.getMessage("init.ioException", goodSourceFile),
-          err
+            Level.WARNING,
+            RESOURCES.getMessage("init.ioException", goodSourceFile),
+            err
         );
       }
       loaded = true;
@@ -208,8 +208,8 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
         // Try ClassLoader for when modules enabled
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         in = (classloader != null)
-          ? classloader.getResourceAsStream(resourceName)
-          : ClassLoader.getSystemResourceAsStream(resourceName);
+            ? classloader.getResourceAsStream(resourceName)
+            : ClassLoader.getSystemResourceAsStream(resourceName);
       }
       if (in == null) {
         throw new UncheckedIOException(new LocalizedIOException(RESOURCES, "init.resourceNotFound", resourceName));
@@ -226,12 +226,12 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
     }
     // Populate the concurrent maps while skipping the validated and modified entries
     for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-      String key = (String)entry.getKey();
-      String value = (String)entry.getValue();
+      String key = (String) entry.getKey();
+      String value = (String) entry.getValue();
       if (key.endsWith(VALIDATED_SUFFIX)) {
-        validatedMap.put(key.substring(0, key.length()-VALIDATED_SUFFIX.length()), Long.parseLong(value));
+        validatedMap.put(key.substring(0, key.length() - VALIDATED_SUFFIX.length()), Long.parseLong(value));
       } else if (key.endsWith(MODIFIED_SUFFIX)) {
-        modifiedMap.put(key.substring(0, key.length()-MODIFIED_SUFFIX.length()), Long.parseLong(value));
+        modifiedMap.put(key.substring(0, key.length() - MODIFIED_SUFFIX.length()), Long.parseLong(value));
       } else {
         valueMap.put(key, value);
       }
@@ -249,7 +249,7 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
   // See sun.util.ResourceBundleEnumeration
   @Override
   public Enumeration<String> getKeys() {
-    ResourceBundle myParent= this.parent;
+    ResourceBundle myParent = this.parent;
     Set<String> set = valueMap.keySet();
     Enumeration<String> enumeration = (myParent != null) ? myParent.getKeys() : null;
     // Java 9: new Enumeration<>
@@ -307,10 +307,10 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
    */
   private static void checkKey(String key) throws IllegalArgumentException {
     if (key.endsWith(VALIDATED_SUFFIX)) {
-      throw new IllegalArgumentException("Key may not end with "+VALIDATED_SUFFIX+": "+key);
+      throw new IllegalArgumentException("Key may not end with " + VALIDATED_SUFFIX + ": " + key);
     }
     if (key.endsWith(MODIFIED_SUFFIX)) {
-      throw new IllegalArgumentException("Key may not end with "+MODIFIED_SUFFIX+": "+key);
+      throw new IllegalArgumentException("Key may not end with " + MODIFIED_SUFFIX + ": " + key);
     }
   }
 
@@ -321,7 +321,7 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
 
     @Override
     public int compare(Object o1, Object o2) {
-      String s1 = (String)o1;
+      String s1 = (String) o1;
       String base1;
       int sub1;
       if (s1.endsWith(MODIFIED_SUFFIX)) {
@@ -334,7 +334,7 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
         base1 = s1;
         sub1 = 0;
       }
-      String s2 = (String)o2;
+      String s2 = (String) o2;
       String base2;
       int sub2;
       if (s2.endsWith(MODIFIED_SUFFIX)) {
@@ -383,9 +383,9 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
         }
         // Java 9: Support UTF-8 properties files via reader/writer
         writer.store(
-          // Wrap to skip any comments generated by Properties code
-          new SkipCommentsFilterOutputStream(out),
-          null
+            // Wrap to skip any comments generated by Properties code
+            new SkipCommentsFilterOutputStream(out),
+            null
         );
         newContent = DiffableProperties.formatProperties(out.toString(propertiesCharset.name())).getBytes(propertiesCharset);
       }
@@ -393,7 +393,7 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
         try (
           TempFileContext tempFileContext = new TempFileContext(sourceFile.getParentFile());
           TempFile tempFile = tempFileContext.createTempFile(sourceFile.getName())
-        ) {
+            ) {
           try (OutputStream out = new FileOutputStream(tempFile.getFile())) {
             out.write(newContent);
           }
@@ -427,13 +427,13 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
     synchronized (properties) {
       Long currentTimeLong = System.currentTimeMillis();
       String currentTimeString = currentTimeLong.toString();
-      properties.setProperty(key, (String)value);
-      properties.setProperty(key+VALIDATED_SUFFIX, currentTimeString);
+      properties.setProperty(key, (String) value);
+      properties.setProperty(key + VALIDATED_SUFFIX, currentTimeString);
       if (modified) {
-        properties.setProperty(key+MODIFIED_SUFFIX, currentTimeString);
+        properties.setProperty(key + MODIFIED_SUFFIX, currentTimeString);
       }
       saveProperties();
-      valueMap.put(key, (String)value);
+      valueMap.put(key, (String) value);
       validatedMap.put(key, currentTimeLong);
       if (modified) {
         modifiedMap.put(key, currentTimeLong);

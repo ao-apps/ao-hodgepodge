@@ -68,15 +68,15 @@ public final class Benchmark {
     System.out.print("Pass #");
     System.out.println(pass);
     System.out.println();
-    for (int c=1;c<args.length;c++) {
-      List<List<Double>> fileThroughputs = throughputs.get(c-1);
-      List<List<Double>> fileSeekRates = seekRates.get(c-1);
-      final String filename=args[c];
+    for (int c = 1; c < args.length; c++) {
+      List<List<Double>> fileThroughputs = throughputs.get(c - 1);
+      List<List<Double>> fileSeekRates = seekRates.get(c - 1);
+      final String filename = args[c];
       final File file = new File(filename);
       System.out.print("Sequential Read by Block Size (");
       System.out.print(Strings.getApproximateSize(MAX_READ_BYTES));
       System.out.println(" Total)");
-      for (int ci=0; ci<blockSizes.length; ci++) {
+      for (int ci = 0; ci < blockSizes.length; ci++) {
         List<Double> blockSizeThroughputs = fileThroughputs.get(ci);
         int blockSize = blockSizes[ci];
         byte[] buff = new byte[blockSize];
@@ -84,9 +84,9 @@ public final class Benchmark {
         long startTime = System.currentTimeMillis();
         try {
           try (InputStream in = new FileInputStream(file)) {
-            while (bytesRead<MAX_READ_BYTES) {
+            while (bytesRead < MAX_READ_BYTES) {
               long bytesLeft = MAX_READ_BYTES - bytesRead;
-              int len = bytesLeft < blockSize ? (int)bytesLeft : blockSize;
+              int len = bytesLeft < blockSize ? (int) bytesLeft : blockSize;
               int ret = in.read(buff, 0, len);
               if (ret == -1) {
                 break;
@@ -99,16 +99,16 @@ public final class Benchmark {
         } finally {
           long timeSpan = System.currentTimeMillis() - startTime;
           if (bytesRead != MAX_READ_BYTES) {
-            System.err.println("Incorrect number of bytes read.  Expected "+MAX_READ_BYTES+", got "+bytesRead);
+            System.err.println("Incorrect number of bytes read.  Expected " + MAX_READ_BYTES + ", got " + bytesRead);
           }
-          double throughput = (double)bytesRead*1000D/((double)timeSpan*1048576D);
+          double throughput = (double) bytesRead * 1000D / ((double) timeSpan * 1048576D);
           blockSizeThroughputs.add(throughput);
           System.out.print("    ");
           System.out.print(Strings.getApproximateSize(blockSize));
           System.out.print(": ");
           System.out.print(numberFormat.format(throughput));
           System.out.print(" MB/sec");
-          if (blockSizeThroughputs.size()>1) {
+          if (blockSizeThroughputs.size() > 1) {
             System.out.print(" (");
             System.out.print(numberFormat.format(Collections.min(blockSizeThroughputs)));
             System.out.print(", ");
@@ -153,7 +153,7 @@ public final class Benchmark {
                   ErrorPrinter.printStackTraces(err, System.err);
                 }
                 synchronized (counter) {
-                  counter[0]+=count;
+                  counter[0] += count;
                 }
               }
             };
@@ -169,14 +169,14 @@ public final class Benchmark {
               return;
             }
           }
-          double seekRate = (double)counter[0]/30L;
+          double seekRate = (double) counter[0] / 30L;
           concurrencySeekRates.add(seekRate);
           System.out.print("    ");
           System.out.print(concurrency);
           System.out.print(": ");
           System.out.print(numberFormat.format(seekRate));
           System.out.print(" seeks/sec");
-          if (concurrencySeekRates.size()>1) {
+          if (concurrencySeekRates.size() > 1) {
             System.out.print(" (");
             System.out.print(numberFormat.format(Collections.min(concurrencySeekRates)));
             System.out.print(", ");
@@ -203,10 +203,10 @@ public final class Benchmark {
       numberFormat.setMinimumFractionDigits(3);
       numberFormat.setMaximumFractionDigits(3);
       int numPasses = Integer.parseInt(args[0]);
-      int numFiles = args.length-1;
+      int numFiles = args.length - 1;
       List<List<List<Double>>> throughputs = new ArrayList<>(numFiles);
       List<List<List<Double>>> seekRates = new ArrayList<>(numFiles);
-      for (int c=0; c<numFiles; c++) {
+      for (int c = 0; c < numFiles; c++) {
         List<List<Double>> fileThroughputs = new ArrayList<>(blockSizes.length);
         for (int d = 0; d < blockSizes.length; d++) {
           fileThroughputs.add(new ArrayList<>(numPasses));
@@ -218,8 +218,8 @@ public final class Benchmark {
         }
         seekRates.add(fileSeekRates);
       }
-      for (int pass=1; pass <= numPasses; pass++) {
-        if (pass>1) {
+      for (int pass = 1; pass <= numPasses; pass++) {
+        if (pass > 1) {
           System.out.println();
         }
         benchmark(pass, args, throughputs, seekRates, numberFormat);

@@ -42,7 +42,7 @@ import java.util.List;
  */
 public abstract class ShellInterpreter implements Runnable {
 
-  private static long lastPID=0;
+  private static long lastPID = 0;
 
   private final long pid;
 
@@ -51,7 +51,7 @@ public abstract class ShellInterpreter implements Runnable {
   protected final TerminalWriter err;
   private final String[] args;
 
-  private boolean isInteractive=false;
+  private boolean isInteractive = false;
 
   /**
    * If running as a separate thread, a handle to the thread
@@ -61,25 +61,25 @@ public abstract class ShellInterpreter implements Runnable {
 
   private ShellInterpreter parent;
 
-  private final List<ShellInterpreter> jobs=new ArrayList<>();
+  private final List<ShellInterpreter> jobs = new ArrayList<>();
 
-  protected String status="Running";
+  protected String status = "Running";
 
   protected ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err) {
     this(in, out, err, EmptyArrays.EMPTY_STRING_ARRAY);
   }
 
   protected ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String ... args) {
-    this.pid=getNextPID();
-    this.in=in;
-    this.out=out;
-    this.err=err;
+    this.pid = getNextPID();
+    this.in = in;
+    this.out = out;
+    this.err = err;
 
     // Process any command line arguments
-    int skipped=0;
+    int skipped = 0;
     for (String arg : args) {
       if ("-i".equals(arg)) {
-        isInteractive=true;
+        isInteractive = true;
         skipped++;
       } else if ("--".equals(arg)) {
         skipped++;
@@ -89,13 +89,13 @@ public abstract class ShellInterpreter implements Runnable {
       }
     }
     if (skipped == 0) {
-      this.args=args;
+      this.args = args;
     } else {
       if (skipped == args.length) {
         this.args = EmptyArrays.EMPTY_STRING_ARRAY;
       } else {
-        this.args = new String[args.length-skipped];
-        System.arraycopy(args, skipped, this.args, 0, args.length-skipped);
+        this.args = new String[args.length - skipped];
+        System.arraycopy(args, skipped, this.args, 0, args.length - skipped);
       }
     }
     out.setEnabled(isInteractive);
@@ -104,18 +104,18 @@ public abstract class ShellInterpreter implements Runnable {
 
   protected ShellInterpreter(Reader in, Writer out, Writer err) {
     this(
-      in,
-      (out instanceof TerminalWriter) ? (TerminalWriter)out : new TerminalWriter(out),
-      (err instanceof TerminalWriter) ? (TerminalWriter)err : new TerminalWriter(err)
+        in,
+        (out instanceof TerminalWriter) ? (TerminalWriter) out : new TerminalWriter(out),
+        (err instanceof TerminalWriter) ? (TerminalWriter) err : new TerminalWriter(err)
     );
   }
 
   protected ShellInterpreter(Reader in, Writer out, Writer err, String[] args) {
     this(
-      in,
-      (out instanceof TerminalWriter) ? (TerminalWriter)out : new TerminalWriter(out),
-      (err instanceof TerminalWriter) ? (TerminalWriter)err : new TerminalWriter(err),
-      args
+        in,
+        (out instanceof TerminalWriter) ? (TerminalWriter) out : new TerminalWriter(out),
+        (err instanceof TerminalWriter) ? (TerminalWriter) err : new TerminalWriter(err),
+        args
     );
   }
 
@@ -152,16 +152,16 @@ public abstract class ShellInterpreter implements Runnable {
   private boolean handleCommandImpl(String[] args) throws IOException, SQLException, Throwable {
     try {
       // Fork to background task
-      if (args.length>0 && "&".equals(args[args.length-1])) {
+      if (args.length > 0 && "&".equals(args[args.length - 1])) {
         String[] newArgs;
         if (args.length == 1) {
           newArgs = EmptyArrays.EMPTY_STRING_ARRAY;
         } else {
-          newArgs = new String[args.length-1];
-          System.arraycopy(args, 0, newArgs, 0, args.length-1);
+          newArgs = new String[args.length - 1];
+          System.arraycopy(args, 0, newArgs, 0, args.length - 1);
         }
-        ShellInterpreter shell=newShellInterpreter(in, out, err, newArgs);
-        shell.parent=this;
+        ShellInterpreter shell = newShellInterpreter(in, out, err, newArgs);
+        shell.parent = this;
         synchronized (jobs) {
           jobs.add(shell);
           if (isInteractive) {
@@ -194,13 +194,13 @@ public abstract class ShellInterpreter implements Runnable {
    * Processes one command and returns.
    */
   private boolean handleCommandImpl(List<String> arguments) throws IOException, SQLException, Throwable {
-    String[] myargs=new String[arguments.size()];
+    String[] myargs = new String[arguments.size()];
     arguments.toArray(myargs);
     return handleCommandImpl(myargs);
   }
 
   protected final boolean isAlive() {
-    Thread t=this.thread;
+    Thread t = this.thread;
     return t != null && t.isAlive();
   }
 
@@ -211,10 +211,10 @@ public abstract class ShellInterpreter implements Runnable {
   public final void jobs(String[] args) {
     // Print all jobs
     synchronized (jobs) {
-      for (int c=0;c<jobs.size();c++) {
-        ShellInterpreter job=jobs.get(c);
+      for (int c = 0; c < jobs.size(); c++) {
+        ShellInterpreter job = jobs.get(c);
         if (job != null) {
-          printJobLine(c+1, job);
+          printJobLine(c + 1, job);
         }
       }
     }
@@ -225,18 +225,18 @@ public abstract class ShellInterpreter implements Runnable {
 
   private void printFinishedJobs() {
     synchronized (jobs) {
-      boolean changed=false;
-      for (int c=0;c<jobs.size();c++) {
-        ShellInterpreter shell=jobs.get(c);
+      boolean changed = false;
+      for (int c = 0; c < jobs.size(); c++) {
+        ShellInterpreter shell = jobs.get(c);
         if (shell != null) {
           if (!shell.isAlive()) {
-            shell.parent=null;
+            shell.parent = null;
             if (isInteractive) {
-              printJobLine(c+1, shell);
+              printJobLine(c + 1, shell);
               out.flush();
             }
             jobs.set(c, null);
-            changed=true;
+            changed = true;
           }
         }
       }
@@ -251,17 +251,17 @@ public abstract class ShellInterpreter implements Runnable {
 
   private void printJobLine(int jobnum, ShellInterpreter shell) {
     out.print('[');
-    String num=String.valueOf(jobnum);
+    String num = String.valueOf(jobnum);
     out.print(num);
     out.print("] ");
-    String mystatus=shell.status;
+    String mystatus = shell.status;
     out.print(mystatus);
-    int blanks=Math.max(1, 25-num.length()-mystatus.length());
+    int blanks = Math.max(1, 25 - num.length() - mystatus.length());
     for (int c = 0; c < blanks; c++) {
       out.print(' ');
     }
-    for (int c=0;c<shell.args.length;c++) {
-      if (c>0) {
+    for (int c = 0; c < shell.args.length; c++) {
+      if (c > 0) {
         out.print(' ');
       }
       out.print(shell.args[c]);
@@ -276,19 +276,19 @@ public abstract class ShellInterpreter implements Runnable {
   @Override
   public final void run() {
     try {
-      if (args.length>0) {
+      if (args.length > 0) {
         handleCommand(args);
       } else {
         runImpl();
       }
-      status="Done";
+      status = "Done";
     } catch (IOException exception) {
-      this.err.println(getName()+": "+exception.getMessage());
-      status="IO Error: "+exception.getMessage();
+      this.err.println(getName() + ": " + exception.getMessage());
+      status = "IO Error: " + exception.getMessage();
       this.err.flush();
     } catch (SQLException exception) {
-      this.err.println(getName()+": "+exception.getMessage());
-      status="SQL Error: "+exception.getMessage();
+      this.err.println(getName() + ": " + exception.getMessage());
+      status = "SQL Error: " + exception.getMessage();
       this.err.flush();
     } catch (ThreadDeath td) {
       throw td;
@@ -298,7 +298,7 @@ public abstract class ShellInterpreter implements Runnable {
       this.err.flush();
     } finally {
       if (Thread.currentThread() == thread) {
-        thread=null;
+        thread = null;
       }
     }
   }
@@ -308,16 +308,16 @@ public abstract class ShellInterpreter implements Runnable {
    * reads from <code>in</code> until end of file or <code>exit</code>.
    */
   private void runImpl() throws IOException, SQLException, Throwable {
-    if (args != null && args.length>0) {
+    if (args != null && args.length > 0) {
       handleCommandImpl(args);
     } else {
       // The arguments that have been read so far
-      List<String> arguments=new ArrayList<>();
+      List<String> arguments = new ArrayList<>();
 
       // The argument that is being read.
-      StringBuilder argument=new StringBuilder();
-      boolean hasArgument=false;
-      int quoteChar=-1;
+      StringBuilder argument = new StringBuilder();
+      boolean hasArgument = false;
+      int quoteChar = -1;
 
       if (isInteractive) {
         out.print(getPrompt());
@@ -325,18 +325,18 @@ public abstract class ShellInterpreter implements Runnable {
       }
       // Read until end of file or exit command
       int ch;
-      while ((ch=in.read()) != -1) {
+      while ((ch = in.read()) != -1) {
         // Skip windows '\r'
         if (ch != '\r') {
           if (ch == '\\') {
             // Process escapes
-            ch=in.read();
+            ch = in.read();
             if (ch == -1) {
               throw new EOFException("unexpected EOF processing escape: \\");
             }
             if (ch == '\r') {
               // Skip windows '\r'
-              ch=in.read();
+              ch = in.read();
               if (ch == -1) {
                 throw new EOFException("unexpected EOF processing escape: \\");
               }
@@ -350,20 +350,20 @@ public abstract class ShellInterpreter implements Runnable {
             } else {
               // skip the escape only when followed by ' when using single quotes
               if (quoteChar == '\'' && ch != '\'') {
-                argument.append('\\').append((char)ch);
-                hasArgument=true;
+                argument.append('\\').append((char) ch);
+                hasArgument = true;
               } else {
                 // use the second character for anything left
-                argument.append((char)ch);
-                hasArgument=true;
+                argument.append((char) ch);
+                hasArgument = true;
               }
             }
           } else if (quoteChar == '\'') {
             // Handle reading single quote
             if (ch == '\'') {
-              quoteChar=-1;
+              quoteChar = -1;
             } else {
-              argument.append((char)ch);
+              argument.append((char) ch);
               if (isInteractive && ch == '\n') {
                 out.print("'> ");
                 out.flush();
@@ -372,9 +372,9 @@ public abstract class ShellInterpreter implements Runnable {
           } else if (quoteChar == '"') {
             // Handle reading double quote
             if (ch == '"') {
-              quoteChar=-1;
+              quoteChar = -1;
             } else {
-              argument.append((char)ch);
+              argument.append((char) ch);
               if (isInteractive && ch == '\n') {
                 out.print("\"> ");
                 out.flush();
@@ -387,13 +387,13 @@ public abstract class ShellInterpreter implements Runnable {
               if (hasArgument) {
                 arguments.add(argument.toString());
                 argument.setLength(0);
-                hasArgument=false;
+                hasArgument = false;
               }
               if (isInteractive) {
                 printFinishedJobs();
               }
-              if (arguments.size()>0) {
-                boolean doMore=handleCommandImpl(arguments);
+              if (arguments.size() > 0) {
+                boolean doMore = handleCommandImpl(arguments);
                 arguments.clear();
                 if (!doMore) {
                   break;
@@ -408,23 +408,23 @@ public abstract class ShellInterpreter implements Runnable {
               if (hasArgument) {
                 arguments.add(argument.toString());
                 argument.setLength(0);
-                hasArgument=false;
+                hasArgument = false;
               }
             } else if (ch == '\'' || ch == '"') {
               // Beginning quote
-              quoteChar=ch;
-              hasArgument=true;
+              quoteChar = ch;
+              hasArgument = true;
             } else {
               // Everything else is part of the argument are begins the next argument
-              argument.append((char)ch);
-              hasArgument=true;
+              argument.append((char) ch);
+              hasArgument = true;
             }
           }
         }
       }
       // If currently parsing quote, throw error
       if (quoteChar != -1) {
-        throw new EOFException("unexpected EOF when processing quote: "+quoteChar);
+        throw new EOFException("unexpected EOF when processing quote: " + quoteChar);
       }
 
       // If commands have been parsed and not executed, run them now
@@ -437,14 +437,14 @@ public abstract class ShellInterpreter implements Runnable {
         arguments.clear();
       }
       if (status == null || "Running".equals(status)) {
-        status="Done";
+        status = "Done";
       }
     }
     // Make the parent of all children the parent of this, and add children to the parents processes
-    ShellInterpreter myparent=this.parent;
+    ShellInterpreter myparent = this.parent;
     synchronized (jobs) {
       for (ShellInterpreter shell : jobs) {
-        shell.parent=myparent;
+        shell.parent = myparent;
         if (myparent != null) {
           myparent.jobs.add(shell); // Should this synchronize myparent.jobs, too?
         }
@@ -458,7 +458,7 @@ public abstract class ShellInterpreter implements Runnable {
       if (thread != null) {
         throw new IllegalThreadStateException("Already started");
       }
-      (thread=new Thread(this, getClass().getName()+"?pid="+pid+(args.length>0?"&command="+args[0]:""))).start();
+      (thread = new Thread(this, getClass().getName() + "?pid=" + pid + (args.length > 0 ? "&command=" + args[0] : ""))).start();
     }
   }
 }

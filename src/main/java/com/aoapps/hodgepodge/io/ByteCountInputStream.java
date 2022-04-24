@@ -46,7 +46,7 @@ public class ByteCountInputStream extends FilterInputStream implements NoClose {
 
   @Override
   public boolean isNoClose() {
-    return (in instanceof NoClose) && ((NoClose)in).isNoClose();
+    return (in instanceof NoClose) && ((NoClose) in).isNoClose();
   }
 
   @Override

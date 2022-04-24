@@ -50,13 +50,13 @@ public class BandwidthLimitingTunnel implements Runnable {
 
   @SuppressWarnings("CallToThreadStartDuringObjectConstruction")
   public BandwidthLimitingTunnel(
-    boolean verbose,
-    String listen_address,
-    int listen_port,
-    String connect_address,
-    int connect_port,
-    Long upstream_bandwidth,
-    Long downstream_bandwidth
+      boolean verbose,
+      String listen_address,
+      int listen_port,
+      String connect_address,
+      int connect_port,
+      Long upstream_bandwidth,
+      Long downstream_bandwidth
   ) {
     this.verbose = verbose;
     this.listen_address = listen_address;
@@ -90,10 +90,10 @@ public class BandwidthLimitingTunnel implements Runnable {
       } else {
         verbose = false;
       }
-      String listen_address=args[pos++];
-      int listen_port=Integer.parseInt(args[pos++]);
-      String connect_address=args[pos++];
-      int connect_port=Integer.parseInt(args[pos++]);
+      String listen_address = args[pos++];
+      int listen_port = Integer.parseInt(args[pos++]);
+      String connect_address = args[pos++];
+      int connect_port = Integer.parseInt(args[pos++]);
       String s = args[pos++];
       Long upstream_bandwidth = s.length() == 0 ? null : Long.parseLong(s);
       s = args[pos++];
@@ -106,7 +106,7 @@ public class BandwidthLimitingTunnel implements Runnable {
   }
 
   private static void printUsage() {
-    System.err.println("usage: "+BandwidthLimitingTunnel.class.getName()+" [-v] {listen_address|*} <listen_port> {connect_address} {connect_port} {upstream_bandwidth|\"\"} {downstream_bandwidth|\"\"}");
+    System.err.println("usage: " + BandwidthLimitingTunnel.class.getName() + " [-v] {listen_address|*} <listen_port> {connect_address} {connect_port} {upstream_bandwidth|\"\"} {downstream_bandwidth|\"\"}");
     System.err.println("        -v                   - switch to display status of each connection on standard output");
     System.err.println("        listen_address       - the hostname or IP address to listen to or * to listen on all local IP addresses");
     System.err.println("        listen_port          - the port to listen to");
@@ -125,9 +125,9 @@ public class BandwidthLimitingTunnel implements Runnable {
           System.out.println("Accepting connections on " + listen_address + ":" + listen_port);
         }
         try (ServerSocket serverSocket = new ServerSocket(
-          listen_port,
-          50,
-          listen_address.equals("*") ? null : InetAddress.getByName(listen_address)
+            listen_port,
+            50,
+            listen_address.equals("*") ? null : InetAddress.getByName(listen_address)
         )) {
           while (!Thread.currentThread().isInterrupted()) {
             Socket socket = serverSocket.accept();

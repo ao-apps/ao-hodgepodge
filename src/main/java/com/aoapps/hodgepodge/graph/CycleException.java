@@ -51,10 +51,10 @@ public class CycleException extends GraphException {
    */
   CycleException(List<?> vertices) {
     super(getMessage(vertices));
-    if (vertices.size()<2) {
+    if (vertices.size() < 2) {
       throw new IllegalArgumentException("Cycle must have at least two vertices (could be the same vertex)");
     }
-    if (!vertices.get(0).equals(vertices.get(vertices.size()-1))) {
+    if (!vertices.get(0).equals(vertices.get(vertices.size() - 1))) {
       throw new IllegalArgumentException("Cycle must start and end on the same vertex");
     }
     this.vertices = vertices;

@@ -33,11 +33,11 @@ public class Edge<V> {
 
   public Edge(V from, V to) {
     if (from == null) {
-      throw new IllegalArgumentException("from is null, to="+to);
+      throw new IllegalArgumentException("from is null, to=" + to);
     }
     this.from = from;
     if (to == null) {
-      throw new IllegalArgumentException("to is null, from="+from);
+      throw new IllegalArgumentException("to is null, from=" + from);
     }
     this.to = to;
   }
@@ -58,7 +58,7 @@ public class Edge<V> {
 
   @Override
   public String toString() {
-    return from+" -> "+to;
+    return from + " -> " + to;
   }
 
   /**
@@ -69,10 +69,10 @@ public class Edge<V> {
     if (!(obj instanceof Edge<?>)) {
       return false;
     }
-    Edge<?> other = (Edge<?>)obj;
+    Edge<?> other = (Edge<?>) obj;
     return
-      from.equals(other.from)
-      && to.equals(other.to)
+        from.equals(other.from)
+            && to.equals(other.to)
     ;
   }
 

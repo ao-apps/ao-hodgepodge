@@ -90,7 +90,7 @@ public class MD5InputStream extends FilterInputStream {
    * Creates a MD5InputStream
    * @param in The input stream
    */
-  public MD5InputStream (InputStream in) {
+  public MD5InputStream(InputStream in) {
     super(in);
 
     md5 = new MD5();
@@ -116,7 +116,7 @@ public class MD5InputStream extends FilterInputStream {
    * Reads into an array of bytes.
    */
   @Override
-  public int read (byte[] bytes, int offset, int length) throws IOException {
+  public int read(byte[] bytes, int offset, int length) throws IOException {
     int r;
 
     if ((r = in.read(bytes, offset, length)) == -1) {
@@ -133,7 +133,7 @@ public class MD5InputStream extends FilterInputStream {
    * finalized for the current state.
    * @see MD5#Final()
    */
-  public byte [] hash () {
+  public byte [] hash() {
     return md5.Final();
   }
 }

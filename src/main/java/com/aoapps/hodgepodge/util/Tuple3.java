@@ -38,9 +38,9 @@ public class Tuple3<E1, E2, E3> {
   private final E3 element3;
 
   public Tuple3(
-    E1 element1,
-    E2 element2,
-    E3 element3
+      E1 element1,
+      E2 element2,
+      E3 element3
   ) {
     this.element1 = element1;
     this.element2 = element2;
@@ -50,11 +50,11 @@ public class Tuple3<E1, E2, E3> {
   @Override
   public String toString() {
     return
-      "("
-      + element1
-      + ',' + element2
-      + ',' + element3
-    + ')';
+        "("
+            + element1
+            + ',' + element2
+            + ',' + element3
+            + ')';
   }
 
   @Override
@@ -65,15 +65,16 @@ public class Tuple3<E1, E2, E3> {
     if (!(obj instanceof Tuple3<?, ?, ?>)) {
       return false;
     }
-    Tuple3<?, ?, ?> other = (Tuple3<?, ?, ?>)obj;
+    Tuple3<?, ?, ?> other = (Tuple3<?, ?, ?>) obj;
     return
-      Objects.equals(element1, other.element1)
-      && Objects.equals(element2, other.element2)
-      && Objects.equals(element3, other.element3)
+        Objects.equals(element1, other.element1)
+            && Objects.equals(element2, other.element2)
+            && Objects.equals(element3, other.element3)
     ;
   }
 
   private int hash;
+
   @Override
   public int hashCode() {
     int h = this.hash;

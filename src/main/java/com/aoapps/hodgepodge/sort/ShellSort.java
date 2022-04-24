@@ -70,45 +70,31 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
       stats.sortStarting();
     }
 
-    int h=1;
+    int h = 1;
 
-    int length=list.size();
-    /*
-     * find the largest h value possible
-     */
-    while ((h*3+1) < length) {
-      h=3*h+1;
+    int length = list.size();
+    // find the largest h value possible
+    while ((h * 3 + 1) < length) {
+      h = 3 * h + 1;
     }
 
-    /*
-     * while h remains larger than 0
-     */
-    while ( h > 0 ) {
-      /*
-       * for each set of elements (there are h sets)
-       */
+    // while h remains larger than 0
+    while (h > 0) {
+      // for each set of elements (there are h sets)
       for (int i = h - 1; i < length; i++) {
-        /*
-         * pick the last element in the set
-         */
+        // pick the last element in the set
         T b = get(list, i, stats);
         int j;// = i;
-        /*
-         * compare the element at B to the one before it in the set
-         * if they are out of order continue this loop, moving
-         * elements "back" to make room for B to be inserted.
-         */
-        for ( j = i; (j >= h) && compare(get(list, j-h, stats), b, comparator, stats)>0; j -= h) {
-          set(list, j, get(list, j-h, stats), stats);
+        // compare the element at B to the one before it in the set
+        // if they are out of order continue this loop, moving
+        // elements "back" to make room for B to be inserted.
+        for (j = i; (j >= h) && compare(get(list, j - h, stats), b, comparator, stats) > 0; j -= h) {
+          set(list, j, get(list, j - h, stats), stats);
         }
-        /*
-         *  insert B into the correct place
-         */
+        // insert B into the correct place
         set(list, j, b, stats);
       }
-      /*
-       * all sets h-sorted, now decrease set size
-       */
+      // all sets h-sorted, now decrease set size
       h /= 3;
     }
 
@@ -123,45 +109,31 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
       stats.sortStarting();
     }
 
-    int h=1;
+    int h = 1;
 
-    int length=array.length;
-    /*
-     * find the largest h value possible
-     */
-    while ((h*3+1) < length) {
-      h=3*h+1;
+    int length = array.length;
+    // find the largest h value possible
+    while ((h * 3 + 1) < length) {
+      h = 3 * h + 1;
     }
 
-    /*
-     * while h remains larger than 0
-     */
-    while ( h > 0 ) {
-      /*
-       * for each set of elements (there are h sets)
-       */
+    // while h remains larger than 0
+    while (h > 0) {
+      // for each set of elements (there are h sets)
       for (int i = h - 1; i < length; i++) {
-        /*
-         * pick the last element in the set
-         */
+        // pick the last element in the set
         T b = get(array, i, stats);
         int j;// = i;
-        /*
-         * compare the element at B to the one before it in the set
-         * if they are out of order continue this loop, moving
-         * elements "back" to make room for B to be inserted.
-         */
-        for ( j = i; (j >= h) && compare(get(array, j-h, stats), b, comparator, stats)>0; j -= h) {
-          set(array, j, get(array, j-h, stats), stats);
+        // compare the element at B to the one before it in the set
+        // if they are out of order continue this loop, moving
+        // elements "back" to make room for B to be inserted.
+        for (j = i; (j >= h) && compare(get(array, j - h, stats), b, comparator, stats) > 0; j -= h) {
+          set(array, j, get(array, j - h, stats), stats);
         }
-        /*
-         *  insert B into the correct place
-         */
+        // insert B into the correct place
         set(array, j, b, stats);
       }
-      /*
-       * all sets h-sorted, now decrease set size
-       */
+      // all sets h-sorted, now decrease set size
       h /= 3;
     }
 

@@ -78,7 +78,7 @@ abstract class BaseIntegerSortAlgorithm extends BaseSortAlgorithm<Number> implem
     if (stats != null) {
       stats.sortSetting();
     }
-    array[i]=value;
+    array[i] = value;
   }
 
   protected static void swap(IntList list, int i, int j, SortStatistics stats) {
@@ -87,7 +87,7 @@ abstract class BaseIntegerSortAlgorithm extends BaseSortAlgorithm<Number> implem
     }
 
     if (list instanceof FileList<?>) {
-      ((FileList<?>)list).swap(i, j);
+      ((FileList<?>) list).swap(i, j);
     } else {
       assert list != null;
       int t = list.getInt(i);

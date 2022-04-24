@@ -128,8 +128,8 @@ public final class LoggingProxy {
     public void run() {
       try {
         try {
-          log(logFile, connectionId, ':', "Connection accepted from " + socketIn.getRemoteSocketAddress()+":"+socketIn.getPort());
-          log(logFile, connectionId, ':', "Connecting to " + connectAddress+":"+connectPort);
+          log(logFile, connectionId, ':', "Connection accepted from " + socketIn.getRemoteSocketAddress() + ":" + socketIn.getPort());
+          log(logFile, connectionId, ':', "Connecting to " + connectAddress + ":" + connectPort);
           try (Socket socketOut = new Socket(connectAddress, connectPort)) {
             ReadLogWriteThread inThread = new ReadLogWriteThread(socketIn.getInputStream(), socketOut.getOutputStream(), connectionId, '<', logFile);
             try {

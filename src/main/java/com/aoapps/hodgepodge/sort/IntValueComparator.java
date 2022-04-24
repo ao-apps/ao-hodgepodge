@@ -46,10 +46,10 @@ public final class IntValueComparator implements Comparator<Number> {
   public int compare(Number o1, Number o2) {
     int i1 = o1.intValue();
     int i2 = o2.intValue();
-    if (i1<i2) {
+    if (i1 < i2) {
       return -1;
     }
-    if (i1>i2) {
+    if (i1 > i2) {
       return 1;
     }
     return 0;

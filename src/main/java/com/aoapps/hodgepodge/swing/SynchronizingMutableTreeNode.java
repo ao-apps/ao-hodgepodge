@@ -86,7 +86,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
     if (children == null) {
       // No children allowed
       while (getChildCount() > 0) {
-        treeModel.removeNodeFromParent((MutableTreeNode)getChildAt(getChildCount()-1));
+        treeModel.removeNodeFromParent((MutableTreeNode) getChildAt(getChildCount() - 1));
       }
       if (getAllowsChildren()) {
         setAllowsChildren(false);
@@ -101,7 +101,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
 
       // Update the children minimally
       int size = children.size();
-      for (int index=0; index<size; index++) {
+      for (int index = 0; index < size; index++) {
         Node<E> child = children.get(index);
         E value = child.getValue();
         SynchronizingMutableTreeNode<E> synchronizingNode;
@@ -109,21 +109,21 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
           synchronizingNode = new SynchronizingMutableTreeNode<>(value);
           treeModel.insertNodeInto(synchronizingNode, this, index);
         } else {
-          synchronizingNode = (SynchronizingMutableTreeNode<E>)getChildAt(index);
+          synchronizingNode = (SynchronizingMutableTreeNode<E>) getChildAt(index);
           if (!synchronizingNode.getUserObject().equals(value)) {
             // Objects don't match
             // If this object is found further down the list, then delete up to that object
             int foundIndex = -1;
-            for (int searchIndex = index+1, count=getChildCount(); searchIndex<count; searchIndex++) {
-              synchronizingNode = (SynchronizingMutableTreeNode<E>)getChildAt(searchIndex);
+            for (int searchIndex = index + 1, count = getChildCount(); searchIndex < count; searchIndex++) {
+              synchronizingNode = (SynchronizingMutableTreeNode<E>) getChildAt(searchIndex);
               if (synchronizingNode.getUserObject().equals(value)) {
                 foundIndex = searchIndex;
                 break;
               }
             }
             if (foundIndex != -1) {
-              for (int removeIndex=foundIndex-1; removeIndex >= index; removeIndex--) {
-                treeModel.removeNodeFromParent((MutableTreeNode)getChildAt(removeIndex));
+              for (int removeIndex = foundIndex - 1; removeIndex >= index; removeIndex--) {
+                treeModel.removeNodeFromParent((MutableTreeNode) getChildAt(removeIndex));
               }
               // synchronizingNode already contains the right node
             } else {
@@ -138,7 +138,7 @@ public class SynchronizingMutableTreeNode<E> extends DefaultMutableTreeNode {
       }
       // Remove any extra children
       while (getChildCount() > size) {
-        treeModel.removeNodeFromParent((MutableTreeNode)getChildAt(getChildCount()-1));
+        treeModel.removeNodeFromParent((MutableTreeNode) getChildAt(getChildCount() - 1));
       }
     }
   }
