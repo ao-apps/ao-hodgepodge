@@ -52,3 +52,6 @@ ef3fc3f4f004192f63c6490b8f9a5289e64d9f3a
 
 # Moving to head
 4e992b24938d76c390a08a65f34020f30c88ec43
+
+# Performed automatic source code clean-up with rewrite-maven-plugin
+8486b560998b86b382c2aa0ad409c0e4a80a26ee
