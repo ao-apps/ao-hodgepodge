@@ -122,11 +122,11 @@ public final class ParallelDelete {
       boolean dryRun = false;
       boolean optionsEnded = false;
       for (String arg : args) {
-        if (!optionsEnded && arg.equals("-v")) {
+        if (!optionsEnded && "-v".equals(arg)) {
           verboseOutput = System.err;
-        } else if (!optionsEnded && arg.equals("-n")) {
+        } else if (!optionsEnded && "-n".equals(arg)) {
           dryRun = true;
-        } else if (!optionsEnded && arg.equals("--")) {
+        } else if (!optionsEnded && "--".equals(arg)) {
           optionsEnded = true;
         } else {
           directories.add(new File(arg));
@@ -157,7 +157,7 @@ public final class ParallelDelete {
     // The set of next files is kept in key order so that it can scale with O(n*log(n)) for larger numbers of directories
     // as opposed to O(n^2) for a list.  This is similar to the fix for AWStats logresolvemerge provided by Dan Armstrong
     // a couple of years ago.
-    final Map<String, List<FilesystemIterator>> nextFiles = new TreeMap<>((S1, S2) -> {
+    final Map<String, List<FilesystemIterator>> nextFiles = new TreeMap<>((String S1, String S2) -> {
       // Make sure directories are sorted after their directory contents
       int diff = S1.compareTo(S2);
       if (diff == 0) {

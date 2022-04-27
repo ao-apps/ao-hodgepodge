@@ -42,7 +42,7 @@ import java.util.List;
  */
 public abstract class ShellInterpreter implements Runnable {
 
-  private static long lastPID = 0;
+  private static long lastPID;
 
   private final long pid;
 
@@ -51,7 +51,7 @@ public abstract class ShellInterpreter implements Runnable {
   protected final TerminalWriter err;
   private final String[] args;
 
-  private boolean isInteractive = false;
+  private boolean isInteractive;
 
   /**
    * If running as a separate thread, a handle to the thread

@@ -41,8 +41,8 @@ public class FifoFileInputStream extends InputStream {
     // Empty lock class to help heap profile
   }
   private final StatsLock statsLock = new StatsLock();
-  private long fifoReadCount = 0;
-  private long fifoReadBytes = 0;
+  private long fifoReadCount;
+  private long fifoReadBytes;
 
   FifoFileInputStream(FifoFile file) {
     this.file = file;

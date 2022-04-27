@@ -65,7 +65,9 @@ public final class LogManagerUtil {
   private static final int WARN_INTERVAL = 10000;
 
   private static class WarnLock {
-    // Empty lock class to help heap profile
+    private WarnLock() {
+      // Empty lock class to help heap profile
+    }
   }
   private static final WarnLock warnLock = new WarnLock();
 

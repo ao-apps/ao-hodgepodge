@@ -80,7 +80,7 @@ public class BandwidthLimitingTunnel implements Runnable {
       int pos = 0;
       boolean verbose;
       if (args.length == 7) {
-        if (args[pos++].equals("-v")) {
+        if ("-v".equals(args[pos++])) {
           verbose = true;
         } else {
           printUsage();
@@ -127,7 +127,7 @@ public class BandwidthLimitingTunnel implements Runnable {
         try (ServerSocket serverSocket = new ServerSocket(
             listen_port,
             50,
-            listen_address.equals("*") ? null : InetAddress.getByName(listen_address)
+            "*".equals(listen_address) ? null : InetAddress.getByName(listen_address)
         )) {
           while (!Thread.currentThread().isInterrupted()) {
             Socket socket = serverSocket.accept();

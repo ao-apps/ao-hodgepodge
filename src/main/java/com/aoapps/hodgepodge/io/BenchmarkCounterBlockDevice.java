@@ -47,7 +47,7 @@ public class BenchmarkCounterBlockDevice {
             long startTime = System.currentTimeMillis();
             try (RandomAccessFile raf = new RandomAccessFile(filename, "r")) {
               long length = raf.length();
-              for (long pos = 1; pos < length; pos += (1024 * 4096 + 4096)) {
+              for (long pos = 1; pos < length; pos += 1024 * 4096 + 4096) {
                 raf.seek(pos);
                 raf.readFully(buff, 0, BufferManager.BUFFER_SIZE);
               }

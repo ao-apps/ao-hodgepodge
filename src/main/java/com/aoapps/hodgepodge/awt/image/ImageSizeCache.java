@@ -48,6 +48,9 @@ public final class ImageSizeCache {
     long lastModified;
     long length;
     Dimension size;
+
+    private CacheEntry() {
+    }
   }
 
   private static final Map<String, CacheEntry> sizeCache = new HashMap<>();

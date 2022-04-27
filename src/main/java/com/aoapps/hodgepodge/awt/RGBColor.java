@@ -134,7 +134,7 @@ public final class RGBColor {
       } else {
         throw new IllegalArgumentException("Invalid character in name: " + ch);
       }
-      color |= (value << ((5 - i) << 2));
+      color |= value << ((5 - i) << 2);
     }
 
     return color;

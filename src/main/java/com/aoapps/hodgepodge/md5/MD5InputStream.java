@@ -133,7 +133,7 @@ public class MD5InputStream extends FilterInputStream {
    * finalized for the current state.
    * @see MD5#Final()
    */
-  public byte [] hash() {
+  public byte[] hash() {
     return md5.Final();
   }
 }

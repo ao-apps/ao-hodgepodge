@@ -52,6 +52,9 @@ public final class Trees {
   }
 
   private static class EmptyTree implements Tree<Object> {
+    private EmptyTree() {
+    }
+
     @Override
     public List<Node<Object>> getRootNodes() {
       return Collections.emptyList();

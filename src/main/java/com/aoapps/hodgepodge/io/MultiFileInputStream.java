@@ -37,8 +37,8 @@ import java.io.InputStream;
 public class MultiFileInputStream extends InputStream {
 
   private final File[] files;
-  private int nextFile = 0;
-  private FileInputStream in = null;
+  private int nextFile;
+  private FileInputStream in;
 
   public MultiFileInputStream(File[] files) {
     this.files = files;

@@ -102,7 +102,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
   private Stack<String> currentDirectories;
   private Stack<String[]> currentLists;
   private Stack<Integer> currentIndexes;
-  private boolean filesDone = false;
+  private boolean filesDone;
 
   /**
    * Gets the next file from the iterator or <code>null</code> if the iterator has completed the iteration of the file system.
@@ -438,7 +438,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
     @Override
     public boolean hasNext() {
-      return (next != null);
+      return next != null;
     }
 
     @Override

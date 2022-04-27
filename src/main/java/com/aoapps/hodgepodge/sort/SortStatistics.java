@@ -74,7 +74,7 @@ public final class SortStatistics {
     if (startTime == -1) {
       throw new RuntimeException("sortStarting not yet called");
     }
-    totalTime += (System.currentTimeMillis() - startTime);
+    totalTime += System.currentTimeMillis() - startTime;
     startTime = -1;
   }
 

@@ -197,7 +197,7 @@ public class MultiBorderLayout extends BorderLayout {
       }
       // Reshape the South Components
       if (southComponents != null) {
-        for (int c = (southComponents.size() - 1); c >= 0; c--) {
+        for (int c = southComponents.size() - 1; c >= 0; c--) {
           Component component = southComponents.get(c);
           if (component.isVisible()) {
             d = component.getSize();
@@ -224,7 +224,7 @@ public class MultiBorderLayout extends BorderLayout {
       }
       // Reshape the East Components
       if (eastComponents != null) {
-        for (int c = (eastComponents.size() - 1); c >= 0; c--) {
+        for (int c = eastComponents.size() - 1; c >= 0; c--) {
           Component component = eastComponents.get(c);
           if (component.isVisible()) {
             d = component.getSize();

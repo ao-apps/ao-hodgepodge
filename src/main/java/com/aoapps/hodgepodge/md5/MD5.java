@@ -195,10 +195,10 @@ public class MD5 {
     out = new int[16];
 
     for (i = j = 0; j < len; i++, j += 4) {
-      out[i] = (buffer[j + shift] & 0xff) |
-          ((buffer[j + 1 + shift] & 0xff) << 8) |
-          ((buffer[j + 2 + shift] & 0xff) << 16) |
-          ((buffer[j + 3 + shift] & 0xff) << 24);
+      out[i] = (buffer[j + shift] & 0xff)
+          | ((buffer[j + 1 + shift] & 0xff) << 8)
+          | ((buffer[j + 2 + shift] & 0xff) << 16)
+          | ((buffer[j + 3 + shift] & 0xff) << 24);
     }
 
     return out;
@@ -315,7 +315,7 @@ public class MD5 {
     // compute number of bytes mod 64
     index = (stat.count[0] >>> 3) & 0x3f;
 
-    if ((stat.count[0] += (length << 3)) < (length << 3)) {
+    if ((stat.count[0] += length << 3) < (length << 3)) {
       stat.count[1]++;
     }
 

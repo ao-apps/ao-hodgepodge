@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  */
 public final class ImageLoader implements ImageConsumer {
 
-  private int status = 0;
+  private int status;
 
   private final Image image;
 

@@ -55,7 +55,7 @@ public class SkipCommentsFilterOutputStream extends FilterOutputStream implement
   }
 
   private boolean lastCharNewline = true;
-  private boolean isCommentLine = false;
+  private boolean isCommentLine;
 
   @Override
   public void write(int ch) throws IOException {

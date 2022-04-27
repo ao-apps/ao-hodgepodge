@@ -85,7 +85,7 @@ public abstract class Recurring {
     if ("weekdays".equalsIgnoreCase(recurring)) {
       return WEEKDAYS;
     }
-    if (recurring.length() >= 3 && recurring.substring(0, 3).equalsIgnoreCase("on ")) {
+    if (recurring.length() >= 3 && "on ".equalsIgnoreCase(recurring.substring(0, 3))) {
       EnumSet<DayOfWeek> daysOfWeek = EnumSet.noneOf(DayOfWeek.class);
       for (String dayStr : Strings.splitCommaSpace(recurring.substring(3))) {
         boolean found = false;
@@ -108,7 +108,7 @@ public abstract class Recurring {
       }
       return new DayOfWeekList(daysOfWeek);
     }
-    if (recurring.length() >= 3 && recurring.substring(0, 3).equalsIgnoreCase("in ")) {
+    if (recurring.length() >= 3 && "in ".equalsIgnoreCase(recurring.substring(0, 3))) {
       EnumSet<Month> months = EnumSet.noneOf(Month.class);
       for (String monthStr : Strings.splitCommaSpace(recurring.substring(3))) {
         boolean found = false;
@@ -140,7 +140,7 @@ public abstract class Recurring {
     if ("yearly".equalsIgnoreCase(recurring)) {
       return YEARLY;
     }
-    if (recurring.length() >= 6 && recurring.substring(0, 6).equalsIgnoreCase("every ")) {
+    if (recurring.length() >= 6 && "every ".equalsIgnoreCase(recurring.substring(0, 6))) {
       int spacePos = recurring.indexOf(' ', 6);
       if (spacePos == -1) {
         throw new IllegalArgumentException("Second space not found in \"every ### {days|weeks|months|years}\": " + recurring);

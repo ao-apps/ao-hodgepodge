@@ -40,8 +40,8 @@ public class FifoFileOutputStream extends OutputStream {
     // Empty lock class to help heap profile
   }
   private final StatsLock statsLock = new StatsLock();
-  private long fifoWriteCount = 0;
-  private long fifoWriteBytes = 0;
+  private long fifoWriteCount;
+  private long fifoWriteBytes;
 
   FifoFileOutputStream(FifoFile file) {
     this.file = file;

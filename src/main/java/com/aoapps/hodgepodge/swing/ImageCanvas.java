@@ -44,7 +44,7 @@ public class ImageCanvas extends JComponent {
   final Window window;
 
   private long nextupdate;
-  private boolean resized = false;
+  private boolean resized;
 
   public ImageCanvas(Image image) {
     this.image = image;

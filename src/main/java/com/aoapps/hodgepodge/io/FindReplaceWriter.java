@@ -48,7 +48,7 @@ public class FindReplaceWriter extends Writer {
   /**
    * The number of characters in find currently matched.
    */
-  private int findMatched = 0;
+  private int findMatched;
 
   /**
    * @see  #FindReplaceWriter(java.io.Writer, char[], char[])

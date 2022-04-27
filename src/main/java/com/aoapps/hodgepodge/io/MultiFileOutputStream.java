@@ -46,8 +46,8 @@ public class MultiFileOutputStream extends OutputStream {
   private final long fileSize;
 
   private final List<File> files = new ArrayList<>();
-  private FileOutputStream out = null;
-  private long bytesOut = 0;
+  private FileOutputStream out;
+  private long bytesOut;
 
   public MultiFileOutputStream(File parent, String prefix, String suffix) {
     this(parent, prefix, suffix, DEFAULT_FILE_SIZE);

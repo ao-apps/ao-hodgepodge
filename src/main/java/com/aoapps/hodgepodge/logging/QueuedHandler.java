@@ -52,7 +52,7 @@ public abstract class QueuedHandler extends Handler {
    * Creates a new executor.  Must be {@linkplain #shutdownExecutor(java.util.concurrent.ExecutorService) shutdown} when no longer needed.
    */
   protected static ExecutorService newExecutor(String executorThreadName) {
-    return Executors.newSingleThreadExecutor(r -> {
+    return Executors.newSingleThreadExecutor((Runnable r) -> {
       Thread thread = new Thread(r);
       thread.setName(executorThreadName);
       thread.setDaemon(true);

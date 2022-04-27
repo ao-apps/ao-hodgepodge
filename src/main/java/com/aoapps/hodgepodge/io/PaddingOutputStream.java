@@ -48,7 +48,7 @@ public class PaddingOutputStream extends FilterOutputStream {
   private final Random random;
   private final byte padding;
 
-  private long byteCount = 0;
+  private long byteCount;
 
   /**
    * Uses the given source of random bytes for padding.

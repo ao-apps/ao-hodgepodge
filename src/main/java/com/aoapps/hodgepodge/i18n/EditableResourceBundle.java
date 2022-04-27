@@ -1134,7 +1134,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     }
     synchronized (lookupValue) {
       // Add this locale if not already set
-      boolean missing = (value == null);
+      boolean missing = value == null;
       lookupValue.locales.computeIfAbsent(locale, l -> new LookupLocaleValue(missing, invalidated));
       //if (!lookupValue.locales.containsKey(locale)) {
       //  lookupValue.locales.put(

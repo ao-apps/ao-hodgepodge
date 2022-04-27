@@ -79,7 +79,9 @@ public class TerminalWriter extends PrintWriter implements NoClose {
     }
 
     // Backspace to the first character that is different
-    for (int i = 0; i < (lastLen - sameCount); i++) verboseOut.append('\b');
+    for (int i = 0; i < (lastLen - sameCount); i++) {
+      verboseOut.append('\b');
+    }
 
     // Append part of new output that is different
     verboseOut.append(newVerboseString, sameCount, newLen);

@@ -39,4 +39,3 @@ public interface GraphSorter<V, Ex extends Exception> {
   // TODO: This should be given the graph as a parameter?
   Set<V> sortGraph() throws Ex;
 }
-

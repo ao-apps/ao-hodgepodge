@@ -37,7 +37,7 @@ import java.io.OutputStream;
  */
 public class ByteCountOutputStream extends FilterOutputStream implements NoClose {
 
-  private long count = 0;
+  private long count;
 
   public ByteCountOutputStream(OutputStream out) {
     super(out);

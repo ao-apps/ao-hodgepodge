@@ -150,18 +150,18 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
     int[] last = new int[PASS_SIZE];
     final int[] pointer = new int[PASS_SIZE];
 
-    for (int x = offset; x < end; ++x) {
+    for (int x = offset; x < end; x++) {
       ++last[((array[x] + UNSIGNED_OFFSET) >> shift) & PASS_MASK];
     }
 
     last[0] += offset;
     pointer[0] = offset;
-    for (int x = 1; x < PASS_SIZE; ++x) {
+    for (int x = 1; x < PASS_SIZE; x++) {
       pointer[x] = last[x - 1];
       last[x] += last[x - 1];
     }
 
-    for (int x = 0; x < PASS_SIZE; ++x) {
+    for (int x = 0; x < PASS_SIZE; x++) {
       while (pointer[x] != last[x]) {
         int value = array[pointer[x]];
         int y = ((value + UNSIGNED_OFFSET) >> shift) & PASS_MASK;
@@ -177,7 +177,7 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
     if (shift > 0) {
       // TODO: Additional criteria
       shift -= BITS_PER_PASS;
-      for (int x = 0; x < PASS_SIZE; ++x) {
+      for (int x = 0; x < PASS_SIZE; x++) {
         final int size = x > 0 ? (pointer[x] - pointer[x - 1]) : (pointer[0] - offset);
         if (size > 64) {
           final int newOffset = pointer[x] - size;
@@ -205,7 +205,7 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 
   // From https://github.com/gorset/radix/blob/master/Radix.java
   private static void insertionSort(int[] array, int offset, int end) {
-    for (int x = offset; x < end; ++x) {
+    for (int x = offset; x < end; x++) {
       for (int y = x; y > offset && array[y - 1] > array[y]; y--) {
         int temp = array[y];
         array[y] = array[y - 1];

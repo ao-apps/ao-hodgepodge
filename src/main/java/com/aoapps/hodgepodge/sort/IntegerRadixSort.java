@@ -845,7 +845,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
         for (N number : list) {
           int numInt = table.addToQueue(0, number, toTaskNum);
           bSeen |= numInt;
-          bNotSeen |= (numInt ^ 0xffffffff);
+          bNotSeen |= numInt ^ 0xffffffff;
         }
       }
       return new ImportDataResult(bSeen, bNotSeen);
@@ -1085,7 +1085,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
         for (int number : list) {
           int numInt = table.addToQueue(0, number, toTaskNum);
           bSeen |= numInt;
-          bNotSeen |= (numInt ^ 0xffffffff);
+          bNotSeen |= numInt ^ 0xffffffff;
         }
       }
       return new ImportDataResult(bSeen, bNotSeen);

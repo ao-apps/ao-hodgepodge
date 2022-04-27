@@ -50,7 +50,7 @@ public class CommentCaptureInputStream extends InputStream {
   }
 
   private boolean isLeadingWhitespace = true;
-  private boolean isCommentLine = false;
+  private boolean isCommentLine;
   private final StringBuilder lineBuffer = new StringBuilder();
 
   private final List<String> comments = new ArrayList<>();

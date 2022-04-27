@@ -197,12 +197,12 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
   /**
    * All accesses should be behind poolLock.
    */
-  private boolean isClosed = false;
+  private boolean isClosed;
 
   /**
    * All access should be protected by poolLock.
    */
-  private int maxConcurrency = 0;
+  private int maxConcurrency;
 
   /**
    * Connections that are checked-out by the current thread.
@@ -222,7 +222,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
    * Incremental allocation of thread IDs, since they are not used outside the scope of this class.
    * No benefit to randomizing the values.
    */
-  private long lastId = 0;
+  private long lastId;
 
   /**
    * The allocation id of the current thread.  This is used as a key in the weak map
