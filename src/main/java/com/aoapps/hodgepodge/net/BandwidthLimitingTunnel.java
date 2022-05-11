@@ -40,31 +40,31 @@ import java.net.Socket;
 public class BandwidthLimitingTunnel implements Runnable {
 
   private final boolean verbose;
-  private final String listen_address;
-  private final int listen_port;
-  private final String connect_address;
-  private final int connect_port;
-  private final Long upstream_bandwidth;
-  private final Long downstream_bandwidth;
+  private final String listenAddress;
+  private final int listenPort;
+  private final String connectAddress;
+  private final int connectPort;
+  private final Long upstreamBandwidth;
+  private final Long downstreamBandwidth;
   private final Thread thread;
 
   @SuppressWarnings("CallToThreadStartDuringObjectConstruction")
   public BandwidthLimitingTunnel(
       boolean verbose,
-      String listen_address,
-      int listen_port,
-      String connect_address,
-      int connect_port,
-      Long upstream_bandwidth,
-      Long downstream_bandwidth
+      String listenAddress,
+      int listenPort,
+      String connectAddress,
+      int connectPort,
+      Long upstreamBandwidth,
+      Long downstreamBandwidth
   ) {
     this.verbose = verbose;
-    this.listen_address = listen_address;
-    this.listen_port = listen_port;
-    this.connect_address = connect_address;
-    this.connect_port = connect_port;
-    this.upstream_bandwidth = upstream_bandwidth;
-    this.downstream_bandwidth = downstream_bandwidth;
+    this.listenAddress = listenAddress;
+    this.listenPort = listenPort;
+    this.connectAddress = connectAddress;
+    this.connectPort = connectPort;
+    this.upstreamBandwidth = upstreamBandwidth;
+    this.downstreamBandwidth = downstreamBandwidth;
     (this.thread = new Thread(this)).start();
   }
 
@@ -90,15 +90,15 @@ public class BandwidthLimitingTunnel implements Runnable {
       } else {
         verbose = false;
       }
-      String listen_address = args[pos++];
-      int listen_port = Integer.parseInt(args[pos++]);
-      String connect_address = args[pos++];
-      int connect_port = Integer.parseInt(args[pos++]);
+      String listenAddress = args[pos++];
+      int listenPort = Integer.parseInt(args[pos++]);
+      String connectAddress = args[pos++];
+      int connectPort = Integer.parseInt(args[pos++]);
       String s = args[pos++];
-      Long upstream_bandwidth = s.length() == 0 ? null : Long.parseLong(s);
+      Long upstreamBandwidth = s.length() == 0 ? null : Long.parseLong(s);
       s = args[pos++];
-      Long downstream_bandwidth = s.length() == 0 ? null : Long.parseLong(s);
-      new BandwidthLimitingTunnel(verbose, listen_address, listen_port, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth);
+      Long downstreamBandwidth = s.length() == 0 ? null : Long.parseLong(s);
+      new BandwidthLimitingTunnel(verbose, listenAddress, listenPort, connectAddress, connectPort, upstreamBandwidth, downstreamBandwidth);
     } else {
       printUsage();
       System.exit(1);
@@ -106,7 +106,13 @@ public class BandwidthLimitingTunnel implements Runnable {
   }
 
   private static void printUsage() {
-    System.err.println("usage: " + BandwidthLimitingTunnel.class.getName() + " [-v] {listen_address|*} <listen_port> {connect_address} {connect_port} {upstream_bandwidth|\"\"} {downstream_bandwidth|\"\"}");
+    System.err.println("usage: " + BandwidthLimitingTunnel.class.getName()
+        + " [-v] {listen_address|*}"
+        + " <listen_port>"
+        + " {connect_address}"
+        + " {connect_port}"
+        + " {upstream_bandwidth|\"\"}"
+        + " {downstream_bandwidth|\"\"}");
     System.err.println("        -v                   - switch to display status of each connection on standard output");
     System.err.println("        listen_address       - the hostname or IP address to listen to or * to listen on all local IP addresses");
     System.err.println("        listen_port          - the port to listen to");
@@ -122,19 +128,19 @@ public class BandwidthLimitingTunnel implements Runnable {
     while (thread == Thread.currentThread() && !Thread.currentThread().isInterrupted()) {
       try {
         if (verbose) {
-          System.out.println("Accepting connections on " + listen_address + ":" + listen_port);
+          System.out.println("Accepting connections on " + listenAddress + ":" + listenPort);
         }
         try (ServerSocket serverSocket = new ServerSocket(
-            listen_port,
+            listenPort,
             50,
-            "*".equals(listen_address) ? null : InetAddress.getByName(listen_address)
+            "*".equals(listenAddress) ? null : InetAddress.getByName(listenAddress)
         )) {
           while (!Thread.currentThread().isInterrupted()) {
             Socket socket = serverSocket.accept();
             if (verbose) {
               System.out.println("New connection from " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
             }
-            new BandwidthLimitingTunnelHandler(verbose, connect_address, connect_port, upstream_bandwidth, downstream_bandwidth, socket);
+            new BandwidthLimitingTunnelHandler(verbose, connectAddress, connectPort, upstreamBandwidth, downstreamBandwidth, socket);
           }
         }
       } catch (ThreadDeath td) {

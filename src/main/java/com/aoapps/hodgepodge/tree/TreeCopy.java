@@ -64,7 +64,9 @@ public class TreeCopy<E> implements Tree<E> {
     } else {
       // Multiple roots
       List<Node<E>> newRootNodes = new ArrayList<>(size);
-      for (Node<E> rootNode : sourceRootNodes) newRootNodes.add(new NodeCopy<>(rootNode));
+      for (Node<E> rootNode : sourceRootNodes) {
+        newRootNodes.add(new NodeCopy<>(rootNode));
+      }
       rootNodes = Collections.unmodifiableList(newRootNodes);
     }
   }
@@ -91,7 +93,9 @@ public class TreeCopy<E> implements Tree<E> {
     } else {
       // Multiple roots
       List<Node<E>> newRootNodes = new ArrayList<>(size);
-      for (Node<E> rootNode : filteredRootNodes) newRootNodes.add(new NodeCopy<>(rootNode, nodeFilter));
+      for (Node<E> rootNode : filteredRootNodes) {
+        newRootNodes.add(new NodeCopy<>(rootNode, nodeFilter));
+      }
       rootNodes = Collections.unmodifiableList(newRootNodes);
     }
   }

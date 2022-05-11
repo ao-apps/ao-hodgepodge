@@ -59,7 +59,9 @@ public class NodeCopy<E> implements Node<E> {
       } else {
         // Multiple children
         List<Node<E>> childrenCopy = new ArrayList<>(size);
-        for (Node<E> child : nodeChildren) childrenCopy.add(new NodeCopy<>(child));
+        for (Node<E> child : nodeChildren) {
+          childrenCopy.add(new NodeCopy<>(child));
+        }
         children = Collections.unmodifiableList(childrenCopy);
       }
     }
@@ -91,7 +93,9 @@ public class NodeCopy<E> implements Node<E> {
       } else {
         // Multiple children
         List<Node<E>> childrenCopy = new ArrayList<>(size);
-        for (Node<E> child : filteredChildren) childrenCopy.add(new NodeCopy<>(child, nodeFilter));
+        for (Node<E> child : filteredChildren) {
+          childrenCopy.add(new NodeCopy<>(child, nodeFilter));
+        }
         children = Collections.unmodifiableList(childrenCopy);
       }
     }

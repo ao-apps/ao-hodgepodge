@@ -40,6 +40,7 @@ import java.io.RandomAccessFile;
  * <p>
  * This class is best used for persistence or management of large
  * FIFO data sets.
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
@@ -50,7 +51,7 @@ public class FifoFile {
   final FifoFileOutputStream out;
   final long maxFifoLength;
   final long fileLength;
-  final int _blockSize;
+  final int blockSize;
 
   public FifoFile(String filename, long maxFifoLength) throws IOException {
     this(new File(filename), maxFifoLength);
@@ -66,8 +67,8 @@ public class FifoFile {
     this.file = new RandomAccessFile(file, "rw");
     this.in = new FifoFileInputStream(this);
     this.out = new FifoFileOutputStream(this);
-    long blockSize = maxFifoLength >> 8;
-    this._blockSize = blockSize >= BufferManager.BUFFER_SIZE ? BufferManager.BUFFER_SIZE : blockSize <= 0 ? 1 : (int) blockSize;
+    long myBlockSize = maxFifoLength >> 8;
+    this.blockSize = myBlockSize >= BufferManager.BUFFER_SIZE ? BufferManager.BUFFER_SIZE : myBlockSize <= 0 ? 1 : (int) myBlockSize;
     if (this.file.length() != fileLength) {
       reset();
     }
@@ -90,7 +91,7 @@ public class FifoFile {
   }
 
   public int getBlockSize() {
-    return _blockSize;
+    return blockSize;
   }
 
   /**

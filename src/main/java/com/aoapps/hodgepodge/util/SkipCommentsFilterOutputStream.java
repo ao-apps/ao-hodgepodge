@@ -37,6 +37,7 @@ import java.util.Properties;
  * <p>
  * This class is optimized for writing {@link Properties} files and assumes
  * ISO-8859-1 encoding.
+ * </p>
  * <p>
  * Java 1.9: Writer properties files via {@link Writer} in UTF-8 format
  * </p>

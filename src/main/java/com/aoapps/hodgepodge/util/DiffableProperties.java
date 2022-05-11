@@ -101,7 +101,10 @@ public final class DiffableProperties {
         isLeadingWhitespace = false;
         // Is escape
         char ch2 = properties.charAt(pos++);
-        char ch3, ch4, ch5, ch6;
+        char ch3;
+        char ch4;
+        char ch5;
+        char ch6;
         if (
             ch2 == 'u'
                 && (pos + 4) <= len

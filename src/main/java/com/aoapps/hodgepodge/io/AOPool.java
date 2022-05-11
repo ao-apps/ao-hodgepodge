@@ -100,32 +100,32 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
     volatile C connection;
 
     /**
-     * The time the connection was created
+     * The time the connection was created.
      */
     volatile long createTime;
 
     /**
-     * Total time using the connection
+     * Total time using the connection.
      */
     final AtomicLong totalTime = new AtomicLong();
 
     /**
-     * The time getting the connection from the pool
+     * The time getting the connection from the pool.
      */
     volatile long startTime;
 
     /**
-     * The time returning the connection to the pool
+     * The time returning the connection to the pool.
      */
     volatile long releaseTime;
 
     /**
-     * Counts the number of times the connection is connected
+     * Counts the number of times the connection is connected.
      */
     final AtomicLong connectCount = new AtomicLong();
 
     /**
-     * Counts the number of times the connection is used
+     * Counts the number of times the connection is used.
      */
     final AtomicLong useCount = new AtomicLong();
 
@@ -152,8 +152,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
     public boolean equals(Object obj) {
       return
           (obj instanceof PooledConnection)
-              && id == ((PooledConnection) obj).id
-      ;
+              && id == ((PooledConnection) obj).id;
     }
 
     @Override
@@ -169,11 +168,12 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
   private final long maxConnectionAge;
 
   /**
-   * Lock for wait/notify
+   * Lock for wait/notify.
    */
   private static class PoolLock {
     // Empty lock class to help heap profile
   }
+
   private final PoolLock poolLock = new PoolLock();
 
   /**
@@ -756,7 +756,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
    * Prints complete statistics about connection pool use.
    */
   @SuppressWarnings("deprecation")
-  public final void printStatisticsHTML(Appendable out, boolean isXhtml) throws IOException, Ex {
+  public final void printStatisticsHtml(Appendable out, boolean isXhtml) throws IOException, Ex {
     // Get the data
     boolean myIsClosed;
     synchronized (poolLock) {
@@ -862,16 +862,18 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
     int totalBusy = 0;
 
     for (int c = 0; c < numConnections; c++) {
-      long connCount = connectCounts[c];
-      boolean isConnected = isConnecteds[c];
-      long useCount = useCounts[c];
-      long totalTime = totalTimes[c];
-      boolean isBusy = isBusies[c];
+      final long connCount = connectCounts[c];
+      final boolean isConnected = isConnecteds[c];
+      final long useCount = useCounts[c];
+      final long totalTime;
+      final boolean isBusy = isBusies[c];
       if (isBusy) {
-        totalTime += time - startTimes[c];
+        totalTime = totalTimes[c] + (time - startTimes[c]);
+      } else {
+        totalTime = totalTimes[c];
       }
-      long stateTime = isBusy ? (time - startTimes[c]) : (time - releaseTimes[c]);
-      Long allocationThreadId = allocationThreadIds[c];
+      final long stateTime = isBusy ? (time - startTimes[c]) : (time - releaseTimes[c]);
+      final Long allocationThreadId = allocationThreadIds[c];
       out.append("    <tr>\n"
           + "      <td>").append(Integer.toString(c + 1)).append("</td>\n"
           + "      <td>").append(isConnected ? "Yes" : "No").append("</td>\n"
@@ -951,14 +953,26 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
   }
 
   /**
+   * Prints complete statistics about connection pool use.
+   *
+   * @deprecated  Please use {@link #printStatisticsHtml(java.lang.Appendable, boolean)} instead.
+   */
+  // TODO: Remove in 6.0.0 release
+  @Deprecated
+  public final void printStatisticsHTML(Appendable out, boolean isXhtml) throws IOException, Ex {
+    printStatisticsHtml(out, isXhtml);
+  }
+
+  /**
    * Prints complete statistics about connection pool use in XHTML.
    *
    * @deprecated  Please specify if is HTML or XHTML
    */
+  // TODO: Remove in 6.0.0 release
   @Deprecated
   @SuppressWarnings("NoopMethodInAbstractClass")
   public final void printStatisticsHTML(Appendable out) throws IOException, Ex {
-    // Do nothing
+    printStatisticsHtml(out, true);
   }
 
   /**

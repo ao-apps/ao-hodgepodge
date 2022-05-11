@@ -56,13 +56,13 @@ public final class EncodingUtils {
   /**
    * Escapes for use in a (X)HTML document and writes to the provided <code>Appendable</code>.
    * In addition to the standard XML Body encoding, it turns newlines into &lt;br /&gt;, tabs to &amp;#x9;, and spaces to &amp;#160;
+   * <p>
+   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>.
+   * </p>
    *
    * @param  value  the object to be escaped.  If value is <code>null</code>, nothing is written.
    *
    * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-   * <p>
-   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
-   * </p>
    */
   @Deprecated
   public static void encodeHtml(Object value, Appendable out, boolean isXhtml) throws IOException {
@@ -72,13 +72,13 @@ public final class EncodingUtils {
   /**
    * Escapes for use in a (X)HTML document and writes to the provided <code>Appendable</code>.
    * In addition to the standard XML Body encoding, it turns newlines into &lt;br /&gt; and spaces to &amp;#160;
+   * <p>
+   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>.
+   * </p>
    *
    * @param cs the string to be escaped.  If S is <code>null</code>, nothing is written.
    *
    * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-   * <p>
-   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
-   * </p>
    */
   @Deprecated
   public static void encodeHtml(CharSequence cs, int start, int end, Appendable out, boolean isXhtml) throws IOException {
@@ -86,10 +86,9 @@ public final class EncodingUtils {
   }
 
   /**
+   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>.
+   *
    * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-   * <p>
-   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
-   * </p>
    */
   @Deprecated
   public static String encodeHtml(Object value, boolean isXhtml) throws IOException {
@@ -102,10 +101,9 @@ public final class EncodingUtils {
   }
 
   /**
+   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>.
+   *
    * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-   * <p>
-   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
-   * </p>
    */
   @Deprecated
   public static void encodeHtml(char ch, Appendable out, boolean isXhtml) throws IOException {
@@ -113,10 +111,9 @@ public final class EncodingUtils {
   }
 
   /**
+   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>.
+   *
    * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-   * <p>
-   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
-   * </p>
    */
   @Deprecated
   public static void encodeHtml(Object value, boolean makeBr, boolean makeNbsp, Appendable out, boolean isXhtml) throws IOException {
@@ -143,15 +140,15 @@ public final class EncodingUtils {
    * Escapes for use in a (X)HTML document and writes to the provided <code>Appendable</code>.
    * Optionally, it turns newlines into &lt;br /&gt; and spaces to &amp;#160;
    * Any characters less than 0x1f that are not \t, \r, or \n are completely filtered.
+   * <p>
+   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>.
+   * </p>
    *
    * @param cs the string to be escaped.  If S is <code>null</code>, nothing is written.
    * @param makeBr  will write &lt;br /&gt; tags for every newline character
    * @param makeNbsp  will write &amp;#160; for a space when another space follows
    *
    * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-   * <p>
-   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
-   * </p>
    */
   @Deprecated
   public static void encodeHtml(CharSequence cs, int start, int end, boolean makeBr, boolean makeNbsp, Appendable out, boolean isXhtml) throws IOException {
@@ -161,29 +158,32 @@ public final class EncodingUtils {
         char ch = cs.charAt(c);
         switch (ch) {
           // Standard XML escapes
-          case '<':
+          case '<': {
             if (toPrint > 0) {
               out.append(cs, c - toPrint, c);
               toPrint = 0;
             }
             out.append("&lt;");
             break;
-          case '>':
+          }
+          case '>': {
             if (toPrint > 0) {
               out.append(cs, c - toPrint, c);
               toPrint = 0;
             }
             out.append("&gt;");
             break;
-          case '&':
+          }
+          case '&': {
             if (toPrint > 0) {
               out.append(cs, c - toPrint, c);
               toPrint = 0;
             }
             out.append("&amp;");
             break;
+          }
           // Special (X)HTML options
-          case ' ':
+          case ' ': {
             if (makeNbsp) {
               if (toPrint > 0) {
                 out.append(cs, c - toPrint, c);
@@ -194,21 +194,24 @@ public final class EncodingUtils {
               toPrint++;
             }
             break;
-          case '\t':
+          }
+          case '\t': {
             if (toPrint > 0) {
               out.append(cs, c - toPrint, c);
               toPrint = 0;
             }
             out.append("&#x9;");
             break;
-          case '\r':
+          }
+          case '\r': {
             if (toPrint > 0) {
               out.append(cs, c - toPrint, c);
               toPrint = 0;
             }
             // skip '\r'
             break;
-          case '\n':
+          }
+          case '\n': {
             if (makeBr) {
               if (toPrint > 0) {
                 out.append(cs, c - toPrint, c);
@@ -219,7 +222,8 @@ public final class EncodingUtils {
               toPrint++;
             }
             break;
-          default:
+          }
+          default: {
             if (ch < ' ') {
               if (toPrint > 0) {
                 out.append(cs, c - toPrint, c);
@@ -229,6 +233,7 @@ public final class EncodingUtils {
             } else {
               toPrint++;
             }
+          }
         }
       }
       if (toPrint > 0) {
@@ -238,14 +243,13 @@ public final class EncodingUtils {
   }
 
   /**
+   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>.
+   *
    * @param  value  the string to be escaped.
    *
    * @return if value is null then null otherwise value escaped
    *
    * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-   * <p>
-   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
-   * </p>
    */
   @Deprecated
   public static String encodeHtml(Object value, boolean makeBr, boolean makeNbsp, boolean isXhtml) throws IOException {
@@ -258,51 +262,58 @@ public final class EncodingUtils {
   }
 
   /**
+   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>.
+   *
    * @deprecated  the effects of makeBr and makeNbsp should be handled by CSS white-space property.
-   * <p>
-   * See <a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/TextInXhtmlEncoder.html">TextInXhtmlEncoder</a>
-   * </p>
    */
   @Deprecated
-  public static void encodeHtml(char ch, boolean make_br, boolean make_nbsp, Appendable out, boolean isXhtml) throws IOException {
+  public static void encodeHtml(char ch, boolean makeBr, boolean makeNbsp, Appendable out, boolean isXhtml) throws IOException {
     switch (ch) {
       // Standard XML escapes
-      case '<':
+      case '<': {
         out.append("&lt;");
         break;
-      case '>':
+      }
+      case '>': {
         out.append("&gt;");
         break;
-      case '&':
+      }
+      case '&': {
         out.append("&amp;");
         break;
+      }
       // Special (X)HTML options
-      case ' ':
-        if (make_nbsp) {
+      case ' ': {
+        if (makeNbsp) {
           out.append("&#160;");
         } else {
           out.append(' ');
         }
         break;
-      case '\t':
+      }
+      case '\t': {
         out.append("&#x9;");
         break;
-      case '\r':
+      }
+      case '\r': {
         // skip '\r'
         break;
-      case '\n':
-        if (make_br) {
+      }
+      case '\n': {
+        if (makeBr) {
           out.append(isXhtml ? "<br />" : "<br>").append('\n');
         } else {
           out.append('\n');
         }
         break;
-      default:
+      }
+      default: {
         if (ch < ' ') {
           // skip the character
         } else {
           out.append(ch);
         }
+      }
     }
   }
   // </editor-fold>

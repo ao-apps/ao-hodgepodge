@@ -58,8 +58,7 @@ public class RMIServerSocketFactorySSL implements RMIServerSocketFactory {
   public boolean equals(Object obj) {
     return
         (obj instanceof RMIServerSocketFactorySSL)
-            && Objects.equals(listenAddress, ((RMIServerSocketFactorySSL) obj).listenAddress)
-    ;
+            && Objects.equals(listenAddress, ((RMIServerSocketFactorySSL) obj).listenAddress);
   }
 
   @Override

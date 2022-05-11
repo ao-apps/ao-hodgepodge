@@ -35,6 +35,7 @@ import java.util.Properties;
  * <p>
  * This class is optimized for reading {@link Properties} files and assumes
  * ISO-8859-1 encoding.
+ * </p>
  * <p>
  * Java 1.9: Read properties files via {@link Reader} in UTF-8 format
  * </p>

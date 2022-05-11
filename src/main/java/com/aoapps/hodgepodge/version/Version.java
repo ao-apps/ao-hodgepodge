@@ -89,7 +89,7 @@ public final class Version {
   }
 
   /**
-   * The toString representation is <code><i>major</i>.<i>minor</i>.<i>release</i>.<i>build</i></code>
+   * The toString representation is <code><i>major</i>.<i>minor</i>.<i>release</i>.<i>build</i></code>.
    *
    * @see #valueOf(String)
    */
@@ -108,8 +108,7 @@ public final class Version {
         build == other.build // Build changes most - check first
             && release == other.release
             && minor == other.minor
-            && major == other.major
-    ;
+            && major == other.major;
   }
 
   @Override
@@ -123,9 +122,10 @@ public final class Version {
 
   /**
    * Gets the major version number.
-   *
+   * <p>
    * A change in the first number means a radically new code base, complete
    * uninstall/reinstall may be necessary.
+   * </p>
    */
   public int getMajor() {
     return major;
@@ -133,10 +133,11 @@ public final class Version {
 
   /**
    * Gets the minor version number.
-   *
+   * <p>
    * A change in the second number means significant features have been added,
    * but are generally compatible with previous versions.
    * Update strongly recommended.
+   * </p>
    */
   public int getMinor() {
     return minor;
@@ -144,10 +145,11 @@ public final class Version {
 
   /**
    * Gets the release number.
-   *
+   * <p>
    * A change in the third number means fixes or improvements to existing
    * features, but maintaining compatibility with current version.
    * Update recommended.
+   * </p>
    */
   public int getRelease() {
     return release;
@@ -155,10 +157,11 @@ public final class Version {
 
   /**
    * Gets the build number.
-   *
+   * <p>
    * A change in the build number only indicates minor fixes or improvements
    * to existing features.
    * Update not required or even suggested.
+   * </p>
    */
   public int getBuild() {
     return build;

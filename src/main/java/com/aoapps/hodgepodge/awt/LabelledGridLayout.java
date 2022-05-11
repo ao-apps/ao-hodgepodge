@@ -38,9 +38,12 @@ import java.awt.LayoutManager;
  */
 public class LabelledGridLayout implements LayoutManager {
 
-  public final int rows, columns;
+  public final int rows;
+  public final int columns;
 
-  public final int hgap, vgap, cgap;
+  public final int hgap;
+  public final int vgap;
+  public final int cgap;
 
   public final boolean stretchComponents;
 
@@ -87,7 +90,7 @@ public class LabelledGridLayout implements LayoutManager {
 
   private Dimension getLayoutSize(Container parent, boolean isMinimum) {
     synchronized (parent.getTreeLock()) {
-      Insets insets = parent.getInsets();
+      final Insets insets = parent.getInsets();
       int ncomponents = parent.getComponentCount();
       int nrows = rows;
       int ncols = columns;
@@ -145,7 +148,7 @@ public class LabelledGridLayout implements LayoutManager {
   @Override
   public void layoutContainer(Container parent) {
     synchronized (parent.getTreeLock()) {
-      Insets insets = parent.getInsets();
+      final Insets insets = parent.getInsets();
       int ncomponents = parent.getComponentCount();
       if (ncomponents == 0) {
         return;

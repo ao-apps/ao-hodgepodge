@@ -25,11 +25,12 @@ import java.util.List;
 /**
  * A heap sort demonstration algorithm
  * SortAlgorithm.java, Thu Oct 27 10:32:35 1994
+ * <p>
+ * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/HeapSortAlgorithm.java.html'>Jason Harrison's HeapSortAlgorithm</a>.
+ * </p>
  *
  * @author Jason Harrison@cs.ubc.ca
  * @version 1.0, 23 Jun 1995
- * <p>
- * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/HeapSortAlgorithm.java.html'>Jason Harrison's HeapSortAlgorithm</a>.
  */
 public final class HeapSort extends BaseComparisonSortAlgorithm<Object> {
 

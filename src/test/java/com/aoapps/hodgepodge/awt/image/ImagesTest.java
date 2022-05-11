@@ -23,6 +23,8 @@
 
 package com.aoapps.hodgepodge.awt.image;
 
+import static org.junit.Assert.assertEquals;
+
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -31,7 +33,6 @@ import java.math.BigDecimal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

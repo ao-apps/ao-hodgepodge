@@ -60,8 +60,7 @@ public class RMIClientSocketFactorySSL implements RMIClientSocketFactory, Serial
   public boolean equals(Object obj) {
     return
         (obj instanceof RMIClientSocketFactorySSL)
-            && Objects.equals(localAddress, ((RMIClientSocketFactorySSL) obj).localAddress)
-    ;
+            && Objects.equals(localAddress, ((RMIClientSocketFactorySSL) obj).localAddress);
   }
 
   @Override
@@ -71,7 +70,6 @@ public class RMIClientSocketFactorySSL implements RMIClientSocketFactory, Serial
 
   @Override
   public Socket createSocket(String host, int port) throws IOException {
-    SSLSocketFactory sslFact = (SSLSocketFactory) SSLSocketFactory.getDefault();
     Socket regSocket = new Socket();
     if (localAddress != null) {
       regSocket.bind(new InetSocketAddress(localAddress, 0));
@@ -79,6 +77,7 @@ public class RMIClientSocketFactorySSL implements RMIClientSocketFactory, Serial
     regSocket.connect(new InetSocketAddress(host, port), 30000);
     regSocket.setKeepAlive(true);
     regSocket.setTcpNoDelay(true);
-    return sslFact.createSocket(regSocket, host, port, true);
+    SSLSocketFactory sslFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+    return sslFactory.createSocket(regSocket, host, port, true);
   }
 }

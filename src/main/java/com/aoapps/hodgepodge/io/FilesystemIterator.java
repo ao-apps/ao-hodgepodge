@@ -272,6 +272,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
 
   /**
    * Gets the next files, up to batchSize.
+   *
    * @return the number of files in the array, zero (0) indicates iteration has completed
    */
   public int getNextFiles(final File[] files, final int batchSize) throws IOException {
@@ -309,7 +310,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
   }
 
   /**
-   * Determines if a path is a possible file system root
+   * Determines if a path is a possible file system root.
    */
   protected boolean isFilesystemRoot(String filename) throws IOException {
     String[] roots = getFilesystemRoots();
@@ -324,12 +325,13 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
   /**
    * Gets the rule that best suits the provided filename.  The rule is the longer
    * rule between the regular rules and the prefix rules.
-   *
+   * <p>
    * The regular rules are scanned first by looking through the filename and then
    * all parents up to the root for the first match.  These use Map lookups in the
    * set of rules so this should still perform well when there are many rules.
    * For example, when searching for the rule for /home/u/username/tmp/, this
    * will search:
+   * </p>
    * <ol>
    *   <li>/home/u/username/tmp/</li>
    *   <li>/home/u/username/tmp</li>
@@ -342,9 +344,10 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
    *   <li>/</li>
    *   <li></li>
    * </ol>
-   *
+   * <p>
    * Next, the entire list of prefix rules is searched, with the longest rule
    * being used if it is a longer match than that found in the regular rules.
+   * </p>
    */
   private FilesystemIteratorRule getBestRule(final String filename) {
     String longestPrefix = null;

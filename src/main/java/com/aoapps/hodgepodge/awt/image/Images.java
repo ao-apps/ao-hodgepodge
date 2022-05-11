@@ -136,7 +136,7 @@ public final class Images {
         final long maxMismatch = (long) (tolerance * maxDeviation);
         // Get pixels all at once
         for (int imageY = 0; imageY <= searchHeight; imageY++) {
-          NextLocation :
+          NextLocation:
           for (int imageX = 0; imageX <= searchWidth; imageX++) {
             long totalMismatch = 0;
             int findMeIndex = 0;
@@ -157,8 +157,7 @@ public final class Images {
                           // Green difference
                           + Math.abs(((imagePixel >>> 8) & 255) - ((findmePixel >>> 8) & 255))
                           // Blue difference
-                          + Math.abs((imagePixel & 255) - (findmePixel & 255))
-                  ;
+                          + Math.abs((imagePixel & 255) - (findmePixel & 255));
                   if (totalMismatch > maxMismatch) {
                     continue NextLocation;
                   }

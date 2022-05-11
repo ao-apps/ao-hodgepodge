@@ -37,11 +37,12 @@ import javax.swing.tree.MutableTreeNode;
  * When requested, it will recursively synchronize its children to an externally-
  * provided tree.  The is useful when the data source is obtained elsewhere and
  * the tree-based component needs to be synchronized.
- *
+ * <p>
  * Since these updates may occur while a user is manipulating the components,
  * only the minimum number of changes to the elements is made.  Thus selections
  * and other aspects of the component remain intact.  Most importantly, if nothing
  * in the list has changed, the component is not changed.
+ * </p>
  *
  * @author  AO Industries, Inc.
  */

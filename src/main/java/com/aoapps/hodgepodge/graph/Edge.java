@@ -72,8 +72,7 @@ public class Edge<V> {
     Edge<?> other = (Edge<?>) obj;
     return
         from.equals(other.from)
-            && to.equals(other.to)
-    ;
+            && to.equals(other.to);
   }
 
   /**

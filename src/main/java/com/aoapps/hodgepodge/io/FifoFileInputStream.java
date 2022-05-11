@@ -40,6 +40,7 @@ public class FifoFileInputStream extends InputStream {
   private static class StatsLock {
     // Empty lock class to help heap profile
   }
+
   private final StatsLock statsLock = new StatsLock();
   private long fifoReadCount;
   private long fifoReadBytes;
@@ -196,7 +197,7 @@ public class FifoFileInputStream extends InputStream {
           }
 
           // Skip as many bytes as currently available
-          long totalSkipped = skipSize;
+          final long totalSkipped = skipSize;
           long newFirstIndex = pos + skipSize;
           while (newFirstIndex >= file.maxFifoLength) {
             newFirstIndex -= file.maxFifoLength;
@@ -231,6 +232,8 @@ public class FifoFileInputStream extends InputStream {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @see  FifoFile#close()
    */
   @Override

@@ -42,17 +42,17 @@ public class WildcardPatternMatcherTest extends TestCase {
   static {
     // Got stupid slow at 10000
     // At 1000, simple matcher was 4,000 times as fast as the regular expressions
-    StringBuilder longSB = new StringBuilder();
+    StringBuilder longSb = new StringBuilder();
     for (int i = 0; i < 100; i++) {
-      longSB.append("long string ");
+      longSb.append("long string ");
     }
-    longString = longSB.toString();
-    longSB.setLength(0);
+    longString = longSb.toString();
+    longSb.setLength(0);
     for (int i = 0; i < 100; i++) {
-      longSB.append("jpepngifitif");
+      longSb.append("jpepngifitif");
     }
     // ".*(jpg|jpeg|png|gif|tiff)$",
-    craftedLongString = longSB.toString();
+    craftedLongString = longSb.toString();
   }
 
   public WildcardPatternMatcherTest(String testName) {
@@ -71,13 +71,13 @@ public class WildcardPatternMatcherTest extends TestCase {
       long startNanos = System.nanoTime();
       WildcardPatternMatcher wcMatcher = WildcardPatternMatcher.compile(patterns);
       long timeNanos = System.nanoTime() - startNanos;
-      System.out.println("    " + testSize + ": Created WildcardPatternMatcher in " + BigDecimal.valueOf(timeNanos, 3) + " \u00B5s");
+      System.out.println("    " + testSize + ": Created WildcardPatternMatcher in " + BigDecimal.valueOf(timeNanos, 3) + " µs");
 
       // Time make pattern
       startNanos = System.nanoTime();
       Pattern rePattern = Pattern.compile(regexp);
       timeNanos = System.nanoTime() - startNanos;
-      System.out.println("    " + testSize + ": Created Pattern                in " + BigDecimal.valueOf(timeNanos, 3) + " \u00B5s");
+      System.out.println("    " + testSize + ": Created Pattern                in " + BigDecimal.valueOf(timeNanos, 3) + " µs");
 
       // Time use matcher
       startNanos = System.nanoTime();
@@ -263,7 +263,7 @@ public class WildcardPatternMatcherTest extends TestCase {
     );
   }
 
-  public void testNoMatchTestGIF() {
+  public void testNoMatchTestGif() {
     doTestPerformance(
         "Match test.GIF vs *.jpg, *.jpeg, *.png, *.gif, *.tiff",
         "*.jpg, *.jpeg, *.png, *.gif, *.tiff",

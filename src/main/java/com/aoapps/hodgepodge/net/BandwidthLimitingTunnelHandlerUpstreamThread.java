@@ -40,11 +40,11 @@ public class BandwidthLimitingTunnelHandlerUpstreamThread extends BandwidthLimit
 
   public BandwidthLimitingTunnelHandlerUpstreamThread(
       boolean verbose,
-      Long upstream_bandwidth,
+      Long upstreamBandwidth,
       Socket listenSocket,
       Socket connectSocket
   ) {
-    super(verbose, upstream_bandwidth, listenSocket, connectSocket);
+    super(verbose, upstreamBandwidth, listenSocket, connectSocket);
   }
 
   @Override

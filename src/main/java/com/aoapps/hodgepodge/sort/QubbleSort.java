@@ -25,10 +25,7 @@ import java.util.List;
 /**
  * An quick sort with buble sort speedup  demonstration algorithm
  * SortAlgorithm.java, Thu Oct 27 10:32:35 1994
- *
- * @author Jim Boritz
- * @version 1.6, 26 Jun 1995
- * <p>
+ * <pre>
  * 19 Feb 1996: Fixed to avoid infinite loop discoved by Paul Haberli.
  *              Misbehaviour expressed when the pivot element was not unique.
  *              -Jason Harrison
@@ -40,8 +37,13 @@ import java.util.List;
  *
  * 09 Jan 1998: Another set of bug fixes by Thomas Everth (everth@wave.co.nz)
  *              and John Brzustowski (jbrzusto@gpu.srv.ualberta.ca).
+ * </pre>
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/QubbleSortAlgorithm.java.html'>Jim Boritz' QubbleSortAlgorithm</a>.
+ * </p>
+ *
+ * @author Jim Boritz
+ * @version 1.6, 26 Jun 1995
  */
 public final class QubbleSort extends BaseComparisonSortAlgorithm<Object> {
 

@@ -139,7 +139,7 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
         Refresher<? super K, ? extends V, ? extends Ex> refresher,
         Result<V, Ex> result
     ) {
-      long currentTime = System.currentTimeMillis();
+      final long currentTime = System.currentTimeMillis();
       this.key = key;
       this.refresher = refresher;
       this.result = result;
@@ -217,9 +217,10 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
   /**
    * Timer used for background refreshing and cleaning.
    * This uses daemon threads.
-   *
+   * <p>
    * TODO: Timer has a very old bug where it does not handle system time resets very well.
    *       Consider alternative.
+   * </p>
    */
   final Timer timer;
 

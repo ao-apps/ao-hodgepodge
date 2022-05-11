@@ -31,11 +31,12 @@ import javax.swing.SwingUtilities;
  * When requested, it will synchronize its list of elements to an externally-
  * provided list.  The is useful when the data source is obtained elsewhere and
  * the list-based component needs to be synchronized.
- *
+ * <p>
  * Since these updates may occur while a user is manipulating the components,
  * only the minimum number of changes to the elements is made.  Thus selections
  * and other aspects of the component remain intact.  Most importantly, if nothing
  * in the list has changed, the component is not changed.
+ * </p>
  *
  * @author  AO Industries, Inc.
  */
@@ -94,10 +95,9 @@ public class SynchronizingComboBoxModel<E> extends DefaultComboBoxModel<E> {
         if (foundIndex != -1) {
           // No removeRange
           // removeRange(index+modelOffset, foundIndex-1+modelOffset);
-          for (
-            int removeIndex = foundIndex - 1 + modelOffset, end = index + modelOffset;
-            removeIndex >= end;
-            removeIndex--
+          for (int removeIndex = foundIndex - 1 + modelOffset, end = index + modelOffset;
+              removeIndex >= end;
+              removeIndex--
           ) {
             removeElementAt(removeIndex);
           }

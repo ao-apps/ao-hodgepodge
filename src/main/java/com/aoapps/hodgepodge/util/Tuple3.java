@@ -69,8 +69,7 @@ public class Tuple3<E1, E2, E3> {
     return
         Objects.equals(element1, other.element1)
             && Objects.equals(element2, other.element2)
-            && Objects.equals(element3, other.element3)
-    ;
+            && Objects.equals(element3, other.element3);
   }
 
   private int hash;

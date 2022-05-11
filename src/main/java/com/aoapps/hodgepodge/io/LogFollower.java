@@ -54,6 +54,7 @@ public class LogFollower extends InputStream {
   private static class FilePosLock {
     // Empty lock class to help heap profile
   }
+
   private final FilePosLock filePosLock = new FilePosLock();
   private long filePos;
 
@@ -131,19 +132,6 @@ public class LogFollower extends InputStream {
 
   public int getPollInterval() {
     return pollInterval;
-  }
-
-  /**
-   * @deprecated The finalization mechanism is inherently problematic.
-   */
-  @Deprecated // Java 9: (since="9")
-  @Override
-  protected void finalize() throws Throwable {
-    try {
-      close();
-    } finally {
-      super.finalize();
-    }
   }
 
   @Override

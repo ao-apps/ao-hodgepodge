@@ -59,8 +59,7 @@ public class RMIClientSocketFactoryTCP implements RMIClientSocketFactory, Serial
   public boolean equals(Object obj) {
     return
         (obj instanceof RMIClientSocketFactoryTCP)
-            && Objects.equals(localAddress, ((RMIClientSocketFactoryTCP) obj).localAddress)
-    ;
+            && Objects.equals(localAddress, ((RMIClientSocketFactoryTCP) obj).localAddress);
   }
 
   @Override

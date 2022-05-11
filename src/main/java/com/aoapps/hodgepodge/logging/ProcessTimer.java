@@ -30,9 +30,10 @@ import java.util.logging.Logger;
 /**
  * A <code>ProcessTimer</code> monitors how long something takes,
  * and logs info when the task takes too long.
- *
+ * <p>
  * This should be submitted to an <code>ExecutorService</code>, but probably
  * one that is unbounded and prepared for long-running tasks.
+ * </p>
  *
  * @author  AO Industries, Inc.
  */

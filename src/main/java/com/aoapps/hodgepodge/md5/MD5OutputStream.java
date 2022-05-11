@@ -75,12 +75,13 @@ import java.io.OutputStream;
 public class MD5OutputStream extends FilterOutputStream {
 
   /**
-   * MD5 context
+   * MD5 context.
    */
   private final MD5 md5;
 
   /**
-   * Creates MD5OutputStream
+   * Creates MD5OutputStream.
+   *
    * @param out The output stream
    */
 
@@ -96,7 +97,7 @@ public class MD5OutputStream extends FilterOutputStream {
   @Override
   public void write(int b) throws IOException {
     out.write(b);
-    md5.Update((byte) b);
+    md5.update((byte) b);
   }
 
   /**
@@ -105,15 +106,16 @@ public class MD5OutputStream extends FilterOutputStream {
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
     out.write(b, off, len);
-    md5.Update(b, off, len);
+    md5.update(b, off, len);
   }
 
   /**
    * Returns array of bytes representing hash of the stream as finalized
    * for the current state.
-   * @see MD5#Final()
+   *
+   * @see MD5#digest()
    */
   public byte[] hash() {
-    return md5.Final();
+    return md5.digest();
   }
 }

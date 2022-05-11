@@ -45,8 +45,7 @@ public class AsymmetricException extends GraphException {
     return
         "No back connection matching connection:\n"
             + "    vertex=" + vertex.getClass().getName() + "(\"" + vertex.toString() + "\")\n"
-            + "    connected=" + connected.getClass().getName() + "(\"" + connected.toString() + "\")"
-    ;
+            + "    connected=" + connected.getClass().getName() + "(\"" + connected.toString() + "\")";
   }
 
   private final Object vertex;

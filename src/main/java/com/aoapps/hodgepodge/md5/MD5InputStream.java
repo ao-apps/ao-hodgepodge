@@ -82,12 +82,13 @@ import java.io.InputStream;
 public class MD5InputStream extends FilterInputStream {
 
   /**
-   * MD5 context
+   * MD5 context.
    */
   private final MD5 md5;
 
   /**
-   * Creates a MD5InputStream
+   * Creates a MD5InputStream.
+   *
    * @param in The input stream
    */
   public MD5InputStream(InputStream in) {
@@ -98,6 +99,7 @@ public class MD5InputStream extends FilterInputStream {
 
   /**
    * Read a byte of data.
+   *
    * @see java.io.FilterInputStream
    */
   @Override
@@ -107,7 +109,7 @@ public class MD5InputStream extends FilterInputStream {
       return -1;
     }
 
-    md5.Update(c);
+    md5.update(c);
 
     return c;
   }
@@ -123,7 +125,7 @@ public class MD5InputStream extends FilterInputStream {
       return -1;
     }
 
-    md5.Update(bytes, offset, r);
+    md5.update(bytes, offset, r);
 
     return r;
   }
@@ -131,9 +133,10 @@ public class MD5InputStream extends FilterInputStream {
   /**
    * Returns array of bytes representing hash of the stream as
    * finalized for the current state.
-   * @see MD5#Final()
+   *
+   * @see MD5#digest()
    */
   public byte[] hash() {
-    return md5.Final();
+    return md5.digest();
   }
 }

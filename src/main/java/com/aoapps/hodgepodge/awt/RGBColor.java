@@ -120,10 +120,9 @@ public final class RGBColor {
 
     // Get the number
     int color = 0;
-    for (
-      int i = start, end = start + 6;
-      i < end;
-      i++
+    for (int i = start, end = start + 6;
+        i < end;
+        i++
     ) {
       char ch = name.charAt(i);
       int value;

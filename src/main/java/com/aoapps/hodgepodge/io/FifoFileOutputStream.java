@@ -39,6 +39,7 @@ public class FifoFileOutputStream extends OutputStream {
   private static class StatsLock {
     // Empty lock class to help heap profile
   }
+
   private final StatsLock statsLock = new StatsLock();
   private long fifoWriteCount;
   private long fifoWriteBytes;
@@ -182,6 +183,8 @@ public class FifoFileOutputStream extends OutputStream {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @see  FifoFile#close()
    */
   @Override

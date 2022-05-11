@@ -36,9 +36,10 @@ import java.util.TreeMap;
  * may be compared to a snapshot of the same directory at a different time.  To
  * perform a quick comparison of two directory trees, a snapshot may be compared
  * to a snapshot of a different directory.
- *
+ * <p>
  * Only watches the lengths and modified times for filesystem objects that Java
  * considers a file.
+ * </p>
  *
  * @see  File#isFile()  for what Java considers a file
  *
@@ -64,8 +65,7 @@ public final class DirectoryMetaSnapshot {
       final FileMetaSnapshot other = (FileMetaSnapshot) obj;
       return
           lastModified == other.lastModified
-              && length == other.length
-      ;
+              && length == other.length;
     }
 
     @Override

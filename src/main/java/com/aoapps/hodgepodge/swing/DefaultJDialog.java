@@ -39,14 +39,13 @@ import javax.swing.WindowConstants;
  */
 public class DefaultJDialog extends JDialog implements WindowListener, ComponentListener {
 
-  public static final int
-      DEFAULT_MIN_WIDTH = 800,
-      DEFAULT_MIN_HEIGHT = 600
-  ;
+  public static final int DEFAULT_MIN_WIDTH = 800;
+  public static final int DEFAULT_MIN_HEIGHT = 600;
 
   private static final long serialVersionUID = 1L;
 
-  private final int minWidth, minHeight;
+  private final int minWidth;
+  private final int minHeight;
 
   public DefaultJDialog(JFrame parent, String title, boolean modal) {
     this(parent, title, modal, DEFAULT_MIN_WIDTH, DEFAULT_MIN_HEIGHT);

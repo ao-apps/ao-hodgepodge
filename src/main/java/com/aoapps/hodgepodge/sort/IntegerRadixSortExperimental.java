@@ -138,46 +138,46 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
 
   // From https://github.com/gorset/radix/blob/master/Radix.java
   public static void sort(final int[] array, int offset, int end, int shift, final Queue<Future<?>> futures) {
-    final int BITS_PER_PASS;
+    final int bitsPerPass;
     if (ENABLE_CONCURRENCY && (shift + R_BITS_PER_PASS) == 32) {
-      BITS_PER_PASS = FIRST_BITS_PER_PASS;
+      bitsPerPass = FIRST_BITS_PER_PASS;
     } else {
-      BITS_PER_PASS = R_BITS_PER_PASS;
+      bitsPerPass = R_BITS_PER_PASS;
     }
-    final int PASS_SIZE = 1 << BITS_PER_PASS;
-    final int PASS_MASK = PASS_SIZE - 1;
+    final int passSize = 1 << bitsPerPass;
+    final int passMask = passSize - 1;
 
-    int[] last = new int[PASS_SIZE];
-    final int[] pointer = new int[PASS_SIZE];
+    int[] last = new int[passSize];
+    final int[] pointer = new int[passSize];
 
     for (int x = offset; x < end; x++) {
-      ++last[((array[x] + UNSIGNED_OFFSET) >> shift) & PASS_MASK];
+      ++last[((array[x] + UNSIGNED_OFFSET) >> shift) & passMask];
     }
 
     last[0] += offset;
     pointer[0] = offset;
-    for (int x = 1; x < PASS_SIZE; x++) {
+    for (int x = 1; x < passSize; x++) {
       pointer[x] = last[x - 1];
       last[x] += last[x - 1];
     }
 
-    for (int x = 0; x < PASS_SIZE; x++) {
+    for (int x = 0; x < passSize; x++) {
       while (pointer[x] != last[x]) {
         int value = array[pointer[x]];
-        int y = ((value + UNSIGNED_OFFSET) >> shift) & PASS_MASK;
+        int y = ((value + UNSIGNED_OFFSET) >> shift) & passMask;
         while (x != y) {
           int temp = array[pointer[y]];
           array[pointer[y]++] = value;
           value = temp;
-          y = ((value + UNSIGNED_OFFSET) >> shift) & PASS_MASK;
+          y = ((value + UNSIGNED_OFFSET) >> shift) & passMask;
         }
         array[pointer[x]++] = value;
       }
     }
     if (shift > 0) {
       // TODO: Additional criteria
-      shift -= BITS_PER_PASS;
-      for (int x = 0; x < PASS_SIZE; x++) {
+      shift -= bitsPerPass;
+      for (int x = 0; x < passSize; x++) {
         final int size = x > 0 ? (pointer[x] - pointer[x - 1]) : (pointer[0] - offset);
         if (size > 64) {
           final int newOffset = pointer[x] - size;

@@ -42,7 +42,7 @@ import java.util.List;
  */
 public abstract class ShellInterpreter implements Runnable {
 
-  private static long lastPID;
+  private static long lastPid;
 
   private final long pid;
 
@@ -70,7 +70,7 @@ public abstract class ShellInterpreter implements Runnable {
   }
 
   protected ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String ... args) {
-    this.pid = getNextPID();
+    this.pid = getNextPid();
     this.in = in;
     this.out = out;
     this.err = err;
@@ -128,14 +128,23 @@ public abstract class ShellInterpreter implements Runnable {
 
   protected abstract String getName();
 
-  private static long getNextPID() {
+  private static long getNextPid() {
     synchronized (ShellInterpreter.class) {
-      return ++lastPID;
+      return ++lastPid;
     }
   }
 
-  public final long getPID() {
+  public final long getPid() {
     return pid;
+  }
+
+  /**
+   * @deprecated  Please use {@link #getPid()} instead.
+   */
+  // TODO: Remove in 6.0.0 release
+  @Deprecated
+  public final long getPID() {
+    return getPid();
   }
 
   protected abstract String getPrompt() throws IOException, SQLException;

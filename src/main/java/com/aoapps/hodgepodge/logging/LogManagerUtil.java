@@ -69,6 +69,7 @@ public final class LogManagerUtil {
       // Empty lock class to help heap profile
     }
   }
+
   private static final WarnLock warnLock = new WarnLock();
 
   private static int burstRemaining = WARN_BURST;
@@ -130,7 +131,7 @@ public final class LogManagerUtil {
         throw td;
       } catch (Throwable t) {
         warn(t);
-        // Fall-through to copied implementation
+        // fall-through to copied implementation
       }
     }
     String val = manager.getProperty(name);
@@ -167,7 +168,7 @@ public final class LogManagerUtil {
         throw td;
       } catch (Throwable t) {
         warn(t);
-        // Fall-through to copied implementation
+        // fall-through to copied implementation
       }
     }
     String val = manager.getProperty(name);
@@ -205,7 +206,7 @@ public final class LogManagerUtil {
         throw td;
       } catch (Throwable t) {
         warn(t);
-        // Fall-through to copied implementation
+        // fall-through to copied implementation
       }
     }
     String val = manager.getProperty(name);
@@ -254,7 +255,7 @@ public final class LogManagerUtil {
         throw td;
       } catch (Throwable t) {
         warn(t);
-        // Fall-through to copied implementation
+        // fall-through to copied implementation
       }
     }
     String val = manager.getProperty(name);

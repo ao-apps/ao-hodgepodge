@@ -54,13 +54,15 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
 
   /**
    * Test the graph for cycles and makes sure that all connections are consistent with back connections.
-   *
+   * <p>
    * Cycle algorithm adapted from:
    *     http://www.personal.kent.edu/~rmuhamma/Algorithms/MyAlgorithms/GraphAlgor/depthSearch.htm
    *     http://www.eecs.berkeley.edu/~kamil/teaching/sp03/041403.pdf
-   *
+   * </p>
+   * <p>
    * In the case of a multigraph, any number of edges one direction is considered a match to any number
    * of edges back.  The number does not need to be equal.
+   * </p>
    *
    * @throws AsymmetricException where the edges are not symmetric
    * @throws CycleException if there is a cycle in the graph
@@ -82,11 +84,11 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
    */
   private void doCheck(Map<V, Color> colors, Map<V, V> predecessors, V vertex) throws AsymmetricException, CycleException, Ex {
     colors.put(vertex, Color.GRAY);
-    for (Edge<V> vEdge : isForward ? graph.getEdgesFrom(vertex) : graph.getEdgesTo(vertex)) {
+    for (Edge<V> vedge : isForward ? graph.getEdgesFrom(vertex) : graph.getEdgesTo(vertex)) {
       //if (!isForward) {
       //    System.out.println("BREAKPOINT");
       //}
-      V connected = isForward ? vEdge.getTo() : vEdge.getFrom();
+      V connected = isForward ? vedge.getTo() : vedge.getFrom();
       // The directed edges should match
       if (
           !(
@@ -98,8 +100,8 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
         throw new AsymmetricException(vertex, connected);
       }
       // Check for cycle
-      Color uMark = colors.get(connected);
-      if (Color.GRAY == uMark /* && child.equals(predecessors.get(obj))*/) {
+      Color umark = colors.get(connected);
+      if (Color.GRAY == umark /* && child.equals(predecessors.get(obj))*/) {
         List<V> vertices = new ArrayList<>();
         vertices.add(connected);
         V pred = vertex;
@@ -109,7 +111,7 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
         }
         throw new CycleException(AoCollections.optimalUnmodifiableList(vertices));
       }
-      if (uMark == null) {
+      if (umark == null) {
         predecessors.put(connected, vertex);
         doCheck(colors, predecessors, connected);
       }

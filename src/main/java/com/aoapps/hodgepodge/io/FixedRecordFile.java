@@ -122,7 +122,7 @@ public class FixedRecordFile extends RandomAccessFile {
           // Perform the copy backward
           long readLocation = fromIndex + numBytes;
           while (readLocation > fromIndex) {
-            long readEnd = readLocation;
+            final long readEnd = readLocation;
             readLocation -= BufferManager.BUFFER_SIZE;
             if (readLocation < fromIndex) {
               readLocation = fromIndex;

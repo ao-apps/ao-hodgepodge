@@ -94,8 +94,7 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
   public static boolean isTrackingKey(String key) {
     return
         key.endsWith(VALIDATED_SUFFIX)
-            || key.endsWith(MODIFIED_SUFFIX)
-    ;
+            || key.endsWith(MODIFIED_SUFFIX);
   }
 
   /**
@@ -391,8 +390,8 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
       }
       if (!sourceFile.exists() || !FileUtils.contentEquals(sourceFile, newContent)) {
         try (
-          TempFileContext tempFileContext = new TempFileContext(sourceFile.getParentFile());
-          TempFile tempFile = tempFileContext.createTempFile(sourceFile.getName())
+            TempFileContext tempFileContext = new TempFileContext(sourceFile.getParentFile());
+            TempFile tempFile = tempFileContext.createTempFile(sourceFile.getName())
             ) {
           try (OutputStream out = new FileOutputStream(tempFile.getFile())) {
             out.write(newContent);

@@ -43,12 +43,10 @@ public class MultiBorderLayout extends BorderLayout {
 
   private static final long serialVersionUID = 1L;
 
-  protected List<Component>
-      northComponents,
-      westComponents,
-      eastComponents,
-      southComponents
-  ;
+  protected List<Component> northComponents;
+  protected List<Component> westComponents;
+  protected List<Component> eastComponents;
+  protected List<Component> southComponents;
 
   protected Component center;
 
@@ -95,6 +93,8 @@ public class MultiBorderLayout extends BorderLayout {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @deprecated  replaced by <code>addLayoutComponent(Component, Object)</code>.
    */
   @Override

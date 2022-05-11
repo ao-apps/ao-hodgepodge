@@ -99,7 +99,8 @@ public class ImageCanvas extends JComponent {
     Dimension size = getSize();
     int width = size.width;
     int height = size.height;
-    int iwidth, iheight;
+    int iwidth;
+    int iheight;
     if (
         g != null
             && width > 0

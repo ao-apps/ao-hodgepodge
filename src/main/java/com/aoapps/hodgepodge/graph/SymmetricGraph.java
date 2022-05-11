@@ -37,8 +37,9 @@ public interface SymmetricGraph<V, E extends Edge<V>, Ex extends Exception> exte
 
   /**
    * {@inheritDoc}
-   *
+   * <p>
    * A graph only allows unique combinations of from and to vertices.
+   * </p>
    */
   @Override
   Set<E> getEdgesTo(V to) throws Ex;

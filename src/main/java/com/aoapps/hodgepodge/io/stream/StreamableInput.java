@@ -47,8 +47,9 @@ public class StreamableInput extends DataInputStream implements NoClose {
 
   /**
    * Reads a compressed integer from the stream.
-   *
+   * <p>
    * The 31 bit pattern is as follows:
+   * </p>
    * <pre>
    * 5 bit   - 000SXXXX
    * 13 bit  - 001SXXXX XXXXXXXX
@@ -82,8 +83,7 @@ public class StreamableInput extends DataInputStream implements NoClose {
               | ((b1 & 0x3f) << 24)
               | (b2 << 16)
               | (b3 << 8)
-              | b4
-      ;
+              | b4;
     } else if ((b1 & 0x40) != 0) {
       // 22 bit
       int b2 = in.read();
@@ -98,8 +98,7 @@ public class StreamableInput extends DataInputStream implements NoClose {
           ((b1 & 0x20) == 0 ? 0 : 0xffe00000)
               | ((b1 & 0x1f) << 16)
               | (b2 << 8)
-              | b3
-      ;
+              | b3;
     } else if ((b1 & 0x20) != 0) {
       // 13 bit
       int b2 = in.read();
@@ -109,21 +108,20 @@ public class StreamableInput extends DataInputStream implements NoClose {
       return
           ((b1 & 0x10) == 0 ? 0 : 0xfffff000)
               | ((b1 & 0x0f) << 8)
-              | b2
-      ;
+              | b2;
     } else {
       // 5 bit
       return
           ((b1 & 0x10) == 0 ? 0 : 0xfffffff0)
-              | (b1 & 0x0f)
-      ;
+              | (b1 & 0x0f);
     }
   }
 
   /**
    * Reads a compressed integer from the stream.
-   *
+   * <p>
    * The 31 bit pattern is as follows:
+   * </p>
    * <pre>
    * 5 bit   - 000SXXXX
    * 13 bit  - 001SXXXX XXXXXXXX

@@ -102,6 +102,8 @@ public abstract class QueuedHandler extends Handler {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @see StreamHandler#publish(java.util.logging.LogRecord)
    */
   @Override
@@ -121,7 +123,7 @@ public abstract class QueuedHandler extends Handler {
         return;
       }
       // Queue for custom action
-          try {
+      try {
         executor.submit(
             () -> {
               try {

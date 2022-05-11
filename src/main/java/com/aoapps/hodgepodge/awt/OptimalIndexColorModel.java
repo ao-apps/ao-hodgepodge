@@ -52,8 +52,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
     public boolean equals(Object obj) {
       return
           (obj instanceof ColorCount)
-              && ((ColorCount) obj).color == color
-      ;
+              && ((ColorCount) obj).color == color;
     }
 
     @Override
@@ -151,7 +150,7 @@ public class OptimalIndexColorModel extends IndexColorModel {
     byte[] g = new byte[numColorsUsed];
     byte[] b = new byte[numColorsUsed];
 
-    int transparent_index = -1;
+    int transparentIndex = -1;
 
     for (int c = 0; c < numColorsUsed; c++) {
       int color = colorCountList.get(c).color;
@@ -163,6 +162,6 @@ public class OptimalIndexColorModel extends IndexColorModel {
       //   transparent_index = c;
       // }
     }
-    return new OptimalIndexColorModel(numColorsUsed, r, g, b, transparent_index);
+    return new OptimalIndexColorModel(numColorsUsed, r, g, b, transparentIndex);
   }
 }

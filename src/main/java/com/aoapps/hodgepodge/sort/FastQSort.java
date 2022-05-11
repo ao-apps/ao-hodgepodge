@@ -37,20 +37,22 @@ import java.util.List;
 /**
  * A quick sort demonstration algorithm
  * SortAlgorithm.java
+ * <p>
+ * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/FastQSortAlgorithm.java.html'>Denis Ahrens' FastQSortAlgorithm</a>,
+ * which was derived from Sun's example QSortAlgorithm.
+ * </p>
+ * <p>
+ * 2003-11-06 - Dan Armstrong - To avoid worst-case scenarios, if the quickSort recursion depth exceeds <code>(int)(10*Math.log(list.size()))</code>,
+ *                              the algorithm will quit and a {@link HeapSort} will be performed.
+ * </p>
  *
  * @author James Gosling
  * @author Kevin A. Smith
  * @version \@(#)QSortAlgorithm.java 1.3, 29 Feb 1996
- * extended with TriMedian and InsertionSort by Denis Ahrens
- * with all the tips from Robert Sedgewick (Algorithms in C++).
- * It uses TriMedian and InsertionSort for lists shorts than 4.
- * &lt;fuhrmann@cs.tu-berlin.de&gt;
- * <p>
- * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/FastQSortAlgorithm.java.html'>Denis Ahrens' FastQSortAlgorithm</a>,
- * which was derived from Sun's example QSortAlgorithm.
- * <p>
- * 2003-11-06 - Dan Armstrong - To avoid worst-case scenarios, if the quickSort recursion depth exceeds <code>(int)(10*Math.log(list.size()))</code>,
- *                              the algorithm will quit and a HeapSort will be performed.
+ *          extended with TriMedian and InsertionSort by Denis Ahrens
+ *          with all the tips from Robert Sedgewick (Algorithms in C++).
+ *          It uses TriMedian and InsertionSort for lists shorts than 4.
+ *          &lt;fuhrmann@cs.tu-berlin.de&gt;
  */
 public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
 
@@ -113,12 +115,13 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
    * This is a generic version of C.A.R Hoare's Quick Sort
    * algorithm. This will handle arrays that are already
    * sorted, and arrays with duplicate keys.<br />
-   *
+   * <p>
    * If you think of a one dimensional array as going from
    * the lowest index on the left to the highest index on the right
    * then the parameters to this function are lowest index or
    * left and highest index or right. The first time you call
    * this function it will be with the parameters 0, a.length - 1.
+   * </p>
    *
    * @param a an integer array
    * @param lo0 left boundary of array partition
@@ -191,12 +194,13 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
    * This is a generic version of C.A.R Hoare's Quick Sort
    * algorithm. This will handle arrays that are already
    * sorted, and arrays with duplicate keys.<br />
-   *
+   * <p>
    * If you think of a one dimensional array as going from
    * the lowest index on the left to the highest index on the right
    * then the parameters to this function are lowest index or
    * left and highest index or right. The first time you call
    * this function it will be with the parameters 0, a.length - 1.
+   * </p>
    *
    * @param a an integer array
    * @param lo0 left boundary of array partition

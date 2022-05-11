@@ -31,9 +31,10 @@ import java.util.Set;
 
 /**
  * Performs a topological sort of all the vertices in the provided symmetric multi graph.
- *
+ * <p>
  * If forward, objects with no edges directed out are first.
  * If backward, objects with no edges directed in are first.
+ * </p>
  * <p>
  * See <a href="https://wikipedia.org/wiki/Topological_sorting#Algorithms">https://wikipedia.org/wiki/Topological_sorting#Algorithms</a>
  * </p>

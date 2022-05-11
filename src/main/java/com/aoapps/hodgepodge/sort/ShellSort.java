@@ -23,29 +23,34 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * A shell sort demonstration algorithm
+ * A shell sort demonstration algorithm.
  * SortAlgorithm.java, Thu Oct 27 10:32:35 1994
  * Note: Invented by Donald Lewis Shell [CACM, July, 1959, pages 30-32]
- * @author Jason Harrison@cs.ubc.ca
- * @version 1.0, 23 Jun 1995
- * @version 1.1, 12 Apr 2000
- *              -- fixed java.lang.ArrayIndexOutOfBoundsException
- *                 Joel Berry &lt;jmbshifty@yahoo.com&gt; found this bug
  * <p>
  * http://www.auto.tuwien.ac.at/~blieb/woop/shell.html
- *
+ * </p>
+ * <p>
  * Shellsort is a simple extension of insertion sort which gains speed
  * by allowing exchanges of elements that are far apart. The idea is
  * to rearrange the array to give it the property that every hth
  * element (starting anywhere) yields a sorted array. Such an array
  * is said to be h-sorted.
- *
+ * </p>
+ * <p>
  * By h-sorting for some large values of h, we can move elements in
  * the array long distances and thus make it easier to h-sort for
  * smaller values of h. Using such a procedure for any sequence of
  * values h which ends in 1 will produce a sorted array.
+ * </p>
  * <p>
  * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/ShellSortAlgorithm.java.html'>Jason Harrison's ShellSortAlgorithm</a>.
+ * </p>
+ *
+ * @author Jason Harrison@cs.ubc.ca
+ * @version 1.0, 23 Jun 1995
+ * @version 1.1, 12 Apr 2000
+ *              -- fixed java.lang.ArrayIndexOutOfBoundsException
+ *                 Joel Berry &lt;jmbshifty@yahoo.com&gt; found this bug
  */
 public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
 
@@ -84,7 +89,7 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
       for (int i = h - 1; i < length; i++) {
         // pick the last element in the set
         T b = get(list, i, stats);
-        int j;// = i;
+        int j; // = i;
         // compare the element at B to the one before it in the set
         // if they are out of order continue this loop, moving
         // elements "back" to make room for B to be inserted.
@@ -123,7 +128,7 @@ public final class ShellSort extends BaseComparisonSortAlgorithm<Object> {
       for (int i = h - 1; i < length; i++) {
         // pick the last element in the set
         T b = get(array, i, stats);
-        int j;// = i;
+        int j; // = i;
         // compare the element at B to the one before it in the set
         // if they are out of order continue this loop, moving
         // elements "back" to make room for B to be inserted.

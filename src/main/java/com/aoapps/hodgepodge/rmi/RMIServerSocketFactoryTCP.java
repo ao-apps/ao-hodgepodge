@@ -56,8 +56,7 @@ public class RMIServerSocketFactoryTCP implements RMIServerSocketFactory {
   public boolean equals(Object obj) {
     return
         (obj instanceof RMIServerSocketFactoryTCP)
-            && Objects.equals(listenAddress, ((RMIServerSocketFactoryTCP) obj).listenAddress)
-    ;
+            && Objects.equals(listenAddress, ((RMIServerSocketFactoryTCP) obj).listenAddress);
   }
 
   @Override

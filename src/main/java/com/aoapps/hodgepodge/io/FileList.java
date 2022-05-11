@@ -197,24 +197,24 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
   }
 
   @Override
-  public boolean addAll(Collection<? extends T> C) {
-    return addAll(size(), C);
+  public boolean addAll(Collection<? extends T> collection) {
+    return addAll(size(), collection);
   }
 
   @Override
-  public boolean addAll(int index, Collection<? extends T> C) {
+  public boolean addAll(int index, Collection<? extends T> collection) {
     try {
-      FileList<? extends T> otherFL;
+      FileList<? extends T> otherFileList;
       if (
-          (C instanceof FileList)
-              && (otherFL = (FileList<? extends T>) C).frf.getRecordLength() == frf.getRecordLength()
+          (collection instanceof FileList)
+              && (otherFileList = (FileList<? extends T>) collection).frf.getRecordLength() == frf.getRecordLength()
       ) {
         // Do direct disk copies
         boolean changed = false;
-        int otherSize = otherFL.size();
+        int otherSize = otherFileList.size();
         if (otherSize > 0) {
           frf.addRecords(index, otherSize);
-          FixedRecordFile.copyRecords(otherFL.frf, 0, frf, index, otherSize);
+          FixedRecordFile.copyRecords(otherFileList.frf, 0, frf, index, otherSize);
           changed = true;
         }
         if (changed) {
@@ -224,10 +224,10 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
       } else {
         // Do block allocate then write
         boolean changed = false;
-        int otherSize = C.size();
+        int otherSize = collection.size();
         if (otherSize > 0) {
           frf.addRecords(index, otherSize);
-          Iterator<? extends T> records = C.iterator();
+          Iterator<? extends T> records = collection.iterator();
           int count = 0;
           while (records.hasNext()) {
             // Write to buffer
@@ -299,20 +299,6 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
 
   public FileListObjectFactory<T> getObjectFactory() {
     return objectFactory;
-  }
-
-  /**
-   * @deprecated The finalization mechanism is inherently problematic.
-   */
-  @Deprecated // Java 9: (since="9")
-  @Override
-  @SuppressWarnings("FinalizeDeclaration")
-  protected void finalize() throws Throwable {
-    try {
-      close();
-    } finally {
-      super.finalize();
-    }
   }
 
   @Override

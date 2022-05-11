@@ -29,9 +29,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 /**
- * Holds a reference to a temp file.  Automatically deletes the file with
- * a finalizer, on JVM shutdown, or when <code>delete()</code> is explicitly
- * called.
+ * Holds a reference to a temp file.  Automatically deletes the file on JVM shutdown
+ * or when <code>delete()</code> is explicitly called.
  *
  * @see  TempFileList  for a way to confine instance lifetime to a narrower scope than automatic garbage collection
  *
@@ -85,21 +84,6 @@ public class TempFile {
     if (f != null) {
       Files.delete(f.toPath());
       tempFile = null;
-    }
-  }
-
-  /**
-   * Deletes the underlying temp file on garbage collection.
-   *
-   * @deprecated The finalization mechanism is inherently problematic.
-   */
-  @Deprecated // Java 9: (since="9")
-  @Override
-  protected void finalize() throws Throwable {
-    try {
-      delete();
-    } finally {
-      super.finalize();
     }
   }
 

@@ -98,8 +98,7 @@ public final class WsEncoder {
               .append(hexChars[(ich >>> 12) & 15])
               .append(hexChars[(ich >>> 8) & 15])
               .append(hexChars[(ich >>> 4) & 15])
-              .append(hexChars[ich & 15])
-          ;
+              .append(hexChars[ich & 15]);
         }
       } else {
         if (encoded != null) {

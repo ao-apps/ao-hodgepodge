@@ -38,8 +38,9 @@ public interface Graph<V, E extends Edge<V>, Ex extends Exception> extends Multi
 
   /**
    * {@inheritDoc}
-   *
+   * <p>
    * A graph only allows unique combinations of from and to vertices.
+   * </p>
    */
   @Override
   Set<E> getEdgesFrom(V from) throws Ex;

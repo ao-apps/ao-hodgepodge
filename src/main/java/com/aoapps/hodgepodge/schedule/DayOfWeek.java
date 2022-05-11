@@ -26,13 +26,34 @@ package com.aoapps.hodgepodge.schedule;
 import java.util.Calendar;
 
 public enum DayOfWeek {
-  SUNDAY   ("Sunday",    "Sun", Calendar.SUNDAY),
-  MONDAY   ("Monday",    "Mon", Calendar.MONDAY),
-  TUESDAY  ("Tuesday",   "Tue", Calendar.TUESDAY),
-  WEDNESDAY("Wednesday", "Wed", Calendar.WEDNESDAY),
-  THURSDAY ("Thursday",  "Thu", Calendar.THURSDAY),
-  FRIDAY   ("Friday",    "Fri", Calendar.FRIDAY),
-  SATURDAY ("Saturday",  "Sat", Calendar.SATURDAY);
+  SUNDAY(
+      "Sunday",
+      "Sun",
+      Calendar.SUNDAY),
+  MONDAY(
+      "Monday",
+      "Mon",
+      Calendar.MONDAY),
+  TUESDAY(
+      "Tuesday",
+      "Tue",
+      Calendar.TUESDAY),
+  WEDNESDAY(
+      "Wednesday",
+      "Wed",
+      Calendar.WEDNESDAY),
+  THURSDAY(
+      "Thursday",
+      "Thu",
+      Calendar.THURSDAY),
+  FRIDAY(
+      "Friday",
+      "Fri",
+      Calendar.FRIDAY),
+  SATURDAY(
+      "Saturday",
+      "Sat",
+      Calendar.SATURDAY);
 
   /**
    * Copy of values for internal use without temporary array copy.
@@ -44,14 +65,22 @@ public enum DayOfWeek {
    */
   public static DayOfWeek getByCalendarDayOfWeek(int calendarDayOfWeek) {
     switch (calendarDayOfWeek) {
-      case Calendar.SUNDAY    : return SUNDAY;
-      case Calendar.MONDAY    : return MONDAY;
-      case Calendar.TUESDAY   : return TUESDAY;
-      case Calendar.WEDNESDAY : return WEDNESDAY;
-      case Calendar.THURSDAY  : return THURSDAY;
-      case Calendar.FRIDAY    : return FRIDAY;
-      case Calendar.SATURDAY  : return SATURDAY;
-      default : throw new AssertionError("Calendar and DayOfWeek mismatch, all fields set?: calendarDayOfWeek = " + calendarDayOfWeek);
+      case Calendar.SUNDAY:
+        return SUNDAY;
+      case Calendar.MONDAY:
+        return MONDAY;
+      case Calendar.TUESDAY:
+        return TUESDAY;
+      case Calendar.WEDNESDAY:
+        return WEDNESDAY;
+      case Calendar.THURSDAY:
+        return THURSDAY;
+      case Calendar.FRIDAY:
+        return FRIDAY;
+      case Calendar.SATURDAY:
+        return SATURDAY;
+      default:
+        throw new AssertionError("Calendar and DayOfWeek mismatch, all fields set?: calendarDayOfWeek = " + calendarDayOfWeek);
     }
   }
 
@@ -80,7 +109,7 @@ public enum DayOfWeek {
 
   /**
    * Gets the day of week value used by the Calendar class.
-   * 
+   *
    * @see  Calendar
    */
   public int getCalendarDayOfWeek() {

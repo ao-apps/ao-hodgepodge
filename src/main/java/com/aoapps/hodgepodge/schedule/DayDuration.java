@@ -32,16 +32,16 @@ public class DayDuration {
 
   public enum Unit {
     DAYS {
-    @Override
-    void toString(int count, StringBuilder sb) {
-      sb.append(count).append(count == 1 ? " day" : " days");
-    }
+      @Override
+      void toString(int count, StringBuilder sb) {
+        sb.append(count).append(count == 1 ? " day" : " days");
+      }
 
-    @Override
-    void offset(int count, Calendar cal) {
-      cal.add(Calendar.DATE, count);
-    }
-  },
+      @Override
+      void offset(int count, Calendar cal) {
+        cal.add(Calendar.DATE, count);
+      }
+    },
     WEEKS {
       @Override
       void toString(int count, StringBuilder sb) {

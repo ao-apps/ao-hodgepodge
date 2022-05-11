@@ -461,7 +461,7 @@ public abstract class Recurring {
          */
         @Override
         public Calendar next() {
-          Calendar date = (Calendar) cal.clone();
+          final Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next month
           cal.set(Calendar.DAY_OF_MONTH, 1);
           cal.add(Calendar.MONTH, 1);
@@ -583,7 +583,7 @@ public abstract class Recurring {
          */
         @Override
         public Calendar next() {
-          Calendar date = (Calendar) cal.clone();
+          final Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next year
           cal.set(Calendar.DAY_OF_MONTH, 1);
           cal.add(Calendar.YEAR, 1);
@@ -624,8 +624,7 @@ public abstract class Recurring {
       Every other = (Every) o;
       return
           increment == other.increment
-              && field == other.field
-      ;
+              && field == other.field;
     }
 
     @Override
@@ -638,19 +637,19 @@ public abstract class Recurring {
       StringBuilder sb = new StringBuilder("Every ");
       sb.append(increment);
       switch (field) {
-        case Calendar.DAY_OF_MONTH :
+        case Calendar.DAY_OF_MONTH:
           sb.append(" days");
           break;
-        case Calendar.WEEK_OF_YEAR :
+        case Calendar.WEEK_OF_YEAR:
           sb.append(" weeks");
           break;
-        case Calendar.MONTH :
+        case Calendar.MONTH:
           sb.append(" months");
           break;
-        case Calendar.YEAR :
+        case Calendar.YEAR:
           sb.append(" years");
           break;
-        default :
+        default:
           throw new AssertionError("Unexpected value for field: " + field);
       }
       return sb.toString();
@@ -659,9 +658,9 @@ public abstract class Recurring {
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
       switch (field) {
-        case Calendar.DAY_OF_MONTH :
-        case Calendar.WEEK_OF_YEAR :
-        case Calendar.YEAR :
+        case Calendar.DAY_OF_MONTH:
+        case Calendar.WEEK_OF_YEAR:
+        case Calendar.YEAR:
           // Java 9: new Iterator<>
           return new Iterator<Calendar>() {
             private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
@@ -682,7 +681,7 @@ public abstract class Recurring {
               return date;
             }
           };
-        case Calendar.MONTH :
+        case Calendar.MONTH:
           // Java 9: new Iterator<>
           return new Iterator<Calendar>() {
             private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
@@ -698,7 +697,7 @@ public abstract class Recurring {
              */
             @Override
             public Calendar next() {
-              Calendar date = (Calendar) cal.clone();
+              final Calendar date = (Calendar) cal.clone();
               // Move the calendar to the next month
               cal.set(Calendar.DAY_OF_MONTH, 1);
               cal.add(Calendar.MONTH, increment);
@@ -707,7 +706,7 @@ public abstract class Recurring {
               return date;
             }
           };
-        default :
+        default:
           throw new AssertionError("Unexpected value for field: " + field);
       }
     }

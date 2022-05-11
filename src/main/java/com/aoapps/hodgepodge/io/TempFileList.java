@@ -100,8 +100,9 @@ public class TempFileList {
 
   /**
    * Deletes all of the underlying temp files immediately.
-   *
+   * <p>
    * This list may still be used for additional temp files.
+   * </p>
    *
    * @see  TempFile#delete()
    */

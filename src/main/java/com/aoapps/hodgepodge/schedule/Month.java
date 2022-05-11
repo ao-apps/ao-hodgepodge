@@ -26,18 +26,54 @@ package com.aoapps.hodgepodge.schedule;
 import java.util.Calendar;
 
 public enum Month {
-  JANUARY  ("January",   "Jan", Calendar.JANUARY),
-  FEBRUARY ("February",  "Feb", Calendar.FEBRUARY),
-  MARCH    ("March",     "Mar", Calendar.MARCH),
-  APRIL    ("April",     "Apr", Calendar.APRIL),
-  MAY      ("May",       "May", Calendar.MAY),
-  JUNE     ("June",      "Jun", Calendar.JUNE),
-  JULY     ("July",      "Jul", Calendar.JULY),
-  AUGUST   ("August",    "Aug", Calendar.AUGUST),
-  SEPTEMBER("September", "Sep", Calendar.SEPTEMBER),
-  OCTOBER  ("October",   "Oct", Calendar.OCTOBER),
-  NOVEMBER ("November",  "Nov", Calendar.NOVEMBER),
-  DECEMBER ("December",  "Dec", Calendar.DECEMBER);
+  JANUARY(
+      "January",
+      "Jan",
+      Calendar.JANUARY),
+  FEBRUARY(
+      "February",
+      "Feb",
+      Calendar.FEBRUARY),
+  MARCH(
+      "March",
+      "Mar",
+      Calendar.MARCH),
+  APRIL(
+      "April",
+      "Apr",
+      Calendar.APRIL),
+  MAY(
+      "May",
+      "May",
+      Calendar.MAY),
+  JUNE(
+      "June",
+      "Jun",
+      Calendar.JUNE),
+  JULY(
+      "July",
+      "Jul",
+      Calendar.JULY),
+  AUGUST(
+      "August",
+      "Aug",
+      Calendar.AUGUST),
+  SEPTEMBER(
+      "September",
+      "Sep",
+      Calendar.SEPTEMBER),
+  OCTOBER(
+      "October",
+      "Oct",
+      Calendar.OCTOBER),
+  NOVEMBER(
+      "November",
+      "Nov",
+      Calendar.NOVEMBER),
+  DECEMBER(
+      "December",
+      "Dec",
+      Calendar.DECEMBER);
 
   /**
    * Copy of values for internal use without temporary array copy.
@@ -49,19 +85,32 @@ public enum Month {
    */
   public static Month getByCalendarMonth(int calendarMonth) {
     switch (calendarMonth) {
-      case Calendar.JANUARY   : return JANUARY;
-      case Calendar.FEBRUARY  : return FEBRUARY;
-      case Calendar.MARCH     : return MARCH;
-      case Calendar.APRIL     : return APRIL;
-      case Calendar.MAY       : return MAY;
-      case Calendar.JUNE      : return JUNE;
-      case Calendar.JULY      : return JULY;
-      case Calendar.AUGUST    : return AUGUST;
-      case Calendar.SEPTEMBER : return SEPTEMBER;
-      case Calendar.OCTOBER   : return OCTOBER;
-      case Calendar.NOVEMBER  : return NOVEMBER;
-      case Calendar.DECEMBER  : return DECEMBER;
-      default : throw new AssertionError("Calendar and Month mismatch");
+      case Calendar.JANUARY:
+        return JANUARY;
+      case Calendar.FEBRUARY:
+        return FEBRUARY;
+      case Calendar.MARCH:
+        return MARCH;
+      case Calendar.APRIL:
+        return APRIL;
+      case Calendar.MAY:
+        return MAY;
+      case Calendar.JUNE:
+        return JUNE;
+      case Calendar.JULY:
+        return JULY;
+      case Calendar.AUGUST:
+        return AUGUST;
+      case Calendar.SEPTEMBER:
+        return SEPTEMBER;
+      case Calendar.OCTOBER:
+        return OCTOBER;
+      case Calendar.NOVEMBER:
+        return NOVEMBER;
+      case Calendar.DECEMBER:
+        return DECEMBER;
+      default:
+        throw new AssertionError("Calendar and Month mismatch");
     }
   }
 
@@ -90,7 +139,7 @@ public enum Month {
 
   /**
    * Gets the month value used by the Calendar class.
-   * 
+   *
    * @see  Calendar
    */
   public int getCalendarMonth() {

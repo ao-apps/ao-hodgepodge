@@ -309,8 +309,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
       final LookupKey other = (LookupKey) obj;
       return
           bundleSet == other.bundleSet
-              && key.equals(other.key)
-      ;
+              && key.equals(other.key);
     }
 
     @Override
@@ -450,52 +449,78 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           out
               .append(" | <span style='color:red'>")
               .append(Integer.toString(missingCount))
-              .append(" Missing</span>")
-          ;
+              .append(" Missing</span>");
         }
         if (invalidatedCount > 0) {
           out
               .append(" | <span style='color:blue'>")
               .append(Integer.toString(invalidatedCount))
-              .append(" Invalidated</span>")
-          ;
+              .append(" Invalidated</span>");
         }
         out.append("</span></a>\n"
             + "</div>\n"
-            + "<div id=\"EditableResourceBundleEditor\" style=\"position:fixed; left:50px; width:640px; top:50px; height:480px; visibility:hidden; border-left:1px solid black; border-top:1px solid black; border-right:2px solid black; border-bottom:2px solid black; background-color:white; overflow:hidden\">\n"
-            + "  <div style=\"border-top:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; bottom:0px; height:").append(Integer.toString(allLocales.size() * editorRows)).append("em; overflow:hidden\">\n");
+            + "<div id=\"EditableResourceBundleEditor\" style=\"position:fixed; left:50px; width:640px; top:50px;"
+            + " height:480px; visibility:hidden; border-left:1px solid black; border-top:1px solid black;"
+            + " border-right:2px solid black; border-bottom:2px solid black; background-color:white; overflow:hidden\">\n"
+            + "  <div style=\"border-top:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; bottom:0px; height:")
+            .append(Integer.toString(allLocales.size() * editorRows)).append("em; overflow:hidden\">\n");
         int i = 0;
         for (Locale locale : allLocales) {
           String toString = locale.toString();
-          out.append("    <div style=\"position:absolute; left:0px; width:6em; top:").append(Integer.toString(i * editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n"
+          out.append("    <div style=\"position:absolute; left:0px; width:6em; top:")
+              .append(Integer.toString(i * editorRows)).append("em; height:")
+              .append(Integer.toString(editorRows)).append("em\">\n"
               // Vertical centering uses Method 1 from http://phrogz.net/CSS/vertical-align/index.html
               + "      <div style=\"position:absolute; top:50%; height:1em; margin-top:-.5em; padding-left:4px; padding-right:2px\">\n"
               + "        ").append(toString.length() == 0 ? "Default" : toString).append("\n"
               + "      </div>\n"
               + "    </div>\n"
-              + "    <div style=\"position:absolute; left:6em; right:").append(verticalButtons ? "10em" : "14em").append("; top:").append(Integer.toString(i * editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n"
-              + "      <textarea disabled=\"disabled\" id=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorTextArea").append(Integer.toString(i + 1)).append("\" cols=\"40\" rows=\"").append(Integer.toString(editorRows)).append("\" style=\"width:100%; height:100%\"></textarea>\n"
+              + "    <div style=\"position:absolute; left:6em; right:").append(verticalButtons ? "10em" : "14em")
+              .append("; top:").append(Integer.toString(i * editorRows)).append("em; height:")
+              .append(Integer.toString(editorRows)).append("em\">\n"
+              + "      <textarea disabled=\"disabled\" id=\"EditableResourceBundleEditorTextArea")
+              .append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorTextArea")
+              .append(Integer.toString(i + 1)).append("\" cols=\"40\" rows=\"")
+              .append(Integer.toString(editorRows)).append("\" style=\"width:100%; height:100%\"></textarea>\n"
               + "    </div>\n"
-              + "    <div style=\"position:absolute; width:").append(verticalButtons ? "10em" : "14em").append("; right:0px; top:").append(Integer.toString(i * editorRows)).append("em; height:").append(Integer.toString(editorRows)).append("em\">\n");
+              + "    <div style=\"position:absolute; width:").append(verticalButtons ? "10em" : "14em")
+              .append("; right:0px; top:").append(Integer.toString(i * editorRows)).append("em; height:")
+              .append(Integer.toString(editorRows)).append("em\">\n");
           if (verticalButtons) {
             out.append("      <div style=\"position:absolute; left:0px; width:100%; top:30%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
+                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton")
+                .append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorValidateButton")
+                .append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(")
+                .append(Integer.toString(i)).append(", false);\" />\n"
                 + "      </div>\n"
                 + "      <div style=\"position:absolute; left:0px; width:100%; top:70%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
-                + "      </div>\n");
+                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton")
+                .append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorModifyButton")
+                .append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(")
+                .append(Integer.toString(i)).append(", true);\" />\n"
+                  + "      </div>\n");
           } else {
             out.append("      <div style=\"position:absolute; left:0px; width:100%; top:50%; height:1.2em; margin-top:-.6em; text-align:center\">\n"
-                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorValidateButton").append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", false);\" />\n"
-                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorModifyButton").append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(").append(Integer.toString(i)).append(", true);\" />\n"
-                + "      </div>\n");
+                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorValidateButton")
+                .append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorValidateButton")
+                .append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Validate\" onclick=\"return EditableResourceBundleEditorModifyOnClick(")
+                .append(Integer.toString(i)).append(", false);\" />\n"
+                + "        <input disabled=\"disabled\" id=\"EditableResourceBundleEditorModifyButton")
+                .append(Integer.toString(i + 1)).append("\" name=\"EditableResourceBundleEditorModifyButton")
+                .append(Integer.toString(i + 1)).append("\" type=\"button\" value=\"Modify\" onclick=\"return EditableResourceBundleEditorModifyOnClick(")
+                .append(Integer.toString(i)).append(", true);\" />\n"
+                  + "      </div>\n");
           }
           out.append("    </div>\n");
           i++;
         }
         out.append("  </div>\n"
-            + "  <div id=\"EditableResourceBundleEditorHeader\" style=\"border-bottom:1px solid black; background-color:#c0c0c0; position:absolute; left:0px; width:100%; top:0px; height:2em; overflow:hidden\">\n"
-            + "    <div style=\"float:right; border:2px outset black; margin:.3em\"><a href=\"#\" onclick=\"if (EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility('hidden'); return false;\" style=\"text-decoration:none; color:black; background-color:white; padding-left:2px; padding-right:2px;\">✕</a></div>\n"
+            + "  <div id=\"EditableResourceBundleEditorHeader\" style=\"border-bottom:1px solid black;"
+            + " background-color:#c0c0c0; position:absolute; left:0px; width:100%; top:0px; height:2em; overflow:hidden\">\n"
+            + "    <div style=\"float:right; border:2px outset black; margin:.3em\"><a href=\"#\" onclick=\"if"
+            + " (EditableResourceBundleEditorSetVisibility) EditableResourceBundleEditorSetVisibility('hidden');"
+            + " return false;\" style=\"text-decoration:none; color:black; background-color:white; padding-left:2px;"
+            + " padding-right:2px;\">✕</a></div>\n"
             + "    <script type=\"" + ContentType.JAVASCRIPT + "\">");
         if (isXhtml) {
           out.append("//<![CDATA[");
@@ -659,7 +684,10 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             + "          var url=\"")
             .append(setValueUrl)
             .append(setValueUrl.indexOf('?') == -1 ? '?' : '&')
-            .append("baseName=\"+encodeURIComponent(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])+\"&locale=\"+encodeURIComponent(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURIComponent(EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURIComponent(value)+\"&modified=\"+modified;\n"
+            .append("baseName=\"+encodeURIComponent(EditableResourceBundleEditorRowBaseNames[EditableResourceBundleEditorSelectedIndex])"
+                + "+\"&locale=\"+encodeURIComponent(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURIComponent("
+                + "EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURIComponent(value)"
+                + "+\"&modified=\"+modified;\n"
                 //+ "          window.alert(url);\n"
                 + "          request.open('GET', url, false);\n"
                 + "          request.send(null);\n"
@@ -778,11 +806,12 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             + " onmousedown=\"return EditableResourceBundleEditorDragMouseDown(this, event);\""
             + ">Resource Editor</div>\n"
             + "  </div>\n"
-            + "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:").append(Integer.toString(allLocales.size() * editorRows)).append("em; overflow:auto\">\n"
-            + "    <table style=\"width:100%; border-collapse: collapse; border:1px solid black\">\n" // Not HTML 5 compatible: cellspacing=\"0\" cellpadding=\"2\"
-            + "      <tr style=\"background-color:#e0e0e0\">\n"
-            + "        <th style=\"border:1px solid black\"></th>\n"
-            + "        <th style=\"border:1px solid black\">Key</th>\n");
+            + "  <div id=\"EditableResourceBundleEditorScroller\" style=\"position:absolute; left:0px; width:100%; top:2em; bottom:")
+            .append(Integer.toString(allLocales.size() * editorRows)).append("em; overflow:auto\">\n"
+              + "    <table style=\"width:100%; border-collapse: collapse; border:1px solid black\">\n" // Not HTML 5 compatible: cellspacing=\"0\" cellpadding=\"2\"
+              + "      <tr style=\"background-color:#e0e0e0\">\n"
+              + "        <th style=\"border:1px solid black\"></th>\n"
+              + "        <th style=\"border:1px solid black\">Key</th>\n");
         for (Locale locale : allLocales) {
           String toString = locale.toString();
           out.append("        <th style=\"border:1px solid black\">").append(toString.length() == 0 ? "Default" : toString).append("</th>\n");
@@ -795,19 +824,29 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           LookupValue lookupValue = lookups.get(lookupKey);
           synchronized (lookupValue) {
             List<Long> elementIds = lookupValue.elementIds;
-            String key = lookupKey.key;
+            final String key = lookupKey.key;
             i++;
             String lookupId = Long.toString(lookupValue.id);
             out.append("      <tr"
                 + " id=\"EditableResourceBundleEditorRow").append(lookupId).append("\""
                 + " style=\"background-color:").append((i & 1) == 1 ? "white" : "#e0e0e0").append('"');
             if (!elementIds.isEmpty()) {
-              out.append(" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(").append(elementIds.get(0).toString()).append(", false);\""
-                  + " onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(").append(elementIds.get(0).toString()).append(");\"");
+              out.append(" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(")
+                  .append(elementIds.get(0).toString()).append(", false);\""
+                  + " onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(")
+                  .append(elementIds.get(0).toString()).append(");\"");
             }
             out.append(">\n"
-                + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0").append("');\" style=\"text-align:right; border:1px solid black\">").append(Long.toString(lookupValue.id)).append("</td>\n"
-                + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0").append("');\" style=\"border:1px solid black\">");
+                + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(")
+                .append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow")
+                .append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0")
+                .append("');\" style=\"text-align:right; border:1px solid black\">")
+                .append(Long.toString(lookupValue.id))
+                .append("</td>\n"
+                + "        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(")
+                .append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow")
+                .append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0")
+                .append("');\" style=\"border:1px solid black\">");
             textInXhtmlEncoder.append(lookupKey.key, out);
             out.append("</td>\n");
             int localeIndex = 0;
@@ -869,13 +908,22 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
                   }
                 }
 
-                out.append("        <td id=\"EditableResourceBundleEditorRow").append(Integer.toString(i)).append("Locale").append(Integer.toString(localeIndex)).append("\" style=\"white-space:pre; ");
+                out.append("        <td id=\"EditableResourceBundleEditorRow").append(Integer.toString(i))
+                    .append("Locale").append(Integer.toString(localeIndex)).append("\" style=\"white-space:pre; ");
                 if (borderColor != null) {
                   out.append("border:2px solid ").append(borderColor).append("; ");
                 } else {
                   out.append("border:1px solid black; ");
                 }
-                out.append("background-color:").append(backgroundColor).append("\" onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0").append("'); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').select(); document.getElementById('EditableResourceBundleEditorTextArea").append(Integer.toString(localeIndex)).append("').focus();\">");
+                out.append("background-color:").append(backgroundColor)
+                    .append("\" onclick=\"EditableResourceBundleEditorSelectedRowOnClick(")
+                    .append(Integer.toString(i - 1))
+                    .append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId)
+                    .append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0")
+                    .append("'); document.getElementById('EditableResourceBundleEditorTextArea")
+                    .append(Integer.toString(localeIndex))
+                    .append("').select(); document.getElementById('EditableResourceBundleEditorTextArea")
+                    .append(Integer.toString(localeIndex)).append("').focus();\">");
                 if (currentValue != null) {
                   if (currentValue.length() > 30) {
                     textInXhtmlEncoder.append(currentValue, 0, 30, out);
@@ -891,7 +939,9 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
               }
             }
             // Base Name
-            out.append("        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(").append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow").append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0").append("');\">");
+            out.append("        <td onclick=\"EditableResourceBundleEditorSelectedRowOnClick(")
+                .append(Integer.toString(i - 1)).append(", document.getElementById('EditableResourceBundleEditorRow")
+                .append(lookupId).append("'), '").append((i & 1) == 1 ? "white" : "#e0e0e0").append("');\">");
             textInXhtmlEncoder.append(bundleSet.getBaseName(), out);
             out.append("</td>\n"
                 + "      </tr>\n");
@@ -921,9 +971,13 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           + "  var EditableResourceBundleEditorHeight = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorHeight\");\n"
           + "  if (EditableResourceBundleEditorHeight != \"\") EditableResourceBundleEditorStyle.height=EditableResourceBundleEditorHeight;\n"
           + "  var EditableResourceBundleEditorTop = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorTop\");\n"
-          + "  if (EditableResourceBundleEditorTop != \"\" && parseInt(EditableResourceBundleEditorTop) >= 0 && (parseInt(EditableResourceBundleEditorTop)+parseInt(EditableResourceBundleEditorStyle.height)) <= window.innerHeight) EditableResourceBundleEditorStyle.top=EditableResourceBundleEditorTop;\n"
+          + "  if (EditableResourceBundleEditorTop != \"\" && parseInt(EditableResourceBundleEditorTop) >= 0 && "
+          + "(parseInt(EditableResourceBundleEditorTop)+parseInt(EditableResourceBundleEditorStyle.height)) <= window.innerHeight) "
+          + "EditableResourceBundleEditorStyle.top=EditableResourceBundleEditorTop;\n"
           + "  var EditableResourceBundleEditorLeft = EditableResourceBundleEditorGetCookie(\"EditableResourceBundleEditorLeft\");\n"
-          + "  if (EditableResourceBundleEditorLeft != \"\" && parseInt(EditableResourceBundleEditorLeft) >= 0 && (parseInt(EditableResourceBundleEditorLeft)+parseInt(EditableResourceBundleEditorStyle.width)) <= window.innerWidth) EditableResourceBundleEditorStyle.left=EditableResourceBundleEditorLeft;\n"
+          + "  if (EditableResourceBundleEditorLeft != \"\" && parseInt(EditableResourceBundleEditorLeft) >= 0 && "
+          + "(parseInt(EditableResourceBundleEditorLeft)+parseInt(EditableResourceBundleEditorStyle.width)) <= window.innerWidth) "
+          + "EditableResourceBundleEditorStyle.left=EditableResourceBundleEditorLeft;\n"
           + "  var EditableResourceBundleEditorVisibility = EditableResourceBundleEditorGetCookie(\"" + VISIBILITY_COOKIE_NAME + "\");\n"
           + "  if (EditableResourceBundleEditorVisibility != \"\") EditableResourceBundleEditorStyle.visibility=EditableResourceBundleEditorVisibility;\n"
           + "\n"
@@ -990,7 +1044,9 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           + "        if (elementId == elementIds[d]) {\n"
           + "          var elem=document.getElementById(\"EditableResourceBundleEditorRow\"+EditableResourceBundleLookupIds[c]);\n"
           + "          if (elem != null) {\n"
-          + "            elem.style.backgroundColor=elem == (!scrollEditor && EditableResourceBundleEditorSelectedRow) ? \"red\" : background != \"transparent\" ? background : elem == EditableResourceBundleEditorSelectedRow ? \"red\" : (c&1) == 0 ? \"white\" : \"#e0e0e0\";\n"
+          + "            elem.style.backgroundColor=elem == (!scrollEditor && EditableResourceBundleEditorSelectedRow) "
+          + "? \"red\" : background != \"transparent\" ? background : elem == EditableResourceBundleEditorSelectedRow "
+          + "? \"red\" : (c&1) == 0 ? \"white\" : \"#e0e0e0\";\n"
           + "            if (scrollEditor) {\n"
           + "              EditableResourceBundleDelayScroll(elem);\n"
           + "            }\n"
@@ -1172,7 +1228,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 
   /**
    * <p>
-   * XHTML: Text surrounded by &lt;span&gt;
+   * XHTML: Text surrounded by &lt;span&gt;.
    * </p>
    * <p>
    * TEXT: &lt;#&lt; and &gt;#&gt; used to cause XHTML parse errors if text value not properly encoded
@@ -1206,10 +1262,11 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     @Override
     public void appendPrefixTo(MarkupType markupType, Appendable out) throws IOException {
       switch (markupType) {
-        case NONE :
+        case NONE: {
           // No markup
           break;
-        case XHTML :
+        }
+        case XHTML: {
           //if (invalidated) {
           //  SB.append(" style=\"color:red\"");
           //}
@@ -1225,23 +1282,20 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
                 .append(", true);\"")
                 .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(")
                 .append(elementIdString)
-                .append(");\">")
-            // TODO: invalidated/modifyAllText marker here, too?
-            ;
+                .append(");\">");
+            // TODO: invalidated/modifyAllText marker here, too?;
           } else {
             // No scripting version, similar to TEXT
             if (invalidated) {
               out
                   .append("&lt;&lt;&lt;")
                   .append(Long.toString(lookupId))
-                  .append("&lt;")
-              ;
+                  .append("&lt;");
             } else if (modifyAllText) {
               out
                   .append("&lt;")
                   .append(Long.toString(lookupId))
-                  .append("&lt;")
-              ;
+                  .append("&lt;");
             } else {
               // Comments only
               out
@@ -1251,41 +1305,41 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             }
           }
           break;
-        case TEXT :
+        }
+        case TEXT: {
           if (invalidated) {
             out
                 .append("<<<")
                 .append(Long.toString(lookupId))
-                .append('<')
-            ;
+                .append('<');
           } else if (modifyAllText) {
             out
                 .append('<')
                 .append(Long.toString(lookupId))
-                .append('<')
-            ;
+                .append('<');
           } else {
             // No prefix
           }
           break;
-        case JAVASCRIPT :
-        case MYSQL :
-        case PSQL :
-        case CSS :
+        }
+        case JAVASCRIPT:
+        case MYSQL:
+        case PSQL:
+        case CSS: {
           out
               .append("/*")
               .append(Long.toString(lookupId))
-              .append("*/")
-          ;
+              .append("*/");
           break;
-        case SH :
+        }
+        case SH: {
           out
               .append("`#")
               .append(Long.toString(lookupId))
-              .append('`')
-          ;
+              .append('`');
           break;
-        default :
+        }
+        default:
           throw new AssertionError();
       }
     }
@@ -1296,10 +1350,11 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
         appendPrefixTo(markupType, out);
       } else {
         switch (markupType) {
-          case NONE :
+          case NONE: {
             // No markup
             break;
-          case XHTML :
+          }
+          case XHTML: {
             //if (invalidated) {
             //  SB.append(" style=\"color:red\"");
             //}
@@ -1315,23 +1370,20 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
                   .append(", true);\"", out)
                   .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(", out)
                   .append(elementIdString, out)
-                  .append(");\">", out)
+                  .append(");\">", out);
               // TODO: invalidated/modifyAllText marker here, too?
-              ;
             } else {
               // No scripting version, similar to TEXT
               if (invalidated) {
                 encoder
                     .append("&lt;&lt;&lt;", out)
                     .append(Long.toString(lookupId), out)
-                    .append("&lt;", out)
-                ;
+                    .append("&lt;", out);
               } else if (modifyAllText) {
                 encoder
                     .append("&lt;", out)
                     .append(Long.toString(lookupId), out)
-                    .append("&lt;", out)
-                ;
+                    .append("&lt;", out);
               } else {
                 // Comments only
                 encoder
@@ -1341,41 +1393,41 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
               }
             }
             break;
-          case TEXT :
+          }
+          case TEXT: {
             if (invalidated) {
               encoder
                   .append("<<<", out)
                   .append(Long.toString(lookupId), out)
-                  .append('<', out)
-              ;
+                  .append('<', out);
             } else if (modifyAllText) {
               encoder
                   .append('<', out)
                   .append(Long.toString(lookupId), out)
-                  .append('<', out)
-              ;
+                  .append('<', out);
             } else {
               // No prefix
             }
             break;
-          case JAVASCRIPT :
-          case MYSQL :
-          case PSQL :
-          case CSS :
+          }
+          case JAVASCRIPT:
+          case MYSQL:
+          case PSQL:
+          case CSS: {
             encoder
                 .append("/*", out)
                 .append(Long.toString(lookupId), out)
-                .append("*/", out)
-            ;
+                .append("*/", out);
             break;
-          case SH :
+          }
+          case SH: {
             encoder
                 .append("`#", out)
                 .append(Long.toString(lookupId), out)
-                .append('`', out)
-            ;
+                .append('`', out);
             break;
-          default :
+          }
+          default:
             throw new AssertionError();
         }
       }
@@ -1384,10 +1436,11 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     @Override
     public void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException {
       switch (markupType) {
-        case NONE :
+        case NONE: {
           // No markup
           break;
-        case XHTML :
+        }
+        case XHTML: {
           if (allowScripts) {
             // TODO: invalidated/modifyAllText marker here, too?
             out.append("</span>");
@@ -1397,44 +1450,43 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
               out
                   .append("&gt;")
                   .append(Long.toString(lookupId))
-                  .append("&gt;&gt;&gt;")
-              ;
+                  .append("&gt;&gt;&gt;");
             } else if (modifyAllText) {
               out
                   .append("&gt;")
                   .append(Long.toString(lookupId))
-                  .append("&gt;")
-              ;
+                  .append("&gt;");
             } else {
               // No suffix
             }
           }
           break;
-        case TEXT :
+        }
+        case TEXT: {
           if (invalidated) {
             out
                 .append('>')
                 .append(Long.toString(lookupId))
-                .append(">>>")
-            ;
+                .append(">>>");
           } else if (modifyAllText) {
             out
                 .append('>')
                 .append(Long.toString(lookupId))
-                .append('>')
-            ;
+                .append('>');
           } else {
             // No suffix
           }
           break;
-        case JAVASCRIPT :
-        case MYSQL :
-        case PSQL :
-        case CSS :
-        case SH :
+        }
+        case JAVASCRIPT:
+        case MYSQL:
+        case PSQL:
+        case CSS:
+        case SH: {
           // No suffix
           break;
-        default :
+        }
+        default:
           throw new AssertionError();
       }
     }
@@ -1445,10 +1497,11 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
         appendSuffixTo(markupType, out);
       } else {
         switch (markupType) {
-          case NONE :
+          case NONE: {
             // No markup
             break;
-          case XHTML :
+          }
+          case XHTML: {
             if (allowScripts) {
               // TODO: invalidated/modifyAllText marker here, too?
               encoder.append("</span>", out);
@@ -1458,44 +1511,43 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
                 encoder
                     .append("&gt;", out)
                     .append(Long.toString(lookupId), out)
-                    .append("&gt;&gt;&gt;", out)
-                ;
+                    .append("&gt;&gt;&gt;", out);
               } else if (modifyAllText) {
                 encoder
                     .append("&gt;", out)
                     .append(Long.toString(lookupId), out)
-                    .append("&gt;", out)
-                ;
+                    .append("&gt;", out);
               } else {
                 // No suffix
               }
             }
             break;
-          case TEXT :
+          }
+          case TEXT: {
             if (invalidated) {
               encoder
                   .append('>', out)
                   .append(Long.toString(lookupId), out)
-                  .append(">>>", out)
-              ;
+                  .append(">>>", out);
             } else if (modifyAllText) {
               encoder
                   .append('>', out)
                   .append(Long.toString(lookupId), out)
-                  .append('>', out)
-              ;
+                  .append('>', out);
             } else {
               // No suffix
             }
             break;
-          case JAVASCRIPT :
-          case MYSQL :
-          case PSQL :
-          case CSS :
-          case SH :
+          }
+          case JAVASCRIPT:
+          case MYSQL:
+          case PSQL:
+          case CSS:
+          case SH: {
             // No suffix
             break;
-          default :
+          }
+          default:
             throw new AssertionError();
         }
       }

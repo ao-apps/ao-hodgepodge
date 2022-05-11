@@ -60,7 +60,8 @@ public class ZeroFile {
       System.exit(1);
     } else {
       try {
-        int bpsIn, bpsOut;
+        int bpsIn;
+        int bpsOut;
         String bpsArg = args[0];
         int slashPos = bpsArg.indexOf('/');
         if (slashPos == -1) {
@@ -141,16 +142,16 @@ public class ZeroFile {
       System.err.println(Long.toString(len));
     }
     final int blocks;
-    {
-      long blocksLong = len / BLOCK_SIZE;
-      if ((len & (BLOCK_SIZE - 1)) != 0) {
-        blocksLong++;
+      {
+        long blocksLong = len / BLOCK_SIZE;
+        if ((len & (BLOCK_SIZE - 1)) != 0) {
+          blocksLong++;
+        }
+        if (blocksLong > Integer.MAX_VALUE) {
+          throw new IOException("File too large: " + len);
+        }
+        blocks = (int) blocksLong;
       }
-      if (blocksLong > Integer.MAX_VALUE) {
-        throw new IOException("File too large: " + len);
-      }
-      blocks = (int) blocksLong;
-    }
     BitSet dirtyBlocks = new BitSet(blocks);
     int numDirtyBlocks = 0;
     // Pass one: read for non zeros
@@ -161,10 +162,10 @@ public class ZeroFile {
     int block = 0;
     for (long pos = 0; pos < len; pos += BLOCK_SIZE, blockIndex++) {
       int blockSize;
-      {
-        long blockSizeLong = len - pos;
-        blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
-      }
+        {
+          long blockSizeLong = len - pos;
+          blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
+        }
       raf.seek(pos);
       raf.readFully(buff, 0, blockSize);
       block++;
@@ -206,10 +207,10 @@ public class ZeroFile {
     for (long pos = 0; pos < len; pos += BLOCK_SIZE, blockIndex++) {
       if (dirtyBlocks.get(blockIndex)) {
         int blockSize;
-        {
-          long blockSizeLong = len - pos;
-          blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
-        }
+          {
+            long blockSizeLong = len - pos;
+            blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
+          }
         if (!DRY_RUN) {
           raf.seek(pos);
           raf.write(buff, 0, blockSize);

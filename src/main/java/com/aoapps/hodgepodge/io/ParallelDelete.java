@@ -157,48 +157,48 @@ public final class ParallelDelete {
     // The set of next files is kept in key order so that it can scale with O(n*log(n)) for larger numbers of directories
     // as opposed to O(n^2) for a list.  This is similar to the fix for AWStats logresolvemerge provided by Dan Armstrong
     // a couple of years ago.
-    final Map<String, List<FilesystemIterator>> nextFiles = new TreeMap<>((String S1, String S2) -> {
+    final Map<String, List<FilesystemIterator>> nextFiles = new TreeMap<>((String s1, String s2) -> {
       // Make sure directories are sorted after their directory contents
-      int diff = S1.compareTo(S2);
+      int diff = s1.compareTo(s2);
       if (diff == 0) {
         return 0;
       }
-      if (S2.startsWith(S1)) {
+      if (s2.startsWith(s1)) {
         return 1;
       }
-      if (S1.startsWith(S2)) {
+      if (s1.startsWith(s2)) {
         return -1;
       }
       return diff;
     });
-    {
-      final Map<String, FilesystemIteratorRule> prefixRules = Collections.emptyMap();
-      for (File directory : directories) {
-        if (!directory.exists()) {
-          throw new IOException("Directory not found: " + directory.getPath());
-        }
-        if (!directory.isDirectory()) {
-          throw new IOException("Not a directory: " + directory.getPath());
-        }
-        String path = directory.getCanonicalPath();
-        FilesystemIterator iterator = new FilesystemIterator(
-            Collections.singletonMap(path, FilesystemIteratorRule.OK),
-            prefixRules,
-            path,
-            false,
-            true
-        );
-        File nextFile = iterator.getNextFile();
-        if (nextFile != null) {
-          String relPath = getRelativePath(nextFile, iterator);
-          List<FilesystemIterator> list = nextFiles.get(relPath);
-          if (list == null) {
-            nextFiles.put(relPath, list = new ArrayList<>(numDirectories));
+      {
+        final Map<String, FilesystemIteratorRule> prefixRules = Collections.emptyMap();
+        for (File directory : directories) {
+          if (!directory.exists()) {
+            throw new IOException("Directory not found: " + directory.getPath());
           }
-          list.add(iterator);
+          if (!directory.isDirectory()) {
+            throw new IOException("Not a directory: " + directory.getPath());
+          }
+          String path = directory.getCanonicalPath();
+          FilesystemIterator iterator = new FilesystemIterator(
+              Collections.singletonMap(path, FilesystemIteratorRule.OK),
+              prefixRules,
+              path,
+              false,
+              true
+          );
+          File nextFile = iterator.getNextFile();
+          if (nextFile != null) {
+            String relPath = getRelativePath(nextFile, iterator);
+            List<FilesystemIterator> list = nextFiles.get(relPath);
+            if (list == null) {
+              nextFiles.put(relPath, list = new ArrayList<>(numDirectories));
+            }
+            list.add(iterator);
+          }
         }
       }
-    }
 
     final BlockingQueue<File> verboseQueue;
     final boolean[] verboseThreadRun;

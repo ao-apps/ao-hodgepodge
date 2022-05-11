@@ -64,8 +64,7 @@ public class Tuple2<E1, E2> {
     Tuple2<?, ?> other = (Tuple2<?, ?>) obj;
     return
         Objects.equals(element1, other.element1)
-            && Objects.equals(element2, other.element2)
-    ;
+            && Objects.equals(element2, other.element2);
   }
 
   private int hash;

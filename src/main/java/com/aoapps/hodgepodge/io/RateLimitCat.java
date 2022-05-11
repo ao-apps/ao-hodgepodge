@@ -53,7 +53,14 @@ public final class RateLimitCat {
   }
 
   private static void usage() {
-    System.err.println("Usage: " + RateLimitCat.class.getName() + " [--blocksize=BLOCK_SIZE[unit]] [--bwlimit=BANDWIDTH_LIMIT[unit]] [--limit=MAXIMUM_BYTES[unit]] [--output=OUTPUT_FILE] [--progress[={true|false}]] [--] [FILE]...");
+    System.err.println("Usage: " + RateLimitCat.class.getName()
+        + " [--blocksize=BLOCK_SIZE[unit]]"
+        + " [--bwlimit=BANDWIDTH_LIMIT[unit]]"
+        + " [--limit=MAXIMUM_BYTES[unit]]"
+        + " [--output=OUTPUT_FILE]"
+        + " [--progress[={true|false}]]"
+        + " [--]"
+        + " [FILE]...");
     System.err.println();
     System.err.println("\tWhen FILE is not provided, reads from standard input.");
     System.err.println("\tWhen FILE is -, will read from standard input.");
@@ -223,6 +230,7 @@ public final class RateLimitCat {
                     public Long getBitRate() {
                       return bwlimit.getBitRate();
                     }
+
                     @Override
                     public int getBlockSize() {
                       return blockSize;
