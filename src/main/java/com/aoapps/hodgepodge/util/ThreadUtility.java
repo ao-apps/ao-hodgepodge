@@ -37,6 +37,7 @@ public final class ThreadUtility {
     return getTopLevelThreadGroup().activeCount();
   }
 
+  // Java 19: java.lang.ThreadGroup Is Degraded, see https://bugs.openjdk.org/browse/JDK-8284161
   public static ThreadGroup getTopLevelThreadGroup() {
     ThreadGroup tg = Thread.currentThread().getThreadGroup();
     ThreadGroup parent;
