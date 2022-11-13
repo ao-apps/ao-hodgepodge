@@ -13,32 +13,22 @@
 
 # Fixed tab indent
 c02e056cf990f8baf35291a6c1fe5fa9e25cf13f
-
-# Fixed tab indent
 7af9eff32206aab934969274249c93e470792cd6
 
 # Removed extraneous space at end of line.
 46849be3cdc7c0a9dd6968e9084f506f22580c1e
-
-# Updated name to be consistent with other projects.
-# cb733e3dadd7fea4ea0148c181f6644b4d162313
-
-# Converted remaining four-space indents to our standard tab indent.
-fc161fe2c289fdb969d29a2150c6c7ab625c4e36
-
-# Fixed whitespace create by maven release plugin
-57eba8b824404c74c68202477d6b02a4b6e3a784
-
-# Removed extraneous space at end of line.
 3791b92df6bd7026ed327a72c73f3b2dc95737f7
 
 # Updated name to be consistent with other projects.
+# cb733e3dadd7fea4ea0148c181f6644b4d162313
 # 135f9c88042d376713b80b7bcdbd88f9f4fd3b96
 
 # Converted remaining four-space indents to our standard tab indent.
+fc161fe2c289fdb969d29a2150c6c7ab625c4e36
 adf764fbe04560adaf5c8798757c2e725026dec0
 
 # Fixed whitespace create by maven release plugin
+57eba8b824404c74c68202477d6b02a4b6e3a784
 bfcae5e9ac79bc5cee160dfac7e3ce0e677cdf73
 
 # Fixed recurring display formatting.
