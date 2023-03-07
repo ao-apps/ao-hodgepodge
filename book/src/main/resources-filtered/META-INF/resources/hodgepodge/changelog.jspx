@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2023-03-07T18:34:21Z"
+    dateModified="2023-03-07T18:41:18Z"
   >
     <c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
       <changelog:release
@@ -48,16 +48,25 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         artifactId="@{documented.artifactId}"
         repository="@{nexusUrl}content/repositories/snapshots/"
         scmUrl="@{project.scm.url}"
-      >
-        <ul>
-          <li>
-            <code>RandomAccessFile.length()</code> is returning <samp>0</samp> on Linux block devices as of
-            Java 11.  Implemented fall-back to <code>/sbin/blockdev --getsize64 …</code>, but only for canonical paths
-            starting with <code>/dev/</code>.
-          </li>
-        </ul>
-      </changelog:release>
+      />
     </c:if>
+
+    <changelog:release
+      projectName="@{documented.name}"
+      version="5.1.1"
+      datePublished="2023-03-07T18:41:18Z"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          <code>RandomAccessFile.length()</code> is returning <samp>0</samp> on Linux block devices as of
+          Java 11.  Implemented fall-back to <code>/sbin/blockdev --getsize64 …</code>, but only for canonical paths
+          starting with <code>/dev/</code>.
+        </li>
+      </ul>
+    </changelog:release>
 
     <changelog:release
       projectName="@{documented.name}"
