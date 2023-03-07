@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -122,6 +122,30 @@ public class ZeroFile {
   }
 
   /**
+   * Gets the length of a random access file, which will also try to fall-back to
+   * <code>/sbin/blockdev --getsize64</code> (while writing a warning to standard error) when both zero is returned and
+   * path begins with {@code "/dev/"}.
+   */
+  @SuppressWarnings("UseOfSystemOutOrSystemErr")
+  static long getFileLengthWithFallbackBlockdev(File file, RandomAccessFile raf) throws IOException {
+    long len = raf.length();
+    if (len == 0) {
+      String canonicalPath = file.getCanonicalPath();
+      if (canonicalPath.startsWith("/dev/")) {
+        System.err.print("Warning: RandomAccessFile.length() returned zero, trying \"/sbin/blockdev --getsize64 " + canonicalPath + "\": ");
+        ProcessResult result = ProcessResult.exec("/sbin/blockdev", "--getsize64", canonicalPath);
+        int exitVal = result.getExitVal();
+        if (exitVal != 0) {
+          throw new IOException("Non-zero exit from \"/sbin/blockdev --getsize64 " + canonicalPath + "\": " + exitVal + ", stderr: \"" + result.getStderr() + "\"");
+        }
+        len = Long.parseLong(result.getStdout().trim());
+        System.err.println(Long.toString(len));
+      }
+    }
+    return len;
+  }
+
+  /**
    * Zeroes the provided random access file, only writing blocks that contain non-zero.
    * Reads at the maximum provided bpsIn blocks per second.
    * Writes at the maximum provided bpsOut blocks per second.
@@ -130,17 +154,7 @@ public class ZeroFile {
   @SuppressWarnings({"UseOfSystemOutOrSystemErr", "UnusedAssignment"})
   public static long zeroFile(int bpsIn, int bpsOut, File file, RandomAccessFile raf) throws IOException {
     // Initialize bitset
-    long len = raf.length();
-    if (len == 0) {
-      System.err.print("Warning: RandomAccessFile.length() returned zero, trying \"/sbin/blockdev --getsize64 " + file.getPath() + "\": ");
-      ProcessResult result = ProcessResult.exec("/sbin/blockdev", "--getsize64", file.getPath());
-      int exitVal = result.getExitVal();
-      if (exitVal != 0) {
-        throw new IOException("Non-zero exit from \"/sbin/blockdev --getsize64 " + file.getPath() + "\": " + exitVal + ", stderr: \"" + result.getStderr() + "\"");
-      }
-      len = Long.parseLong(result.getStdout().trim());
-      System.err.println(Long.toString(len));
-    }
+    long len = getFileLengthWithFallbackBlockdev(file, raf);
     final int blocks;
       {
         long blocksLong = len / BLOCK_SIZE;
