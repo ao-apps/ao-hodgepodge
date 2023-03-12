@@ -149,7 +149,7 @@ public final class Benchmark {
                     PrimitiveIterator.OfLong randomizer = fastRandom.longs(0, blocks).iterator();
                     long endTime = System.currentTimeMillis() + (30L * 1000);
                     while (System.currentTimeMillis() < endTime) {
-                      raf.seek(randomizer.nextLong());
+                      raf.seek(randomizer.nextLong() * BufferManager.BUFFER_SIZE);
                       raf.read(buff, 0, BufferManager.BUFFER_SIZE);
                       count++;
                     }
