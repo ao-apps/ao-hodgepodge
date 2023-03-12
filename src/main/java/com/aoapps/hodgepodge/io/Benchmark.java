@@ -83,6 +83,11 @@ public final class Benchmark {
         long bytesRead = 0;
         long startTime = System.currentTimeMillis();
         try {
+          // TODO: Kernel page buffer is making this sequential scan buffered since systems usually have more than 4 GiB RAM now.
+          //       Consider any/all of the following:
+          //       1) Perform direct I/O
+          //       2) Start at a randomized buffer position within the entire device
+          //       3) Continue from last position instead of re-reading in the block device positions
           try (InputStream in = new FileInputStream(file)) {
             while (bytesRead < MAX_READ_BYTES) {
               long bytesLeft = MAX_READ_BYTES - bytesRead;
