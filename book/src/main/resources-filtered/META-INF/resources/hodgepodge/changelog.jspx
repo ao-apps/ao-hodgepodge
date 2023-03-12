@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2023-03-12T02:34:37Z"
+    dateModified="2023-03-12T03:37:52Z"
   >
     <c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
       <changelog:release
@@ -48,15 +48,25 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         artifactId="@{documented.artifactId}"
         repository="@{nexusUrl}content/repositories/snapshots/"
         scmUrl="@{project.scm.url}"
-      >
-        <ul>
-          <li>
-            Fixed bug in <code>Benchmark</code> that was seeking to byte address instead of 4k block number.
-            This was a result of some previous refactoring to use random number generator streams.
-          </li>
-        </ul>
-      </changelog:release>
+      />
     </c:if>
+
+    <changelog:release
+      projectName="@{documented.name}"
+      version="5.1.2"
+      datePublished="2023-03-12T03:37:52Z"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          Fixed bug in <code>Benchmark</code> that was seeking to byte offset instead of 4k block number.
+          This resulted in significantly higher I/O measurements due to caching.
+          This was a result of some previous refactoring to use random number generator streams.
+        </li>
+      </ul>
+    </changelog:release>
 
     <changelog:release
       projectName="@{documented.name}"
