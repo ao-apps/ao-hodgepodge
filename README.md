@@ -28,7 +28,7 @@ evaporate into nothing.
 * [Project Home](https://oss.aoapps.com/hodgepodge/)
 * [Changelog](https://oss.aoapps.com/hodgepodge/changelog)
 * [API Docs](https://oss.aoapps.com/hodgepodge/apidocs/)
-* [Maven Central Repository](https://central.sonatype.com/search?namespace=com.aoapps&q=a%3Aao-hodgepodge)
+* [Maven Central Repository](https://central.sonatype.com/artifact/com.aoapps/ao-hodgepodge)
 * [GitHub](https://github.com/ao-apps/ao-hodgepodge)
 
 ## Contact Us
