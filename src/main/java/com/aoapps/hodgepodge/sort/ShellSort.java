@@ -43,7 +43,7 @@ import java.util.List;
  * values h which ends in 1 will produce a sorted array.
  * </p>
  * <p>
- * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/ShellSortAlgorithm.java.html'>Jason Harrison's ShellSortAlgorithm</a>.
+ * Adapted from <a href="http://www.cs.ubc.ca/spider/harrison/Java/ShellSortAlgorithm.java.html">Jason Harrison's ShellSortAlgorithm</a>.
  * </p>
  *
  * @author Jason Harrison@cs.ubc.ca

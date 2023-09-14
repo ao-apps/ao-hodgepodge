@@ -38,7 +38,7 @@ import java.util.List;
  * A quick sort demonstration algorithm
  * SortAlgorithm.java
  * <p>
- * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/FastQSortAlgorithm.java.html'>Denis Ahrens' FastQSortAlgorithm</a>,
+ * Adapted from <a href="http://www.cs.ubc.ca/spider/harrison/Java/FastQSortAlgorithm.java.html">Denis Ahrens' FastQSortAlgorithm</a>,
  * which was derived from Sun's example QSortAlgorithm.
  * </p>
  * <p>

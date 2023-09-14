@@ -39,7 +39,7 @@ import java.util.List;
  *              and John Brzustowski (jbrzusto@gpu.srv.ualberta.ca).
  * </pre>
  * <p>
- * Adapted from <a href='http://www.cs.ubc.ca/spider/harrison/Java/EQSortAlgorithm.java.html'>Jim Boritz' EQSortAlgorithm</a>.
+ * Adapted from <a href="http://www.cs.ubc.ca/spider/harrison/Java/EQSortAlgorithm.java.html">Jim Boritz' EQSortAlgorithm</a>.
  * </p>
  *
  * @author Jim Boritz
