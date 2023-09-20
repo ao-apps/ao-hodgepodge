@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2023-03-12T03:37:52Z"
+    dateModified="2023-09-20T16:47:30Z"
   >
     <c:set var="latestRelease" value="5.1.2" />
     <c:if test="${
@@ -1088,7 +1088,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
       scmUrl="@{project.scm.url}"
     >
       <ul>
-        <li>Release of 1.8.1 failed due to JDK bug in bootclasspath set for Javadoc: <ao:a href="https://bugs.openjdk.java.net/browse/JDK-8041628" /></li>
+        <li>Release of 1.8.1 failed due to JDK bug in bootclasspath set for Javadoc: <ao:a href="https://bugs.openjdk.org/browse/JDK-8041628" /></li>
         <li>JDK bug workaround.</li>
       </ul>
     </changelog:release>
