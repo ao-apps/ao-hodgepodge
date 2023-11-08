@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2021, 2022, 2023  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,53 +24,78 @@
 package com.aoapps.hodgepodge.schedule;
 
 import java.util.Calendar;
+import java.util.Optional;
 
 public enum Month {
   JANUARY(
+      "Januaries",
+      "Januarys",
       "January",
       "Jan",
       Calendar.JANUARY),
   FEBRUARY(
+      "Februaries",
+      "Februarys",
       "February",
       "Feb",
       Calendar.FEBRUARY),
   MARCH(
+      "Marches",
+      null,
       "March",
       "Mar",
       Calendar.MARCH),
   APRIL(
+      "Aprils",
+      null,
       "April",
       "Apr",
       Calendar.APRIL),
   MAY(
+      "Mays",
+      null,
       "May",
       "May",
       Calendar.MAY),
   JUNE(
+      "Junes",
+      null,
       "June",
       "Jun",
       Calendar.JUNE),
   JULY(
+      "Julys",
+      "Julies",
       "July",
       "Jul",
       Calendar.JULY),
   AUGUST(
+      "Augusts",
+      null,
       "August",
       "Aug",
       Calendar.AUGUST),
   SEPTEMBER(
+      "Septembers",
+      null,
       "September",
       "Sep",
       Calendar.SEPTEMBER),
   OCTOBER(
+      "Octobers",
+      null,
       "October",
       "Oct",
       Calendar.OCTOBER),
   NOVEMBER(
+      "Novembers",
+      null,
       "November",
       "Nov",
       Calendar.NOVEMBER),
   DECEMBER(
+      "Decembers",
+      null,
       "December",
       "Dec",
       Calendar.DECEMBER);
@@ -78,6 +103,7 @@ public enum Month {
   /**
    * Copy of values for internal use without temporary array copy.
    */
+  @SuppressWarnings("PackageVisibleField")
   static Month[] values = values();
 
   /**
@@ -114,11 +140,15 @@ public enum Month {
     }
   }
 
+  private final String pluralName;
+  private final String altPluralName;
   private final String longName;
   private final String shortName;
   private final int calendarMonth;
 
-  private Month(String longName, String shortName, int calendarMonth) {
+  private Month(String pluralName, String altPluralName, String longName, String shortName, int calendarMonth) {
+    this.pluralName = pluralName;
+    this.altPluralName = altPluralName;
     this.longName = longName;
     this.shortName = shortName;
     this.calendarMonth = calendarMonth;
@@ -127,6 +157,14 @@ public enum Month {
   @Override
   public String toString() {
     return longName;
+  }
+
+  public String getPluralName() {
+    return pluralName;
+  }
+
+  public Optional<String> getAltPluralName() {
+    return Optional.ofNullable(altPluralName);
   }
 
   public String getLongName() {

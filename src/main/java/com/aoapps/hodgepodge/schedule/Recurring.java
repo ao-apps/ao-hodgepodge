@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015, 2016, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * @author  AO Industries, Inc.
@@ -37,10 +38,19 @@ import java.util.NoSuchElementException;
 public abstract class Recurring {
 
   /**
-   * Copy of values for internal use without temporary array copy.
+   * All days of week as enum.
    */
-  private static final DayOfWeek[] allDaysOfWeek = DayOfWeek.values();
-  private static final Month[] allMonths = Month.values();
+  private static final EnumSet<DayOfWeek> ALL_DAYS_OF_WEEK_ENUM = EnumSet.allOf(DayOfWeek.class);
+
+  /**
+   * The set of all weekdays.
+   */
+  private static final EnumSet<DayOfWeek> WEEKDAYS_ENUM = EnumSet.range(DayOfWeek.MONDAY, DayOfWeek.FRIDAY);
+
+  /**
+   * All months as enum.
+   */
+  private static final EnumSet<Month> ALL_MONTHS = EnumSet.allOf(Month.class);
 
   /**
    * Parses a human-readable representation of a recurring schedule.
@@ -52,8 +62,10 @@ public abstract class Recurring {
    *   <li>
    *     "on day-of-week-list" - on a comma-separated list of days of the week.
    *     The day of the week for the "on" date must be in this list.
+   *     Example: "on Mondays, Wednesdays, Fridays".
    *     Example: "on Monday, Wednesday, Friday".
    *     Example: "On mon, tue, Sat".
+   *     Example: "on Mondays, Wednesday, Fri".
    *   </li>
    *   <li>"weekly" - recurring on the same day every week.</li>
    *   <li>
@@ -66,8 +78,10 @@ public abstract class Recurring {
    *     last day of the month is used. (Only affects February 29th)
    *   </li>
    *   <li>
-   *     "every ### {days|weeks|months|years}" - recurring every unit days.
+   *     "every (other|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|###) {days|weeks|months|years|day-of-week|month-of-year}" - recurring every unit days.
    *     For "months", if the day is past the last day of the month, the last day of the month is used.
+   *     For "day-of-week", is named day such as "every other Friday" or "every 4 Mondays".
+   *     For "month-of-year", is named month such as "every other March" or "every 3 Januaries".
    *   </li>
    * </ul>
    *
@@ -89,10 +103,11 @@ public abstract class Recurring {
       EnumSet<DayOfWeek> daysOfWeek = EnumSet.noneOf(DayOfWeek.class);
       for (String dayStr : Strings.splitCommaSpace(recurring.substring(3))) {
         boolean found = false;
-        for (DayOfWeek dow : allDaysOfWeek) {
+        for (DayOfWeek dow : DayOfWeek.values) {
           if (
               dow.getLongName().equalsIgnoreCase(dayStr)
                   || dow.getShortName().equalsIgnoreCase(dayStr)
+                  || dow.getPluralName().equalsIgnoreCase(dayStr)
           ) {
             daysOfWeek.add(dow);
             found = true;
@@ -106,16 +121,24 @@ public abstract class Recurring {
       if (daysOfWeek.isEmpty()) {
         throw new IllegalArgumentException("Must specify at least one day of the week for recurring on");
       }
+      if (ALL_DAYS_OF_WEEK_ENUM.equals(daysOfWeek)) {
+        return EVERYDAY;
+      }
+      if (WEEKDAYS_ENUM.equals(daysOfWeek)) {
+        return WEEKDAYS;
+      }
       return new DayOfWeekList(daysOfWeek);
     }
     if (recurring.length() >= 3 && "in ".equalsIgnoreCase(recurring.substring(0, 3))) {
       EnumSet<Month> months = EnumSet.noneOf(Month.class);
       for (String monthStr : Strings.splitCommaSpace(recurring.substring(3))) {
         boolean found = false;
-        for (Month month : allMonths) {
+        for (Month month : Month.values) {
           if (
               month.getLongName().equalsIgnoreCase(monthStr)
                   || month.getShortName().equalsIgnoreCase(monthStr)
+                  || month.getPluralName().equalsIgnoreCase(monthStr)
+                  || monthStr.equalsIgnoreCase(month.getAltPluralName().orElse(null))
           ) {
             months.add(month);
             found = true;
@@ -128,6 +151,9 @@ public abstract class Recurring {
       }
       if (months.isEmpty()) {
         throw new IllegalArgumentException("Must specify at least one month for recurring in");
+      }
+      if (ALL_MONTHS.equals(months)) {
+        return MONTHLY;
       }
       return new MonthList(months);
     }
@@ -143,11 +169,39 @@ public abstract class Recurring {
     if (recurring.length() >= 6 && "every ".equalsIgnoreCase(recurring.substring(0, 6))) {
       int spacePos = recurring.indexOf(' ', 6);
       if (spacePos == -1) {
-        throw new IllegalArgumentException("Second space not found in \"every ### {days|weeks|months|years}\": " + recurring);
+        throw new IllegalArgumentException("Second space not found in \"every ### {days|weeks|months|years|day-of-week|month-of-year}\": " + recurring);
       }
-      int increment = Integer.parseInt(recurring.substring(6, spacePos));
+      String incrementStr = recurring.substring(6, spacePos);
+      int increment;
+      if ("other".equalsIgnoreCase(incrementStr) || "second".equalsIgnoreCase(incrementStr)) {
+        increment = 2;
+      } else if ("third".equalsIgnoreCase(incrementStr)) {
+        increment = 3;
+      } else if ("fourth".equalsIgnoreCase(incrementStr)) {
+        increment = 4;
+      } else if ("fifth".equalsIgnoreCase(incrementStr)) {
+        increment = 5;
+      } else if ("sixth".equalsIgnoreCase(incrementStr)) {
+        increment = 6;
+      } else if ("seventh".equalsIgnoreCase(incrementStr)) {
+        increment = 7;
+      } else if ("eighth".equalsIgnoreCase(incrementStr)) {
+        increment = 8;
+      } else if ("ninth".equalsIgnoreCase(incrementStr)) {
+        increment = 9;
+      } else if ("tenth".equalsIgnoreCase(incrementStr)) {
+        increment = 10;
+      } else if ("eleventh".equalsIgnoreCase(incrementStr)) {
+        increment = 11;
+      } else if ("twelfth".equalsIgnoreCase(incrementStr)) {
+        increment = 12;
+      } else {
+        increment = Integer.parseInt(incrementStr);
+      }
       String fieldStr = recurring.substring(spacePos + 1);
-      int field;
+      int field = -1;
+      DayOfWeek dayOfWeek = null;
+      Month month = null;
       if ("days".equalsIgnoreCase(fieldStr) || "day".equalsIgnoreCase(fieldStr)) {
         field = Calendar.DAY_OF_MONTH;
       } else if ("weeks".equalsIgnoreCase(fieldStr) || "week".equalsIgnoreCase(fieldStr)) {
@@ -157,9 +211,71 @@ public abstract class Recurring {
       } else if ("years".equalsIgnoreCase(fieldStr) || "year".equalsIgnoreCase(fieldStr)) {
         field = Calendar.YEAR;
       } else {
-        throw new IllegalArgumentException("Unexpected value for field: " + fieldStr);
+        for (DayOfWeek dow : DayOfWeek.values) {
+          if (
+              dow.getLongName().equalsIgnoreCase(fieldStr)
+                  || dow.getShortName().equalsIgnoreCase(fieldStr)
+                  || dow.getPluralName().equalsIgnoreCase(fieldStr)
+          ) {
+            dayOfWeek = dow;
+            break;
+          }
+        }
+        if (dayOfWeek == null) {
+          for (Month m : Month.values) {
+            if (
+                m.getLongName().equalsIgnoreCase(fieldStr)
+                    || m.getShortName().equalsIgnoreCase(fieldStr)
+                    || m.getPluralName().equalsIgnoreCase(fieldStr)
+                    || fieldStr.equalsIgnoreCase(m.getAltPluralName().orElse(null))
+            ) {
+              month = m;
+              break;
+            }
+          }
+          if (month == null) {
+            throw new IllegalArgumentException("Unexpected value for field: " + fieldStr);
+          }
+        }
       }
-      return new Every(increment, field);
+      if (increment == 1) {
+        if (field == Calendar.DAY_OF_MONTH) {
+          return EVERYDAY;
+        }
+        if (field == Calendar.WEEK_OF_YEAR) {
+          return WEEKLY;
+        }
+        if (field == Calendar.MONTH) {
+          return MONTHLY;
+        }
+        if (field == Calendar.YEAR) {
+          return YEARLY;
+        }
+        if (dayOfWeek != null) {
+          return new DayOfWeekList(EnumSet.of(dayOfWeek));
+        }
+        if (month != null) {
+          return new MonthList(EnumSet.of(month));
+        }
+      }
+      if (increment == 12 && field == Calendar.MONTH) {
+        return YEARLY;
+      }
+      if (field != -1) {
+        assert dayOfWeek == null;
+        assert month == null;
+        return new Every(increment, field);
+      } else if (dayOfWeek != null) {
+        assert field == -1;
+        assert month == null;
+        return new EveryByDayOfWeek(increment, dayOfWeek);
+      } else if (month != null) {
+        assert field == -1;
+        assert dayOfWeek == null;
+        return new EveryByMonth(increment, month);
+      } else {
+        throw new AssertionError();
+      }
     }
     throw new IllegalArgumentException("Unexpected value for recurring: " + recurring);
   }
@@ -224,7 +340,7 @@ public abstract class Recurring {
          */
         @Override
         public Calendar next() {
-          Calendar date = (Calendar) cal.clone();
+          final Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next day
           cal.add(Calendar.DAY_OF_MONTH, 1);
           return date;
@@ -288,7 +404,7 @@ public abstract class Recurring {
             // Move the calendar to the next day
             cal.add(Calendar.DAY_OF_MONTH, 1);
           }
-          Calendar date = (Calendar) cal.clone();
+          final Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next day
           cal.add(Calendar.DAY_OF_MONTH, 1);
           return date;
@@ -322,6 +438,14 @@ public abstract class Recurring {
       return daysOfWeek.hashCode();
     }
 
+    /**
+     * For testing only.
+     */
+    @SuppressWarnings("ReturnOfCollectionOrArrayField")
+    EnumSet<DayOfWeek> getDaysOfWeek() {
+      return daysOfWeek;
+    }
+
     @Override
     public String getRecurringDisplay() {
       StringBuilder sb = new StringBuilder("On ");
@@ -342,7 +466,8 @@ public abstract class Recurring {
       // List of days must include the day of the week for the first day "on"
       DayOfWeek fromDow = DayOfWeek.getByCalendarDayOfWeek(from.get(Calendar.DAY_OF_WEEK));
       if (!daysOfWeek.contains(fromDow)) {
-        return "Day of week for \"" + attribute + "\" not found in days of week list: " + fromDow.getLongName();
+        return "Day of week for \"" + attribute + "\" not found in days of week list (" + Strings.join(daysOfWeek, ", ")
+            + "): " + fromDow.getLongName();
       }
       return null;
     }
@@ -372,7 +497,7 @@ public abstract class Recurring {
             // Move the calendar to the next day
             cal.add(Calendar.DAY_OF_MONTH, 1);
           }
-          Calendar date = (Calendar) cal.clone();
+          final Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next day
           cal.add(Calendar.DAY_OF_MONTH, 1);
           return date;
@@ -416,7 +541,7 @@ public abstract class Recurring {
          */
         @Override
         public Calendar next() {
-          Calendar date = (Calendar) cal.clone();
+          final Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next week
           cal.add(Calendar.WEEK_OF_YEAR, 1);
           return date;
@@ -498,6 +623,14 @@ public abstract class Recurring {
       return months.hashCode();
     }
 
+    /**
+     * For testing only.
+     */
+    @SuppressWarnings("ReturnOfCollectionOrArrayField")
+    EnumSet<Month> getMonths() {
+      return months;
+    }
+
     @Override
     public String getRecurringDisplay() {
       StringBuilder sb = new StringBuilder("In ");
@@ -514,9 +647,21 @@ public abstract class Recurring {
     }
 
     @Override
+    public String checkScheduleFrom(Calendar from, String attribute) {
+      // List of months must include the month for the first day "on"
+      Month fromMonth = Month.getByCalendarMonth(from.get(Calendar.MONTH));
+      if (!months.contains(fromMonth)) {
+        return "Month for \"" + attribute + "\" not found in months list (" + Strings.join(months, ", ") + "): "
+            + fromMonth.getLongName();
+      }
+      return null;
+    }
+
+    @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
       // Java 9: new Iterator<>
       return new Iterator<Calendar>() {
+        private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
         @Override
@@ -535,12 +680,18 @@ public abstract class Recurring {
             if (months.contains(month)) {
               break;
             }
-            // Move the calendar to the next day
+            // Move the calendar to the next month
+            cal.set(Calendar.DAY_OF_MONTH, 1);
             cal.add(Calendar.MONTH, 1);
+            int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+            cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
           }
-          Calendar date = (Calendar) cal.clone();
+          final Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next month
+          cal.set(Calendar.DAY_OF_MONTH, 1);
           cal.add(Calendar.MONTH, 1);
+          int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+          cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
           return date;
         }
       };
@@ -632,6 +783,20 @@ public abstract class Recurring {
       return increment * 31 + field;
     }
 
+    /**
+     * For testing only.
+     */
+    int getIncrement() {
+      return increment;
+    }
+
+    /**
+     * For testing only.
+     */
+    int getField() {
+      return field;
+    }
+
     @Override
     public String getRecurringDisplay() {
       StringBuilder sb = new StringBuilder("Every ");
@@ -660,7 +825,6 @@ public abstract class Recurring {
       switch (field) {
         case Calendar.DAY_OF_MONTH:
         case Calendar.WEEK_OF_YEAR:
-        case Calendar.YEAR:
           // Java 9: new Iterator<>
           return new Iterator<Calendar>() {
             private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
@@ -675,13 +839,14 @@ public abstract class Recurring {
              */
             @Override
             public Calendar next() {
-              Calendar date = (Calendar) cal.clone();
+              final Calendar date = (Calendar) cal.clone();
               // Move the calendar to the next by field and increment
               cal.add(field, increment);
               return date;
             }
           };
         case Calendar.MONTH:
+        case Calendar.YEAR:
           // Java 9: new Iterator<>
           return new Iterator<Calendar>() {
             private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
@@ -700,7 +865,7 @@ public abstract class Recurring {
               final Calendar date = (Calendar) cal.clone();
               // Move the calendar to the next month
               cal.set(Calendar.DAY_OF_MONTH, 1);
-              cal.add(Calendar.MONTH, increment);
+              cal.add(field, increment);
               int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
               cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
               return date;
@@ -709,6 +874,201 @@ public abstract class Recurring {
         default:
           throw new AssertionError("Unexpected value for field: " + field);
       }
+    }
+  }
+
+  public static class EveryByDayOfWeek extends Recurring {
+
+    private final int increment;
+    private final DayOfWeek dayOfWeek;
+
+    public EveryByDayOfWeek(int increment, DayOfWeek dayOfWeek) {
+      if (increment < 1) {
+        throw new IllegalArgumentException("Increment must be at least one");
+      }
+      this.increment = increment;
+      this.dayOfWeek = Objects.requireNonNull(dayOfWeek);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof EveryByDayOfWeek)) {
+        return false;
+      }
+      EveryByDayOfWeek other = (EveryByDayOfWeek) o;
+      return
+          increment == other.increment
+              && dayOfWeek == other.dayOfWeek;
+    }
+
+    @Override
+    public int hashCode() {
+      return increment * 31 + dayOfWeek.hashCode();
+    }
+
+    /**
+     * For testing only.
+     */
+    int getIncrement() {
+      return increment;
+    }
+
+    /**
+     * For testing only.
+     */
+    DayOfWeek getDayOfWeek() {
+      return dayOfWeek;
+    }
+
+    @Override
+    public String getRecurringDisplay() {
+      StringBuilder sb = new StringBuilder("Every ");
+      sb.append(increment).append(' ').append(increment == 1 ? dayOfWeek.getLongName() : dayOfWeek.getPluralName());
+      return sb.toString();
+    }
+
+    @Override
+    public String checkScheduleFrom(Calendar from, String attribute) {
+      // Day of week must match the first day "on"
+      DayOfWeek fromDow = DayOfWeek.getByCalendarDayOfWeek(from.get(Calendar.DAY_OF_WEEK));
+      if (dayOfWeek != fromDow) {
+        return "Day of week for \"" + attribute + "\" is not \"" + dayOfWeek.getLongName() + "\": " + fromDow.getLongName();
+      }
+      return null;
+    }
+
+    @Override
+    public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+      // Java 9: new Iterator<>
+      return new Iterator<Calendar>() {
+        private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public Calendar next() {
+          // Skip past days that are not selected
+          while (true) {
+            if (dayOfWeek == DayOfWeek.getByCalendarDayOfWeek(cal.get(Calendar.DAY_OF_WEEK))) {
+              break;
+            }
+            // Move the calendar to the next day
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+          }
+          final Calendar date = (Calendar) cal.clone();
+          // Move the calendar to the next increment week
+          cal.add(Calendar.WEEK_OF_YEAR, increment);
+          assert dayOfWeek == DayOfWeek.getByCalendarDayOfWeek(cal.get(Calendar.DAY_OF_WEEK));
+          return date;
+        }
+      };
+    }
+  }
+
+  public static class EveryByMonth extends Recurring {
+
+    private final int increment;
+    private final Month month;
+
+    public EveryByMonth(int increment, Month month) {
+      if (increment < 1) {
+        throw new IllegalArgumentException("Increment must be at least one");
+      }
+      this.increment = increment;
+      this.month = Objects.requireNonNull(month);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof EveryByMonth)) {
+        return false;
+      }
+      EveryByMonth other = (EveryByMonth) o;
+      return
+          increment == other.increment
+              && month == other.month;
+    }
+
+    @Override
+    public int hashCode() {
+      return increment * 31 + month.hashCode();
+    }
+
+    /**
+     * For testing only.
+     */
+    int getIncrement() {
+      return increment;
+    }
+
+    /**
+     * For testing only.
+     */
+    Month getMonth() {
+      return month;
+    }
+
+    @Override
+    public String getRecurringDisplay() {
+      StringBuilder sb = new StringBuilder("Every ");
+      sb.append(increment).append(' ').append(increment == 1 ? month.getLongName() : month.getPluralName());
+      return sb.toString();
+    }
+
+    @Override
+    public String checkScheduleFrom(Calendar from, String attribute) {
+      // Month must match the first day "on"
+      Month fromMonth = Month.getByCalendarMonth(from.get(Calendar.MONTH));
+      if (month != fromMonth) {
+        return "Month for \"" + attribute + "\" is not \"" + month.getLongName() + "\": " + fromMonth.getLongName();
+      }
+      return null;
+    }
+
+    @Override
+    public Iterator<Calendar> getScheduleIterator(final Calendar from) {
+      // Java 9: new Iterator<>
+      return new Iterator<Calendar>() {
+        private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
+        private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public Calendar next() {
+          // Skip past months that are not selected
+          while (true) {
+            if (month == Month.getByCalendarMonth(cal.get(Calendar.MONTH))) {
+              break;
+            }
+            // Move the calendar to the next month
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            cal.add(Calendar.MONTH, 1);
+            int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+            cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
+          }
+          final Calendar date = (Calendar) cal.clone();
+          // Move the calendar to the next increment month
+          cal.set(Calendar.DAY_OF_MONTH, 1);
+          cal.add(Calendar.YEAR, increment);
+          int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+          cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
+          assert month == Month.getByCalendarMonth(cal.get(Calendar.MONTH));
+          return date;
+        }
+      };
     }
   }
 }

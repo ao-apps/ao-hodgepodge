@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015, 2018, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2018, 2021, 2022, 2023  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,30 +27,37 @@ import java.util.Calendar;
 
 public enum DayOfWeek {
   SUNDAY(
+      "Sundays",
       "Sunday",
       "Sun",
       Calendar.SUNDAY),
   MONDAY(
+      "Mondays",
       "Monday",
       "Mon",
       Calendar.MONDAY),
   TUESDAY(
+      "Tuesdays",
       "Tuesday",
       "Tue",
       Calendar.TUESDAY),
   WEDNESDAY(
+      "Wednesdays",
       "Wednesday",
       "Wed",
       Calendar.WEDNESDAY),
   THURSDAY(
+      "Thursdays",
       "Thursday",
       "Thu",
       Calendar.THURSDAY),
   FRIDAY(
+      "Fridays",
       "Friday",
       "Fri",
       Calendar.FRIDAY),
   SATURDAY(
+      "Saturdays",
       "Saturday",
       "Sat",
       Calendar.SATURDAY);
@@ -58,6 +65,7 @@ public enum DayOfWeek {
   /**
    * Copy of values for internal use without temporary array copy.
    */
+  @SuppressWarnings("PackageVisibleField")
   static DayOfWeek[] values = values();
 
   /**
@@ -84,11 +92,13 @@ public enum DayOfWeek {
     }
   }
 
+  private final String pluralName;
   private final String longName;
   private final String shortName;
   private final int calendarDayOfWeek;
 
-  private DayOfWeek(String longName, String shortName, int calendarDayOfWeek) {
+  private DayOfWeek(String pluralName, String longName, String shortName, int calendarDayOfWeek) {
+    this.pluralName = pluralName;
     this.longName = longName;
     this.shortName = shortName;
     this.calendarDayOfWeek = calendarDayOfWeek;
@@ -97,6 +107,10 @@ public enum DayOfWeek {
   @Override
   public String toString() {
     return longName;
+  }
+
+  public String getPluralName() {
+    return pluralName;
   }
 
   public String getLongName() {
