@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2023, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -69,7 +69,7 @@ public final class Benchmark {
     System.out.println(pass);
     System.out.println();
     for (int c = 1; c < args.length; c++) {
-      List<List<Double>> fileThroughputs = throughputs.get(c - 1);
+      final List<List<Double>> fileThroughputs = throughputs.get(c - 1);
       List<List<Double>> fileSeekRates = seekRates.get(c - 1);
       final String filename = args[c];
       final File file = new File(filename);

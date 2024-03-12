@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2017, 2018, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2017, 2018, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -69,13 +69,13 @@ public class WildcardPatternMatcherTest extends TestCase {
     for (int testSize = 1; testSize <= END_TEST_SIZE; testSize *= 100) {
       // Time make matcher
       long startNanos = System.nanoTime();
-      WildcardPatternMatcher wcMatcher = WildcardPatternMatcher.compile(patterns);
+      final WildcardPatternMatcher wcMatcher = WildcardPatternMatcher.compile(patterns);
       long timeNanos = System.nanoTime() - startNanos;
       System.out.println("    " + testSize + ": Created WildcardPatternMatcher in " + BigDecimal.valueOf(timeNanos, 3) + " µs");
 
       // Time make pattern
       startNanos = System.nanoTime();
-      Pattern rePattern = Pattern.compile(regexp);
+      final Pattern rePattern = Pattern.compile(regexp);
       timeNanos = System.nanoTime() - startNanos;
       System.out.println("    " + testSize + ": Created Pattern                in " + BigDecimal.valueOf(timeNanos, 3) + " µs");
 
