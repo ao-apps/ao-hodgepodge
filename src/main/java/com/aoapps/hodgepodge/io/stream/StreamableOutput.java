@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -117,10 +117,6 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
     writeCompressedInt(i, out);
   }
 
-  public void writeCompressedUTF(String str) throws IOException {
-    writeCompressedUTF(str, 0);
-  }
-
   private String[] lastStrings;
   private int[] lastCommonLengths;
 
@@ -188,6 +184,10 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
     // Get ready for the next call
     lastStrings[slot] = str;
     lastCommonLengths[slot] = common;
+  }
+
+  public void writeCompressedUTF(String str) throws IOException {
+    writeCompressedUTF(str, 0);
   }
 
   public void writeNullUTF(String str) throws IOException {

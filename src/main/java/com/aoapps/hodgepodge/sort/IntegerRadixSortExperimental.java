@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -55,6 +55,8 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
   private static final int R_BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
   //private static final int R_PASS_SIZE = 1 << R_BITS_PER_PASS;
   //private static final int R_PASS_MASK = R_PASS_SIZE - 1;
+
+  private static final int UNSIGNED_OFFSET = 0x80000000;
 
   private static final boolean ENABLE_CONCURRENCY = true; // TODO: Concurrent broken currently when test has many values in 0-255 range
   private static final int MIN_CONCURRENCY_SIZE = 1 << 9; // TODO: 1 << 16
@@ -133,8 +135,6 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
       stats.sortEnding();
     }
   }
-
-  private static final int UNSIGNED_OFFSET = 0x80000000;
 
   // From https://github.com/gorset/radix/blob/master/Radix.java
   public static void sort(final int[] array, int offset, int end, int shift, final Queue<Future<?>> futures) {

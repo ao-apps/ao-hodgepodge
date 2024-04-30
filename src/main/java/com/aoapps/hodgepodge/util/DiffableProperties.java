@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
+ * Copyright (C) 2019, 2020, 2021, 2022, 2023, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -75,6 +75,24 @@ public final class DiffableProperties {
       return (char) (ch + ('a' - 'A'));
     } else {
       return ch;
+    }
+  }
+
+  public static class FormatResult {
+    private final String before;
+    private final String after;
+
+    private FormatResult(String before, String after) {
+      this.before = before;
+      this.after = after;
+    }
+
+    public String getBefore() {
+      return before;
+    }
+
+    public String getAfter() {
+      return after;
     }
   }
 
@@ -172,24 +190,6 @@ public final class DiffableProperties {
       }
     }
     return sb.toString();
-  }
-
-  public static class FormatResult {
-    private final String before;
-    private final String after;
-
-    private FormatResult(String before, String after) {
-      this.before = before;
-      this.after = after;
-    }
-
-    public String getBefore() {
-      return before;
-    }
-
-    public String getAfter() {
-      return after;
-    }
   }
 
   /**
