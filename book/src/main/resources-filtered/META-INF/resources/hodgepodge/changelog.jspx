@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
-Copyright (C) 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
+Copyright (C) 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024  AO Industries, Inc.
     support@aoindustries.com
     7262 Bull Pen Cir
     Mobile, AL 36695
@@ -38,9 +38,9 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2023-11-08T01:13:52Z"
+    dateModified="2024-05-08T13:02:47Z"
   >
-    <c:set var="latestRelease" value="5.1.2" />
+    <c:set var="latestRelease" value="5.2.0" />
     <c:if test="${
       fn:endsWith('@{project.version}', '-SNAPSHOT')
       and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')
@@ -53,32 +53,41 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         artifactId="@{documented.artifactId}"
         repository="@{nexusUrl}content/repositories/snapshots/"
         scmUrl="@{project.scm.url}"
-      >
-        <ul>
-          <li>Additional recurring schedule parsing:
-            <ol>
-              <li>Supporting "other" for "every ### unit", equal to "2".</li>
-              <li>Supporting ordinals for "every ### unit" from 2 to 12: "second", "third", …, "twelfth".</li>
-              <li>Days of week may now be referred to in plural form, such as "Fridays".</li>
-              <li>Months of year may now be referred to in plural form, such as "Januarys" or "Januaries".</li>
-              <li>Supporting days of week as unit for "every ### unit", such as "every other Friday"
-                or "every 100 mondays".</li>
-              <li>Substituting more specialized recurring implementations for "every 1 (day|week|month|year)"
-                as equivalent to "everyday", "weekly", "monthly", "yearly".</li>
-              <li>Substituting "everyday" in place of "on …" that contains every day of the week.</li>
-              <li>Substituting "weekdays" in place of "on …" that contains every weekday.</li>
-              <li>Substituting "monthly" in place of "in …" that contains every month.</li>
-            </ol>
-          </li>
-          <li>Added missing implementations of <code>checkScheduleFrom(…)</code>.</li>
-          <li>
-            Maintaining original day-of-month in all types of yearly and monthly processing.  Some uses would
-            previously round-down for shorter months and lose the original "on" day-of-month.
-          </li>
-          <li>Added unit tests for recurring scheduling.</li>
-        </ul>
-      </changelog:release>
+      />
     </c:if>
+
+    <changelog:release
+      projectName="@{documented.name}"
+      version="5.2.0"
+      datePublished="2024-05-08T13:02:47Z"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Additional recurring schedule parsing:
+          <ol>
+            <li>Supporting "other" for "every ### unit", equal to "2".</li>
+            <li>Supporting ordinals for "every ### unit" from 2 to 12: "second", "third", …, "twelfth".</li>
+            <li>Days of week may now be referred to in plural form, such as "Fridays".</li>
+            <li>Months of year may now be referred to in plural form, such as "Januarys" or "Januaries".</li>
+            <li>Supporting days of week as unit for "every ### unit", such as "every other Friday"
+              or "every 100 mondays".</li>
+            <li>Substituting more specialized recurring implementations for "every 1 (day|week|month|year)"
+              as equivalent to "everyday", "weekly", "monthly", "yearly".</li>
+            <li>Substituting "everyday" in place of "on …" that contains every day of the week.</li>
+            <li>Substituting "weekdays" in place of "on …" that contains every weekday.</li>
+            <li>Substituting "monthly" in place of "in …" that contains every month.</li>
+          </ol>
+        </li>
+        <li>Added missing implementations of <code>checkScheduleFrom(…)</code>.</li>
+        <li>
+          Maintaining original day-of-month in all types of yearly and monthly processing.  Some uses would
+          previously round-down for shorter months and lose the original "on" day-of-month.
+        </li>
+        <li>Added unit tests for recurring scheduling.</li>
+      </ul>
+    </changelog:release>
 
     <changelog:release
       projectName="@{documented.name}"
