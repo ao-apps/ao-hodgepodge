@@ -904,7 +904,8 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
       if (t == null) {
         out.append("&#160;");
       } else {
-        out.append("        <a href=\"#\" onclick='var elem = document.getElementById(\"stack_").append(Integer.toString(c)).append("\").style; elem.visibility=(elem.visibility == \"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
+        out.append("        <a href=\"#\" onclick='var elem = document.getElementById(\"stack_")
+            .append(Integer.toString(c)).append("\").style; elem.visibility=(elem.visibility == \"visible\" ? \"hidden\" : \"visible\"); return false;'>Stack Trace</a>\n"
             + "        <span id=\"stack_")
             .append(Integer.toString(c))
             .append("\" style=\"text-align:left; white-space:nowrap; position:absolute; visibility: hidden; z-index:")
