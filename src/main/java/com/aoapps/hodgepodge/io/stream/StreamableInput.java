@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -47,15 +47,13 @@ public class StreamableInput extends DataInputStream implements NoClose {
 
   /**
    * Reads a compressed integer from the stream.
-   * <p>
-   * The 31 bit pattern is as follows:
-   * </p>
-   * <pre>
-   * 5 bit   - 000SXXXX
+   *
+   * <p>The 31 bit pattern is as follows:</p>
+   *
+   * <pre>5 bit   - 000SXXXX
    * 13 bit  - 001SXXXX XXXXXXXX
    * 22 bit  - 01SXXXXX XXXXXXXX XXXXXXXX
-   * 31 bit  - 1SXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX
-   * </pre>
+   * 31 bit  - 1SXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX</pre>
    *
    * @exception  EOFException if the end of file is reached
    */
@@ -119,15 +117,13 @@ public class StreamableInput extends DataInputStream implements NoClose {
 
   /**
    * Reads a compressed integer from the stream.
-   * <p>
-   * The 31 bit pattern is as follows:
-   * </p>
-   * <pre>
-   * 5 bit   - 000SXXXX
+   *
+   * <p>The 31 bit pattern is as follows:</p>
+   *
+   * <pre>5 bit   - 000SXXXX
    * 13 bit  - 001SXXXX XXXXXXXX
    * 22 bit  - 01SXXXXX XXXXXXXX XXXXXXXX
-   * 31 bit  - 1SXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX
-   * </pre>
+   * 31 bit  - 1SXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX</pre>
    *
    * @exception  EOFException if the end of file is reached
    */

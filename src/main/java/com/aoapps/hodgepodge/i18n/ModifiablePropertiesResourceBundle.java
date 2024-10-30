@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -59,21 +59,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * <p>
  * Wraps the resources with XHTML and scripts to allow the modification of the
  * resource bundle contents directly through the web interface.  Also adds an
  * indicator when the resource need to be verified.  Verification is required
  * when any other locale has a modified time greater than the verified time
  * of this locale.
- * </p>
- * <p>
- * The properties file should have the same name as this class, including any language
+ *
+ * <p>The properties file should have the same name as this class, including any language
  * or locale.  For instance, class <code>com.aoapps.hodgepodge.swing.ApplicationResources_ja</code>
- * would load its properties from <code>com/aoapps/hodgepodge/swing/ApplicationResources_ja.properties</code>.
- * </p>
- * <p>
- * Idea: Occasionally check sourceFile and reload properties if externally modified.
- * </p>
+ * would load its properties from <code>com/aoapps/hodgepodge/swing/ApplicationResources_ja.properties</code>.</p>
+ *
+ * <p>Idea: Occasionally check sourceFile and reload properties if externally modified.</p>
  *
  * @author  AO Industries, Inc.
  */
@@ -98,17 +94,14 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
   }
 
   /**
-   * <p>
    * If this sourceFile exists, the properties will be read from that file,
    * otherwise it will fall back to <code>Class.getResourceAsStream</code>.
    * This allows direct manipulation of the source tree during development,
    * while maintaining compatibility with the standard <code>PropertyResourceBundle</code>
    * implementation.
-   * </p>
-   * <p>
-   * If this sourceFile does not exist, the bundle will not be modifiable and
-   * any attempt to modify it will result in a <code>RuntimeException</code>.
-   * </p>
+   *
+   * <p>If this sourceFile does not exist, the bundle will not be modifiable and
+   * any attempt to modify it will result in a <code>RuntimeException</code>.</p>
    */
   private final File sourceFile;
 

@@ -25,8 +25,8 @@ import java.util.List;
 /**
  * An enhanced quick sort demonstration algorithm
  * SortAlgorithm.java, Thu Oct 27 10:32:35 1994
- * <pre>
- * 19 Feb 1996: Fixed to avoid infinite loop discoved by Paul Haberli.
+ *
+ * <pre>19 Feb 1996: Fixed to avoid infinite loop discoved by Paul Haberli.
  *              Misbehaviour expressed when the pivot element was not unique.
  *              -Jason Harrison
  *
@@ -36,11 +36,9 @@ import java.util.List;
  *              new pivoting code. - Jason Harrison
  *
  * 09 Jan 1998: Another set of bug fixes by Thomas Everth (everth@wave.co.nz)
- *              and John Brzustowski (jbrzusto@gpu.srv.ualberta.ca).
- * </pre>
- * <p>
- * Adapted from <a href="http://www.cs.ubc.ca/spider/harrison/Java/EQSortAlgorithm.java.html">Jim Boritz' EQSortAlgorithm</a>.
- * </p>
+ *              and John Brzustowski (jbrzusto@gpu.srv.ualberta.ca).</pre>
+ *
+ * <p>Adapted from <a href="http://www.cs.ubc.ca/spider/harrison/Java/EQSortAlgorithm.java.html">Jim Boritz' EQSortAlgorithm</a>.</p>
  *
  * @author Jim Boritz
  * @version 1.0, 26 Jun 1995

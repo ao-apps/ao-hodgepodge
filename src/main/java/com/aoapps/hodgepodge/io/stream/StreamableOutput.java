@@ -123,8 +123,7 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
   /**
    * Writes a String to the stream while using prefix compression.
    *
-   * <pre>
-   * The first byte has these bits:
+   * <pre>The first byte has these bits:
    *
    * X X X X X X X X
    * | | +-+-+-+-+-+ Slot number (0-63)
@@ -134,8 +133,7 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
    * Second, if common length difference is not zero, the common length change follows
    *                 one less for positive differences because 0 is handled in first byte
    *
-   * Third, if suffix UTF follows, writeUTF of all the string after common length
-   * </pre>
+   * Third, if suffix UTF follows, writeUTF of all the string after common length</pre>
    */
   public void writeCompressedUTF(String str, int slot) throws IOException {
     if (slot < 0 || slot > 0x3f) {

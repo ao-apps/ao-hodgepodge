@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,11 +34,10 @@ import java.io.RandomAccessFile;
  * is closed and recreated, which is typical during log rotations,
  * the new file is opened and read from the beginning.  The file is assumed
  * to have been replaced when its length is smaller than before.
- * <p>
- * This class will block on read.  If end of file is reached, it will continue
+ *
+ * <p>This class will block on read.  If end of file is reached, it will continue
  * to block until data becomes available.  End of file is never returned from
- * this class, it will wait indefinitely for data.
- * </p>
+ * this class, it will wait indefinitely for data.</p>
  *
  * @author  AO Industries, Inc.
  */

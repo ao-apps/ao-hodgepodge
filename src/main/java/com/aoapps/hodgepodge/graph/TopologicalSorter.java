@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016, 2017, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2017, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,13 +31,11 @@ import java.util.Set;
 
 /**
  * Performs a topological sort of all the vertices in the provided symmetric multi graph.
- * <p>
- * If forward, objects with no edges directed out are first.
- * If backward, objects with no edges directed in are first.
- * </p>
- * <p>
- * See <a href="https://wikipedia.org/wiki/Topological_sorting#Algorithms">https://wikipedia.org/wiki/Topological_sorting#Algorithms</a>
- * </p>
+ *
+ * <p>If forward, objects with no edges directed out are first.
+ * If backward, objects with no edges directed in are first.</p>
+ *
+ * <p>See <a href="https://wikipedia.org/wiki/Topological_sorting#Algorithms">https://wikipedia.org/wiki/Topological_sorting#Algorithms</a></p>
  *
  * @param  <Ex>  An arbitrary exception type that may be thrown
  *

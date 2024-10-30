@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,10 +31,10 @@ import java.util.ResourceBundle;
 
 /**
  * ISO 3166-1 alpha-2 country codes.
- * <p>
- * Source: <a href="https://wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements">https://wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements</a> on 2009-12-13
- * </p>
- * TODO: Update before next production release
+ *
+ * <p>Source: <a href="https://wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements">https://wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements</a> on 2009-12-13</p>
+ *
+ * <p>TODO: Update before next production release</p>
  *
  * @author  AO Industries, Inc.
  */

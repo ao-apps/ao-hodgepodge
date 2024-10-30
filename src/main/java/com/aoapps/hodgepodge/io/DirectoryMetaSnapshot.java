@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2019, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2019, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -36,10 +36,9 @@ import java.util.TreeMap;
  * may be compared to a snapshot of the same directory at a different time.  To
  * perform a quick comparison of two directory trees, a snapshot may be compared
  * to a snapshot of a different directory.
- * <p>
- * Only watches the lengths and modified times for filesystem objects that Java
- * considers a file.
- * </p>
+ *
+ * <p>Only watches the lengths and modified times for filesystem objects that Java
+ * considers a file.</p>
  *
  * @see  File#isFile()  for what Java considers a file
  *

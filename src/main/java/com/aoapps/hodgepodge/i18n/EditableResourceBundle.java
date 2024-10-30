@@ -159,10 +159,9 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     /**
      * Creates a new settings instance that shares the underlying sequences, map, and lookup context, but with a
      * different configuration.
-     * <p>
-     * These new settings are not automatically associated with the current thread.  That must be done via
-     * {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.
-     * </p>
+     *
+     * <p>These new settings are not automatically associated with the current thread.  That must be done via
+     * {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.</p>
      *
      * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
      *          sequences, map, and lookup context.
@@ -192,10 +191,9 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 
     /**
      * Sets the mode.
-     * <p>
-     * These new settings are not automatically associated with the current thread.  That must be done via
-     * {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.
-     * </p>
+     *
+     * <p>These new settings are not automatically associated with the current thread.  That must be done via
+     * {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.</p>
      *
      * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
      *          sequences, map, and lookup context.
@@ -212,10 +210,9 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
 
     /**
      * Sets the modify all text flag.
-     * <p>
-     * These new settings are not automatically associated with the current thread.  That must be done via
-     * {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.
-     * </p>
+     *
+     * <p>These new settings are not automatically associated with the current thread.  That must be done via
+     * {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.</p>
      *
      * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
      *          sequences, map, and lookup context.
@@ -356,9 +353,8 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
    * Any page that allows the editing of resources must set this at the beginning of the request.
    * If not all users of the site are allowed to edit the content, must also clear this at the end of the request
    * by either calling this method with <code>false</code> or calling <code>printEditableResourceBundleLookups</code>.
-   * <p>
-   * Also resets the {@linkplain BundleLookupThreadContext thread lookup context}.
-   * </p>
+   *
+   * <p>Also resets the {@linkplain BundleLookupThreadContext thread lookup context}.</p>
    *
    * @param  setValueUrl  Must be non-null when {@code canEditResources} is {@code true}.
    *
@@ -395,11 +391,11 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
   /**
    * Prints the resource bundle lookup editor.  This should be called at the end of a request,
    * just before the body tag is closed.
-   * <p>
-   * Also clears the {@linkplain BundleLookupThreadContext thread lookup context}.
-   * </p>
-   * TODO: Add language resources to properties files (but do not make it an editable properties file to avoid possible infinite recursion?)
-   * TODO: Decouple from ao-hodgepodge and use ao-fluent-html
+   *
+   * <p>Also clears the {@linkplain BundleLookupThreadContext thread lookup context}.</p>
+   *
+   * <p>TODO: Add language resources to properties files (but do not make it an editable properties file to avoid possible infinite recursion?)
+   * TODO: Decouple from ao-hodgepodge and use ao-fluent-html</p>
    */
   public static void printEditableResourceBundleLookups(
       Encoder textInJavascriptEncoder,
@@ -1230,15 +1226,11 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
   }
 
   /**
-   * <p>
    * XHTML: Text surrounded by &lt;span&gt;.
-   * </p>
-   * <p>
-   * TEXT: &lt;#&lt; and &gt;#&gt; used to cause XHTML parse errors if text value not properly encoded
-   * </p>
-   * <p>
-   * JAVASCRIPT: Adds a comment before the string with the lookup id
-   * </p>
+   *
+   * <p>TEXT: &lt;#&lt; and &gt;#&gt; used to cause XHTML parse errors if text value not properly encoded</p>
+   *
+   * <p>JAVASCRIPT: Adds a comment before the string with the lookup id</p>
    */
   private static final class EditableResourceBundleLookupMarkup implements BundleLookupMarkup {
 
@@ -1265,83 +1257,88 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     @Override
     public void appendPrefixTo(MarkupType markupType, Appendable out) throws IOException {
       switch (markupType) {
-        case NONE: {
-          // No markup
-          break;
-        }
-        case XHTML: {
-          //if (invalidated) {
-          //  SB.append(" style=\"color:red\"");
-          //}
-          if (allowScripts) {
-            String elementIdString = Long.toString(elementId);
-            out
-                .append("<!--")
-                .append(Long.toString(lookupId))
-                .append("--><span id=\"EditableResourceBundleElement")
-                .append(elementIdString)
-                .append("\" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(")
-                .append(elementIdString)
-                .append(", true);\"")
-                .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(")
-                .append(elementIdString)
-                .append(");\">");
-            // TODO: invalidated/modifyAllText marker here, too?;
-          } else {
-            // No scripting version, similar to TEXT
-            if (invalidated) {
-              out
-                  .append("&lt;&lt;&lt;")
-                  .append(Long.toString(lookupId))
-                  .append("&lt;");
-            } else if (modifyAllText) {
-              out
-                  .append("&lt;")
-                  .append(Long.toString(lookupId))
-                  .append("&lt;");
-            } else {
-              // Comments only
+        case NONE:
+          {
+            // No markup
+            break;
+          }
+        case XHTML:
+          {
+            //if (invalidated) {
+            //  SB.append(" style=\"color:red\"");
+            //}
+            if (allowScripts) {
+              String elementIdString = Long.toString(elementId);
               out
                   .append("<!--")
                   .append(Long.toString(lookupId))
-                  .append("-->");
+                  .append("--><span id=\"EditableResourceBundleElement")
+                  .append(elementIdString)
+                  .append("\" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(")
+                  .append(elementIdString)
+                  .append(", true);\"")
+                  .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(")
+                  .append(elementIdString)
+                  .append(");\">");
+              // TODO: invalidated/modifyAllText marker here, too?;
+            } else {
+              // No scripting version, similar to TEXT
+              if (invalidated) {
+                out
+                    .append("&lt;&lt;&lt;")
+                    .append(Long.toString(lookupId))
+                    .append("&lt;");
+              } else if (modifyAllText) {
+                out
+                    .append("&lt;")
+                    .append(Long.toString(lookupId))
+                    .append("&lt;");
+              } else {
+                // Comments only
+                out
+                    .append("<!--")
+                    .append(Long.toString(lookupId))
+                    .append("-->");
+              }
             }
+            break;
           }
-          break;
-        }
-        case TEXT: {
-          if (invalidated) {
-            out
-                .append("<<<")
-                .append(Long.toString(lookupId))
-                .append('<');
-          } else if (modifyAllText) {
-            out
-                .append('<')
-                .append(Long.toString(lookupId))
-                .append('<');
-          } else {
-            // No prefix
+        case TEXT:
+          {
+            if (invalidated) {
+              out
+                  .append("<<<")
+                  .append(Long.toString(lookupId))
+                  .append('<');
+            } else if (modifyAllText) {
+              out
+                  .append('<')
+                  .append(Long.toString(lookupId))
+                  .append('<');
+            } else {
+              // No prefix
+            }
+            break;
           }
-          break;
-        }
         case JAVASCRIPT:
         case MYSQL:
         case PSQL:
-        case CSS: {
-          out
-              .append("/*")
-              .append(Long.toString(lookupId))
-              .append("*/");
-          break;
-        }
-        case SH: {
-          out
-              .append("`#")
-              .append(Long.toString(lookupId))
-              .append('`');
-          break;
-        }
+        case CSS:
+          {
+            out
+                .append("/*")
+                .append(Long.toString(lookupId))
+                .append("*/");
+            break;
+          }
+        case SH:
+          {
+            out
+                .append("`#")
+                .append(Long.toString(lookupId))
+                .append('`');
+            break;
+          }
         default:
           throw new AssertionError();
       }
@@ -1353,83 +1350,88 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
         appendPrefixTo(markupType, out);
       } else {
         switch (markupType) {
-          case NONE: {
-            // No markup
-            break;
-          }
-          case XHTML: {
-            //if (invalidated) {
-            //  SB.append(" style=\"color:red\"");
-            //}
-            if (allowScripts) {
-              String elementIdString = Long.toString(elementId);
-              encoder
-                  .append("<!--", out)
-                  .append(Long.toString(lookupId), out)
-                  .append("--><span id=\"EditableResourceBundleElement", out)
-                  .append(elementIdString, out)
-                  .append("\" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(", out)
-                  .append(elementIdString, out)
-                  .append(", true);\"", out)
-                  .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(", out)
-                  .append(elementIdString, out)
-                  .append(");\">", out);
-              // TODO: invalidated/modifyAllText marker here, too?
-            } else {
-              // No scripting version, similar to TEXT
-              if (invalidated) {
-                encoder
-                    .append("&lt;&lt;&lt;", out)
-                    .append(Long.toString(lookupId), out)
-                    .append("&lt;", out);
-              } else if (modifyAllText) {
-                encoder
-                    .append("&lt;", out)
-                    .append(Long.toString(lookupId), out)
-                    .append("&lt;", out);
-              } else {
-                // Comments only
+          case NONE:
+            {
+              // No markup
+              break;
+            }
+          case XHTML:
+            {
+              //if (invalidated) {
+              //  SB.append(" style=\"color:red\"");
+              //}
+              if (allowScripts) {
+                String elementIdString = Long.toString(elementId);
                 encoder
                     .append("<!--", out)
                     .append(Long.toString(lookupId), out)
-                    .append("-->", out);
+                    .append("--><span id=\"EditableResourceBundleElement", out)
+                    .append(elementIdString, out)
+                    .append("\" onmouseover=\"if (typeof EditableResourceBundleHighlightAll == &#39;function&#39;) EditableResourceBundleHighlightAll(", out)
+                    .append(elementIdString, out)
+                    .append(", true);\"", out)
+                    .append(" onmouseout=\"if (typeof EditableResourceBundleUnhighlightAll == &#39;function&#39;) EditableResourceBundleUnhighlightAll(", out)
+                    .append(elementIdString, out)
+                    .append(");\">", out);
+                // TODO: invalidated/modifyAllText marker here, too?
+              } else {
+                // No scripting version, similar to TEXT
+                if (invalidated) {
+                  encoder
+                      .append("&lt;&lt;&lt;", out)
+                      .append(Long.toString(lookupId), out)
+                      .append("&lt;", out);
+                } else if (modifyAllText) {
+                  encoder
+                      .append("&lt;", out)
+                      .append(Long.toString(lookupId), out)
+                      .append("&lt;", out);
+                } else {
+                  // Comments only
+                  encoder
+                      .append("<!--", out)
+                      .append(Long.toString(lookupId), out)
+                      .append("-->", out);
+                }
               }
+              break;
             }
-            break;
-          }
-          case TEXT: {
-            if (invalidated) {
-              encoder
-                  .append("<<<", out)
-                  .append(Long.toString(lookupId), out)
-                  .append('<', out);
-            } else if (modifyAllText) {
-              encoder
-                  .append('<', out)
-                  .append(Long.toString(lookupId), out)
-                  .append('<', out);
-            } else {
-              // No prefix
+          case TEXT:
+            {
+              if (invalidated) {
+                encoder
+                    .append("<<<", out)
+                    .append(Long.toString(lookupId), out)
+                    .append('<', out);
+              } else if (modifyAllText) {
+                encoder
+                    .append('<', out)
+                    .append(Long.toString(lookupId), out)
+                    .append('<', out);
+              } else {
+                // No prefix
+              }
+              break;
             }
-            break;
-          }
           case JAVASCRIPT:
           case MYSQL:
           case PSQL:
-          case CSS: {
-            encoder
-                .append("/*", out)
-                .append(Long.toString(lookupId), out)
-                .append("*/", out);
-            break;
-          }
-          case SH: {
-            encoder
-                .append("`#", out)
-                .append(Long.toString(lookupId), out)
-                .append('`', out);
-            break;
-          }
+          case CSS:
+            {
+              encoder
+                  .append("/*", out)
+                  .append(Long.toString(lookupId), out)
+                  .append("*/", out);
+              break;
+            }
+          case SH:
+            {
+              encoder
+                  .append("`#", out)
+                  .append(Long.toString(lookupId), out)
+                  .append('`', out);
+              break;
+            }
           default:
             throw new AssertionError();
         }
@@ -1439,56 +1441,60 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     @Override
     public void appendSuffixTo(MarkupType markupType, Appendable out) throws IOException {
       switch (markupType) {
-        case NONE: {
-          // No markup
-          break;
-        }
-        case XHTML: {
-          if (allowScripts) {
-            // TODO: invalidated/modifyAllText marker here, too?
-            out.append("</span>");
-          } else {
-            // No scripting version, similar to TEXT
+        case NONE:
+          {
+            // No markup
+            break;
+          }
+        case XHTML:
+          {
+            if (allowScripts) {
+              // TODO: invalidated/modifyAllText marker here, too?
+              out.append("</span>");
+            } else {
+              // No scripting version, similar to TEXT
+              if (invalidated) {
+                out
+                    .append("&gt;")
+                    .append(Long.toString(lookupId))
+                    .append("&gt;&gt;&gt;");
+              } else if (modifyAllText) {
+                out
+                    .append("&gt;")
+                    .append(Long.toString(lookupId))
+                    .append("&gt;");
+              } else {
+                // No suffix
+              }
+            }
+            break;
+          }
+        case TEXT:
+          {
             if (invalidated) {
               out
-                  .append("&gt;")
+                  .append('>')
                   .append(Long.toString(lookupId))
-                  .append("&gt;&gt;&gt;");
+                  .append(">>>");
             } else if (modifyAllText) {
               out
-                  .append("&gt;")
+                  .append('>')
                   .append(Long.toString(lookupId))
-                  .append("&gt;");
+                  .append('>');
             } else {
               // No suffix
             }
+            break;
           }
-          break;
-        }
-        case TEXT: {
-          if (invalidated) {
-            out
-                .append('>')
-                .append(Long.toString(lookupId))
-                .append(">>>");
-          } else if (modifyAllText) {
-            out
-                .append('>')
-                .append(Long.toString(lookupId))
-                .append('>');
-          } else {
-            // No suffix
-          }
-          break;
-        }
         case JAVASCRIPT:
         case MYSQL:
         case PSQL:
         case CSS:
-        case SH: {
-          // No suffix
-          break;
-        }
+        case SH:
+          {
+            // No suffix
+            break;
+          }
         default:
           throw new AssertionError();
       }
@@ -1500,56 +1506,60 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
         appendSuffixTo(markupType, out);
       } else {
         switch (markupType) {
-          case NONE: {
-            // No markup
-            break;
-          }
-          case XHTML: {
-            if (allowScripts) {
-              // TODO: invalidated/modifyAllText marker here, too?
-              encoder.append("</span>", out);
-            } else {
-              // No scripting version, similar to TEXT
+          case NONE:
+            {
+              // No markup
+              break;
+            }
+          case XHTML:
+            {
+              if (allowScripts) {
+                // TODO: invalidated/modifyAllText marker here, too?
+                encoder.append("</span>", out);
+              } else {
+                // No scripting version, similar to TEXT
+                if (invalidated) {
+                  encoder
+                      .append("&gt;", out)
+                      .append(Long.toString(lookupId), out)
+                      .append("&gt;&gt;&gt;", out);
+                } else if (modifyAllText) {
+                  encoder
+                      .append("&gt;", out)
+                      .append(Long.toString(lookupId), out)
+                      .append("&gt;", out);
+                } else {
+                  // No suffix
+                }
+              }
+              break;
+            }
+          case TEXT:
+            {
               if (invalidated) {
                 encoder
-                    .append("&gt;", out)
+                    .append('>', out)
                     .append(Long.toString(lookupId), out)
-                    .append("&gt;&gt;&gt;", out);
+                    .append(">>>", out);
               } else if (modifyAllText) {
                 encoder
-                    .append("&gt;", out)
+                    .append('>', out)
                     .append(Long.toString(lookupId), out)
-                    .append("&gt;", out);
+                    .append('>', out);
               } else {
                 // No suffix
               }
+              break;
             }
-            break;
-          }
-          case TEXT: {
-            if (invalidated) {
-              encoder
-                  .append('>', out)
-                  .append(Long.toString(lookupId), out)
-                  .append(">>>", out);
-            } else if (modifyAllText) {
-              encoder
-                  .append('>', out)
-                  .append(Long.toString(lookupId), out)
-                  .append('>', out);
-            } else {
-              // No suffix
-            }
-            break;
-          }
           case JAVASCRIPT:
           case MYSQL:
           case PSQL:
           case CSS:
-          case SH: {
-            // No suffix
-            break;
-          }
+          case SH:
+            {
+              // No suffix
+              break;
+            }
           default:
             throw new AssertionError();
         }

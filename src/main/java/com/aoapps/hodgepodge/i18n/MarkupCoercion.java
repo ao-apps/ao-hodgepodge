@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -134,8 +134,10 @@ public final class MarkupCoercion {
    * Encodes an object's String representation with markup enabled using the provided encoder,
    * supporting streaming for specialized types.
    *
-   * @param  encodeLookupMarkup  <p>Does the lookup markup need to be encoded?</p>
+   * @param  encodeLookupMarkup  Does the lookup markup need to be encoded?
+   *
    *                             <p>When {@code encodeLookupMarkup = true}:</p>
+   *
    *                             <ol>
    *                               <li>Write markup prefix without encoding</li>
    *                               <li>Write any encoder prefix</li>
@@ -143,7 +145,9 @@ public final class MarkupCoercion {
    *                               <li>Write any encoder suffix</li>
    *                               <li>Write markup suffix without encoding</li>
    *                             </ol>
+   *
    *                             <p>When {@code encodeLookupMarkup = false}:</p>
+   *
    *                             <ol>
    *                               <li>Write any encoder prefix</li>
    *                               <li>Write markup prefix with encoding</li>
@@ -151,18 +155,16 @@ public final class MarkupCoercion {
    *                               <li>Write markup suffix with encoding</li>
    *                               <li>Write any encoder suffix</li>
    *                             </ol>
-   *                             <p>
-   *                               Value is not used when {@code encoder == null}.
-   *                             </p>
+   *
+   *                             <p>Value is not used when {@code encoder == null}.</p>
    *
    * @param  encoder  no encoding performed when null, and values of {@code encodeLookupMarkup} and
    *                  {@code encoderPrefixSuffix} are not used.
    *
    * @param  encoderPrefixSuffix  This includes the encoder {@linkplain Encoder#writePrefixTo(java.lang.Appendable) prefix}
    *                              and {@linkplain Encoder#writeSuffixTo(java.lang.Appendable, boolean) suffix}.
-   *                              <p>
-   *                                Value is not used when {@code encoder == null}.
-   *                              </p>
+   *
+   *                              <p>Value is not used when {@code encoder == null}.</p>
    *
    * @see  MarkupType
    */
@@ -174,8 +176,10 @@ public final class MarkupCoercion {
    * Encodes an object's String representation with markup enabled using the provided encoder,
    * supporting streaming for specialized types.
    *
-   * @param  encodeLookupMarkup  <p>Does the lookup markup need to be encoded?</p>
+   * @param  encodeLookupMarkup  Does the lookup markup need to be encoded?
+   *
    *                             <p>When {@code encodeLookupMarkup = true}:</p>
+   *
    *                             <ol>
    *                               <li>Write markup prefix without encoding</li>
    *                               <li>Write any encoder prefix</li>
@@ -183,7 +187,9 @@ public final class MarkupCoercion {
    *                               <li>Write any encoder suffix</li>
    *                               <li>Write markup suffix without encoding</li>
    *                             </ol>
+   *
    *                             <p>When {@code encodeLookupMarkup = false}:</p>
+   *
    *                             <ol>
    *                               <li>Write any encoder prefix</li>
    *                               <li>Write markup prefix with encoding</li>
@@ -191,18 +197,16 @@ public final class MarkupCoercion {
    *                               <li>Write markup suffix with encoding</li>
    *                               <li>Write any encoder suffix</li>
    *                             </ol>
-   *                             <p>
-   *                               Value is not used when {@code encoder == null}.
-   *                             </p>
+   *
+   *                             <p>Value is not used when {@code encoder == null}.</p>
    *
    * @param  encoder  no encoding performed when null, and values of {@code encodeLookupMarkup} and
    *                  {@code encoderPrefixSuffix} are not used.
    *
    * @param  encoderPrefixSuffix  This includes the encoder {@linkplain Encoder#writePrefixTo(java.lang.Appendable) prefix}
    *                              and {@linkplain Encoder#writeSuffixTo(java.lang.Appendable, boolean) suffix}.
-   *                              <p>
-   *                                Value is not used when {@code encoder == null}.
-   *                              </p>
+   *
+   *                              <p>Value is not used when {@code encoder == null}.</p>
    *
    * @param  outOptimized  Is {@code out} already known to have been passed through {@link Coercion#optimize(java.io.Writer, com.aoapps.lang.io.Encoder)}?
    *
@@ -376,8 +380,10 @@ public final class MarkupCoercion {
    * Encodes an object's String representation with markup enabled using the provided encoder,
    * supporting streaming for specialized types.
    *
-   * @param  encodeLookupMarkup  <p>Does the lookup markup need to be encoded?</p>
+   * @param  encodeLookupMarkup  Does the lookup markup need to be encoded?
+   *
    *                             <p>When {@code encodeLookupMarkup = true}:</p>
+   *
    *                             <ol>
    *                               <li>Write markup prefix without encoding</li>
    *                               <li>Write any encoder prefix</li>
@@ -385,7 +391,9 @@ public final class MarkupCoercion {
    *                               <li>Write any encoder suffix</li>
    *                               <li>Write markup suffix without encoding</li>
    *                             </ol>
+   *
    *                             <p>When {@code encodeLookupMarkup = false}:</p>
+   *
    *                             <ol>
    *                               <li>Write any encoder prefix</li>
    *                               <li>Write markup prefix with encoding</li>
@@ -393,18 +401,16 @@ public final class MarkupCoercion {
    *                               <li>Write markup suffix with encoding</li>
    *                               <li>Write any encoder suffix</li>
    *                             </ol>
-   *                             <p>
-   *                               Value is not used when {@code encoder == null}.
-   *                             </p>
+   *
+   *                             <p>Value is not used when {@code encoder == null}.</p>
    *
    * @param  encoder  no encoding performed when null, and values of {@code encodeLookupMarkup} and
    *                  {@code encoderPrefixSuffix} are not used.
    *
    * @param  encoderPrefixSuffix  This includes the encoder {@linkplain Encoder#writePrefixTo(java.lang.Appendable) prefix}
    *                              and {@linkplain Encoder#writeSuffixTo(java.lang.Appendable, boolean) suffix}.
-   *                              <p>
-   *                                Value is not used when {@code encoder == null}.
-   *                              </p>
+   *
+   *                              <p>Value is not used when {@code encoder == null}.</p>
    *
    * @see  MarkupType
    */
@@ -416,8 +422,10 @@ public final class MarkupCoercion {
    * Encodes an object's String representation with markup enabled using the provided encoder,
    * supporting streaming for specialized types.
    *
-   * @param  encodeLookupMarkup  <p>Does the lookup markup need to be encoded?</p>
+   * @param  encodeLookupMarkup  Does the lookup markup need to be encoded?
+   *
    *                             <p>When {@code encodeLookupMarkup = true}:</p>
+   *
    *                             <ol>
    *                               <li>Write markup prefix without encoding</li>
    *                               <li>Write any encoder prefix</li>
@@ -425,7 +433,9 @@ public final class MarkupCoercion {
    *                               <li>Write any encoder suffix</li>
    *                               <li>Write markup suffix without encoding</li>
    *                             </ol>
+   *
    *                             <p>When {@code encodeLookupMarkup = false}:</p>
+   *
    *                             <ol>
    *                               <li>Write any encoder prefix</li>
    *                               <li>Write markup prefix with encoding</li>
@@ -433,18 +443,16 @@ public final class MarkupCoercion {
    *                               <li>Write markup suffix with encoding</li>
    *                               <li>Write any encoder suffix</li>
    *                             </ol>
-   *                             <p>
-   *                               Value is not used when {@code encoder == null}.
-   *                             </p>
+   *
+   *                             <p>Value is not used when {@code encoder == null}.</p>
    *
    * @param  encoder  no encoding performed when null, and values of {@code encodeLookupMarkup} and
    *                  {@code encoderPrefixSuffix} are not used.
    *
    * @param  encoderPrefixSuffix  This includes the encoder {@linkplain Encoder#writePrefixTo(java.lang.Appendable) prefix}
    *                              and {@linkplain Encoder#writeSuffixTo(java.lang.Appendable, boolean) suffix}.
-   *                              <p>
-   *                                Value is not used when {@code encoder == null}.
-   *                              </p>
+   *
+   *                              <p>Value is not used when {@code encoder == null}.</p>
    *
    * @param  outOptimized  Is {@code out} already known to have been passed through {@link Coercion#optimize(java.io.Writer, com.aoapps.lang.io.Encoder)}?
    *

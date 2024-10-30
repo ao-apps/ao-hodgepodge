@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2017, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2017, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -30,21 +30,17 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * <p>
  * Each thread has a markup context associated with it.  When set, bundle lookups
  * will be recorded with any markup-context appropriate prefixes and suffixes added.
  * This allows the use of a normal API while providing a mechanism for in-context
  * translation interfaces to better integrate with the underlying resource bundles.
- * </p>
- * <p>
- * Under concurrent programming, one context can
+ *
+ * <p>Under concurrent programming, one context can
  * {@linkplain I18nThreadLocalRunnable end up being accessed concurrently by multiple threads},
- * thus BundleLookupThreadContext is a thread-safe implementation.
- * </p>
- * <p>
- * Bundle lookups are not guaranteed to be recorded, such as when in-context translation
- * is disabled (production mode).
- * </p>
+ * thus BundleLookupThreadContext is a thread-safe implementation.</p>
+ *
+ * <p>Bundle lookups are not guaranteed to be recorded, such as when in-context translation
+ * is disabled (production mode).</p>
  */
 public final class BundleLookupThreadContext {
 
@@ -171,11 +167,10 @@ public final class BundleLookupThreadContext {
 
   /**
    * Gets the lookup markup for the given String or {@code null} if not found.
-   * <p>
-   * The string is looked-up by identity only: {@link String#equals(java.lang.Object)} is not called.
+   *
+   * <p>The string is looked-up by identity only: {@link String#equals(java.lang.Object)} is not called.
    * This is to give a more precise match to lookups.  Much care is taken care to support this string
-   * identity lookup, including things like resource bundles, I/O buffers, and tag attribute manipulation.
-   * </p>
+   * identity lookup, including things like resource bundles, I/O buffers, and tag attribute manipulation.</p>
    */
   public BundleLookupMarkup getLookupMarkup(String result) {
     if (result == null) {

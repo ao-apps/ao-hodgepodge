@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,26 +38,21 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * <p>
  * Our backup directories contain parallel directories with many hard links.
  * The performance of deleting more than one of the directories can be improved
  * by deleting from them in parallel.
- * </p>
- * <p>
- * Also performs the task with three threads:
- * </p>
- * <pre>
- *     Iterate filesystem -&gt; Delete entries -&gt; Verbose Output
- *     (Calling Thread)      (New Thread)      (New Thread)
- * </pre>
- * <p>
- * Verifying this is, in fact, true.  This is measured with a copy of the
+ *
+ * <p>Also performs the task with three threads:</p>
+ *
+ * <pre>    Iterate filesystem -&gt; Delete entries -&gt; Verbose Output
+ *     (Calling Thread)      (New Thread)      (New Thread)</pre>
+ *
+ * <p>Verifying this is, in fact, true.  This is measured with a copy of the
  * backups from one of our managed servers.  The system RAM was limited to 128
  * MB to better simulate backup server hardware.  ext3 benchmarks on Maxtor 250
- * GB 7200 RPM SATA.  reiserfs benchmarks on WD 80 GB 7200 IDE.
- * </p>
- * <pre>
- *                       +---------------------+---------------------+
+ * GB 7200 RPM SATA.  reiserfs benchmarks on WD 80 GB 7200 IDE.</p>
+ *
+ * <pre>                      +---------------------+---------------------+
  *                       |         ext3        |      reiserfs       |
  * +-----------+---------+----------+----------+----------+----------+
  * | # Deleted |         | parallel |  rm -rf  | parallel |  rm -rf  |
@@ -72,18 +67,14 @@ import java.util.concurrent.BlockingQueue;
  * |     13/13 | System  |    89.90 |    48.01 |   180.69 |   113.26 |
  * |           | Elapsed | 10:38:53 | 10:23.79 |  8:26.71 | 33:13.52 |
  * |           | % CPU   |      23% |       8% |      48% |       5% |
- * +-----------+---------+----------+----------+----------+----------+
- * </pre>
- * <p>
- * TODO: Once benchmarks finished for other # Deleted, adjust threshold between
- *       rm and parallel in FailoverFileReplicationManager
- * </p>
- * <p>
- * TODO: Should it use a provided ExecutorService instead of making own Threads?
- * </p>
- * <p>
- * TODO: Concurrent deletes would be possible.  Is there any advantage?
- * </p>
+ * +-----------+---------+----------+----------+----------+----------+</pre>
+ *
+ * <p>TODO: Once benchmarks finished for other # Deleted, adjust threshold between
+ *       rm and parallel in FailoverFileReplicationManager</p>
+ *
+ * <p>TODO: Should it use a provided ExecutorService instead of making own Threads?</p>
+ *
+ * <p>TODO: Concurrent deletes would be possible.  Is there any advantage?</p>
  *
  * @author  AO Industries, Inc.
  */

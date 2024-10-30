@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2017, 2019, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2017, 2019, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,12 +34,11 @@ import java.util.List;
  * Manages a set of temporary files.  When a context is completed, all
  * temporary files created within that context may be deleted by calling delete
  * on its list.
- * <p>
- * For example, a context might be the lifecycle of serving one HTTP request.
+ *
+ * <p>For example, a context might be the lifecycle of serving one HTTP request.
  * Once the request has been completed, any temporary files created should be
  * cleaned-up immediately instead of waiting an indeterminate amount of time
- * for
- * </p>
+ * for</p>
  *
  * @see  TempFile
  *
@@ -100,9 +99,8 @@ public class TempFileList {
 
   /**
    * Deletes all of the underlying temp files immediately.
-   * <p>
-   * This list may still be used for additional temp files.
-   * </p>
+   *
+   * <p>This list may still be used for additional temp files.</p>
    *
    * @see  TempFile#delete()
    */

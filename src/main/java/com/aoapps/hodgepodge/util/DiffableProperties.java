@@ -49,9 +49,8 @@ import java.util.Properties;
  *     after any "\n" that is not at the end of the line already.  The next line
  *     will be prefixed with a "\" if it starts with whitespace.</li>
  * </ol>
- * <p>
- * For maximum diffability, this should be used along with {@link com.aoapps.collections.SortedProperties}.
- * </p>
+ *
+ * <p>For maximum diffability, this should be used along with {@link com.aoapps.collections.SortedProperties}.</p>
  *
  * @see  Properties
  * @see  com.aoapps.collections.SortedProperties
@@ -99,11 +98,10 @@ public final class DiffableProperties {
   /**
    * Formats a properties file provided as a String.  The file may contain
    * Unicode values as supported by Java 9+.
-   * <p>
-   * The file encoding is not performed by this method.
+   *
+   * <p>The file encoding is not performed by this method.
    * For Java &lt;= 8, this should be stored in the ISO8859-1 encoding.
-   * For Java &gt;= 9, this may be stored in the UTF-8 encoding.
-   * </p>
+   * For Java &gt;= 9, this may be stored in the UTF-8 encoding.</p>
    */
   public static String formatProperties(String properties) {
     int len = properties.length();

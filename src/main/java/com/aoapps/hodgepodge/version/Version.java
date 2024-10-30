@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2015, 2016, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2011, 2015, 2016, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -122,10 +122,9 @@ public final class Version {
 
   /**
    * Gets the major version number.
-   * <p>
-   * A change in the first number means a radically new code base, complete
-   * uninstall/reinstall may be necessary.
-   * </p>
+   *
+   * <p>A change in the first number means a radically new code base, complete
+   * uninstall/reinstall may be necessary.</p>
    */
   public int getMajor() {
     return major;
@@ -133,11 +132,10 @@ public final class Version {
 
   /**
    * Gets the minor version number.
-   * <p>
-   * A change in the second number means significant features have been added,
+   *
+   * <p>A change in the second number means significant features have been added,
    * but are generally compatible with previous versions.
-   * Update strongly recommended.
-   * </p>
+   * Update strongly recommended.</p>
    */
   public int getMinor() {
     return minor;
@@ -145,11 +143,10 @@ public final class Version {
 
   /**
    * Gets the release number.
-   * <p>
-   * A change in the third number means fixes or improvements to existing
+   *
+   * <p>A change in the third number means fixes or improvements to existing
    * features, but maintaining compatibility with current version.
-   * Update recommended.
-   * </p>
+   * Update recommended.</p>
    */
   public int getRelease() {
     return release;
@@ -157,11 +154,10 @@ public final class Version {
 
   /**
    * Gets the build number.
-   * <p>
-   * A change in the build number only indicates minor fixes or improvements
+   *
+   * <p>A change in the build number only indicates minor fixes or improvements
    * to existing features.
-   * Update not required or even suggested.
-   * </p>
+   * Update not required or even suggested.</p>
    */
   public int getBuild() {
     return build;

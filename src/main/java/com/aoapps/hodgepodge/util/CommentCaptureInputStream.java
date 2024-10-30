@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2019, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,13 +32,11 @@ import java.util.Properties;
 
 /**
  * Captures comments from any lines that begin with # (preceding space, tab, and formfeed allowed).
- * <p>
- * This class is optimized for reading {@link Properties} files and assumes
- * ISO-8859-1 encoding.
- * </p>
- * <p>
- * Java 1.9: Read properties files via {@link Reader} in UTF-8 format
- * </p>
+ *
+ * <p>This class is optimized for reading {@link Properties} files and assumes
+ * ISO-8859-1 encoding.</p>
+ *
+ * <p>Java 1.9: Read properties files via {@link Reader} in UTF-8 format</p>
  *
  * @author  AO Industries, Inc.
  */

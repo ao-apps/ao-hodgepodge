@@ -42,27 +42,23 @@ import java.util.logging.Logger;
 
 /**
  * Reusable generic connection pooling with dynamic flaming tiger feature.
- * <p>
- * Two lists of connections are maintained.  The first is the list of connections
+ *
+ * <p>Two lists of connections are maintained.  The first is the list of connections
  * that are ready unused, and the second is the list of connections that are
  * currently checked-out.  By using this strategy, an available connection
- * can be found without searching the entire list.
- * </p>
- * <p>
- * In addition to the global lists, a {@link ThreadLocal} list of connections
+ * can be found without searching the entire list.</p>
+ *
+ * <p>In addition to the global lists, a {@link ThreadLocal} list of connections
  * checked-out by the current thread is maintained.  When getting a new connection,
  * this is used to check against <code>maxConnections</code> instead of checking
- * the global lists.
- * </p>
- * <p>
- * Idea: Add some sort of thread-connection affinity, where the same connection
+ * the global lists.</p>
+ *
+ * <p>Idea: Add some sort of thread-connection affinity, where the same connection
  *       slot will be used by the same thread when it is available.  This should
- *       help cache locality.
- * </p>
- * <p>
- * Idea: Automatically connect ahead of time in the background.  This could
- *       hide connection latency on first-use.
- * </p>
+ *       help cache locality.</p>
+ *
+ * <p>Idea: Automatically connect ahead of time in the background.  This could
+ *       hide connection latency on first-use.</p>
  *
  * @param  <Ex>  An arbitrary exception type that may be thrown
  *
@@ -206,13 +202,11 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
   /**
    * Connections that are checked-out by the current thread.
-   * <p>
-   * All access to this map must be synchronized on the map.
-   * </p>
-   * <p>
-   * Furthermore, access to each of the individual lists must be synchronized on the list.  When a connection is
-   * shared between threads, this list will be accessed by multiple threads.
-   * </p>
+   *
+   * <p>All access to this map must be synchronized on the map.</p>
+   *
+   * <p>Furthermore, access to each of the individual lists must be synchronized on the list.  When a connection is
+   * shared between threads, this list will be accessed by multiple threads.</p>
    *
    * @see  #currentThreadId
    */
@@ -227,10 +221,9 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
   /**
    * The allocation id of the current thread.  This is used as a key in the weak map
    * {@link #threadConnectionsByThreadId} and is tracked per-connection by {@link #allocationThreadIdByConnection}.
-   * <p>
-   * This approach allows sharing of information between threads, while still allowing garbage collection once a
-   * thread dies.
-   * </p>
+   *
+   * <p>This approach allows sharing of information between threads, while still allowing garbage collection once a
+   * thread dies.</p>
    *
    * @see  #threadConnectionsByThreadId
    */
@@ -249,9 +242,8 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
   /**
    * Tracks the thread ID that allocated each connection.
-   * <p>
-   * All access to this map must be synchronized on the map.
-   * </p>
+   *
+   * <p>All access to this map must be synchronized on the map.</p>
    */
   private final Map<C, Long> allocationThreadIdByConnection = new IdentityHashMap<>();
 
@@ -300,9 +292,8 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
    * Closes the underlying connection.
    * The connection may or may not already have been {@linkplain #resetConnection(java.lang.AutoCloseable) reset}.
    * The connection may or may not already be {@linkplain #isClosed(java.lang.AutoCloseable) closed}.
-   * <p>
-   * Please note, this is distinct from the implementation of {@link AutoCloseable} for use in try-with-resources.
-   * </p>
+   *
+   * <p>Please note, this is distinct from the implementation of {@link AutoCloseable} for use in try-with-resources.</p>
    */
   protected abstract void close(C conn) throws Ex;
 
@@ -370,10 +361,9 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
   /**
    * Gets either an available connection or creates a new connection,
    * warning when a connection is already used by this thread.
-   * <p>
-   * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
-   * available.
-   * </p>
+   *
+   * <p>If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
+   * available.</p>
    *
    * @return  Either a reused or new connection
    *
@@ -395,18 +385,16 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
   /**
    * Gets either an available connection or creates a new connection.
-   * <p>
-   * If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
-   * available.
-   * </p>
+   *
+   * <p>If all the connections in the pool are busy and the pool is at capacity, waits until a connection becomes
+   * available.</p>
    *
    * @param  maxConnections  The maximum number of connections expected to be used by the current thread.
    *                         This should normally be one to avoid potential deadlock.
-   *                         <p>
-   *                         The connection will continue to be considered used by the allocating thread until
+   *
+   *                         <p>The connection will continue to be considered used by the allocating thread until
    *                         released (via {@link AutoCloseable#close()}, even if the connection is shared by another
-   *                         thread.
-   *                         </p>
+   *                         thread.</p>
    *
    * @return  Either a reused or new connection
    *
@@ -637,12 +625,11 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
   /**
    * Creates a new connection.
-   * <p>
-   * The returned connection must call {@link #release(java.lang.AutoCloseable)} on
+   *
+   * <p>The returned connection must call {@link #release(java.lang.AutoCloseable)} on
    * {@link AutoCloseable#close()}.  This is to support use via try-with-resources, and is
    * distinct from {@link #isClosed(java.lang.AutoCloseable)} and {@link #close(java.lang.AutoCloseable)}, which must
-   * both work with the underlying connection.
-   * </p>
+   * both work with the underlying connection.</p>
    *
    * @throws I when interrupted
    * @throws Ex when error
@@ -739,9 +726,8 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
   /**
    * Determine if the underlying connection is closed.
-   * <p>
-   * Please note, this is distinct from the implementation of {@link AutoCloseable} for use in try-with-resources.
-   * </p>
+   *
+   * <p>Please note, this is distinct from the implementation of {@link AutoCloseable} for use in try-with-resources.</p>
    */
   protected abstract boolean isClosed(C conn) throws Ex;
 
@@ -996,16 +982,13 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
   /**
    * Releases the database <code>Connection</code> to the <code>Connection</code> pool.
-   * <p>
-   * It is safe to call this method more than once, but only the first call will have any affect.
-   * </p>
-   * <p>
-   * If the connection is not from this pool, no action is taken.
-   * </p>
-   * <p>
-   * The connection will be {@linkplain #resetConnection(java.lang.AutoCloseable) reset} and/or
-   * {@linkplain #close(java.lang.AutoCloseable) closed}.
-   * </p>
+   *
+   * <p>It is safe to call this method more than once, but only the first call will have any affect.</p>
+   *
+   * <p>If the connection is not from this pool, no action is taken.</p>
+   *
+   * <p>The connection will be {@linkplain #resetConnection(java.lang.AutoCloseable) reset} and/or
+   * {@linkplain #close(java.lang.AutoCloseable) closed}.</p>
    *
    * @see  #isClosed(java.lang.AutoCloseable)
    * @see  #logConnection(java.lang.AutoCloseable)

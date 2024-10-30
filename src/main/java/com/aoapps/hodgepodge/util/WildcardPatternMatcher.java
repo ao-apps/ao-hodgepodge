@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2017, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2017, 2018, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,20 +43,16 @@ import java.util.regex.Pattern;
  *   <li>"prefix*infix*suffix"  Prefix, infix, and suffix match</li>
  *   <li>"exact_value"          Exact match</li>
  * </ul>
- * <p>
- * Any consecutive sequence of '*' are combined into a single '*'.
- * </p>
- * <p>
- * All matchers are thread-safe.
- * </p>
- * <p>
- * {@link WildcardPatternMatcher} are measured typically 2 to 100 times as fast as {@link Pattern},
+ *
+ * <p>Any consecutive sequence of '*' are combined into a single '*'.</p>
+ *
+ * <p>All matchers are thread-safe.</p>
+ *
+ * <p>{@link WildcardPatternMatcher} are measured typically 2 to 100 times as fast as {@link Pattern},
  * and have been measured up to 2000 times as fast in contrived scenarios (suffix match on long strings),
- * and should never be slower in their limited use-case domain.
- * </p>
- * <p>
- * TODO: Support "**" as an escape for literal '*' in matching?  No longer collapse adjacent '*'?
- * </p>
+ * and should never be slower in their limited use-case domain.</p>
+ *
+ * <p>TODO: Support "**" as an escape for literal '*' in matching?  No longer collapse adjacent '*'?</p>
  *
  * @author  AO Industries, Inc.
  */
@@ -97,14 +93,12 @@ public abstract class WildcardPatternMatcher {
 
   /**
    * Gets the matcher for the comma and/or space separated patterns.
-   * <p>
-   * Any null or empty pattern matches none.
-   * </p>
-   * <p>
-   * TODO: New optional flag to limit the matchers to disable the infix matching.
+   *
+   * <p>Any null or empty pattern matches none.</p>
+   *
+   * <p>TODO: New optional flag to limit the matchers to disable the infix matching.
    * The prefix and suffix matches will always be fast O(n), but the infix matching
-   * can be O(n^2).  This may be useful with public facing search forms, for example.
-   * </p>
+   * can be O(n^2).  This may be useful with public facing search forms, for example.</p>
    */
   public static WildcardPatternMatcher compile(String patterns) {
     if (patterns == null || patterns.isEmpty()) {

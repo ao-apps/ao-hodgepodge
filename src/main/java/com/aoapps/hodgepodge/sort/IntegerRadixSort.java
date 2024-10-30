@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2018, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -43,21 +43,18 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * A radix sort implementation for numeric data, sorting by its integer representation.
- * <p>
- * Although a very different implementation, this topic is discussed at
+ *
+ * <p>Although a very different implementation, this topic is discussed at
  * <a href="http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html">http://erik.gorset.no/2011/04/radix-sort-is-faster-than-quicksort.html</a>
- * with source provided at <a href="https://github.com/gorset/radix/blob/master/Radix.java">https://github.com/gorset/radix/blob/master/Radix.java</a>.
- * </p>
- * <p>
- * TODO: For concurrent implementation: Might get better performance (due to cache
+ * with source provided at <a href="https://github.com/gorset/radix/blob/master/Radix.java">https://github.com/gorset/radix/blob/master/Radix.java</a>.</p>
+ *
+ * <p>TODO: For concurrent implementation: Might get better performance (due to cache
  * locality of reference) by flattening the two-dimensional fixed dimensions of
- * the arrays into a single dimension.
- * </p>
- * <p>
- * TODO: For concurrent implementation: Might also consider changing the row/column
+ * the arrays into a single dimension.</p>
+ *
+ * <p>TODO: For concurrent implementation: Might also consider changing the row/column
  * order of the multi-dimensional arrays to help cache interaction.  Might get
- * better throughput when hit the cache wall where performance drops considerably.
- * </p>
+ * better throughput when hit the cache wall where performance drops considerably.</p>
  *
  * @author  AO Industries, Inc.
  */
@@ -140,9 +137,8 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
   /**
    * Waits for all futures to complete, discarding any results.
-   * <p>
-   * Note: This method is cloned from ConcurrentUtils.java to avoid package dependency.
-   * </p>
+   *
+   * <p>Note: This method is cloned from ConcurrentUtils.java to avoid package dependency.</p>
    */
   private static void waitForAll(Iterable<? extends Future<?>> futures) throws InterruptedException, ExecutionException {
     for (Future<?> future : futures) {

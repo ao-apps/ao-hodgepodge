@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,12 +31,11 @@ import javax.swing.SwingUtilities;
  * When requested, it will synchronize its list of elements to an externally-
  * provided list.  The is useful when the data source is obtained elsewhere and
  * the list-based component needs to be synchronized.
- * <p>
- * Since these updates may occur while a user is manipulating the components,
+ *
+ * <p>Since these updates may occur while a user is manipulating the components,
  * only the minimum number of changes to the elements is made.  Thus selections
  * and other aspects of the component remain intact.  Most importantly, if nothing
- * in the list has changed, the component is not changed.
- * </p>
+ * in the list has changed, the component is not changed.</p>
  *
  * @author  AO Industries, Inc.
  */

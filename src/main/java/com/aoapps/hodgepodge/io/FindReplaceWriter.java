@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,13 +29,11 @@ import java.io.Writer;
 
 /**
  * Replaces strings while writing.
- * <p>
- * This class is not thread safe and requires external synchronization if used by more than one thread.
- * </p>
- * <p>
- * This is a simple implementation that forces all writes to be one character at a time.
- * It is recommended to use along with {@link BufferedWriter} when used in a performance-sensitive application.
- * </p>
+ *
+ * <p>This class is not thread safe and requires external synchronization if used by more than one thread.</p>
+ *
+ * <p>This is a simple implementation that forces all writes to be one character at a time.
+ * It is recommended to use along with {@link BufferedWriter} when used in a performance-sensitive application.</p>
  *
  * @author  AO Industries, Inc.
  */

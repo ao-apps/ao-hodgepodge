@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -54,15 +54,13 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
 
   /**
    * Test the graph for cycles and makes sure that all connections are consistent with back connections.
-   * <p>
-   * Cycle algorithm adapted from:
+   *
+   * <p>Cycle algorithm adapted from:
    *     http://www.personal.kent.edu/~rmuhamma/Algorithms/MyAlgorithms/GraphAlgor/depthSearch.htm
-   *     http://www.eecs.berkeley.edu/~kamil/teaching/sp03/041403.pdf
-   * </p>
-   * <p>
-   * In the case of a multigraph, any number of edges one direction is considered a match to any number
-   * of edges back.  The number does not need to be equal.
-   * </p>
+   *     http://www.eecs.berkeley.edu/~kamil/teaching/sp03/041403.pdf</p>
+   *
+   * <p>In the case of a multigraph, any number of edges one direction is considered a match to any number
+   * of edges back.  The number does not need to be equal.</p>
    *
    * @throws AsymmetricException where the edges are not symmetric
    * @throws CycleException if there is a cycle in the graph

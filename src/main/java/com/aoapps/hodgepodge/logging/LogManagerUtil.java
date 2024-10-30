@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,11 +34,10 @@ import java.util.logging.LogManager;
  * {@link LogManager} has several methods that would be very useful in setting
  * up logging, but they are package-private.  This implements the same set of
  * methods here.
- * <p>
- * This first tries to access to private methods directly through
+ *
+ * <p>This first tries to access to private methods directly through
  * {@link Method#setAccessible(boolean)}, which might give up-to-date implementations.
- * When this fails, uses an implementation copied here from Java 1.8.0_231.
- * </p>
+ * When this fails, uses an implementation copied here from Java 1.8.0_231.</p>
  *
  * @see LogManager
  *

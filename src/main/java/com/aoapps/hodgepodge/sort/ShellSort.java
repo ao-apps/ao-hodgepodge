@@ -26,25 +26,21 @@ import java.util.List;
  * A shell sort demonstration algorithm.
  * SortAlgorithm.java, Thu Oct 27 10:32:35 1994
  * Note: Invented by Donald Lewis Shell [CACM, July, 1959, pages 30-32]
- * <p>
- * http://www.auto.tuwien.ac.at/~blieb/woop/shell.html
- * </p>
- * <p>
- * Shellsort is a simple extension of insertion sort which gains speed
+ *
+ * <p>http://www.auto.tuwien.ac.at/~blieb/woop/shell.html</p>
+ *
+ * <p>Shellsort is a simple extension of insertion sort which gains speed
  * by allowing exchanges of elements that are far apart. The idea is
  * to rearrange the array to give it the property that every hth
  * element (starting anywhere) yields a sorted array. Such an array
- * is said to be h-sorted.
- * </p>
- * <p>
- * By h-sorting for some large values of h, we can move elements in
+ * is said to be h-sorted.</p>
+ *
+ * <p>By h-sorting for some large values of h, we can move elements in
  * the array long distances and thus make it easier to h-sort for
  * smaller values of h. Using such a procedure for any sequence of
- * values h which ends in 1 will produce a sorted array.
- * </p>
- * <p>
- * Adapted from <a href="http://www.cs.ubc.ca/spider/harrison/Java/ShellSortAlgorithm.java.html">Jason Harrison's ShellSortAlgorithm</a>.
- * </p>
+ * values h which ends in 1 will produce a sorted array.</p>
+ *
+ * <p>Adapted from <a href="http://www.cs.ubc.ca/spider/harrison/Java/ShellSortAlgorithm.java.html">Jason Harrison's ShellSortAlgorithm</a>.</p>
  *
  * @author Jason Harrison@cs.ubc.ca
  * @version 1.0, 23 Jun 1995

@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2016, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2016, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -32,14 +32,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * <p>
  * A cache that is refreshed in the background, implementing only get, put, and size.
  * There is no remove; background cleaning is performed on the underlying map.
- * </p>
- * <p>
- * When the system is sitting idle, all cache entries are expired and there is
- * zero overhead.  Background refreshes only happen on recently used keys.
- * </p>
+ *
+ * <p>When the system is sitting idle, all cache entries are expired and there is
+ * zero overhead.  Background refreshes only happen on recently used keys.</p>
  *
  * @param  <Ex>  An arbitrary exception type that may be thrown
  *
@@ -217,10 +214,9 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
   /**
    * Timer used for background refreshing and cleaning.
    * This uses daemon threads.
-   * <p>
-   * TODO: Timer has a very old bug where it does not handle system time resets very well.
-   *       Consider alternative.
-   * </p>
+   *
+   * <p>TODO: Timer has a very old bug where it does not handle system time resets very well.
+   *       Consider alternative.</p>
    */
   final Timer timer;
 
@@ -376,11 +372,10 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
 
   /**
    * Puts a new entry, replacing any existing.  Schedules refresh on the timer.
-   * <p>
-   * Any formerly scheduled timer is not canceled.  It will detect it has been
+   *
+   * <p>Any formerly scheduled timer is not canceled.  It will detect it has been
    * replaced when it is called and cancel itself.  This puts more of the load
-   * on the background thread.
-   * </p>
+   * on the background thread.</p>
    */
   private void put(
       K key,

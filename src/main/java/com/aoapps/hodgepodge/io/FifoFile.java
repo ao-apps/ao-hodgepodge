@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2019, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2019, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,10 +37,9 @@ import java.io.RandomAccessFile;
  * <code>RandomAccessFile</code>, only one instance may read and one instance may write.
  * However, race conditions still exists in this scenario, and it is strongly advised
  * to access a file through a single instance of <code>FifoFile</code>.
- * <p>
- * This class is best used for persistence or management of large
- * FIFO data sets.
- * </p>
+ *
+ * <p>This class is best used for persistence or management of large
+ * FIFO data sets.</p>
  *
  * @author  AO Industries, Inc.
  */

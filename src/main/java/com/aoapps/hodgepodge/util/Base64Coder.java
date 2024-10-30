@@ -5,28 +5,24 @@ import java.util.Base64;
 
 /**
  * Obtained from: http://www.source-code.biz/snippets/java/Base64Coder.java.txt
- * <p>
- * A Base64 Encoder/Decoder.
- * </p>
- * <p>
- * This class is used to encode and decode data in Base64 format as described in RFC 1521.
- * </p>
- * <p>
- * This is "Open Source" software and released under the <a href="https://www.gnu.org/licenses/lgpl.html">GNU/LGPL</a> license.<br>
+ *
+ * <p>A Base64 Encoder/Decoder.</p>
+ *
+ * <p>This class is used to encode and decode data in Base64 format as described in RFC 1521.</p>
+ *
+ * <p>This is "Open Source" software and released under the <a href="https://www.gnu.org/licenses/lgpl.html">GNU/LGPL</a> license.<br>
  * It is provided "as is" without warranty of any kind.<br>
  * Copyright 2003: Christian d'Heureuse, Inventec Informatik AG, Switzerland.<br>
- * Home page: <a href="http://www.source-code.biz">www.source-code.biz</a><br>
- * </p>
- * <p>
- * Version history:<br>
+ * Home page: <a href="http://www.source-code.biz">www.source-code.biz</a><br></p>
+ *
+ * <p>Version history:<br>
  * 2003-07-22 Christian d'Heureuse (chdh): Module created.<br>
  * 2005-08-11 chdh: Lincense changed from GPL to LGPL.<br>
  * 2006-11-21 chdh:<br>
  *  &#160; Method encode(String) renamed to encodeString(String).<br>
  *  &#160; Method decode(String) renamed to decodeString(String).<br>
  *  &#160; New method encode(byte[],int) added.<br>
- *  &#160; New method decode(String) added.<br>
- * </p>
+ *  &#160; New method decode(String) added.<br></p>
  *
  * @deprecated  Please use {@link Base64} as of Java 8.
  */
