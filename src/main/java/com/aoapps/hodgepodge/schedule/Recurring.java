@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -326,8 +326,7 @@ public abstract class Recurring {
 
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
-      // Java 9: new Iterator<>
-      return new Iterator<Calendar>() {
+      return new Iterator<>() {
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
         @Override
@@ -381,8 +380,7 @@ public abstract class Recurring {
 
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
-      // Java 9: new Iterator<>
-      return new Iterator<Calendar>() {
+      return new Iterator<>() {
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
         @Override
@@ -474,8 +472,7 @@ public abstract class Recurring {
 
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
-      // Java 9: new Iterator<>
-      return new Iterator<Calendar>() {
+      return new Iterator<>() {
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
         @Override
@@ -527,8 +524,7 @@ public abstract class Recurring {
 
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
-      // Java 9: new Iterator<>
-      return new Iterator<Calendar>() {
+      return new Iterator<>() {
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
         @Override
@@ -571,8 +567,7 @@ public abstract class Recurring {
 
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
-      // Java 9: new Iterator<>
-      return new Iterator<Calendar>() {
+      return new Iterator<>() {
         private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -659,8 +654,7 @@ public abstract class Recurring {
 
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
-      // Java 9: new Iterator<>
-      return new Iterator<Calendar>() {
+      return new Iterator<>() {
         private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -719,8 +713,7 @@ public abstract class Recurring {
 
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
-      // Java 9: new Iterator<>
-      return new Iterator<Calendar>() {
+      return new Iterator<>() {
         private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -825,8 +818,7 @@ public abstract class Recurring {
       switch (field) {
         case Calendar.DAY_OF_MONTH:
         case Calendar.WEEK_OF_YEAR:
-          // Java 9: new Iterator<>
-          return new Iterator<Calendar>() {
+          return new Iterator<>() {
             private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
             @Override
@@ -847,8 +839,7 @@ public abstract class Recurring {
           };
         case Calendar.MONTH:
         case Calendar.YEAR:
-          // Java 9: new Iterator<>
-          return new Iterator<Calendar>() {
+          return new Iterator<>() {
             private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
             private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
@@ -939,8 +930,7 @@ public abstract class Recurring {
 
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
-      // Java 9: new Iterator<>
-      return new Iterator<Calendar>() {
+      return new Iterator<>() {
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 
         @Override
@@ -1033,8 +1023,7 @@ public abstract class Recurring {
 
     @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
-      // Java 9: new Iterator<>
-      return new Iterator<Calendar>() {
+      return new Iterator<>() {
         private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
 

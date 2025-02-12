@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2025-01-15T06:34:15Z"
+    dateModified="2025-02-12T02:29:49Z"
   >
     <c:set var="latestRelease" value="5.2.0" />
     <c:if test="${
@@ -56,6 +56,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
       >
         <ul>
           <li>Updated to <ao:a href="https://checkstyle.org/releasenotes.html#Release_10.21.1">Checkstyle 10.21.1</ao:a>.</li>
+          <li>Minimum Java version changed from 1.8 to 11.</li>
         </ul>
       </changelog:release>
     </c:if>

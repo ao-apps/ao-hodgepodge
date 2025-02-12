@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2019, 2020, 2021, 2022, 2023, 2024  AO Industries, Inc.
+ * Copyright (C) 2019, 2020, 2021, 2022, 2023, 2024, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -196,7 +196,7 @@ public final class DiffableProperties {
    * @return  The result, with {@link FormatResult#getAfter()} {@code null}
    *          when the file unmodified
    */
-  // Java 9: Support UTF-8 properties
+  // TODO: Java 9: Support UTF-8 properties
   public static FormatResult formatProperties(File file) throws IOException {
     String before;
     try (Reader in = new InputStreamReader(new FileInputStream(file), StandardCharsets.ISO_8859_1)) {
@@ -207,7 +207,7 @@ public final class DiffableProperties {
       // Overwrites in-place to avoid altering file permissions or ownership,
       // at the risk of leaving an empty file if the disk is full or write fails.
       // This is assumed to be used in a version control environment so this risk is acceptable.
-      // Java 8: Write in a way that is both atomic and preserves permissions in a cross-platform manner
+      // TODO: Java 8: Write in a way that is both atomic and preserves permissions in a cross-platform manner
       try (Writer out = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.ISO_8859_1)) {
         out.write(after);
       }
@@ -221,7 +221,7 @@ public final class DiffableProperties {
   /**
    * Rewrites the given files, if modified.  Reads and writes the files in ISO8859-1 encoding.
    */
-  // Java 9: Support UTF-8 properties
+  // TODO: Java 9: Support UTF-8 properties
   @SuppressWarnings({"UseOfSystemOutOrSystemErr", "TooBroadCatch"})
   public static void main(String[] args) {
     if (args.length == 0) {

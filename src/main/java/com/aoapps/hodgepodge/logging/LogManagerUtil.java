@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2020, 2021, 2022, 2024  AO Industries, Inc.
+ * Copyright (C) 2020, 2021, 2022, 2024, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,7 +37,7 @@ import java.util.logging.LogManager;
  *
  * <p>This first tries to access to private methods directly through
  * {@link Method#setAccessible(boolean)}, which might give up-to-date implementations.
- * When this fails, uses an implementation copied here from Java 1.8.0_231.</p>
+ * When this fails, uses an implementation copied here from Java 1.8.0_231 and reviewed in Java 17.0.14.</p>
  *
  * @see LogManager
  *
@@ -103,17 +103,20 @@ public final class LogManagerUtil {
     }
   }
 
-  private static Method getStringPropertyMethod;
+  private static final Method getStringPropertyMethod;
 
   static {
+    Method method;
     try {
-      Method method = LogManager.class.getDeclaredMethod("getStringProperty", String.class, String.class);
+      method = LogManager.class.getDeclaredMethod("getStringProperty", String.class, String.class);
       method.setAccessible(true);
     } catch (ThreadDeath td) {
       throw td;
     } catch (Throwable t) {
+      method = null;
       warn(t);
     }
+    getStringPropertyMethod = method;
   }
 
   /**
@@ -140,17 +143,20 @@ public final class LogManagerUtil {
     return val.trim();
   }
 
-  private static Method getLevelPropertyMethod;
+  private static final Method getLevelPropertyMethod;
 
   static {
+    Method method;
     try {
-      Method method = LogManager.class.getDeclaredMethod("getLevelProperty", String.class, Level.class);
+      method = LogManager.class.getDeclaredMethod("getLevelProperty", String.class, Level.class);
       method.setAccessible(true);
     } catch (ThreadDeath td) {
       throw td;
     } catch (Throwable t) {
+      method = null;
       warn(t);
     }
+    getLevelPropertyMethod = method;
   }
 
   /**
@@ -174,20 +180,25 @@ public final class LogManagerUtil {
     if (val == null) {
       return defaultValue;
     }
+    // Level l = Level.findLevel(val.trim());
+    // return l != null ? l : defaultValue;
     return Level.parse(val.trim());
   }
 
-  private static Method getFilterPropertyMethod;
+  private static final Method getFilterPropertyMethod;
 
   static {
+    Method method;
     try {
-      Method method = LogManager.class.getDeclaredMethod("getFilterProperty", String.class, Filter.class);
+      method = LogManager.class.getDeclaredMethod("getFilterProperty", String.class, Filter.class);
       method.setAccessible(true);
     } catch (ThreadDeath td) {
       throw td;
     } catch (Throwable t) {
+      method = null;
       warn(t);
     }
+    getFilterPropertyMethod = method;
   }
 
   /**
@@ -226,17 +237,20 @@ public final class LogManagerUtil {
     return defaultValue;
   }
 
-  private static Method getFormatterPropertyMethod;
+  private static final Method getFormatterPropertyMethod;
 
   static {
+    Method method;
     try {
-      Method method = LogManager.class.getDeclaredMethod("getFormatterProperty", String.class, Formatter.class);
+      method = LogManager.class.getDeclaredMethod("getFormatterProperty", String.class, Formatter.class);
       method.setAccessible(true);
     } catch (ThreadDeath td) {
       throw td;
     } catch (Throwable t) {
+      method = null;
       warn(t);
     }
+    getFormatterPropertyMethod = method;
   }
 
   /**
