@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2025-02-12T02:29:49Z"
+    dateModified="2025-02-23T17:27:46Z"
   >
     <c:set var="latestRelease" value="5.2.0" />
     <c:if test="${
@@ -57,6 +57,15 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         <ul>
           <li>Updated to <ao:a href="https://checkstyle.org/releasenotes.html#Release_10.21.1">Checkstyle 10.21.1</ao:a>.</li>
           <li>Minimum Java version changed from 1.8 to 11.</li>
+          <li>SyncFile improvements:
+            <ol type="1">
+              <li><code>RandomAccessFile.length()</code> is returning <samp>0</samp> on Linux block devices as of
+                Java 11.  Implemented fall-back to <code>/sbin/blockdev --getsize64 …</code>, but only for canonical paths
+                starting with <code>/dev/</code>.
+              </li>
+              <li>Debug output disabled, but verbose remains</li>
+            </ol>
+          </li>
         </ul>
       </changelog:release>
     </c:if>

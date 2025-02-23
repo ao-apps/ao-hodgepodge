@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2016, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2012, 2016, 2020, 2021, 2022, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,11 +29,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 
 /**
  * Copies one file to another, only writing the blocks of the destination
  * file if they either didn't already exist or contain different content.
- * This is to update flash media where reads are much faster than reads.
+ *
+ * <p>This is to useful for flash media where reads are much faster than reads and the number of write cycles is
+ * limited.</p>
+ *
+ * <p>This is also useful for synchronizing data to an LVM snapshot (or a logical volume that has any snapshots), to
+ * minimize the allocated copy-on-write space.</p>
  *
  * @author  AO Industries, Inc.
  */
@@ -42,7 +48,8 @@ public class SyncFile {
   /**
    * Debug flags.
    */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
+  private static final boolean VERBOSE = true || DEBUG;
   private static final boolean DRY_RUN = false;
 
   private static final int BLOCK_SIZE = 1048576;
@@ -66,7 +73,7 @@ public class SyncFile {
           }
           RandomAccessFile out = new RandomAccessFile(to, DRY_RUN ? "r" : "rw");
           try {
-            bytesWritten = syncFile(in, out);
+            bytesWritten = syncFile(in, to, out);
           } finally {
             if (DEBUG) {
               System.err.println("Closing " + to);
@@ -79,7 +86,7 @@ public class SyncFile {
           }
           in.close();
         }
-        if (DEBUG) {
+        if (VERBOSE) {
           System.err.println("Wrote " + bytesWritten + " bytes");
         }
       } catch (IOException e) {
@@ -93,26 +100,28 @@ public class SyncFile {
    * doesn't already match the input.
    * Returns the number of bytes written.
    */
-  public static long syncFile(InputStream in, RandomAccessFile out) throws IOException {
+  public static long syncFile(InputStream in, File outFile, RandomAccessFile out) throws IOException {
     byte[] inBuff = new byte[BLOCK_SIZE];
     byte[] outBuff = new byte[BLOCK_SIZE];
+    // Get the starting length of "out", with special case when zero is returned:
+    final long outLen = ZeroFile.getFileLengthWithFallbackBlockdev(outFile, out);
     long pos = 0;
     long bytesWritten = 0;
     int numBytes;
     while ((numBytes = in.read(inBuff, 0, BLOCK_SIZE)) != -1) {
       if (DEBUG) {
-        System.err.println(pos + ": Read " + numBytes + " bytes of input");
+        System.err.println(pos + ": Reading " + numBytes + " bytes of input");
       }
       out.seek(pos);
       long blockEnd = pos + numBytes;
-      if (out.length() >= blockEnd) {
+      if (outLen >= blockEnd) {
         // Read block from out
         if (DEBUG) {
           System.err.println(pos + ": Reading " + numBytes + " bytes of output");
         }
         out.readFully(outBuff, 0, numBytes);
         if (!AoArrays.equals(inBuff, outBuff, 0, numBytes)) {
-          if (DEBUG) {
+          if (VERBOSE) {
             System.err.println(pos + ": Updating " + numBytes + " bytes of output");
           }
           out.seek(pos);
@@ -127,7 +136,7 @@ public class SyncFile {
         }
       } else {
         // At end, write entire block
-        if (DEBUG) {
+        if (VERBOSE) {
           System.err.println(pos + ": Appending " + numBytes + " bytes to output");
         }
         if (!DRY_RUN) {
@@ -137,11 +146,10 @@ public class SyncFile {
       }
       pos = blockEnd;
     }
-    if (out.length() != pos) {
-      if (DEBUG) {
+    if (outLen > pos) {
+      if (VERBOSE) {
         System.err.println(pos + ": Truncating output to " + pos + " bytes");
       }
-      assert out.length() > pos;
       if (!DRY_RUN) {
         try {
           out.setLength(pos);
