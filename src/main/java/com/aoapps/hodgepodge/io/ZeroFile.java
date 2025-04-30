@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
+ * Copyright (C) 2012, 2013, 2014, 2016, 2018, 2019, 2020, 2021, 2022, 2023, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -156,16 +156,16 @@ public class ZeroFile {
     // Initialize bitset
     long len = getFileLengthWithFallbackBlockdev(file, raf);
     final int blocks;
-      {
-        long blocksLong = len / BLOCK_SIZE;
-        if ((len & (BLOCK_SIZE - 1)) != 0) {
-          blocksLong++;
-        }
-        if (blocksLong > Integer.MAX_VALUE) {
-          throw new IOException("File too large: " + len);
-        }
-        blocks = (int) blocksLong;
+    {
+      long blocksLong = len / BLOCK_SIZE;
+      if ((len & (BLOCK_SIZE - 1)) != 0) {
+        blocksLong++;
       }
+      if (blocksLong > Integer.MAX_VALUE) {
+        throw new IOException("File too large: " + len);
+      }
+      blocks = (int) blocksLong;
+    }
     BitSet dirtyBlocks = new BitSet(blocks);
     int numDirtyBlocks = 0;
     // Pass one: read for non zeros
@@ -176,10 +176,10 @@ public class ZeroFile {
     int block = 0;
     for (long pos = 0; pos < len; pos += BLOCK_SIZE, blockIndex++) {
       int blockSize;
-        {
-          long blockSizeLong = len - pos;
-          blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
-        }
+      {
+        long blockSizeLong = len - pos;
+        blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
+      }
       raf.seek(pos);
       raf.readFully(buff, 0, blockSize);
       block++;
@@ -221,10 +221,10 @@ public class ZeroFile {
     for (long pos = 0; pos < len; pos += BLOCK_SIZE, blockIndex++) {
       if (dirtyBlocks.get(blockIndex)) {
         int blockSize;
-          {
-            long blockSizeLong = len - pos;
-            blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
-          }
+        {
+          long blockSizeLong = len - pos;
+          blockSize = blockSizeLong > BLOCK_SIZE ? BLOCK_SIZE : (int) blockSizeLong;
+        }
         if (!DRY_RUN) {
           raf.seek(pos);
           raf.write(buff, 0, blockSize);

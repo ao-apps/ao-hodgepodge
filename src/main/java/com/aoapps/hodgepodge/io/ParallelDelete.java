@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2024, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -162,34 +162,34 @@ public final class ParallelDelete {
       }
       return diff;
     });
-      {
-        final Map<String, FilesystemIteratorRule> prefixRules = Collections.emptyMap();
-        for (File directory : directories) {
-          if (!directory.exists()) {
-            throw new IOException("Directory not found: " + directory.getPath());
+    {
+      final Map<String, FilesystemIteratorRule> prefixRules = Collections.emptyMap();
+      for (File directory : directories) {
+        if (!directory.exists()) {
+          throw new IOException("Directory not found: " + directory.getPath());
+        }
+        if (!directory.isDirectory()) {
+          throw new IOException("Not a directory: " + directory.getPath());
+        }
+        String path = directory.getCanonicalPath();
+        FilesystemIterator iterator = new FilesystemIterator(
+            Collections.singletonMap(path, FilesystemIteratorRule.OK),
+            prefixRules,
+            path,
+            false,
+            true
+        );
+        File nextFile = iterator.getNextFile();
+        if (nextFile != null) {
+          String relPath = getRelativePath(nextFile, iterator);
+          List<FilesystemIterator> list = nextFiles.get(relPath);
+          if (list == null) {
+            nextFiles.put(relPath, list = new ArrayList<>(numDirectories));
           }
-          if (!directory.isDirectory()) {
-            throw new IOException("Not a directory: " + directory.getPath());
-          }
-          String path = directory.getCanonicalPath();
-          FilesystemIterator iterator = new FilesystemIterator(
-              Collections.singletonMap(path, FilesystemIteratorRule.OK),
-              prefixRules,
-              path,
-              false,
-              true
-          );
-          File nextFile = iterator.getNextFile();
-          if (nextFile != null) {
-            String relPath = getRelativePath(nextFile, iterator);
-            List<FilesystemIterator> list = nextFiles.get(relPath);
-            if (list == null) {
-              nextFiles.put(relPath, list = new ArrayList<>(numDirectories));
-            }
-            list.add(iterator);
-          }
+          list.add(iterator);
         }
       }
+    }
 
     final BlockingQueue<File> verboseQueue;
     final boolean[] verboseThreadRun;

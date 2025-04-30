@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -109,14 +109,14 @@ public class IntegerRadixSortTest extends TestCase {
 
       // Time experimental radix sort
       List<N> expRadixResult = new ArrayList<>(randomValues);
-        {
-          long startNanos = System.nanoTime();
-          IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
-          if (iteration > 0) {
-            expRadixNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
+        if (iteration > 0) {
+          expRadixNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" µs");
         }
+      }
 
       if (GC_EACH_PASS) {
         System.gc();
@@ -155,14 +155,14 @@ public class IntegerRadixSortTest extends TestCase {
 
       // Time radix sort
       List<N> oldRadixResult = new ArrayList<>(randomValues);
-        {
-          long startNanos = System.nanoTime();
-          IntegerRadixSort.getInstance().sort(oldRadixResult);
-          if (iteration > 0) {
-            oldRadixNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        IntegerRadixSort.getInstance().sort(oldRadixResult);
+        if (iteration > 0) {
+          oldRadixNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" µs");
         }
+      }
 
       if (GC_EACH_PASS) {
         System.gc();
@@ -177,14 +177,14 @@ public class IntegerRadixSortTest extends TestCase {
 
       // Time Java sort
       List<N> javaResult = new ArrayList<>(randomValues);
-        {
-          long startNanos = System.nanoTime();
-          Collections.sort(javaResult, null);
-          if (iteration > 0) {
-            javaNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        Collections.sort(javaResult, null);
+        if (iteration > 0) {
+          javaNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" µs");
         }
+      }
 
       // Check results
       assertEquals(javaResult, oldRadixResult);
@@ -306,14 +306,14 @@ public class IntegerRadixSortTest extends TestCase {
       // Time experimental radix sort
       N[] expRadixResult = (N[]) new Number[randomValues.length];
       System.arraycopy(randomValues, 0, expRadixResult, 0, randomValues.length);
-        {
-          long startNanos = System.nanoTime();
-          IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
-          if (iteration > 0) {
-            expRadixNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
+        if (iteration > 0) {
+          expRadixNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" µs");
         }
+      }
 
       if (GC_EACH_PASS) {
         System.gc();
@@ -354,14 +354,14 @@ public class IntegerRadixSortTest extends TestCase {
       // Time radix sort
       N[] oldRadixResult = (N[]) new Number[randomValues.length];
       System.arraycopy(randomValues, 0, oldRadixResult, 0, randomValues.length);
-        {
-          long startNanos = System.nanoTime();
-          IntegerRadixSort.getInstance().sort(oldRadixResult);
-          if (iteration > 0) {
-            oldRadixNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        IntegerRadixSort.getInstance().sort(oldRadixResult);
+        if (iteration > 0) {
+          oldRadixNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" µs");
         }
+      }
 
       if (GC_EACH_PASS) {
         System.gc();
@@ -377,14 +377,14 @@ public class IntegerRadixSortTest extends TestCase {
       // Time Java sort
       N[] javaResult = (N[]) new Number[randomValues.length];
       System.arraycopy(randomValues, 0, javaResult, 0, randomValues.length);
-        {
-          long startNanos = System.nanoTime();
-          Arrays.sort(javaResult);
-          if (iteration > 0) {
-            javaNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        Arrays.sort(javaResult);
+        if (iteration > 0) {
+          javaNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" µs");
         }
+      }
 
       // Check results
       List<N> javaResultList = Arrays.asList(javaResult);
@@ -505,14 +505,14 @@ public class IntegerRadixSortTest extends TestCase {
 
       // Time experimental radix sort
       IntList expRadixResult = new IntArrayList(randomValues);
-        {
-          long startNanos = System.nanoTime();
-          IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
-          if (iteration > 0) {
-            expRadixNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
+        if (iteration > 0) {
+          expRadixNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" µs");
         }
+      }
 
       if (GC_EACH_PASS) {
         System.gc();
@@ -551,14 +551,14 @@ public class IntegerRadixSortTest extends TestCase {
 
       // Time radix sort
       IntList oldRadixResult = new IntArrayList(randomValues);
-        {
-          long startNanos = System.nanoTime();
-          IntegerRadixSort.getInstance().sort(oldRadixResult);
-          if (iteration > 0) {
-            oldRadixNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        IntegerRadixSort.getInstance().sort(oldRadixResult);
+        if (iteration > 0) {
+          oldRadixNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" µs");
         }
+      }
 
       if (GC_EACH_PASS) {
         System.gc();
@@ -573,14 +573,14 @@ public class IntegerRadixSortTest extends TestCase {
 
       // Time Java sort
       IntList javaResult = new IntArrayList(randomValues);
-        {
-          long startNanos = System.nanoTime();
-          Collections.sort(javaResult, null);
-          if (iteration > 0) {
-            javaNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        Collections.sort(javaResult, null);
+        if (iteration > 0) {
+          javaNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" µs");
         }
+      }
 
       // Check results
       assertEquals(javaResult, oldRadixResult);
@@ -701,15 +701,15 @@ public class IntegerRadixSortTest extends TestCase {
       // Time experimental radix sort
       int[] expRadixResult = new int[randomValues.length];
       System.arraycopy(randomValues, 0, expRadixResult, 0, randomValues.length);
-        {
-          long startNanos = System.nanoTime();
-          IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
-          //Arrays.sort(expRadixResult);
-          if (iteration > 0) {
-            expRadixNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        IntegerRadixSortExperimental.getInstance().sort(expRadixResult);
+        //Arrays.sort(expRadixResult);
+        if (iteration > 0) {
+          expRadixNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": IntegerRadixSortExperimental in "+BigDecimal.valueOf(expRadixNanos, 3)+" µs");
         }
+      }
 
       if (GC_EACH_PASS) {
         System.gc();
@@ -751,15 +751,15 @@ public class IntegerRadixSortTest extends TestCase {
       // Time radix sort
       int[] oldRadixResult = new int[randomValues.length];
       System.arraycopy(randomValues, 0, oldRadixResult, 0, randomValues.length);
-        {
-          long startNanos = System.nanoTime();
-          IntegerRadixSort.getInstance().sort(oldRadixResult);
-          //Arrays.sort(oldRadixResult);
-          if (iteration > 0) {
-            oldRadixNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        IntegerRadixSort.getInstance().sort(oldRadixResult);
+        //Arrays.sort(oldRadixResult);
+        if (iteration > 0) {
+          oldRadixNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": IntegerRadixSort in "+BigDecimal.valueOf(radixNanos, 3)+" µs");
         }
+      }
 
       if (GC_EACH_PASS) {
         System.gc();
@@ -775,14 +775,14 @@ public class IntegerRadixSortTest extends TestCase {
       // Time Java sort
       int[] javaResult = new int[randomValues.length];
       System.arraycopy(randomValues, 0, javaResult, 0, randomValues.length);
-        {
-          long startNanos = System.nanoTime();
-          Arrays.sort(javaResult);
-          if (iteration > 0) {
-            javaNanos += System.nanoTime() - startNanos;
-            //System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" µs");
-          }
+      {
+        long startNanos = System.nanoTime();
+        Arrays.sort(javaResult);
+        if (iteration > 0) {
+          javaNanos += System.nanoTime() - startNanos;
+          //System.out.println(pass+"/"+testSize+": Collections.sort in "+BigDecimal.valueOf(javaNanos, 3)+" µs");
         }
+      }
 
       // Check results
       List<Integer> javaResultList = new IntArrayList(javaResult);
