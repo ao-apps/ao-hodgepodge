@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2019, 2020, 2021, 2022, 2024, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -93,7 +93,7 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
               isForward
                   ? graph.getEdgesTo(connected).contains(new Edge<>(vertex, connected))
                   : graph.getEdgesFrom(connected).contains(new Edge<>(connected, vertex))
-          )
+            )
       ) {
         throw new AsymmetricException(vertex, connected);
       }

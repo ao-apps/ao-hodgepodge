@@ -143,7 +143,7 @@ public final class DiffableProperties {
                 && !(
                 pos >= len
                     || (ch3 = properties.charAt(pos)) == '\r' || ch3 == '\n'
-            )
+              )
                 // If already followed by \(EOL) end-of-line, do nothing
                 && !(
                 ch3 == '\\'
@@ -151,7 +151,7 @@ public final class DiffableProperties {
                     (pos + 1) >= len
                         || (ch4 = properties.charAt(pos + 1)) == '\r' || ch4 == '\n'
                 )
-            )
+              )
         ) {
           // Add \(EOL) escape, and possible \ if the next value is ' ', '\t', '\f'
           sb.append(ch1).append(ch2).append("\\\n");

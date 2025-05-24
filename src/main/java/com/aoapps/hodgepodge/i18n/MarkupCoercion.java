@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2024, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -108,7 +108,7 @@ public final class MarkupCoercion {
                 || (
                 value instanceof Writable
                     && !((Writable) value).isFastToString()
-            )
+              )
                 // Other types that will not be converted to String for bundle lookups
                 || (value instanceof CharSequence && !(value instanceof String))
                 || value instanceof char[]
@@ -263,7 +263,7 @@ public final class MarkupCoercion {
                 || (
                 value instanceof Writable
                     && !((Writable) value).isFastToString()
-            )
+              )
                 // Other types that will not be converted to String for bundle lookups
                 || (value instanceof CharSequence && !(value instanceof String))
                 || value instanceof char[]
@@ -353,7 +353,7 @@ public final class MarkupCoercion {
                 || (
                 value instanceof Writable
                     && !((Writable) value).isFastToString()
-            )
+              )
                 // Other types that will not be converted to String for bundle lookups
                 || (value instanceof CharSequence && !(value instanceof String))
                 || value instanceof char[]
@@ -503,7 +503,7 @@ public final class MarkupCoercion {
                   || (
                   value instanceof Writable
                       && !((Writable) value).isFastToString()
-              )
+                )
                   // Other types that will not be converted to String for bundle lookups
                   || (value instanceof CharSequence && !(value instanceof String))
                   || value instanceof char[]
