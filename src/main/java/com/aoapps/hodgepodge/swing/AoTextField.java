@@ -276,24 +276,31 @@ public class AoTextField<T> extends JTextField {
     getDocument().addDocumentListener(new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
-          SwingUtilities.invokeLater(AoTextField.this::onDocumentUpdated);
+          SwingUtilities.invokeLater(AoTextField.this::revalidateValue);
         }
 
         @Override
         public void removeUpdate(DocumentEvent e) {
-          SwingUtilities.invokeLater(AoTextField.this::onDocumentUpdated);
+          SwingUtilities.invokeLater(AoTextField.this::revalidateValue);
         }
 
         @Override
         public void changedUpdate(DocumentEvent e) {
-          SwingUtilities.invokeLater(AoTextField.this::onDocumentUpdated);
+          SwingUtilities.invokeLater(AoTextField.this::revalidateValue);
         }
     });
   }
 
   private Color noErrorColor;
 
-  private void onDocumentUpdated() {
+  /**
+   * Revalidates the current field contents versus the parser and all registered validators.
+   * Updates the text color to either default for parseable and valid or to red for invalid.
+   *
+   * <p>In the case of validators that are effected by external state, such as the value of other fields,
+   * this may be called when the other field is updated to ensure consistent validation state.</p>
+   */
+  public void revalidateValue() {
     try {
       Optional<T> value = getValue();
       if (!isFocusOwner()) {
