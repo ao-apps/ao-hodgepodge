@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2025-06-11T00:46:41Z"
+    dateModified="2025-06-27T01:32:20Z"
   >
     <c:set var="latestRelease" value="5.2.0" />
     <c:if test="${
@@ -67,6 +67,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
             </ol>
           </li>
           <li>New class <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/swing/AoTextField.html">AoTextField</ao:a>.</li>
+          <li>New class <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/swing/RunnableDocumentListener.html">RunnableDocumentListener</ao:a>.</li>
         </ul>
       </changelog:release>
     </c:if>
