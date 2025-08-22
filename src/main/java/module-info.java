@@ -28,7 +28,7 @@ module com.aoapps.hodgepodge {
   exports com.aoapps.hodgepodge.graph;
   exports com.aoapps.hodgepodge.i18n;
   exports com.aoapps.hodgepodge.io;
-  //exports com.aoapps.hodgepodge.io.posix.linux.kernel;
+  // exports com.aoapps.hodgepodge.io.posix.linux.kernel;
   exports com.aoapps.hodgepodge.io.stream;
   exports com.aoapps.hodgepodge.logging;
   exports com.aoapps.hodgepodge.md5;

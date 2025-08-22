@@ -232,7 +232,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
                       Arrays.sort(list);
                     }
                   } else {
-                    //System.err.println("Skipping non-canonical directory listing: "+filename);
+                    // System.err.println("Skipping non-canonical directory listing: "+filename);
                     list = EmptyArrays.EMPTY_STRING_ARRAY;
                   }
                 } else {
@@ -355,7 +355,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
     String path = filename;
     while (true) {
       // Check the current path for an exact match
-      //System.out.println("DEBUG: Checking "+path);
+      // System.out.println("DEBUG: Checking "+path);
       rule = rules.get(path);
       if (rule != null) {
         longestPrefix = path;
@@ -389,7 +389,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
             (longestPrefix == null || prefix.length() > longestPrefix.length())
                 && filename.startsWith(prefix)
         ) {
-          //System.err.println("DEBUG: FilesystemIterator: getBestRule: filename="+filename+", prefix="+prefix+", longestPrefix="+longestPrefix);
+          // System.err.println("DEBUG: FilesystemIterator: getBestRule: filename="+filename+", prefix="+prefix+", longestPrefix="+longestPrefix);
           longestPrefix = prefix;
           rule = entry.getValue();
         }

@@ -80,7 +80,7 @@ public final class LogManagerUtil {
    * restricted runtimes.
    */
   @SuppressWarnings("UseOfSystemOutOrSystemErr")
-  static void warn(Throwable t, Object ... extraInfo) {
+  static void warn(Throwable t, Object... extraInfo) {
     if (!(t instanceof SecurityException)) {
       synchronized (warnLock) {
         long currentTime = System.currentTimeMillis();

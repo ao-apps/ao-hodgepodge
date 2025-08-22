@@ -323,7 +323,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
     private final boolean invalidated;
 
     private LookupLocaleValue(boolean missing, boolean invalidated) {
-      //assert !(missing && invalidated) : "May not be invalidated when missing";
+      // assert !(missing && invalidated) : "May not be invalidated when missing";
       this.missing = missing;
       this.invalidated = invalidated;
     }
@@ -365,7 +365,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
    */
   @Deprecated
   public static void resetRequest(boolean canEditResources, String setValueUrl, boolean modifyAllText) {
-    //System.out.println("DEBUG: EditableResourceBundle: resetRequest: thread.id="+Thread.currentThread().getId()+", canEditResources="+canEditResources+", setValueUrl="+setValueUrl);
+    // System.out.println("DEBUG: EditableResourceBundle: resetRequest: thread.id="+Thread.currentThread().getId()+", canEditResources="+canEditResources+", setValueUrl="+setValueUrl);
     if (canEditResources && setValueUrl == null) {
       throw new IllegalArgumentException("setValueUrl is null when canEditResources is true");
     }
@@ -661,15 +661,15 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             + "        for (var e=0; e<elementIds.length; e++) {\n"
             + "          elem=document.getElementById(\"EditableResourceBundleElement\"+elementIds[e]);\n"
             + "          if (elem != null) {\n"
-            //+ "            elem.firstChild.nodeValue=value;\n"
+            // + "            elem.firstChild.nodeValue=value;\n"
             + "            elem.innerHTML=value;\n"
             // From http://www.webdeveloper.com/forum/showthread.php?t=71464
-            //+ "            var parser = new DOMParser();\n"
-            //+ "            var doc=parser.parseFromString('<div xmlns=\"http://www.w3.org/1999/xhtml\">' + value + '<\\/div>', 'application/xhtml+xml');\n"
-            //+ "            var root=doc.documentElement;\n"
-            //+ "            for (var i=0; i<root.childNodes.length; ++i) {\n"
-            //+ "              elem.appendChild(document.importNode(root.childNodes[i], true));\n"
-            //+ "            }\n"
+            // + "            var parser = new DOMParser();\n"
+            // + "            var doc=parser.parseFromString('<div xmlns=\"http://www.w3.org/1999/xhtml\">' + value + '<\\/div>', 'application/xhtml+xml');\n"
+            // + "            var root=doc.documentElement;\n"
+            // + "            for (var i=0; i<root.childNodes.length; ++i) {\n"
+            // + "              elem.appendChild(document.importNode(root.childNodes[i], true));\n"
+            // + "            }\n"
             + "          }\n"
             + "        }\n"
             + "      }\n"
@@ -687,7 +687,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
                 + "+\"&locale=\"+encodeURIComponent(EditableResourceBundleEditorLocales[localeIndex])+\"&key=\"+encodeURIComponent("
                 + "EditableResourceBundleEditorRowKeys[EditableResourceBundleEditorSelectedIndex])+\"&value=\"+encodeURIComponent(value)"
                 + "+\"&modified=\"+modified;\n"
-                //+ "          window.alert(url);\n"
+                // + "          window.alert(url);\n"
                 + "          request.open('GET', url, false);\n"
                 + "          request.send(null);\n"
                 + "          if (request.status != 200) {\n"
@@ -1191,12 +1191,12 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
       // Add this locale if not already set
       boolean missing = value == null;
       lookupValue.locales.computeIfAbsent(locale, l -> new LookupLocaleValue(missing, invalidated));
-      //if (!lookupValue.locales.containsKey(locale)) {
-      //  lookupValue.locales.put(
-      //    locale,
-      //    new LookupLocaleValue(value == null, invalidated)
-      //  );
-      //}
+      // if (!lookupValue.locales.containsKey(locale)) {
+      //   lookupValue.locales.put(
+      //     locale,
+      //     new LookupLocaleValue(value == null, invalidated)
+      //   );
+      // }
       if (!missing) {
         // Record the lookup in any thread context
         BundleLookupThreadContext threadContext = BundleLookupThreadContext.getThreadContext();
@@ -1264,9 +1264,9 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
           }
         case XHTML:
           {
-            //if (invalidated) {
-            //  SB.append(" style=\"color:red\"");
-            //}
+            // if (invalidated) {
+            //   SB.append(" style=\"color:red\"");
+            // }
             if (allowScripts) {
               String elementIdString = Long.toString(elementId);
               out
@@ -1357,9 +1357,9 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
             }
           case XHTML:
             {
-              //if (invalidated) {
-              //  SB.append(" style=\"color:red\"");
-              //}
+              // if (invalidated) {
+              //   SB.append(" style=\"color:red\"");
+              // }
               if (allowScripts) {
                 String elementIdString = Long.toString(elementId);
                 encoder

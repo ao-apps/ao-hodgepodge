@@ -49,12 +49,12 @@ public final class IntegerRadixSortExperimental extends BaseIntegerSortAlgorithm
   private static final int MIN_RADIX_SORT_SIZE = 1 << 8;
 
   private static final int FIRST_BITS_PER_PASS = 4; // Must be power of two and less than or equal to 32
-  //private static final int FIRST_PASS_SIZE = 1 << FIRST_BITS_PER_PASS;
-  //private static final int FIRST_PASS_MASK = FIRST_PASS_SIZE - 1;
+  // private static final int FIRST_PASS_SIZE = 1 << FIRST_BITS_PER_PASS;
+  // private static final int FIRST_PASS_MASK = FIRST_PASS_SIZE - 1;
 
   private static final int R_BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
-  //private static final int R_PASS_SIZE = 1 << R_BITS_PER_PASS;
-  //private static final int R_PASS_MASK = R_PASS_SIZE - 1;
+  // private static final int R_PASS_SIZE = 1 << R_BITS_PER_PASS;
+  // private static final int R_PASS_MASK = R_PASS_SIZE - 1;
 
   private static final int UNSIGNED_OFFSET = 0x80000000;
 

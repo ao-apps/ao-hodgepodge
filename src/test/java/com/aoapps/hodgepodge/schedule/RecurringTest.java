@@ -54,7 +54,7 @@ public class RecurringTest {
     assertSame(Recurring.WEEKDAYS, Recurring.parse("wEekdays"));
   }
 
-  private static void checkParseDayOfWeekList(String recurring, DayOfWeek ... expectedDaysOfWeek) {
+  private static void checkParseDayOfWeekList(String recurring, DayOfWeek... expectedDaysOfWeek) {
     Recurring r = Recurring.parse(recurring);
     assertSame(Recurring.DayOfWeekList.class, r.getClass());
     Recurring.DayOfWeekList daysOfWeekList = (Recurring.DayOfWeekList) r;
@@ -73,7 +73,7 @@ public class RecurringTest {
     checkParseDayOfWeekList("On Monday, Tuesday, Mon, tue, Fridays", DayOfWeek.MONDAY, DayOfWeek.FRIDAY, DayOfWeek.TUESDAY);
   }
 
-  private static void checkParseMonthList(String recurring, Month ... expectedMonths) {
+  private static void checkParseMonthList(String recurring, Month... expectedMonths) {
     Recurring r = Recurring.parse(recurring);
     assertSame(Recurring.MonthList.class, r.getClass());
     Recurring.MonthList monthList = (Recurring.MonthList) r;

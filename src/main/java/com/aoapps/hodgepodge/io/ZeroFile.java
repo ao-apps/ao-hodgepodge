@@ -206,7 +206,7 @@ public class ZeroFile {
                 + "% dirty",
             System.err
         );
-        //System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": "+(allZero ? "Already zero" : "Dirty"));
+        // System.err.println("0x"+Long.toString(pos, 16)+"-0x"+Long.toString(pos+blockSize-1, 16)+": "+(allZero ? "Already zero" : "Dirty"));
       }
     }
     if (PROGRESS && !lastVerboseString.isEmpty()) {

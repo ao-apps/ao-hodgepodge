@@ -217,10 +217,10 @@ public class LabelledGridLayout implements LayoutManager {
             // yend = lasty+cellHeight;
           }
 
-          //int actualWidth=labelD.width;
-          //if (actualWidth>availableWidth) {
-          //  actualWidth=availableWidth;
-          //}
+          // int actualWidth=labelD.width;
+          // if (actualWidth>availableWidth) {
+          //   actualWidth=availableWidth;
+          // }
           label.setBounds(
               lastx + insets.left,
               lasty + insets.top,

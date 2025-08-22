@@ -240,7 +240,7 @@ public final class DiffableProperties {
           throw td;
         } catch (IOException e) {
           System.err.println(filename + ": " + e.getMessage());
-          //e.printStackTrace(System.err);
+          // e.printStackTrace(System.err);
           System.exit(SysExits.getSysExit(e));
         } catch (Throwable t) {
           System.err.println(filename + ": " + t.getMessage());

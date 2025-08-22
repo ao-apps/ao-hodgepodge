@@ -83,9 +83,9 @@ public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements Gr
   private void doCheck(Map<V, Color> colors, Map<V, V> predecessors, V vertex) throws AsymmetricException, CycleException, Ex {
     colors.put(vertex, Color.GRAY);
     for (Edge<V> vedge : isForward ? graph.getEdgesFrom(vertex) : graph.getEdgesTo(vertex)) {
-      //if (!isForward) {
-      //    System.out.println("BREAKPOINT");
-      //}
+      // if (!isForward) {
+      //     System.out.println("BREAKPOINT");
+      // }
       V connected = isForward ? vedge.getTo() : vedge.getFrom();
       // The directed edges should match
       if (

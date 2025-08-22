@@ -58,10 +58,10 @@ public class TopologicalSorter<V, Ex extends Exception> implements GraphSorter<V
     final int size = vertices.size();
     Set<V> visited = AoCollections.newHashSet(size);
     Set<V> sequence = new LinkedHashSet<>();
-    //L ← Empty list that will contain the sorted nodes
+    // L ← Empty list that will contain the sorted nodes
     Set<V> l = AoCollections.newLinkedHashSet(size);
-    //S ← Set of all nodes with no incoming edges
-    //for each node n in S do
+    // S ← Set of all nodes with no incoming edges
+    // for each node n in S do
     for (V n : vertices) {
       if (
           // Getting edges can be expensive, while checking visited should always be cheap
@@ -82,7 +82,7 @@ public class TopologicalSorter<V, Ex extends Exception> implements GraphSorter<V
     return l;
   }
 
-  //function visit(node n)
+  // function visit(node n)
   private void topologicalSortVisit(V n, Set<V> l, Set<V> visited, Set<V> sequence) throws CycleException, Ex {
     //    if n has not been visited yet then
     //        mark n as visited

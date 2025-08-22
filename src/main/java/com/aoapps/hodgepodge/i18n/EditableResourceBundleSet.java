@@ -75,7 +75,7 @@ public class EditableResourceBundleSet {
    * @param baseName the base name of the default locale's bundle.
    * @param locales the set of all allowed locales.
    */
-  public EditableResourceBundleSet(String baseName, Locale ... locales) {
+  public EditableResourceBundleSet(String baseName, Locale... locales) {
     this(baseName, Arrays.asList(locales));
   }
 
@@ -83,7 +83,7 @@ public class EditableResourceBundleSet {
    * @param baseName the class to use as the base name of the default locale's bundle.
    * @param locales the set of all allowed locales.
    */
-  public EditableResourceBundleSet(Class<?> baseName, Locale ... locales) {
+  public EditableResourceBundleSet(Class<?> baseName, Locale... locales) {
     this(baseName.getName(), Arrays.asList(locales));
   }
 

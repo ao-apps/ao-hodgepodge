@@ -43,7 +43,7 @@ public class FindReplaceWriterTest extends TestCase {
     return suite;
   }
 
-  private static void doTest(String unix, String ... dos) throws IOException {
+  private static void doTest(String unix, String... dos) throws IOException {
     StringWriter buffer = new StringWriter(unix.length());
     try {
       try (FindReplaceWriter writer = new FindReplaceWriter(buffer, "\r\n", NativeToPosixWriter.POSIX_EOL)) {

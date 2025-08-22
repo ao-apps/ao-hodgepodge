@@ -69,7 +69,7 @@ public abstract class ShellInterpreter implements Runnable {
     this(in, out, err, EmptyArrays.EMPTY_STRING_ARRAY);
   }
 
-  protected ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String ... args) {
+  protected ShellInterpreter(Reader in, TerminalWriter out, TerminalWriter err, String... args) {
     this.pid = getNextPid();
     this.in = in;
     this.out = out;

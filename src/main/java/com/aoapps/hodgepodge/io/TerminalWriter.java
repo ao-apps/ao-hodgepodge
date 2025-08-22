@@ -44,8 +44,8 @@ public class TerminalWriter extends PrintWriter implements NoClose {
   private static final char[] CLEAR_SCREEN = new char[]{ESC, '[', 'H', ESC, '[', 'J'};
   private static final char[] BOLD_ON = new char[]{ESC, '[', '1', 'm'};
   private static final char[] ATTRIBUTES_OFF = new char[]{ESC, '[', 'm'};
-  //private static final char[] ECHO_OFF=new char[] {ESC, '[', '1', '2', 'h'};
-  //private static final char[] ECHO_ON=new char[] {ESC, '[', '1', '2', 'l'};
+  // private static final char[] ECHO_OFF=new char[] {ESC, '[', '1', '2', 'h'};
+  // private static final char[] ECHO_ON=new char[] {ESC, '[', '1', '2', 'l'};
 
   // If this is not enough, could also check the TERM environment variable for expected values
   private static final boolean supported = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("linux");

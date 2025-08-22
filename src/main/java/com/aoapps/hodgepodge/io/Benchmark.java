@@ -194,7 +194,7 @@ public final class Benchmark {
             System.out.print(')');
           }
           System.out.println();
-          //System.out.println("    "+concurrency+": "+seekRate+" seeks/sec, "+SQLUtility.formatDecimal2((int)(1000000d*concurrency/counter[0]))+" ms/seek");
+          // System.out.println("    "+concurrency+": "+seekRate+" seeks/sec, "+SQLUtility.formatDecimal2((int)(1000000d*concurrency/counter[0]))+" ms/seek");
         }
       } finally {
         BufferManager.release(buff, false);

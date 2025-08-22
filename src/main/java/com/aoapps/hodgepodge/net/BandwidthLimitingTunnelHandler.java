@@ -36,12 +36,12 @@ import java.net.Socket;
  */
 public class BandwidthLimitingTunnelHandler {
 
-  //private boolean verbose;
-  //private String connectAddress;
-  //private int connectPort;
-  //private Long upstreamBandwidth;
-  //private Long downstreamBandwidth;
-  //private Socket socket;
+  // private boolean verbose;
+  // private String connectAddress;
+  // private int connectPort;
+  // private Long upstreamBandwidth;
+  // private Long downstreamBandwidth;
+  // private Socket socket;
 
   public BandwidthLimitingTunnelHandler(
       boolean verbose,
@@ -51,12 +51,12 @@ public class BandwidthLimitingTunnelHandler {
       Long downstreamBandwidth,
       Socket socket
   ) throws IOException {
-    //this.verbose = verbose;
-    //this.connectAddress = connectAddress;
-    //this.connectPort = connectPort;
-    //this.upstreamBandwidth = upstreamBandwidth;
-    //this.downstreamBandwidth = downstreamBandwidth;
-    //this.socket = socket;
+    // this.verbose = verbose;
+    // this.connectAddress = connectAddress;
+    // this.connectPort = connectPort;
+    // this.upstreamBandwidth = upstreamBandwidth;
+    // this.downstreamBandwidth = downstreamBandwidth;
+    // this.socket = socket;
 
     Socket connectSocket = new Socket(InetAddress.getByName(connectAddress), connectPort);
 
