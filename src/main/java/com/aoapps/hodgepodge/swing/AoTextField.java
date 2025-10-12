@@ -55,6 +55,9 @@ import javax.swing.text.Document;
  * <li>Re-formatting once parsing successful and all validators have passed.</li>
  * </ol>
  *
+ * <p>TODO: Should we extend {@link javax.swing.JFormattedTextField} instead?
+ * Are we duplicating too much of what it already provides?</p>
+ *
  * @param <T> The type for parsing, validation, and re-formatting.
  *
  * @author  AO Industries, Inc.
