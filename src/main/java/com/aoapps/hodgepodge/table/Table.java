@@ -31,7 +31,7 @@ import java.util.List;
  * An abstract structure for tables.
  *
  * @author  AO Industries, Inc.
-*/
+ */
 public interface Table<T extends Row> {
 
   /**

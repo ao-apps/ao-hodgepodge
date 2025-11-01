@@ -31,7 +31,7 @@ import java.util.List;
  * An abstract structure for trees.  Each tree may have multiple roots.
  *
  * @author  AO Industries, Inc.
-*/
+ */
 public interface Tree<E> {
 
   /**

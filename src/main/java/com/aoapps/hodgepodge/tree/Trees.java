@@ -30,7 +30,7 @@ import java.util.List;
  * A set of static Tree-related classes, in the flavor of <code>java.util.Collections</code>.
  *
  * @author  AO Industries, Inc.
-*/
+ */
 public final class Trees {
 
   /** Make no instances. */

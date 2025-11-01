@@ -30,7 +30,7 @@ import java.sql.SQLException;
  * Filters may be applied while copying trees.
  *
  * @author  AO Industries, Inc.
-*/
+ */
 @FunctionalInterface
 public interface NodeFilter<E> {
 

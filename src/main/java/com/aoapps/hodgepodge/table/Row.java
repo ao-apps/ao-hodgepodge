@@ -27,7 +27,7 @@ package com.aoapps.hodgepodge.table;
  * An abstract structure for rows in a table.
  *
  * @author  AO Industries, Inc.
-*/
+ */
 public interface Row {
 
   /**

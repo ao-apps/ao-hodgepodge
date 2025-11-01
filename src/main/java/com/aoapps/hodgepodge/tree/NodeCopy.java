@@ -35,7 +35,7 @@ import java.util.List;
  * @see TreeCopy
  *
  * @author  AO Industries, Inc.
-*/
+ */
 public class NodeCopy<E> implements Node<E> {
 
   private final E value;
