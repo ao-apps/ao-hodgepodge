@@ -134,6 +134,8 @@ public abstract class ModifiablePropertiesResourceBundle extends ModifiableResou
   private final Properties properties = new Properties();
 
   /**
+   * TODO: Require source files exist for *-devel ApplicationResources*.properties in dev mode.
+   *
    * @param sourceFiles The source file(s).  If multiple source files are provided,
    *                    only one may exist and be both readable and writable.  If more than
    *                    one possible source file exists, will throw an IllegalStateException.
