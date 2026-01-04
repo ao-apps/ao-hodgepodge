@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
-Copyright (C) 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025  AO Industries, Inc.
+Copyright (C) 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026  AO Industries, Inc.
     support@aoindustries.com
     7262 Bull Pen Cir
     Mobile, AL 36695
@@ -23,10 +23,10 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <jsp:root
   xmlns:ao="https://oss.aoapps.com/taglib/"
-  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:c="jakarta.tags.core"
   xmlns:changelog="https://semanticcms.com/changelog/taglib/"
   xmlns:core="https://semanticcms.com/core/taglib/"
-  xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+  xmlns:fn="jakarta.tags.functions"
   xmlns:jsp="http://java.sun.com/JSP/Page"
   xmlns:section="https://semanticcms.com/section/taglib/"
   version="2.1"
@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2025-07-02T23:05:45Z"
+    dateModified="2025-12-30T13:42:11Z"
   >
     <c:set var="latestRelease" value="5.2.0" />
     <c:if test="${
@@ -894,7 +894,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
           The result may be cached for up to five seconds.
           <ul>
             <li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html#getLastModified-java.lang.String-">ServletContextCache.getLastModified(String)</ao:a></li>
-            <li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html#getLastModified-javax.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
+            <li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html#getLastModified-jakarta.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
           </ul>
         </li>
         <li>Improved implementation of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Wrapper.html">java.sql.Wrapper</ao:a>.</li>
@@ -930,7 +930,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         </li>
         <li>
           New constant <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletUtil.html#SKIP_PAGE_EXCEPTION">ServletUtil.SKIP_PAGE_EXCEPTION</ao:a>
-          to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
+          to avoid the overhead of instantiating new <ao:a rel="nofollow" href="@{javadoc.link.javaee.7}javax/servlet/jsp/SkipPageException.html">SkipPageException</ao:a>
           repeatedly during routine operation.
         </li>
         <li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
@@ -958,7 +958,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         </li>
         <li>
           <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/http/Dispatcher.html">Dispatcher</ao:a> may now forward
-          and include to caller-provided <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
+          and include to caller-provided <ao:a rel="nofollow" href="@{javadoc.link.javaee.7}javax/servlet/RequestDispatcher.html">RequestDispatcher</ao:a>.
         </li>
       </ul>
     </changelog:release>
