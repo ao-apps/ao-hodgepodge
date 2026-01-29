@@ -52,19 +52,19 @@ public abstract class ModifiableResourceBundle extends ResourceBundle {
   /**
    * This will only be called on modifiable bundles.
    *
-   * @see #isModifiable()
+   * @see ModifiableResourceBundle#isModifiable()
    */
   protected abstract void handleRemoveKey(String key);
 
   /**
-   * @see #setObject(java.lang.String, java.lang.Object, boolean)
+   * @see ModifiableResourceBundle#setObject(java.lang.String, java.lang.Object, boolean)
    */
   public final void setString(String key, String value, boolean modified) {
     setObject(key, value, modified);
   }
 
   /**
-   * @see #setObject(java.lang.String, java.lang.Object, boolean)
+   * @see ModifiableResourceBundle#setObject(java.lang.String, java.lang.Object, boolean)
    */
   public final void setStringArray(String key, String[] value, boolean modified) {
     setObject(key, value, modified);
@@ -91,8 +91,8 @@ public abstract class ModifiableResourceBundle extends ResourceBundle {
   /**
    * This will only be called on modifiable bundles.
    *
-   * @see #isModifiable()
-   * @see #setObject(java.lang.String, java.lang.Object, boolean)
+   * @see ModifiableResourceBundle#isModifiable()
+   * @see ModifiableResourceBundle#setObject(java.lang.String, java.lang.Object, boolean)
    */
   protected abstract void handleSetObject(String key, Object value, boolean modified);
 }

@@ -121,7 +121,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
    * avoid any potential downfalls, it is recommended to use the default instance
    * from <code>getInstance</code> for most scenarios.
    *
-   * @see  #getInstance()
+   * @see  IntegerRadixSort#getInstance()
    */
   public static IntegerRadixSort getSingleThreadedInstance() {
     return singleThreadedInstance;

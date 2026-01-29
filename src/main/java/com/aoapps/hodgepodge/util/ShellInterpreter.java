@@ -139,7 +139,7 @@ public abstract class ShellInterpreter implements Runnable {
   }
 
   /**
-   * @deprecated  Please use {@link #getPid()} instead.
+   * @deprecated  Please use {@link ShellInterpreter#getPid()} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated

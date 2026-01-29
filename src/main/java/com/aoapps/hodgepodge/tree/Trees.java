@@ -39,7 +39,7 @@ public final class Trees {
   }
 
   /**
-   * @see #emptyTree()
+   * @see Trees#emptyTree()
    */
   public static final Tree<?> EMPTY_TREE = new EmptyTree();
 

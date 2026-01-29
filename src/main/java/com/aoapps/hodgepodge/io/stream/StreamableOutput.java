@@ -48,23 +48,23 @@ public class StreamableOutput extends DataOutputStream implements NoClose {
   }
 
   /**
-   * The minimum value of int that can be written via {@link #writeCompressedInt(int)}
-   * or {@link #writeCompressedInt(int, java.io.OutputStream)}.
+   * The minimum value of int that can be written via {@link StreamableOutput#writeCompressedInt(int)}
+   * or {@link StreamableOutput#writeCompressedInt(int, java.io.OutputStream)}.
    */
   public static final int MIN_COMPRESSED_INT_VALUE = -0x40000000;
 
   /**
-   * The maximum value of int that can be written via {@link #writeCompressedInt(int)}
-   * or {@link #writeCompressedInt(int, java.io.OutputStream)}.
+   * The maximum value of int that can be written via {@link StreamableOutput#writeCompressedInt(int)}
+   * or {@link StreamableOutput#writeCompressedInt(int, java.io.OutputStream)}.
    */
   public static final int MAX_COMPRESSED_INT_VALUE = 0x3fffffff;
 
   /**
    * Verifies a value is in the acceptable range for a compressed int.
    *
-   * @see  #writeCompressedInt(int)
-   * @see  #MIN_COMPRESSED_INT_VALUE
-   * @see  #MAX_COMPRESSED_INT_VALUE
+   * @see  StreamableOutput#writeCompressedInt(int)
+   * @see  StreamableOutput#MIN_COMPRESSED_INT_VALUE
+   * @see  StreamableOutput#MAX_COMPRESSED_INT_VALUE
    */
   public static void checkCompressedInt(int i) throws IOException {
     if (i < MIN_COMPRESSED_INT_VALUE || i > MAX_COMPRESSED_INT_VALUE) {

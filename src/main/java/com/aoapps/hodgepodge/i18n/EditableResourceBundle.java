@@ -161,7 +161,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
      * different configuration.
      *
      * <p>These new settings are not automatically associated with the current thread.  That must be done via
-     * {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.</p>
+     * {@link ThreadSettings#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.</p>
      *
      * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
      *          sequences, map, and lookup context.
@@ -193,12 +193,12 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
      * Sets the mode.
      *
      * <p>These new settings are not automatically associated with the current thread.  That must be done via
-     * {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.</p>
+     * {@link ThreadSettings#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.</p>
      *
      * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
      *          sequences, map, and lookup context.
      *
-     * @see  #setSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings.Mode, boolean)
+     * @see  ThreadSettings#setSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings.Mode, boolean)
      */
     public ThreadSettings setMode(Mode mode) {
       return setSettings(mode, modifyAllText);
@@ -212,12 +212,12 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
      * Sets the modify all text flag.
      *
      * <p>These new settings are not automatically associated with the current thread.  That must be done via
-     * {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.</p>
+     * {@link ThreadSettings#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}.</p>
      *
      * @return  When configuration unchanged, returns {@code this}, otherwise a new instance with shared underlying
      *          sequences, map, and lookup context.
      *
-     * @see  #setSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings.Mode, boolean)
+     * @see  ThreadSettings#setSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings.Mode, boolean)
      */
     public ThreadSettings setModifyAllText(boolean modifyAllText) {
       return setSettings(mode, modifyAllText);
@@ -253,7 +253,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
    * Removes the settings for the current thread.
    * Also removes {@link BundleLookupThreadContext} for the current thread.
    *
-   * @deprecated  Please use {@link #resetThreadSettings()} instead.
+   * @deprecated  Please use {@link EditableResourceBundle#resetThreadSettings()} instead.
    */
   @Deprecated
   public static void removeThreadSettings() {
@@ -264,9 +264,9 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
    * Sets the settings for the current thread.
    * Also configures {@link BundleLookupThreadContext} for the current thread.
    *
-   * @param  threadSettings  When {@code null}, is equivalent to {@link #resetThreadSettings()}.
+   * @param  threadSettings  When {@code null}, is equivalent to {@link EditableResourceBundle#resetThreadSettings()}.
    *
-   * @see  #printEditableResourceBundleLookups(com.aoapps.lang.io.Encoder, com.aoapps.lang.io.Encoder, java.lang.Appendable, boolean, int, boolean)
+   * @see  EditableResourceBundle#printEditableResourceBundleLookups(com.aoapps.lang.io.Encoder, com.aoapps.lang.io.Encoder, java.lang.Appendable, boolean, int, boolean)
    */
   @SuppressWarnings("deprecation")
   public static void setThreadSettings(ThreadSettings threadSettings) {
@@ -358,10 +358,10 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
    *
    * @param  setValueUrl  Must be non-null when {@code canEditResources} is {@code true}.
    *
-   * @see  #printEditableResourceBundleLookups(com.aoapps.lang.io.Encoder, com.aoapps.lang.io.Encoder, java.lang.Appendable, boolean, int, boolean)
+   * @see  EditableResourceBundle#printEditableResourceBundleLookups(com.aoapps.lang.io.Encoder, com.aoapps.lang.io.Encoder, java.lang.Appendable, boolean, int, boolean)
    *
-   * @deprecated  Please use {@link #setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}
-   *              or {@link #resetThreadSettings()}.
+   * @deprecated  Please use {@link EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)}
+   *              or {@link EditableResourceBundle#resetThreadSettings()}.
    */
   @Deprecated
   public static void resetRequest(boolean canEditResources, String setValueUrl, boolean modifyAllText) {
@@ -1078,7 +1078,7 @@ public abstract class EditableResourceBundle extends ModifiablePropertiesResourc
   }
 
   /**
-   * @deprecated  Please use {@link #printEditableResourceBundleLookups(com.aoapps.lang.io.Encoder, com.aoapps.lang.io.Encoder, java.lang.Appendable, boolean, int, boolean)}
+   * @deprecated  Please use {@link EditableResourceBundle#printEditableResourceBundleLookups(com.aoapps.lang.io.Encoder, com.aoapps.lang.io.Encoder, java.lang.Appendable, boolean, int, boolean)}
    *              directly, providing whether is SGML or XHTML serialization with the {@code isXhtml} flag.
    *              This assumes XHTML serialization for backward-compatibility.
    */

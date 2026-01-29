@@ -70,7 +70,7 @@ public class AoTextField<T> extends JTextField {
    * Parses the non-null text into the type-specific value or {@link Optional#empty()} if field is empty
    * or effectively empty (such as white-space only depending on parser).
    *
-   * @see #getValue()
+   * @see AoTextField#getValue()
    */
   // Note: This javadoc is copied to parse(String) and getValue()
   @FunctionalInterface
@@ -153,8 +153,8 @@ public class AoTextField<T> extends JTextField {
   /**
    * Formats the type-specific value to text, only called for values that pass all registered validators.
    *
-   * @see  #setValue(java.lang.Object)
-   * @see  #removeValue()
+   * @see  AoTextField#setValue(java.lang.Object)
+   * @see  AoTextField#removeValue()
    */
   // Note: This javadoc is copied to format(T)
   @FunctionalInterface
@@ -166,8 +166,8 @@ public class AoTextField<T> extends JTextField {
      *
      * @return  the textual representation, never null
      *
-     * @see  #setValue(java.lang.Object)
-     * @see  #removeValue()
+     * @see  Formatter#setValue(java.lang.Object)
+     * @see  Formatter#removeValue()
      */
     // Note: This javadoc is copied from Formatter
     java.lang.String format(T value);
@@ -323,8 +323,8 @@ public class AoTextField<T> extends JTextField {
   /**
    * Adds a {@link Validator}.
    *
-   * @see  #getValue()
-   * @see  #removeValidator(com.aoapps.hodgepodge.swing.AoTextField.Validator)
+   * @see  AoTextField#getValue()
+   * @see  AoTextField#removeValidator(com.aoapps.hodgepodge.swing.AoTextField.Validator)
    */
   public void addValidator(Validator<? super T> validator) {
     validators.add(validator);
@@ -334,8 +334,8 @@ public class AoTextField<T> extends JTextField {
    * Removes a {@link Validator}, matching by object identity
    * (not by {@linkplain Object#equals(java.lang.Object) equals}).
    *
-   * @see  #getValue()
-   * @see  #addValidator(com.aoapps.hodgepodge.swing.AoTextField.Validator)
+   * @see  AoTextField#getValue()
+   * @see  AoTextField#addValidator(com.aoapps.hodgepodge.swing.AoTextField.Validator)
    */
   public void removeValidator(Validator<? super T> validator) {
     // Remove by identity
@@ -343,7 +343,7 @@ public class AoTextField<T> extends JTextField {
   }
 
   /**
-   * @deprecated  Should not be used directly, use {@link #getValue()} instead.
+   * @deprecated  Should not be used directly, use {@link AoTextField#getValue()} instead.
    */
   @Override
   @Deprecated(forRemoval = false)
@@ -352,7 +352,7 @@ public class AoTextField<T> extends JTextField {
   }
 
   /**
-   * @deprecated  Should not be used directly, use {@link #getValue()} instead.
+   * @deprecated  Should not be used directly, use {@link AoTextField#getValue()} instead.
    */
   @Override
   @Deprecated(forRemoval = false)
@@ -368,8 +368,8 @@ public class AoTextField<T> extends JTextField {
    *
    * @return  The valid value, if present.
    *
-   * @see  #parser
-   * @see  #validators
+   * @see  AoTextField#parser
+   * @see  AoTextField#validators
    * @see  Parser
    * @see  Validator
    */
@@ -391,8 +391,8 @@ public class AoTextField<T> extends JTextField {
   }
 
   /**
-   * @deprecated  Should not be used directly, use {@link #setValue(java.lang.Object)} or
-   *              {@link #removeValue()} instead.
+   * @deprecated  Should not be used directly, use {@link AoTextField#setValue(java.lang.Object)} or
+   *              {@link AoTextField#removeValue()} instead.
    */
   @Override
   @Deprecated(forRemoval = false)
@@ -403,13 +403,13 @@ public class AoTextField<T> extends JTextField {
   /**
    * Formats and sets the textual value of the field.
    *
-   * <p>Only calls {@link #setText(java.lang.String)} when value changed to minimize firing of events.</p>
+   * <p>Only calls {@link AoTextField#setText(java.lang.String)} when value changed to minimize firing of events.</p>
    *
    * @param value The new value that has already passed all registered validators, which may be {@code null}.
    *
    * @see  Formatter
-   * @see  #setValue(java.lang.Object)
-   * @see  #removeValue()
+   * @see  AoTextField#setValue(java.lang.Object)
+   * @see  AoTextField#removeValue()
    */
   private void setValueKnownValid(T value) {
     java.lang.String newText = formatter.format(value);
@@ -423,16 +423,16 @@ public class AoTextField<T> extends JTextField {
    *
    * <p>If value is non-null, validates against each registered {@link Validator}.</p>
    *
-   * <p>Only calls {@link #setText(java.lang.String)} when value changed to minimize firing of events.</p>
+   * <p>Only calls {@link AoTextField#setText(java.lang.String)} when value changed to minimize firing of events.</p>
    *
-   * <p>When setting to a {@code null} value, may use {@link #removeValue()} that does not throw
+   * <p>When setting to a {@code null} value, may use {@link AoTextField#removeValue()} that does not throw
    * {@link ValidationException}.</p>
    *
    * @param value The new value, which may be {@code null}.
    *
    * @see  Formatter
-   * @see  #setValueKnownValid(java.lang.Object)
-   * @see  #removeValue()
+   * @see  AoTextField#setValueKnownValid(java.lang.Object)
+   * @see  AoTextField#removeValue()
    */
   public void setValue(T value) throws ValidationException {
     if (value != null) {
@@ -449,10 +449,10 @@ public class AoTextField<T> extends JTextField {
   /**
    * Removes the value of the field.
    *
-   * <p>Only calls {@link #setText(java.lang.String)} when value changed to minimize firing of events.</p>
+   * <p>Only calls {@link AoTextField#setText(java.lang.String)} when value changed to minimize firing of events.</p>
    *
-   * @see  #setValueKnownValid(java.lang.Object)
-   * @see  #setValue(java.lang.Object)
+   * @see  AoTextField#setValueKnownValid(java.lang.Object)
+   * @see  AoTextField#setValue(java.lang.Object)
    */
   public void removeValue() {
     setValueKnownValid(null);

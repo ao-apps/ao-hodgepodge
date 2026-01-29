@@ -143,7 +143,7 @@ public class BitRate implements Serializable, Comparable<BitRate> {
   /**
    * Two BitRates are equal when they have the same quantity and the same unit.
    *
-   * @see  #compareTo
+   * @see  BitRate#compareTo
    */
   @Override
   public boolean equals(Object obj) {

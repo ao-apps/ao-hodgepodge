@@ -47,7 +47,7 @@ public final class Version {
   /**
    * Parses a version number from its string representation.
    *
-   * @see  #toString()
+   * @see  Version#toString()
    */
   public static Version valueOf(String version) throws IllegalArgumentException {
     NullArgumentException.checkNotNull(version, "version");
@@ -91,7 +91,7 @@ public final class Version {
   /**
    * The toString representation is <code><i>major</i>.<i>minor</i>.<i>release</i>.<i>build</i></code>.
    *
-   * @see #valueOf(String)
+   * @see Version#valueOf(String)
    */
   @Override
   public String toString() {

@@ -49,7 +49,7 @@ public class FindReplaceWriter extends Writer {
   private int findMatched;
 
   /**
-   * @see  #FindReplaceWriter(java.io.Writer, char[], char[])
+   * @see  FindReplaceWriter#FindReplaceWriter(java.io.Writer, char[], char[])
    */
   public FindReplaceWriter(Writer out, String find, String replace) {
     this(out, find.toCharArray(), replace.toCharArray());

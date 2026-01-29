@@ -185,7 +185,7 @@ public class TerminalWriter extends PrintWriter implements NoClose {
   }
 
   /**
-   * @see  #progressOutput(java.lang.String, java.lang.String, java.io.Writer)
+   * @see  TerminalWriter#progressOutput(java.lang.String, java.lang.String, java.io.Writer)
    */
   public String progressOutput(String lastVerboseString, String newVerboseString) throws IOException {
     return progressOutput(lastVerboseString, newVerboseString, out);

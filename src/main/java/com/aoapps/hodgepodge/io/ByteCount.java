@@ -130,7 +130,7 @@ public class ByteCount implements Serializable, Comparable<ByteCount> {
   /**
    * Two BitRates are equal when they have the same quantity and the same unit.
    *
-   * @see  #compareTo
+   * @see  ByteCount#compareTo
    */
   @Override
   public boolean equals(Object obj) {

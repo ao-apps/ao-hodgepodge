@@ -54,10 +54,10 @@ public final class BundleLookupThreadContext {
   /**
    * Gets the current context for the current thread or {@code null} if none set and none created.
    *
-   * @deprecated  Please use {@link #getThreadContext()} directly, since this content is now added and removed based on the
+   * @deprecated  Please use {@link BundleLookupThreadContext#getThreadContext()} directly, since this content is now added and removed based on the
    *              {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
    *
-   * @see  #getThreadContext()
+   * @see  BundleLookupThreadContext#getThreadContext()
    * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
    */
   @Deprecated
@@ -101,7 +101,7 @@ public final class BundleLookupThreadContext {
    * This content is added and removed based on the
    * {@linkplain EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings) current thread settings}.
    *
-   * @param  context  When {@code null}, is equivalent to {@link #removeThreadContext()}.
+   * @param  context  When {@code null}, is equivalent to {@link BundleLookupThreadContext#removeThreadContext()}.
    *
    * @see  EditableResourceBundle#setThreadSettings(com.aoapps.util.i18n.EditableResourceBundle.ThreadSettings)
    */

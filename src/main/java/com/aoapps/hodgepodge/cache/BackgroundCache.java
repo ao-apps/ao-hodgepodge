@@ -97,7 +97,7 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
   /**
    * The background-verified and updated cache entries.
    *
-   * @see  #lock  All read/write access must be under the lock
+   * @see  BackgroundCache#lock  All read/write access must be under the lock
    */
   class CacheEntry extends TimerTask {
 
@@ -251,7 +251,7 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
   /**
    * Uses the default logger.
    *
-   * @see  #BackgroundCache(java.lang.String, java.lang.Class, long, long, java.util.logging.Logger)
+   * @see  BackgroundCache#BackgroundCache(java.lang.String, java.lang.Class, long, long, java.util.logging.Logger)
    */
   public BackgroundCache(
       String name,
@@ -289,8 +289,8 @@ public class BackgroundCache<K, V, Ex extends Throwable> {
    *
    * @return  The result obtained from either the cache or this refresher
    *
-   * @see  #get(java.lang.Object)
-   * @see  #put(java.lang.Object, com.aoapps.hodgepodge.cache.BackgroundCache.Refresher)
+   * @see  BackgroundCache#get(java.lang.Object)
+   * @see  BackgroundCache#put(java.lang.Object, com.aoapps.hodgepodge.cache.BackgroundCache.Refresher)
    */
   public Result<V, Ex> get(
       K key,

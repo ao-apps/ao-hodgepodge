@@ -150,7 +150,7 @@ public class MD5 {
    * Initialize MD5 internal state (object can be reused just by
    * calling init() after every digest().
    *
-   * @deprecated  Please use {@link #init()} instead.
+   * @deprecated  Please use {@link MD5#init()} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated
@@ -372,7 +372,7 @@ public class MD5 {
   }
 
   /**
-   * @deprecated  Please use {@link #update(byte[], int, int)} instead.
+   * @deprecated  Please use {@link MD5#update(byte[], int, int)} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated
@@ -385,7 +385,7 @@ public class MD5 {
   }
 
   /**
-   * @deprecated  Please use {@link #update(byte[], int)} instead.
+   * @deprecated  Please use {@link MD5#update(byte[], int)} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated
@@ -407,7 +407,7 @@ public class MD5 {
    *
    * @param buffer Array of bytes to use for updating the hash
    *
-   * @deprecated  Please use {@link #update(byte[])} instead.
+   * @deprecated  Please use {@link MD5#update(byte[])} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated
@@ -432,7 +432,7 @@ public class MD5 {
    *
    * @param b Single byte to update the hash
    *
-   * @deprecated  Please use {@link #update(byte)} instead.
+   * @deprecated  Please use {@link MD5#update(byte)} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated
@@ -462,7 +462,7 @@ public class MD5 {
    * @param s String to be update to hash (is used as
    *          s.getBytes())
    *
-   * @deprecated  Please use {@link #update(java.lang.String)} instead.
+   * @deprecated  Please use {@link MD5#update(java.lang.String)} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated
@@ -488,7 +488,7 @@ public class MD5 {
    * @param i Integer value, which is then converted to
    *          byte as i &amp; 0xff
    *
-   * @deprecated  Please use {@link #update(int)} instead.
+   * @deprecated  Please use {@link MD5#update(int)} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated
@@ -554,7 +554,7 @@ public class MD5 {
    *
    * @return Array of 16 bytes, the hash of all updated bytes
    *
-   * @deprecated  Please use {@link #digest()} instead.
+   * @deprecated  Please use {@link MD5#digest()} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated

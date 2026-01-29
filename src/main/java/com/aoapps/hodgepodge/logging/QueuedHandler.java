@@ -46,7 +46,7 @@ import java.util.logging.StreamHandler;
 public abstract class QueuedHandler extends Handler {
 
   /**
-   * Creates a new executor.  Must be {@linkplain #shutdownExecutor(java.util.concurrent.ExecutorService) shutdown} when no longer needed.
+   * Creates a new executor.  Must be {@linkplain QueuedHandler#shutdownExecutor(java.util.concurrent.ExecutorService) shutdown} when no longer needed.
    */
   protected static ExecutorService newExecutor(String executorThreadName) {
     return Executors.newSingleThreadExecutor((Runnable r) -> {
@@ -86,11 +86,11 @@ public abstract class QueuedHandler extends Handler {
 
   /**
    * Uses the provided executor.  The executor is
-   * not {@linkplain ExecutorService#shutdown() shutdown} on {@link #close()};
+   * not {@linkplain ExecutorService#shutdown() shutdown} on {@link QueuedHandler#close()};
    * it is up to the caller to manage the executor lifecycle.
    *
-   * @see #newExecutor(java.lang.String)
-   * @see #shutdownExecutor(java.util.concurrent.ExecutorService)
+   * @see QueuedHandler#newExecutor(java.lang.String)
+   * @see QueuedHandler#shutdownExecutor(java.util.concurrent.ExecutorService)
    */
   protected QueuedHandler(ExecutorService executor) {
     this.executor = executor;

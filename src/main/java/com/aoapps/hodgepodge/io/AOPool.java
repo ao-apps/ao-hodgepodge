@@ -208,7 +208,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
    * <p>Furthermore, access to each of the individual lists must be synchronized on the list.  When a connection is
    * shared between threads, this list will be accessed by multiple threads.</p>
    *
-   * @see  #currentThreadId
+   * @see  AOPool#currentThreadId
    */
   private final Map<Long, List<PooledConnection<C>>> threadConnectionsByThreadId = new WeakHashMap<>();
 
@@ -220,12 +220,12 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
   /**
    * The allocation id of the current thread.  This is used as a key in the weak map
-   * {@link #threadConnectionsByThreadId} and is tracked per-connection by {@link #allocationThreadIdByConnection}.
+   * {@link AOPool#threadConnectionsByThreadId} and is tracked per-connection by {@link AOPool#allocationThreadIdByConnection}.
    *
    * <p>This approach allows sharing of information between threads, while still allowing garbage collection once a
    * thread dies.</p>
    *
-   * @see  #threadConnectionsByThreadId
+   * @see  AOPool#threadConnectionsByThreadId
    */
   @SuppressWarnings({"deprecation", "UnnecessaryBoxing"})
   private final ThreadLocal<Long> currentThreadId = ThreadLocal.withInitial(() -> {
@@ -290,8 +290,8 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
 
   /**
    * Closes the underlying connection.
-   * The connection may or may not already have been {@linkplain #resetConnection(java.lang.AutoCloseable) reset}.
-   * The connection may or may not already be {@linkplain #isClosed(java.lang.AutoCloseable) closed}.
+   * The connection may or may not already have been {@linkplain AOPool#resetConnection(java.lang.AutoCloseable) reset}.
+   * The connection may or may not already be {@linkplain AOPool#isClosed(java.lang.AutoCloseable) closed}.
    *
    * <p>Please note, this is distinct from the implementation of {@link AutoCloseable} for use in try-with-resources.</p>
    */
@@ -370,7 +370,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
    * @throws  I  when interrupted
    * @throws  Ex  when an error occurs, or when a thread attempts to allocate more than half the pool
    *
-   * @see  #getConnection(int)
+   * @see  AOPool#getConnection(int)
    * @see  AutoCloseable#close()
    */
   // Note:      Is AOPool.getConnection()
@@ -401,7 +401,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
    * @throws  I  when interrupted
    * @throws  Ex  when an error occurs, or when a thread attempts to allocate more than half the pool
    *
-   * @see  #getConnection()
+   * @see  AOPool#getConnection()
    * @see  AutoCloseable#close()
    */
   // Note:      Is AOPool.getConnection(int)
@@ -626,9 +626,9 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
   /**
    * Creates a new connection.
    *
-   * <p>The returned connection must call {@link #release(java.lang.AutoCloseable)} on
+   * <p>The returned connection must call {@link AOPool#release(java.lang.AutoCloseable)} on
    * {@link AutoCloseable#close()}.  This is to support use via try-with-resources, and is
-   * distinct from {@link #isClosed(java.lang.AutoCloseable)} and {@link #close(java.lang.AutoCloseable)}, which must
+   * distinct from {@link AOPool#isClosed(java.lang.AutoCloseable)} and {@link AOPool#close(java.lang.AutoCloseable)}, which must
    * both work with the underlying connection.</p>
    *
    * @throws I when interrupted
@@ -942,7 +942,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
   /**
    * Prints complete statistics about connection pool use.
    *
-   * @deprecated  Please use {@link #printStatisticsHtml(java.lang.Appendable, boolean)} instead.
+   * @deprecated  Please use {@link AOPool#printStatisticsHtml(java.lang.Appendable, boolean)} instead.
    */
   // TODO: Remove in 6.0.0 release
   @Deprecated
@@ -987,14 +987,14 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
    *
    * <p>If the connection is not from this pool, no action is taken.</p>
    *
-   * <p>The connection will be {@linkplain #resetConnection(java.lang.AutoCloseable) reset} and/or
-   * {@linkplain #close(java.lang.AutoCloseable) closed}.</p>
+   * <p>The connection will be {@linkplain AOPool#resetConnection(java.lang.AutoCloseable) reset} and/or
+   * {@linkplain AOPool#close(java.lang.AutoCloseable) closed}.</p>
    *
-   * @see  #isClosed(java.lang.AutoCloseable)
-   * @see  #logConnection(java.lang.AutoCloseable)
-   * @see  #resetConnection(java.lang.AutoCloseable)
-   * @see  #close(java.lang.AutoCloseable)
-   * @see  #release(com.aoapps.hodgepodge.io.AOPool.PooledConnection)
+   * @see  AOPool#isClosed(java.lang.AutoCloseable)
+   * @see  AOPool#logConnection(java.lang.AutoCloseable)
+   * @see  AOPool#resetConnection(java.lang.AutoCloseable)
+   * @see  AOPool#close(java.lang.AutoCloseable)
+   * @see  AOPool#release(com.aoapps.hodgepodge.io.AOPool.PooledConnection)
    */
   @SuppressWarnings({"UseSpecificCatch", "NestedSynchronizedStatement"})
   protected void release(C connection) throws Ex {
@@ -1100,9 +1100,9 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
   }
 
   /**
-   * Perform any connection logging before {@link #resetConnection(java.lang.AutoCloseable)} and/or
-   * {@link #close(java.lang.AutoCloseable)}.  This is only called on connections that are not
-   * {@linkplain #isClosed(java.lang.AutoCloseable) closed}.
+   * Perform any connection logging before {@link AOPool#resetConnection(java.lang.AutoCloseable)} and/or
+   * {@link AOPool#close(java.lang.AutoCloseable)}.  This is only called on connections that are not
+   * {@linkplain AOPool#isClosed(java.lang.AutoCloseable) closed}.
    */
   @SuppressWarnings("NoopMethodInAbstractClass")
   protected void logConnection(C conn) throws Ex {

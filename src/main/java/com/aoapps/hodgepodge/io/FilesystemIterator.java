@@ -55,7 +55,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
    * Performs a preorder traversal - directory before directory contents.
    * The directories are sorted.
    *
-   * @see  #FilesystemIterator(Map, Map, String, boolean, boolean)
+   * @see  FilesystemIterator#FilesystemIterator(Map, Map, String, boolean, boolean)
    */
   public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules) {
     this(rules, prefixRules, "", true, true);
@@ -64,7 +64,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
   /**
    * Constructs an iterator without any filename conversions and starting at all roots.
    *
-   * @see  #FilesystemIterator(Map, Map, String, boolean, boolean)
+   * @see  FilesystemIterator#FilesystemIterator(Map, Map, String, boolean, boolean)
    */
   public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules, boolean isPreorder, boolean isSorted) {
     this(rules, prefixRules, "", isPreorder, isSorted);
@@ -75,7 +75,7 @@ public class FilesystemIterator implements Comparable<FilesystemIterator> {
    * Performs a preorder traversal - directory before directory contents.
    * The directories are sorted.
    *
-   * @see  #FilesystemIterator(Map, Map, String, boolean, boolean)
+   * @see  FilesystemIterator#FilesystemIterator(Map, Map, String, boolean, boolean)
    */
   public FilesystemIterator(Map<String, FilesystemIteratorRule> rules, Map<String, FilesystemIteratorRule> prefixRules, String startPath) {
     this(rules, prefixRules, startPath, true, true);

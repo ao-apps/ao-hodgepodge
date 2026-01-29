@@ -131,7 +131,7 @@ public class DayDuration {
    *   <li># years</li>
    * </ol>
    *
-   * @see  #toString()
+   * @see  DayDuration#toString()
    */
   public static DayDuration valueOf(String duration) {
     int spacePos = duration.indexOf(' ');
