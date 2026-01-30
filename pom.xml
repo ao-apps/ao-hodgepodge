@@ -29,12 +29,12 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
-  <groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId><version>5.3.0</version>
+  <groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId><version>5.3.0-POST-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
     <!-- Must be set to ${git.commit.time} for snapshots or ISO 8601 timestamp for releases. -->
-    <project.build.outputTimestamp>2026-01-30T12:28:55Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
     <module.name>com.aoapps.hodgepodge</module.name>
 
     <javadoc.breadcrumbs><![CDATA[<a target="${javadoc.target}" href="https://oss.aoapps.com/">AO OSS</a>
@@ -75,7 +75,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     <connection>scm:git:git://github.com/ao-apps/ao-hodgepodge.git</connection>
     <developerConnection>scm:git:git@github.com:ao-apps/ao-hodgepodge.git</developerConnection>
     <url>https://github.com/ao-apps/ao-hodgepodge</url>
-    <tag>ao-hodgepodge-5.3.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
