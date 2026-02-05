@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015, 2021, 2022, 2023  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2021, 2022, 2023, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -137,6 +137,40 @@ public enum Month {
         return DECEMBER;
       default:
         throw new AssertionError("Calendar and Month mismatch");
+    }
+  }
+
+  /**
+   * Gets the month from the java.time.Month value.
+   */
+  public static Month getByJavaTimeMonth(java.time.Month javaMonth) {
+    switch (javaMonth) {
+      case JANUARY:
+        return JANUARY;
+      case FEBRUARY:
+        return FEBRUARY;
+      case MARCH:
+        return MARCH;
+      case APRIL:
+        return APRIL;
+      case MAY:
+        return MAY;
+      case JUNE:
+        return JUNE;
+      case JULY:
+        return JULY;
+      case AUGUST:
+        return AUGUST;
+      case SEPTEMBER:
+        return SEPTEMBER;
+      case OCTOBER:
+        return OCTOBER;
+      case NOVEMBER:
+        return NOVEMBER;
+      case DECEMBER:
+        return DECEMBER;
+      default:
+        throw new AssertionError("Calendar and java.time.Month mismatch: " + javaMonth);
     }
   }
 

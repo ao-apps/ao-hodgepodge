@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015, 2018, 2021, 2022, 2023  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2018, 2021, 2022, 2023, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -89,6 +89,30 @@ public enum DayOfWeek {
         return SATURDAY;
       default:
         throw new AssertionError("Calendar and DayOfWeek mismatch, all fields set?: calendarDayOfWeek = " + calendarDayOfWeek);
+    }
+  }
+
+  /**
+   * Gets the day of the week from the DayOfWeek value.
+   */
+  public static DayOfWeek getByJavaTimeDayOfWeek(java.time.DayOfWeek javaTimeDayOfWeek) {
+    switch (javaTimeDayOfWeek) {
+      case SUNDAY:
+        return SUNDAY;
+      case MONDAY:
+        return MONDAY;
+      case TUESDAY:
+        return TUESDAY;
+      case WEDNESDAY:
+        return WEDNESDAY;
+      case THURSDAY:
+        return THURSDAY;
+      case FRIDAY:
+        return FRIDAY;
+      case SATURDAY:
+        return SATURDAY;
+      default:
+        throw new AssertionError("java.time.DayOfWeek and DayOfWeek mismatch: javaTimeDayOfWeek = " + javaTimeDayOfWeek);
     }
   }
 

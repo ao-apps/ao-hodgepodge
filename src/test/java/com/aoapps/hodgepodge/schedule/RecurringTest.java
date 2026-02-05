@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2023  AO Industries, Inc.
+ * Copyright (C) 2023, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -30,6 +30,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 
 import com.aoapps.lang.util.CalendarUtils;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -175,6 +177,7 @@ public class RecurringTest {
   public void testCheckScheduleFromEveryday() {
     Recurring r = Recurring.EVERYDAY;
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-07"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-07"), "test"));
   }
 
   @Test
@@ -182,14 +185,20 @@ public class RecurringTest {
     Iterator<Calendar> schedule = Recurring.EVERYDAY.getScheduleIterator(CalendarUtils.parseDate("2023-11-07"));
     assertEquals(CalendarUtils.parseDate("2023-11-07"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-08"), schedule.next());
+    Iterator<LocalDate> schedule2 = Recurring.EVERYDAY.getScheduleIterator(LocalDate.parse("2023-11-07"));
+    assertEquals(LocalDate.parse("2023-11-07"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-08"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromWeekdays() {
     Recurring r = Recurring.WEEKDAYS;
     assertNotNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-11"), "test"));
+    assertNotNull(r.checkScheduleFrom(LocalDate.parse("2023-11-11"), "test"));
     assertNotNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-12"), "test"));
+    assertNotNull(r.checkScheduleFrom(LocalDate.parse("2023-11-12"), "test"));
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-13"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-13"), "test"));
   }
 
   @Test
@@ -202,13 +211,23 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2023-11-17"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-20"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-21"), schedule.next());
+    Iterator<LocalDate> schedule2 = Recurring.WEEKDAYS.getScheduleIterator(LocalDate.parse("2023-11-11"));
+    assertEquals(LocalDate.parse("2023-11-13"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-14"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-15"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-16"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-17"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-20"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-21"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromDayOfWeekList() {
     Recurring r = new Recurring.DayOfWeekList(EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY));
     assertNotNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-04"), "test"));
+    assertNotNull(r.checkScheduleFrom(LocalDate.parse("2023-11-04"), "test"));
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-06"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-06"), "test"));
   }
 
   @Test
@@ -219,12 +238,19 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2023-11-10"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-13"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-17"), schedule.next());
+    Iterator<LocalDate> schedule2 = new Recurring.DayOfWeekList(EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY))
+        .getScheduleIterator(LocalDate.parse("2023-11-04"));
+    assertEquals(LocalDate.parse("2023-11-06"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-10"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-13"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-17"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromWeekly() {
     Recurring r = Recurring.WEEKLY;
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-07"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-07"), "test"));
   }
 
   @Test
@@ -235,12 +261,19 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2023-11-21"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-28"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-12-05"), schedule.next());
+    Iterator<LocalDate> schedule2 = Recurring.WEEKLY.getScheduleIterator(LocalDate.parse("2023-11-07"));
+    assertEquals(LocalDate.parse("2023-11-07"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-14"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-21"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-12-05"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromMonthly() {
     Recurring r = Recurring.MONTHLY;
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-07"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-07"), "test"));
   }
 
   @Test
@@ -258,13 +291,28 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2023-10-31"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-30"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-12-31"), schedule.next());
+    Iterator<LocalDate> schedule2 = Recurring.MONTHLY.getScheduleIterator(LocalDate.parse("2023-01-31"));
+    assertEquals(LocalDate.parse("2023-01-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-02-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-03-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-04-30"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-05-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-06-30"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-07-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-08-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-09-30"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-10-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-30"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-12-31"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromMonthList() {
     Recurring r = new Recurring.MonthList(EnumSet.of(Month.JANUARY, Month.FEBRUARY));
     assertNotNull(r.checkScheduleFrom(CalendarUtils.parseDate("2022-12-31"), "test"));
+    assertNotNull(r.checkScheduleFrom(LocalDate.parse("2022-12-31"), "test"));
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-01-31"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-01-31"), "test"));
   }
 
   @Test
@@ -277,12 +325,21 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2024-02-29"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2025-01-31"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2025-02-28"), schedule.next());
+    Iterator<LocalDate> schedule2 = new Recurring.MonthList(EnumSet.of(Month.JANUARY, Month.FEBRUARY))
+        .getScheduleIterator(LocalDate.parse("2022-12-31"));
+    assertEquals(LocalDate.parse("2023-01-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-02-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2024-01-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2024-02-29"), schedule2.next());
+    assertEquals(LocalDate.parse("2025-01-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2025-02-28"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromYearly() {
     Recurring r = Recurring.YEARLY;
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-07"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-07"), "test"));
   }
 
   @Test
@@ -294,12 +351,20 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2027-02-28"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2028-02-29"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2029-02-28"), schedule.next());
+    Iterator<LocalDate> schedule2 = Recurring.YEARLY.getScheduleIterator(LocalDate.parse("2024-02-29"));
+    assertEquals(LocalDate.parse("2024-02-29"), schedule2.next());
+    assertEquals(LocalDate.parse("2025-02-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2026-02-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2027-02-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2028-02-29"), schedule2.next());
+    assertEquals(LocalDate.parse("2029-02-28"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromEveryFieldDay() {
     Recurring r = new Recurring.Every(3, Calendar.DAY_OF_MONTH);
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-07"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-07"), "test"));
   }
 
   @Test
@@ -310,12 +375,19 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2023-11-10"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-13"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-16"), schedule.next());
+    Iterator<LocalDate> schedule2 = new Recurring.Every(3, ChronoUnit.DAYS)
+        .getScheduleIterator(LocalDate.parse("2023-11-07"));
+    assertEquals(LocalDate.parse("2023-11-07"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-10"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-13"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-16"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromEveryFieldWeek() {
     Recurring r = new Recurring.Every(3, Calendar.WEEK_OF_YEAR);
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-07"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-07"), "test"));
   }
 
   @Test
@@ -326,12 +398,19 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2023-11-28"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-12-19"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2024-01-09"), schedule.next());
+    Iterator<LocalDate> schedule2 = new Recurring.Every(3, ChronoUnit.WEEKS)
+        .getScheduleIterator(LocalDate.parse("2023-11-07"));
+    assertEquals(LocalDate.parse("2023-11-07"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-12-19"), schedule2.next());
+    assertEquals(LocalDate.parse("2024-01-09"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromEveryFieldMonth() {
     Recurring r = new Recurring.Every(11, Calendar.MONTH);
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-07"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-07"), "test"));
   }
 
   @Test
@@ -351,12 +430,28 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2032-03-31"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2033-02-28"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2034-01-31"), schedule.next());
+    Iterator<LocalDate> schedule2 = new Recurring.Every(11, ChronoUnit.MONTHS)
+        .getScheduleIterator(LocalDate.parse("2023-01-31"));
+    assertEquals(LocalDate.parse("2023-01-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-12-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2024-11-30"), schedule2.next());
+    assertEquals(LocalDate.parse("2025-10-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2026-09-30"), schedule2.next());
+    assertEquals(LocalDate.parse("2027-08-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2028-07-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2029-06-30"), schedule2.next());
+    assertEquals(LocalDate.parse("2030-05-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2031-04-30"), schedule2.next());
+    assertEquals(LocalDate.parse("2032-03-31"), schedule2.next());
+    assertEquals(LocalDate.parse("2033-02-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2034-01-31"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromEveryFieldYear() {
     Recurring r = new Recurring.Every(2, Calendar.YEAR);
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-07"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-07"), "test"));
   }
 
   @Test
@@ -367,13 +462,21 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2026-02-28"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2028-02-29"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2030-02-28"), schedule.next());
+    Iterator<LocalDate> schedule2 = new Recurring.Every(2, ChronoUnit.YEARS)
+        .getScheduleIterator(LocalDate.parse("2024-02-29"));
+    assertEquals(LocalDate.parse("2024-02-29"), schedule2.next());
+    assertEquals(LocalDate.parse("2026-02-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2028-02-29"), schedule2.next());
+    assertEquals(LocalDate.parse("2030-02-28"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromEveryByDayOfWeek() {
     Recurring r = new Recurring.EveryByDayOfWeek(2, DayOfWeek.SUNDAY);
     assertNotNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-04"), "test"));
+    assertNotNull(r.checkScheduleFrom(LocalDate.parse("2023-11-04"), "test"));
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2023-11-05"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2023-11-05"), "test"));
   }
 
   @Test
@@ -383,13 +486,20 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2023-11-12"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-11-26"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2023-12-10"), schedule.next());
+    Iterator<LocalDate> schedule2 = new Recurring.EveryByDayOfWeek(2, DayOfWeek.SUNDAY)
+        .getScheduleIterator(LocalDate.parse("2023-11-07"));
+    assertEquals(LocalDate.parse("2023-11-12"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-11-26"), schedule2.next());
+    assertEquals(LocalDate.parse("2023-12-10"), schedule2.next());
   }
 
   @Test
   public void testCheckScheduleFromEveryByMonth() {
     Recurring r = new Recurring.EveryByMonth(2, Month.FEBRUARY);
     assertNotNull(r.checkScheduleFrom(CalendarUtils.parseDate("2024-01-31"), "test"));
+    assertNotNull(r.checkScheduleFrom(LocalDate.parse("2024-01-31"), "test"));
     assertNull(r.checkScheduleFrom(CalendarUtils.parseDate("2024-02-29"), "test"));
+    assertNull(r.checkScheduleFrom(LocalDate.parse("2024-02-29"), "test"));
   }
 
   @Test
@@ -399,5 +509,10 @@ public class RecurringTest {
     assertEquals(CalendarUtils.parseDate("2024-02-29"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2026-02-28"), schedule.next());
     assertEquals(CalendarUtils.parseDate("2028-02-29"), schedule.next());
+    Iterator<LocalDate> schedule2 = new Recurring.EveryByMonth(2, Month.FEBRUARY)
+        .getScheduleIterator(LocalDate.parse("2024-01-31"));
+    assertEquals(LocalDate.parse("2024-02-29"), schedule2.next());
+    assertEquals(LocalDate.parse("2026-02-28"), schedule2.next());
+    assertEquals(LocalDate.parse("2028-02-29"), schedule2.next());
   }
 }

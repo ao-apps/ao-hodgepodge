@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2015, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2015, 2021, 2022, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,6 +23,7 @@
 
 package com.aoapps.hodgepodge.schedule;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 
 /**
@@ -41,6 +42,11 @@ public class DayDuration {
       void offset(int count, Calendar cal) {
         cal.add(Calendar.DATE, count);
       }
+
+      @Override
+      LocalDate plus(int count, LocalDate date) {
+        return date.plusDays(count);
+      }
     },
     WEEKS {
       @Override
@@ -51,6 +57,11 @@ public class DayDuration {
       @Override
       void offset(int count, Calendar cal) {
         cal.add(Calendar.WEEK_OF_YEAR, count);
+      }
+
+      @Override
+      LocalDate plus(int count, LocalDate date) {
+        return date.plusWeeks(count);
       }
     },
     MONTHS {
@@ -63,6 +74,11 @@ public class DayDuration {
       void offset(int count, Calendar cal) {
         cal.add(Calendar.MONTH, count);
       }
+
+      @Override
+      LocalDate plus(int count, LocalDate date) {
+        return date.plusMonths(count);
+      }
     },
     YEARS {
       @Override
@@ -73,6 +89,11 @@ public class DayDuration {
       @Override
       void offset(int count, Calendar cal) {
         cal.add(Calendar.YEAR, count);
+      }
+
+      @Override
+      LocalDate plus(int count, LocalDate date) {
+        return date.plusYears(count);
       }
     };
 
@@ -110,6 +131,8 @@ public class DayDuration {
     abstract void toString(int count, StringBuilder sb);
 
     abstract void offset(int count, Calendar cal);
+
+    abstract LocalDate plus(int count, LocalDate date);
   }
 
   /**
@@ -186,5 +209,12 @@ public class DayDuration {
    */
   public void offset(Calendar cal) {
     unit.offset(count, cal);
+  }
+
+  /**
+   * Offsets the given date by the unit and count.
+   */
+  public LocalDate plus(LocalDate date) {
+    return unit.plus(count, date);
   }
 }

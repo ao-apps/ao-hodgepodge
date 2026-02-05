@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023, 2025  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023, 2025, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,6 +25,8 @@ package com.aoapps.hodgepodge.schedule;
 
 import com.aoapps.lang.Strings;
 import com.aoapps.lang.util.UnmodifiableCalendar;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -300,10 +302,24 @@ public abstract class Recurring {
   }
 
   /**
+   * Checks if the schedule can start on the given day.
+   * Returns null if OK or a string reason of why not OK.
+   */
+  public String checkScheduleFrom(LocalDate from, String attribute) {
+    return null;
+  }
+
+  /**
    * Gets an iterator over dates in the YYYY-MM-DD format.
    * The iteration starts at the given date.
    */
   public abstract Iterator<Calendar> getScheduleIterator(Calendar from);
+
+  /**
+   * Gets an iterator over dates in the YYYY-MM-DD format.
+   * The iteration starts at the given date.
+   */
+  public abstract Iterator<LocalDate> getScheduleIterator(LocalDate from);
 
   private static final int EVERYDAY_HASH_CODE = 0;
   public static final Recurring EVERYDAY = new Recurring() {
@@ -346,6 +362,29 @@ public abstract class Recurring {
         }
       };
     }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      return new Iterator<>() {
+        private LocalDate cal = from;
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public LocalDate next() {
+          final LocalDate date = cal;
+          // Move the calendar to the next day
+          cal = cal.plusDays(1);
+          return date;
+        }
+      };
+    }
   };
 
   private static final int WEEKDAYS_HASH_CODE = EVERYDAY_HASH_CODE + 1;
@@ -379,6 +418,17 @@ public abstract class Recurring {
     }
 
     @Override
+    public String checkScheduleFrom(LocalDate from, String attribute) {
+      // The first day "on" must be a weekday
+      java.time.DayOfWeek dayOfWeek = from.getDayOfWeek();
+      if (dayOfWeek == java.time.DayOfWeek.SATURDAY || dayOfWeek == java.time.DayOfWeek.SUNDAY) {
+        DayOfWeek fromDow = DayOfWeek.getByJavaTimeDayOfWeek(dayOfWeek);
+        return "Day of week for \"" + attribute + "\" must be a weekday: " + fromDow.getLongName();
+      }
+      return null;
+    }
+
+    @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
       return new Iterator<>() {
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
@@ -405,6 +455,38 @@ public abstract class Recurring {
           final Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next day
           cal.add(Calendar.DAY_OF_MONTH, 1);
+          return date;
+        }
+      };
+    }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      return new Iterator<>() {
+        private LocalDate cal = from;
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public LocalDate next() {
+          // Skip past weekends
+          while (true) {
+            java.time.DayOfWeek dayOfWeek = cal.getDayOfWeek();
+            if (dayOfWeek != java.time.DayOfWeek.SATURDAY && dayOfWeek != java.time.DayOfWeek.SUNDAY) {
+              break;
+            }
+            // Move the calendar to the next day
+            cal = cal.plusDays(1);
+          }
+          final LocalDate date = cal;
+          // Move the calendar to the next day
+          cal = cal.plusDays(1);
           return date;
         }
       };
@@ -471,6 +553,17 @@ public abstract class Recurring {
     }
 
     @Override
+    public String checkScheduleFrom(LocalDate from, String attribute) {
+      // List of days must include the day of the week for the first day "on"
+      DayOfWeek fromDow = DayOfWeek.getByJavaTimeDayOfWeek(from.getDayOfWeek());
+      if (!daysOfWeek.contains(fromDow)) {
+        return "Day of week for \"" + attribute + "\" not found in days of week list (" + Strings.join(daysOfWeek, ", ")
+            + "): " + fromDow.getLongName();
+      }
+      return null;
+    }
+
+    @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
       return new Iterator<>() {
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
@@ -497,6 +590,38 @@ public abstract class Recurring {
           final Calendar date = (Calendar) cal.clone();
           // Move the calendar to the next day
           cal.add(Calendar.DAY_OF_MONTH, 1);
+          return date;
+        }
+      };
+    }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      return new Iterator<>() {
+        private LocalDate cal = from;
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public LocalDate next() {
+          // Skip past days that are not selected
+          while (true) {
+            DayOfWeek dow = DayOfWeek.getByJavaTimeDayOfWeek(cal.getDayOfWeek());
+            if (daysOfWeek.contains(dow)) {
+              break;
+            }
+            // Move the calendar to the next day
+            cal = cal.plusDays(1);
+          }
+          final LocalDate date = cal;
+          // Move the calendar to the next day
+          cal = cal.plusDays(1);
           return date;
         }
       };
@@ -544,6 +669,29 @@ public abstract class Recurring {
         }
       };
     }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      return new Iterator<>() {
+        private LocalDate cal = from;
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public LocalDate next() {
+          final LocalDate date = cal;
+          // Move the calendar to the next week
+          cal = cal.plusWeeks(1);
+          return date;
+        }
+      };
+    }
   };
 
   private static final int MONTHLY_HASH_CODE = WEEKLY_HASH_CODE + 1;
@@ -587,6 +735,33 @@ public abstract class Recurring {
           cal.add(Calendar.MONTH, 1);
           int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
           cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
+          return date;
+        }
+      };
+    }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      return new Iterator<>() {
+        private final int dayOfMonth = from.getDayOfMonth();
+        private LocalDate cal = from;
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public LocalDate next() {
+          final LocalDate date = cal;
+          // Move the calendar to the next month
+          cal = cal.withDayOfMonth(1);
+          cal = cal.plusMonths(1);
+          int daysInMonth = cal.lengthOfMonth();
+          cal = cal.withDayOfMonth(Math.min(daysInMonth, dayOfMonth));
           return date;
         }
       };
@@ -653,6 +828,17 @@ public abstract class Recurring {
     }
 
     @Override
+    public String checkScheduleFrom(LocalDate from, String attribute) {
+      // List of months must include the month for the first day "on"
+      Month fromMonth = Month.getByJavaTimeMonth(from.getMonth());
+      if (!months.contains(fromMonth)) {
+        return "Month for \"" + attribute + "\" not found in months list (" + Strings.join(months, ", ") + "): "
+            + fromMonth.getLongName();
+      }
+      return null;
+    }
+
+    @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
       return new Iterator<>() {
         private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
@@ -686,6 +872,45 @@ public abstract class Recurring {
           cal.add(Calendar.MONTH, 1);
           int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
           cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
+          return date;
+        }
+      };
+    }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      return new Iterator<>() {
+        private final int dayOfMonth = from.getDayOfMonth();
+        private LocalDate cal = from;
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public LocalDate next() {
+          // Skip past months that are not selected
+          while (true) {
+            Month month = Month.getByJavaTimeMonth(cal.getMonth());
+            if (months.contains(month)) {
+              break;
+            }
+            // Move the calendar to the next month
+            cal = cal.withDayOfMonth(1);
+            cal = cal.plusMonths(1);
+            int daysInMonth = cal.lengthOfMonth();
+            cal = cal.withDayOfMonth(Math.min(daysInMonth, dayOfMonth));
+          }
+          final LocalDate date = cal;
+          // Move the calendar to the next month
+          cal = cal.withDayOfMonth(1);
+          cal = cal.plusMonths(1);
+          int daysInMonth = cal.lengthOfMonth();
+          cal = cal.withDayOfMonth(Math.min(daysInMonth, dayOfMonth));
           return date;
         }
       };
@@ -737,27 +962,87 @@ public abstract class Recurring {
         }
       };
     }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      return new Iterator<>() {
+        private final int dayOfMonth = from.getDayOfMonth();
+        private LocalDate cal = from;
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public LocalDate next() {
+          final LocalDate date = cal;
+          // Move the calendar to the next year
+          cal = cal.withDayOfMonth(1);
+          cal = cal.plusYears(1);
+          int daysInMonth = cal.lengthOfMonth();
+          cal = cal.withDayOfMonth(Math.min(daysInMonth, dayOfMonth));
+          return date;
+        }
+      };
+    }
   };
 
   public static class Every extends Recurring {
 
     private final int increment;
     private final int field;
+    private final ChronoUnit chronoUnit;
 
     public Every(int increment, int field) {
       if (increment < 1) {
         throw new IllegalArgumentException("Increment must be at least one");
       }
       this.increment = increment;
-      if (
-          field != Calendar.DAY_OF_MONTH
-              && field != Calendar.WEEK_OF_YEAR
-              && field != Calendar.MONTH
-              && field != Calendar.YEAR
-      ) {
-        throw new IllegalArgumentException("Unexpected value for field: " + field);
+      switch (field) {
+        case Calendar.DAY_OF_MONTH:
+          chronoUnit = ChronoUnit.DAYS;
+          break;
+        case Calendar.WEEK_OF_YEAR:
+          chronoUnit = ChronoUnit.WEEKS;
+          break;
+        case Calendar.MONTH:
+          chronoUnit = ChronoUnit.MONTHS;
+          break;
+        case Calendar.YEAR:
+          chronoUnit = ChronoUnit.YEARS;
+          break;
+        default:
+          throw new IllegalArgumentException("Unexpected value for field: " + field);
       }
       this.field = field;
+    }
+
+    public Every(int increment, ChronoUnit chronoUnit) {
+      if (increment < 1) {
+        throw new IllegalArgumentException("Increment must be at least one");
+      }
+      this.increment = increment;
+      switch (chronoUnit) {
+        case DAYS:
+          field = Calendar.DAY_OF_MONTH;
+          break;
+        case WEEKS:
+          field = Calendar.WEEK_OF_YEAR;
+          break;
+        case MONTHS:
+          field = Calendar.MONTH;
+          break;
+        case YEARS:
+          field = Calendar.YEAR;
+          break;
+        default:
+          throw new IllegalArgumentException("Unexpected value for chronoUnit: " + chronoUnit);
+      }
+      this.chronoUnit = chronoUnit;
     }
 
     @Override
@@ -866,6 +1151,60 @@ public abstract class Recurring {
           throw new AssertionError("Unexpected value for field: " + field);
       }
     }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      switch (chronoUnit) {
+        case DAYS:
+        case WEEKS:
+          return new Iterator<>() {
+            private LocalDate cal = from;
+
+            @Override
+            public boolean hasNext() {
+              return true;
+            }
+
+            /**
+             * Never-ending iterator - will never throw {@link NoSuchElementException}.
+             */
+            @Override
+            public LocalDate next() {
+              final LocalDate date = cal;
+              // Move the calendar to the next by field and increment
+              cal = cal.plus(increment, chronoUnit);
+              return date;
+            }
+          };
+        case MONTHS:
+        case YEARS:
+          return new Iterator<>() {
+            private final int dayOfMonth = from.getDayOfMonth();
+            private LocalDate cal = from;
+
+            @Override
+            public boolean hasNext() {
+              return true;
+            }
+
+            /**
+             * Never-ending iterator - will never throw {@link NoSuchElementException}.
+             */
+            @Override
+            public LocalDate next() {
+              final LocalDate date = cal;
+              // Move the calendar to the next month
+              cal = cal.withDayOfMonth(1);
+              cal = cal.plus(increment, chronoUnit);
+              int daysInMonth = cal.lengthOfMonth();
+              cal = cal.withDayOfMonth(Math.min(daysInMonth, dayOfMonth));
+              return date;
+            }
+          };
+        default:
+          throw new AssertionError("Unexpected value for chronoUnit: " + chronoUnit);
+      }
+    }
   }
 
   public static class EveryByDayOfWeek extends Recurring {
@@ -929,6 +1268,16 @@ public abstract class Recurring {
     }
 
     @Override
+    public String checkScheduleFrom(LocalDate from, String attribute) {
+      // Day of week must match the first day "on"
+      DayOfWeek fromDow = DayOfWeek.getByJavaTimeDayOfWeek(from.getDayOfWeek());
+      if (dayOfWeek != fromDow) {
+        return "Day of week for \"" + attribute + "\" is not \"" + dayOfWeek.getLongName() + "\": " + fromDow.getLongName();
+      }
+      return null;
+    }
+
+    @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
       return new Iterator<>() {
         private final Calendar cal = UnmodifiableCalendar.unwrapClone(from);
@@ -955,6 +1304,38 @@ public abstract class Recurring {
           // Move the calendar to the next increment week
           cal.add(Calendar.WEEK_OF_YEAR, increment);
           assert dayOfWeek == DayOfWeek.getByCalendarDayOfWeek(cal.get(Calendar.DAY_OF_WEEK));
+          return date;
+        }
+      };
+    }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      return new Iterator<>() {
+        private LocalDate cal = from;
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public LocalDate next() {
+          // Skip past days that are not selected
+          while (true) {
+            if (dayOfWeek == DayOfWeek.getByJavaTimeDayOfWeek(cal.getDayOfWeek())) {
+              break;
+            }
+            // Move the calendar to the next day
+            cal = cal.plusDays(1);
+          }
+          final LocalDate date = cal;
+          // Move the calendar to the next increment week
+          cal = cal.plusWeeks(increment);
+          assert dayOfWeek == DayOfWeek.getByJavaTimeDayOfWeek(cal.getDayOfWeek());
           return date;
         }
       };
@@ -1022,6 +1403,16 @@ public abstract class Recurring {
     }
 
     @Override
+    public String checkScheduleFrom(LocalDate from, String attribute) {
+      // Month must match the first day "on"
+      Month fromMonth = Month.getByJavaTimeMonth(from.getMonth());
+      if (month != fromMonth) {
+        return "Month for \"" + attribute + "\" is not \"" + month.getLongName() + "\": " + fromMonth.getLongName();
+      }
+      return null;
+    }
+
+    @Override
     public Iterator<Calendar> getScheduleIterator(final Calendar from) {
       return new Iterator<>() {
         private final int dayOfMonth = from.get(Calendar.DAY_OF_MONTH);
@@ -1055,6 +1446,45 @@ public abstract class Recurring {
           int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
           cal.set(Calendar.DAY_OF_MONTH, Math.min(daysInMonth, dayOfMonth));
           assert month == Month.getByCalendarMonth(cal.get(Calendar.MONTH));
+          return date;
+        }
+      };
+    }
+
+    @Override
+    public Iterator<LocalDate> getScheduleIterator(final LocalDate from) {
+      return new Iterator<>() {
+        private final int dayOfMonth = from.getDayOfMonth();
+        private LocalDate cal = from;
+
+        @Override
+        public boolean hasNext() {
+          return true;
+        }
+
+        /**
+         * Never-ending iterator - will never throw {@link NoSuchElementException}.
+         */
+        @Override
+        public LocalDate next() {
+          // Skip past months that are not selected
+          while (true) {
+            if (month == Month.getByJavaTimeMonth(cal.getMonth())) {
+              break;
+            }
+            // Move the calendar to the next month
+            cal = cal.withDayOfMonth(1);
+            cal = cal.plusMonths(1);
+            int daysInMonth = cal.lengthOfMonth();
+            cal = cal.withDayOfMonth(Math.min(daysInMonth, dayOfMonth));
+          }
+          final LocalDate date = cal;
+          // Move the calendar to the next increment month
+          cal = cal.withDayOfMonth(1);
+          cal = cal.plusYears(increment);
+          int daysInMonth = cal.lengthOfMonth();
+          cal = cal.withDayOfMonth(Math.min(daysInMonth, dayOfMonth));
+          assert month == Month.getByJavaTimeMonth(cal.getMonth());
           return date;
         }
       };
