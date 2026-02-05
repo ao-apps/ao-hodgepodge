@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2026-02-05T15:48:18Z"
+    dateModified="2026-02-05T18:09:30Z"
   >
     <c:set var="latestRelease" value="5.4.0" />
     <c:if test="${
@@ -65,7 +65,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     >
       <ul>
         <li>
-          Supporting <ao:a rel="nofollow" href="@{javadoc.link.javase}java/time/LocalDate.html">LocalDate</ao:a>
+          Supporting <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/time/LocalDate.html">LocalDate</ao:a>
           in recurring scheduling.
         </li>
       </ul>
@@ -343,7 +343,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
       <ul>
         <li>
           Deprecated <code>Base64Coder</code> in favor of
-          <code><ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Base64.html">Base64</ao:a></code>
+          <code><ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/util/Base64.html">Base64</ao:a></code>
           available since Java 8.
         </li>
         <li>
@@ -353,7 +353,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
           <ol>
             <li>
               <code>AOPool</code> now internally tracks thread ID as a
-              <code><ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Long.html">Long</ao:a></code>
+              <code><ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/lang/Long.html">Long</ao:a></code>
               instead of <code>SmallIdentifier</code>.  This only affects the textual display of thread ID in
               <code>printStatisticsHTML(…)</code>, and it is arguably more meaningful since they are now
               sequentially generated.
@@ -586,7 +586,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
           <ao:a href="https://oss.aoapps.com/encoding/apidocs/com.aoapps.encoding/com/aoapps/encoding/Coercion.html">Coercion</ao:a>:
           <ol>
             <li>Supporting instances of <ao:a href="https://oss.aoapps.com/lang/apidocs/com.aoapps.lang/com/aoapps/lang/io/Writable.html">Writable</ao:a>.</li>
-            <li>Supporting instances of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/CharSequence.html">CharSequence</ao:a>.</li>
+            <li>Supporting instances of <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/lang/CharSequence.html">CharSequence</ao:a>.</li>
             <li>Supporting instances of <code>char[]</code>.</li>
           </ol>
         </li>
@@ -616,23 +616,23 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
             </li>
             <li>
               Removed <code>com.aoindustries.security.AccountDisabledException</code>; please use
-              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountLockedException.html">AccountLockedException</ao:a> instead.
+              <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}javax/security/auth/login/AccountLockedException.html">AccountLockedException</ao:a> instead.
             </li>
             <li>
               Removed <code>com.aoindustries.security.AccountNotFoundException</code>; please use
-              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/AccountNotFoundException.html">AccountNotFoundException</ao:a> instead.
+              <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}javax/security/auth/login/AccountNotFoundException.html">AccountNotFoundException</ao:a> instead.
             </li>
             <li>
               Removed <code>com.aoindustries.security.BadPasswordException</code>; please use
-              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/FailedLoginException.html">FailedLoginException</ao:a> instead.
+              <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}javax/security/auth/login/FailedLoginException.html">FailedLoginException</ao:a> instead.
             </li>
             <li>
               Removed <code>com.aoindustries.security.IncompleteLoginException</code>; please use
-              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/CredentialNotFoundException.html">CredentialNotFoundException</ao:a> instead.
+              <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}javax/security/auth/login/CredentialNotFoundException.html">CredentialNotFoundException</ao:a> instead.
             </li>
             <li>
               Removed <code>com.aoindustries.security.LoginException</code>; please use
-              <ao:a rel="nofollow" href="@{javadoc.link.javase}javax/security/auth/login/LoginException.html">LoginException</ao:a> instead.
+              <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}javax/security/auth/login/LoginException.html">LoginException</ao:a> instead.
             </li>
           </ol>
         </li>
@@ -674,17 +674,17 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         </li>
         <li>
           New class <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/DiffableProperties.html">DiffableProperties</ao:a>
-          to format <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a>
+          to format <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/util/Properties.html">Properties</ao:a>
           files in a way optimized for diff tools, such as <code>git diff</code>.  Best used in conjunction with
           <ao:a href="https://oss.aoapps.com/collections/apidocs/com.aoapps.collections/com/aoapps/collections/SortedProperties.html">SortedProperties</ao:a>.
         </li>
         <li>
           Made <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/CommentCaptureInputStream.html">CommentCaptureInputStream</ao:a>
-          public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
+          public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/util/Properties.html">Properties</ao:a> files.
         </li>
         <li>
           Made <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/SkipCommentsFilterOutputStream.html">SkipCommentsFilterOutputStream</ao:a>
-          public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Properties.html">Properties</ao:a> files.
+          public so other tools may use it when manipulating <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/util/Properties.html">Properties</ao:a> files.
         </li>
         <li>
           <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/i18n/ModifiablePropertiesResourceBundle.html">ModifiablePropertiesResourceBundle</ao:a>
@@ -706,7 +706,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         <li>
           New abstract class <ao:a href="https://oss.aoapps.com/sql/wrapper/apidocs/com.aoapps.sql.wrapper/com/aoapps/sql/wrapper/ConnectionWrapper.html">ConnectionWrapper</ao:a>
           split from <ao:a href="https://oss.aoapps.com/sql/pool/apidocs/com.aoapps.sql.pool/com/aoapps/sql/pool/PostgresqlConnectionWrapper.html">PostgresqlConnectionWrapper</ao:a>
-          to be used by other implementations of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Connection.html">Connection</ao:a>
+          to be used by other implementations of <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.sql/java/sql/Connection.html">Connection</ao:a>
           wrapping.
         </li>
         <li>Removed some long-deprecated or otherwise long-unused classes and methods:
@@ -799,13 +799,13 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         </li>
         <li>
           <p>
-            New methods to read and write possibly nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Timestamp.html">Timestamp</ao:a>
+            New methods to read and write possibly nullable <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.sql/java/sql/Timestamp.html">Timestamp</ao:a>
             in <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html">StreamableOutput</ao:a>
             and <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html">StreamableInput</ao:a>.
           </p>
           <p>
             These methods use a wire protocol deliberately compatible with
-            <ao:a rel="nofollow" href="@{javadoc.link.javase}java/time/Instant.html">Instant</ao:a> in Java 8,
+            <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/time/Instant.html">Instant</ao:a> in Java 8,
             however the API remains <code>Timestamp</code>-only since the minimum Java version is still 1.7.
           </p>
         </li>
@@ -855,9 +855,9 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         </li>
         <li>
           <code>PersistentLinkedList</code> now implements
-          <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Deque.html">Deque</ao:a>
+          <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/util/Deque.html">Deque</ao:a>
           instead of
-          <ao:a rel="nofollow" href="@{javadoc.link.javase}java/util/Queue.html">Queue</ao:a>.
+          <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/util/Queue.html">Queue</ao:a>.
         </li>
       </ul>
     </changelog:release>
@@ -894,14 +894,14 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     >
       <ul>
         <li>
-          New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Byte.html">Byte</ao:a>:
+          New methods to read and write nullable <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/lang/Byte.html">Byte</ao:a>:
           <ul>
             <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullByte-java.lang.Byte-">CompressedDataOutputStream.writeNullByte(Byte)</ao:a></li>
             <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullByte--">CompressedDataInputStream.readNullByte()</ao:a></li>
           </ul>
         </li>
         <li>
-          New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Short.html">Short</ao:a>:
+          New methods to read and write nullable <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/lang/Short.html">Short</ao:a>:
           <ul>
             <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullShort-java.lang.Short-">CompressedDataOutputStream.writeNullShort(Short)</ao:a></li>
             <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullShort--">CompressedDataInputStream.readNullShort()</ao:a></li>
@@ -922,7 +922,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
             <li><ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/ServletContextCache.html#getLastModified-jakarta.servlet.ServletContext-java.lang.String-">ServletContextCache.getLastModified(ServletContext, String)</ao:a></li>
           </ul>
         </li>
-        <li>Improved implementation of <ao:a rel="nofollow" href="@{javadoc.link.javase}java/sql/Wrapper.html">java.sql.Wrapper</ao:a>.</li>
+        <li>Improved implementation of <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.sql/java/sql/Wrapper.html">java.sql.Wrapper</ao:a>.</li>
       </ul>
     </changelog:release>
 
@@ -960,14 +960,14 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         </li>
         <li><code>UnmodifiableHttpParameters.wrap</code> now returns <code>null</code> when given <code>null</code>.</li>
         <li>
-          New methods to read and write nullable <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Boolean.html">Boolean</ao:a>:
+          New methods to read and write nullable <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/lang/Boolean.html">Boolean</ao:a>:
           <ul>
             <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableOutput.html#writeNullBoolean-java.lang.Boolean-">CompressedDataOutputStream.writeNullBoolean(Boolean)</ao:a></li>
             <li><ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/io/stream/StreamableInput.html#readNullBoolean--">CompressedDataInputStream.readNullBoolean()</ao:a></li>
           </ul>
         </li>
         <li>
-          New methods to join into arbitrary <ao:a rel="nofollow" href="@{javadoc.link.javase}java/lang/Appendable.html">Appendable</ao:a>:
+          New methods to join into arbitrary <ao:a rel="nofollow" href="@{documented.javadoc.link.javase}java.base/java/lang/Appendable.html">Appendable</ao:a>:
           <ul>
             <li><ao:a href="https://oss.aoapps.com/lang/apidocs/com.aoapps.lang/com/aoapps/lang/Strings.html#join(java.lang.Iterable,java.lang.String,A)">StringUtility.join(Iterable, String, Appendable)</ao:a></li>
             <li><ao:a href="https://oss.aoapps.com/lang/apidocs/com.aoapps.lang/com/aoapps/lang/Strings.html#join(java.lang.Object[],java.lang.String,A)">StringUtility.join(Object[], String, Appendable)</ao:a></li>
