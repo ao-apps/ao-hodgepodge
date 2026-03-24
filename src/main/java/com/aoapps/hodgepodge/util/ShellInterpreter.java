@@ -772,10 +772,6 @@ public abstract class ShellInterpreter implements Runnable {
             break;
           }
         }
-        if (!result.atEof && isInteractive) {
-          out.print(getPrompt());
-          out.flush();
-        }
       } while (!result.atEof);
       if (status == null || "Running".equals(status)) {
         status = "Done";
