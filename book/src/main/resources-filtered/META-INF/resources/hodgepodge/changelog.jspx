@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2026-03-24T06:38:38Z"
+    dateModified="2026-03-24T13:22:28Z"
   >
     <c:set var="latestRelease" value="5.4.0" />
     <c:if test="${
@@ -54,14 +54,15 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         scmUrl="@{project.scm.url}"
       >
         <ul>
-          <li>Breaking changes to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/ShellInterpreter.html">ShellInterpreter</ao:a>:
+          <li>Improvements to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/ShellInterpreter.html">ShellInterpreter</ao:a>:
             <ol>
               <li>
-                Now provides both <code>rawArgs</code> and <code>args</code>.  This allows commands to get access to
+                <strong>Breaking change:</strong> Now provides both <code>rawArgs</code> and <code>args</code>.  This allows commands to get access to
                 the quoting details, if desired, such as when parsing SQL statements.  <code>rawArgs</code> may be
                 <code>null</code> when arguments parsed elsewhere, such as when using the arguments passed-in to Java's
                 <code>main(String[])</code> method.
               </li>
+              <li>Write newline after end-of-file when in interactive mode.</li>
             </ol>
           </li>
         </ul>

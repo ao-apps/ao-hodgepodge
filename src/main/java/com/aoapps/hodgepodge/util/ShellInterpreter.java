@@ -286,10 +286,10 @@ public abstract class ShellInterpreter implements Runnable {
   protected abstract boolean handleCommand(String[] rawArgs, String... args) throws IOException, SQLException;
 
   /**
-   * Processes one command and returns.
+   * Processes one command and returns, with support for background jobs ending in {@code "&"}.
    */
   @SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
-  private boolean handleCommandImpl(String[] rawArgs, String... args) throws IOException, SQLException, Throwable {
+  private boolean handleCommandFromInput(String[] rawArgs, String... args) throws IOException, SQLException, Throwable {
     checkRawArgsVersusArgs(true, true, rawArgs, args);
     try {
       // Fork to background task
@@ -752,30 +752,33 @@ public abstract class ShellInterpreter implements Runnable {
    * reads from <code>in</code> until end of file or <code>exit</code>.
    */
   private void runImpl() throws IOException, SQLException, Throwable {
-    if (args != null && args.length > 0) { // TODO: Why checked both here and in run()?
-      handleCommandImpl(rawArgs, args);
-    } else {
-      ParseBuffer buffer = new ParseBuffer();
-      ParseResult result;
-      do {
+    ParseBuffer buffer = new ParseBuffer();
+    ParseResult result;
+    do {
+      if (isInteractive) {
+        out.print(getPrompt());
+        out.flush();
+      }
+      result = parse(in, isInteractive ? out : null, buffer);
+      if (result.atEof) {
         if (isInteractive) {
-          out.print(getPrompt());
+          // Write newline on output for a tidy terminal after Ctrl-D to exit
+          out.println();
           out.flush();
         }
-        result = parse(in, isInteractive ? out : null, buffer);
-        if (!result.atEof && isInteractive) {
-          printFinishedJobs();
-        }
-        if (result.args.length > 0) {
-          boolean doMore = handleCommandImpl(result.rawArgs, result.args);
-          if (!doMore) {
-            break;
-          }
-        }
-      } while (!result.atEof);
-      if (status == null || "Running".equals(status)) {
-        status = "Done";
       }
+      if (!result.atEof && isInteractive) {
+        printFinishedJobs();
+      }
+      if (result.args.length > 0) {
+        boolean doMore = handleCommandFromInput(result.rawArgs, result.args);
+        if (!doMore) {
+          break;
+        }
+      }
+    } while (!result.atEof);
+    if (status == null || "Running".equals(status)) {
+      status = "Done";
     }
     // Make the parent of all children the parent of this, and add children to the parents processes
     ShellInterpreter myparent = this.parent;
