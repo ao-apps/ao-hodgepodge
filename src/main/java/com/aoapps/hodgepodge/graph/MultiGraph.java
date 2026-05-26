@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2021, 2022, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,8 +34,7 @@ import java.util.Set;
  *
  * @author  AO Industries, Inc.
  */
-// TODO: Ex extends Throwable
-public interface MultiGraph<V, E extends Edge<V>, Ex extends Exception> {
+public interface MultiGraph<V, E extends Edge<V>, Ex extends Throwable> {
 
   /**
    * Gets the set of vertices for this graph.

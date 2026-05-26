@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2026-03-24T13:22:28Z"
+    dateModified="2026-05-26T15:46:33Z"
   >
     <c:set var="latestRelease" value="5.4.0" />
     <c:if test="${
@@ -64,6 +64,10 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
               </li>
               <li>Write newline after end-of-file when in interactive mode.</li>
             </ol>
+          </li>
+          <li>
+            <strong>Breaking change:</strong> <code>com.aoapps.hodgepodge.graph</code> package now extends
+            <code>Throwable</code> instead of <code>Exception</code> for generic exceptions.
           </li>
         </ul>
       </changelog:release>

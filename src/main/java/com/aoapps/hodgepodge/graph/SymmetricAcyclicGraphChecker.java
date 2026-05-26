@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2013, 2016, 2019, 2020, 2021, 2022, 2024, 2025  AO Industries, Inc.
+ * Copyright (C) 2011, 2013, 2016, 2019, 2020, 2021, 2022, 2024, 2025, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -37,8 +37,7 @@ import java.util.Set;
  *
  * @author  AO Industries, Inc.
  */
-// TODO: Ex extends Throwable
-public class SymmetricAcyclicGraphChecker<V, Ex extends Exception> implements GraphChecker<Ex> {
+public class SymmetricAcyclicGraphChecker<V, Ex extends Throwable> implements GraphChecker<Ex> {
 
   private final SymmetricMultiGraph<V, ?, ? extends Ex> graph;
   private final boolean isForward;

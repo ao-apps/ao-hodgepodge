@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2019, 2020, 2021, 2022, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,8 +33,7 @@ import java.util.Set;
  * @author  AO Industries, Inc.
  */
 @FunctionalInterface
-// TODO: Ex extends Throwable
-public interface GraphSorter<V, Ex extends Exception> {
+public interface GraphSorter<V, Ex extends Throwable> {
 
   // TODO: This should be given the graph as a parameter?
   Set<V> sortGraph() throws Ex;
