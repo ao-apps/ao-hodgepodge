@@ -263,15 +263,6 @@ public abstract class ShellInterpreter implements Runnable {
     return pid;
   }
 
-  /**
-   * @deprecated  Please use {@link ShellInterpreter#getPid()} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final long getPID() {
-    return getPid();
-  }
-
   protected abstract String getPrompt() throws IOException, SQLException;
 
   /**

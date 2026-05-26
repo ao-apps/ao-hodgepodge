@@ -44,23 +44,6 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]util[/\\]ShellInterpreter\.java$"
   />
 
-  <!-- TODO: Remove in 6.0.0 release -->
-  <suppress
-    checks="AbbreviationAsWordInName"
-    files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]io[/\\]AOPool\.java$"
-    message="'printStatisticsHTML'"
-  />
-  <suppress
-    checks="MethodName"
-    files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]md5[/\\]MD5\.java$"
-    message="'(Init|Update|Final)'"
-  />
-  <suppress
-    checks="AbbreviationAsWordInName"
-    files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]util[/\\]ShellInterpreter\.java$"
-    message="'getPID'"
-  />
-
   <!-- Using "Ex" for generic exceptions, since "E" is often "Element" -->
   <suppress
     checks="(ClassTypeParameterName|InterfaceTypeParameterName)"

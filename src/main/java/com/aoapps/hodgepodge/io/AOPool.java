@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2024, 2025  AO Industries, Inc.
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2013, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2024, 2025, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -937,29 +937,6 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
         + "    </tr>\n"
         + "  </tfoot>\n"
         + "</table>\n");
-  }
-
-  /**
-   * Prints complete statistics about connection pool use.
-   *
-   * @deprecated  Please use {@link AOPool#printStatisticsHtml(java.lang.Appendable, boolean)} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final void printStatisticsHTML(Appendable out, boolean isXhtml) throws IOException, Ex {
-    printStatisticsHtml(out, isXhtml);
-  }
-
-  /**
-   * Prints complete statistics about connection pool use in XHTML.
-   *
-   * @deprecated  Please specify if is HTML or XHTML
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  @SuppressWarnings("NoopMethodInAbstractClass")
-  public final void printStatisticsHTML(Appendable out) throws IOException, Ex {
-    printStatisticsHtml(out, true);
   }
 
   /**

@@ -147,18 +147,6 @@ public class MD5 {
   }
 
   /**
-   * Initialize MD5 internal state (object can be reused just by
-   * calling init() after every digest().
-   *
-   * @deprecated  Please use {@link MD5#init()} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final void Init() {
-    init();
-  }
-
-  /**
    * Class constructor.
    */
   public MD5() {
@@ -371,26 +359,8 @@ public class MD5 {
     update(this.state, buffer, offset, length);
   }
 
-  /**
-   * @deprecated  Please use {@link MD5#update(byte[], int, int)} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final void Update(byte[] buffer, int offset, int length) {
-    update(buffer, offset, length);
-  }
-
   public void update(byte[] buffer, int length) {
     update(this.state, buffer, 0, length);
-  }
-
-  /**
-   * @deprecated  Please use {@link MD5#update(byte[], int)} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final void Update(byte[] buffer, int length) {
-    update(buffer, length);
   }
 
   /**
@@ -403,19 +373,6 @@ public class MD5 {
   }
 
   /**
-   * Updates hash with given array of bytes.
-   *
-   * @param buffer Array of bytes to use for updating the hash
-   *
-   * @deprecated  Please use {@link MD5#update(byte[])} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final void Update(byte[] buffer) {
-    update(buffer);
-  }
-
-  /**
    * Updates hash with a single byte.
    *
    * @param b Single byte to update the hash
@@ -425,19 +382,6 @@ public class MD5 {
     buffer[0] = b;
 
     update(buffer, 1);
-  }
-
-  /**
-   * Updates hash with a single byte.
-   *
-   * @param b Single byte to update the hash
-   *
-   * @deprecated  Please use {@link MD5#update(byte)} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final void Update(byte b) {
-    update(b);
   }
 
   /**
@@ -457,20 +401,6 @@ public class MD5 {
   }
 
   /**
-   * Update buffer with given string.
-   *
-   * @param s String to be update to hash (is used as
-   *          s.getBytes())
-   *
-   * @deprecated  Please use {@link MD5#update(java.lang.String)} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final void Update(String s) {
-    update(s);
-  }
-
-  /**
    * Update buffer with a single integer (only &amp; 0xff part is used,
    * as a byte).
    *
@@ -479,21 +409,6 @@ public class MD5 {
    */
   public void update(int i) {
     update((byte) (i & 0xff));
-  }
-
-  /**
-   * Update buffer with a single integer (only &amp; 0xff part is used,
-   * as a byte).
-   *
-   * @param i Integer value, which is then converted to
-   *          byte as i &amp; 0xff
-   *
-   * @deprecated  Please use {@link MD5#update(int)} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final void Update(int i) {
-    update(i);
   }
 
   private byte[] encode(int[] input, int len) {
@@ -544,22 +459,6 @@ public class MD5 {
     }
 
     return encode(finals.state, 16);
-  }
-
-  /**
-   * Returns array of bytes (16 bytes) representing hash as of the
-   * current state of this object. Note: getting a hash does not
-   * invalidate the hash object, it only creates a copy of the real
-   * state which is finalized.
-   *
-   * @return Array of 16 bytes, the hash of all updated bytes
-   *
-   * @deprecated  Please use {@link MD5#digest()} instead.
-   */
-  // TODO: Remove in 6.0.0 release
-  @Deprecated
-  public final byte[] Final() {
-    return digest();
   }
 
   /**
