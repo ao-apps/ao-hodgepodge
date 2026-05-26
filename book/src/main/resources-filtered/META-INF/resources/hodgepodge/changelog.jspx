@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2026-05-26T15:46:33Z"
+    dateModified="2026-05-26T16:08:46Z"
   >
     <c:set var="latestRelease" value="5.4.0" />
     <c:if test="${
@@ -68,6 +68,28 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
           <li>
             <strong>Breaking change:</strong> <code>com.aoapps.hodgepodge.graph</code> package now extends
             <code>Throwable</code> instead of <code>Exception</code> for generic exceptions.
+          </li>
+          <li>
+            <strong>Breaking change:</strong> Removed long-deprecated methods that have changed case:
+            <ul>
+              <li><code>com.aoapps.hodgepodge.io.AOPool</code>:
+                <ul>
+                  <li><code>printStatisticsHTML(…)</code> → <code>printStatisticsHtml(…)</code></li>
+                </ul>
+              </li>
+              <li><code>com.aoapps.hodgepodge.md5.MD5</code>:
+                <ul>
+                  <li><code>Init()</code> → <code>init()</code></li>
+                  <li><code>Update(…)</code> → <code>update(…)</code></li>
+                  <li><code>Final()</code> → <code>digest()</code></li>
+                </ul>
+              </li>
+              <li><code>com.aoapps.hodgepodge.util.ShellInterpreter</code>:
+                <ul>
+                  <li><code>getPID()</code> → <code>getPid()</code></li>
+                </ul>
+              </li>
+            </ol>
           </li>
         </ul>
       </changelog:release>
