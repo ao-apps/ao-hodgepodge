@@ -38,9 +38,9 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2026-05-26T16:08:46Z"
+    dateModified="2026-05-26T19:43:23Z"
   >
-    <c:set var="latestRelease" value="5.4.0" />
+    <c:set var="latestRelease" value="6.0.0" />
     <c:if test="${
       fn:endsWith('@{project.version}', '-SNAPSHOT')
       and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')
@@ -52,48 +52,57 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         groupId="@{project.groupId}"
         artifactId="@{documented.artifactId}"
         scmUrl="@{project.scm.url}"
-      >
-        <ul>
-          <li>Improvements to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/ShellInterpreter.html">ShellInterpreter</ao:a>:
-            <ol>
-              <li>
-                <strong>Breaking change:</strong> Now provides both <code>rawArgs</code> and <code>args</code>.  This allows commands to get access to
-                the quoting details, if desired, such as when parsing SQL statements.  <code>rawArgs</code> may be
-                <code>null</code> when arguments parsed elsewhere, such as when using the arguments passed-in to Java's
-                <code>main(String[])</code> method.
-              </li>
-              <li>Write newline after end-of-file when in interactive mode.</li>
-            </ol>
-          </li>
-          <li>
-            <strong>Breaking change:</strong> <code>com.aoapps.hodgepodge.graph</code> package now extends
-            <code>Throwable</code> instead of <code>Exception</code> for generic exceptions.
-          </li>
-          <li>
-            <strong>Breaking change:</strong> Removed long-deprecated methods that have changed case:
-            <ul>
-              <li><code>com.aoapps.hodgepodge.io.AOPool</code>:
-                <ul>
-                  <li><code>printStatisticsHTML(…)</code> → <code>printStatisticsHtml(…)</code></li>
-                </ul>
-              </li>
-              <li><code>com.aoapps.hodgepodge.md5.MD5</code>:
-                <ul>
-                  <li><code>Init()</code> → <code>init()</code></li>
-                  <li><code>Update(…)</code> → <code>update(…)</code></li>
-                  <li><code>Final()</code> → <code>digest()</code></li>
-                </ul>
-              </li>
-              <li><code>com.aoapps.hodgepodge.util.ShellInterpreter</code>:
-                <ul>
-                  <li><code>getPID()</code> → <code>getPid()</code></li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </changelog:release>
+      />
     </c:if>
+
+    <changelog:release
+      projectName="@{documented.name}"
+      version="6.0.0"
+      datePublished="2026-05-26T19:43:23Z"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Improvements to <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/util/ShellInterpreter.html">ShellInterpreter</ao:a>:
+          <ol>
+            <li>
+              <strong>Breaking change:</strong> Now provides both <code>rawArgs</code> and <code>args</code>.  This allows commands to get access to
+              the quoting details, if desired, such as when parsing SQL statements.  <code>rawArgs</code> may be
+              <code>null</code> when arguments parsed elsewhere, such as when using the arguments passed-in to Java's
+              <code>main(String[])</code> method.
+            </li>
+            <li>Write newline after end-of-file when in interactive mode.</li>
+          </ol>
+        </li>
+        <li>
+          <strong>Breaking change:</strong> <code>com.aoapps.hodgepodge.graph</code> package now extends
+          <code>Throwable</code> instead of <code>Exception</code> for generic exceptions.
+        </li>
+        <li>
+          <strong>Breaking change:</strong> Removed long-deprecated methods that have changed case:
+          <ul>
+            <li><code>com.aoapps.hodgepodge.io.AOPool</code>:
+              <ul>
+                <li><code>printStatisticsHTML(…)</code> → <code>printStatisticsHtml(…)</code></li>
+              </ul>
+            </li>
+            <li><code>com.aoapps.hodgepodge.md5.MD5</code>:
+              <ul>
+                <li><code>Init()</code> → <code>init()</code></li>
+                <li><code>Update(…)</code> → <code>update(…)</code></li>
+                <li><code>Final()</code> → <code>digest()</code></li>
+              </ul>
+            </li>
+            <li><code>com.aoapps.hodgepodge.util.ShellInterpreter</code>:
+              <ul>
+                <li><code>getPID()</code> → <code>getPid()</code></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </changelog:release>
 
     <changelog:release
       projectName="@{documented.name}"
