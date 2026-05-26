@@ -89,7 +89,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
                   <li><code>getPID()</code> → <code>getPid()</code></li>
                 </ul>
               </li>
-            </ol>
+            </ul>
           </li>
         </ul>
       </changelog:release>
