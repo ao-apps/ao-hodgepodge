@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2025  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2025, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -130,28 +130,26 @@ public class IntegerRadixSortTest extends TestCase {
       }
 
       // Time new radix sort
-      /*
-      List<N> newRadixResult = new ArrayList<>(randomValues);
-        {
-          long startNanos = System.nanoTime();
-          NewIntegerRadixSort.getInstance().sort(newRadixResult);
-          if (iteration>0) {
-            newRadixNanos += System.nanoTime() - startNanos;
-            // System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" µs");
-          }
-        }
-
-      if (GC_EACH_PASS) {
-        System.gc();
-        try {
-          Thread.sleep(GC_SLEEP_TIME);
-        } catch (InterruptedException e) {
-          e.printStackTrace(System.err);
-          // Restore the interrupted status
-          Thread.currentThread().interrupt();
-        }
-      }
-       */
+      // List<N> newRadixResult = new ArrayList<>(randomValues);
+      //   {
+      //     long startNanos = System.nanoTime();
+      //     NewIntegerRadixSort.getInstance().sort(newRadixResult);
+      //     if (iteration>0) {
+      //       newRadixNanos += System.nanoTime() - startNanos;
+      //       // System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" µs");
+      //     }
+      //   }
+      //
+      // if (GC_EACH_PASS) {
+      //   System.gc();
+      //   try {
+      //     Thread.sleep(GC_SLEEP_TIME);
+      //   } catch (InterruptedException e) {
+      //     e.printStackTrace(System.err);
+      //     // Restore the interrupted status
+      //     Thread.currentThread().interrupt();
+      //   }
+      // }
 
       // Time radix sort
       List<N> oldRadixResult = new ArrayList<>(randomValues);
@@ -327,29 +325,27 @@ public class IntegerRadixSortTest extends TestCase {
       }
 
       // Time new radix sort
-      /*
-      N[] newRadixResult = (N[])new Number[randomValues.length];
-      System.arraycopy(randomValues, 0, newRadixResult, 0, randomValues.length);
-        {
-          long startNanos = System.nanoTime();
-          NewIntegerRadixSort.getInstance().sort(newRadixResult);
-          if (iteration>0) {
-            newRadixNanos += System.nanoTime() - startNanos;
-            // System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" µs");
-          }
-        }
-
-      if (GC_EACH_PASS) {
-        System.gc();
-        try {
-          Thread.sleep(GC_SLEEP_TIME);
-        } catch (InterruptedException e) {
-          e.printStackTrace(System.err);
-          // Restore the interrupted status
-          Thread.currentThread().interrupt();
-        }
-      }
-       */
+      // N[] newRadixResult = (N[])new Number[randomValues.length];
+      // System.arraycopy(randomValues, 0, newRadixResult, 0, randomValues.length);
+      //   {
+      //     long startNanos = System.nanoTime();
+      //     NewIntegerRadixSort.getInstance().sort(newRadixResult);
+      //     if (iteration>0) {
+      //       newRadixNanos += System.nanoTime() - startNanos;
+      //       // System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" µs");
+      //     }
+      //   }
+      //
+      // if (GC_EACH_PASS) {
+      //   System.gc();
+      //   try {
+      //     Thread.sleep(GC_SLEEP_TIME);
+      //   } catch (InterruptedException e) {
+      //     e.printStackTrace(System.err);
+      //     // Restore the interrupted status
+      //     Thread.currentThread().interrupt();
+      //   }
+      // }
 
       // Time radix sort
       N[] oldRadixResult = (N[]) new Number[randomValues.length];
@@ -526,28 +522,26 @@ public class IntegerRadixSortTest extends TestCase {
       }
 
       // Time new radix sort
-      /*
-      IntList newRadixResult = new IntArrayList(randomValues);
-        {
-          long startNanos = System.nanoTime();
-          NewIntegerRadixSort.getInstance().sort(newRadixResult);
-          if (iteration>0) {
-            newRadixNanos += System.nanoTime() - startNanos;
-            // System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" µs");
-          }
-        }
-
-      if (GC_EACH_PASS) {
-        System.gc();
-        try {
-          Thread.sleep(GC_SLEEP_TIME);
-        } catch (InterruptedException e) {
-          e.printStackTrace(System.err);
-          // Restore the interrupted status
-          Thread.currentThread().interrupt();
-        }
-      }
-       */
+      // IntList newRadixResult = new IntArrayList(randomValues);
+      //   {
+      //     long startNanos = System.nanoTime();
+      //     NewIntegerRadixSort.getInstance().sort(newRadixResult);
+      //     if (iteration>0) {
+      //       newRadixNanos += System.nanoTime() - startNanos;
+      //       // System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" µs");
+      //     }
+      //   }
+      //
+      // if (GC_EACH_PASS) {
+      //   System.gc();
+      //   try {
+      //     Thread.sleep(GC_SLEEP_TIME);
+      //   } catch (InterruptedException e) {
+      //     e.printStackTrace(System.err);
+      //     // Restore the interrupted status
+      //     Thread.currentThread().interrupt();
+      //   }
+      // }
 
       // Time radix sort
       IntList oldRadixResult = new IntArrayList(randomValues);
@@ -723,30 +717,28 @@ public class IntegerRadixSortTest extends TestCase {
       }
 
       // Time new radix sort
-      /*
-      int[] newRadixResult = new int[randomValues.length];
-      System.arraycopy(randomValues, 0, newRadixResult, 0, randomValues.length);
-        {
-          long startNanos = System.nanoTime();
-          NewIntegerRadixSort.getInstance().sort(newRadixResult);
-          // Arrays.sort(newRadixResult);
-          if (iteration>0) {
-            newRadixNanos += System.nanoTime() - startNanos;
-            // System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" µs");
-          }
-        }
-
-      if (GC_EACH_PASS) {
-        System.gc();
-        try {
-          Thread.sleep(GC_SLEEP_TIME);
-        } catch (InterruptedException e) {
-          e.printStackTrace(System.err);
-          // Restore the interrupted status
-          Thread.currentThread().interrupt();
-        }
-      }
-       */
+      // int[] newRadixResult = new int[randomValues.length];
+      // System.arraycopy(randomValues, 0, newRadixResult, 0, randomValues.length);
+      //   {
+      //     long startNanos = System.nanoTime();
+      //     NewIntegerRadixSort.getInstance().sort(newRadixResult);
+      //     // Arrays.sort(newRadixResult);
+      //     if (iteration>0) {
+      //       newRadixNanos += System.nanoTime() - startNanos;
+      //       // System.out.println(pass+"/"+testSize+": NewIntegerRadixSort in "+BigDecimal.valueOf(newRadixNanos, 3)+" µs");
+      //     }
+      //   }
+      //
+      // if (GC_EACH_PASS) {
+      //   System.gc();
+      //   try {
+      //     Thread.sleep(GC_SLEEP_TIME);
+      //   } catch (InterruptedException e) {
+      //     e.printStackTrace(System.err);
+      //     // Restore the interrupted status
+      //     Thread.currentThread().interrupt();
+      //   }
+      // }
 
       // Time radix sort
       int[] oldRadixResult = new int[randomValues.length];

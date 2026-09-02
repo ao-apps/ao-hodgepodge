@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2024, 2025  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2013, 2016, 2018, 2019, 2020, 2021, 2022, 2024, 2025, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -200,7 +200,7 @@ public final class ParallelDelete {
       verboseThread = null;
     } else {
       verboseQueue = new ArrayBlockingQueue<>(VERBOSE_QUEUE_SIZE);
-      verboseThreadRun = new boolean[]{true};
+      verboseThreadRun = new boolean[] {true};
       verboseThread = new Thread("ParallelDelete - Verbose Thread") {
         @Override
         public void run() {
@@ -228,7 +228,7 @@ public final class ParallelDelete {
     }
     try {
       final BlockingQueue<File> deleteQueue = new ArrayBlockingQueue<>(DELETE_QUEUE_SIZE);
-      final boolean[] deleteThreadRun = new boolean[]{true};
+      final boolean[] deleteThreadRun = new boolean[] {true};
       final IOException[] deleteException = new IOException[1];
       Thread deleteThread = new Thread("ParallelDelete - Delete Thread") {
         @Override

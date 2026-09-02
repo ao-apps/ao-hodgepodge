@@ -127,9 +127,9 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
    * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
    */
   private static <T> boolean quickSort(List<T> list, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
-    final int M = 4;
+    final int m = 4;
 
-    if ((r - l) > M) {
+    if ((r - l) > m) {
       int i = (r + l) / 2;
 
       if (compare(list, l, i, comparator, stats) > 0) {
@@ -205,9 +205,9 @@ public final class FastQSort extends BaseComparisonSortAlgorithm<Object> {
    * @param true if the algorithm completed correctly, false if maximum recursion was exceeded
    */
   private static <T> boolean quickSort(T[] array, int l, int r, Comparator<? super T> comparator, SortStatistics stats, int currentRecursion, int maxRecursion) {
-    final int M = 4;
+    final int m = 4;
 
-    if ((r - l) > M) {
+    if ((r - l) > m) {
       int i = (r + l) / 2;
 
       if (compare(array, l, i, comparator, stats) > 0) {

@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2015, 2016, 2018, 2019, 2020, 2021, 2022, 2024, 2025  AO Industries, Inc.
+ * Copyright (C) 2013, 2015, 2016, 2018, 2019, 2020, 2021, 2022, 2024, 2025, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -61,8 +61,8 @@ import java.util.concurrent.ThreadFactory;
 public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
   private static final int BITS_PER_PASS = 8; // Must be power of two and less than or equal to 32
-  private static final int PASS_SIZE     = 1 << BITS_PER_PASS;
-  private static final int PASS_MASK     = PASS_SIZE - 1;
+  private static final int PASS_SIZE = 1 << BITS_PER_PASS;
+  private static final int PASS_MASK = PASS_SIZE - 1;
 
   /**
    * When sorting lists less than this size, will use a different algorithm.
@@ -247,10 +247,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     @SuppressWarnings("unchecked")
     SingleTaskNumberRadixTable(int size) {
       super(size, 1);
-      this.fromQueues       = (N[][]) new Number[PASS_SIZE][];
+      this.fromQueues = (N[][]) new Number[PASS_SIZE][];
       this.fromQueueLengths = new int[PASS_SIZE];
-      this.toQueues         = (N[][]) new Number[PASS_SIZE][];
-      this.toQueueLengths   = new int[PASS_SIZE];
+      this.toQueues = (N[][]) new Number[PASS_SIZE][];
+      this.toQueueLengths = new int[PASS_SIZE];
     }
 
     @Override
@@ -322,10 +322,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     @SuppressWarnings("unchecked")
     MultiTaskNumberRadixTable(int size, int numTasks) {
       super(size, numTasks);
-      this.fromQueues       = (N[][][]) new Number[numTasks][PASS_SIZE][];
+      this.fromQueues = (N[][][]) new Number[numTasks][PASS_SIZE][];
       this.fromQueueLengths = new int[numTasks][PASS_SIZE];
-      this.toQueues         = (N[][][]) new Number[numTasks][PASS_SIZE][];
-      this.toQueueLengths   = new int[numTasks][PASS_SIZE];
+      this.toQueues = (N[][][]) new Number[numTasks][PASS_SIZE][];
+      this.toQueueLengths = new int[numTasks][PASS_SIZE];
     }
 
     @Override
@@ -407,10 +407,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
     SingleTaskIntRadixTable(int size) {
       super(size, 1);
-      this.fromQueues       = new int[PASS_SIZE][];
+      this.fromQueues = new int[PASS_SIZE][];
       this.fromQueueLengths = new int[PASS_SIZE];
-      this.toQueues         = new int[PASS_SIZE][];
-      this.toQueueLengths   = new int[PASS_SIZE];
+      this.toQueues = new int[PASS_SIZE][];
+      this.toQueueLengths = new int[PASS_SIZE];
     }
 
     @Override
@@ -478,10 +478,10 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
     MultiTaskIntRadixTable(int size, int numTasks) {
       super(size, numTasks);
-      this.fromQueues       = new int[numTasks][PASS_SIZE][];
+      this.fromQueues = new int[numTasks][PASS_SIZE][];
       this.fromQueueLengths = new int[numTasks][PASS_SIZE];
-      this.toQueues         = new int[numTasks][PASS_SIZE][];
-      this.toQueueLengths   = new int[numTasks][PASS_SIZE];
+      this.toQueues = new int[numTasks][PASS_SIZE][];
+      this.toQueueLengths = new int[numTasks][PASS_SIZE];
     }
 
     @Override
@@ -649,7 +649,7 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
           }
 
           final int finalTaskStart = taskStart;
-          final int finalTaskEnd   = taskEnd;
+          final int finalTaskEnd = taskEnd;
           final int finalToTaskNum = toTaskNum;
           importStepFutures.add(
               executor.submit(
@@ -781,8 +781,8 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
 
             // Reset to next task
             taskFromQueueStart = finalTaskFromQueueEnd;
-            taskOutIndex      += taskTotalLength;
-            taskTotalLength    = 0;
+            taskOutIndex += taskTotalLength;
+            taskTotalLength = 0;
           }
         } while (
             (fromQueueNum = (fromQueueNum + 1) & PASS_MASK)
@@ -819,8 +819,8 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     private final boolean useRandomAccess;
 
     NumberListSource(int size, List<N> list) {
-      this.size            = size;
-      this.list            = list;
+      this.size = size;
+      this.list = list;
       this.useRandomAccess = size < Integer.MAX_VALUE && (list instanceof RandomAccess);
     }
 
@@ -1059,8 +1059,8 @@ public final class IntegerRadixSort extends BaseIntegerSortAlgorithm {
     private final boolean useRandomAccess;
 
     IntListSource(int size, IntList list) {
-      this.size            = size;
-      this.list            = list;
+      this.size = size;
+      this.list = list;
       this.useRandomAccess = size < Integer.MAX_VALUE && (list instanceof RandomAccess);
     }
 

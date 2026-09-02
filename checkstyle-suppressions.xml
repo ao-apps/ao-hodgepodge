@@ -52,21 +52,21 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 
   <!-- Consistency with standard "BufferedImage.getRGB" -->
   <suppress
-    checks="AbbreviationAsWordInName"
+    checks="(AbbreviationAsWordInName|GoogleMethodName)"
     files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]awt[/\\]image[/\\]Images\.java$"
     message="'(getRGBArray|getRGB)'"
   />
 
   <!-- Consistency with standard "readUTF" -->
   <suppress
-    checks="AbbreviationAsWordInName"
+    checks="(AbbreviationAsWordInName|GoogleMethodName)"
     files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]io[/\\]stream[/\\]StreamableInput\.java$"
     message="'read.*UTF'"
   />
 
   <!-- Consistency with standard "writeUTF" -->
   <suppress
-    checks="AbbreviationAsWordInName"
+    checks="(AbbreviationAsWordInName|GoogleMethodName)"
     files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]io[/\\]stream[/\\]StreamableOutput\.java$"
     message="'write.*UTF'"
   />
@@ -109,6 +109,20 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     message="'RMIServerSocketFactoryTCP'"
   />
 
+  <!-- Intentional code style -->
+  <suppress
+    checks="SingleSpaceSeparator"
+    files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]io[/\\]BitRate\.java$"
+  />
+  <suppress
+    checks="SingleSpaceSeparator"
+    files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]io[/\\]ByteCount\.java$"
+  />
+  <suppress
+    checks="SingleSpaceSeparator"
+    files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]md5[/\\]MD5\.java$"
+  />
+
   <!-- Will keep capitalization of "AO" when used as prefix -->
   <suppress
     checks="AbbreviationAsWordInName"
@@ -125,7 +139,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
 
   <!-- Will keep capitalization of "MD5" -->
   <suppress
-    checks="AbbreviationAsWordInName"
+    checks="(AbbreviationAsWordInName|GoogleMethodName)"
     files="[/\\]com[/\\]aoapps[/\\]hodgepodge[/\\]md5[/\\]MD5\.java$"
     message="'(MD5|MD5State|getMD5String|getMD5Hi|getMD5Lo)'"
   />

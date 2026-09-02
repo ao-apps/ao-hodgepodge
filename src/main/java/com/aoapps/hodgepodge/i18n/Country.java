@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2009, 2010, 2011, 2016, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
+ * Copyright (C) 2009, 2010, 2011, 2016, 2019, 2020, 2021, 2022, 2024, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -55,7 +55,7 @@ public enum Country {
   AT(1974),
   AU(
       1974,
-      new String[]{
+      new String[] {
           "Capital Territory",
           "New South Wales",
           "Northern Territory",
@@ -74,7 +74,7 @@ public enum Country {
   BD(1974),
   BE(
       1974,
-      new String[]{
+      new String[] {
           "Antwerpen",
           "Brabant Wallon",
           "Brussels",
@@ -99,7 +99,7 @@ public enum Country {
   BO(1974),
   BR(
       1974,
-      new String[]{
+      new String[] {
           "Acre",
           "Alagoas",
           "Amapa",
@@ -137,7 +137,7 @@ public enum Country {
   BZ(1974),
   CA(
       1974,
-      new String[]{
+      new String[] {
           "Alberta",
           "British Columbia",
           "Manitoba",
@@ -220,7 +220,7 @@ public enum Country {
   IM(2006),
   IN(
       1974,
-      new String[]{
+      new String[] {
           "Andaman and Nicobar Islands",
           "Andhra Pradesh",
           "Arunachal Pradesh",
@@ -268,7 +268,7 @@ public enum Country {
   JO(1974),
   JP(
       1974,
-      new String[]{
+      new String[] {
           "Aichi",
           "Akita",
           "Aomori",
@@ -362,7 +362,7 @@ public enum Country {
   MW(1974),
   MX(
       1974,
-      new String[]{
+      new String[] {
           "Aguascalientes",
           "Baja California",
           "Baja California Sur",
@@ -472,7 +472,7 @@ public enum Country {
   UM(1986),
   US(
       1974,
-      new String[]{
+      new String[] {
           "Alabama",
           "Alaska",
           "American Samoa",

@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2013, 2016, 2021, 2022, 2024  AO Industries, Inc.
+ * Copyright (C) 2013, 2016, 2021, 2022, 2024, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -94,7 +94,7 @@ public class FindReplaceWriter extends Writer {
   }
 
   @Override
-  public void write(char[] cbuf, int off, int len) throws IOException  {
+  public void write(char[] cbuf, int off, int len) throws IOException {
     while (len > 0) {
       write(cbuf[off++]);
       len--;

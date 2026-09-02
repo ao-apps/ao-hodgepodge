@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2016, 2017, 2019, 2020, 2021, 2022, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -315,17 +315,16 @@ public class FileList<T extends FileListObject> extends AbstractList<T> implemen
     if (extension == null) {
       extension = "tmp";
     }
-    /* Now just using standard Java temporary files to avoid dependency on new ao-io-posix project.
-    try {
-      // First try to use Unix file because it creates the files with 600 permissions.
-      File f=PosixFile.mktemp(System.getProperty("java.io.tmpdir")+'/'+prefix+'_'+extension+'.', true).getFile();
-      return f;
-    } catch (SecurityException err) {
-      // This is OK if now allowed to load libraries
-    } catch (UnsatisfiedLinkError err) {
-      // This is OK if the library is not supported on this platform
-    }
-     */
+    // Now just using standard Java temporary files to avoid dependency on new ao-io-posix project.
+    // try {
+    //   // First try to use Unix file because it creates the files with 600 permissions.
+    //   File f=PosixFile.mktemp(System.getProperty("java.io.tmpdir")+'/'+prefix+'_'+extension+'.', true).getFile();
+    //   return f;
+    // } catch (SecurityException err) {
+    //   // This is OK if now allowed to load libraries
+    // } catch (UnsatisfiedLinkError err) {
+    //   // This is OK if the library is not supported on this platform
+    // }
     File f = File.createTempFile(prefix + '_', '.' + extension);
     f.deleteOnExit();
     return f;

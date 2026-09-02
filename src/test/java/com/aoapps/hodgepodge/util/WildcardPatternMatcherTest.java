@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2017, 2018, 2021, 2022, 2024  AO Industries, Inc.
+ * Copyright (C) 2017, 2018, 2021, 2022, 2024, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -290,15 +290,15 @@ public class WildcardPatternMatcherTest extends TestCase {
    * 1000000: Uses of WildcardPatternMatcher in 52.211 ms
    * 1000000: Uses of Pattern                in 102805.092 ms (1969.0042)
    *
-  public void testNoMatchMultipleExtensionsCraftedLong() {
-    doTestPerformance(
-      "No match vs *.jpg, *.jpeg, *.png, *.gif, *.tiff, crafted long string",
-      "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
-      ".*(jpg|jpeg|png|gif|tiff)$",
-      craftedLongString,
-      false
-    );
-  }
+   * public void testNoMatchMultipleExtensionsCraftedLong() {
+   *   doTestPerformance(
+   *     "No match vs *.jpg, *.jpeg, *.png, *.gif, *.tiff, crafted long string",
+   *     "*.jpg, *.jpeg, *.png, *.gif, *.tiff",
+   *     ".*(jpg|jpeg|png|gif|tiff)$",
+   *     craftedLongString,
+   *     false
+   *   );
+   * }
    */
 
   /*
@@ -308,21 +308,21 @@ public class WildcardPatternMatcherTest extends TestCase {
    * 1000000: Uses of WildcardPatternMatcher in 15758.539 ms
    * 1000000: Uses of Pattern                in 61916.204 ms (3.9290571)
    *
-  public void testNoMatchCrafted() {
-    doTestPerformance(
-      "No match vs crafted",
-      "*aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa*",
-      ".*aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.*",
-      " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
-      false
-    );
-  }
+   * public void testNoMatchCrafted() {
+   *   doTestPerformance(
+   *     "No match vs crafted",
+   *     "*aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa*",
+   *     ".*aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.*",
+   *     " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   *     + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   *     + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   *     + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   *     + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   *     + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   *     + " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
+   *     false
+   *   );
+   * }
    */
 
   /*
@@ -332,21 +332,21 @@ public class WildcardPatternMatcherTest extends TestCase {
    *1000000: Uses of WildcardPatternMatcher in 13691.655 ms
    *1000000: Uses of Pattern                in 45054.135 ms (3.2906272)
    *
-  public void testNoMatchCraftedLonger() {
-    int size = 200;
-    StringBuilder sb = new StringBuilder(size * 2);
-    for (int i = 0; i < size; i++) sb.append('a');
-    String findme = sb.substring(0, size);
-    sb.setCharAt(size - 1, ' ');
-    for (int i = 0; i < size; i++) sb.append(' ');
-    String findin = sb.toString();
-    doTestPerformance(
-      "No match vs crafted longer",
-      "*" + findme + "*",
-      ".*" + findme + "*",
-      findin,
-      false
-    );
-  }
+   * public void testNoMatchCraftedLonger() {
+   *   int size = 200;
+   *   StringBuilder sb = new StringBuilder(size * 2);
+   *   for (int i = 0; i < size; i++) sb.append('a');
+   *   String findme = sb.substring(0, size);
+   *   sb.setCharAt(size - 1, ' ');
+   *   for (int i = 0; i < size; i++) sb.append(' ');
+   *   String findin = sb.toString();
+   *   doTestPerformance(
+   *     "No match vs crafted longer",
+   *     "*" + findme + "*",
+   *     ".*" + findme + "*",
+   *     findin,
+   *     false
+   *   );
+   * }
    */
 }

@@ -35,7 +35,7 @@ public final class Base64Coder {
   }
 
   // Mapping table from 6-bit nibbles to Base64 characters.
-  private static final char[]    map1 = new char[64];
+  private static final char[] map1 = new char[64];
 
   static {
     int i = 0;
@@ -53,7 +53,7 @@ public final class Base64Coder {
   }
 
   // Mapping table from Base64 characters to 6-bit nibbles.
-  private static final byte[]    map2 = new byte[128];
+  private static final byte[] map2 = new byte[128];
 
   static {
     for (int i = 0; i < map2.length; i++) {
@@ -105,7 +105,7 @@ public final class Base64Coder {
       int i1 = ip < inLen ? in[ip++] & 0xff : 0;
       int i2 = ip < inLen ? in[ip++] & 0xff : 0;
       int o0 = i0 >>> 2;
-      int o1 = ((i0 &   3) << 4) | (i1 >>> 4);
+      int o1 = ((i0 & 3) << 4) | (i1 >>> 4);
       int o2 = ((i1 & 0xf) << 2) | (i2 >>> 6);
       final int o3 = i2 & 0x3F;
       out[op++] = map1[o0];
@@ -175,9 +175,9 @@ public final class Base64Coder {
       if (b0 < 0 || b1 < 0 || b2 < 0 || b3 < 0) {
         throw new IllegalArgumentException("Illegal character in Base64 encoded data.");
       }
-      int o0 = (b0       << 2) | (b1 >>> 4);
+      int o0 = (b0 << 2) | (b1 >>> 4);
       int o1 = ((b1 & 0xf) << 4) | (b2 >>> 2);
-      int o2 = ((b2 &   3) << 6) |  b3;
+      int o2 = ((b2 & 3) << 6) | b3;
       out[op++] = (byte) o0;
       if (op < olen) {
         out[op++] = (byte) o1;
