@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2011, 2016, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2011, 2016, 2021, 2022, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,7 +24,7 @@
 package com.aoapps.hodgepodge.graph;
 
 /**
- * A weighted edge (or arc) between two vertices.
+ * A labeled edge (or arc) between two vertices.
  */
 public class LabeledEdge<V, L> extends Edge<V> {
 
