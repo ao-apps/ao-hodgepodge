@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2025  AO Industries, Inc.
+ * Copyright (C) 2025, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,6 +31,7 @@ import javax.swing.event.DocumentListener;
  * Implements {@link DocumentListener} sending all events to the given {@link Runnable} on the
  * swing event thread via {@link SwingUtilities#invokeLater(java.lang.Runnable)}.
  */
+// TODO: Rename to InvokeLaterDocumentListener, leave a deprecated-for-removal RunnableDocumentListener as a subclass.
 public class RunnableDocumentListener implements DocumentListener {
 
   private final Runnable doRun;
