@@ -329,7 +329,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
       } catch (ThreadDeath td) {
         throw td;
       } catch (Throwable t) {
-        logger.log(Level.WARNING, null, t);
+        logger.log(Level.WARNING, "TODO: message here", t);
       }
     }
   }
@@ -1104,7 +1104,7 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
         try {
           sleep(delayTime);
         } catch (InterruptedException err) {
-          logger.log(Level.WARNING, null, err);
+          logger.log(Level.WARNING, "TODO: message here", err);
           // Restore the interrupted status
           Thread.currentThread().interrupt();
         }
@@ -1151,13 +1151,13 @@ public abstract class AOPool<C extends AutoCloseable, Ex extends Throwable, I ex
           } catch (ThreadDeath td) {
             throw td;
           } catch (Throwable t) {
-            logger.log(Level.WARNING, null, t);
+            logger.log(Level.WARNING, "TODO: message here", t);
           }
         }
       } catch (ThreadDeath td) {
         throw td;
       } catch (Throwable t) {
-        logger.log(Level.SEVERE, null, t);
+        logger.log(Level.SEVERE, "TODO: message here", t);
       }
     }
   }
