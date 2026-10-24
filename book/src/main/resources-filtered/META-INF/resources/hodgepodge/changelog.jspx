@@ -38,7 +38,7 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-29T16:23:04-05:00"
-    dateModified="2026-05-26T19:43:23Z"
+    dateModified="2026-10-24T01:46:41Z"
   >
     <c:set var="latestRelease" value="6.0.0" />
     <c:if test="${
@@ -52,7 +52,23 @@ along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
         groupId="@{project.groupId}"
         artifactId="@{documented.artifactId}"
         scmUrl="@{project.scm.url}"
-      />
+      >
+        <ul>
+          <li>
+            <p>
+              New <ao:a href="apidocs/com.aoapps.hodgepodge/com/aoapps/hodgepodge/net/IpReputation.html">IpReputation</ao:a>
+              that tracks connections, aborts, failures, and successes, and keeps score to support automatically blocking
+              suspected malicious traffic.  The implementation is service-agnostic.
+            </p>
+            <p>
+              This first version is extremely simple; it maintains only a bad score per IP address.  Potential
+              enhancements are documented, such as separately tracking good scores, persisting between application
+              restarts, sharing reputation through services, and performing reputation of network ranges in addition to
+              individual IPs.
+            </p>
+          </li>
+        </ul>
+      </changelog:release>
     </c:if>
 
     <changelog:release
