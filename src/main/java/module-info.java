@@ -1,6 +1,6 @@
 /*
  * ao-hodgepodge - Reusable Java library of general tools with minimal external dependencies.
- * Copyright (C) 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2021, 2022, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -21,6 +21,16 @@
  * along with ao-hodgepodge.  If not, see <https://www.gnu.org/licenses/>.
  */
 module com.aoapps.hodgepodge {
+  // Direct
+  requires com.aoapps.collections; // <groupId>com.aoapps</groupId><artifactId>ao-collections</artifactId>
+  requires com.aoapps.lang; // <groupId>com.aoapps</groupId><artifactId>ao-lang</artifactId>
+  requires com.aoapps.tempfiles; // <groupId>com.aoapps</groupId><artifactId>ao-tempfiles</artifactId>
+  // Java SE
+  requires java.desktop;
+  requires java.logging;
+  requires java.rmi;
+  requires java.sql;
+
   exports com.aoapps.hodgepodge.awt;
   exports com.aoapps.hodgepodge.awt.image;
   exports com.aoapps.hodgepodge.cache;
@@ -43,13 +53,4 @@ module com.aoapps.hodgepodge {
   exports com.aoapps.hodgepodge.util;
   exports com.aoapps.hodgepodge.version;
   exports com.aoapps.hodgepodge.ws;
-  // Direct
-  requires com.aoapps.collections; // <groupId>com.aoapps</groupId><artifactId>ao-collections</artifactId>
-  requires com.aoapps.lang; // <groupId>com.aoapps</groupId><artifactId>ao-lang</artifactId>
-  requires com.aoapps.tempfiles; // <groupId>com.aoapps</groupId><artifactId>ao-tempfiles</artifactId>
-  // Java SE
-  requires java.desktop;
-  requires java.logging;
-  requires java.rmi;
-  requires java.sql;
 }
